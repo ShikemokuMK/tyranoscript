@@ -1,0 +1,150 @@
+/*reset css */
+
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,
+form,fieldset,input,textarea,p,blockquote,th,td{
+    padding:0;
+    margin:0;
+}
+table{
+    border-collapse: collapse;
+    border-spacing:0;
+}
+fieldset,img{
+    border:0;
+}
+address,caption,cite,code,dfn,em,strong,th,var{
+    font-weight:normal;
+    font-style:normal;
+}
+ol,ul{
+    list-style:none;
+}
+caption,th{
+    text-align:left;
+}
+h1,h2,h3,h4,h5,h6{
+    font-weight:normal;
+    font-size:100%;
+}
+q:before,q:after{
+    content:'';
+}
+abbr,acronym{
+    border:0;
+}
+
+
+/*smart novel original css */
+
+.vertical_text{
+
+    font-family:'@ＭＳ 明朝';
+    /*color:white;*/
+    writing-mode:vertical-rl ;
+    -webkit-writing-mode:vertical-rl ; 
+    float:right;
+    /*height : 960px ;*/
+
+}
+
+
+.layer_menu {
+    display:none;
+    font-size:1.3em;
+    font-weight:bold;
+    position:absolute;
+    width:100%;
+    height:100%;
+}
+
+.save_menu_font{
+    
+    color:gray;
+    
+}
+
+
+
+
+/*メニュ－ボタン系*/
+.menu_item {position:relative;margin-top:3%;text-align:center;cursor:pointer}
+.menu_item img {width:auto;max-width:80%;max-height:10%;}
+.display_menu .button:first-child {margin-top:0;}
+.display_menu{
+    overflow:visible;padding:0;
+    position:relative;
+    /*overflow:visible;padding:2%;display:table-cell;vertical-align:middle*/
+}
+
+/*セーブ・ロードのテキスト部分の文字のスタイルを指定できます*/
+.save_menu_date_font {
+    font-size:10px;
+}
+
+/*セーブ・ロード画面のテキスト部分のスタイルを指定できます。*/
+.save_menu_text_font{
+    font-size:14px;
+}
+
+/*セーブ・ロードデータの行間などが調整できます*/
+.save_display_area{
+    margin-top:20px;
+}
+
+
+
+.layer_event_click{
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.button_menu{
+    position:absolute;
+    z-index:99999;
+    top:20px;
+    cursor:pointer;    
+}
+
+/*
+ CSSを修正することで、ゲーム画面をカスタマイズすることが可能です
+ * */
+
+/*ゲーム枠の外側の色を指定します*/
+
+body{
+    background-color:black;        
+    -webkit-tap-highlight-color: transparent; 
+
+}
+
+
+/*次へのクリックを促すアイコン*/
+
+.img_next{
+    padding-left:3px;
+}
+
+/*ウェブフォントを使用する場合はここ*/
+
+/* Firefox, Opera, Safari */
+@font-face {
+font-family:webfont;
+src:url("../data/others/TanukiMagic.ttf") format("truetype");
+}
+/*IE*/
+@font-face {
+font-family: webfont;
+src: url("./data/others/TanukiMagic.eot");
+}
+
+/*テキストボックスの共通スタイル*/
+.text_box{
+    
+}
+
+.tyrano_base{
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+}
+

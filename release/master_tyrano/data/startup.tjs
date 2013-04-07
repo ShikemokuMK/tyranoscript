@@ -1,0 +1,36 @@
+{
+	var throw_system_not_found =
+		function
+		{
+			throw new Exception(
+				"システムが見つかりません\n"
+				"この紹介用スクリプトは、フォルダ/ファイル構成が\n"
+				"KAGの配布時と同じでないと正常に動作しません。");
+		};
+
+	if(Storages.isExistentStorage("../kag3/scenario/snow.ks"))
+		Storages.addAutoPath("../kag3/scenario/"),
+		Storages.addAutoPath("../kag3/image/");
+	else if(Storages.isExistentStorage("../kag3plugin/snow/scenario/snow.ks"))
+		Storages.addAutoPath("../kag3plugin/snow/scenario/"),
+		Storages.addAutoPath("../kag3plugin/snow/image/");
+	else
+		throw_system_not_found();
+
+	if(Storages.isExistentStorage("../template/system/Initialize.tjs"))
+	{
+		Storages.addAutoPath("../template/system/");
+		Scripts.execStorage("../template/system/Initialize.tjs");
+	}
+	else if(Storages.isExistentStorage("../kag3/system/Initialize.tjs"))
+	{
+		Storages.addAutoPath("../kag3/system/");
+		Scripts.execStorage("../kag3/system/Initialize.tjs");
+	}
+	else
+	{
+		throw_system_not_found();
+	}
+}
+
+

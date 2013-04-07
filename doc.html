@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>タグリファレンス生成</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />  
+
+<script type="text/javascript" src="./tyrano/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="./tyrano/jquery-ui-1.8.20.custom.min.js"></script>
+  
+<script type="text/javascript" src="./tyrano/libs.js" ></script>
+<script type="text/javascript" src="./tyrano/doc.js" ></script>
+
+
+<script type="text/javascript"  >
+    
+    tyrano.plugin.kag.tag ={};
+    
+</script>
+<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag.js" ></script>
+<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_audio.js" ></script>
+<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_system.js" ></script>
+<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ext.js" ></script>
+
+<link href="http://tyrano.jp/css/style.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<textarea id="src_html">
+ </textarea>
+
+<article>
+    
+<!-- div.sectionArea -->
+            <div class="sectionArea">
+                <h2>リファレンス</h2>
+                <p>ライブラリパラメータデモ</p>
+                <!-- div.howtoArea -->
+                <div class="howtoArea">
+                    <!-- div.howtoMain -->
+                    
+                    
+                    
+                    <div class="howtoMain">
+                       <h2>基本</h2>
+                    <p>
+                        
+                        [ ] で囲まれた部分がタグになります。 <br/ >
+                        @で始まる行も、タグとして認識しますが、１行で記述しなければなりません<br/ >
+                        ;(セミコロン)で始まる行はコメントとして扱われます。<br/ >
+                        cond属性があります。JS式を記述して、その結果が真の場合のみタグが実行されます<br/ >
+                        
+                    </p>
+                       
+                        <div>
+                            <a name="タグ名"></a>
+                            <h3>【l】クリック待ち</h3>
+                            <p>クリックをまつ命令です</p>
+                            <table>
+                                    <tr>
+                                        <th>
+                                            パラメータ名
+                                        </th>
+                                        <th>
+                                            必須
+                                        </th>
+                                        <th>
+                                            説明
+                                        </th>
+                                    <tr>
+                                        
+                                    <tr>
+                                        <td>あああああ</td>
+                                        <td>◯</td>
+                                        <td>これはいいな</td>
+                                        
+                                    </tr>
+                                     <tr>
+                                        <td>あああああ</td>
+                                        <td>◯</td>
+                                        <td>これはいいな</td>
+                                        
+                                    </tr>
+                                        
+                                </table>
+                            
+                            <h5>サンプルコード</h5>
+                            <p>
+                                <code>
+                                    
+                                    サンプルコード
+                                    
+                                </code>
+                            
+                            </p>
+                        
+                        </div>
+                        
+                    </div>
+                    <!-- /div.howtoMain -->
+                    <!-- div.howtoNav -->
+                    
+                    
+                    <div class="howtoNav">
+                        
+                    </div>                    
+                    
+                    <!-- /div.howtoNav -->
+                </div>
+                <!-- /div.howtoArea -->
+            </div>
+            <!-- /div.sectionArea -->
+            
+</article>        
+
+
+
+
+<script type="text/javascript">
+   
+   $(function(){
+    
+        //masterタグの作成
+        
+        $("body").click(function(){
+            $.generateHtml();
+        });
+        
+    
+   }); 
+   
+
+
+
+</script>
+
+
+
+</body>
+</html>
