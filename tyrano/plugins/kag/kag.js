@@ -29,7 +29,7 @@ tyrano.plugin.kag ={
     
     //動作オプション
     options:{
-        modules:["order","parser","tag","layer","menu","tag_audio","tag_system","tag_ext"]
+        modules:["order","parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse"]
     },
     
     

@@ -41,7 +41,7 @@ tyrano.plugin.kag.menu ={
         var menu_html = ""
                 
         +'<div class="display_menu" style="z-index: 10000; width:100%; height:100%; position: absolute; display:block;" align="center">'
-        +'    <div class="menu_item menu_close" style="float:right;"><img src="tyrano/images/kag/menu_button_close.png" /></div>'
+        +'    <div class="menu_item menu_close" style="float:right;width:64px;"><img src="tyrano/images/kag/menu_button_close.png" /></div>'
         +'    <div style="clear:both"></div>'
         +'    <div class="menu_item menu_save"><img src="tyrano/images/kag/menu_button_save.gif" /></div>'
         +'    <div class="menu_item menu_load"><img src="tyrano/images/kag/menu_button_load.gif" /></div>'
