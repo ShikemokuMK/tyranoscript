@@ -791,7 +791,7 @@ tyrano.plugin.kag.tag.text={
                     //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
                     //グリフが指定されている場合はこちらを適用 
                     if(that.kag.stat.flag_glyph =="false"){
-                    　$(".img_next").remove();
+                        $(".img_next").remove();
                         jtext.find("p").append("<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
                     
                     }else{
@@ -2689,7 +2689,7 @@ tyrano.plugin.kag.tag.button = {
             j_button.click(function(){
                     
                   //fix指定のボタンは、繰り返し実行できるようにする
-                  if(button_clicked == true　&& _pm.fix =="false"){
+                  if(button_clicked == true && _pm.fix =="false"){
                     
                     return false;
                     
