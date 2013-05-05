@@ -545,7 +545,7 @@ tyrano.plugin.kag.tag["elsif"] = {
     start:function(pm){
         
         //条件合格
-        if(this.kag.getStack("if") == false　&& this.kag.embScript(pm.exp)){
+        if(this.kag.getStack("if") == false && this.kag.embScript(pm.exp)){
             
             this.kag.setStack("if",true);
             this.kag.ftag.nextOrder();
