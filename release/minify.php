@@ -37,7 +37,8 @@ $array_mini = array(
 "plugins/kag/kag.tag.js",
 "plugins/kag/kag.tag_audio.js",
 "plugins/kag/kag.tag_ext.js",
-"plugins/kag/kag.tag_system.js"
+"plugins/kag/kag.tag_system.js",
+"plugins/kag/kag.key_mouse.js",
 
 );
 
