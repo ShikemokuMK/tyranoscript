@@ -832,13 +832,12 @@ tyrano.plugin.kag.tag.label = {
     //ラベル記録
     if(this.kag.config.autoRecordPageShowing == "true"){
     
-        var sf_str = "sf.trail_"+this.kag.stat.current_scenario.replace(".ks","").replace("/","")+"_"+pm.label_name +"";
+        var sf_str = "sf.trail_"+this.kag.stat.current_scenario.replace(".ks","").replace(/\u002f/g, "").replace(/:/g,"").replace(/./g,"")+"_"+pm.label_name +"";
         
-        var scr_str = ""
+        var scr_str = "";
         
         + sf_str +" = "+sf_str+"  || 0;"
         + sf_str +"++;";
-        
         this.kag.evalScript(scr_str);
         
     }
@@ -974,8 +973,16 @@ tyrano.plugin.kag.tag.graph = {
         current_str = jtext.find("p").find(".current_span").html();
       }
       
+   	   var storage_url = "";
+       
+       if($.isHTTP(pm.storage)){
+    	    storage_url	= pm.storage;	
+    	}else{
+    		storage_url = "./data/image/"+pm.storage;
+    	}
+      
       //テキストエリアに画像を追加して、次のメッセージへ晋
-      this.kag.appendMessage(jtext, current_str + "<img src='./data/image/"+pm.storage+"' >")
+      this.kag.appendMessage(jtext, current_str + "<img src='"+storage_url+"' >");
       
       this.kag.ftag.nextOrder();
       
@@ -1317,7 +1324,15 @@ tyrano.plugin.kag.tag.position = {
             
         }else if(pm.frame !=""){
             
-            target_layer.css("background-image","url(./data/image/"+pm.frame+")");
+             var storage_url = "";
+        
+	        if($.isHTTP(pm.frame)){
+	    	    storage_url	= pm.frame;	
+	    	}else{
+	    		storage_url = "./data/image/"+pm.frame+"";
+	    	}
+    	    
+            target_layer.css("background-image","url("+storage_url+")");
             target_layer.css("background-repeat","no-repeat");
             target_layer.css("opacity",1);
             target_layer.css("background-color","");
@@ -1488,8 +1503,12 @@ tyrano.plugin.kag.tag.image={
             }
             
     	    //前景レイヤ
-    		strage_url = "./data/"+folder+"/"+pm.storage;
-    	    
+    	    if($.isHTTP(pm.storage)){
+    	    	strage_url = pm.storage;	
+    	    }else{
+    	    	strage_url = "./data/"+folder+"/"+pm.storage;
+    	    }
+    		
     	    var img_obj = $("<img />");
     	    img_obj.attr("src",strage_url);
     	    
@@ -1531,8 +1550,12 @@ tyrano.plugin.kag.tag.image={
             }
     	    
     	    //背景レイヤ
-    	    strage_url = "./data/"+folder+"/"+pm.storage;
-    	    
+    	    if($.isHTTP(pm.storage)){
+    	    	strage_url = pm.storage;	
+    	    }else{
+    	    	strage_url = "./data/"+folder+"/"+pm.storage;
+    	    }
+    		
     	    //backの場合はスタイルなしですよ
     	    
     	    var new_style ={
@@ -2641,9 +2664,16 @@ tyrano.plugin.kag.tag.button = {
             target_layer = this.kag.layer.getLayer("fix");
         }
         
+        var storage_url = "";
         
+        if($.isHTTP(pm.graphic)){
+    	    storage_url	= pm.graphic;	
+    	}else{
+    		storage_url = "./data/"+pm.folder+"/"+pm.graphic
+    	}
+    	
         var j_button = $("<img />");
-        j_button.attr("src","./data/"+pm.folder+"/"+pm.graphic);
+        j_button.attr("src",storage_url);
         j_button.css("position","absolute");
         j_button.css("cursor","pointer");
         j_button.css("z-index",99999999);

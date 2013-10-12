@@ -117,8 +117,16 @@ tyrano.plugin.kag.tag.playbgm = {
             target = "sound";
         }
         
+        var storage_url = "";
+        
+         if($.isHTTP(pm.storage)){
+    	 	storage_url = pm.storage;	
+    	 }else{
+    	    storage_url = "./data/"+target+"/" + pm.storage;
+    	 }
+        
         //音楽再生
-        var audio_obj = new Audio("./data/"+target+"/" + pm.storage);
+        var audio_obj = new Audio(storage_url);
         if(pm.loop =="true"){
             audio_obj.loop = true;
            
@@ -247,21 +255,25 @@ tyrano.plugin.kag.tag.playbgm = {
         if(pm.target =="se"){
             target = "sound";
         }
+        
+        var storage_url = "";
+        
+         if($.isHTTP(pm.storage)){
+    	 	storage_url = pm.storage;	
+    	 }else{
+    	    storage_url = "./data/"+target+"/" + pm.storage;
+    	 }
+        
         if(target ==="bgm"){
             this.kag.stat.current_bgm = pm.storage;
-            this.kag.sound_swf.playMusic("./data/"+target+"/" + pm.storage ,repeat);
-        
+            this.kag.sound_swf.playMusic(storage_url ,repeat);
         }else{
-        
-            this.kag.sound_swf.playSound("./data/"+target+"/" + pm.storage ,repeat);
-            
+            this.kag.sound_swf.playSound(storage_url ,repeat);
         }
         
         
         if(pm.stop == "false"){
-        
             this.kag.ftag.nextOrder();
-        
         }
         
         

@@ -432,12 +432,17 @@ tyrano.plugin.kag ={
         //デフォルトフォントの状態を設定
         this.kag.stat.font = $.extend(true, $.cloneObject(this.kag.stat.font), this.stat.default_font);
         
-        
         //タイトルの設定
         this.setTitle(this.config["System.title"]);
         
+        var first_scenario_file = "first.ks";
+        
+        if($("#first_scenario_file").size() >0){
+        	first_scenario_file = $("#first_scenario_file").val();
+        }
+        
         //シナリオファイルの読み込み。parser から、シナリオを解析して、タグ管理画面を作る。
-        this.loadScenario("first.ks",function(array_tag){
+        this.loadScenario(first_scenario_file,function(array_tag){
             
             that.ftag.buildTag(array_tag);
             //最初にレイヤをコピーしておく、、、その必要はない！コメント化20122119
@@ -485,7 +490,16 @@ tyrano.plugin.kag ={
         this.stat.current_scenario = file_name;
         
         //同じディレクトリにある、KAG関連のデータを読み込み
-        $.loadText("./data/scenario/"+file_name,function(text_str){
+        
+        var file_url = "";
+        
+        if($.isHTTP(file_name)){
+    	    file_url = file_name;	
+    	}else{
+    		file_url = "./data/scenario/"+file_name;
+    	}
+        
+        $.loadText(file_url,function(text_str){
             
             var result_obj = that.parser.parseScenario(text_str);
             
@@ -621,8 +635,6 @@ tyrano.plugin.kag ={
             var line = parseInt(this.kag.stat.current_line) + 1;
             
             var err ="Error:"+current_storage+":"+line+"行目:"+str;
-            
-            alert(err);
             
         }
       

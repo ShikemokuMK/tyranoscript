@@ -18,8 +18,15 @@
         var i = str.lastIndexOf('/');
         return str.substring(0,i+1);
    
-    },
+    };
 
+	$.isHTTP = function(str){
+		if(str.substring(0,4) ==="http"){
+			return true;
+		}else{
+			return false;
+		}
+	};
 
     $.play_audio=function(audio_obj){
 
@@ -45,7 +52,7 @@
         }
         
         return {width: width, height: height};
-    },
+    };
     
     $.escapeHTML = function(val, replace_str) {
         val = val || "";
