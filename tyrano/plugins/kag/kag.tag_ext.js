@@ -994,12 +994,11 @@ tyrano.plugin.kag.tag.chara_new ={
         
         var storage_url = "./data/fgimage/"+pm.storage;
         
-        //事前ローディング
-        /*
-        var strage_url = "./data/fgimage/"+pm.storage;
-        var img_obj = $("<img />");
-        img_obj.attr("src",strage_url);
-        */
+        //HTTP対応
+        if($.isHTTP(pm.storage)){
+    	    storage_url	= pm.storage;	
+    	}
+      
        
         this.kag.preload(storage_url);
         
@@ -1063,10 +1062,15 @@ tyrano.plugin.kag.tag.chara_show ={
             return;
         }
         
-        var strage_url = "./data/fgimage/"+cpm.storage;
+        var storage_url = "./data/fgimage/"+cpm.storage;
+        
+         if($.isHTTP(cpm.storage)){
+    	    storage_url	= cpm.storage;	
+    	}
+        
         var img_obj = $("<img />");
         
-        img_obj.attr("src",strage_url);
+        img_obj.attr("src",storage_url);
         
         img_obj.css("position","absolute");
         
@@ -1391,7 +1395,15 @@ tyrano.plugin.kag.tag.chara_mod ={
     
     start:function(pm){
        
-       $("."+pm.name).attr("src","./data/fgimage/"+pm.storage);
+       var storage_url ="";
+       
+        if($.isHTTP(pm.storage)){
+    	    storage_url	= pm.storage;	
+    	}else{
+    		storage_url = "./data/fgimage/"+pm.storage
+    	}
+       
+       $("."+pm.name).attr("src",storage_url);
        
        this.kag.ftag.nextOrder();
         

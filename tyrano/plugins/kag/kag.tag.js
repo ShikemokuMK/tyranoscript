@@ -2869,8 +2869,18 @@ tyrano.plugin.kag.tag.clickable = {
             j_button.click(function(){
                     
                     //Sタグに到達していないとクリッカブルが有効にならない
-                    if(that.kag.stat.is_strong_stop !=true){
-                        return false;
+                    
+                    var is_s = (function(obj){
+	                    if(obj.kag.stat.is_strong_stop !=true){
+	                    	return false;
+	                    }
+	                    
+	                    return true;
+	                    
+	                })(that);
+                    
+                    if(is_s == false){
+                    	return false;
                     }
                     
                     //that.kag.ftag.startTag("cm",{});
