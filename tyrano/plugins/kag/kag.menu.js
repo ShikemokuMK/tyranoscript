@@ -321,10 +321,10 @@ tyrano.plugin.kag.menu ={
         //停止の場合は復活
         this.kag.stat.is_strong_stop = false;
         
-        //音楽再生中だった場合、その音楽を鳴らす
-        //一旦音楽は全て止めないと
+        //一旦音楽と効果音は全て止めないと
         
         this.kag.ftag.startTag("stopbgm",{stop:"true"});
+        this.kag.ftag.startTag("stopse",{});
          
         //音楽再生
         if(this.kag.stat.current_bgm != ""){

@@ -1,4 +1,4 @@
-TyranoScript｜ティラノスクリプト　Ver2.60（C）ShikemokuMK
+TyranoScript｜ティラノスクリプト　Ver2.80（C）ShikemokuMK
 http://tyrano.jp
 
 
@@ -90,6 +90,10 @@ http://kikyou.info/
 ■主な更新履歴■
 
 ---------------------------------------------------------------------
+Ver2.80
+iOS7 対応
+storageにhttpを指定可能へ
+
 Ver2.60
 ライセンスをオープンソース。MITライセンスに変更
 
