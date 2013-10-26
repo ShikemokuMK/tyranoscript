@@ -324,7 +324,7 @@ tyrano.plugin.kag.menu ={
         //一旦音楽と効果音は全て止めないと
         
         this.kag.ftag.startTag("stopbgm",{stop:"true"});
-        this.kag.ftag.startTag("stopse",{});
+        this.kag.ftag.startTag("stopse",{stop:"true"});
          
         //音楽再生
         if(this.kag.stat.current_bgm != ""){
