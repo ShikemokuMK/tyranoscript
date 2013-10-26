@@ -94,7 +94,7 @@ tyrano.plugin.kag.tag.playbgm = {
             
             var browser = $.getBrowser();
             
-            if(browser == "firefox" || browser =="opera" || (browser =="safari" && $.userenv()=="pc" ) ){
+            if(browser == "firefox" || browser =="opera" ){
                 
                 that.playSwf(pm);
                 
@@ -359,7 +359,7 @@ tyrano.plugin.kag.tag.stopbgm = {
             }
             
         //フラッシュで再生している場合
-        }else if(browser == "firefox" || browser =="opera" || (browser =="safari" && $.userenv()=="pc" )){
+        }else if(browser == "firefox" || browser =="opera"){
             
             
             this.kag.sound_swf.stopMusic();
