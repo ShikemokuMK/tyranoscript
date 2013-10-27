@@ -322,6 +322,10 @@ tyrano.plugin.kag ={
         	this.variable.sf["system"]["autosave"] = false;
         }
         
+        //バックログ保存用の設定
+        this.variable.tf["system"] = {};
+        this.variable.tf["system"]["backlog"] = [];
+        
          //コンフィグボタン追加
          var button_menu_obj = $("<div class='button_menu'><img src='./tyrano/images/kag/button_menu.png'  /></div>");
             
@@ -462,6 +466,22 @@ tyrano.plugin.kag ={
         
         });
         
+    },
+    
+    //BackLogを格納します
+    pushBackLog:function(str){
+    	
+    	var max_back_log = parseInt(this.kag.config["maxBackLogNum"]);
+    	
+    	if(max_back_log < 1 ) return ;
+    	
+    	this.variable.tf["system"]["backlog"].push(str);  
+		
+    	//上限を超えたらFILO で処理
+    	if(max_back_log < this.variable.tf["system"]["backlog"].length){
+    		this.variable.tf["system"]["backlog"].shift();
+    	}
+    	
     },
     
     //タイトル名を設定します

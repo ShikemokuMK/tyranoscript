@@ -610,6 +610,9 @@ tyrano.plugin.kag.tag.text={
     showMessage:function(message_str){
         var that = this;
         
+        //バックログ用の値を格納
+        this.kag.pushBackLog(message_str);
+        
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
        that.kag.ftag.hideNextImg();
         

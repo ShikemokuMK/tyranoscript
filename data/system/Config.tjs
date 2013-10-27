@@ -74,7 +74,11 @@ function KAGWindow_config()
 ;configLeft    = -1     //コンフィグアイコンの左位置を指定できます。-1の場合は画面右下
 ;configTop     = -1     //コンフィグアイコンの上位置を指定できます。-1の場合は画面右下
 
-
+// ◆ バックログ機能
+// バックログ機能用にテキストの最大保持数を保存できます。
+// 保存されたデータはtf.system.backlog に配列として格納されます。
+// 0の場合、保存を行いません。
+;maxBackLogNum = 10;
 
 // ◆ ラベル記録
 // 自動的に「読んだ」ラベルを記録するかどうかを指定します。
@@ -97,7 +101,7 @@ function KAGWindow_config()
 //    ( 文章を表示しきっていない場合でも リンク先へジャンプすると「読んだ」
 //      と見なされるので注意; link や button タグの countpage 属性を参照 )
 // ・return タグで戻るとき ( call で飛ぶときは終了とは見なされません )
-;autoRecordPageShowing = true;
+;autoRecordPageShowing = false;
 
 
 // ◆ 通過記録
