@@ -438,13 +438,15 @@ tyrano.plugin.kag.tag.emb = {
 :exp
 式を評価し、その結果が true ( または 0 以外 ) ならば、 elsif・else・endif のいずれかまでにある文章やタグを実行し、 そうでない場合は無視します。
 :sample
-; 例1 [if exp="false"]
+; 例1 
+[if exp="false"]
 ここは表示されない
 [else]
 ここは表示される
 [endif]
 
-; 例2 [if exp="false"]
+; 例2 
+[if exp="false"]
 ここは表示されない
 [elsif exp="false"]
 ここは表示されない
@@ -452,7 +454,8 @@ tyrano.plugin.kag.tag.emb = {
 ここは表示される
 [endif]
 
-; 例3 [if exp="false"]
+; 例3 
+[if exp="false"]
 ここは表示されない
 [elsif exp="true"]
 ここは表示される
@@ -460,7 +463,8 @@ tyrano.plugin.kag.tag.emb = {
 ここは表示されない
 [endif]
 
-; 例4 [if exp="true"]
+; 例4 
+[if exp="true"]
 ここは表示される
 [elsif exp="true"]
 ここは表示されない
@@ -915,6 +919,102 @@ tyrano.plugin.kag.tag.savesnap = {
 }
 
 
+/*
+#[autosave]
+:group
+システム操作
+:title
+オートセーブ機能
+:exp
+このタグに到達した際、自動的にプレイ状況を保存します。自動セーブ機能に活用ください。
+[autosave]されたデータが存在する場合、sf.system.autosaveにtrueが格納されます。
+タイトル画面より前に、サンプルのような判定ロジックを用意しておくことで、
+スマートフォンなどで、復帰後に事前にプレイしていた状態からゲームを開始することができるようになります。
+:sample
+
+[autosave]
+
+;autosaveされたデータが存在する場合、sf.system.autosave に trueが入ります
+[if exp="sf.system.autosave ==true"]
+	自動的に保存されたデータが存在します。ロードしますか？[l][r]
+	
+	[link target=*select1]【１】はい[endlink][r]
+	[link target=*select2]【２】いいえ[endlink][r]
+
+	[s]
+
+	*select1
+	;ロードを実行します
+	[autoload]
+
+	*select2
+	[cm]
+	ロードをやめました[l]
+	@jump target=*noload
+[else]
+	自動的に保存されたデータはありません。[l][r]
+[endif]
+
+:param
+title=セーブデータのタイトルを指定します。
+#[end]
+*/
+
+tyrano.plugin.kag.tag.autosave = {
+    
+    vital:[],
+    
+    pm:{
+        title:""
+    },
+    
+    start:function(pm){
+    	  
+    	  //タイトルが設定されいない場合は現在のテキストを設定
+    	  if(pm.title ==""){
+    	  	pm.title = this.kag.stat.current_message_str;
+    	  }
+		  
+          this.kag.menu.snapSave(pm.title);
+          this.kag.menu.doSetAutoSave();
+          
+          this.kag.ftag.nextOrder();
+    	  
+    }
+    
+    
+}
+
+
+/*
+#[autoload]
+:group
+システム操作
+:title
+オートロード機能
+:exp
+[autosave]タグで保存されたデータを読み込みます
+:sample
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.autoload = {
+    
+    vital:[],
+    
+    pm:{
+        title:""
+    },
+    
+    start:function(pm){
+    	  
+    	  var game_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
+    	  this.kag.menu.loadAutoSave();
+    	  
+    }
+    
+}
 
 /*
 #[ignore]

@@ -187,7 +187,6 @@ tyrano.plugin.kag.menu ={
     //セーブを実行する
     doSave:function(num){
         
-        
         var array_save = this.getSaveData();
         
         var data = {};
@@ -202,18 +201,36 @@ tyrano.plugin.kag.menu ={
             return false;
         }
         
-        
         data = this.snap;
         
-        
         data.save_date = $.getNowDate()+"　"+$.getNowTime();
-        
          
         array_save.data[num] = data;
                        
-         $.setStorage(this.kag.config.projectID+"_tyrano_data",array_save);
+        $.setStorage(this.kag.config.projectID+"_tyrano_data",array_save);
                             
         
+    },
+    
+    //doSaveSnap 自動セーブのデータを保存する
+    doSetAutoSave:function(){
+    	
+    	var data = this.snap;
+        data.save_date = $.getNowDate()+"　"+$.getNowTime();
+        $.setStorage(this.kag.config.projectID+"_tyrano_auto_save",data);
+                            
+    },
+    
+    //自動保存のデータを読み込む
+    loadAutoSave:function(){
+    	var data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
+    	
+    	if(data){
+        	data = eval("("+data+")");
+    	}else{
+        	return false;
+       }
+    	this.loadGameData($.extend(true,{},data));
     },
     
     //セーブ状態のスナップを保存します。
@@ -308,9 +325,13 @@ tyrano.plugin.kag.menu ={
        var array_save = this.getSaveData();
        var array = array_save.data; //セーブデータ配列
        
-       var auto_next = "yes";
+       this.loadGameData($.extend(true,{},array[num]));
        
-       data = $.extend(true,{},array[num]) ;
+    },
+    
+    loadGameData:function(data){
+    	
+    	var auto_next = "yes";
        
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
@@ -359,7 +380,6 @@ tyrano.plugin.kag.menu ={
         };
         
         this.kag.ftag.nextOrderWithIndex(data.current_order_index,data.stat.current_scenario,true,insert,auto_next);
-        
         
     },
     

@@ -309,6 +309,18 @@ tyrano.plugin.kag ={
             this.variable.sf = eval("("+tmpsf+")");
         }
         
+        /////////////システムで使用する変数の初期化設定////////////////////
+        
+        //自動セーブのデータがあるかどうか
+        var auto_save_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
+    	
+    	this.variable.sf["system"] ={};
+    	
+    	if(auto_save_data){
+        	this.variable.sf["system"]["autosave"] = true;
+        }else{
+        	this.variable.sf["system"]["autosave"] = false;
+        }
         
          //コンフィグボタン追加
          var button_menu_obj = $("<div class='button_menu'><img src='./tyrano/images/kag/button_menu.png'  /></div>");
