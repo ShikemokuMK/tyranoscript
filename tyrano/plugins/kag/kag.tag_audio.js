@@ -99,8 +99,7 @@ tyrano.plugin.kag.tag.playbgm = {
                 that.playSwf(pm);
                 
             }else{
-            
-                that.play(pm);
+            	that.play(pm);
                 
             }
         }

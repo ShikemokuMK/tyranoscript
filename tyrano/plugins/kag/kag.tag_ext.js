@@ -1068,129 +1068,135 @@ tyrano.plugin.kag.tag.chara_show ={
     	    storage_url	= cpm.storage;	
     	}
         
-        var img_obj = $("<img />");
         
-        img_obj.attr("src",storage_url);
-        
-        img_obj.css("position","absolute");
-        
-        img_obj.css("display","none");
-        //前景レイヤを表示状態にする
-        
-        var target_layer = this.kag.layer.getLayer(pm.layer,pm.page);
-        target_layer.append(img_obj).show();
-        
-        
-        var chara_num = 1;
-        this.kag.layer.hideEventLayer();
-            
-        
-        //立ち位置を自動的に設定する場合
-        if(this.kag.stat.chara_pos_mode =="true" && pm.top=="0" && pm.left =="0"){
-            
-            //立ち位置自動調整
-            img_obj.css("bottom","0px");
-            
-            //既存キャラの位置を調整する
-            var chara_cnt = target_layer.find(".tyrano_chara").length;
-            
-            var sc_width = parseInt(this.kag.config.scWidth);
-            var sc_height = parseInt(this.kag.config.scHeight);
-            
-            var center = Math.floor(parseInt(img_obj.css("width"))/2);
-           
-            //一つあたりの位置決定
-            var base = Math.floor(sc_width/(chara_cnt+2));
-            var tmp_base = base;
-            var first_left = base - center;
-                     
-            img_obj.css("left",first_left+"px");
-            
-            //すべてのanimationが完了するまで、次へ進めないように指定
-            
-            target_layer.find(".tyrano_chara").each(function(){
+        //画像は事前にロードしておく必要がありそう
+        this.kag.preload(storage_url,function(){
+        	
+	        var img_obj = $("<img />");
+	        
+	        img_obj.attr("src",storage_url);
+	        
+	        img_obj.css("position","absolute");
+	        
+	        img_obj.css("display","none");
+	        //前景レイヤを表示状態にする
+	        
+	        var target_layer = that.kag.layer.getLayer(pm.layer,pm.page);
+	        target_layer.append(img_obj).show();
+	        
+	        
+	        var chara_num = 1;
+	        that.kag.layer.hideEventLayer();
+	            
+	        
+	        //立ち位置を自動的に設定する場合
+	        if(that.kag.stat.chara_pos_mode =="true" && pm.top=="0" && pm.left =="0"){
+	            
+	            //立ち位置自動調整
+	            img_obj.css("bottom","0px");
+	            
+	            //既存キャラの位置を調整する
+	            var chara_cnt = target_layer.find(".tyrano_chara").length;
+	            
+	            var sc_width = parseInt(that.kag.config.scWidth);
+	            var sc_height = parseInt(that.kag.config.scHeight);
+	            
+	            var center = Math.floor(parseInt(img_obj.css("width"))/2);
+	           
+	            //一つあたりの位置決定
+	            var base = Math.floor(sc_width/(chara_cnt+2));
+	            var tmp_base = base;
+	            var first_left = base - center;
+	                     
+	            img_obj.css("left",first_left+"px");
+	            
+	            //すべてのanimationが完了するまで、次へ進めないように指定
+	            
+	            target_layer.find(".tyrano_chara").each(function(){
+	                
+	                chara_num++;
+	                
+	                tmp_base +=base;
+	                
+	                var j_chara = $(that);
+	                //この分をプラスする感じですね
+	                center = Math.floor(parseInt(j_chara.css("width"))/2);
+	                //1つ目は主人公にゆずる
+	                var left = tmp_base - center;
+	                
+	                j_chara.animate(
+	                    {
+	                        left:left
+	                    }
+	                    ,
+	                    parseInt(pm.time), 
+	                    that.kag.stat.chara_effect,
+	                    function(){
+	                        chara_num--;
+	                        if(chara_num == 0){
+	                            that.kag.layer.showEventLayer();
+	                            that.kag.ftag.nextOrder();
+	                        }
+	                    }
+	                );
+	                
+	            });
+	            
+	            
+	        }else{
+	            
+	            
+	            img_obj.css("top",pm.top+"px");
+	            img_obj.css("left",pm.left+"px");
+	            
+	            //that.kag.ftag.nextOrder();
+	            
+	        }
+	        
+	        //オブジェクトにクラス名をセットします name属性は一意でなければなりません
+	        $.setName(img_obj,cpm.name);
+	        img_obj.addClass("tyrano_chara"); //キャラクター属性を付与。
+	        
+	        //新しいスタイルの定義
+	        
+	        if(cpm.width!=""){
+	            img_obj.css("width",cpm.width+"px");
+	        }
+	        
+	        if(cpm.height!=""){
+	            img_obj.css("height",cpm.height+"px");
+	        }
+	        
+	        if(pm.wait!="true"){
+	            that.kag.ftag.nextOrder();
+	        }
+	        
+	        //アニメーションでj表示させます
+	        img_obj.animate(
+	                {
+	                    opacity:"show"
+	                },
+	                {
+	                    duration: pm.time, 
+	                    easing:that.kag.stat.chara_effect,
+	                    complete: function(){
+	                        
+	                        chara_num--;
+	                        if(chara_num == 0){
+	                            that.kag.layer.showEventLayer();
+	                            
+	                            if(pm.wait=="true"){
+	                                that.kag.ftag.nextOrder();
+	                            }
+	                            
+	                        }
+	                        
+	                    }//end complerte
+	                }
+	       );
                 
-                chara_num++;
-                
-                tmp_base +=base;
-                
-                var j_chara = $(this);
-                //この分をプラスする感じですね
-                center = Math.floor(parseInt(j_chara.css("width"))/2);
-                //1つ目は主人公にゆずる
-                var left = tmp_base - center;
-                
-                j_chara.animate(
-                    {
-                        left:left
-                    }
-                    ,
-                    parseInt(pm.time), 
-                    that.kag.stat.chara_effect,
-                    function(){
-                        chara_num--;
-                        if(chara_num == 0){
-                            that.kag.layer.showEventLayer();
-                            that.kag.ftag.nextOrder();
-                        }
-                    }
-                );
-                
-            });
-            
-            
-        }else{
-            
-            
-            img_obj.css("top",pm.top+"px");
-            img_obj.css("left",pm.left+"px");
-            
-            //that.kag.ftag.nextOrder();
-            
-        }
+        }); //end preload
         
-        //オブジェクトにクラス名をセットします name属性は一意でなければなりません
-        $.setName(img_obj,cpm.name);
-        img_obj.addClass("tyrano_chara"); //キャラクター属性を付与。
-        
-        //新しいスタイルの定義
-        
-        if(cpm.width!=""){
-            img_obj.css("width",cpm.width+"px");
-        }
-        
-        if(cpm.height!=""){
-            img_obj.css("height",cpm.height+"px");
-        }
-        
-        if(pm.wait!="true"){
-            this.kag.ftag.nextOrder();
-        }
-        
-        //アニメーションでj表示させます
-        img_obj.animate(
-                {
-                    opacity:"show"
-                },
-                {
-                    duration: pm.time, 
-                    easing:that.kag.stat.chara_effect,
-                    complete: function(){
-                        
-                        chara_num--;
-                        if(chara_num == 0){
-                            that.kag.layer.showEventLayer();
-                            
-                            if(pm.wait=="true"){
-                                that.kag.ftag.nextOrder();
-                            }
-                            
-                        }
-                        
-                    }//end complerte
-                }
-       );
-       
        
     }
 };

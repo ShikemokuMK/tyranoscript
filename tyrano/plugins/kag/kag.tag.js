@@ -1252,9 +1252,9 @@ tyrano.plugin.kag.tag.current = {
 いずれの属性も、省略すれば設定は変更されません。
 :sample
 ;メッセージレイヤの位置とサイズを変更
-[layopt width=400 height=300 top=100 left=20]
+[position width=400 height=300 top=100 left=20]
 ;メッセージレイヤの色と透明度を変更
-[layopt color=blue opacity=100]
+[position color=blue opacity=100]
 :param
 layer=対象とするメッセージレイヤを指定します。<br/>省略するとcurrentタグで指定されたレイヤが選択されます,
 page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略するとcurrentタグで指定された、現在のページが選択されます。,

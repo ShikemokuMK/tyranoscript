@@ -1287,7 +1287,7 @@ name属性を指定することで、該当する要素のみを削除するこ�
 [ptext name="sample" layer=fix page=fore text="テキストテキスト" size=30 x=200 y=100 color=red ]
 
 ;fixレイヤーのクリア
-[fixclear name="sample"]
+[clearfix name="sample"]
 
 :param
 name=fixレイヤーへ追加した時に名前を指定した場合、適応できます。
