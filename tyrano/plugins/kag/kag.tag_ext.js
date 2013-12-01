@@ -1115,7 +1115,7 @@ tyrano.plugin.kag.tag.chara_show ={
 	                
 	                tmp_base +=base;
 	                
-	                var j_chara = $(that);
+	                var j_chara = $(this);
 	                //この分をプラスする感じですね
 	                center = Math.floor(parseInt(j_chara.css("width"))/2);
 	                //1つ目は主人公にゆずる
