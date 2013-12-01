@@ -837,7 +837,7 @@ tyrano.plugin.kag.tag.endmacro = {
         if(map_obj){
            
             //呼び出し元に戻る
-            this.kag.ftag.nextOrderWithIndex(map_obj.index,map_obj.storage);
+            this.kag.ftag.nextOrderWithIndex(map_obj.index,map_obj.storage, true);
             this.kag.popStack("macro");//スタックを奪い取る
             
             this.kag.stat.mp = this.kag.getStack("macro"); //参照用パラメータを設定
