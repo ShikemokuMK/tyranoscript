@@ -1069,18 +1069,15 @@ tyrano.plugin.kag.tag.chara_show ={
     	}
         
         
+        var img_obj = $("<img />");
+	    img_obj.attr("src",storage_url);
+	    img_obj.css("position","absolute");
+	    img_obj.css("display","none");
+	    //前景レイヤを表示状態にする
+	        
         //画像は事前にロードしておく必要がありそう
         this.kag.preload(storage_url,function(){
         	
-	        var img_obj = $("<img />");
-	        
-	        img_obj.attr("src",storage_url);
-	        
-	        img_obj.css("position","absolute");
-	        
-	        img_obj.css("display","none");
-	        //前景レイヤを表示状態にする
-	        
 	        var target_layer = that.kag.layer.getLayer(pm.layer,pm.page);
 	        target_layer.append(img_obj).show();
 	        
