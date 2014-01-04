@@ -107,11 +107,21 @@ tyrano.plugin.kag.parser ={
                 
             }else if(first_char ==="#"){
                 
+                var tmp_line = $.trim(line_str.replace("#",""));
+                var chara_name = "";
+                var chara_face = "";
+                if(tmp_line.split(":").length > 1){
+                	var array_line = tmp_line.split(":");
+                	chara_name = array_line[0];
+                	chara_face = array_line[1];
+                }else{
+                	chara_name = tmp_line;
+                }
                 //キャラクターボックスへの名前表示
                var text_obj = {
                                 line:i,
                                 name:"chara_ptext",
-                                pm:{"name":$.trim(line_str.replace("#",""))},
+                                pm:{"name":chara_name,"face":chara_face},
                                 val:text
               }
                             

@@ -843,17 +843,33 @@ tyrano.plugin.kag.tag.kanim ={
 
 //=====================================
 
+/*
+#[chara_ptext]
+:group
+キャラクター操作
+:title
+キャラクターの発言名前欄表示と表情変更
+:exp
+[chara_config ptext="hogehoge"]という形式で定義した発言者のメッセージボックスにnameで指定した名前を設定できます。
+さらに、faceパラメータを指定することで、同時に表情も変更できます。
+このタグには省略して書くことができます。
+#chara_name:face_name と　[ptext name="chara_name" face="face_name"] は同じ動作をします。
+[chara_new]時に登録した画像ファイルはface="default"で指定できます。
+[chara_new name="yuko" storage="yuko.png"  jname="ゆうこ"]
+:param
+name=[chara_new]で定義したnameを指定します。紐づいたjnameがptext欄に表示されます,
+face=[chara_face]で定義したface名を指定してください
+:sample
 
-//**** キャラクター操作系
-
-
+#[end]
+*/
 tyrano.plugin.kag.tag.chara_ptext ={
     
     
     pm:{
         
-        name : ""
-        
+        name : "",
+        face : ""
     },
     
     start:function(pm){
@@ -872,6 +888,16 @@ tyrano.plugin.kag.tag.chara_ptext ={
                 //存在しない場合はそのまま表示できる
                  $("."+this.kag.stat.chara_ptext).html(pm.name);
             }
+        }
+        
+        //表情の変更もあわせてできる
+        if(pm.face !=""){
+       		if(!(this.kag.stat.charas[pm.name]["map_face"][pm.face])){
+        	    this.kag.error("指定されたキャラクター「"+pm.name+"」もしくはface:「"+pm.face+"」は定義されていません。もう一度確認をお願いします");
+        	    return;
+        	}
+       		var storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
+       		$("."+pm.name).attr("src",storage_url);
         }
         this.kag.ftag.nextOrder();
         
@@ -982,15 +1008,13 @@ tyrano.plugin.kag.tag.chara_new ={
         width:"",
         height:"",
         jname:"",
-        visible:"false" 
-        
+        visible:"false", 
+        map_face:{}
     },
     
     start:function(pm){
         
         //イメージの追加
-        //前景レイヤ
-        this.kag.stat.charas[pm.name] = pm;
         
         var storage_url = "./data/fgimage/"+pm.storage;
         
@@ -998,14 +1022,18 @@ tyrano.plugin.kag.tag.chara_new ={
         if($.isHTTP(pm.storage)){
     	    storage_url	= pm.storage;	
     	}
-      
-       
+      	
+      	pm.map_face["default"] = storage_url;
         this.kag.preload(storage_url);
         
         //即座に追加
         if(pm.visible == "true"){
             
         }
+        
+        //前景レイヤ
+        this.kag.stat.charas[pm.name] = pm;
+        
         
         this.kag.ftag.nextOrder();
         
@@ -1380,6 +1408,7 @@ tyrano.plugin.kag.tag.chara_delete ={
 [chara_mod name="yuko" storage="newface.png"]
 :param
 name=[chara_new]で定義したname属性を指定してください。,
+face=[chara_face]で定義したface属性を指定してください,
 storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。
 
 #[end]
@@ -1387,28 +1416,98 @@ storage=変更する画像ファイルを指定してください。ファイル
 
 tyrano.plugin.kag.tag.chara_mod ={
     
-    vital:["name","storage"],
+    vital:["name"],
     
     pm:{
         
         name:"",
+        face:"",
         storage:"" 
         
     },
     
     start:function(pm){
+    	
+    	var storage_url ="";
+       	if(pm.face !=""){
+       		if(!(this.kag.stat.charas[pm.name]["map_face"][pm.face])){
+        	    this.kag.error("指定されたキャラクター「"+pm.name+"」もしくはface:「"+pm.face+"」は定義されていません。もう一度確認をお願いします");
+        	    return;
+        	}
+       		storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
+       	}else{
+       		
+	        if($.isHTTP(pm.storage)){
+	    	    storage_url	= pm.storage;	
+	    	}else{
+	    		storage_url = "./data/fgimage/"+pm.storage
+	    	}	
+	       	
+       	}
        
-       var storage_url ="";
+       $("."+pm.name).attr("src",storage_url);
+       
+       this.kag.ftag.nextOrder();
+        
+    }
+    
+};
+
+
+/*
+#[chara_face]
+:group
+キャラクター操作
+:title
+キャラクター表情登録
+:exp
+キャラクターの表情画像を名称と共に登録できます
+:sample
+
+;表情の登録
+[chara_face name="yuko" face="angry" storage="newface.png"]
+;表情の適応
+[chara_mod name="yuko" face="angry"]
+;発言者の名前も同時にかえたい場合
+[chara_ptext name="yuko" face="angry"]
+;短縮して書けます。以下も同じ意味
+#yuko:angry
+;chara_new で登録した画像はdefaultという名前で指定可能
+#yuko:default
+
+
+:param
+name=[chara_new]で定義したname属性を指定してください。,
+face=登録する表情の名前を指定してください,
+storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.chara_face ={
+    
+    vital:["name","face","storage"],
+    
+    pm:{
+        
+        name:"",
+        face:"",
+        storage:"" 
+        
+    },
+    
+    start:function(pm){
+    	
+    	var storage_url ="";
        
         if($.isHTTP(pm.storage)){
     	    storage_url	= pm.storage;	
     	}else{
     		storage_url = "./data/fgimage/"+pm.storage
     	}
-       
-       $("."+pm.name).attr("src",storage_url);
-       
-       this.kag.ftag.nextOrder();
+    	
+    	this.kag.stat.charas[pm.name]["map_face"][pm.face]=storage_url;
+       	this.kag.ftag.nextOrder();
         
     }
     
