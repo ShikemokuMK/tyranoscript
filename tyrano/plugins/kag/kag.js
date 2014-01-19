@@ -71,6 +71,7 @@ tyrano.plugin.kag ={
         is_stop:false,//停止中。クリックしても先に進ませない
         
         is_strong_stop:false,// [s]タグで立ち止まってる状態。強力な停止中。解除するにはジャンプやマクロが呼び出せれる
+        strong_stop_recover_index:0, //[s]タグ指定中に保存した場合、戻ってくるindex [_s]時のindexを保持しておく
         
         is_nowait:false, //ノーウェイト、テキスト瞬間表示状態
         
@@ -355,8 +356,8 @@ tyrano.plugin.kag ={
         //tyranoの大本部分の調整
         this.tyrano.base.setBaseSize(this.config.scWidth,this.config.scHeight);
         
-        //スマホの場合は、実施。
-        if($.userenv() !="pc"){
+        //スマホの場合は、実施。 PCの場合でも画面を一致させる処理→すべての画面フィットさせる仕様に変更
+//       if($.userenv() !="pc"){
             this.tyrano.base.fitBaseSize(that.config.scWidth,that.config.scHeight);
             //スマホの場合、傾いた時に再計算させる
             $(window).bind("load orientationchange resize",function(){
@@ -370,7 +371,7 @@ tyrano.plugin.kag ={
                 
                 }
             });
-        }
+//        }
         
         
         

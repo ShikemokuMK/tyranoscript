@@ -195,11 +195,12 @@ tyrano.plugin.kag.menu ={
             this.snapSave(this.kag.stat.current_message_str);
         }
         
-        //現在、停止中のステータスなら、
+        //現在、停止中のステータスなら、[_s]ポジションからセーブデータ取得
         if(this.snap.stat.is_strong_stop == true){
-            alert("ここではセーブできません");
-            return false;
+            this.snap.current_order_index = this.kag.stat.strong_stop_recover_index -1;
+            //return false;
         }
+        
         
         data = this.snap;
         
@@ -255,9 +256,9 @@ tyrano.plugin.kag.menu ={
         if(scenario !=""){
             this.snap.stat.current_scenario = scenario;
         }
-        
+       
         if(order_index !=""){
-            this.snap.current_order_index = order_index;
+        	this.snap.current_order_index = order_index;
             
         }
         

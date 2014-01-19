@@ -33,21 +33,26 @@ tyrano.base ={
         
         var space_width = 0;
         
-        if(width_f > height_f){
-            
-            scale_f = height_f;
-            
-        }else{
-            
-            scale_f = width_f;
-            
-            
-        }
+        var screen_ratio = this.tyrano.kag.config.ScreenRatio;
         
-        //$(".tyrano_base").css("-webkit-transform","scale("+width_f+") scaleY("+height_f+")");
-        //alert(scale_f);
-        $(".tyrano_base").css("-webkit-transform","scale("+scale_f+") ");
-    
+        //比率を固定にしたい場合は以下　以下のとおりになる
+        if(screen_ratio =="fix"){
+        	
+        	if(width_f > height_f){
+               scale_f = height_f;
+             }else{
+                scale_f = width_f;
+        	}
+        	//alert(scale_f);
+        	$(".tyrano_base").css("-webkit-transform","scale("+scale_f+") ");	
+        
+        }else{
+        	
+        	//スクリーンサイズに合わせて自動的に調整される
+        	$(".tyrano_base").css("-webkit-transform","scaleX("+width_f+") scaleY("+height_f+")");
+        
+        }
+       
         
     },
     
