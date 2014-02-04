@@ -20,24 +20,6 @@ tyrano.plugin.kag.menu ={
         
         layer_menu.html("");
 
-
-/*
- 
-
-<div class="display_menu" style="z-index: 10000; width: 740px; height: 780px; position: absolute; background-color:white; display:block;:auto;"align="center">
-    <div class="menu_item menu_close" style="float:right;"><img src="tyrano/images/kag/menu_button_close.png" /></div>
-    <div style="clear:both"></div>
-    <div class="menu_item menu_save"><img src="tyrano/images/kag/menu_button_save.gif" /></div>
-    <div class="menu_item menu_load"><img src="tyrano/images/kag/menu_button_save.gif" /></div>
-    <div class="menu_item menu_window_close"><img src="tyrano/images/kag/menu_button_save.gif" /></div>
-    <div class="menu_item menu_skip"><img src="tyrano/images/kag/menu_button_save.gif" /></div>
-    <div class="menu_item menu_back_title"><img src="tyrano/images/kag/menu_button_save.gif" /></div>
-</div>
-
-
- * 
- * */
-
         var menu_html = ""
                 
         +'<div class="display_menu" style="z-index: 10000; width:100%; height:100%; position: absolute; display:block;" align="center">'
@@ -148,7 +130,6 @@ tyrano.plugin.kag.menu ={
                     //var html ="<div class='save_display_area'><span class='save_menu_font' style='font-size:10px;'>【"+(i+1)+"】"+_data.save_date+"</span><br/><span class='save_menu_font' style='font-size:14px;'>"+_data.title+"</span></div>";
                     var html ="<div class='save_display_area' style=''><span class='save_menu_date_font' style=''>【"+(i+1)+"】"+_data.save_date+"</span><br/><span class='save_menu_text_font' style=''>"+_data.title+"</span></div>";
                     
-                    
                     var save = $(html);
                 
                     j_save.append(save);
@@ -197,10 +178,14 @@ tyrano.plugin.kag.menu ={
         
         //現在、停止中のステータスなら、[_s]ポジションからセーブデータ取得
         if(this.snap.stat.is_strong_stop == true){
+        	alert("ここではセーブできません");
+            return false;
+
+			//[_s]タグによる、現状復帰施策については、一旦見送り。
+            /*
             this.snap.current_order_index = this.kag.stat.strong_stop_recover_index -1;
-            //return false;
+            */
         }
-        
         
         data = this.snap;
         
@@ -236,6 +221,28 @@ tyrano.plugin.kag.menu ={
     
     //セーブ状態のスナップを保存します。
     snapSave:function(title,scenario,order_index){
+        
+        //スナップ取得のサンプル。これは、うまく使いたいですね。
+        /*
+        html2canvas(document.body, {
+    	onrendered: function(canvas) {
+        	// canvas is the final rendered <canvas> element
+    			alert("gggg");
+    			console.log(canvas);
+    			canvas.toDataURL()
+    			
+    			var img = new Image();
+    			canvas.createPNGStream();
+    			
+    			img.src = canvas.toDataURL("image/png");
+    			img.onload = function(){
+    				location.href = img.src;
+    			}
+    			
+    			
+    		}
+		});
+        */
         
         scenario = scenario || "";
         order_index = order_index || "";
@@ -456,6 +463,58 @@ tyrano.plugin.kag.menu ={
         }
         
     },
+    
+    //バックログ画面表示
+    displayLog:function(){
+            
+            var that = this;
+            this.kag.stat.is_skip = false;
+            
+            var j_save = $("<div></div>");
+            
+            var html = ""
+            +'<div class="display_menu" style="z-index:10000; width:100%; height:100%; position: absolute; display:block;">'
+            +'    <div class="menu_item menu_close" style="float:right;width:64px;"><img src="tyrano/images/kag/menu_button_close.png" /></div>'
+            +'    <div style="clear:both"></div>'
+            +'    <div class="log_body" style="border:solid 1px gray;width:90%;height:80%;overflow-y:scroll;padding:5px" align="left"></div>'
+            +'</div>';
+            
+            var j_menu = $(html);
+            
+            var layer_menu = this.kag.layer.getMenuLayer();
+            layer_menu.append(j_menu);
+            
+            layer_menu.find(".menu_close").click(function(){
+                layer_menu.hide();
+                $(".button_menu").show();
+            });
+            
+            var log_str = "";
+            
+            var array_log = this.kag.variable.tf.system.backlog;
+            
+            for (var i=0;i<array_log.length;i++){
+                log_str += array_log[i]+"<br />";
+            }
+            
+            layer_menu.find(".log_body").html(log_str);
+            
+            var j_menu_img =$("<img src='tyrano/images/kag/menu_bg.jpg' style=left:0px;top:0px;position:absolute;z-index:100' />");
+        
+            j_menu_img.css("width",this.kag.config.scWidth);
+            j_menu_img.css("height",this.kag.config.scHeight);
+            
+            layer_menu.append(j_menu_img);
+            layer_menu.show();
+            
+            //一番下固定させる
+            layer_menu.find(".log_body").scrollTop(9999999999);
+            
+            $(".button_menu").hide();
+            
+        
+    },
+    
     
       
     test:function(){

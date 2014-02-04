@@ -1513,3 +1513,34 @@ tyrano.plugin.kag.tag.chara_face ={
     
 };
 
+
+
+/*
+#[showlog]
+:group
+システム操作
+:title
+バックログを表示します
+:exp
+バックログを表示します
+:sample
+[showlog]
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.showlog ={
+    
+    
+    pm:{
+    },
+    
+    start:function(pm){
+        
+        this.kag.menu.displayLog();
+        
+    }
+    
+};
+
+
