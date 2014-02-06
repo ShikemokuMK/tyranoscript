@@ -1,4 +1,4 @@
-i(function($){
+(function($){
     
     //jquery 拡張
     
