@@ -184,8 +184,16 @@ tyrano.plugin.kag.tag.playbgm = {
             this.kag.stat.current_bgm = pm.storage;
         }
         
-        var audio_obj = new Media("./data/"+target+"/"+ pm.storage,
-
+        //iphone の場合
+        var src_url = "./data/"+target+"/"+ pm.storage;
+        
+        //android ならパス表記変更
+        if($.userenv()==="android" || $.userenv()==="andoroid"){
+            src_url = $.getBaseURL()+"data/"+target+"/"+ pm.storage;
+        }
+        
+        var audio_obj = new Media(src_url,
+ 
            function(){
                         
                                   
@@ -342,9 +350,6 @@ tyrano.plugin.kag.tag.stopbgm = {
                             _audio_obj = target_map[_key];
                         }
                         
-                        _audio_obj.stop();
-                        _audio_obj.release();
-                        
                         if(pm.target ==="bgm"){
                             that.kag.tmp.map_bgm[_key] = null;
                             delete that.kag.tmp.map_bgm[_key] ;
@@ -352,7 +357,12 @@ tyrano.plugin.kag.tag.stopbgm = {
                             that.kag.tmp.map_se[_key] = null;
                             delete that.kag.tmp.map_se[_key] ;
                          }
-                    
+                        
+                        //上記マップを削除した後に、ストップ処理を行うといいのではないか。 
+                        _audio_obj.stop();
+                        _audio_obj.release();
+                        
+                         
                     })();
                     
             }

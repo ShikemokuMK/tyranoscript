@@ -1,4 +1,4 @@
-(function($){
+i(function($){
     
     //jquery 拡張
     
@@ -319,7 +319,7 @@
         }else if(ua.indexOf('iPad') > -1){
             return 'iphone';
         }else if(ua.indexOf('Android') > -1 ){ 
-            return 'andoroid';
+            return 'android';
         }else{
             return "pc";
         }

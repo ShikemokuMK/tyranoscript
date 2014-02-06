@@ -163,11 +163,11 @@ tyrano.plugin.kag ={
             
         });
         
-        //アプリか否かの設定
+        //アプリか否かの設定 
         $("script").each(function(){
         
             if($(this).attr("src")){
-                if($(this).attr("src").indexOf("cordova")!=-1){
+                if($(this).attr("src").indexOf("cordova")!=-1 || $(this).attr("src").indexOf("phonegap")!=-1){
                     that.define.FLAG_APRI = true;
                 }
             }
