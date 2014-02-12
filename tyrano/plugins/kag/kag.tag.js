@@ -2665,6 +2665,13 @@ savesnap=true or false で指定します。デフォルトはfalse このボタ
 folder=好きな画像フォルダから、画像を選択できます。通常前景レイヤはfgimage　背景レイヤはbgimageと決まっていますが、ここで記述したフォルダ以下の画像ファイルを使用することができるようになります。,
 exp=ボタンがクリックされた時に実行されるJSを指定できます。,
 preexp="タグが評価された時点で変数 preexpに値を格納します。つまり、ボタンがクリックされた時に、expでpreexpという変数が利用できます。"
+hint=マウスカーソルを静止させたときに表示されるツールチップの文字列を指定できます。
+clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください
+enterse=ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください
+leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。
+clickimg=ボタンをクリックした時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください
+enterimg=ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。
+
 
 #[end]
 */
@@ -2687,7 +2694,15 @@ tyrano.plugin.kag.tag.button = {
         savesnap:"false",
         folder:"image",
         exp:"",
-        prevar:""
+        prevar:"",
+        
+        hint:"",
+        clickse:"",
+        enterse:"",
+        leavese:"",
+        clickimg:"",
+        enterimg:"",
+
     },
     
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -2745,6 +2760,11 @@ tyrano.plugin.kag.tag.button = {
             j_button.css("height",pm.height+"px");
          }
         
+        //ツールチップの設定
+        if(pm.hint !=""){
+            j_button.attr({"title":pm.hint,"alt":pm.hint});
+        }
+        
         //オブジェクトにクラス名をセットします
         $.setName(j_button,pm.name);
         
@@ -2757,8 +2777,69 @@ tyrano.plugin.kag.tag.button = {
             var preexp =  that.kag.embScript(pm.preexp);
             var button_clicked = false;
             
-            j_button.click(function(){
+            j_button.hover(
+                function(){
+                    //マウスが乗った時
+                    if(_pm.enterse!=""){
+                        that.kag.ftag.startTag("playse",{"storage":_pm.enterse});
+                    }
                     
+                    if(_pm.enterimg!=""){
+                        var enter_img_url ="";
+                        if($.isHTTP(_pm.enterimg)){
+                            enter_img_url = _pm.enterimg;   
+                        }else{
+                            enter_img_url = "./data/"+_pm.folder+"/"+_pm.enterimg;
+                        }
+                        
+                        $(this).attr("src",enter_img_url);
+                    
+                    }
+                    
+                },
+                function () {
+                    //マウスが外れた時
+                    if(_pm.leavese!=""){
+                        that.kag.ftag.startTag("playse",{"storage":_pm.leavese});
+                    }
+                    
+                    //元に戻す
+                    if(_pm.enterimg!=""){
+                    
+                        var enter_img_url ="";
+                        if($.isHTTP(_pm.graphic)){
+                            enter_img_url = _pm.graphic;   
+                        }else{
+                            enter_img_url = "./data/"+_pm.folder+"/"+_pm.graphic;
+                        }
+                        
+                        $(this).attr("src",enter_img_url);
+                    
+                    }
+                    
+                }
+            );
+            
+            j_button.click(function(){
+                   
+                   //クリックされた時に音が指定されていたら
+                   if(_pm.clickse !=""){
+                       that.kag.ftag.startTag("playse",{"storage":_pm.clickse});
+                   }
+                   
+                   if(_pm.clickimg !=""){
+                   
+                       var click_img_url ="";
+                       if($.isHTTP(_pm.clickimg)){
+                            click_img_url = _pm.clickimg;   
+                        }else{
+                            click_img_url = "./data/"+_pm.folder+"/"+_pm.clickimg;
+                        }
+                        
+                        j_button.attr("src",click_img_url);
+                        
+                   }
+                   
                   //fix指定のボタンは、繰り返し実行できるようにする
                   if(button_clicked == true && _pm.fix =="false"){
                     
