@@ -18,90 +18,74 @@ tyrano.plugin.kag.menu ={
         
         var layer_menu = this.kag.layer.getMenuLayer();
         
-        layer_menu.html("");
-
-        var menu_html = ""
+        layer_menu.empty();
+        
+        this.kag.html("menu",{},function(html_str){
+            
+            var j_menu = $(html_str);
+            
+            layer_menu.append(j_menu);
+        
+            layer_menu.find(".menu_skip").click(function(){
                 
-        +'<div class="display_menu" style="z-index: 10000; width:100%; height:100%; position: absolute; display:block;" align="center">'
-        +'    <div class="menu_item menu_close" style="float:right;width:64px;"><img src="tyrano/images/kag/menu_button_close.png" /></div>'
-        +'    <div style="clear:both"></div>'
-        +'    <div class="menu_item menu_save"><img src="tyrano/images/kag/menu_button_save.gif" /></div>'
-        +'    <div class="menu_item menu_load"><img src="tyrano/images/kag/menu_button_load.gif" /></div>'
-        +'    <div class="menu_item menu_window_close"><img src="tyrano/images/kag/menu_message_close.gif" /></div>'
-        +'    <div class="menu_item menu_skip"><img src="tyrano/images/kag/menu_button_skip.gif" /></div>'
-        +'    <div class="menu_item menu_back_title"><img src="tyrano/images/kag/menu_button_title.gif" /></div>'
-        +'</div>';
-        
-        var j_menu_img =$("<img src='tyrano/images/kag/menu_bg.jpg' style=left:0px;top:0px;position:absolute;z-index:100' />");
-        
-        j_menu_img.css("width",this.kag.config.scWidth);
-        j_menu_img.css("height",this.kag.config.scHeight);
-        
-        layer_menu.append(j_menu_img);
+                //スキップを開始する
+                layer_menu.html("");
+                layer_menu.hide();
+                $(".button_menu").show();
                 
-        var j_menu = $(menu_html);
-        
+                //nextOrder にして、
+                that.kag.stat.is_skip = true;
+                that.kag.ftag.nextOrder();
+                
+            });
             
-        layer_menu.append(j_menu);
-    
-        layer_menu.find(".menu_skip").click(function(){
+            layer_menu.find(".menu_close").click(function(){
+                layer_menu.hide();
+                $(".button_menu").show();
+            });
             
-            //スキップを開始する
-            layer_menu.html("");
-            layer_menu.hide();
-            $(".button_menu").show();
+            layer_menu.find(".menu_window_close").click(function(){
+                
+                //ウィンドウ消去
+                that.kag.layer.hideMessageLayers();
+                
+                layer_menu.hide();
+                $(".button_menu").show();
+                
+            });
             
-            //nextOrder にして、
-            that.kag.stat.is_skip = true;
-            that.kag.ftag.nextOrder();
+            layer_menu.find(".menu_save").click(function(){
+                
+                that.displaySave();
+                
+            });
+            
+            layer_menu.find(".menu_load").click(function(){
+                
+                that.displayLoad();
+                
+            });
+            
+            //タイトルに戻る
+            layer_menu.find(".menu_back_title").click(function(){
+                
+                /*
+                if(!confirm("タイトルに戻ります。よろしいですね？")){
+                    return false;
+                }
+                */
+                //first.ks の *start へ戻ります
+                location.reload();
+            });
+            
+            layer_menu.show();
+            $(".button_menu").hide();
+            
             
         });
-        
-        layer_menu.find(".menu_close").click(function(){
-            layer_menu.hide();
-            $(".button_menu").show();
-        });
-        
-        layer_menu.find(".menu_window_close").click(function(){
-            
-            //ウィンドウ消去
-            that.kag.layer.hideMessageLayers();
-            
-            layer_menu.hide();
-            $(".button_menu").show();
-            
-        });
-        
-        layer_menu.find(".menu_save").click(function(){
-            
-            that.displaySave();
-            
-        });
-        
-        layer_menu.find(".menu_load").click(function(){
-            
-            that.displayLoad();
-            
-        });
-        
-        //タイトルに戻る
-        layer_menu.find(".menu_back_title").click(function(){
-            
-            /*
-            if(!confirm("タイトルに戻ります。よろしいですね？")){
-                return false;
-            }
-            */
-            //first.ks の *start へ戻ります
-            location.reload();
-        });
-        
-        layer_menu.show();
-        $(".button_menu").hide();
          
     },
     
-    //displaySave displayLoadこの２つだな
     
     displaySave:function(){
         
@@ -114,54 +98,45 @@ tyrano.plugin.kag.menu ={
         
             
             var array_save = that.getSaveData();
-            
             var array = array_save.data; //セーブデータ配列
             
-            var j_save = $("<div></div>");
+            var layer_menu = that.kag.layer.getMenuLayer();
+            
+            for (var i=0;i<array.length;i++){
+                array[i].num = i;
+            }
             
             
-            for(var i=0;i<array.length;i++){
-               
-                (function(){
-                   
-                    var _data = array[i];
-                    var _i = i;
-                    
-                    //var html ="<div class='save_display_area'><span class='save_menu_font' style='font-size:10px;'>【"+(i+1)+"】"+_data.save_date+"</span><br/><span class='save_menu_font' style='font-size:14px;'>"+_data.title+"</span></div>";
-                    var html ="<div class='save_display_area' style=''><span class='save_menu_date_font' style=''>【"+(i+1)+"】"+_data.save_date+"</span><br/><span class='save_menu_text_font' style=''>"+_data.title+"</span></div>";
-                    
-                    var save = $(html);
-                
-                    j_save.append(save);
-                    
-                    save.css("cursor","pointer");
-                    
-                    save.click(function(){
+            this.kag.html("save",{array_save:array},function(html_str){
+                var j_save = $(html_str);
+                j_save.find(".save_display_area").click(function(){
                         
-                        //デフォルトシステムからの場合はスナップクリア
+                        var num = $(this).attr("data-num");
+                        
                         that.snap = null;
-                        
-                        that.doSave(_i);
-                        
+                        that.doSave(num);
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
                         $(".button_menu").show();
-            
                         
-                    });
-                    
-                })();
+                });
                 
+                var layer_menu = that.kag.layer.getMenuLayer();
+                
+                that.setMenu(j_save);
+                
+            });
             
-            }
+            
             
             //背景素材挿入
+            /*
             var j_menu_save_img =$("<img src='tyrano/images/kag/menu_save_bg.jpg' style='z-index:-1;left:0px;top:0px;position:absolute;' />");
             j_menu_save_img.css("width",this.kag.config.scWidth);
             j_menu_save_img.css("height",this.kag.config.scHeight);
             j_save.append(j_menu_save_img);
-        
-            that.setMenu(j_save);
+            */
+           
             
     },
     
@@ -271,60 +246,45 @@ tyrano.plugin.kag.menu ={
         
     },
     
-    //ロード画面の呼び出し
     displayLoad:function(){
-            
+        
             var that = this;
             
             this.kag.stat.is_skip = false;
-        
             
             var array_save = that.getSaveData();
             var array = array_save.data; //セーブデータ配列
             
+            var layer_menu = that.kag.layer.getMenuLayer();
             
-            var j_save = $("<div></div>");
+            for (var i=0;i<array.length;i++){
+                array[i].num = i;
+            }
             
             
-            for(var i=0;i<array.length;i++){
-               
-                (function(){
-                   
-                    var _data = array[i];
-                    var _i = i;
-                    
-                    var html ="<div class='save_display_area' style=''><span class='save_menu_date_font' style=''>【"+(i+1)+"】"+_data.save_date+"</span><br/><span class='save_menu_text_font' style=''>"+_data.title+"</span></div>";
-                    var save = $(html);
-                
-                    j_save.append(save);
-                    
-                    save.css("cursor","pointer");
-                    
-                    save.click(function(){
-                       
-                       that.loadGame(_i);
+            this.kag.html("load",{array_save:array},function(html_str){
+                var j_save = $(html_str);
+                j_save.find(".save_display_area").click(function(){
                         
-                        //レイヤメニュー
+                        var num = $(this).attr("data-num");
+                        
+                        that.snap = null;
+                        that.loadGame(num);
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
                         $(".button_menu").show();
-                      
                         
-                    });
-                    
-                })();
+                });
+                
+                var layer_menu = that.kag.layer.getMenuLayer();
+                
+                that.setMenu(j_save);
+                
+            });
             
-            }
             
-             //背景素材挿入
-            var j_menu_save_img =$("<img src='tyrano/images/kag/menu_load_bg.jpg' style='z-index:-1;left:0px;top:0px;position:absolute;' />");
-            j_menu_save_img.css("width",this.kag.config.scWidth);
-            j_menu_save_img.css("height",this.kag.config.scHeight);
-            j_save.append(j_menu_save_img);
-            
-            that.setMenu(j_save);
-        
     },
+    
     
     
     //ゲームを途中から開始します
@@ -472,47 +432,38 @@ tyrano.plugin.kag.menu ={
             
             var j_save = $("<div></div>");
             
-            var html = ""
-            +'<div class="display_menu" style="z-index:10000; width:100%; height:100%; position: absolute; display:block;">'
-            +'    <div class="menu_item menu_close" style="float:right;width:64px;"><img src="tyrano/images/kag/menu_button_close.png" /></div>'
-            +'    <div style="clear:both"></div>'
-            +'    <div class="log_body" style="border:solid 1px gray;width:90%;height:80%;overflow-y:scroll;padding:5px" align="left"></div>'
-            +'</div>';
-            
-            var j_menu = $(html);
-            
-            var layer_menu = this.kag.layer.getMenuLayer();
-            layer_menu.append(j_menu);
-            
-            layer_menu.find(".menu_close").click(function(){
-                layer_menu.hide();
-                $(".button_menu").show();
+            this.kag.html("backlog",{},function(html_str){
+                
+                var j_menu = $(html_str);
+                
+                var layer_menu = that.kag.layer.getMenuLayer();
+                layer_menu.empty();
+                layer_menu.append(j_menu);
+                
+                layer_menu.find(".menu_close").click(function(){
+                    layer_menu.hide();
+                    $(".button_menu").show();
+                });
+                
+                var log_str = "";
+                
+                var array_log = that.kag.variable.tf.system.backlog;
+                
+                for (var i=0;i<array_log.length;i++){
+                    log_str += array_log[i]+"<br />";
+                }
+                
+                layer_menu.find(".log_body").html(log_str);
+                layer_menu.show();
+                
+                //一番下固定させる
+                layer_menu.find(".log_body").scrollTop(9999999999);
+                
+                $(".button_menu").hide();
+                
+                
             });
             
-            var log_str = "";
-            
-            var array_log = this.kag.variable.tf.system.backlog;
-            
-            for (var i=0;i<array_log.length;i++){
-                log_str += array_log[i]+"<br />";
-            }
-            
-            layer_menu.find(".log_body").html(log_str);
-            
-            var j_menu_img =$("<img src='tyrano/images/kag/menu_bg.jpg' style=left:0px;top:0px;position:absolute;z-index:100' />");
-        
-            j_menu_img.css("width",this.kag.config.scWidth);
-            j_menu_img.css("height",this.kag.config.scHeight);
-            
-            layer_menu.append(j_menu_img);
-            layer_menu.show();
-            
-            //一番下固定させる
-            layer_menu.find(".log_body").scrollTop(9999999999);
-            
-            $(".button_menu").hide();
-            
-        
     },
     
     

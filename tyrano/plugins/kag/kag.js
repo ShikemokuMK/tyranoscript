@@ -659,6 +659,24 @@ tyrano.plugin.kag ={
         
     },
     
+    //指定したHTMLを取得してかえす 
+    html:function(html_file_name,data,callback){
+        
+        data = (data || {});
+        
+        $.loadText("./tyrano/html/"+html_file_name+".html",function(text_str){
+                
+                var tmpl = $.templates(text_str);
+                var html = tmpl.render(data);
+                
+                if(callback){
+                    callback($(html));
+                }
+                
+        });
+        
+    },
+    
     error:function(str){
         
         if(this.kag.config["debugMenu.visible"] == "true"){

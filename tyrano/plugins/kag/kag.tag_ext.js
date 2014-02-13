@@ -1538,6 +1538,8 @@ tyrano.plugin.kag.tag.showlog ={
     start:function(pm){
         
         this.kag.menu.displayLog();
+        this.kag.ftag.nextOrder();
+        
         
     }
     
