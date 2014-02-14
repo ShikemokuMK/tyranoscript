@@ -90,7 +90,6 @@ tyrano.plugin.kag.menu ={
     displaySave:function(){
         
         //セーブ画面作成
-            //セーブ個数は５個までにしておくか
             
             var that = this;
             
@@ -106,19 +105,22 @@ tyrano.plugin.kag.menu ={
                 array[i].num = i;
             }
             
-            
             this.kag.html("save",{array_save:array},function(html_str){
                 var j_save = $(html_str);
-                j_save.find(".save_display_area").click(function(){
-                        
+                j_save.find(".save_display_area").each(function(){
+                    
+                   $(this).click(function(){
                         var num = $(this).attr("data-num");
+                        alert("save:"+num);
                         
                         that.snap = null;
                         that.doSave(num);
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
+                        layer_menu.empty();
                         $(".button_menu").show();
                         
+                   }) ;
                 });
                 
                 var layer_menu = that.kag.layer.getMenuLayer();
@@ -261,19 +263,20 @@ tyrano.plugin.kag.menu ={
                 array[i].num = i;
             }
             
-            
             this.kag.html("load",{array_save:array},function(html_str){
                 var j_save = $(html_str);
-                j_save.find(".save_display_area").click(function(){
-                        
+                j_save.find(".save_display_area").each(function(){
+                    
+                   $(this).click(function(){
                         var num = $(this).attr("data-num");
-                        
                         that.snap = null;
                         that.loadGame(num);
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
+                        layer_menu.empty();
                         $(".button_menu").show();
                         
+                   }) ;
                 });
                 
                 var layer_menu = that.kag.layer.getMenuLayer();
@@ -327,7 +330,7 @@ tyrano.plugin.kag.menu ={
                 /*time:2000,*/
                 stop:"true"
             }
-            
+                    
             this.kag.ftag.startTag("playbgm",pm);
     
         }
