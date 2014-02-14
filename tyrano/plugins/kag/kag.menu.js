@@ -111,7 +111,6 @@ tyrano.plugin.kag.menu ={
                     
                    $(this).click(function(){
                         var num = $(this).attr("data-num");
-                        alert("save:"+num);
                         
                         that.snap = null;
                         that.doSave(num);
@@ -148,30 +147,27 @@ tyrano.plugin.kag.menu ={
         var array_save = this.getSaveData();
         
         var data = {};
+        var that = this;
         
         if(this.snap == null){
-            this.snapSave(this.kag.stat.current_message_str);
+            //ここはサムネイルイメージ作成のため、callback指定する
+            this.snapSave(this.kag.stat.current_message_str,
+                function(){
+                    //現在、停止中のステータスなら、[_s]ポジションからセーブデータ取得
+                    if(that.snap.stat.is_strong_stop == true){
+                        alert("ここではセーブできません");
+                        return false;
+                    }
+                    
+                    data = that.snap;
+                    data.save_date = $.getNowDate()+"　"+$.getNowTime();
+                    array_save.data[num] = data;
+                    $.setStorage(that.kag.config.projectID+"_tyrano_data",array_save);
+                    
+                }
+            );
+        
         }
-        
-        //現在、停止中のステータスなら、[_s]ポジションからセーブデータ取得
-        if(this.snap.stat.is_strong_stop == true){
-        	alert("ここではセーブできません");
-            return false;
-
-			//[_s]タグによる、現状復帰施策については、一旦見送り。
-            /*
-            this.snap.current_order_index = this.kag.stat.strong_stop_recover_index -1;
-            */
-        }
-        
-        data = this.snap;
-        
-        data.save_date = $.getNowDate()+"　"+$.getNowTime();
-         
-        array_save.data[num] = data;
-                       
-        $.setStorage(this.kag.config.projectID+"_tyrano_data",array_save);
-                            
         
     },
     
@@ -197,54 +193,59 @@ tyrano.plugin.kag.menu ={
     },
     
     //セーブ状態のスナップを保存します。
-    snapSave:function(title,scenario,order_index){
+    snapSave:function(title,call_back){
         
+        var that = this;
+        
+        //画面のキャプチャも取るよ
         //スナップ取得のサンプル。これは、うまく使いたいですね。
-        /*
-        html2canvas(document.body, {
-    	onrendered: function(canvas) {
-        	// canvas is the final rendered <canvas> element
-    			alert("gggg");
-    			console.log(canvas);
-    			canvas.toDataURL()
+        
+        var _current_order_index = that.kag.ftag.current_order_index;
+        var _stat = $.extend(true, {}, $.cloneObject(that.kag.stat));
+        
+        html2canvas($("#tyrano_base").get(0), {
+    	   onrendered: function(canvas) {
+            // canvas is the final rendered <canvas> element
+    			//console.log(canvas);
+    			var img_code = canvas.toDataURL()
     			
-    			var img = new Image();
-    			canvas.createPNGStream();
-    			
-    			img.src = canvas.toDataURL("image/png");
-    			img.onload = function(){
-    				location.href = img.src;
-    			}
-    			
+    			/*
+    			scenario = scenario || "";
+                order_index = order_index || "";
+                */
+               
+                var data = {};
+                
+                data.title = title;
+                data.stat = _stat;
+                data.current_order_index = _current_order_index -1; //１つ前
+                data.save_date = $.getNowDate()+"　"+$.getNowTime();
+                data.img_data = img_code;
+                
+                //レイヤ部分のHTMLを取得
+                var layer_obj = that.kag.layer.getLayeyHtml();
+                data.layer = layer_obj;
+                
+                that.snap= $.extend(true, {}, $.cloneObject(data));
+                
+                //現在のシナリオ上書き。Save.ksから呼び出された場合、うまく機能しないのに対応
+                /*
+                if(scenario !=""){
+                    that.snap.stat.current_scenario = scenario;
+                }
+               
+                if(order_index !=""){
+                    that.snap.current_order_index = order_index;
+                }
+                */
+                
+                if(call_back){
+                    call_back();
+                }
     			
     		}
 		});
-        */
         
-        scenario = scenario || "";
-        order_index = order_index || "";
-        
-        var data = {};
-        
-        data.title = title;
-        data.stat = this.kag.stat;
-        data.current_order_index = this.kag.ftag.current_order_index; //１つ前
-        data.save_date = $.getNowDate()+"　"+$.getNowTime();
-        
-        //レイヤ部分のHTMLを取得
-        var layer_obj = this.kag.layer.getLayeyHtml();
-        data.layer = layer_obj;
-        
-        this.snap= $.extend(true, {}, $.cloneObject(data));
-        //現在のシナリオ上書き。Save.ksから呼び出された場合、うまく機能しないのに対応
-        if(scenario !=""){
-            this.snap.stat.current_scenario = scenario;
-        }
-       
-        if(order_index !=""){
-        	this.snap.current_order_index = order_index;
-            
-        }
         
     },
     
@@ -284,7 +285,6 @@ tyrano.plugin.kag.menu ={
                 that.setMenu(j_save);
                 
             });
-            
             
     },
     

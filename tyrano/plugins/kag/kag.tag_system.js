@@ -975,11 +975,11 @@ tyrano.plugin.kag.tag.autosave = {
     	  	pm.title = this.kag.stat.current_message_str;
     	  }
 		  
-          this.kag.menu.snapSave(pm.title);
-          this.kag.menu.doSetAutoSave();
+          this.kag.menu.snapSave(pm.title,function(){
+            this.kag.menu.doSetAutoSave();
+            this.kag.ftag.nextOrder();
+          });
           
-          this.kag.ftag.nextOrder();
-    	  
     }
     
     
