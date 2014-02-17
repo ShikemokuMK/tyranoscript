@@ -87,8 +87,8 @@ tyrano.plugin.kag.layer ={
     
     addLayer:function(layer_name){
       
-      var layer_obj_fore = $("<div class='"+layer_name+"_fore'></div>");
-      var layer_obj_back = $("<div class='"+layer_name+"_back' style='display:none'></div>");
+      var layer_obj_fore = $("<div class='layer "+layer_name+"_fore'></div>");
+      var layer_obj_back = $("<div class='layer "+layer_name+"_back' style='display:none'></div>");
       
       layer_obj_fore.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
       layer_obj_back.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");

@@ -1546,6 +1546,8 @@ tyrano.plugin.kag.tag.image={
             
     	}else{
     	    
+    	    //base レイヤの場合
+    	    
     	    if(pm.folder !=""){
                 folder = pm.folder;
             }else{
