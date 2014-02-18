@@ -1,18 +1,15 @@
-<div>
+<ul class='save_list'>
 	{{for array_save}}
-		
-		<div style="border:solid 1px gray" class='save_display_area' data-num='{{:num}}' style='cursor:pointer'>
-			<img style="float:left;width:160px;height:120px" src="{{:img_data}}" />
-			<div style="float:left">
-			<span class='save_menu_date_font' style=''>{{:save_date}}</span><br/>
-			<span class='save_menu_text_font' style=''>{{:title}}</span>
-			</div>
-		</div>
-		
-		<div style="clear:both">
-		
+		<li class='save_list_item' data-num='{{:num}}'>
+			<span class='save_list_item_thumb'>
+				<img src="{{:img_data}}">
+			</span>
+			<span class='save_list_item_area'>
+				<span class='save_list_item_date'>{{:save_date}}</span>
+				<span class='save_list_item_text'>{{:title}}</span>
+			</span>
+		</li>
 	{{/for}}
+</ul>
 
-<img src='tyrano/images/kag/menu_save_bg.jpg' style='z-index:-1;left:0px;top:0px;width:100%;height:100%;position:absolute;' />
-
-</div>
+<img src='tyrano/images/kag/menu_save_bg.jpg' style='z-index:-1;left:0px;top:0px;width:100%;height:100%;position:absolute;'>
