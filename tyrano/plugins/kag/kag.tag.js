@@ -1997,26 +1997,7 @@ tyrano.plugin.kag.tag.s ={
     
 };
 
-
-/*
-#[_s]
-:group
-システム操作
-:title
-選択肢表示時の
-:exp
-次のゲームを停止時にセーブされた場合、この場所から再開させることが可能
-選択肢の前などは必ず配置する必要がある
-
-:sample
-[_s]
-[link target=*select1]【１】選択肢　その１[endlink][r]
-[link target=*select2]【２】選択肢　その２[endlink][r]
-[s]
-:param
-#[end]
-*/
-
+//使用禁止
 //処理停止、事前準備
 tyrano.plugin.kag.tag._s ={
     
