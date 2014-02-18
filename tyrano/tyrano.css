@@ -41,7 +41,7 @@ abbr,acronym{
     font-family:'@ＭＳ 明朝';
     /*color:white;*/
     writing-mode:vertical-rl ;
-    -webkit-writing-mode:vertical-rl ; 
+    -webkit-writing-mode:vertical-rl ;
     float:right;
     /*height : 960px ;*/
 
@@ -57,13 +57,6 @@ abbr,acronym{
     height:100%;
 }
 
-.save_menu_font{
-    
-    color:gray;
-    
-}
-
-
 
 
 /*メニュ－ボタン系*/
@@ -72,27 +65,59 @@ abbr,acronym{
 .display_menu .button:first-child {margin-top:0;}
 .display_menu{
     overflow:visible;padding:0;
-    z-index: 10000; 
-    width:100%; 
-    height:100%; 
-    position: absolute; 
+    z-index: 10000;
+    width:100%;
+    height:100%;
+    position: absolute;
     display:block;
     /*overflow:visible;padding:2%;display:table-cell;vertical-align:middle*/
 }
 
-/*セーブ・ロードのテキスト部分の文字のスタイルを指定できます*/
-.save_menu_date_font {
-    font-size:10px;
+/* セーブ時の画面の設定
+--------------------------*/
+/* セーブデータリスト全体の設定 */
+.save_list {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  border-top: 1px solid #ccc;
+  font-size: 14px;
+  font-weight: normal;
 }
-
-/*セーブ・ロード画面のテキスト部分のスタイルを指定できます。*/
-.save_menu_text_font{
-    font-size:14px;
+/* セーブデータの設定 */
+.save_list_item {
+  display: table-row;
+  cursor: pointer;
 }
-
-/*セーブ・ロードデータの行間などが調整できます*/
-.save_display_area{
-    margin-top:20px;
+/* セーブデータのサムネイル部分の設定 */
+.save_list_item_thumb {
+  display: table-cell;
+  width: 96px;
+  border-bottom: 1px solid #ccc;
+}
+.save_list_item_thumb img {
+  width: 96px;
+  height: 72px;
+}
+/* セーブデータのテキスト部文の設定 */
+.save_list_item_area {
+  display: table-cell;
+  vertical-align: top;
+  padding: 0 10px;
+  border-bottom: 1px solid #ccc;
+}
+/* セーブデータの日付の設定 */
+.save_list_item_date {
+  display: block;
+  padding: 5px 0;
+  line-height: 1;
+}
+/* セーブデータのテキストの設定 */
+.save_list_item_text {
+  display: block;
+  line-height: 1.3;
+  height: 48px;
+  overflow: hidden;
 }
 
 
@@ -110,7 +135,7 @@ abbr,acronym{
     position:absolute;
     z-index:99999;
     top:20px;
-    cursor:pointer;    
+    cursor:pointer;
 }
 
 /*
@@ -120,8 +145,8 @@ abbr,acronym{
 /*ゲーム枠の外側の色を指定します*/
 
 body{
-    background-color:black;        
-    -webkit-tap-highlight-color: transparent; 
+    background-color:black;
+    -webkit-tap-highlight-color: transparent;
 
 }
 
@@ -147,7 +172,7 @@ src: url("./data/others/TanukiMagic.eot");
 
 /*テキストボックスの共通スタイル*/
 .text_box{
-    
+
 }
 
 .tyrano_base{
