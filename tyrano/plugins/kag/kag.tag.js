@@ -2877,6 +2877,155 @@ tyrano.plugin.kag.tag.button = {
     
 };
 
+/*
+#[glink]
+:group
+ラベル・ジャンプ操作
+:title
+グラフィカルリンク
+:exp
+グラフィカルなボタンを表示することができます。画像は必要ありません
+グラフィックリンク表示中は強制的にシナリオ進行が停止しますので、必ずジャンプ先を指定して下さい
+また、グラフィックボタンの表示位置は直前のlocateタグによる指定位置を参照します。
+ただし、x、y が指定されている場合は、そちらが優先されます。
+ここから、移動した場合はコールスタックに残りません。つまり、リターンできないのでご注意ください
+ジャンプ後は自動的に[cm]タグが実行され、ボタンは消失します
+:sample
+
+[glink target="j1" text="選択肢１" size=20  width="500" y=300]
+[glink target="j2" text="選択肢２" size=30  width="500" y=400]
+[glink target="j3" text="選択肢３" size=30  width="500" y=400]
+
+[s]
+
+:param
+color=ボタンの色を指定できます。デフォルトはblackです（black gray white orange red blue rosy green pink）,
+storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
+target=ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。,
+name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
+text=ボタンの文字列です,
+x=ボタンの横位置を指定します,
+y=ボタンの縦位置を指定します。
+width=ボタンの横幅をピクセルで指定できます,
+height=ボタンの高さをピクセルで指定できます,
+exp=ボタンがクリックされた時に実行されるJSを指定できます。,
+clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください
+size=フォントサイズを指定できます。デフォルトは３０です,
+
+#[end]
+*/
+
+
+//グラフィカルな選択肢を表示する　CSSボタン
+tyrano.plugin.kag.tag.glink = {
+    
+    pm:{
+        color:"black", //クラス名でいいよ
+        storage:null,
+        target:null,
+        name:"",
+        text:"",
+        x:"auto",
+        y:"",
+        clickse:"",
+        width:"",
+        height:"",
+        size:30
+    },
+    
+    //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
+    //cmで抹消しよう
+    start:function(pm){
+        
+        var that = this;
+        var target_layer = null;
+        target_layer = this.kag.layer.getFreeLayer();
+        target_layer.css("z-index",999999);
+        
+        var j_button = $("<div class='button'>"+pm.text+"</div>");
+        j_button.css("position","absolute");
+        j_button.css("cursor","pointer");
+        j_button.css("z-index",99999999);
+        j_button.css("font-size",pm.size+"px");
+        j_button.addClass(pm.color);
+       
+       if(pm.height !=""){
+            j_button.css("height",pm.height+"px");
+       }
+       
+       if(pm.width !=""){
+           j_button.css("width",pm.width+"px");
+       }
+       
+        if(pm.x=="auto"){
+            var chara_cnt = target_layer.find(".tyrano_chara").length;
+            var sc_width = parseInt(that.kag.config.scWidth);
+            var center = Math.floor(parseInt(j_button.css("width"))/2);
+            var base = Math.floor(sc_width/2);
+            var first_left = base - center;
+            j_button.css("left",first_left+"px");
+                        
+       }else if(pm.x==""){
+            j_button.css("left",this.kag.stat.locate.x+"px");
+       }else{
+            j_button.css("left",pm.x+"px");
+       }
+       
+       
+       if(pm.y==""){
+            j_button.css("top",this.kag.stat.locate.y+"px");
+       }else{
+            j_button.css("top",pm.y+"px");
+       }
+        
+        //オブジェクトにクラス名をセットします
+        $.setName(j_button,pm.name);
+        
+        (function(){
+                
+            var _target = pm.target ;
+            var _storage = pm.storage;
+            var _pm = pm;
+            var preexp =  that.kag.embScript(pm.preexp);
+            var button_clicked = false;
+            
+            j_button.click(function(){
+                   
+                   //クリックされた時に音が指定されていたら
+                   if(_pm.clickse !=""){
+                       that.kag.ftag.startTag("playse",{"storage":_pm.clickse});
+                   }
+                  
+                    //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
+                    if(that.kag.stat.is_strong_stop !=true){
+                        return false;
+                    }
+                    
+                    button_clicked = true;
+                    
+                    if(_pm.exp !=""){
+                        //スクリプト実行
+                        that.kag.embScript(_pm.exp,preexp);
+                    }
+                    
+                    that.kag.layer.showEventLayer();
+                    
+                    that.kag.ftag.startTag("cm",{});
+                    //コールを実行する
+                    that.kag.ftag.startTag("jump",_pm);
+                    
+            });
+            
+        })();
+        
+        target_layer.append(j_button);
+        target_layer.show();
+        this.kag.ftag.nextOrder();
+        
+    }
+    
+};
+
 
 /*
 #[clickable]
