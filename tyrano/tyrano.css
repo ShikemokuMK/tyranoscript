@@ -40,6 +40,7 @@ abbr,acronym{
 
     font-family:'@ＭＳ 明朝';
     /*color:white;*/
+    writing-mode:tb-rl;
     writing-mode:vertical-rl ;
     -webkit-writing-mode:vertical-rl ;
     float:right;

@@ -480,63 +480,64 @@
     
     /*スマホの場合は、タッチでクリックを置き換える*/
     /*タッチ系、一応出来たけど、動作確認よくしなければならなｋ，問題なければR9にも適応*/
+    if ($.userenv() != "pc") {
+        $.event.tap = function(o) {
+            o.bind('touchstart', onTouchStart_);
 
-    $.event.tap = function(o) {
-        o.bind('touchstart', onTouchStart_);
+              function onTouchStart_(e) {
+                e.preventDefault();
+                o.data('event.tap.moved', false)
+                  .one('touchmove', onTouchMove_)
+                  .one('touchend', onTouchEnd_);
+                e.stopPropagation();
+              }
 
-          function onTouchStart_(e) {
-            e.preventDefault();
-            o.data('event.tap.moved', false)
-              .one('touchmove', onTouchMove_)
-              .one('touchend', onTouchEnd_);
-            e.stopPropagation();
-          }
+              function onTouchMove_(e) {
+                o.data('event.tap.moved', true);
+                e.stopPropagation();
+              }
 
-          function onTouchMove_(e) {
-            o.data('event.tap.moved', true);
-            e.stopPropagation();
-          }
+              function onTouchEnd_(e) {
+                if (!o.data('event.tap.moved')) {
+                  o.unbind('touchmove', onTouchMove_);
+                  o.trigger('click').click();
+                  e.stopPropagation();
+                }
+              }
+        };
 
-          function onTouchEnd_(e) {
-            if (!o.data('event.tap.moved')) {
-              o.unbind('touchmove', onTouchMove_);
-              o.trigger('click').click();
-              e.stopPropagation();
+
+        if ('ontouchend' in document) {
+          $.fn.tap = function(data, fn) {
+
+            //alert("tap!");
+
+            if (fn == null) {
+              fn = data;
+              data = null;
             }
+
+            if (arguments.length > 0) {
+              this.bind('tap', data, fn);
+              $.event.tap(this);
+            } else {
+              this.trigger('tap');
+            }
+            return this;
+          };
+
+          if ($.attrFn) {
+            $.attrFn['tap'] = true;
           }
-    };
 
+          //クリック上書き
+          $.fn.click = $.fn.tap;
 
-    if ('ontouchend' in document) {
-      $.fn.tap = function(data, fn) {
-          
-        //alert("tap!");
-          
-        if (fn == null) {
-          fn = data;
-          data = null;
-        }
-    
-        if (arguments.length > 0) {
-          this.bind('tap', data, fn);
-          $.event.tap(this);
         } else {
-          this.trigger('tap');
+          //$.fn.tap = $.fn.click;
         }
-        return this;
-      };
-    
-      if ($.attrFn) {
-        $.attrFn['tap'] = true;
-      }
-      
-      //クリック上書き
-      $.fn.click = $.fn.tap;
-      
-    } else {
-      //$.fn.tap = $.fn.click;
     }
-           
+
 //////////////////////////////
 
     
