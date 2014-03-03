@@ -2684,7 +2684,7 @@ tyrano.plugin.kag.tag.button = {
         enterse:"",
         leavese:"",
         clickimg:"",
-        enterimg:"",
+        enterimg:""
 
     },
     

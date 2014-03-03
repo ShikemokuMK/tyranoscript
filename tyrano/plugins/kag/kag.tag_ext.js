@@ -50,7 +50,7 @@ mp4形式の動画を再生します。
 :sample
 [movie storage="" skip=false ]
 :param
-storage=再生するmp4ファイルを指定してください
+storage=再生するmp4ファイルを指定してください,
 skip=動画再生中に途中でスキップ可能か否かを指定します true か false を指定してください
 #[end]
 */
@@ -99,7 +99,7 @@ tyrano.plugin.kag.tag.movie ={
             var url = "./data/video/"+pm.storage;
             
             var video = document.createElement('video');
-            video.setAttribute('myvideo');
+            //video.setAttribute('myvideo');
             video.src = url;
             
             //top:0px;left:0px;width:100%;height:100%;'";
