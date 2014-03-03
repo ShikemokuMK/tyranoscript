@@ -5,7 +5,7 @@
  *     [ESC]でメッセージウィンドウを消す.
  * マウス:
  *     マウスの右クリックでメニューを表示.
- *     ※メニューが非表示の場合(configVisible = false)、メッセージウィンドウを消します.
+ *     ※メニューが非表示の場合、メッセージウィンドウを消します.
  *
  * This is a plugin to support the operation of keyboard and mouse.
  * Keyboard:
@@ -13,7 +13,7 @@
  *     Press [Ecs] to hide the message window.
  * Mouse:
  *     Right-clicking displays the menu.
- *     Note: When the menu is not displayed (configVisible = false), hide the message window.
+ *     Note: When the menu is not displayed, hide the message window.
  */
 tyrano.plugin.kag.key_mouose = {
     init : function() {
@@ -32,7 +32,7 @@ tyrano.plugin.kag.key_mouose = {
         });
         $(document).on("mousedown", function(e) {
             if (e.which == 3) {
-                if (tyrano.plugin.kag.config.configVisible == "true") {
+                if ($('.button_menu').is(':visible')) {
                     tyrano.plugin.kag.key_mouose.showMenu();
                 } else {
                     tyrano.plugin.kag.key_mouose.hideMessage();
