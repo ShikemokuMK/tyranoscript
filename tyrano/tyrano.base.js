@@ -29,7 +29,7 @@ tyrano.base ={
         
         var scale_f = 0;
         
-        $(".tyrano_base").css("-webkit-transform-origin","0 0");
+        $(".tyrano_base").css("transform-origin","0 0");
         
         var space_width = 0;
         
@@ -44,12 +44,12 @@ tyrano.base ={
                 scale_f = width_f;
         	}
         	//alert(scale_f);
-        	$(".tyrano_base").css("-webkit-transform","scale("+scale_f+") ");	
+        	$(".tyrano_base").css("transform","scale("+scale_f+") ");	
         
         }else{
         	
         	//スクリーンサイズに合わせて自動的に調整される
-        	$(".tyrano_base").css("-webkit-transform","scaleX("+width_f+") scaleY("+height_f+")");
+        	$(".tyrano_base").css("transform","scaleX("+width_f+") scaleY("+height_f+")");
         
         }
        
