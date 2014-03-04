@@ -1418,7 +1418,7 @@ name=ティラノスクリプトのみ。animタグなどからこの名前で�
 pos=レイヤ位置を自動的に決定します。前景レイヤに対して使います。横方向の位置は、この属性で指定した left ( 左端 ) 、left_center ( 左より )、center ( 中央 )、 right_center ( 右より )、right ( 右端 ) の位置に表示されます。各横方向の座標の中心 位置は Config.tjs で指定することができます。
 　<br>left 、left_center、 center、 right_center、 right の代わりに、それぞれ l、 lc、 c、 rc、 r を 指定することもできます ( 動作は同じです )。
 　<br>この属性を指定した場合は left 属性や top 属性は無視されます。
-　<br>layerをbase と指定した場合にはこの属性は指定しないでください。各々の表示位置はConfit.tjsで事前に設定しておきましょう
+　<br>layerをbase と指定した場合にはこの属性は指定しないでください。各々の表示位置はConfig.tjsで事前に設定しておきましょう
 #[end]
 */
 

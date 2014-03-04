@@ -46,11 +46,15 @@ tyrano.base ={
         	//alert(scale_f);
         	$(".tyrano_base").css("transform","scale("+scale_f+") ");	
         
+        }else if(screen_ratio =="fit"){
+            
+            //スクリーンサイズに合わせて自動的に調整される
+            $(".tyrano_base").css("transform","scaleX("+width_f+") scaleY("+height_f+")");
+        
         }else{
         	
-        	//スクリーンサイズに合わせて自動的に調整される
-        	$(".tyrano_base").css("transform","scaleX("+width_f+") scaleY("+height_f+")");
-        
+        	//スクリーンサイズ固定
+        	
         }
        
         

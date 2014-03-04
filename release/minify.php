@@ -15,7 +15,7 @@ $original_dir = "../tyrano/";
 $array_copy = array(
 
 "config.js",
-"jquery-1.7.2.min.js",
+"jquery-1.10.2.min.js",
 "jquery-ui-1.8.20.custom.min.js",
 "jquery.a3d.min.js",
 "libs.js",
