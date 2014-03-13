@@ -1446,7 +1446,7 @@ tyrano.plugin.kag.tag.chara_mod ={
        	}
        
        $("."+pm.name).attr("src",storage_url);
-       
+       this.kag.stat.charas[pm.name]["storage"] = pm.storage;
        this.kag.ftag.nextOrder();
         
     }
