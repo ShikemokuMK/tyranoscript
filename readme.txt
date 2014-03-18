@@ -1,4 +1,4 @@
-TyranoScript｜ティラノスクリプト　Ver2.93（C）ShikemokuMK
+TyranoScript｜ティラノスクリプト　Ver3.00（C）ShikemokuMK
 http://tyrano.jp
 
 
@@ -52,6 +52,11 @@ KAGの仕様については、以下のURLがわかりやすいです。
 
 http://devdoc.kikyou.info/tvp/docs/kag3doc/contents/index.html
 
+【ティラノビルダー】
+http://b.tyrano.jp
+
+ティラノスクリプトの公式開発ツールです。ゲーム制作が楽になります。
+
 
 ■利用規約■
 
@@ -90,6 +95,8 @@ http://kikyou.info/
 ■主な更新履歴■
 
 ---------------------------------------------------------------------
+Ver3.0
+ティラノビルダー対応
 
 Ver2.80
 iOS7 対応

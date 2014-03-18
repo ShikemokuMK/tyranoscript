@@ -12,6 +12,11 @@ tyrano.plugin.kag.menu ={
     
     showMenu:function(call_back){
         
+        ///処理待ち状態の時は、実行してはいけない
+       if(this.kag.layer.layer_event.css("display") =="none"){
+            return false;
+       }
+        
         var that = this;
         
         this.kag.stat.is_skip = false;
@@ -35,7 +40,18 @@ tyrano.plugin.kag.menu ={
                 
                 //nextOrder にして、
                 that.kag.stat.is_skip = true;
-                that.kag.ftag.nextOrder();
+                
+                ///処理待ち状態の時は、実行してはいけない
+                if(that.kag.layer.layer_event.css("display") =="none"){
+                    //alert("今、スキップしない");
+                    //that.kag.ftag.nextOrder();
+                }else{
+                    //alert("スキップするよ");
+                    that.kag.ftag.nextOrder();
+                    
+                }
+                
+                
                 
             });
             
