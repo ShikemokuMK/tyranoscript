@@ -22,7 +22,10 @@ $array_copy = array(
 "tyrano.base.js",
 "tyrano.js",
 "tyrano.css",
-"flash.js"
+"flash.js",
+"jsrender.min.js",
+"html2canvas.js",
+
 );
 
 //ミニファイ対象のファイル郡
@@ -64,6 +67,7 @@ foreach($array_copy as $file){
 
 //imageディレクトリのコピー
 	exec("cp -R ../tyrano/images/ ".$dirname."/tyrano/");
+	exec("cp -R ../tyrano/html/ ".$dirname."/tyrano/");
 
 //オリジナルマスターデータのコピー	
 	exec("cp -R ./master_tyrano/data ".$dirname."/data/");

@@ -1196,13 +1196,14 @@ tyrano.plugin.kag.tag.chara_show ={
 	            that.kag.ftag.nextOrder();
 	        }
 	        
+	        
 	        //アニメーションでj表示させます
 	        img_obj.animate(
 	                {
 	                    opacity:"show"
 	                },
 	                {
-	                    duration: pm.time, 
+	                    duration: parseInt(pm.time), 
 	                    easing:that.kag.stat.chara_effect,
 	                    complete: function(){
 	                        
