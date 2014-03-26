@@ -377,7 +377,7 @@ tyrano.plugin.kag.menu ={
         
             var layer_menu = this.kag.layer.getMenuLayer();
         
-            layer_menu.html("");
+            layer_menu.empty();
         
             var menu_html = ""
         
@@ -395,8 +395,8 @@ tyrano.plugin.kag.menu ={
             
             });
             
-            layer_menu.show();
             layer_menu.append(j_obj);
+            layer_menu.show();
             
             
         },

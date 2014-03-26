@@ -8,6 +8,8 @@ tyrano.plugin.kag ={
     
     sound_swf:null,
     
+    cache_html:{},
+    
     config:{
       
       defaultStorageExtension:"jpg",
@@ -662,12 +664,26 @@ tyrano.plugin.kag ={
     //指定したHTMLを取得してかえす 
     html:function(html_file_name,data,callback){
         
+        var that = this;
+        
         data = (data || {});
+        
+        //キャッシュを確認して、すでに存在する場合はそれを返す
+        if(this.cache_html[html_file_name]){
+            if(callback){
+                var tmpl = $.templates(this.cache_html[html_file_name]);
+                var html = tmpl.render(data);
+                callback($(html));
+            }
+        }
         
         $.loadText("./tyrano/html/"+html_file_name+".html",function(text_str){
                 
                 var tmpl = $.templates(text_str);
                 var html = tmpl.render(data);
+                
+                //一度読みに行ったものは次回から読みに行かない
+                that.cache_html[html_file_name] = text_str;
                 
                 if(callback){
                     callback($(html));
