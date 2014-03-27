@@ -2642,7 +2642,7 @@ name=ティラノスクリプトのみ。animタグなどからこの名前で�
 x=ボタンの横位置を指定します,
 y=ボタンの縦位置を指定します。
 width=ボタンの横幅をピクセルで指定できます,
-width=ボタンの高さをピクセルで指定できます,
+height=ボタンの高さをピクセルで指定できます,
 fix=true falseで指定します。デフォルトはfalse 。trueを指定すると、Fixレイヤーにボタンが配置されます。この場合、ボタンを表示してもシナリオを進める事ができます。例えば、セーブボタンといった常に表示したいボタンを配置する時に活用できます。また、fixレイヤーに追加した要素を消す場合はfixclearタグ を使います。fixをtrueの場合は必ず別storageのtargetを指定してその場所にボタンが押されたときの処理を記述します。,
 savesnap=true or false で指定します。デフォルトはfalse このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します,
 folder=好きな画像フォルダから、画像を選択できます。通常前景レイヤはfgimage　背景レイヤはbgimageと決まっていますが、ここで記述したフォルダ以下の画像ファイルを使用することができるようになります。,
@@ -3046,9 +3046,13 @@ tyrano.plugin.kag.tag.glink = {
 [locate x=300 y=100]
 [clickable width=100 height=100 border="solid:1px:gray" target=*oda]
 
+[s]
+
 :param
 width=領域の横幅を指定します,
 height=領域に高さを指定します,
+x=領域の左端位置のX座標を指定します,
+y=領域の左端位置のY座標を指定します。,
 borderstyle=領域に線を表示することができます。「線の太さ:線の種類（CSS準拠）:線の色」のフォーマットで記述して下さい。線の種類はsolid double groove dashed dotted などが指定できます,　
 color=表示色を 0xRRGGBB 形式で指定 します。 ,
 opacity=領域の不透明度を 0 ～ 255 の数値で指定します0で完全 に透明です。,
@@ -3067,6 +3071,8 @@ tyrano.plugin.kag.tag.clickable = {
     pm:{
         width:"0",
         height:"0",
+        x:"",
+        y:"",
         border:"none",
         color:"",
         mouseopacity:"",
@@ -3099,6 +3105,16 @@ tyrano.plugin.kag.tag.clickable = {
         j_button.css("border",$.replaceAll(pm.border,":"," "));
         
         //alert($.replaceAll(pm.border,":"," "));
+        
+        //x,y 座標が指定されている場合は、そっちを採用
+        if(pm.x !=""){
+            j_button.css("left",parseInt(pm.x));
+        }
+        
+        if(pm.y !=""){
+            j_button.css("top",parseInt(pm.y));
+        }
+        
         
         (function(){
                 

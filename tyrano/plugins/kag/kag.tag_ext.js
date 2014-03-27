@@ -164,6 +164,7 @@ tyrano.plugin.kag.tag.showsave ={
     start:function(pm){
         
         this.kag.menu.displaySave();
+        this.kag.ftag.nextOrder();
         
     }
     
