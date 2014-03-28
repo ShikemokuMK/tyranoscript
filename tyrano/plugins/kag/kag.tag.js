@@ -1351,7 +1351,6 @@ tyrano.plugin.kag.tag.position = {
         
         this.kag.layer.refMessageLayer();
         
-        
         //message_inner のスタイルを変更する必要もある
         
         var layer_inner = this.kag.layer.getLayer(pm.layer,pm.page).find(".message_inner");

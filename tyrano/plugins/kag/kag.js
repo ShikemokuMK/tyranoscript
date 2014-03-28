@@ -110,6 +110,7 @@ tyrano.plugin.kag ={
         ch_speed:30, //文字表示スピード
         
         flag_glyph : "false", //クリック待ちボタンが指定されているか否か
+        current_cursor:"auto", //現在のカーソル指定
         
         //表示フォント指定
         font:{
@@ -454,6 +455,9 @@ tyrano.plugin.kag ={
         //タイトルの設定
         this.setTitle(this.config["System.title"]);
         
+        //cursorの設定
+        this.setCursor(this.config["cursorDefault"]);
+        
         var first_scenario_file = "first.ks";
         
         if($("#first_scenario_file").size() >0){
@@ -498,6 +502,20 @@ tyrano.plugin.kag ={
     
     pushAnimStack:function(){
       this.kag.tmp.num_anim++;  
+    },
+    
+    //ゲームのカーソルを指定する
+    setCursor:function(cursor){
+        
+        this.stat.current_cursor = cursor;
+        
+        if(cursor ==="default"){
+            //標準のカーソルをセット
+            $("body").css("cursor","auto");
+        }else{
+            $("body").css("cursor","url(./data/image/"+cursor+"),default");
+        }
+        
     },
     
     

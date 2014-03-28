@@ -429,6 +429,8 @@ tyrano.plugin.kag.tag.emb = {
 };
 
 
+
+
 /*
 #[if]
 :group
@@ -1360,6 +1362,41 @@ tyrano.plugin.kag.tag.commit ={
 };
 
 
+
+/*
+#[cursor]
+:group
+システム操作
+:title
+マウスカーソルに画像を設定できいます
+:exp
+storageに指定した画像ファイルがマウスカーソルに指定されます。data/imageフォルダ以下に配置してください。ファイルは形式は gif png jpg です。
+ゲーム中に何度でも変更することが可能です。ゲームでの標準カーソルを指定する場合はsystem/Config.tjsのcursorDefaultを指定してください。
+システムの標準カーソルに戻す場合はdefaultを指定します
+:sample
+[cursor storage="my_cursor.gif"]
+:param
+storage=カーソルに指定したい画像ファイルを指定します。画像はdata/imageフォルダに配置してください。
+#[end]
+*/
+
+tyrano.plugin.kag.tag.cursor = {
+    
+    vital:["storage"],
+    
+    pm:{
+        storage:"default"
+    },
+    
+    start:function(pm){
+        
+        //評価された値を代入
+        this.kag.setCursor(pm.storage);
+        this.kag.ftag.nextOrder();
+        
+    }
+    
+};
 
 
 

@@ -64,13 +64,13 @@ function KAGWindow_config()
 ;autoModeLineWaits.slow = 500; // 「遅い」
 
 
-// ◆ マウスカーソル（未実装）
+// ◆ マウスカーソル
 // マウスカーソルを指定します。画像ファイルも指定することができます
+// defaultを指定すると、通常の矢印になります。
+// 独自の画像カーソルを使用したい場合はimageフォルダに配置した上で、ファイル名を指定してください
+// [cursor]タグを使って、ゲーム中に変更することもできます。
 
-;cursorDefault = crArrow; // 通常のマウスカーソル
-;cursorPointed = crHandPoint; // リンクなどをポイントしたとき
-;cursorWaitingClick = crArrow; // クリック待ちの時
-;cursorDraggable = crSizeAll; // メッセージレイヤをドラッグ可能なとき
+;cursorDefault = default; // 通常のマウスカーソル 
 
 
 // ◆ コンフィグ（メニュー）機能表示

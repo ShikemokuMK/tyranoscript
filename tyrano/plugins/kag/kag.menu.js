@@ -351,6 +351,8 @@ tyrano.plugin.kag.menu ={
     
         }
         
+        //カーソルの復元
+        this.kag.setCursor(this.kag.stat.current_cursor);
         
         //ジャンプ
         //data.stat.current_scenario; 
