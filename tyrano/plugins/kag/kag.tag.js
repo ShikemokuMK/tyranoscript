@@ -2653,8 +2653,7 @@ enterse=ボタンの上にマウスカーソルが乗った時に再生する効
 leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。,
 clickimg=ボタンをクリックした時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください,
 enterimg=ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。,
-
-
+role=ボタンに特別な機能を割り当てることができます。この場合storageやtargetは無視されます。強制的にfix属性がtrueになります。指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)。backlog（過去ログを表示）【重要】fixレイヤはload時に復元されません。つまりこの機能を使う場合はゲーム初期化時に定義しておくのと合わせて、load時に実行されるmake.ksファイルに初期化時と同様にfixレイヤを再構築が必ず必要です。
 #[end]
 */
 
@@ -2683,7 +2682,9 @@ tyrano.plugin.kag.tag.button = {
         enterse:"",
         leavese:"",
         clickimg:"",
-        enterimg:""
+        enterimg:"",
+        
+        role:""
 
     },
     
@@ -2694,6 +2695,11 @@ tyrano.plugin.kag.tag.button = {
         var that = this;
         
         var target_layer = null;
+        
+        //role が設定された時は自動的にfix属性になる
+        if(pm.role !=""){
+            pm.fix ="true";
+        }
         
         if(pm.fix =="false"){
             target_layer = this.kag.layer.getFreeLayer();
@@ -2802,7 +2808,7 @@ tyrano.plugin.kag.tag.button = {
                 }
             );
             
-            j_button.click(function(){
+            j_button.click(function(event){
                    
                    //クリックされた時に音が指定されていたら
                    if(_pm.clickse !=""){
@@ -2840,7 +2846,6 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.embScript(_pm.exp,preexp);
                     }
                     
-                    //fixの場合は、アニメーション中は
                     
                     if(_pm.savesnap == "true"){
                           
@@ -2850,6 +2855,50 @@ tyrano.plugin.kag.tag.button = {
                           }
                           
                           that.kag.menu.snapSave(that.kag.stat.current_message_str);
+                    }
+                    
+                    //roleが設定されている場合は対応する処理を実行
+                    //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
+                    if(_pm.role !=""){
+                        
+                        switch(_pm.role){
+                            
+                            case "save":
+                                that.kag.menu.displaySave();
+                            break;
+                            
+                            case "load":
+                                that.kag.menu.displayLoad();
+                            break;
+                            
+                            case "window": 
+                                that.kag.layer.hideMessageLayers();
+                                break;
+                            break;   
+                            case "title":
+                                if(!confirm("タイトルに戻ります。よろしいですね？")){
+                                    return false;
+                                }
+                                //first.ks の *start へ戻ります
+                                location.reload();
+                            break;   
+                            case "menu": 
+                                that.kag.menu.showMenu();
+                            break;   
+                            case "skip": 
+                                 that.kag.ftag.startTag("skipstart",{});
+                            break;   
+                            case "backlog":
+                                 that.kag.ftag.startTag("showlog",{});
+                            break;
+                            
+                        }
+                        
+                        //バグリングさせない
+                        event.stopPropagation();
+                        
+                        //ジャンプは行わない
+                        return false;
                     }
                     
                     

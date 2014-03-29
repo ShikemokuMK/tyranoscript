@@ -55,12 +55,13 @@ tyrano.plugin.kag.menu ={
                 
             });
             
-            layer_menu.find(".menu_close").click(function(){
+            layer_menu.find(".menu_close").click(function(e){
                 layer_menu.hide();
                 $(".button_menu").show();
+                        
             });
             
-            layer_menu.find(".menu_window_close").click(function(){
+            layer_menu.find(".menu_window_close").click(function(e){
                 
                 //ウィンドウ消去
                 that.kag.layer.hideMessageLayers();
@@ -70,13 +71,13 @@ tyrano.plugin.kag.menu ={
                 
             });
             
-            layer_menu.find(".menu_save").click(function(){
+            layer_menu.find(".menu_save").click(function(e){
                 
                 that.displaySave();
                 
             });
             
-            layer_menu.find(".menu_load").click(function(){
+            layer_menu.find(".menu_load").click(function(e){
                 
                 that.displayLoad();
                 
@@ -85,11 +86,10 @@ tyrano.plugin.kag.menu ={
             //タイトルに戻る
             layer_menu.find(".menu_back_title").click(function(){
                 
-                /*
+                
                 if(!confirm("タイトルに戻ります。よろしいですね？")){
                     return false;
                 }
-                */
                 //first.ks の *start へ戻ります
                 location.reload();
             });
@@ -125,7 +125,7 @@ tyrano.plugin.kag.menu ={
                 var j_save = $(html_str);
                 j_save.find(".save_display_area").each(function(){
                     
-                   $(this).click(function(){
+                   $(this).click(function(e){
                         var num = $(this).attr("data-num");
                         
                         that.snap = null;
@@ -284,7 +284,7 @@ tyrano.plugin.kag.menu ={
                 var j_save = $(html_str);
                 j_save.find(".save_display_area").each(function(){
                     
-                   $(this).click(function(){
+                   $(this).click(function(e){
                         var num = $(this).attr("data-num");
                         that.snap = null;
                         that.loadGame(num);
@@ -390,11 +390,12 @@ tyrano.plugin.kag.menu ={
             var j_menu = $(menu_html);
             layer_menu.append(j_menu);
 
-            layer_menu.find(".menu_close").click(function(){
+            layer_menu.find(".menu_close").click(function(e){
                 layer_menu.hide();
                 $(".button_menu").show();
-                that.kag.ftag.nextOrder();
-            
+                
+                //that.kag.ftag.nextOrder();
+                
             });
             
             layer_menu.append(j_obj);

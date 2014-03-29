@@ -159,6 +159,8 @@ tyrano.plugin.kag.layer ={
             this.getLayer("message"+i).hide();
         }
         
+        //fixレイヤも隠します
+        this.hideFixLayer();
     },
     
     //メッセージレイヤの表示
@@ -180,7 +182,19 @@ tyrano.plugin.kag.layer ={
             
         }
         
+        //fixレイヤも
+        this.showFixLayer();
+        
     },
+    
+    showFixLayer:function(){
+        $(".fixlayer").show();
+    },
+    
+    hideFixLayer:function(){
+        $(".fixlayer").hide();
+    },
+    
     
     appendObj:function(layer_name,page,obj){
         
