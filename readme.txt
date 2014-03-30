@@ -1,4 +1,4 @@
-TyranoScript｜ティラノスクリプト　Ver3.00（C）ShikemokuMK
+TyranoScript｜ティラノスクリプト　Ver3.01（C）ShikemokuMK
 http://tyrano.jp
 
 
@@ -77,7 +77,7 @@ http://b.tyrano.jp
 shikemokumk@gmail.com
 
 Twitter
-http://twitter.com/shikemokuMK
+http://twitter.com/shikemokumk
 
 
 
