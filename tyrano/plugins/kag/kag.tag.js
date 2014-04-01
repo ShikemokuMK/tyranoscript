@@ -3201,12 +3201,11 @@ tyrano.plugin.kag.tag.clickable = {
                     	return false;
                     }
                     
-                    //that.kag.ftag.startTag("cm",{});
-                    
+                    that.kag.ftag.startTag("cm",{});
                     //コールを実行する
+                    that.kag.layer.showEventLayer();
                     that.kag.ftag.startTag("jump",_pm);
                     
-                    that.kag.layer.showEventLayer();
                     
                     /*
                     if(pm.target == null && pm.storage!=null){
