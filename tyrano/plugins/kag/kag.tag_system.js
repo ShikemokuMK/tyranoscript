@@ -972,14 +972,16 @@ tyrano.plugin.kag.tag.autosave = {
     
     start:function(pm){
     	  
+    	  var that = this;
+    	  
     	  //タイトルが設定されいない場合は現在のテキストを設定
     	  if(pm.title ==""){
     	  	pm.title = this.kag.stat.current_message_str;
     	  }
 		  
           this.kag.menu.snapSave(pm.title,function(){
-            this.kag.menu.doSetAutoSave();
-            this.kag.ftag.nextOrder();
+            that.kag.menu.doSetAutoSave();
+            that.kag.ftag.nextOrder();
           });
           
     }
