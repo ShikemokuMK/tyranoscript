@@ -2883,7 +2883,7 @@ tyrano.plugin.kag.tag.button = {
                                 location.reload();
                             break;   
                             case "menu": 
-                                that.kag.menu.showMenu();
+                                that.kag.ftag.startTag("showmenu",{});
                             break;   
                             case "skip": 
                                  that.kag.ftag.startTag("skipstart",{});
