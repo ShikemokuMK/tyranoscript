@@ -223,7 +223,7 @@ tyrano.plugin.kag.tag.showmenu ={
     start:function(pm){
         
         this.kag.menu.showMenu();
-        this.kag.ftag.nextOrder();
+//        this.kag.ftag.nextOrder();
         
     }
 };
