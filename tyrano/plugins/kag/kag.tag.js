@@ -2049,9 +2049,11 @@ tyrano.plugin.kag.tag.wait = {
 		var that = this;
 		
 		//クリック無効
-		this.kag.layer.hideEventLayer();
+		this.kag.stat.is_strong_stop = true;
+        this.kag.layer.hideEventLayer();
         
         setTimeout(function(){
+            that.kag.stat.is_strong_stop = false;
             that.kag.layer.showEventLayer();
         	that.kag.ftag.nextOrder();
         },pm.time);
