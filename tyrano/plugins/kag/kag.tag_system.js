@@ -723,6 +723,7 @@ tyrano.plugin.kag.tag["return"] = {
     
     start:function(){
         
+        //マクロからの場合、ここから、呼び出さないとだめ。だからmacro で return は使えない
         var pm = this.kag.getStack("call"); //最新のコールスタックを取得
         //呼び出し元に戻る 
         
