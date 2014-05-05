@@ -544,7 +544,48 @@ tyrano.plugin.kag.tag.anim ={
 //トランジション完了を待つ
 tyrano.plugin.kag.tag.wa={
     start:function(pm){
-        this.kag.layer.hideEventLayer();
+        
+        //実行中のアニメーションがある場合だけ待つ
+        if(this.kag.tmp.num_anim > 0){
+            this.kag.layer.hideEventLayer();
+        }else{
+            this.kag.ftag.nextOrder();
+            
+        }
+        
+        
+    }
+};
+
+
+/*
+#[stopanim]
+:group
+アニメーション関連
+:title
+アニメーション強制停止
+:exp
+実行中のアニメーションを強制的に停止します。
+:sample
+:param
+name=ここで指定した値が設定されている要素に対してアニメーションを停止します
+#[end]
+*/
+
+//アニメーション強制停止
+tyrano.plugin.kag.tag.stopanim={
+    vital:["name"],
+    
+    pm:{
+        name:""
+    },
+    
+    start:function(pm){
+       
+       $("."+pm.name).stop(); 
+       this.kag.popAnimStack();
+       this.kag.ftag.nextOrder();
+        
     }
 };
 

@@ -520,10 +520,13 @@ tyrano.plugin.kag ={
     
     
     popAnimStack:function(){
-      this.kag.tmp.num_anim--;
       
+      if(this.kag.tmp.num_anim > 0){
+        this.kag.tmp.num_anim--;
+      }
+           
       //すべてのアニメーションが終了したら、
-      if(this.kag.tmp.num_anim == 0){
+      if(this.kag.tmp.num_anim <= 0){
           
           //停止中なら
           if(this.kag.stat.is_stop == true){
