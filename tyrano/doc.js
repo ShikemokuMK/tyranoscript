@@ -143,17 +143,6 @@ tyrano.plugin.kag ={};
         
         //タグのグルーピングで左部分作成
         
-        /*
-        <p >■グラフィックカンレね</p>
-                        <ul>
-                            <a href="/usage/tutorial/about">メッセージ関連</a><br />
-                            <a href="/usage/tutorial/about">メッセージ関連</a><br />
-                            <a href="/usage/tutorial/about">メッセージ関連</a><br />
-                            <a href="/usage/tutorial/about">メッセージ関連</a><br />
-                            
-                        </ul>
-        */
-       
         var group_map = {};
         
         var ghtml = "";
@@ -311,8 +300,16 @@ tyrano.plugin.kag ={};
 +'</div>'
                 $(".howtoMain").append(basic_exp);
                 $(".howtoMain").append(j_root);
-                
                 $("#src_html").val(html);
+                
+                var js_auto_complete = "";
+                for(key in master_tag ){
+                    js_auto_complete += '"'+key+'",\n';
+                }
+                
+                console.log(master_tag);
+                
+                $("#auto_complete_tag").val(js_auto_complete);
                 
         
     };
