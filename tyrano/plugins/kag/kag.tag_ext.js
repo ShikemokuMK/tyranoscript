@@ -1454,7 +1454,6 @@ tyrano.plugin.kag.tag.chara_delete ={
 :param
 name=[chara_new]で定義したname属性を指定してください。,
 face=[chara_face]で定義したface属性を指定してください,
-time="切り替えにクロスフェードの効果を与えて、指定した時間をかけて画像を入れ替えます。デフォルトは0です",
 storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。
 
 #[end]
@@ -1468,16 +1467,15 @@ tyrano.plugin.kag.tag.chara_mod ={
         
         name:"",
         face:"",
-        storage:"",
-        time:"600" 
+        storage:""
         
     },
     
     start:function(pm){
     	
     	var that = this;
-    	
     	var storage_url ="";
+    	
        	if(pm.face !=""){
        		if(!(this.kag.stat.charas[pm.name]["map_face"][pm.face])){
         	    this.kag.error("指定されたキャラクター「"+pm.name+"」もしくはface:「"+pm.face+"」は定義されていません。もう一度確認をお願いします");
@@ -1493,39 +1491,12 @@ tyrano.plugin.kag.tag.chara_mod ={
 	    	}	
 	       	
        	}
-       if(pm.time !="0"){
-            var j_new_img = $("."+pm.name).clone();
-            j_new_img.attr("src",storage_url);
-            j_new_img.css("opacity",0);
-            
-            var j_img = $("."+pm.name);
-            j_img.after(j_new_img);
-            
-            j_img.fadeTo(
-                parseInt(pm.time), 
-                0,
-                function(){
-                    //alert("完了");
-                }
-             );
-            
-             j_new_img.fadeTo(
-                parseInt(pm.time), 
-                1,
-                function(){
-                    j_img.remove();
-                    that.kag.ftag.nextOrder();
-                }
-             );
-            
-       }else{
-            $("."+pm.name).attr("src",storage_url);
-            this.kag.ftag.nextOrder();
-       }
+       	
+        $("."+pm.name).attr("src",storage_url);
+        this.kag.ftag.nextOrder();
        
        //キャラクターのhideした後、showした時はデフォルトの表情を適用する
        //this.kag.stat.charas[pm.name]["storage"] = pm.storage;
-       
         
     }
     
