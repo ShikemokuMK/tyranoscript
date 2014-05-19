@@ -2906,9 +2906,18 @@ tyrano.plugin.kag.tag.button = {
                     
                     that.kag.layer.showEventLayer();
                     
-                    //コールを実行する
-                    that.kag.ftag.startTag("jump",_pm);
+                    //fixレイヤの場合はcallでスタックが積まれる
+                    if(_pm.role=="" && _pm.fix =="true"){
+                            
+                        //jumpを実行する
+                        that.kag.ftag.startTag("call",_pm);
+                        
+                    }else{
+                        
+                        //jumpを実行する
+                        that.kag.ftag.startTag("jump",_pm);
                     
+                    }
             });
             
         })();
