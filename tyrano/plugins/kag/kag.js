@@ -139,6 +139,7 @@ tyrano.plugin.kag ={
         chara_pos_mode:"true",
         chara_effect:"swing",
         chara_ptext:"",
+        chara_time:"600",
         //定義されたキャラクター情報
         charas:{},
         
