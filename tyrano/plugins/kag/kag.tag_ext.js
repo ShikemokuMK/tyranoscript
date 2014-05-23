@@ -961,6 +961,7 @@ tyrano.plugin.kag.tag.chara_ptext ={
 pos_mode=true か false　を指定します。デフォルトはtrueです。trueの場合は、[chara_show]タグなどで追加した時の立ち位置を自動的に計算し、配置します。,
 ptext=発言者の名前領域のptextを指定できます。例えば[ptext name="name_space"] のように定義されていた場合、その後 #yuko のように指定するだけで、ptext領域キャラクターの名前を表示することができます。,
 time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
+memory=true か false を指定します。デフォルトはfalseです。キャラクターを非表示にして再度表示した時に、表情を維持するかどうかをしていできます。falseをしていすると、[chara_new]で指定してデフォルトの表情で表示されます,
 effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
 jswing
 ｜def
@@ -1007,6 +1008,7 @@ tyrano.plugin.kag.tag.chara_config ={
         effect:"swing",
         ptext:"",
         time:"600",
+        memory:"false"
         
     },
     
@@ -1016,6 +1018,8 @@ tyrano.plugin.kag.tag.chara_config ={
         this.kag.stat.chara_effect = pm.effect;
         this.kag.stat.chara_ptext = pm.ptext;
         this.kag.stat.chara_time  = pm.time;
+        this.kag.stat.chara_memory  = pm.memory;
+        
         
         this.kag.ftag.nextOrder();
         
@@ -1071,6 +1075,7 @@ tyrano.plugin.kag.tag.chara_new ={
     	}
       	
       	pm.map_face["default"] = pm.storage;
+      	
         this.kag.preload(storage_url);
         
         //即座に追加
@@ -1396,6 +1401,11 @@ tyrano.plugin.kag.tag.chara_hide ={
                 }
        ); // end animate
        
+       //キャラクターの表情を引き継がない
+       if(this.kag.stat.chara_memory =="false"){
+           this.kag.stat.charas[pm.name].storage = this.kag.stat.charas[pm.name]["map_face"]["default"];
+       }
+       
         //すぐに次の命令を実行
         if(pm.wait!="true"){
             this.kag.ftag.nextOrder();
@@ -1545,7 +1555,7 @@ tyrano.plugin.kag.tag.chara_mod ={
        }
        
        //showする前でも、表情が適応されるようにする
-       this.kag.stat.charas[pm.name]["storage"] = pm.storage;
+       this.kag.stat.charas[pm.name]["storage"] = storage_url;
        
         
     }
