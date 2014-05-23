@@ -960,6 +960,7 @@ tyrano.plugin.kag.tag.chara_ptext ={
 :param
 pos_mode=true か false　を指定します。デフォルトはtrueです。trueの場合は、[chara_show]タグなどで追加した時の立ち位置を自動的に計算し、配置します。,
 ptext=発言者の名前領域のptextを指定できます。例えば[ptext name="name_space"] のように定義されていた場合、その後 #yuko のように指定するだけで、ptext領域キャラクターの名前を表示することができます。,
+time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
 effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
 jswing
 ｜def
@@ -1004,7 +1005,8 @@ tyrano.plugin.kag.tag.chara_config ={
         
         pos_mode : "true",
         effect:"swing",
-        ptext:""
+        ptext:"",
+        time:"600",
         
     },
     
@@ -1013,6 +1015,7 @@ tyrano.plugin.kag.tag.chara_config ={
         this.kag.stat.chara_pos_mode = pm.pos_mode;
         this.kag.stat.chara_effect = pm.effect;
         this.kag.stat.chara_ptext = pm.ptext;
+        this.kag.stat.chara_time  = pm.time;
         
         this.kag.ftag.nextOrder();
         
@@ -1454,6 +1457,7 @@ tyrano.plugin.kag.tag.chara_delete ={
 :param
 name=[chara_new]で定義したname属性を指定してください。,
 face=[chara_face]で定義したface属性を指定してください,
+time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
 storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。
 
 #[end]
@@ -1467,15 +1471,16 @@ tyrano.plugin.kag.tag.chara_mod ={
         
         name:"",
         face:"",
-        storage:""
+        storage:"",
+        time:"",
         
     },
     
     start:function(pm){
     	
     	var that = this;
-    	var storage_url ="";
     	
+    	var storage_url ="";
        	if(pm.face !=""){
        		if(!(this.kag.stat.charas[pm.name]["map_face"][pm.face])){
         	    this.kag.error("指定されたキャラクター「"+pm.name+"」もしくはface:「"+pm.face+"」は定義されていません。もう一度確認をお願いします");
@@ -1491,12 +1496,51 @@ tyrano.plugin.kag.tag.chara_mod ={
 	    	}	
 	       	
        	}
+       
+       var chara_time = this.kag.stat.chara_time;
+       if(pm.time !=""){
+           chara_time = pm.time;
+       }
+       
+       //変更する際の画像が同じ場合は、即時表示
+       if($(".layer_fore").find("."+pm.name).attr("src") == storage_url){
+           chara_time = "0";
+       }
+            
        	
-        $("."+pm.name).attr("src",storage_url);
-        this.kag.ftag.nextOrder();
+       if(chara_time !="0"){
+           var j_new_img = $(".layer_fore").find("."+pm.name).clone();
+            j_new_img.attr("src",storage_url);
+            j_new_img.css("opacity",0);
+            
+            var j_img = $(".layer_fore").find("."+pm.name);
+            j_img.after(j_new_img);
+            
+            j_img.fadeTo(
+                parseInt(chara_time), 
+                0,
+                function(){
+                    //alert("完了");
+                }
+             );
+            
+             j_new_img.fadeTo(
+                parseInt(chara_time), 
+                1,
+                function(){
+                    j_img.remove();
+                    that.kag.ftag.nextOrder();
+                }
+             );
+            
+       }else{
+            $(".layer_fore").find("."+pm.name).attr("src",storage_url);
+            this.kag.ftag.nextOrder();
+       }
        
        //キャラクターのhideした後、showした時はデフォルトの表情を適用する
        //this.kag.stat.charas[pm.name]["storage"] = pm.storage;
+       
         
     }
     
