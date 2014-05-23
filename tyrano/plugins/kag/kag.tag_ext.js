@@ -1070,7 +1070,7 @@ tyrano.plugin.kag.tag.chara_new ={
     	    storage_url	= pm.storage;	
     	}
       	
-      	pm.map_face["default"] = storage_url;
+      	pm.map_face["default"] = pm.storage;
         this.kag.preload(storage_url);
         
         //即座に追加
@@ -1492,10 +1492,16 @@ tyrano.plugin.kag.tag.chara_mod ={
 	        if($.isHTTP(pm.storage)){
 	    	    storage_url	= pm.storage;	
 	    	}else{
-	    		storage_url = "./data/fgimage/"+pm.storage
+	    		storage_url = pm.storage
 	    	}	
 	       	
        	}
+       
+       if($(".layer_fore").find("."+pm.name).size() == 0){
+            this.kag.stat.charas[pm.name]["storage"] = storage_url;
+            this.kag.ftag.nextOrder();
+            return;
+       }
        
        var chara_time = this.kag.stat.chara_time;
        if(pm.time !=""){
@@ -1503,14 +1509,14 @@ tyrano.plugin.kag.tag.chara_mod ={
        }
        
        //変更する際の画像が同じ場合は、即時表示
-       if($(".layer_fore").find("."+pm.name).attr("src") == storage_url){
+       if($(".layer_fore").find("."+pm.name).attr("src") == "./data/fgimage/"+storage_url){
            chara_time = "0";
        }
-            
-       	
+       
+       
        if(chara_time !="0"){
            var j_new_img = $(".layer_fore").find("."+pm.name).clone();
-            j_new_img.attr("src",storage_url);
+            j_new_img.attr("src","./data/fgimage/"+storage_url);
             j_new_img.css("opacity",0);
             
             var j_img = $(".layer_fore").find("."+pm.name);
@@ -1534,12 +1540,12 @@ tyrano.plugin.kag.tag.chara_mod ={
              );
             
        }else{
-            $(".layer_fore").find("."+pm.name).attr("src",storage_url);
+            $(".layer_fore").find("."+pm.name).attr("src","./data/fgimage/"+storage_url);
             this.kag.ftag.nextOrder();
        }
        
-       //キャラクターのhideした後、showした時はデフォルトの表情を適用する
-       //this.kag.stat.charas[pm.name]["storage"] = pm.storage;
+       //showする前でも、表情が適応されるようにする
+       this.kag.stat.charas[pm.name]["storage"] = pm.storage;
        
         
     }
@@ -1596,7 +1602,7 @@ tyrano.plugin.kag.tag.chara_face ={
         if($.isHTTP(pm.storage)){
     	    storage_url	= pm.storage;	
     	}else{
-    		storage_url = "./data/fgimage/"+pm.storage
+    		storage_url = pm.storage;
     	}
     	
     	this.kag.stat.charas[pm.name]["map_face"][pm.face]=storage_url;
