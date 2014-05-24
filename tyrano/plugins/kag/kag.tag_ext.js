@@ -1482,7 +1482,7 @@ tyrano.plugin.kag.tag.chara_mod ={
         name:"",
         face:"",
         storage:"",
-        time:"",
+        time:""
         
     },
     
