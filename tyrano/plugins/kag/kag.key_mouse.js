@@ -60,7 +60,7 @@ tyrano.plugin.kag.key_mouose = {
             if ($(".menu_close").size() > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
-                tyrano.plugin.kag.ftag.startTag("showmenu");
+                $(".button_menu").click();
             }
         }
     },

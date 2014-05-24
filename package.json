@@ -1,6 +1,6 @@
 {
         "name":"tyranoscript",
-        "main":"index.html",
+        "main":"app://./index.html",
 		"window":{
 		"title": "node-webkit demo",
     		"icon": "link.png",

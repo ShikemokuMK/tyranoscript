@@ -180,7 +180,7 @@ function AC_Generateobj(objAttrs, params, embedAttrs)
   }
   else
   {
-    str += '<embed ';
+    str += '<embed width="0" height="0" ';
     for (var i in embedAttrs)
     {
       str += i + '="' + embedAttrs[i] + '" ';
