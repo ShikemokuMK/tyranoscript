@@ -962,6 +962,7 @@ pos_mode=true か false　を指定します。デフォルトはtrueです。tr
 ptext=発言者の名前領域のptextを指定できます。例えば[ptext name="name_space"] のように定義されていた場合、その後 #yuko のように指定するだけで、ptext領域キャラクターの名前を表示することができます。,
 time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
 memory=true か false を指定します。デフォルトはfalseです。キャラクターを非表示にして再度表示した時に、表情を維持するかどうかをしていできます。falseをしていすると、[chara_new]で指定してデフォルトの表情で表示されます,
+anim=キャラクターを自動配置する場合、キャラクターの立ち位置が変わるときにアニメーションを行うか否かを指定できます。デフォルトは true です。falseを指定するとじんわりと入れ替わる効果に切り替わります。
 effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
 jswing
 ｜def
@@ -1008,7 +1009,8 @@ tyrano.plugin.kag.tag.chara_config ={
         effect:"swing",
         ptext:"",
         time:"600",
-        memory:"false"
+        memory:"false",
+        anim:"true"
         
     },
     
@@ -1019,7 +1021,7 @@ tyrano.plugin.kag.tag.chara_config ={
         this.kag.stat.chara_ptext = pm.ptext;
         this.kag.stat.chara_time  = pm.time;
         this.kag.stat.chara_memory  = pm.memory;
-        
+        this.kag.stat.chara_anim    = pm.anim;
         
         this.kag.ftag.nextOrder();
         
@@ -1201,21 +1203,51 @@ tyrano.plugin.kag.tag.chara_show ={
 	                //1つ目は主人公にゆずる
 	                var left = tmp_base - center;
 	                
-	                j_chara.animate(
-	                    {
-	                        left:left
-	                    }
-	                    ,
-	                    parseInt(pm.time), 
-	                    that.kag.stat.chara_effect,
-	                    function(){
-	                        chara_num--;
-	                        if(chara_num == 0){
-	                            that.kag.layer.showEventLayer();
-	                            that.kag.ftag.nextOrder();
-	                        }
-	                    }
-	                );
+	                if(that.kag.stat.chara_anim =="false"){
+	                   
+	                  
+	                   j_chara.fadeTo(
+                            parseInt(pm.time), 
+                            0,
+                            function(){
+                                
+                                j_chara.css("left",left);
+                       
+                                j_chara.fadeTo(
+                                    parseInt(pm.time), 
+                                    1,
+                                    function(){
+                                        
+                                        chara_num--;
+                                        if(chara_num == 0){
+                                            that.kag.layer.showEventLayer();
+                                            that.kag.ftag.nextOrder();
+                                        }
+                                    }
+                                );
+                               
+                            }
+                        );
+	                    
+	                }else{
+	                    
+    	                j_chara.animate(
+    	                    {
+    	                        left:left
+    	                    }
+    	                    ,
+    	                    parseInt(pm.time), 
+    	                    that.kag.stat.chara_effect,
+    	                    function(){
+    	                        chara_num--;
+    	                        if(chara_num == 0){
+    	                            that.kag.layer.showEventLayer();
+    	                            that.kag.ftag.nextOrder();
+    	                        }
+    	                    }
+    	                );
+    	                
+    	            }
 	                
 	            });
 	            
@@ -1367,24 +1399,53 @@ tyrano.plugin.kag.tag.chara_hide ={
                                     //1つ目は主人公にゆずる
                                     var left = tmp_base - center;
                                     
-                                    j_chara.animate(
-                                        {
-                                            left:left
-                                        }
-                                        ,
-                                        parseInt(pm.time), 
-                                        that.kag.stat.chara_effect,
-                                        function(){
-                                            
-                                            chara_num--;
-                                            if(chara_num == 0){
-                                                that.kag.layer.showEventLayer();
+                                    if(that.kag.stat.chara_anim =="false"){
+                                        
+                                        j_chara.fadeTo(
+                                            parseInt(pm.time), 
+                                            0,
+                                            function(){
                                                 
-                                                that.kag.ftag.nextOrder();
+                                                j_chara.css("left",left);
+                                       
+                                                j_chara.fadeTo(
+                                                    parseInt(pm.time), 
+                                                    1,
+                                                    function(){
+                                                        
+                                                        chara_num--;
+                                                        if(chara_num == 0){
+                                                            that.kag.layer.showEventLayer();
+                                                            that.kag.ftag.nextOrder();
+                                                        }
+                                                    }
+                                                );
+                                               
                                             }
-                                            
-                                        }
-                                    );
+                                        );
+                                        
+                                    }else{
+                                        
+                                    
+                                        j_chara.animate(
+                                            {
+                                                left:left
+                                            }
+                                            ,
+                                            parseInt(pm.time), 
+                                            that.kag.stat.chara_effect,
+                                            function(){
+                                                
+                                                chara_num--;
+                                                if(chara_num == 0){
+                                                    that.kag.layer.showEventLayer();
+                                                    that.kag.ftag.nextOrder();
+                                                }
+                                                
+                                            }
+                                        );
+                                        
+                                    }// end else 
                                     
                                 });
                                 
