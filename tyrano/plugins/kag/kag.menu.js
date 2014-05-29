@@ -214,53 +214,69 @@ tyrano.plugin.kag.menu ={
         var that = this;
         
         //画面のキャプチャも取るよ
-        //スナップ取得のサンプル。これは、うまく使いたいですね。
         
         var _current_order_index = that.kag.ftag.current_order_index;
         var _stat = $.extend(true, {}, $.cloneObject(that.kag.stat));
         
-        html2canvas($("#tyrano_base").get(0), {
-    	   onrendered: function(canvas) {
-            // canvas is the final rendered <canvas> element
-    			//console.log(canvas);
-    			var img_code = canvas.toDataURL()
-    			
-    			/*
-    			scenario = scenario || "";
-                order_index = order_index || "";
-                */
-               
-                var data = {};
-                
-                data.title = title;
-                data.stat = _stat;
-                data.current_order_index = _current_order_index -1; //１つ前
-                data.save_date = $.getNowDate()+"　"+$.getNowTime();
-                data.img_data = img_code;
-                
-                //レイヤ部分のHTMLを取得
-                var layer_obj = that.kag.layer.getLayeyHtml();
-                data.layer = layer_obj;
-                
-                that.snap= $.extend(true, {}, $.cloneObject(data));
-                
-                //現在のシナリオ上書き。Save.ksから呼び出された場合、うまく機能しないのに対応
-                /*
-                if(scenario !=""){
-                    that.snap.stat.current_scenario = scenario;
+        if(this.kag.config.configThumbnail =="false"){
+            
+             //サムネデータを保存しない
+             var img_code = "";
+             var data = {};
+                    
+             data.title = title;
+             data.stat = _stat;
+             data.current_order_index = _current_order_index -1; //１つ前
+             data.save_date = $.getNowDate()+"　"+$.getNowTime();
+             data.img_data = img_code;
+             
+             //レイヤ部分のHTMLを取得
+             var layer_obj = that.kag.layer.getLayeyHtml();
+             data.layer = layer_obj;
+             
+             that.snap= $.extend(true, {}, $.cloneObject(data));
+             
+             if(call_back){
+                call_back();
+             }
+            
+        }else{
+            
+           html2canvas($("#tyrano_base").get(0), {
+                onrendered: function(canvas) {
+                    // canvas is the final rendered <canvas> element
+                    //console.log(canvas);
+                    var img_code = canvas.toDataURL();
+                    
+                    /*
+                    scenario = scenario || "";
+                    order_index = order_index || "";
+                    */
+                   
+                    var data = {};
+                    
+                    data.title = title;
+                    data.stat = _stat;
+                    data.current_order_index = _current_order_index -1; //１つ前
+                    data.save_date = $.getNowDate()+"　"+$.getNowTime();
+                    data.img_data = img_code;
+                    
+                    //レイヤ部分のHTMLを取得
+                    var layer_obj = that.kag.layer.getLayeyHtml();
+                    data.layer = layer_obj;
+                    
+                    that.snap= $.extend(true, {}, $.cloneObject(data));
+                    
+                    
+                    if(call_back){
+                        call_back();
+                    }
                 }
-               
-                if(order_index !=""){
-                    that.snap.current_order_index = order_index;
-                }
-                */
-                
-                if(call_back){
-                    call_back();
-                }
-    			
-    		}
-		});
+            });
+        
+            
+        }
+        
         
         
     },
@@ -432,6 +448,7 @@ tyrano.plugin.kag.menu ={
                 json.title  = "まだ、保存されているデータがありません"; // ラストテキスト
                 json.current_order_index = 0;
                 json.save_date = "　";
+                json.img_data  ="";
                 json.stat = {};
                 
                 tmp_array.push(json);
