@@ -2863,6 +2863,16 @@ tyrano.plugin.kag.tag.button = {
                     //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
                     if(_pm.role !=""){
                         
+                        //強制停止中は使用できないようにする
+                        ///処理待ち状態の時は、実行してはいけない
+                        if(that.kag.layer.layer_event.css("display") =="none"){
+                             return false;
+                        }
+                        
+                        if(that.kag.stat.is_strong_stop == true){
+                            return false;
+                        }
+                        
                         switch(_pm.role){
                             
                             case "save":

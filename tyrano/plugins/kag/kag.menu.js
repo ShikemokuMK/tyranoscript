@@ -16,6 +16,11 @@ tyrano.plugin.kag.menu ={
        if(this.kag.layer.layer_event.css("display") =="none"){
             return false;
        }
+       
+       //上記と同義
+       if(this.kag.stat.is_strong_stop == true){
+            return false;
+       }
         
         var that = this;
         
