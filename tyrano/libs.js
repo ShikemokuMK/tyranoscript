@@ -417,17 +417,17 @@
     
     $.setStorage = function(key,val){
         val = JSON.stringify(val);
-		localStorage.setItem(key, escape(val));
+		localStorage.setItem(key, LZString.compress(escape(val)));
 	};
 	
 	$.getStorage = function(key){
 		
 		try{
 		
-    		var gv = "null";
+			var gv = "null";
     		
     		if(localStorage.getItem(key)){
-    			gv = unescape(localStorage.getItem(key));
+    			gv = unescape(LZString.decompress(localStorage.getItem(key)));
     		}
     		
     		if(gv =="null") return null;
