@@ -835,10 +835,9 @@ tyrano.plugin.kag.tag.label = {
     //ラベル記録
     if(this.kag.config.autoRecordPageShowing == "true"){
     
-        var sf_str = "sf.trail_"+this.kag.stat.current_scenario.replace(".ks","").replace(/\u002f/g, "").replace(/:/g,"").replace(/./g,"")+"_"+pm.label_name +"";
+        var sf_str = "sf.trail_"+this.kag.stat.current_scenario.replace(".ks","").replace(/\u002f/g, "").replace(/:/g,"").replace(/\./g,"")+"_"+pm.label_name +"";
         
-        var scr_str = "";
-        
+        var scr_str = ""
         + sf_str +" = "+sf_str+"  || 0;"
         + sf_str +"++;";
         this.kag.evalScript(scr_str);
