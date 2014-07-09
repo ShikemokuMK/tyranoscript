@@ -543,7 +543,11 @@ tyrano.plugin.kag.tag.text = {
 
             }
 
-            this.showMessageVertical(pm.val);
+            if (this.kag.config.textMode == "paragraph") {
+                this.showMessageParagraph(pm.val);
+            } else {
+                this.showMessageVertical(pm.val);
+            }
 
         } else {
 
@@ -770,6 +774,94 @@ tyrano.plugin.kag.tag.text = {
             pchar(pchar);
 
         })(this.kag.getMessageInnerLayer());
+
+    },
+
+    showMessageParagraph : function(message_str) {
+        var that = this;
+        var j_text = this.kag.getMessageInnerLayer();
+
+        var j_p = $("<p class='vertical_text'></p>");
+
+        var message_html = "";
+        var index = 0;
+        //jtext.html("");
+        //メッセージ領域を取得
+        //var j_span = that.kag.getMessageCurrentSpan();
+        var pchar = function(pchar) {
+
+            var c = message_str.substring(index, ++index);
+            //ルビ指定がされている場合
+            /*
+             if (that.kag.stat.ruby_str != "") {
+             c = "<ruby><rb>" + c + "</rb><rt>" + that.kag.stat.ruby_str + "</rt></ruby>";
+             that.kag.stat.ruby_str = "";
+
+             }
+             */
+
+            message_html += c;
+
+            if (index <= message_str.length) {
+
+                that.kag.stat.is_adding_text = true;
+
+                /*
+                 //再生途中にクリックされて、残りを一瞬で表示する
+                 if (that.kag.stat.is_click_text == true || that.kag.stat.is_skip == true) {
+                 setTimeout(function() {
+                 pchar(pchar)
+                 }, 0);
+                 } else {
+                 setTimeout(function() {
+                 pchar(pchar)
+                 }, that.kag.stat.ch_speed);
+                 }*/
+
+                pchar(pchar);
+
+            } else {
+
+                that.kag.stat.is_adding_text = false;
+                that.kag.stat.is_click_text = false;
+
+                //ここで、画面に追加
+                j_p.css("color", that.kag.stat.font.color).css("font-weight", that.kag.stat.font.bold).css("font-size", that.kag.stat.font.size + "px").css("font-family", that.kag.stat.font.face).css("margin-right", "7px");
+
+                j_p.css("display", "none");
+
+                //段落が変わるときは頭に空白を入れる
+
+                j_p.append("　" + message_html);
+
+                j_text.append(j_p);
+                $(".img_next").remove();
+                        
+                $.trans("slide", j_p, 500, "show", function() {
+
+                    //すべて表示完了
+                    that.kag.ftag.nextOrder();
+
+                    //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
+                    //グリフが指定されている場合はこちらを適用
+                    if (that.kag.stat.flag_glyph == "false") {
+                        j_p.append("<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
+
+                    } else {
+
+                        $("#glyph_image").show();
+
+                    }
+
+                });
+
+                //that.kag.appendMessage(jtext,current_str+"<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
+
+            }
+
+        };
+
+        pchar(pchar);
 
     },
 
@@ -3334,67 +3426,63 @@ tyrano.plugin.kag.tag.bg = {
         //現在の背景画像の要素を取得
 
         //クローンして、同じ階層に配置する
-        
-        var storage_url = "./data/bgimage/"+pm.storage;
-        if($.isHTTP(pm.storage)){
-            storage_url = pm.storage;  
+
+        var storage_url = "./data/bgimage/" + pm.storage;
+        if ($.isHTTP(pm.storage)) {
+            storage_url = pm.storage;
         }
-        
+
         //jqyeru で一つを削除して、もう一方を復活させる
-        this.kag.preload(storage_url, function(){
-            
-            
+        this.kag.preload(storage_url, function() {
+
             var j_old_bg = that.kag.layer.getLayer("base", "fore");
             var j_new_bg = j_old_bg.clone(false);
-            
-            j_new_bg.css("background-image","url("+storage_url+")");
-            j_new_bg.css("display","none");
-            
+
+            j_new_bg.css("background-image", "url(" + storage_url + ")");
+            j_new_bg.css("display", "none");
+
             j_old_bg.after(j_new_bg);
-            
+
             that.kag.ftag.hideNextImg();
-            that.kag.layer.updateLayer("base","fore",j_new_bg);
-                
+            that.kag.layer.updateLayer("base", "fore", j_new_bg);
+
             $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
-                
+
                 j_old_bg.remove();
-                
+
             });
-            
+
             $.trans(pm.method, j_new_bg, parseInt(pm.time), "show", function() {
-                
+
                 that.kag.layer.showEventLayer();
                 if (pm.wait == "true") {
                     that.kag.ftag.nextOrder();
                 }
             });
-            
+
             if (pm.wait == "false") {
                 that.kag.ftag.nextOrder();
-            }else{
+            } else {
                 that.kag.layer.hideEventLayer();
-                
+
             }
             //レイヤの中で、画像を取得する
-            
-            /*
-            j_old_bg.fadeTo(parseInt(pm.time), 0, function() {
-                
-            });
-            
-            j_new_bg.fadeTo(parseInt(pm.time), 1, function() {
-                    //アニメーション完了
-                that.kag.layer.showEventLayer();
-                that.kag.ftag.nextOrder();
-            });
-            
-            */
-            
-        
 
-            
+            /*
+             j_old_bg.fadeTo(parseInt(pm.time), 0, function() {
+
+             });
+
+             j_new_bg.fadeTo(parseInt(pm.time), 1, function() {
+             //アニメーション完了
+             that.kag.layer.showEventLayer();
+             that.kag.ftag.nextOrder();
+             });
+
+             */
+
         });
-        
+
         if (pm.wait == "false") {
             this.kag.ftag.nextOrder();
         }
