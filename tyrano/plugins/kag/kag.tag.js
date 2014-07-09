@@ -3313,7 +3313,7 @@ wait=背景の切り替えが完了するまで処理を待ちます,
 #[end]
 */
 
-//トランジション
+//背景変更
 tyrano.plugin.kag.tag.bg = {
 
     vital : ["storage"],
@@ -3395,8 +3395,9 @@ tyrano.plugin.kag.tag.bg = {
             
         });
         
-        this.kag.ftag.nextOrder();
-
+        if (pm.wait == "false") {
+            this.kag.ftag.nextOrder();
+        }
     }
 };
 
