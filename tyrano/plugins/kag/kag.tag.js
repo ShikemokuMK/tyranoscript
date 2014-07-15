@@ -784,24 +784,27 @@ tyrano.plugin.kag.tag.text = {
 
 tyrano.plugin.kag.tag.label = {
 
-    pm : {},
-
-    start : function(pm) {
-        //ラベル通過したよ。
-
-        //ラベル記録
-        if (this.kag.config.autoRecordPageShowing == "true") {
-
-            var sf_str = "sf.trail_" + this.kag.stat.current_scenario.replace(".ks", "").replace(/\u002f/g, "").replace(/:/g, "").replace(/./g, "") + "_" + pm.label_name + "";
-
-            var scr_str = ""; +sf_str + " = " + sf_str + "  || 0;" + sf_str + "++;";
-            this.kag.evalScript(scr_str);
-
-        }
-
-        this.kag.ftag.nextOrder();
-
+  pm:{},
+  
+  start:function(pm){
+    //ラベル通過したよ。
+    
+    //ラベル記録
+    if(this.kag.config.autoRecordPageShowing == "true"){
+    
+        var sf_str = "sf.trail_"+this.kag.stat.current_scenario.replace(".ks","").replace(/\u002f/g, "").replace(/:/g,"").replace(/\./g,"")+"_"+pm.label_name +"";
+        
+        var scr_str = ""
+        + sf_str +" = "+sf_str+"  || 0;"
+        + sf_str +"++;";
+        this.kag.evalScript(scr_str);
+        
     }
+    
+    this.kag.ftag.nextOrder();
+    
+  }
+    
 };
 
 /*
