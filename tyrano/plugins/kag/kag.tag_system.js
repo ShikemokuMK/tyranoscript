@@ -123,11 +123,25 @@ tyrano.plugin.kag.tag["close"] = {
         
         if(pm.ask=="true"){
             if(confirm("ウィンドウを閉じて終了します。よろしいですね？")){
-                window.close();
+                this.close();
             }
         }else{
-            window.close();
+            this.close();
         }
+    },
+    close:function() {
+        window.close();
+        if (typeof navigator.app != 'undefined') {
+            navigator.app.exitApp();
+        }
+        if (typeof require != 'undefined' && typeof require('nw.gui') != 'undefined') {
+            require('nw.gui').Window.get().close();
+        }
+
+        //最新のブラウザは、window.closeで閉じないので以下を実行。
+        //※ただし、Firefoxや最新のChromeは、blankページが残る。
+        //（新規で開いたページでないと、セキュリティポリシーで閉じれない）
+        window.open('about:blank','_self').close();
     }
 
 };
