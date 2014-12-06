@@ -78,6 +78,7 @@ tyrano.plugin.kag.key_mouose = {
                                 j_layer.show();
                             }
                         }
+                        tyrano.plugin.kag.layer.showFixLayer();
                         tyrano.plugin.kag.stat.is_hide_message = false;
                     } else {
                         tyrano.plugin.kag.ftag.startTag("hidemessage");

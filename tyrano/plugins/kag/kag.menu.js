@@ -41,8 +41,9 @@ tyrano.plugin.kag.menu ={
                 //スキップを開始する
                 layer_menu.html("");
                 layer_menu.hide();
-                $(".button_menu").show();
-                
+                if(that.kag.config.configVisible=="true"){
+                    $(".button_menu").show();
+                }
                 //nextOrder にして、
                 that.kag.stat.is_skip = true;
                 
@@ -62,8 +63,9 @@ tyrano.plugin.kag.menu ={
             
             layer_menu.find(".menu_close").click(function(e){
                 layer_menu.hide();
-                $(".button_menu").show();
-                        
+                if(that.kag.config.configVisible=="true"){
+                    $(".button_menu").show();
+                }
             });
             
             layer_menu.find(".menu_window_close").click(function(e){
@@ -72,7 +74,9 @@ tyrano.plugin.kag.menu ={
                 that.kag.layer.hideMessageLayers();
                 
                 layer_menu.hide();
-                $(".button_menu").show();
+                if(that.kag.config.configVisible=="true"){
+                    $(".button_menu").show();
+                }
                 
             });
             
@@ -138,8 +142,9 @@ tyrano.plugin.kag.menu ={
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
                         layer_menu.empty();
-                        $(".button_menu").show();
-                        
+                        if(that.kag.config.configVisible=="true"){
+                            $(".button_menu").show();
+                        }
                    }) ;
                 });
                 
@@ -312,8 +317,9 @@ tyrano.plugin.kag.menu ={
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
                         layer_menu.empty();
-                        $(".button_menu").show();
-                        
+                        if(that.kag.config.configVisible=="true"){
+                            $(".button_menu").show();
+                        }
                    }) ;
                 });
                 
@@ -413,7 +419,9 @@ tyrano.plugin.kag.menu ={
 
             layer_menu.find(".menu_close").click(function(e){
                 layer_menu.hide();
-                $(".button_menu").show();
+                if(that.kag.config.configVisible=="true"){
+                    $(".button_menu").show();
+                }
                 
                 //that.kag.ftag.nextOrder();
                 
@@ -486,7 +494,9 @@ tyrano.plugin.kag.menu ={
                 
                 layer_menu.find(".menu_close").click(function(){
                     layer_menu.hide();
-                    $(".button_menu").show();
+                    if(that.kag.config.configVisible=="true"){
+                        $(".button_menu").show();
+                    }
                 });
                 
                 var log_str = "";

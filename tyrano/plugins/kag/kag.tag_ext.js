@@ -253,6 +253,7 @@ tyrano.plugin.kag.tag.showmenubutton ={
     start:function(pm){
         
         $(".button_menu").show();
+        this.kag.config.configVisible="true";
         this.kag.ftag.nextOrder();
         
     }
@@ -282,6 +283,7 @@ tyrano.plugin.kag.tag.hidemenubutton ={
     start:function(pm){
         
         $(".button_menu").hide();
+        this.kag.config.configVisible="false";
         this.kag.ftag.nextOrder();
         
     }
