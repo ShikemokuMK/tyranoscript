@@ -71,6 +71,7 @@ tyrano.plugin.kag.key_mouose = {
             } else {
                 if (!tyrano.plugin.kag.stat.is_strong_stop) {
                     if (tyrano.plugin.kag.stat.is_hide_message) {
+                        tyrano.plugin.kag.stat.is_hide_message = false;
                         var num_message_layer = parseInt(tyrano.plugin.kag.config.numMessageLayers);
                         for ( var i = 0; i < num_message_layer; i++) {
                             var j_layer = tyrano.plugin.kag.layer.getLayer("message" + i);
@@ -79,8 +80,8 @@ tyrano.plugin.kag.key_mouose = {
                             }
                         }
                         tyrano.plugin.kag.layer.showFixLayer();
-                        tyrano.plugin.kag.stat.is_hide_message = false;
                     } else {
+                        tyrano.plugin.kag.stat.is_hide_message = true;
                         tyrano.plugin.kag.ftag.startTag("hidemessage");
                     }
                 }
