@@ -624,7 +624,7 @@ tyrano.plugin.kag.tag.text = {
                 current_str += c;
                 
                 //スキップ中は１文字ずつ追加ということはしない
-                if(that.kag.stat.is_skip != true){
+                if(that.kag.stat.is_skip != true && that.kag.stat.is_nowait!=true){
                     that.kag.appendMessage(jtext, current_str);
                 }
                 
@@ -653,7 +653,7 @@ tyrano.plugin.kag.tag.text = {
 
                     if (that.kag.stat.is_stop != "true") {
                             
-                        if(that.kag.stat.is_skip == true){
+                        if(that.kag.stat.is_skip == true || that.kag.stat.is_nowait==true){
                             
                             that.kag.appendMessage(jtext, current_str);
                             setTimeout(function(){
@@ -739,7 +739,7 @@ tyrano.plugin.kag.tag.text = {
                 current_str += c;
 
                 //スキップ中は１文字ずつ追加ということはしない
-                if(that.kag.stat.is_skip != true){
+                if(that.kag.stat.is_skip != true && that.kag.stat.is_nowait!=true){
                     that.kag.appendMessage(jtext, current_str);
                 }
                 
@@ -765,7 +765,7 @@ tyrano.plugin.kag.tag.text = {
                         
                     //すべて表示完了
                     
-                     if(that.kag.stat.is_skip == true){
+                     if(that.kag.stat.is_skip == true || that.kag.stat.is_nowait==true){
                             
                          that.kag.appendMessage(jtext, current_str);
                          setTimeout(function(){
