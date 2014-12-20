@@ -15,6 +15,9 @@ tyrano.plugin.kag.layer ={
     
     //状況に応じて変化する
     
+    //指が動いた状態を管理するための値
+    start_point:{x:0,y:0},
+    end_point:{x:0,y:0},
     
     init:function(){
      
@@ -25,6 +28,8 @@ tyrano.plugin.kag.layer ={
         //画面クリックのレイヤ
         var layer_obj_click = $("<div class='layer layer_event_click' style='z-index:9999;display:none'></div>");
         layer_obj_click.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
+        
+        
         
         layer_obj_click.click(function(e){
             
@@ -54,6 +59,47 @@ tyrano.plugin.kag.layer ={
             
             that.kag.ftag.nextOrder();
             
+        });
+        
+        
+        ///マウス周り
+        //スライドイベント
+        layer_obj_click.bind('touchstart', function(e) {
+            e.preventDefault();                     // ページが動くのを止める
+            var pageX = event.changedTouches[0].pageX; // X 座標の位置
+            var pageY = event.changedTouches[0].pageY; // Y 座標の位置
+            that.start_point.x = pageX;
+            that.start_point.y = pageY;
+            
+            console.log("start -------");
+            console.log(pageY);
+            
+        });
+        
+        //スライドイベント
+        layer_obj_click.bind('touchend', function(e) {
+            e.preventDefault();                     // ページが動くのを止める
+            var pageX = event.changedTouches[0].pageX; // X 座標の位置
+            var pageY = event.changedTouches[0].pageY; // Y 座標の位置
+            
+            that.end_point.x = pageX;
+            that.end_point.y = pageY;
+            
+            var move_x = that.end_point.x - that.start_point.x;
+            var move_y = that.end_point.y - that.start_point.y;
+            
+            ////
+            if(move_x > 250){
+                //右スライド
+                console.log("右スライド");
+            }else if(move_y > 50){
+                //縦スライド
+                that.kag.ftag.startTag("showmenu", {});
+            
+            }
+            
+            console.log(move_y);
+        
         });
         
         this.layer_event = layer_obj_click ;

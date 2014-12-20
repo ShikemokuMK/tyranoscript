@@ -622,9 +622,12 @@ tyrano.plugin.kag.tag.text = {
                 }
 
                 current_str += c;
-
-                that.kag.appendMessage(jtext, current_str);
-
+                
+                //スキップ中は１文字ずつ追加ということはしない
+                if(that.kag.stat.is_skip != true){
+                    that.kag.appendMessage(jtext, current_str);
+                }
+                
                 if (index <= _message_str.length) {
 
                     that.kag.stat.is_adding_text = true;
@@ -644,12 +647,22 @@ tyrano.plugin.kag.tag.text = {
 
                     that.kag.stat.is_adding_text = false;
                     that.kag.stat.is_click_text = false;
-
+                    
+                    
                     //すべて表示完了 ここまではイベント残ってたな
 
                     if (that.kag.stat.is_stop != "true") {
-
-                        that.kag.ftag.nextOrder();
+                            
+                        if(that.kag.stat.is_skip == true){
+                            
+                            that.kag.appendMessage(jtext, current_str);
+                            setTimeout(function(){
+                                that.kag.ftag.nextOrder()
+                             }, parseInt(that.kag.config.skipSpeed));
+                            
+                        }else{
+                            that.kag.ftag.nextOrder();
+                        }
 
                     } else {
 
@@ -725,8 +738,11 @@ tyrano.plugin.kag.tag.text = {
 
                 current_str += c;
 
-                that.kag.appendMessage(jtext, current_str);
-
+                //スキップ中は１文字ずつ追加ということはしない
+                if(that.kag.stat.is_skip != true){
+                    that.kag.appendMessage(jtext, current_str);
+                }
+                
                 if (index <= _message_str.length) {
 
                     that.kag.stat.is_adding_text = true;
@@ -746,9 +762,19 @@ tyrano.plugin.kag.tag.text = {
 
                     that.kag.stat.is_adding_text = false;
                     that.kag.stat.is_click_text = false;
-
+                        
                     //すべて表示完了
-                    that.kag.ftag.nextOrder();
+                    
+                     if(that.kag.stat.is_skip == true){
+                            
+                         that.kag.appendMessage(jtext, current_str);
+                         setTimeout(function(){
+                             that.kag.ftag.nextOrder()
+                         }, parseInt(that.kag.config.skipSpeed));
+                            
+                    }else{
+                        that.kag.ftag.nextOrder()
+                    }
 
                     //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
                     //グリフが指定されている場合はこちらを適用
@@ -3310,8 +3336,8 @@ tyrano.plugin.kag.tag.trans = {
 [bg storage=fg0.png time=1500 wait=true]
 :param
 storage=切り替えるための画像ファイルを指定します。ファイルはbgimage以下に配置してください,
-method=トランジションのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
-time=トランジションを行っている時間をミリ秒で指定します。,
+method=切り替えのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
+time=時間をミリ秒で指定します。,
 wait=背景の切り替えが完了するまで処理を待ちます,
 #[end]
 */
@@ -3346,7 +3372,6 @@ tyrano.plugin.kag.tag.bg = {
         //jqyeru で一つを削除して、もう一方を復活させる
         this.kag.preload(storage_url, function(){
             
-            
             var j_old_bg = that.kag.layer.getLayer("base", "fore");
             var j_new_bg = j_old_bg.clone(false);
             
@@ -3376,25 +3401,8 @@ tyrano.plugin.kag.tag.bg = {
                 that.kag.ftag.nextOrder();
             }else{
                 that.kag.layer.hideEventLayer();
-                
             }
             //レイヤの中で、画像を取得する
-            
-            /*
-            j_old_bg.fadeTo(parseInt(pm.time), 0, function() {
-                
-            });
-            
-            j_new_bg.fadeTo(parseInt(pm.time), 1, function() {
-                    //アニメーション完了
-                that.kag.layer.showEventLayer();
-                that.kag.ftag.nextOrder();
-            });
-            
-            */
-            
-        
-
             
         });
         
