@@ -16,6 +16,7 @@
  *     Note: When the menu is not displayed, hide the message window.
  */
 tyrano.plugin.kag.key_mouose = {
+    kag : null,
     init : function() {
         $(document).keyup(function(e) {
             switch (e.keyCode) {
@@ -69,23 +70,14 @@ tyrano.plugin.kag.key_mouose = {
             if ($(".menu_close").size() > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
-                if (!tyrano.plugin.kag.stat.is_strong_stop) {
-                    if (tyrano.plugin.kag.stat.is_hide_message) {
-                        var num_message_layer = parseInt(tyrano.plugin.kag.config.numMessageLayers);
-                        for ( var i = 0; i < num_message_layer; i++) {
-                            var j_layer = tyrano.plugin.kag.layer.getLayer("message" + i);
-                            if (j_layer.attr("l_visible") == "true") {
-                                j_layer.show();
-                            }
-                        }
-                        tyrano.plugin.kag.layer.showFixLayer();
-                        tyrano.plugin.kag.stat.is_hide_message = false;
+                if (!this.kag.stat.is_strong_stop) {
+                    if (this.kag.stat.is_hide_message) {
+                        this.kag.layer.showMessageLayers();
                     } else {
-                        tyrano.plugin.kag.ftag.startTag("hidemessage");
+                        this.kag.ftag.startTag("hidemessage");
                     }
                 }
             }
         }
     }
 };
-tyrano.plugin.kag.key_mouose.init();
