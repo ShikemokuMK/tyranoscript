@@ -307,7 +307,12 @@ tyrano.plugin.kag ={
         this.menu = object(tyrano.plugin.kag.menu);
         this.menu.kag = that;
         this.menu.init();
-        
+
+        //key_mouse 追加
+        this.kay_mouse = object(tyrano.plugin.kag.key_mouose);
+        this.key_mouose.kag = that;
+        this.key_mouose.init();
+
         //システム変数の初期化
         var tmpsf = $.getStorage(this.kag.config.projectID+"_sf");
         
