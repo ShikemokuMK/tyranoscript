@@ -1,4 +1,4 @@
-TyranoScript｜ティラノスクリプト　Ver3.01（C）ShikemokuMK
+TyranoScript｜ティラノスクリプト　Ver3.14（C）ShikemokuMK
 http://tyrano.jp
 
 
@@ -95,6 +95,9 @@ http://kikyou.info/
 ■主な更新履歴■
 
 ---------------------------------------------------------------------
+Ver3.14
+スキップ安定化施策など
+
 Ver3.0
 ティラノビルダー対応
 
