@@ -1842,21 +1842,39 @@ tyrano.plugin.kag.tag.link = {
             var _target = pm.target;
             var _storage = pm.storage;
 
-            j_span.bind('click', function(e) {
-
-                //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
-                that.kag.ftag.nextOrderWithLabel(_target, _storage);
-                that.kag.layer.showEventLayer();
-
+            //クラスとイベントを登録する
+            that.kag.event.addEventElement({
+                "tag":"link",
+                "j_target":j_span, //イベント登録先の
+                "pm":pm
             });
-
-            j_span.css("cursor", "pointer");
+            
+            //イベントを設定する
+            that.setEvent(j_span,pm);
 
         })();
 
         this.kag.ftag.nextOrder();
 
-    }
+    },
+    
+    setEvent:function(j_span,pm){
+         
+         var _target = pm.target;
+         var _storage = pm.storage;
+         
+         j_span.bind('click', function(e) {
+                
+                //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
+                TYRANO.kag.ftag.nextOrderWithLabel(_target, _storage);
+                TYRANO.kag.layer.showEventLayer();
+                
+         });
+
+         j_span.css("cursor", "pointer");
+    
+    },
+
 };
 
 /*
@@ -2644,12 +2662,35 @@ tyrano.plugin.kag.tag.button = {
 
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
+        
+        //クラスとイベントを登録する
+        that.kag.event.addEventElement({
+            "tag":"button",
+            "j_target":j_button, //イベント登録先の
+            "pm":pm
+        });
+        that.setEvent(j_button,pm);
 
+        target_layer.append(j_button);
+
+        if (pm.fix == "false") {
+            target_layer.show();
+        }
+
+        this.kag.ftag.nextOrder();
+
+    },
+    
+    setEvent:function(j_button, pm){
+        
+        var that = TYRANO;
+        
         (function() {
 
             var _target = pm.target;
             var _storage = pm.storage;
             var _pm = pm;
+            
             var preexp = that.kag.embScript(pm.preexp);
             var button_clicked = false;
 
@@ -2821,15 +2862,11 @@ tyrano.plugin.kag.tag.button = {
 
         })();
 
-        target_layer.append(j_button);
-
-        if (pm.fix == "false") {
-            target_layer.show();
-        }
-
-        this.kag.ftag.nextOrder();
-
-    }
+        
+    },
+    
+    
+    
 };
 
 /*
@@ -2933,12 +2970,30 @@ tyrano.plugin.kag.tag.glink = {
 
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
+        
+        that.kag.event.addEventElement({
+            "tag":"glink",
+            "j_target":j_button, //イベント登録先の
+            "pm":pm
+        });
+        this.setEvent(j_button,pm);
 
-        (function() {
+        target_layer.append(j_button);
+        target_layer.show();
+        this.kag.ftag.nextOrder();
+
+    },
+    
+    setEvent:function(j_button,pm){
+         
+         var that = TYRANO;
+         
+         (function() {
 
             var _target = pm.target;
             var _storage = pm.storage;
             var _pm = pm;
+            console.log(that);
             var preexp = that.kag.embScript(pm.preexp);
             var button_clicked = false;
 
@@ -2972,12 +3027,9 @@ tyrano.plugin.kag.tag.glink = {
             });
 
         })();
-
-        target_layer.append(j_button);
-        target_layer.show();
-        this.kag.ftag.nextOrder();
-
-    }
+        
+    
+    },
 };
 
 /*
@@ -3066,7 +3118,27 @@ tyrano.plugin.kag.tag.clickable = {
         if (pm.y != "") {
             j_button.css("top", parseInt(pm.y));
         }
+        
+        //クラスとイベントを登録する
+        that.kag.event.addEventElement({
+            "tag":"clickable",
+            "j_target":j_button, //イベント登録先の
+            "pm":pm
+        });
 
+        that.setEvent(j_button,pm);
+
+        layer_free.append(j_button);
+        layer_free.show();
+
+        this.kag.ftag.nextOrder();
+
+    },
+    
+    setEvent:function(j_button,pm){
+        
+        var that = TYRANO;
+                
         (function() {
 
             var _target = pm.target;
@@ -3108,27 +3180,14 @@ tyrano.plugin.kag.tag.clickable = {
                 that.kag.layer.showEventLayer();
                 that.kag.ftag.startTag("jump", _pm);
 
-                /*
-                 if(pm.target == null && pm.storage!=null){
-                 that.kag.ftag.nextOrderWithIndex(0,_storage);
-                 }else{
-                 that.kag.ftag.nextOrderWithLabel(_target,_storage);
 
-                 }
-
-                 that.kag.layer.showEventLayer();
-                 */
             });
 
         })();
-
-        layer_free.append(j_button);
-
-        layer_free.show();
-
-        this.kag.ftag.nextOrder();
-
+        
+    
     }
+    
 };
 
 /*

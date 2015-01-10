@@ -32,7 +32,7 @@ tyrano.plugin.kag ={
     
     //動作オプション
     options:{
-        modules:["order","parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse"]
+        modules:["parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse","event"]
     },
     
     
@@ -313,6 +313,11 @@ tyrano.plugin.kag ={
         this.key_mouose.kag = that;
         this.key_mouose.init();
 
+        //event 追加
+        this.event = object(tyrano.plugin.kag.event);
+        this.event.kag = that;
+        this.event.init();
+
         //システム変数の初期化
         var tmpsf = $.getStorage(this.kag.config.projectID+"_sf");
         
@@ -340,7 +345,7 @@ tyrano.plugin.kag ={
         this.variable.tf["system"]["backlog"] = [];
         
          //コンフィグボタン追加
-         var button_menu_obj = $("<div class='button_menu'><img src='./tyrano/images/kag/button_menu.png'  /></div>");
+         var button_menu_obj = $("<div class='button_menu' style='z-index:100000000'><img src='./tyrano/images/kag/button_menu.png'  /></div>");
             
          //コンフィグボタンの位置を指定する
             

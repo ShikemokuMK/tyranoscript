@@ -13,6 +13,8 @@ tyrano.plugin.kag.menu ={
     showMenu:function(call_back){
         
         ///処理待ち状態の時は、実行してはいけない
+       
+       /*
        if(this.kag.layer.layer_event.css("display") =="none"){
             return false;
        }
@@ -21,6 +23,7 @@ tyrano.plugin.kag.menu ={
        if(this.kag.stat.is_strong_stop == true){
             return false;
        }
+       */
         
         var that = this;
         
@@ -180,10 +183,13 @@ tyrano.plugin.kag.menu ={
             this.snapSave(this.kag.stat.current_message_str,
                 function(){
                     //現在、停止中のステータスなら、[_s]ポジションからセーブデータ取得
+                    
+                    /*
                     if(that.snap.stat.is_strong_stop == true){
                         alert("ここではセーブできません");
                         return false;
                     }
+                    */
                     
                     data = that.snap;
                     data.save_date = $.getNowDate()+"　"+$.getNowTime();
@@ -353,8 +359,14 @@ tyrano.plugin.kag.menu ={
         //その他ステータスの設定
         this.kag.stat = data.stat;
         
-        //停止の場合は復活
-        this.kag.stat.is_strong_stop = false;
+        //ステータスがストロングストップの場合
+        if(this.kag.stat.is_strong_stop == true){
+            auto_next ="stop";
+        }else{
+            //停止の場合は復活
+            this.kag.stat.is_strong_stop = false;
+        }
+        
         
         //一旦音楽と効果音は全て止めないと
         
@@ -381,12 +393,24 @@ tyrano.plugin.kag.menu ={
         //カーソルの復元
         this.kag.setCursor(this.kag.stat.current_cursor);
         
+        //イベントの復元
+        $(".event-setting-element").each(function(){
+            var j_elm = $(this);
+            var kind = j_elm.attr("data-event-tag");
+            var pm = JSON.parse(j_elm.attr("data-event-pm"));
+            var event_tag = object(tyrano.plugin.kag.tag[kind]);
+            
+            event_tag.setEvent(j_elm, pm);
+            
+        });
+        
         //ジャンプ
         //data.stat.current_scenario; 
         //data.current_order_index;
         //必ず、ファイルロード。別シナリオ経由的な
         //this.kag.ftag.startTag("call",{storage:"make.ks"});
         
+        /*
         var insert = {
           
           name:"call",
@@ -394,6 +418,10 @@ tyrano.plugin.kag.menu ={
           val:"" 
             
         };
+        */
+       
+       //make.ks を廃止したい
+        var insert =undefined;
         
         this.kag.ftag.nextOrderWithIndex(data.current_order_index,data.stat.current_scenario,true,insert,auto_next);
         

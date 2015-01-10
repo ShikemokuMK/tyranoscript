@@ -298,6 +298,12 @@ tyrano.plugin.kag.layer ={
             layer_info["map_layer_fore"][key] = this.map_layer_fore[key].outerHTML();
         }
         
+        /*
+        for( key in this.map_layer_fix ){
+            layer_info["map_layer_fix"][key] = this.map_layer_fix[key].outerHTML();
+        }
+        */
+        
         layer_info["layer_free"] = this.layer_free.outerHTML();
         
         var n = 0;
@@ -330,23 +336,23 @@ tyrano.plugin.kag.layer ={
          }
 
 //fixlayerの削除
+/*
         $(".fixlayer").each(function(){
             $(this).remove();
         });
+*/
            
 //fixlayer は復元しない 
-/*
+
         for(key in layer.layer_fix){
                 $("#tyrano_base").append($(layer.layer_fix[key]));
          }
-*/    
+
          
          this.layer_free.remove();
          delete this.layer_free ;
          this.layer_free = $(layer.layer_free);
          this.appendLayer(this.layer_free);
-         
-         
          
         
     },
