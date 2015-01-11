@@ -14,16 +14,18 @@ tyrano.plugin.kag.menu ={
         
         ///処理待ち状態の時は、実行してはいけない
        
-       /*
        if(this.kag.layer.layer_event.css("display") =="none"){
             return false;
        }
        
+      
        //上記と同義
+       /*
        if(this.kag.stat.is_strong_stop == true){
             return false;
        }
        */
+       
         
         var that = this;
         

@@ -336,14 +336,13 @@ tyrano.plugin.kag.layer ={
          }
 
 //fixlayerの削除
-/*
         $(".fixlayer").each(function(){
             $(this).remove();
         });
-*/
            
 //fixlayer は復元しない 
 
+        
         for(key in layer.layer_fix){
                 $("#tyrano_base").append($(layer.layer_fix[key]));
          }
