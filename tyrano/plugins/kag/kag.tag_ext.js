@@ -311,6 +311,10 @@ tyrano.plugin.kag.tag.skipstart ={
     
     start:function(pm){
         
+        if(this.kag.stat.is_skip==true){
+            return false;
+        }
+        
         this.kag.stat.is_skip = true;
         this.kag.ftag.nextOrder();
             

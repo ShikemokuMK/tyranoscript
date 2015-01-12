@@ -693,7 +693,8 @@ tyrano.plugin.kag.tag["call"] = {
     pm:{
         storage:null,
         target:null,//ラベル名
-        countpage:true
+        countpage:true,
+        auto_next:"yes"
     },
     
     start:function(pm){
@@ -701,6 +702,7 @@ tyrano.plugin.kag.tag["call"] = {
         var back_pm = {};
         back_pm.index = this.kag.ftag.current_order_index ;
         back_pm.storage = this.kag.stat.current_scenario ;
+        back_pm.auto_next = pm.auto_next;
         
         //これは行き先を入れてもしょうがないよね。今の状態を
         this.kag.pushStack("call",back_pm);//スタックに配置する
@@ -741,7 +743,11 @@ tyrano.plugin.kag.tag["return"] = {
         var pm = this.kag.getStack("call"); //最新のコールスタックを取得
         //呼び出し元に戻る 
         
-        this.kag.ftag.nextOrderWithIndex(pm.index,pm.storage);
+        var auto_next = pm.auto_next;
+        
+        console.log(auto_next);
+        
+        this.kag.ftag.nextOrderWithIndex(pm.index,pm.storage,undefined,undefined,auto_next);
         this.kag.popStack("call");//スタックを奪い取る
         
     

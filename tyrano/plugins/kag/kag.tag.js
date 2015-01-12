@@ -2532,6 +2532,7 @@ linkタグの画像版となります。
 また、グラフィックボタンの表示位置は直前のlocateタグによる指定位置を参照します。
 ただし、x、y が指定されている場合は、そちらが優先されます。
 ここから、移動した場合はコールスタックに残りません。つまり、リターンできないのでご注意ください
+注意→fixにtrueを指定した場合はコールスタックに残ります。コール先からリターンするまで全てのボタンは有効にならないのでご注意ください
 ジャンプ後に必ず[cm]タグでボタンを非表示にする必要があります。
 :sample
 [locate x=20 y=100]
@@ -2549,7 +2550,7 @@ x=ボタンの横位置を指定します,
 y=ボタンの縦位置を指定します。
 width=ボタンの横幅をピクセルで指定できます,
 height=ボタンの高さをピクセルで指定できます,
-fix=true falseで指定します。デフォルトはfalse 。trueを指定すると、Fixレイヤーにボタンが配置されます。この場合、ボタンを表示してもシナリオを進める事ができます。例えば、セーブボタンといった常に表示したいボタンを配置する時に活用できます。また、fixレイヤーに追加した要素を消す場合はfixclearタグ を使います。fixをtrueの場合は必ず別storageのtargetを指定してその場所にボタンが押されたときの処理を記述します。,
+fix=true falseで指定します。デフォルトはfalse 。trueを指定すると、Fixレイヤーにボタンが配置されます。この場合、ボタンを表示してもシナリオを進める事ができます。例えば、セーブボタンといった常に表示したいボタンを配置する時に活用できます。また、fixレイヤーに追加した要素を消す場合はfixclearタグ を使います。fixをtrueの場合は必ず別storageのtargetを指定してその場所にボタンが押されたときの処理を記述します。fixをtrueにした場合コールスタックが残ります。コールスタックが消化されるまではボタンが有効にならないのでご注意ください。,
 savesnap=true or false で指定します。デフォルトはfalse このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します,
 folder=好きな画像フォルダから、画像を選択できます。通常前景レイヤはfgimage　背景レイヤはbgimageと決まっていますが、ここで記述したフォルダ以下の画像ファイルを使用することができるようになります。,
 exp=ボタンがクリックされた時に実行されるJSを指定できます。,
@@ -2845,12 +2846,32 @@ tyrano.plugin.kag.tag.button = {
                 }
 
                 that.kag.layer.showEventLayer();
-
+                
                 //fixレイヤの場合はcallでスタックが積まれる
                 if (_pm.role == "" && _pm.fix == "true") {
+                    
+                    //コールスタックが帰ってきてない場合は、実行しないようにする必要がある
+                    //fixの場合はコールスタックに残る。
+                    var stack_pm = that.kag.getStack("call"); //最新のコールスタックを取得
+                    
+                    if(stack_pm==null){
+                       //callを実行する
+                       //fixから遷移した場合はリターン時にnextorderしない
+                       //strong_stopの場合は反応しない
+                       if(that.kag.stat.is_strong_stop == true){
+                           that.kag.log("[s]で停止中はfixボタンは反応しません");
+                           return false;
+                       }
+                       
+                       _pm.auto_next = "yes";
+                       that.kag.ftag.startTag("call", _pm);
+                    
+                    }else{
+                        //スタックで残された
+                        that.kag.log("callスタックが残っている場合、fixボタンは反応しません");
 
-                    //jumpを実行する
-                    that.kag.ftag.startTag("call", _pm);
+                        return false;
+                    }
 
                 } else {
 
@@ -2993,7 +3014,6 @@ tyrano.plugin.kag.tag.glink = {
             var _target = pm.target;
             var _storage = pm.storage;
             var _pm = pm;
-            console.log(that);
             var preexp = that.kag.embScript(pm.preexp);
             var button_clicked = false;
 
