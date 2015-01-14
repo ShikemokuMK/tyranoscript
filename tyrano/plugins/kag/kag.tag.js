@@ -1873,7 +1873,7 @@ tyrano.plugin.kag.tag.link = {
 
          j_span.css("cursor", "pointer");
     
-    },
+    }
 
 };
 
@@ -2884,7 +2884,7 @@ tyrano.plugin.kag.tag.button = {
         })();
 
         
-    },
+    }
     
     
     
@@ -3049,7 +3049,7 @@ tyrano.plugin.kag.tag.glink = {
         })();
         
     
-    },
+    }
 };
 
 /*
