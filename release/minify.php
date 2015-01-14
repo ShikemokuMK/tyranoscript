@@ -14,7 +14,6 @@ $original_dir = "../tyrano/";
 //通常コピーで良いファイル郡
 $array_copy = array(
 
-"config.js",
 "jquery-1.10.2.min.js",
 "jquery-ui-1.8.20.custom.min.js",
 "jquery.a3d.min.js",
@@ -23,6 +22,7 @@ $array_copy = array(
 "tyrano.js",
 "tyrano.css",
 "flash.js",
+"lang.js",
 "jsrender.min.js",
 "html2canvas.js",
 

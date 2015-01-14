@@ -326,6 +326,16 @@
     
     };
     
+    $.lang = function(key){
+        
+        if(tyrano_lang["word"][key]){
+            return tyrano_lang["word"][key];
+        }else{
+            return "NOT_DEFINED";
+        }
+         
+    };
+    
     //ユーザのブラウザ情報を取得
     $.getBrowser = function(){
     

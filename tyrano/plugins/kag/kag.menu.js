@@ -99,8 +99,7 @@ tyrano.plugin.kag.menu ={
             //タイトルに戻る
             layer_menu.find(".menu_back_title").click(function(){
                 
-                
-                if(!confirm("タイトルに戻ります。よろしいですね？")){
+                if(!confirm($.lang("go_title"))){
                     return false;
                 }
                 //first.ks の *start へ戻ります
@@ -487,7 +486,7 @@ tyrano.plugin.kag.menu ={
             for(var i=0;i<5;i++){
             
                 var json ={};
-                json.title  = "まだ、保存されているデータがありません"; // ラストテキスト
+                json.title  = $.lang("not_saved"); // ラストテキスト
                 json.current_order_index = 0;
                 json.save_date = "　";
                 json.img_data  ="";

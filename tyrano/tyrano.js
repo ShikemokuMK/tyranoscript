@@ -29,6 +29,8 @@ tyrano.core ={
         loaded_plugin:0,
     },
     
+    array_plugins:["kag"], //ロードするプラグイン一覧
+    
     init:function(options){
         
         var that = this;
@@ -38,7 +40,7 @@ tyrano.core ={
         
         this.config = window.config;
         
-        var array_plugins = this.config.init.plugins;
+        var array_plugins = this.array_plugins;
         
         //スクリプトをロードして、そのオブジェクトを作成
         this.loadPlugins(array_plugins,function(array_src){
@@ -141,7 +143,7 @@ tyrano.core ={
         
         //console.log(this.status.loaded_plugin);
         
-        if(this.status.loaded_plugin === this.config.init.plugins.length){
+        if(this.status.loaded_plugin === this.array_plugins.length){
             
             this.build();
         }
