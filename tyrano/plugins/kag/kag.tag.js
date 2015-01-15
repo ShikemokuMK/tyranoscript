@@ -475,8 +475,11 @@ tyrano.plugin.kag.ftag = {
         } else if (auto_next == "stop") {
 
             //[s]タグで終わった人が登場してきた時
-            this.kag.stat.is_strong_stop = true;
-
+            //this.kag.stat.is_strong_stop = true;
+            //レイヤイベントレイヤ非表示。
+            //this.current_order_index--;
+            this.kag.ftag.startTag("s",{"val":{}});
+            
         }
 
     }
@@ -2860,10 +2863,11 @@ tyrano.plugin.kag.tag.button = {
                        //strong_stopの場合は反応しない
                        if(that.kag.stat.is_strong_stop == true){
                            that.kag.log("[s]で停止中はfixボタンは反応しません");
-                           return false;
+                           _pm.auto_next = "stop";
+                       }else{
+                           _pm.auto_next = "yes";
                        }
                        
-                       _pm.auto_next = "yes";
                        that.kag.ftag.startTag("call", _pm);
                     
                     }else{

@@ -744,9 +744,6 @@ tyrano.plugin.kag.tag["return"] = {
         //呼び出し元に戻る 
         
         var auto_next = pm.auto_next;
-        
-        console.log(auto_next);
-        
         this.kag.ftag.nextOrderWithIndex(pm.index,pm.storage,undefined,undefined,auto_next);
         this.kag.popStack("call");//スタックを奪い取る
         

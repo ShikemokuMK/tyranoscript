@@ -242,7 +242,7 @@ tyrano.plugin.kag.menu ={
                     
              data.title = title;
              data.stat = _stat;
-             data.current_order_index = _current_order_index -1; //１つ前
+             data.current_order_index = _current_order_index ; //１つ前
              data.save_date = $.getNowDate()+"　"+$.getNowTime();
              data.img_data = img_code;
              
@@ -273,7 +273,7 @@ tyrano.plugin.kag.menu ={
                     
                     data.title = title;
                     data.stat = _stat;
-                    data.current_order_index = _current_order_index -1; //１つ前
+                    data.current_order_index = _current_order_index ; //１つ前
                     data.save_date = $.getNowDate()+"　"+$.getNowTime();
                     data.img_data = img_code;
                     
@@ -351,8 +351,8 @@ tyrano.plugin.kag.menu ={
     
     loadGameData:function(data){
     	
-    	var auto_next = "yes";
-       
+    	var auto_next = "no";
+        
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
         
@@ -399,7 +399,6 @@ tyrano.plugin.kag.menu ={
             var kind = j_elm.attr("data-event-tag");
             var pm = JSON.parse(j_elm.attr("data-event-pm"));
             var event_tag = object(tyrano.plugin.kag.tag[kind]);
-            
             event_tag.setEvent(j_elm, pm);
             
         });
@@ -478,7 +477,6 @@ tyrano.plugin.kag.menu ={
             return eval("("+tmp_array+")");
             
         }else{
-            
             tmp_array = new Array();
             
             var root = {kind:"save"};
