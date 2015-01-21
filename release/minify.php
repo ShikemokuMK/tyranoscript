@@ -2,8 +2,13 @@
 
 echo "start TyranoScript Minifiy\n";
 
+echo "version:v".$argv[1]."\n";
+
+$version = $argv[1];
+
 //今日の日付を含むディレクトリの作成
-$dirname="./result/tyrano_".date("Ymd_g_i_s");
+$tyrano_name = "tyranoscript_v".$version;
+$dirname="./result/".$tyrano_name;
 
 mkdir($dirname, 0700);
 
@@ -50,7 +55,7 @@ exec("cp ../index.html ".$dirname."/index.html");
 exec("cp ../readme.txt ".$dirname."/readme.txt");
 exec("cp ../novel_sound.swf ".$dirname."/novel_sound.swf");
 //exec("cp ../memo.txt ".$dirname."/うまく動かない場合.txt");
-exec("cp ../package.json ".$dirname."/package.json");
+//exec("cp ../package.json ".$dirname."/package.json");
 
 
 exec("mkdir -p -m 777 ".$dirname."/tyrano/plugins/kag/");
@@ -83,7 +88,23 @@ foreach($array_mini as $file){
 
 }
 
+	chdir("./result") ;
 
+	exec("zip -r ".$tyrano_name.".zip ".$tyrano_name );
+	
+	//$mac_path = "tyranoscript_for_mac_v".$version;
+	//$win_path = "tyranoscript_for_win_v".$version;
+	
+//各ファイルをコピーする	
+	//exec("cp -R ../binmac ".$mac_path);
+	//exec("cp -R ../binwin ".$win_path);
+	
+	//exec("cp -R ".$dirname."/* ".$mac_path."/");
+	//exec("cp -R ".$dirname."/* ".$win_path."/");
+	
+	//exec("zip -r ".$mac_path.".zip ".$mac_path."/*" );
+	//exec("zip -r ".$win_path.".zip ".$win_path."/*" );
+	
 
 //copy("", $newfile);
 
