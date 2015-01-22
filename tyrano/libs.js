@@ -336,6 +336,16 @@
          
     };
     
+    $.novel = function(key){
+    
+        if(tyrano_lang["novel"][key]){
+            return tyrano_lang["novel"][key];
+        }else{
+            return "NOT_DEFINED";
+        }
+    
+    };
+    
     //ユーザのブラウザ情報を取得
     $.getBrowser = function(){
     

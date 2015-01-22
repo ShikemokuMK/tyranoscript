@@ -34,7 +34,7 @@ tyrano.plugin.kag.menu ={
         
         layer_menu.empty();
         
-        this.kag.html("menu",{},function(html_str){
+        this.kag.html("menu",{"novel":$.novel},function(html_str){
             
             var j_menu = $(html_str);
             
@@ -133,7 +133,7 @@ tyrano.plugin.kag.menu ={
                 array[i].num = i;
             }
             
-            this.kag.html("save",{array_save:array},function(html_str){
+            this.kag.html("save",{array_save:array,"novel":$.novel},function(html_str){
                 var j_save = $(html_str);
                 j_save.find(".save_display_area").each(function(){
                     
@@ -312,7 +312,7 @@ tyrano.plugin.kag.menu ={
                 array[i].num = i;
             }
             
-            this.kag.html("load",{array_save:array},function(html_str){
+            this.kag.html("load",{array_save:array,"novel":$.novel},function(html_str){
                 var j_save = $(html_str);
                 j_save.find(".save_display_area").each(function(){
                     
@@ -510,7 +510,7 @@ tyrano.plugin.kag.menu ={
             
             var j_save = $("<div></div>");
             
-            this.kag.html("backlog",{},function(html_str){
+            this.kag.html("backlog",{"novel":$.novel},function(html_str){
                 
                 var j_menu = $(html_str);
                 
