@@ -1370,6 +1370,7 @@ height=画像の高さ位置を指定します。（ピクセル）,
 folder=好きな画像フォルダから、画像を選択できます。通常前景レイヤはfgimage　背景レイヤはbgimageと決まっていますが、ここで記述したフォルダ以下の画像ファイルを使用することができるようになります。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 pos=レイヤ位置を自動的に決定します。前景レイヤに対して使います。横方向の位置は、この属性で指定した left ( 左端 ) 、left_center ( 左より )、center ( 中央 )、 right_center ( 右より )、right ( 右端 ) の位置に表示されます。各横方向の座標の中心 位置は Config.tjs で指定することができます。
+time=ミリ秒を指定することで、徐々にイメージを表示させることができます。
 <br>left 、left_center、 center、 right_center、 right の代わりに、それぞれ l、 lc、 c、 rc、 r を 指定することもできます ( 動作は同じです )。
 <br>この属性を指定した場合は left 属性や top 属性は無視されます。
 <br>layerをbase と指定した場合にはこの属性は指定しないでください。各々の表示位置はConfig.tjsで事前に設定しておきましょう
@@ -1393,7 +1394,8 @@ tyrano.plugin.kag.tag.image = {
         "height" : "",
         "pos" : "",
         "name" : "",
-        "folder" : "" //画像フォルダを明示できる
+        "folder" : "", //画像フォルダを明示できる
+        "time" : ""
         //"visible":"true"
 
     },
@@ -1401,9 +1403,9 @@ tyrano.plugin.kag.tag.image = {
     start : function(pm) {
 
         var strage_url = "";
-
         var folder = "";
-
+        var that = this;
+        
         if (pm.layer != "base") {
 
             //visible true が指定されている場合は表示状態に持っていけ
@@ -1489,9 +1491,26 @@ tyrano.plugin.kag.tag.image = {
 
             //オブジェクトにクラス名をセットします
             $.setName(img_obj, pm.name);
+            
+            if(pm.time != ""){
+        
+                img_obj.css("opacity",0);
+                this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
+                
+                img_obj.animate(
+                    {"opacity":1},
+                    parseInt(pm.time), 
+                    function(){
+                        that.kag.ftag.nextOrder();
+                    }
+                );
+                        
+                
+            }else{
+                this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
+                this.kag.ftag.nextOrder();
 
-            this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
-            this.kag.ftag.nextOrder();
+            }
 
         } else {
 
@@ -1552,6 +1571,7 @@ tyrano.plugin.kag.tag.image = {
 :param
 layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
 page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます
+time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます、
 #[end]
 */
 
@@ -1562,24 +1582,46 @@ tyrano.plugin.kag.tag.freeimage = {
 
     pm : {
         layer : "",
-        page : "fore"
+        page : "fore",
+        time:"" //徐々に非表示にする
     },
 
     start : function(pm) {
-
+        
+        var that = this;
+        
         if (pm.layer != "base") {
 
             //前景レイヤの場合、全部削除だよ
-            this.kag.layer.getLayer(pm.layer, pm.page).empty();
+            
+            //非表示にした後、削除する
+            if(pm.time !=""){
+                
+                var j_obj = this.kag.layer.getLayer(pm.layer, pm.page).children();
+                
+                j_obj.animate(
+                    {"opacity":0},
+                    parseInt(pm.time), 
+                    function(){
+                        that.kag.layer.getLayer(pm.layer, pm.page).empty();
+                        //次へ移動ですがな
+                        that.kag.ftag.nextOrder();
+                    }
+                );
+                
+            }else{
+                 that.kag.layer.getLayer(pm.layer, pm.page).empty();
+                 //次へ移動ですがな
+                 that.kag.ftag.nextOrder();
+            }
 
         } else {
-
+            
             this.kag.layer.getLayer(pm.layer, pm.page).css("background-image", "");
-
+            //次へ移動ですがな
+            this.kag.ftag.nextOrder();            
         }
-
-        //次へ移動ですがな
-        this.kag.ftag.nextOrder();
+        
 
     }
 };
@@ -2766,12 +2808,12 @@ tyrano.plugin.kag.tag.button = {
 
                 }
 
+    
                 //fix指定のボタンは、繰り返し実行できるようにする
                 if (button_clicked == true && _pm.fix == "false") {
-
                     return false;
-
                 }
+                
                 //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
                 if (that.kag.stat.is_strong_stop != true && _pm.fix == "false") {
                     return false;
@@ -2793,6 +2835,12 @@ tyrano.plugin.kag.tag.button = {
 
                     that.kag.menu.snapSave(that.kag.stat.current_message_str);
                 }
+                
+                
+                //画面効果中は実行できないようにする
+                if(that.kag.layer.layer_event.css("display") =="none" && that.kag.stat.is_strong_stop != true){
+                    return false;
+                }
 
                 //roleが設定されている場合は対応する処理を実行
                 //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
@@ -2800,13 +2848,19 @@ tyrano.plugin.kag.tag.button = {
 
                     //強制停止中は使用できないようにする
                     ///処理待ち状態の時は、実行してはいけない
+                    /*
                     if (that.kag.layer.layer_event.css("display") == "none") {
                         return false;
                     }
+                    */
 
+                    /*
                     if (that.kag.stat.is_strong_stop == true) {
                         return false;
                     }
+                    */
+                   
+       
 
                     switch(_pm.role) {
 
@@ -2862,7 +2916,6 @@ tyrano.plugin.kag.tag.button = {
                        //fixから遷移した場合はリターン時にnextorderしない
                        //strong_stopの場合は反応しない
                        if(that.kag.stat.is_strong_stop == true){
-                           that.kag.log("[s]で停止中はfixボタンは反応しません");
                            _pm.auto_next = "stop";
                        }else{
                            _pm.auto_next = "yes";

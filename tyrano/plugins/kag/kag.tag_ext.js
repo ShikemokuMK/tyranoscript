@@ -1348,7 +1348,7 @@ tyrano.plugin.kag.tag.chara_hide ={
         layer:"0",//レイヤーデフォルトは０に追加
         name:"",
         wait:"true",
-        time:1000
+        time:"1000"
         
     },
     
@@ -1370,7 +1370,7 @@ tyrano.plugin.kag.tag.chara_hide ={
                     opacity:"hide"
                 },
                 {
-                    duration: pm.time, 
+                    duration: parseInt(pm.time), 
                     easing: "linear",
                     complete: function(){
                         
