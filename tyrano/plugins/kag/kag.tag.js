@@ -7,7 +7,7 @@ tyrano.plugin.kag.ftag = {
     array_tag : [], //命令タグの配列
     master_tag : {}, //使用可能なタグの種類
     current_order_index : -1, //現在の命令実行インデックス
-
+    
     init : function() {
 
         // タグの種類を確定させる
@@ -94,16 +94,22 @@ tyrano.plugin.kag.ftag = {
             this.kag.log(tag);
 
             //前に改ページ指定が入っている場合はテキスト部分をクリアする
-
-            if (this.kag.stat.flag_ref_page == true) {
-
-                this.kag.stat.flag_ref_page = false;
-                //this.startTag("cm"); //画面クリア　かつ、　画面遷移なし
-
-                this.kag.ftag.hideNextImg();
-
-                this.kag.getMessageInnerLayer().html("");
-
+            if((tag.name=="call" && tag.pm.storage=="make.ks") || this.kag.stat.current_scenario=="make.ks"){
+                //alert("makeだお");
+                //make中は基本、メッセージクリアを行わない
+            }else{
+            
+                if (this.kag.stat.flag_ref_page == true) {
+    
+                    this.kag.stat.flag_ref_page = false;
+                    //this.startTag("cm"); //画面クリア　かつ、　画面遷移なし
+    
+                    this.kag.ftag.hideNextImg();
+    
+                    this.kag.getMessageInnerLayer().html("");
+    
+                }
+                
             }
 
             //タグを無視する
@@ -447,7 +453,9 @@ tyrano.plugin.kag.ftag = {
             this.kag.loadScenario(scenario_file, function(array_tag) {
 
                 if ( typeof insert == "object") {
+                    
                     array_tag.splice(index + 1, 0, insert);
+                    
                 }
 
                 that.kag.layer.showEventLayer();
@@ -2924,8 +2932,11 @@ tyrano.plugin.kag.tag.button = {
                        that.kag.ftag.startTag("call", _pm);
                     
                     }else{
+                        
                         //スタックで残された
                         that.kag.log("callスタックが残っている場合、fixボタンは反応しません");
+                        that.kag.log(stack_pm);
+
 
                         return false;
                     }
@@ -3075,7 +3086,7 @@ tyrano.plugin.kag.tag.glink = {
             var button_clicked = false;
 
             j_button.click(function() {
-
+                
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
                     that.kag.ftag.startTag("playse", {

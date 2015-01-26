@@ -221,6 +221,7 @@ tyrano.plugin.kag.menu ={
     	}else{
         	return false;
        }
+       
     	this.loadGameData($.extend(true,{},data));
     },
     
@@ -230,8 +231,7 @@ tyrano.plugin.kag.menu ={
         var that = this;
         
         //画面のキャプチャも取るよ
-        
-        var _current_order_index = that.kag.ftag.current_order_index;
+        var _current_order_index = that.kag.ftag.current_order_index-1;
         var _stat = $.extend(true, {}, $.cloneObject(that.kag.stat));
         
         if(this.kag.config.configThumbnail =="false"){
@@ -409,20 +409,22 @@ tyrano.plugin.kag.menu ={
         //必ず、ファイルロード。別シナリオ経由的な
         //this.kag.ftag.startTag("call",{storage:"make.ks"});
         
-        /*
+        //auto_next 一旦makeを経由するときに、auto_nextを考えておく
+        //alert(auto_next);
         var insert = {
           
           name:"call",
-          pm:{storage:"make.ks"},
-          val:"" 
+          pm:{storage:"make.ks","auto_next":auto_next},
+          val:""
             
         };
-        */
-       
-       //make.ks を廃止したい
-        var insert =undefined;
         
-        this.kag.ftag.nextOrderWithIndex(data.current_order_index,data.stat.current_scenario,true,insert,auto_next);
+        //auto_next = "yes";
+        
+        //make.ks を廃止したい
+        //var insert =undefined;
+        
+        this.kag.ftag.nextOrderWithIndex(data.current_order_index,data.stat.current_scenario,true,insert,"yes");
         
     },
     
