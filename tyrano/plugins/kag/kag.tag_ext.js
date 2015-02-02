@@ -947,7 +947,8 @@ tyrano.plugin.kag.tag.chara_ptext ={
         	    return;
         	}
        		var storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
-       		$("."+pm.name).attr("src",storage_url);
+       		$("."+pm.name).attr("src","./data/fgimage/"+storage_url);
+       		//$("."+pm.name).attr("src",storage_url);
         }
         this.kag.ftag.nextOrder();
         

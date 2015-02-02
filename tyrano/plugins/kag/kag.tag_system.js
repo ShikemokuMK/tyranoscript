@@ -182,6 +182,7 @@ tyrano.plugin.kag.tag["trace"] = {
         //this.kag.ftag.startTag("text",{"val":val});
         
         this.kag.log("trace出力："+val);
+        this.kag.ftag.nextOrder();
         
     }
 

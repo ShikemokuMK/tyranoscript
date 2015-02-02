@@ -38,8 +38,8 @@ function KAGWindow_config()
 // ◆ 画面サイズ
 // scWidth に画面の幅、scHeight に画面の高さをピクセル単位で指定します。
 
-;scWidth = 640;
-;scHeight = 480;
+;scWidth = 960;
+;scHeight = 640;
 
 
 // ◆ 文字表示スピード (ミリ秒/文字)（未実装）
@@ -247,10 +247,12 @@ function MessageLayer_config()
 
 // ◆ 自動改行/改ページ
 // true を設定すると、行末での自動改行、ページ末での自動改ページが行われま
-// す。false を設定するとこれらが行われない他、禁則処理等もされなくなりま
 // す。
-;defaultAutoReturn = true; 
+;defaultAutoReturn = false; 
 
+// ◆ 禁則処理
+// trueでメッセージの禁則処理が有効になります
+;WordBreak=true;
 
 // ◆ 右文字マージン
 // 禁則処理用にあけておく右端の文字数を指定します。

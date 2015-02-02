@@ -312,7 +312,8 @@ tyrano.plugin.kag.parser ={
                         
                         //空白削除。カンマの中の場合
                         if(c ==" "){
-                            c ="&nbsp;";
+                            //個々消さないとダメ
+                            c ="";
                         }
                         
                         tmp_str +=c;

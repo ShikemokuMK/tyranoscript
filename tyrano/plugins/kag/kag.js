@@ -391,7 +391,6 @@ tyrano.plugin.kag ={
 //        }
         
         
-        
         this.layer.addLayer("base");
         
         //メッセージレイヤの追加
@@ -416,7 +415,7 @@ tyrano.plugin.kag ={
         var j_message_inner = $("<div class='message_inner' style='z-index:1001'></div>");
         
         //禁則処理
-        if(this.config.defaultAutoReturn != "false"){
+        if(this.config.WordBreak == "false"){
             j_message_inner.css("word-break","break-all");
         }
         
