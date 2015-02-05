@@ -1701,13 +1701,28 @@ tyrano.plugin.kag.tag.ptext = {
 
         //visible true が指定されている場合は表示状態に持っていけ
         //これはレイヤのスタイル
+        
+        //指定がない場合はデフォルトフォントを適応する
+        
+        if(pm.face ==""){
+            pm.face=that.kag.stat.font.face;
+        }
+        
+        if(pm.color == ""){
+            pm.color=$.convertColor(that.kag.stat.font.color);
+        }else{
+            pm.color = $.convertColor(pm.color);
+        }
+        
+        
+        
         var font_new_style = {
 
             "color" : pm.color,
             "font-weight" : pm.bold,
             "font-style" : pm.fontstyle,
             "font-size" : pm.size + "px",
-            "font-family" : that.kag.stat.font.face,
+            "font-family" : pm.face,
             "z-index" : "999",
             "text" : ""
 

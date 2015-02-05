@@ -459,6 +459,7 @@ tyrano.plugin.kag ={
         this.stat.default_font.color = $.convertColor(this.kag.config.defaultChColor);
         this.stat.default_font.bold  = $.convertBold(this.kag.config.defaultBold);
         this.stat.default_font.size  = this.kag.config.defaultFontSize;
+        this.stat.default_font.face  = this.kag.config.userFace;
         
         this.stat.vertical    = this.kag.config.vertical;
         
