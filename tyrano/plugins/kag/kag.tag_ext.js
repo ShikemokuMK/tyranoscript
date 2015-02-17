@@ -1462,7 +1462,7 @@ tyrano.plugin.kag.tag.chara_hide ={
                         }else{
                             
                             that.kag.layer.showEventLayer();
-                            //that.kag.ftag.nextOrder();
+                            that.kag.ftag.nextOrder();
                             
                         }
                     }//end complerte
