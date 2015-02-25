@@ -135,6 +135,10 @@ tyrano.plugin.kag.menu ={
             
             this.kag.html("save",{array_save:array,"novel":$.novel},function(html_str){
                 var j_save = $(html_str);
+                
+                //フォントをゲームで指定されているフォントにする。
+                j_save.find(".save_list").css("font-family",that.kag.config.userFace);
+                
                 j_save.find(".save_display_area").each(function(){
                     
                    $(this).click(function(e){
@@ -314,6 +318,9 @@ tyrano.plugin.kag.menu ={
             
             this.kag.html("load",{array_save:array,"novel":$.novel},function(html_str){
                 var j_save = $(html_str);
+                
+                j_save.find(".save_list").css("font-family",that.kag.config.userFace);
+                
                 j_save.find(".save_display_area").each(function(){
                     
                    $(this).click(function(e){

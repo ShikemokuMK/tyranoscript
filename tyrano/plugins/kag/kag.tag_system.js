@@ -1137,7 +1137,7 @@ tyrano.plugin.kag.tag.endignore ={
 [s]
 
 *commit
-[commit]
+[commit name="f.test"]
 [cm]
 ;入力されたテキストの内容を表示する
 値が確定しました[l]
@@ -1364,7 +1364,7 @@ tyrano.plugin.kag.tag.commit ={
         var that = this;
         
         this.kag.layer.getFreeLayer().find(".form").each(function(){
-           
+              
            var name = $(this).attr("name");
            var val = $(this).val();
            
