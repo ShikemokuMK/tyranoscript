@@ -1607,13 +1607,19 @@ tyrano.plugin.kag.tag.freeimage = {
                 
                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page).children();
                 
+                var cnt = 0;
+                var s_cnt = j_obj.length;
+                
                 j_obj.animate(
                     {"opacity":0},
                     parseInt(pm.time), 
                     function(){
                         that.kag.layer.getLayer(pm.layer, pm.page).empty();
                         //次へ移動ですがな
-                        that.kag.ftag.nextOrder();
+                        cnt++;
+                        if(s_cnt == cnt){
+                            that.kag.ftag.nextOrder();
+                        }
                     }
                 );
                 
