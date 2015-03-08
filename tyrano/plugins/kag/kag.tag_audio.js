@@ -96,7 +96,9 @@ tyrano.plugin.kag.tag.playbgm = {
             
             if(browser == "firefox" || browser =="opera" ){
                 
-                that.playSwf(pm);
+                //swfによる音楽の再生を廃止
+                //that.playSwf(pm); 
+                that.play(pm);
                 
             }else{
             	that.play(pm);
