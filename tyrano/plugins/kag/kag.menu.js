@@ -17,6 +17,7 @@ tyrano.plugin.kag.menu ={
             return false;
        }
        
+       
       
        //上記と同義
        /*
@@ -39,7 +40,7 @@ tyrano.plugin.kag.menu ={
             var j_menu = $(html_str);
             
             layer_menu.append(j_menu);
-        
+            
             layer_menu.find(".menu_skip").click(function(){
                 
                 //スキップを開始する
@@ -327,6 +328,7 @@ tyrano.plugin.kag.menu ={
                         var num = $(this).attr("data-num");
                         that.snap = null;
                         that.loadGame(num);
+                        
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
                         layer_menu.empty();
@@ -351,6 +353,11 @@ tyrano.plugin.kag.menu ={
        
        var array_save = this.getSaveData();
        var array = array_save.data; //セーブデータ配列
+       
+       //保存されていないデータはロード不可
+       if(array[num].save_date ==""){
+            return;
+       }
        
        this.loadGameData($.extend(true,{},array[num]));
        
@@ -495,7 +502,7 @@ tyrano.plugin.kag.menu ={
                 var json ={};
                 json.title  = $.lang("not_saved"); // ラストテキスト
                 json.current_order_index = 0;
-                json.save_date = "　";
+                json.save_date = "";
                 json.img_data  ="";
                 json.stat = {};
                 
