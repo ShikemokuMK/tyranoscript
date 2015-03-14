@@ -184,6 +184,8 @@ tyrano.plugin.kag ={
         //フラッシュの設定
         try{
             var browser = $.getBrowser();
+            //音楽再生にFLASHは関係なくなった
+            /*
             if(browser == "firefox" || browser =="opera" || (browser =="safari" && $.userenv()=="pc" ) ){
                 
                 if($.isFlashInstalled() != true){
@@ -193,6 +195,8 @@ tyrano.plugin.kag ={
                 }
                 
             }
+            */
+           
         }catch(e){
             console.log(e);
         }

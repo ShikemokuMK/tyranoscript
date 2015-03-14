@@ -95,7 +95,7 @@ tyrano.plugin.kag.ftag = {
 
             //前に改ページ指定が入っている場合はテキスト部分をクリアする
             if((tag.name=="call" && tag.pm.storage=="make.ks") || this.kag.stat.current_scenario=="make.ks"){
-                //alert("makeだお");
+                //makeです
                 //make中は基本、メッセージクリアを行わない
             }else{
             
@@ -423,7 +423,8 @@ tyrano.plugin.kag.ftag = {
 
         } else {
 
-            $.error_message("ラベル名：「" + label_name + "」は存在しません");
+            $.error_message($.lang("label")+"：'" + label_name + "'"+$.lang("not_exists"));
+
             this.nextOrder();
 
         }
