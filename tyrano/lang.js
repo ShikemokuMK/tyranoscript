@@ -7,7 +7,8 @@ window.tyrano_lang = {
         "tag":"タグ",
         "not_exists":"は存在しません",
         "error":"エラーが発生しました。スクリプトを確認して下さい",
-        "label":"ラベル"
+        "label":"ラベル",
+        "label_double":"は同一シナリオファイル内に重複しています"
     },
 
     novel : {

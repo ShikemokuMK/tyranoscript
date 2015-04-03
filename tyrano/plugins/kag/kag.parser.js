@@ -157,7 +157,9 @@ tyrano.plugin.kag.parser ={
                  array_s.push(label_obj);
                  
                  if(map_label[label_obj.pm.label_name]){
-                    this.kag.warning("警告:"+i+"行目:"+"ラベル名「"+label_obj.pm.label_name+"」は同一シナリオファイル内に重複しています");    
+                    //this.kag.warning("警告:"+i+"行目:"+"ラベル名「"+label_obj.pm.label_name+"」は同一シナリオファイル内に重複しています");    
+                    this.kag.warning("Warning line:"+i+" "+ $.lang("label") +"'"+ label_obj.pm.label_name+"'"+ $.lang("label_double"));
+                    
                  }else{
                     map_label[label_obj.pm.label_name] = label_obj.pm;
                  }     
