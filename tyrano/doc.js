@@ -210,7 +210,7 @@ tyrano.plugin.kag ={};
                     
                     var array_param = obj.param.split(",");
                     
-                    console.log("==== array_param  =====")
+                    console.log("==== array_param  =====");
                     console.log(array_param);
                     
                     for(var k=0;k<array_param.length;k++){
@@ -297,7 +297,7 @@ tyrano.plugin.kag ={};
 +'                        '
 +'                    </p>     '
 +''
-+'</div>'
++'</div>';
                 $(".howtoMain").append(basic_exp);
                 $(".howtoMain").append(j_root);
                 $("#src_html").val(html);

@@ -123,7 +123,7 @@ tyrano.plugin.kag.parser ={
                                 name:"chara_ptext",
                                 pm:{"name":chara_name,"face":chara_face},
                                 val:text
-              }
+              };
                             
               array_s.push(text_obj);
                             
@@ -151,7 +151,7 @@ tyrano.plugin.kag.parser ={
                         "val":label_val
                     },
                     val:label_val
-                 }
+                 };
                  
                  //ラベル
                  array_s.push(label_obj);
@@ -228,7 +228,7 @@ tyrano.plugin.kag.parser ={
                                 name:"text",
                                 pm:{"val":text},
                                 val:text
-                            }
+                            };
                             
                             array_s.push(text_obj);
                             
@@ -250,7 +250,7 @@ tyrano.plugin.kag.parser ={
                         name:"text",
                         pm:{"val":text},
                         val:text
-                    }
+                    };
                     
                     array_s.push(text_obj);
                 }

@@ -26,7 +26,7 @@ tyrano.core ={
     },
     
     status:{
-        loaded_plugin:0,
+        loaded_plugin:0
     },
     
     array_plugins:["kag"], //ロードするプラグイン一覧

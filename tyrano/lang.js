@@ -23,7 +23,7 @@ window.tyrano_lang = {
         "file_load_bg":"menu_load_bg.jpg",
         "file_button_menu":"button_menu.png"
         
-    },
+    }
 
 };
 

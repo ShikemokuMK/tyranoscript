@@ -398,7 +398,7 @@ tyrano.plugin.kag.menu ={
                 /*fadein:"true",*/
                 /*time:2000,*/
                 stop:"true"
-            }
+            };
                     
             this.kag.ftag.startTag("playbgm",pm);
     

@@ -839,7 +839,7 @@ tyrano.plugin.kag.tag.kanim ={
             
             that.kag.popAnimStack();
             
-        }
+        };
         
         if(pm.name !=""){ 
             
