@@ -226,7 +226,7 @@ tyrano.plugin.kag ={
        
        var f = this.stat.f;
        var sf = this.variable.sf;
-       var tf = this.variable.tf 
+       var tf = this.variable.tf;
        var mp = this.stat.mp;
        
        return eval(str);
@@ -313,9 +313,9 @@ tyrano.plugin.kag ={
         this.menu.init();
 
         //key_mouse 追加
-        this.kay_mouse = object(tyrano.plugin.kag.key_mouose);
-        this.key_mouose.kag = that;
-        this.key_mouose.init();
+        this.key_mouse = object(tyrano.plugin.kag.key_mouse);
+        this.key_mouse.kag = that;
+        this.key_mouse.init();
 
         //event 追加
         this.event = object(tyrano.plugin.kag.event);
@@ -411,7 +411,7 @@ tyrano.plugin.kag ={
         .css("height",eval(this.config.mh))
         .css("z-index",100);
         
-        j_message.l_visible
+        j_message.l_visible;
         
         this.layer.appendObj("message0","fore",j_message);
         
@@ -603,7 +603,7 @@ tyrano.plugin.kag ={
     getMessageCurrentSpan:function(){
         
         //ここでも、
-        var j_obj = this.layer.getLayer(this.stat.current_layer,this.stat.current_page).find(".message_inner").find("p").find(".current_span")
+        var j_obj = this.layer.getLayer(this.stat.current_layer,this.stat.current_page).find(".message_inner").find("p").find(".current_span");
         
         return j_obj;
     

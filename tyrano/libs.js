@@ -32,7 +32,7 @@
 
         audio_obj.play();
     
-    },
+    };
     
     $.getViewPort = function() {
         var width, heiht;
@@ -56,7 +56,7 @@
     
     $.escapeHTML = function(val, replace_str) {
         val = val || "";
-        var t =$("<div/>").text(val).html(); 
+        var t =$("<div />").text(val).html();
         
         if(replace_str){
             if(t === ""){
@@ -184,7 +184,7 @@
         
         return name;
         
-    },
+    };
     
     //要素をクローンします
     $.cloneObject = function(source) {
@@ -206,7 +206,7 @@
     //パスにfgimage bgimage image が含まれていた場合、それを適応する
     $.convertStorage=function(path){
         
-    },
+    };
     
     $.convertColor=function(val){
         

@@ -46,7 +46,7 @@
                 mode:"forwards",
                 maintain:"true"
                 
-            }
+            };
             
             var options=$.extend(defaults, trimAll(config));
             
@@ -82,7 +82,7 @@
                 var last_mod_frames = $.data(this,"last_mod_frames") || {};
                 var last_mod_styles = $.data(this,"last_mod_styles") || {};
                 
-                point = $.data(this,"point") || {x:0,y:0,z:0}
+                point = $.data(this,"point") || {x:0,y:0,z:0};
                 
                 var state_text = last_frame_text + "; " + last_style_text;
                
@@ -358,7 +358,7 @@
             var last_mod_frames = $.data(this,"last_mod_frames") || {};
             var last_mod_styles = $.data(this,"last_mod_styles") || {};
                 
-            var point = $.data(this,"point") || {x:0,y:0,z:0}
+            var point = $.data(this,"point") || {x:0,y:0,z:0};
             
             var result = {
                 point : point,
@@ -366,7 +366,7 @@
                 style_text :last_style_text,
                 frames:last_mod_frames,
                 styles:last_mod_styles
-            }
+            };
             
             result_array.push(result);
         

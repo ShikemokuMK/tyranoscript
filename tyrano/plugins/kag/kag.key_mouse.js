@@ -15,28 +15,29 @@
  *     Right-clicking displays the menu.
  *     Note: When the menu is not displayed, hide the message window.
  */
-tyrano.plugin.kag.key_mouose = {
+tyrano.plugin.kag.key_mouse = {
     kag : null,
     init : function() {
+        var that = this;
         $(document).keyup(function(e) {
             switch (e.keyCode) {
             case 13:
             case 32:
-                if (tyrano.plugin.kag.key_mouose.canClick()) {
+                if (that.kag.key_mouse.canClick()) {
                     $(".layer_event_click").click();
                 }
                 break;
             case 27:
-                tyrano.plugin.kag.key_mouose.hideMessage();
+                that.kag.key_mouse.hideMessage();
                 break;
             }
         });
         $(document).on("mousedown", function(e) {
             if (e.which == 3) {
                 if ($('.button_menu').is(':visible')) {
-                    tyrano.plugin.kag.key_mouose.showMenu();
+                    that.kag.key_mouse.showMenu();
                 } else {
-                    tyrano.plugin.kag.key_mouose.hideMessage();
+                    that.kag.key_mouse.hideMessage();
                 }
             }
         });

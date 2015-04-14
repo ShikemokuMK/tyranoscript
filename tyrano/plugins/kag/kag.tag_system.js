@@ -905,7 +905,7 @@ tyrano.plugin.kag.tag.erasemacro = {
     }
     
     
-}
+};
 
 
 
@@ -937,7 +937,7 @@ tyrano.plugin.kag.tag.savesnap = {
     }
     
     
-}
+};
 
 
 /*
@@ -1006,7 +1006,7 @@ tyrano.plugin.kag.tag.autosave = {
     }
     
     
-}
+};
 
 
 /*
@@ -1037,7 +1037,7 @@ tyrano.plugin.kag.tag.autoload = {
     	  
     }
     
-}
+};
 
 /*
 #[ignore]
@@ -1189,7 +1189,7 @@ tyrano.plugin.kag.tag.edit = {
            width:pm.width,
            height:pm.height,
            "font-size":pm.size
-       }
+       };
        
        j_text.css(new_style);
        j_text.css("position","absolute");
