@@ -1420,5 +1420,46 @@ tyrano.plugin.kag.tag.cursor = {
 };
 
 
+/*
+#[screen_full]
+:group
+システム操作
+:title
+フルスクリーン
+:exp
+ゲーム画面をフルスクリーンにします。PCゲームのみ動作します
+ウィンドウに戻す場合は再度呼び出すことでウィンドウに戻ります
+:sample
+[screen_full]
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.screen_full = {
+    
+    vital:[],
+    
+    pm:{
+    },
+    
+    start:function(pm){
+                
+        if($.userenv() =="pc"){
+            var gui = require("nw.gui");
+            var win = gui.Window.get();
+            if(win.isFullscreen){
+                win.leaveFullscreen();
+            }else{
+                win.enterFullscreen();
+            }
+        }
+        
+        this.kag.ftag.nextOrder();
+        
+    }
+    
+};
+
+
 
 
