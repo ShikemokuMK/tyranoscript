@@ -1053,6 +1053,7 @@ name=キャラクターを以後操作するための名前を半角英数で指
 storage=キャラクター画像を指定してください。画像ファイルはプロジェクトフォルダのfgimageフォルダに配置してください,
 width=画像の横幅を指定できます,
 height=画像の高さを指定できます。,
+reflect=画像を反転します,
 jname=このキャラクターをネームスペースに表示する場合、適用する名称を指定できます。例えば、#yuko と指定すると　メッセージエリアに　ゆうこ　と表示できます
 #[end]
 */
@@ -1067,6 +1068,7 @@ tyrano.plugin.kag.tag.chara_new ={
         storage:"",
         width:"",
         height:"",
+        reflect:"false",
         jname:"",
         visible:"false", 
         map_face:{}
@@ -1118,6 +1120,9 @@ time="ミリ秒で指定します。指定した時間をかけて登場しま�
 layer="キャラクターを配置するレイヤーを指定できます。デフォルトは前景レイヤ layer=0 です",
 page="foreかbackを指定します。デフォルトはforeです",
 wait="trueを指定すると、キャラクターの登場完了を待ちます。デフォルトはtrue です。",
+reflect="trueを指定すると左右反転します",
+width="キャラクターの横幅を指定できます。",
+height="キャラクターの縦幅を指定できます。",
 left="キャラクターの横位置を指定できます。指定した場合、自動配置が有効であっても無効になります。",
 top="キャラクターの縦位置を指定できます。指定した場合、自動配置が有効であっても無効になります。"
 
@@ -1136,6 +1141,9 @@ tyrano.plugin.kag.tag.chara_show ={
         wait:"true", //アニメーションの終了を待ちます
         left:"0",  //chara_config でauto になっている場合は、自動的に決まります。指定されている場合はこちらを優先します。
         top:"0",  
+        width:"",
+        height:"",
+        reflect:"",
         time:1000
         
     },
@@ -1157,13 +1165,32 @@ tyrano.plugin.kag.tag.chara_show ={
     	    storage_url	= cpm.storage;	
     	}
         
-        
         var img_obj = $("<img />");
 	    img_obj.attr("src",storage_url);
 	    img_obj.css("position","absolute");
 	    img_obj.css("display","none");
 	    //前景レイヤを表示状態にする
-	        
+	    
+	    if(pm.width != ""){
+	       var width = parseInt(pm.width);
+	       cpm.width = width;
+	    }
+	    
+	    if(pm.height != ""){
+	       var height = parseInt(pm.height);
+           cpm.height = height;
+	    }
+	    
+	    //反転表示
+	    if(pm.reflect != ""){
+    	    if(pm.reflect == "true"){
+    	       cpm.reflect = "true";
+    	    }else{
+    	       cpm.reflect = "false";
+    	    }
+	    }
+        
+        
         //画像は事前にロードしておく必要がありそう
         this.kag.preload(storage_url,function(){
         	
@@ -1173,7 +1200,9 @@ tyrano.plugin.kag.tag.chara_show ={
 	        
 	        var chara_num = 1;
 	        that.kag.layer.hideEventLayer();
-	            
+	        
+	        //キャラのサイズを設定する必要がある。
+	        
 	        
 	        //立ち位置を自動的に設定する場合
 	        if(that.kag.stat.chara_pos_mode =="true" && pm.top=="0" && pm.left =="0"){
@@ -1283,10 +1312,15 @@ tyrano.plugin.kag.tag.chara_show ={
 	            img_obj.css("height",cpm.height+"px");
 	        }
 	        
+	        if(cpm.reflect =="true"){
+	           img_obj.addClass("reflect");
+	        }else{
+	           img_obj.removeClass("reflect");
+	        }
+	        
 	        if(pm.wait!="true"){
 	            that.kag.ftag.nextOrder();
 	        }
-	        
 	        
 	        //アニメーションでj表示させます
 	        img_obj.animate(
@@ -1536,6 +1570,7 @@ tyrano.plugin.kag.tag.chara_delete ={
 name=[chara_new]で定義したname属性を指定してください。,
 face=[chara_face]で定義したface属性を指定してください,
 time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
+reflect=trueを指定すると左右反転します,
 storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。
 
 #[end]
@@ -1549,6 +1584,7 @@ tyrano.plugin.kag.tag.chara_mod ={
         
         name:"",
         face:"",
+        reflect:"",
         storage:"",
         time:""
         
@@ -1577,6 +1613,7 @@ tyrano.plugin.kag.tag.chara_mod ={
        
        if($(".layer_fore").find("."+pm.name).size() == 0){
             this.kag.stat.charas[pm.name]["storage"] = storage_url;
+            this.kag.stat.charas[pm.name]["reflect"] = reflect;
             this.kag.ftag.nextOrder();
             return;
        }
@@ -1591,6 +1628,19 @@ tyrano.plugin.kag.tag.chara_mod ={
            chara_time = "0";
        }
        
+       if(pm.reflect != ""){
+           if(pm.reflect =="true"){
+                $(".layer_fore").find("."+pm.name).addClass("reflect");
+           }else{
+                $(".layer_fore").find("."+pm.name).removeClass("reflect");
+           }
+           this.kag.stat.charas[pm.name]["reflect"] = pm.reflect;
+       }
+       //storageが指定されていない場合は終わり
+       if(storage_url == ""){
+           this.kag.ftag.nextOrder();
+           return;
+       }
        
        if(chara_time !="0"){
            var j_new_img = $(".layer_fore").find("."+pm.name).clone();
@@ -1621,6 +1671,8 @@ tyrano.plugin.kag.tag.chara_mod ={
             $(".layer_fore").find("."+pm.name).attr("src","./data/fgimage/"+storage_url);
             this.kag.ftag.nextOrder();
        }
+       
+       
        
        //showする前でも、表情が適応されるようにする
        this.kag.stat.charas[pm.name]["storage"] = storage_url;

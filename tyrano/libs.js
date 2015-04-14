@@ -351,7 +351,7 @@
     
         var userAgent = window.navigator.userAgent.toLowerCase();
     
-        if (userAgent.indexOf("msie") > -1) {
+        if (userAgent.indexOf('msie') >= 0 || userAgent.indexOf('trident') >= 0) {
             return "msie";
         }
         else if (userAgent.indexOf("firefox") > -1) {
