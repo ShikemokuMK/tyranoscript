@@ -437,8 +437,13 @@
     
     $.setStorage = function(key,val){
         val = JSON.stringify(val);
-		//localStorage.setItem(key, LZString.compress(escape(val)));
-		localStorage.setItem(key, escape(val));
+
+        try{
+            //localStorage.setItem(key, LZString.compress(escape(val)));
+            localStorage.setItem(key, escape(val));
+        }catch(e){
+            alert("An error occurred while saving data. " + e);
+        }
 	};
 	
 	$.getStorage = function(key){
