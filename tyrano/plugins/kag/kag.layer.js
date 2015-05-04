@@ -37,6 +37,16 @@ tyrano.plugin.kag.layer ={
             if(that.kag.stat.is_skip == true){
                 that.kag.stat.is_skip = false; 
             }
+
+            // POSSIBLE IMPROVE
+            // make "isReturn" variable
+            // and do all if statements
+            // then do "if (isReturn) return;"
+            
+            if(that.kag.stat.is_hide_message == true){
+                that.showMessageLayers();
+                return;
+            }
             
             //テキスト再生中にクリックされた場合、文字列を進めて終了にする
             if(that.kag.stat.is_adding_text == true){
@@ -52,11 +62,7 @@ tyrano.plugin.kag.layer ={
             if(that.kag.stat.is_stop == true){
                 return;
             }
-            
-            if(that.kag.stat.is_hide_message == true){
-                that.showMessageLayers();
-            }
-            
+
             that.kag.ftag.nextOrder();
             
         });
