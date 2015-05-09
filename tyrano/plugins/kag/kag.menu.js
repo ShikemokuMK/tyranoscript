@@ -262,8 +262,9 @@ tyrano.plugin.kag.menu ={
              }
             
         }else{
-            
-           html2canvas($("#tyrano_base").get(0), {
+
+            var gameScreen = document.getElementById("tyrano_base");
+            html2canvas(gameScreen, {
                 onrendered: function(canvas) {
                     // canvas is the final rendered <canvas> element
 
@@ -274,7 +275,7 @@ tyrano.plugin.kag.menu ={
                     thumb.setAttribute('width',thumbWidth);
                     thumb.setAttribute('height',thumbHeight);
                     var thumbCTX = thumb.getContext('2d');
-                    thumbCTX.drawImage(canvas,0,0,canvas.width, canvas.height,0,0,thumbWidth,thumbHeight);
+                    thumbCTX.drawImage(canvas, 0, 0, gameScreen.getBoundingClientRect().width, gameScreen.getBoundingClientRect().height, 0, 0, thumbWidth, thumbHeight);
 
                     // convert scaled canvas to data url
                     var img_code = thumb.toDataURL();
@@ -304,8 +305,7 @@ tyrano.plugin.kag.menu ={
                     }
                 }
             });
-        
-            
+
         }
         
         
