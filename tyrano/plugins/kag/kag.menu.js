@@ -145,10 +145,10 @@ tyrano.plugin.kag.menu ={
                    $(this).click(function(e){
                         var num = $(this).attr("data-num");
                         
-                        that.snap = null;
-                        that.doSave(num);
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
+                        that.snap = null;
+                        that.doSave(num);
                         layer_menu.empty();
                         if(that.kag.config.configVisible=="true"){
                             $(".button_menu").show();
