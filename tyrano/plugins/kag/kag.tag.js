@@ -1604,6 +1604,7 @@ tyrano.plugin.kag.tag.freeimage = {
             //前景レイヤの場合、全部削除だよ
             
             //非表示にした後、削除する
+            if (pm.time == 0) pm.time = ""; // integer 0 and string "0" are equal to ""
             if(pm.time !=""){
                 
                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page).children();
