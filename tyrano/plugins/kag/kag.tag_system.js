@@ -122,7 +122,7 @@ tyrano.plugin.kag.tag["close"] = {
     start:function(pm){
         
         if(pm.ask=="true"){
-            if(confirm("ウィンドウを閉じて終了します。よろしいですね？")){
+            if(confirm($.lang("exit_game"))){
                 this.close();
             }
         }else{
