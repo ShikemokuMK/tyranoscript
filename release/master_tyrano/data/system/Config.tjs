@@ -84,7 +84,9 @@ function KAGWindow_config()
 
 // セーブ・ロード時にサムネを表示したくない場合はこちらをfalseに設定してください
 // 一部古い機種でセーブ機能が動作しない場合などにサムネを表示しないことで解決しないことがあります。
-;configThumbnail    = true;
+;saveThumb          = true;
+;saveThumbWidth     = 64;
+;saveThumbHeight    = 48;
 
 // ◆ バックログ機能
 // バックログ機能用にテキストの最大保持数を保存できます。

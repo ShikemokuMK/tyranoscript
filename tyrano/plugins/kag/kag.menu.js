@@ -239,7 +239,7 @@ tyrano.plugin.kag.menu ={
         var _current_order_index = that.kag.ftag.current_order_index-1;
         var _stat = $.extend(true, {}, $.cloneObject(that.kag.stat));
         
-        if(this.kag.config.configThumbnail =="false"){
+        if(this.kag.config.saveThumb =="false"){
             
              //サムネデータを保存しない
              var img_code = "";
@@ -262,12 +262,23 @@ tyrano.plugin.kag.menu ={
              }
             
         }else{
-            
-           html2canvas($("#tyrano_base").get(0), {
+
+            var gameScreen = document.getElementById("tyrano_base");
+            html2canvas(gameScreen, {
                 onrendered: function(canvas) {
                     // canvas is the final rendered <canvas> element
-                    //console.log(canvas);
-                    var img_code = canvas.toDataURL();
+
+                    // scale canvas to get thumbnail
+                    var thumbWidth  = that.kag.config.saveThumbWidth ? that.kag.config.saveThumbWidth : canvas.width/10,
+                        thumbHeight = that.kag.config.saveThumbHeight ? that.kag.config.saveThumbHeight : canvas.height/10;
+                    var thumb = document.createElement('canvas');
+                    thumb.setAttribute('width',thumbWidth);
+                    thumb.setAttribute('height',thumbHeight);
+                    var thumbCTX = thumb.getContext('2d');
+                    thumbCTX.drawImage(canvas, 0, 0, gameScreen.getBoundingClientRect().width, gameScreen.getBoundingClientRect().height, 0, 0, thumbWidth, thumbHeight);
+
+                    // convert scaled canvas to data url
+                    var img_code = thumb.toDataURL();
                     
                     /*
                     scenario = scenario || "";
@@ -294,8 +305,7 @@ tyrano.plugin.kag.menu ={
                     }
                 }
             });
-        
-            
+
         }
         
         
