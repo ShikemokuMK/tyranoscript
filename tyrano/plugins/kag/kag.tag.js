@@ -1501,6 +1501,7 @@ tyrano.plugin.kag.tag.image = {
             //オブジェクトにクラス名をセットします
             $.setName(img_obj, pm.name);
             
+            if (pm.time == 0) pm.time = ""; // integer 0 and string "0" are equal to ""
             if(pm.time != ""){
         
                 img_obj.css("opacity",0);
@@ -1604,6 +1605,7 @@ tyrano.plugin.kag.tag.freeimage = {
             //前景レイヤの場合、全部削除だよ
             
             //非表示にした後、削除する
+            if (pm.time == 0) pm.time = ""; // integer 0 and string "0" are equal to ""
             if(pm.time !=""){
                 
                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page).children();
@@ -3528,6 +3530,10 @@ tyrano.plugin.kag.tag.bg = {
         this.kag.ftag.hideNextImg();
 
         var that = this;
+        
+        // time=0 and wait=true conflicts
+        // may be some code refactor needed
+        if (pm.time == 0) pm.wait = "false";
 
         //現在の背景画像の要素を取得
 
@@ -3551,26 +3557,22 @@ tyrano.plugin.kag.tag.bg = {
             
             that.kag.ftag.hideNextImg();
             that.kag.layer.updateLayer("base","fore",j_new_bg);
-                
+
+            if (pm.wait == "true") {
+                that.kag.layer.hideEventLayer();
+            }
+
             $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
-                
                 j_old_bg.remove();
-                
             });
             
             $.trans(pm.method, j_new_bg, parseInt(pm.time), "show", function() {
-                
-                that.kag.layer.showEventLayer();
                 if (pm.wait == "true") {
+                    that.kag.layer.showEventLayer();
                     that.kag.ftag.nextOrder();
                 }
             });
             
-            if (pm.wait == "false") {
-                that.kag.ftag.nextOrder();
-            }else{
-                that.kag.layer.hideEventLayer();
-            }
             //レイヤの中で、画像を取得する
             
         });
