@@ -87,6 +87,7 @@ function KAGWindow_config()
 ;saveThumb          = true;
 ;saveThumbWidth     = 64;
 ;saveThumbHeight    = 48;
+;saveCount          = 9;
 
 // ◆ バックログ機能
 // バックログ機能用にテキストの最大保持数を保存できます。
