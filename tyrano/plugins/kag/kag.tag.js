@@ -1688,7 +1688,7 @@ tyrano.plugin.kag.tag.ptext = {
         "x" : 0,
         "y" : 0,
         "vertical" : "false",
-        "text" : "　　　　　　　　　　　　　　", //テキスト領域のデフォルト値を指定するためですが、、、
+        "text" : "", //テキスト領域のデフォルト値を指定するためですが、、、
         "size" : "",
         "face" : "",
         "color" : "",
