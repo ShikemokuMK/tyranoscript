@@ -208,6 +208,30 @@ tyrano.plugin.kag.menu ={
         
     },
     
+    setQuickSave:function(){
+        var that = this;
+
+        var saveTitle = that.kag.stat.current_message_str;
+
+        that.kag.menu.snapSave(saveTitle,function(){
+            var data = that.snap;
+            data.save_date = $.getNowDate()+"　"+$.getNowTime();
+            $.setStorage(that.kag.config.projectID+"_tyrano_quick_save",data);
+        });
+    },
+    
+    loadQuickSave:function(){
+        var data = $.getStorage(this.kag.config.projectID+"_tyrano_quick_save");
+        
+        if(data){
+            data = eval("("+data+")");
+        }else{
+            return false;
+       }
+       
+        this.loadGameData($.extend(true,{},data));
+    },
+
     //doSaveSnap 自動セーブのデータを保存する
     doSetAutoSave:function(){
     	
