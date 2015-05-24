@@ -88,6 +88,9 @@ abbr,acronym{
 /* セーブデータの設定 */
 .save_list_item {
   display: table-row;
+}
+.save_list_item_content {
+  display: table-cell;
   cursor: pointer;
 }
 /* セーブデータのサムネイル部分の設定 */
@@ -106,6 +109,7 @@ abbr,acronym{
   vertical-align: top;
   padding: 0 10px;
   border-bottom: 1px solid #ccc;
+  cursor: pointer;
 }
 /* セーブデータの日付の設定 */
 .save_list_item_date {
@@ -119,6 +123,19 @@ abbr,acronym{
   line-height: 1.3;
   height: 48px;
   overflow: hidden;
+}
+.save_list_item_buttons {
+  display: table-cell;
+  width: 80px;
+  vertical-align: top;
+  padding: 0 10px;
+  border-bottom: 1px solid #ccc;
+}
+.save_list_item_delete {
+  display: block;
+	text-aligh: center;
+	padding: 5px;
+  cursor: pointer;
 }
 
 
