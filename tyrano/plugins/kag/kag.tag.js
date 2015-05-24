@@ -2922,6 +2922,12 @@ tyrano.plugin.kag.tag.button = {
                         case "backlog":
                             that.kag.ftag.startTag("showlog", {});
                             break;
+                        case "quicksave":
+                            that.kag.menu.doSetQuickSave();
+                            break;
+                        case "quickload":
+                            that.kag.menu.loadQuickSave();
+                            break;
 
                     }
 
