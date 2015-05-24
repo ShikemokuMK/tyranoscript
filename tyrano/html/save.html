@@ -1,22 +1,28 @@
 <div>
 
-<ul class='save_list'>
-	{{for array_save}}
-		<li class='save_display_area save_list_item' data-num='{{:num}}'>
-			<span class='save_list_item_thumb'>
-			{{if img_data != ""}}
-				<img style="width:100px" src="{{:img_data}}">
-			{{/if}}
-			</span>
-			
-			<span class='save_list_item_area'>
-				<span class='save_list_item_date'>{{:save_date}}</span>
-				<span class='save_list_item_text'>{{:title}}</span>
-			</span>
-		</li>
-	{{/for}}
-</ul>
+	<ul class='save_list'>
+		{{for array_save}}
+			<li class='save_display_area save_list_item' data-num='{{:num}}'>
 
-<img src='tyrano/images/kag/{{:novel("file_save_bg")}}' style='z-index:-1;left:0;top:0;width:100%;height:100%;position:absolute;'>
+				<span class='save_display_content save_list_item_thumb'>
+				{{if img_data != ""}}
+					<img style="width:100px" src="{{:img_data}}">
+				{{/if}}
+				</span>
+				
+				<span class='save_display_content save_list_item_area'>
+					<span class='save_list_item_date'>{{:save_date}}</span>
+					<span class='save_list_item_text'>{{:title}}</span>
+				</span>
+
+				<span class='save_list_item_buttons'>
+					<span class='save_delete save_list_item_delete'>{{:novel("file_save_txt")}}</span>
+				</span>
+
+			</li>
+		{{/for}}
+	</ul>
+
+	<img src='tyrano/images/kag/{{:novel("file_save_bg")}}' style='z-index:-1;left:0;top:0;width:100%;height:100%;position:absolute;'>
 
 </div>
