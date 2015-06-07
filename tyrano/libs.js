@@ -20,13 +20,13 @@
    
     };
 
-	$.isHTTP = function(str){
-		if(str.substring(0,4) ==="http"){
-			return true;
-		}else{
-			return false;
-		}
-	};
+    $.isHTTP = function(str){
+        if(str.substring(0,4) ==="http"){
+            return true;
+        }else{
+            return false;
+        }
+    };
 
     $.play_audio=function(audio_obj){
 
@@ -379,60 +379,136 @@
             return document[str];
         }
     };
+
+
+    $.getAnimationSupport = function() {
+        var animation = false,
+            animationstring = 'animation',
+            keyframeprefix = '',
+            domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
+            pfx  = '',
+            elm = document.createElement('div');
+
+        if( elm.style.animationName !== undefined ) { animation = true; }    
+
+        if( animation === false ) {
+          for( var i = 0; i < domPrefixes.length; i++ ) {
+            if( elm.style[ domPrefixes[i] + 'AnimationName' ] !== undefined ) {
+              pfx = domPrefixes[ i ];
+              animationstring = pfx + 'Animation';
+              keyframeprefix = '-' + pfx.toLowerCase() + '-';
+              animation = true;
+              break;
+            }
+          }
+        }
+
+        if ( animation === true ) {
+            if ( pfx === '' ) {
+                return 'animation'
+            } else {
+                return pfx + 'Animation'
+            }
+        }
+    }
     
     
+    $.animationStyle = $.getAnimationSupport();
+
+
     $.trans = function(method,j_obj,time,mode,callback){
-    	
-    	if(method =="crossfade" || mode=="show"){
             
-            if (time == 0) {
+        if (time == 0) {
+
+            if (mode == "show") {
+                j_obj.show();
+            } else {
+                j_obj.hide();
+            }
+             if (callback) {
+                 callback();
+             }
+
+        } else {
+
+            var cssMethod,
+                animationEndEvents,
+                animationEndFunc,
+                animateClasses,
+                setCSSAnimation;
+                
+            animationEndEvents = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+
+            animationEndFunc = function() {
+                j_obj.removeClass('animated');
+                if (cssMethod) j_obj.removeClass(cssMethod);
+                if (mode == "hide") j_obj.hide();
+                 if (callback) {
+                     callback();
+                 }
+            };
+
+            setCSSAnimation = function() {
+                animateClasses = 'animated ' + cssMethod;
+                j_obj.one(animationEndEvents, animationEndFunc);
+                if ($.animationStyle === 'animation') {
+                    // set only animation duration to not break other properties
+                    j_obj[0].style.animationDuration = time+'ms';
+                } else {
+                    // set animationName with time to prevent Chrome webkitAnimation bug
+                    j_obj[0].style[$.animationStyle] = cssMethod + ' ' + time+'ms';
+                }
+                j_obj.addClass(animateClasses);
+            }
+
+            if (method == "crossfade" || mode=="show") {
+                
                 if (mode == "show") {
                     j_obj.show();
+                    cssMethod = 'fadeIn';
                 } else {
-                    j_obj.hide();
+                    cssMethod = 'fadeOut';
                 }
-		 		if (callback) {
-		 			callback();
-		 		}
-            } else {
-                var ta = {};
+                setCSSAnimation();
 
-                if (mode == "show") {
-                    ta = {"opacity":"show"};
-                } else {
-                    ta = {"opacity":"hide"};
+            } else {
+
+                // rename jQuery methods to CSS analogs
+                switch (method) {
+                    case "slide":
+                        method = "slideOutLeft";
+                        break;
+                    case "blind":
+                        method = "fadeOutUp";
+                        break;
+                    case "drop":
+                        method = "fadeOutLeft";
+                        break;
+                    case "fold":
+                        method = "fadeOutUp";
+                        break;
+                    case "scale":
+                        method = "zoomOut";
+                        break;
                 }
-        	
-    	    	j_obj.animate(
-    	    		ta,
-    	   			{
-    	   				duration: time, 
-    	   		    	easing: "linear",
-    	    		 	complete: function(){
-    	    		 		if(callback){
-    	    		 			callback();
-    	    		 		}
-    	    			}//end complerte
-    	    		}
-    	    	);
+
+                switch (method) {
+                    // jquery methods
+                    case "explode":
+                        j_obj.hide(method,time,function(){if(callback)callback();});
+                        break;
+                    default:
+                        cssMethod = method;
+                        setCSSAnimation();
+                        break;
+                }
+
             }
-	    	
-	    	return false;
-	    
-	    }else {
-	       
-	        if(mode=="hide"){
-                j_obj.hide(method,time,function(){if(callback)callback();});
-            }
-            else if(mode=="show"){
-                j_obj.show(method,time,function(){if(callback)callback();});
-            }
-	       
-	    }
-	    
+        }
+        
     };
-    
-    
+
+
     //要素から空白のオブジェクトを削除して返却する
     $.minifyObject = function(obj){
         
@@ -448,30 +524,30 @@
     
     $.setStorage = function(key,val){
         val = JSON.stringify(val);
-		//localStorage.setItem(key, LZString.compress(escape(val)));
-		localStorage.setItem(key, escape(val));
-	};
-	
-	$.getStorage = function(key){
-		
-		try{
-		
-			var gv = "null";
-    		
-    		if(localStorage.getItem(key)){
-    			//gv = unescape(LZString.decompress(localStorage.getItem(key)));
-    			gv = unescape(localStorage.getItem(key));
-    		}
-    		
-    		if(gv =="null") return null;
-    		
-		}catch(e){
-		  alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
-		}
-		
-		return gv;
-		
-	};
+        //localStorage.setItem(key, LZString.compress(escape(val)));
+        localStorage.setItem(key, escape(val));
+    };
+    
+    $.getStorage = function(key){
+        
+        try{
+        
+            var gv = "null";
+            
+            if(localStorage.getItem(key)){
+                //gv = unescape(LZString.decompress(localStorage.getItem(key)));
+                gv = unescape(localStorage.getItem(key));
+            }
+            
+            if(gv =="null") return null;
+            
+        }catch(e){
+          alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
+        }
+        
+        return gv;
+        
+    };
     //オブジェクトの個数をもってきます。1
     $.countObj = function(obj){
         
