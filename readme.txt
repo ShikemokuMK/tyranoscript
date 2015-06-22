@@ -157,3 +157,5 @@ V0.01 (2012/08/21)
 
 ---------------------------------------------------------------------
 
+
+Join the chat at https://gitter.im/ShikemokuMK/tyranoscript
