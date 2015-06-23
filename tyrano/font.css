@@ -1,0 +1,10 @@
+/*ウェブフォントを使用する場合はここに定義を追加して下さい*/
+
+@font-face {
+	font-family:"mfrules";
+	src:url("../data/others/Mf_Break_The_Rules.eot?") format("eot"),
+	url("../data/others/Mf_Break_The_Rules.woff") format("woff"),
+	url("../data/others/Mf_Break_The_Rules.ttf") format("truetype"),
+	url("../data/others/Mf_Break_The_Rules.svg#MfBreakTheRules") format("svg");
+	font-weight:normal;font-style:normal;
+}

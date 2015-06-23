@@ -3014,6 +3014,8 @@ height=ボタンの高さをピクセルで指定できます,
 exp=ボタンがクリックされた時に実行されるJSを指定できます。,
 clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
 size=フォントサイズを指定できます。デフォルトは３０です,
+face=フォントを指定できます。Webフォントを追加したい場合はfont.cssに定義を記述して下さい,
+
 
 #[end]
 */
@@ -3032,7 +3034,8 @@ tyrano.plugin.kag.tag.glink = {
         clickse : "",
         width : "",
         height : "",
-        size : 30
+        size : 30,
+        face:""
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -3057,6 +3060,12 @@ tyrano.plugin.kag.tag.glink = {
 
         if (pm.width != "") {
             j_button.css("width", pm.width + "px");
+        }
+        
+        if(pm.face !=""){
+            j_button.css("font-family", pm.face);
+        }else if(that.kag.stat.font.face !=""){
+            j_button.css("font-family", that.kag.stat.font.face);
         }
 
         if (pm.x == "auto") {
