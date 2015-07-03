@@ -3,6 +3,7 @@ window.tyrano_lang = {
     word : {
         
         "go_title":"タイトルに戻ります。よろしいですね？",
+        "exit_game":"ウィンドウを閉じて終了します。よろしいですね？",
         "not_saved":"まだ、保存されているデータがありません",
         "tag":"タグ",
         "not_exists":"は存在しません",
