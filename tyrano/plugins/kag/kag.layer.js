@@ -286,7 +286,7 @@ tyrano.plugin.kag.layer ={
     },
     
     //レイヤに関連するHTMLファイルを文字列でぶっこ抜きます
-    getLayeyHtml:function(){
+    getLayerHtml:function(){
         
         var layer_info ={
             
