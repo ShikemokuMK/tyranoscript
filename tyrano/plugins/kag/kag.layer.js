@@ -387,8 +387,8 @@ tyrano.plugin.kag.layer ={
     		
     		if(layer == "" || layer == key){
             	
-        		var fore_class_name = this.map_layer_fore[key].attr("class");
-        		var back_class_name = this.map_layer_back[key].attr("class");
+                var fore_class_name = key + '_fore';
+                var back_class_name = key + '_back';
         		
         		this.map_layer_back[key] = this.map_layer_fore[key].clone();
         		
@@ -427,8 +427,8 @@ tyrano.plugin.kag.layer ={
             
             if(layer == "" || layer == key){
             
-                var fore_class_name = this.map_layer_fore[key].attr("class");
-                var back_class_name = this.map_layer_back[key].attr("class");
+                var fore_class_name = key + '_fore';
+                var back_class_name = key + '_back';
                 
                 this.map_layer_fore[key] = this.map_layer_back[key].clone(true);
                 
