@@ -375,12 +375,14 @@ tyrano.plugin.kag.layer ={
         if (layer == "" || layer == key) {
             var fore_class_name = this.map_layer_fore[key].attr("class");
             var back_class_name = this.map_layer_back[key].attr("class");
+
             this.map_layer_back[key] = this.map_layer_fore[key].clone();
+
             this.map_layer_back[key].removeClass(fore_class_name);
             this.map_layer_back[key].addClass(back_class_name);
-            $("." + back_class_name.replace(/ +/g, '.')).remove();
+
             this.map_layer_back[key].hide();
-            this.appendLayer(this.map_layer_back[key])
+            $("." + back_class_name.replace(/ +/g, '.')).replaceWith(this.map_layer_back[key]);
         }
     },
     
@@ -425,10 +427,9 @@ tyrano.plugin.kag.layer ={
             this.map_layer_fore[key].removeClass(back_class_name);
             this.map_layer_fore[key].addClass(fore_class_name);
 
-            $("." + fore_class_name.replace(/ +/g, '.')).remove();
-            this.appendLayer(this.map_layer_fore[key]);
+            $("." + fore_class_name.replace(/ +/g, '.')).replaceWith(this.map_layer_fore[key]);
 
-            this.map_layer_back[key].css("display", "none");
+            this.map_layer_back[key].hide();
             if (key.indexOf("message") != -1) this.map_layer_fore[key].css("opacity", "")
         }
     },
