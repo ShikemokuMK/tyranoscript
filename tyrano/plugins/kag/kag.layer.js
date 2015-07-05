@@ -436,7 +436,6 @@ tyrano.plugin.kag.layer ={
             $("." + fore_class_name.replace(/ +/g, '.')).replaceWith(this.map_layer_fore[key]);
 
             this.map_layer_back[key].hide();
-            if (key.indexOf("message") != -1) this.map_layer_fore[key].css("opacity", "")
         }
     },
     
