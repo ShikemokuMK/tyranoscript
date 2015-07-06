@@ -1,9 +1,3 @@
-* {
-  /* transform and z-index conflict fix for Chrome */
-  -webkit-transform: translate3d(0px,0px,0px);
-  transform: translate3d(0px,0px,0px);
-}
-
 @-webkit-keyframes clip {
   0% {
     -webkit-transform: scale(1,1);
