@@ -399,6 +399,7 @@ tyrano.plugin.kag ={
         
         //メッセージレイヤの追加
         this.layer.addLayer("message0");
+        this.layer.getLayer("message0").css("z-index",100);
         
         //メッセージ外枠部分の作成
         var j_message = $("<div class='message_outer'></div>");
