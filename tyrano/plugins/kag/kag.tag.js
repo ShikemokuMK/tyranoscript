@@ -2637,7 +2637,7 @@ enterse=ボタンの上にマウスカーソルが乗った時に再生する効
 leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。,
 clickimg=ボタンをクリックした時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください,
 enterimg=ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。,
-role=ボタンに特別な機能を割り当てることができます。この場合storageやtargetは無視されます。強制的にfix属性がtrueになります。指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。window(メッセージウィンドウを非表示にします)。skip(スキップの実行)。backlog（過去ログを表示）。
+role=ボタンに特別な機能を割り当てることができます。この場合storageやtargetは無視されます。強制的にfix属性がtrueになります。指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。window(メッセージウィンドウを非表示にします)。skip(スキップの実行)。backlog（過去ログを表示）。fullscreen(フルスクリーン切り替え)
 #[end]
 */
 
@@ -2921,6 +2921,9 @@ tyrano.plugin.kag.tag.button = {
                             break;
                         case "backlog":
                             that.kag.menu.displayLog();
+                            break;
+                        case "fullscreen":
+                            that.kag.menu.screenFull();
                             break;
 
                     }
