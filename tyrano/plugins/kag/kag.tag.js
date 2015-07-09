@@ -669,11 +669,11 @@ tyrano.plugin.kag.tag.text = {
                             
                             that.kag.appendMessage(jtext, current_str);
                             setTimeout(function(){
-                                that.kag.ftag.nextOrder()
+                                if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
                              }, parseInt(that.kag.config.skipSpeed));
                             
                         }else{
-                            that.kag.ftag.nextOrder();
+                            if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
                         }
 
                     } else {
