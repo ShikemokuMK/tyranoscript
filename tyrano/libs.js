@@ -384,27 +384,38 @@
     $.trans = function(method,j_obj,time,mode,callback){
     	
     	if(method =="crossfade" || mode=="show"){
-    	
-    	   var ta = {};
-    	
-    	   if(mode =="show"){
-    	       ta = {"opacity":"show"};
-    	   }else{
-    	       ta = {"opacity":"hide"};
-    	   }
-    	
-	    	j_obj.animate(
-	    		ta,
-	   			{
-	   				duration: time, 
-	   		    	easing: "linear",
-	    		 	complete: function(){
-	    		 		if(callback){
-	    		 			callback();
-	    		 		}
-	    			}//end complerte
-	    		}
-	    	);
+            
+            if (time == 0) {
+                if (mode == "show") {
+                    j_obj.show();
+                } else {
+                    j_obj.hide();
+                }
+		 		if (callback) {
+		 			callback();
+		 		}
+            } else {
+                var ta = {};
+
+                if (mode == "show") {
+                    ta = {"opacity":"show"};
+                } else {
+                    ta = {"opacity":"hide"};
+                }
+        	
+    	    	j_obj.animate(
+    	    		ta,
+    	   			{
+    	   				duration: time, 
+    	   		    	easing: "linear",
+    	    		 	complete: function(){
+    	    		 		if(callback){
+    	    		 			callback();
+    	    		 		}
+    	    			}//end complerte
+    	    		}
+    	    	);
+            }
 	    	
 	    	return false;
 	    
