@@ -2926,6 +2926,12 @@ tyrano.plugin.kag.tag.button = {
                         case "fullscreen":
                             that.kag.menu.screenFull();
                             break;
+                        case "quicksave":
+                            that.kag.menu.doSetQuickSave();
+                            break;
+                        case "quickload":
+                            that.kag.menu.loadQuickSave();
+                            break;
 
                     }
 
