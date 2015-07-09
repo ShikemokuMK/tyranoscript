@@ -521,7 +521,7 @@ tyrano.plugin.kag.menu ={
             
             var root = {kind:"save"};
             
-            for(var i=0;i<5;i++){
+            for(var i=0;i<this.kag.config.saveCount;i++){
             
                 var json ={};
                 json.title  = $.lang("not_saved"); // ラストテキスト
