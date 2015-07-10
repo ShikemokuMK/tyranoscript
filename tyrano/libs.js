@@ -381,6 +381,8 @@
     };
 
 
+    // get animation style property name
+    // prefixed or not
     $.getAnimationSupport = function() {
         var animation = false,
             animationstring = 'animation',
@@ -409,48 +411,141 @@
             } else {
                 return pfx + 'Animation'
             }
+        } else {
+            return 'jQuery';
         }
     }
     
     
     $.animationStyle = $.getAnimationSupport();
 
+    // get animation end event name
+    // perfixed or not
+    $.getAnimationEndSupport = function() {
+        var eventName = false;
+        var el = document.createElement('div');
+        var eventsArr = [
+            'WebkitAnimation',
+            'MozAnimation',
+            'msAnimation',
+            'OAnimation'
+        ];
+        var eventsDictionary = {
+          WebkitAnimation: 'webkitAnimationEnd',
+          MozAnimation:    'mozAnimationEnd',
+          msAnimation:     'MSAnimationEnd',
+          OAnimation:      'oAnimationEnd'
+        }
+
+        if (el.style.animation !== undefined) {
+            eventName = 'animationend';
+        } else {
+            for (var t = 0; t < eventsArr.length; t++) {
+                if (el.style[eventsDictionary[t]] !== undefined) {
+                    eventName = eventsDictionary[t];
+                    break;
+                }
+            }
+        }
+
+        return eventName;
+    }
+
+    $.animationEnd = $.getAnimationEndSupport();
 
     $.trans = function(method,j_obj,time,mode,callback){
+
+        domObj = j_obj[0];
             
         if (time == 0) {
+            // if time === 0 just show/hide element
 
-            if (mode == "show") {
-                j_obj.show();
-            } else {
+            if (mode == "show")
+                j_obj.show()
+            else
                 j_obj.hide();
-            }
-             if (callback) {
-                 callback();
-             }
 
+            if (callback) callback();
+
+        } else if ($.animationStyle === 'jQuery') {
+            // animate with jQuery
+
+            // convert css methods to jQuery
+            switch (method) {
+                case "slide":
+                case "blind":
+                case "drop":
+                case "fold":
+                case "scale":
+                case "explode":
+                    break;
+                case "slideOutLeft":
+                    method = "slide";
+                    break;
+                case "fadeOutUp":
+                    method = "blind";
+                    break;
+                case "fadeOutLeft":
+                    method = "drop";
+                    break;
+                case "zoomOut":
+                    method = "scale";
+                    break;
+                default:
+                    method = "crossfade";
+            }
+            if (method == "crossfade" || mode == "show") {
+                
+                    var ta = {};
+
+                    if (mode == "show") {
+                        ta = {"opacity":"show"};
+                    } else {
+                        ta = {"opacity":"hide"};
+                    }
+                
+                    j_obj.animate(
+                        ta,
+                        {
+                            duration: time, 
+                            easing: "linear",
+                            complete: function(){
+                                if(callback){
+                                    callback();
+                                }
+                            }
+                        }
+                    );
+
+            } else {
+                j_obj.hide(
+                    method,
+                    time,
+                    function() {
+                        if (callback) callback();
+                    });
+            }
         } else {
+            // animate with CSS
 
             var cssMethod,
-                animationEndEvents,
                 animationEndFunc,
-                animateClasses,
                 setCSSAnimation;
-                
-            animationEndEvents = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
 
-            animationEndFunc = function() {
+            animationEndFunc = function(e) {
+                // jQuery's "one" don't work properly, use pure js way to add and remove event
+                domObj.removeEventListener($.animationEnd, animationEndFunc);
+
+                j_obj.removeClass(cssMethod);
                 j_obj.removeClass('animated');
-                if (cssMethod) j_obj.removeClass(cssMethod);
                 if (mode == "hide") j_obj.hide();
-                 if (callback) {
-                     callback();
-                 }
+                if (callback) callback();
             };
 
             setCSSAnimation = function() {
-                animateClasses = 'animated ' + cssMethod;
-                j_obj.one(animationEndEvents, animationEndFunc);
+                // jQuery's "one" don't work properly, use pure js way to add and remove event
+                domObj.addEventListener($.animationEnd, animationEndFunc);
+
                 if ($.animationStyle === 'animation') {
                     // set only animation duration to not break other properties
                     j_obj[0].style.animationDuration = time+'ms';
@@ -458,10 +553,11 @@
                     // set animationName with time to prevent Chrome webkitAnimation bug
                     j_obj[0].style[$.animationStyle] = cssMethod + ' ' + time+'ms';
                 }
-                j_obj.addClass(animateClasses);
+                j_obj.addClass('animated');
+                j_obj.addClass(cssMethod);
             }
 
-            if (method == "crossfade" || mode=="show") {
+            if (method == "crossfade" || mode == "show") {
                 
                 if (mode == "show") {
                     j_obj.show();
@@ -473,7 +569,7 @@
 
             } else {
 
-                // rename jQuery methods to CSS analogs
+                // convert method name from jQuery to CSS analogs
                 switch (method) {
                     case "slide":
                         method = "slideOutLeft";
@@ -493,10 +589,16 @@
                 }
 
                 switch (method) {
-                    // jquery methods
+                    // fallback to jquery methods
                     case "explode":
-                        j_obj.hide(method,time,function(){if(callback)callback();});
+                        j_obj.hide(
+                            method,
+                            time,
+                            function() {
+                                if (callback) callback();
+                            });
                         break;
+                    // css methods
                     default:
                         cssMethod = method;
                         setCSSAnimation();
