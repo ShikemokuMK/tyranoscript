@@ -440,9 +440,11 @@
         if (el.style.animation !== undefined) {
             eventName = 'animationend';
         } else {
+            var testedAnimationName;
             for (var t = 0; t < eventsArr.length; t++) {
-                if (el.style[eventsDictionary[t]] !== undefined) {
-                    eventName = eventsDictionary[t];
+                testedAnimationName = eventsArr[t];
+                if (el.style[testedAnimationName] !== undefined) {
+                    eventName = eventsDictionary[testedAnimationName];
                     break;
                 }
             }
