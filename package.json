@@ -10,9 +10,7 @@
     		"height": 480,
     		"position": "mouse",
     		"min_width": 640,
-    		"min_height": 480,
-    		"max_width": 640,
-    		"max_height": 480
+    		"min_height": 480
 	}
 
 }

@@ -634,6 +634,22 @@ tyrano.plugin.kag.menu ={
             
     },
     
+    //画面をフルスクリーンにします
+    screenFull:function(){
+        
+        if($.userenv() =="pc"){
+            var gui = require("nw.gui");
+            var win = gui.Window.get();
+            if(win.isFullscreen){
+                win.leaveFullscreen();
+            }else{
+                win.enterFullscreen();
+            }
+        }
+        
+    },
+    
+    
     
       
     test:function(){

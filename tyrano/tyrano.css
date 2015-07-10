@@ -1,4 +1,5 @@
 /*reset css */
+@import url("font.css");
 
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,
 form,fieldset,input,textarea,p,blockquote,th,td{
@@ -173,19 +174,6 @@ body{
 
 .img_next{
     padding-left:3px;
-}
-
-/*ウェブフォントを使用する場合はここ*/
-
-/* Firefox, Opera, Safari */
-@font-face {
-font-family:webfont;
-src:url("../data/others/TanukiMagic.ttf") format("truetype");
-}
-/*IE*/
-@font-face {
-font-family: webfont;
-src: url("./data/others/TanukiMagic.eot");
 }
 
 /*テキストボックスの共通スタイル*/
@@ -458,4 +446,5 @@ src: url("./data/others/TanukiMagic.eot");
     transform: scaleX(-1);
 	filter: FlipH;
 }
+
 

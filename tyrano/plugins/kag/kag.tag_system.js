@@ -1444,15 +1444,7 @@ tyrano.plugin.kag.tag.screen_full = {
     
     start:function(pm){
                 
-        if($.userenv() =="pc"){
-            var gui = require("nw.gui");
-            var win = gui.Window.get();
-            if(win.isFullscreen){
-                win.leaveFullscreen();
-            }else{
-                win.enterFullscreen();
-            }
-        }
+        this.kag.menu.screenFull();
         
         this.kag.ftag.nextOrder();
         
