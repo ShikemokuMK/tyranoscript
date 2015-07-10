@@ -183,9 +183,8 @@ src: url("./data/others/TanukiMagic.eot");
 }
 
 .tyrano_base * {
-  /* transform and z-index conflict fix */
-  -webkit-transform: translate3d(0px,0px,0px);
-  transform: translate3d(0px,0px,0px);
+	/* without this elements with animations overlaping other */
+	-webkit-backface-visibility: hidden;
 }
 
 /* button 
