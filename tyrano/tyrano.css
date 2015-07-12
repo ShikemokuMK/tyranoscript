@@ -187,9 +187,17 @@ body{
     -khtml-user-select: none;
 }
 
+/* fix last webkit */
+/* without this elements with opacity animations overlaping other */
 .tyrano_base * {
-	/* without this elements with animations overlaping other */
 	-webkit-backface-visibility: hidden;
+}
+
+/* fix last webkit */
+/* switch back "-webkit-backface-visibility" on layers to prevent unwanted text blur */
+.layer,
+.layer * {
+	-webkit-backface-visibility: visible;
 }
 
 /* button 
