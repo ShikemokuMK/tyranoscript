@@ -132,27 +132,38 @@ tyrano.plugin.kag.menu ={
             
             for (var i=0;i<array.length;i++){
                 array[i].num = i;
+                array[i].novel = $.novel;
             }
-            
+
             this.kag.html("save",{array_save:array,"novel":$.novel},function(html_str){
                 var j_save = $(html_str);
                 
                 //フォントをゲームで指定されているフォントにする。
                 j_save.find(".save_list").css("font-family",that.kag.config.userFace);
                 
-                j_save.find(".save_display_area").each(function(){
-                    
+                j_save.find(".save_display_content").each(function(){
                    $(this).click(function(e){
-                        var num = $(this).attr("data-num");
+                        var num = $(this).parents('.save_display_area').attr("data-num");
                         
-                        that.snap = null;
-                        that.doSave(num);
                         var layer_menu = that.kag.layer.getMenuLayer();
                         layer_menu.hide();
+                        that.snap = null;
+                        that.doSave(num);
                         layer_menu.empty();
                         if(that.kag.config.configVisible=="true"){
                             $(".button_menu").show();
                         }
+                   }) ;
+                });
+                
+                j_save.find(".save_delete").each(function(){
+                   $(this).click(function(e){
+                        var num = $(this).parents('.save_display_area').attr("data-num");
+                        
+                        that.snap = null;
+                        that.doDeleteSave(num);
+
+                        that.displaySave();
                    }) ;
                 });
                 
@@ -207,7 +218,7 @@ tyrano.plugin.kag.menu ={
         }
         
     },
-    
+
     setQuickSave:function(){
         var that = this;
 
@@ -232,10 +243,28 @@ tyrano.plugin.kag.menu ={
         this.loadGameData($.extend(true,{},data));
     },
 
+    doDeleteSave:function(num){
+
+        var array_save = this.getSaveData();
+
+        var data = {};
+        data.title  = $.lang("not_saved"); // ラストテキスト
+        data.current_order_index = 0;
+        data.save_date = "";
+        data.img_data  ="";
+        data.stat = {};
+
+        var that = this;
+
+        array_save.data[num] = data;
+        $.setStorage(that.kag.config.projectID+"_tyrano_data",array_save);
+
+    },
+
     //doSaveSnap 自動セーブのデータを保存する
     doSetAutoSave:function(){
-    	
-    	var data = this.snap;
+        
+        var data = this.snap;
         data.save_date = $.getNowDate()+"　"+$.getNowTime();
         $.setStorage(this.kag.config.projectID+"_tyrano_auto_save",data);
                             
@@ -243,15 +272,15 @@ tyrano.plugin.kag.menu ={
     
     //自動保存のデータを読み込む
     loadAutoSave:function(){
-    	var data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
-    	
-    	if(data){
-        	data = eval("("+data+")");
-    	}else{
-        	return false;
+        var data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
+        
+        if(data){
+            data = eval("("+data+")");
+        }else{
+            return false;
        }
        
-    	this.loadGameData($.extend(true,{},data));
+        this.loadGameData($.extend(true,{},data));
     },
     
     //セーブ状態のスナップを保存します。
@@ -263,7 +292,7 @@ tyrano.plugin.kag.menu ={
         var _current_order_index = that.kag.ftag.current_order_index-1;
         var _stat = $.extend(true, {}, $.cloneObject(that.kag.stat));
         
-        if(this.kag.config.configThumbnail =="false"){
+        if(this.kag.config.saveThumb =="false"){
             
              //サムネデータを保存しない
              var img_code = "";
@@ -276,7 +305,7 @@ tyrano.plugin.kag.menu ={
              data.img_data = img_code;
              
              //レイヤ部分のHTMLを取得
-             var layer_obj = that.kag.layer.getLayeyHtml();
+             var layer_obj = that.kag.layer.getLayerHtml();
              data.layer = layer_obj;
              
              that.snap= $.extend(true, {}, $.cloneObject(data));
@@ -286,40 +315,48 @@ tyrano.plugin.kag.menu ={
              }
             
         }else{
-            
-           html2canvas($("#tyrano_base").get(0), {
-                onrendered: function(canvas) {
-                    // canvas is the final rendered <canvas> element
-                    //console.log(canvas);
-                    var img_code = canvas.toDataURL();
-                    
-                    /*
-                    scenario = scenario || "";
-                    order_index = order_index || "";
-                    */
-                   
-                    var data = {};
-                    
-                    data.title = title;
-                    data.stat = _stat;
-                    data.current_order_index = _current_order_index ; //１つ前
-                    data.save_date = $.getNowDate()+"　"+$.getNowTime();
-                    data.img_data = img_code;
-                    
-                    //レイヤ部分のHTMLを取得
-                    var layer_obj = that.kag.layer.getLayeyHtml();
-                    data.layer = layer_obj;
-                    
-                    that.snap= $.extend(true, {}, $.cloneObject(data));
-                    
-                    
-                    if(call_back){
-                        call_back();
-                    }
+
+            var gameScreen = document.getElementById("tyrano_base");
+            html2canvas(gameScreen).then(function(canvas) {
+                // canvas is the final rendered <canvas> element
+
+                // scale canvas to get thumbnail
+                var thumbWidth  = that.kag.config.saveThumbWidth ? that.kag.config.saveThumbWidth : canvas.width/10,
+                    thumbHeight = that.kag.config.saveThumbHeight ? that.kag.config.saveThumbHeight : canvas.height/10;
+                var thumb = document.createElement('canvas');
+                thumb.setAttribute('width',thumbWidth);
+                thumb.setAttribute('height',thumbHeight);
+                var thumbCTX = thumb.getContext('2d');
+                thumbCTX.drawImage(canvas, 0, 0, gameScreen.getBoundingClientRect().width, gameScreen.getBoundingClientRect().height, 0, 0, thumbWidth, thumbHeight);
+
+                // convert scaled canvas to data url
+                var img_code = thumb.toDataURL();
+                
+                /*
+                scenario = scenario || "";
+                order_index = order_index || "";
+                */
+               
+                var data = {};
+                
+                data.title = title;
+                data.stat = _stat;
+                data.current_order_index = _current_order_index ; //１つ前
+                data.save_date = $.getNowDate()+"　"+$.getNowTime();
+                data.img_data = img_code;
+                
+                //レイヤ部分のHTMLを取得
+                var layer_obj = that.kag.layer.getLayerHtml();
+                data.layer = layer_obj;
+                
+                that.snap= $.extend(true, {}, $.cloneObject(data));
+                
+                
+                if(call_back){
+                    call_back();
                 }
             });
-        
-            
+
         }
         
         
@@ -339,17 +376,17 @@ tyrano.plugin.kag.menu ={
             
             for (var i=0;i<array.length;i++){
                 array[i].num = i;
+                array[i].novel = $.novel;
             }
-            
+
             this.kag.html("load",{array_save:array,"novel":$.novel},function(html_str){
                 var j_save = $(html_str);
                 
                 j_save.find(".save_list").css("font-family",that.kag.config.userFace);
                 
-                j_save.find(".save_display_area").each(function(){
-                    
+                j_save.find(".save_display_content").each(function(){
                    $(this).click(function(e){
-                        var num = $(this).attr("data-num");
+                        var num = $(this).parents('.save_display_area').attr("data-num");
                         that.snap = null;
                         that.loadGame(num);
                         
@@ -359,6 +396,17 @@ tyrano.plugin.kag.menu ={
                         if(that.kag.config.configVisible=="true"){
                             $(".button_menu").show();
                         }
+                   }) ;
+                });
+                
+                j_save.find(".save_delete").each(function(){
+                   $(this).click(function(e){
+                        var num = $(this).parents('.save_display_area').attr("data-num");
+                        
+                        that.snap = null;
+                        that.doDeleteSave(num);
+
+                        that.displayLoad();
                    }) ;
                 });
                 
@@ -388,8 +436,8 @@ tyrano.plugin.kag.menu ={
     },
     
     loadGameData:function(data){
-    	
-    	var auto_next = "no";
+        
+        var auto_next = "no";
         
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
@@ -521,7 +569,7 @@ tyrano.plugin.kag.menu ={
             
             var root = {kind:"save"};
             
-            for(var i=0;i<5;i++){
+            for(var i=0;i<this.kag.config.saveCount;i++){
             
                 var json ={};
                 json.title  = $.lang("not_saved"); // ラストテキスト

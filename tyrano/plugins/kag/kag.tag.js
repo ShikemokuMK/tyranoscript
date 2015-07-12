@@ -3431,18 +3431,16 @@ time=トランジションを行っている時間をミリ秒で指定します
 
 //トランジション
 tyrano.plugin.kag.tag.trans = {
+    vital: ["time"],
 
-    vital : ["time"],
-
-    pm : {
-        layer : "base",
-        method : "crossfade",
-        children : true,
-        time : 1500
+    pm: {
+        layer: "base",
+        method: "crossfade",
+        children: true,
+        time: 1500
     },
 
-    start : function(pm) {
-
+    start: function(pm) {
         this.kag.ftag.hideNextImg();
 
         var that = this;
@@ -3456,58 +3454,58 @@ tyrano.plugin.kag.tag.trans = {
         var layer_num = $.countObj(this.kag.layer.map_layer_fore);
 
         //ここがチルドレンの場合、必ず即レイヤ実行ね
-        if (pm.children == "false") {
-            layer_num = 0;
-        }
+        if (pm.children == "false") layer_num = 0;
 
-        for (key in this.kag.layer.map_layer_fore ) {
+        var _trans = function(key) {
+            var layer_fore = that.kag.layer.map_layer_fore[key];
+            var layer_back = that.kag.layer.map_layer_back[key];
 
-            //指定条件のレイヤのみ実施
-            if (pm.children == true || key === pm.layer) {
+            //メッセージレイヤの場合、カレント以外はトランスしない。むしろ非表示
+            if (key.indexOf("message") != -1 && layer_back.attr("l_visible") == "false") {
 
-                (function() {
+                comp_num++;
+                that.kag.layer.forelay(key)
 
-                    var _key = key;
+            } else {
 
-                    var layer_fore = that.kag.layer.map_layer_fore[_key];
-                    var layer_back = that.kag.layer.map_layer_back[_key];
+                $.trans(pm.method, layer_fore, parseInt(pm.time), "hide", function() {});
 
-                    //メッセージレイヤの場合、カレント以外はトランスしない。むしろ非表示
-                    //if((_key.indexOf("message")!=-1 && _key !== that.kag.stat.current_layer) || (_key.indexOf("message")!=-1 && layer_back.attr("l_visible") == "false") ){
-                    if ((_key.indexOf("message") != -1 && layer_back.attr("l_visible") == "false")) {
+                layer_back.css("display", "none");
 
-                        comp_num++;
-                        that.kag.layer.forelay(_key);
+                $.trans(pm.method, layer_back, parseInt(pm.time), "show", function() {
+                    comp_num++;
+                    that.kag.layer.forelay(key);
 
-                    } else {
+                    //すべてのトランジション完了
+                    if (layer_num <= comp_num) that.kag.ftag.completeTrans();
 
-                        $.trans(pm.method, layer_fore, parseInt(pm.time), "hide", function() {
-                        });
-                        layer_back.css("display", "none");
+                    that.kag.ftag.hideNextImg()
+                })
 
-                        $.trans(pm.method, layer_back, parseInt(pm.time), "show", function() {
-                            comp_num++;
-                            that.kag.layer.forelay(_key);
-
-                            //すべてのトランジション完了
-                            if (layer_num <= comp_num) {
-
-                                that.kag.ftag.completeTrans();
-
-                            }
-
-                            that.kag.ftag.hideNextImg();
-
-                        });
-
-                    }
-
-                })();
             }
+        };
+
+        if (pm.children == true) {
+
+            for (key in this.kag.layer.map_layer_fore)
+                if (key == 'base')
+                    _trans(key);
+
+            for (key in this.kag.layer.map_layer_fore)
+                if (key.indexOf('message') != -1)
+                    _trans(key);
+
+            for (key in this.kag.layer.map_layer_fore)
+                if (key != 'base' && key.indexOf('message') == -1)
+                    _trans(key);
+
+        } else if (this.kag.layer.map_layer_fore[pm.layer]) {
+
+            _trans(pm.layer);
+
         }
 
-        this.kag.ftag.nextOrder();
-
+        this.kag.ftag.nextOrder()
     }
 };
 
