@@ -376,34 +376,40 @@ tyrano.plugin.kag.layer ={
         }
         
     },
+
+    backlayProcess: function(layer, key) {
+        if (layer == "" || layer == key) {
+            var fore_class_name = this.map_layer_fore[key].attr("class");
+            var back_class_name = this.map_layer_back[key].attr("class");
+
+            this.map_layer_back[key] = this.map_layer_fore[key].clone();
+
+            this.map_layer_back[key].removeClass(fore_class_name);
+            this.map_layer_back[key].addClass(back_class_name);
+
+            this.map_layer_back[key].hide();
+            $("." + back_class_name.replace(/ +/g, '.')).replaceWith(this.map_layer_back[key]);
+        }
+    },
     
     //前景レイヤを背景レイヤにコピーする
-    backlay:function(layer){
+    backlay: function(layer) {
         
         //レイヤが指定されている場合は、そのレイヤのみコピーする
         layer = layer || "";
-        
-    	for( key in this.map_layer_fore ){
-    		
-    		if(layer == "" || layer == key){
-            	
-        		var fore_class_name = this.map_layer_fore[key].attr("class");
-        		var back_class_name = this.map_layer_back[key].attr("class");
-        		
-        		this.map_layer_back[key] = this.map_layer_fore[key].clone();
-        		
-        		this.map_layer_back[key].removeClass(fore_class_name);
-        		this.map_layer_back[key].addClass(back_class_name);
-        		//削除
-        		$("."+back_class_name).remove();
-        		//追加
-        		this.map_layer_back[key].hide();
-        		this.appendLayer(this.map_layer_back[key]);
-          	
-          	}	
-    		
-    	}
-    	
+
+        for (key in this.map_layer_fore)
+            if (key == 'base')
+                this.backlayProcess(layer, key);
+
+        for (key in this.map_layer_fore)
+            if (key.indexOf('message') != -1)
+                this.backlayProcess(layer, key);
+
+        for (key in this.map_layer_fore)
+            if (key != 'base' && key.indexOf('message') == -1)
+                this.backlayProcess(layer, key);
+
     },
     
     //全面のイベントレイヤを削除する
@@ -416,43 +422,31 @@ tyrano.plugin.kag.layer ={
         this.kag.stat.is_stop = true;
         this.layer_event.hide();
     },
+
+    forelayProcess: function(layer, key) {
+        if (layer == "" || layer == key) {
+            var fore_class_name = this.map_layer_fore[key].attr("class");
+            var back_class_name = this.map_layer_back[key].attr("class");
+
+            this.map_layer_fore[key] = this.map_layer_back[key].clone(true);
+
+            this.map_layer_fore[key].removeClass(back_class_name);
+            this.map_layer_fore[key].addClass(fore_class_name);
+
+            $("." + fore_class_name.replace(/ +/g, '.')).replaceWith(this.map_layer_fore[key]);
+
+            this.map_layer_back[key].hide();
+        }
+    },
     
     //backlayの逆 トランスの後に実施する
     forelay:function(layer){
         
         //レイヤが指定されている場合は、そのレイヤのみコピーする
         layer = layer || "";
-        
-        for( key in this.map_layer_back ){
-            
-            if(layer == "" || layer == key){
-            
-                var fore_class_name = this.map_layer_fore[key].attr("class");
-                var back_class_name = this.map_layer_back[key].attr("class");
-                
-                this.map_layer_fore[key] = this.map_layer_back[key].clone(true);
-                
-                this.map_layer_fore[key].removeClass(back_class_name);
-                this.map_layer_fore[key].addClass(fore_class_name);
-                
-                
-                //削除
-                $("."+fore_class_name).remove();
-                //追加
-                this.appendLayer(this.map_layer_fore[key]);
-                
-                //バックレイヤは隠す
-                this.map_layer_back[key].css("display","none");
-                
-                //this.map_layer_fore[key].css("display","block");
-                
-                if(key.indexOf("message")!=-1){
-                    this.map_layer_fore[key].css("opacity","");
-                }
-            
-            }
-            
-        }  
+
+        for (key in this.map_layer_back)
+            this.forelayProcess(layer, key);
     },
     
     test:function(){

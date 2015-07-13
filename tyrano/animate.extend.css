@@ -1,0 +1,61 @@
+@-webkit-keyframes clip {
+  0% {
+    -webkit-transform: scale(1,1);
+    transform: scale(1,1);
+    opacity: 1;
+  }
+
+  100% {
+    -webkit-transform: scale(1,0);
+    transform: scale(1,0);
+    opacity: 0;
+  }
+}
+
+@keyframes clip {
+  0% {
+    -webkit-transform: scale(1,1);
+    transform: scale(1,1);
+    opacity: 1;
+  }
+
+  100% {
+    -webkit-transform: scale(1,0);
+    transform: scale(1,0);
+    opacity: 0;
+  }
+}
+
+.clip {
+  -webkit-animation-name: clip;
+  animation-name: clip;
+}
+
+@-webkit-keyframes puff {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+    -webkit-transform: scale3d(3, 3, 3);
+    transform: scale3d(3, 3, 3);
+  }
+}
+
+@keyframes puff {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-transform: scale3d(3, 3, 3);
+    transform: scale3d(3, 3, 3);
+  }
+}
+
+.puff {
+  -webkit-animation-name: puff;
+  animation-name: puff;
+}
