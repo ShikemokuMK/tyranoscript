@@ -84,6 +84,11 @@ tyrano.plugin.kag.layer ={
         
         //スライドイベント
         layer_obj_click.bind('touchend', function(e) {
+            
+            if(that.kag.config.configVisible=="false"){
+                return false;
+            }
+            
             e.preventDefault();                     // ページが動くのを止める
             var pageX = event.changedTouches[0].pageX; // X 座標の位置
             var pageY = event.changedTouches[0].pageY; // Y 座標の位置
