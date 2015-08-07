@@ -399,6 +399,10 @@ tyrano.plugin.kag.layer ={
         		
         		this.map_layer_back[key].removeClass(fore_class_name);
         		this.map_layer_back[key].addClass(back_class_name);
+        		
+        		back_class_name = $.replaceAll(back_class_name," ",".");
+                
+        		
         		//削除
         		$("."+back_class_name).remove();
         		//追加
@@ -440,6 +444,7 @@ tyrano.plugin.kag.layer ={
                 this.map_layer_fore[key].removeClass(back_class_name);
                 this.map_layer_fore[key].addClass(fore_class_name);
                 
+                fore_class_name = $.replaceAll(fore_class_name," ",".");
                 
                 //削除
                 $("."+fore_class_name).remove();
