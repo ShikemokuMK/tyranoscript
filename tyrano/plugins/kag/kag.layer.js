@@ -402,7 +402,6 @@ tyrano.plugin.kag.layer ={
         		
         		back_class_name = $.replaceAll(back_class_name," ",".");
                 
-        		
         		//削除
         		$("."+back_class_name).remove();
         		//追加
