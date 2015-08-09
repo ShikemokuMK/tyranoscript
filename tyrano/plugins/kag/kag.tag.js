@@ -2453,7 +2453,11 @@ tyrano.plugin.kag.tag.layopt = {
         }
 
         var j_layer = this.kag.layer.getLayer(pm.layer, pm.page);
-
+        
+        if(pm.layer=="fix" || pm.layer=="fixlayer"){
+            j_layer = $("#tyrano_base").find(".fixlayer");
+        }
+        
         //表示部分の変更
         if (pm.visible != "") {
 
@@ -2642,6 +2646,7 @@ enterse=ボタンの上にマウスカーソルが乗った時に再生する効
 leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。,
 clickimg=ボタンをクリックした時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください,
 enterimg=ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。,
+visible=初期状態で表示か非表示を選択できます。trueで表示falseで非表示の初期状態となります,
 role=ボタンに特別な機能を割り当てることができます。この場合storageやtargetは無視されます。強制的にfix属性がtrueになります。指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。window(メッセージウィンドウを非表示にします)。skip(スキップの実行)。backlog（過去ログを表示）。fullscreen(フルスクリーン切り替え)。auicksave(クイックセーブ実行)。quickload(クイックロード実行)
 #[end]
 */
@@ -2664,7 +2669,7 @@ tyrano.plugin.kag.tag.button = {
         folder : "image",
         exp : "",
         prevar : "",
-
+        visible:"true",
         hint : "",
         clickse : "",
         enterse : "",
@@ -2709,7 +2714,14 @@ tyrano.plugin.kag.tag.button = {
         j_button.css("position", "absolute");
         j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
-
+        
+        //初期状態で表示か非表示蚊
+        if(pm.visible=="true"){
+            j_button.show();
+        }else{
+            j_button.hide();
+        }
+        
         if (pm.x == "") {
             j_button.css("left", this.kag.stat.locate.x + "px");
         } else {
