@@ -134,7 +134,7 @@
 
 [cm]
 よし、再生するよ。[l]
-@fadeinbgm time="3000" storage=music.mp3 loop=true
+@playbgm time="3000" storage=music.ogg loop=true
 徐々にフェードインしながら再生することもできるんだ[l][cm]
 
 @jump target="*common"
