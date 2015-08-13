@@ -8,11 +8,23 @@
 BGMの再生
 :exp
 BGMを再生します。
-mp3形式、ogg形式　等　HTML5標準をサポートします。
 再生するファイルはプロジェクトフォルダのbgmフォルダに格納してください。
 
+ogg形式、HTML5標準をサポートします。
+動作させる環境によって対応フォーマットが異なります。
+
+基本的にogg形式を指定しておけば問題ありません。
+ただし、複数のブラウザで動作させる場合 IEとSafariにも対応させるためには
+bgmフォルダに同名でaac形式(m4a)ファイルも配置して下さい。
+すると自動的に適切なファイルを選択して再生します。
+
+デフォルト設定ではmp3は再生できません。
+Confit.tjs の mediaFormatDefaultをmp3に変更して下さい。
+ただしこの場合 PCアプリとしては動作しません
+
+
 :sample
-[playbgm storage="music.mp3"]
+[playbgm storage="music.ogg"]
 :param
 storage=再生する音楽ファイルを指定してください,
 loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます,
@@ -92,18 +104,9 @@ tyrano.plugin.kag.tag.playbgm = {
             
         }else{
             
-            var browser = $.getBrowser();
             
-            if(browser == "firefox" || browser =="opera" ){
-                
-                //swfによる音楽の再生を廃止
-                //that.playSwf(pm); 
-                that.play(pm);
-                
-            }else{
-            	that.play(pm);
-                
-            }
+            that.play(pm);
+            
         }
          
     },
@@ -120,10 +123,21 @@ tyrano.plugin.kag.tag.playbgm = {
         
         var storage_url = "";
         
-         if($.isHTTP(pm.storage)){
-    	 	storage_url = pm.storage;	
+        var browser = $.getBrowser();
+        var storage = pm.storage;
+        
+        //ogg m4a を推奨するための対応 ogg を m4a に切り替え
+        //mp3 が有効になっている場合は無視する
+        if(this.kag.config.mediaFormatDefault != "mp3"){
+            if(browser == "msie" || browser =="safari" ){
+                storage = $.replaceAll(storage,".ogg",".m4a");
+            }
+        }
+        
+        if($.isHTTP(pm.storage)){
+    	 	storage_url = storage;	
     	 }else{
-    	    storage_url = "./data/"+target+"/" + pm.storage;
+    	    storage_url = "./data/"+target+"/" + storage;
     	 }
         
         //音楽再生
@@ -137,11 +151,11 @@ tyrano.plugin.kag.tag.playbgm = {
         }
         
         if(target ==="bgm"){
-            this.kag.tmp.map_bgm[pm.storage] = audio_obj;
-            that.kag.stat.current_bgm = pm.storage;
+            this.kag.tmp.map_bgm[storage] = audio_obj;
+            that.kag.stat.current_bgm = storage;
             
         }else{
-            this.kag.tmp.map_se[pm.storage] = audio_obj;
+            this.kag.tmp.map_se[storage] = audio_obj;
         }
         
         audio_obj.play();
@@ -370,25 +384,6 @@ tyrano.plugin.kag.tag.stopbgm = {
             }
             
         //フラッシュで再生している場合
-        }else if(browser == "firefox" || browser =="opera"){
-            
-            
-            this.kag.sound_swf.stopMusic();
-            
-            //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
-            
-            var target = "bgm";
-            if(pm.target =="se"){
-                target = "sound";
-            }
-            if(target ==="bgm"){
-                 //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
-                 if(pm.stop == "false"){
-                    that.kag.stat.current_bgm = "";
-                 }
-            }
-        
-            
         }else{
         
             
@@ -461,12 +456,13 @@ tyrano.plugin.kag.tag.stopbgm = {
 :group
 オーディオ関連
 :title
-BGMにフェードイン
+【非推奨】BGMにフェードイン
 :exp
+【非推奨】です。playbgmを利用して下さい
 BGMを徐々に再生します。
 一部環境（Firefox、Sarafi等）においては対応していません。その場合、playbgmの動作となります。
 :sample
-[fadeinbgm storage=sample.mp3 loop=false time=3000]
+[fadeinbgm storage=sample.ogg loop=false time=3000]
 :param
 storage=再生する音楽ファイルを指定してください,
 loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます,
@@ -500,8 +496,9 @@ tyrano.plugin.kag.tag.fadeinbgm = {
 :group
 オーディオ関連
 :title
-BGMのフェードアウト
+【非推奨】BGMのフェードアウト
 :exp
+【非推奨】stopbgmを利用して下さい
 再生中のBGMをフェードアウトしながら停止します。
 一部環境（Firefox、Sarafi等）においては対応していません。その場合、playbgmの動作となります。
 :sample
@@ -533,13 +530,14 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
 :group
 オーディオ関連
 :title
-BGMのクロスフェード（入れ替え）
+【非推奨】BGMのクロスフェード（入れ替え）
+
 :exp
-BGMを入れ替えます。
+【非推奨】BGMを入れ替えます。
 音楽が交差して切り替わる演出に使用できます。
 一部環境（Firefox、Safari等）において対応していません。その場合、playbgmの動作となります。
 :sample
-[xchgbgm storage=new.mp3 loop=true time=3000]
+[xchgbgm storage=new.ogg loop=true time=3000]
 :param
 storage=次に再生するファイルを指定してください,
 loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます,
@@ -581,8 +579,21 @@ tyrano.plugin.kag.tag.xchgbgm = {
 :exp
 効果音を再生します
 効果音ファイルはプロジェクトフォルダのsoundフォルダに入れてください
+
+ogg形式、HTML5標準をサポートします。
+動作させる環境によって対応フォーマットが異なります。
+
+基本的にogg形式を指定しておけば問題ありません。
+ただし、複数のブラウザで動作させる場合 IEとSafariにも対応させるためには
+bgmフォルダに同名でaac形式(m4a)ファイルも配置して下さい。
+すると自動的に適切なファイルを選択して再生します。
+
+デフォルト設定ではmp3は再生できません。
+Confit.tjs の mediaFormatDefaultをmp3に変更して下さい。
+ただしこの場合 PCアプリとしては動作しません
+
 :sample
-[playse storage=sound.mp3 loop=false ]
+[playse storage=sound.ogg loop=false ]
 :param
 storage=再生するファイルを指定してください,
 loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
@@ -647,17 +658,19 @@ tyrano.plugin.kag.tag.stopse = {
 :group
 オーディオ関連
 :title
-効果音のフェードイン
+【非推奨】効果音のフェードイン
 :exp
+【非推奨】です。stopse を使用して下さい
 効果音をフェードインしながら再生します
 :sample
-[fadeinse storage=sound.mp3 loop=false time=2000 ]
+[fadeinse storage=sound.ogg loop=false time=2000 ]
 :param
 storage=次に再生するファイルを指定してください,
 loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
 time=フェードインの時間をミリ秒で指定します
 #[end]
 */
+
 
 tyrano.plugin.kag.tag.fadeinse = {
     
@@ -685,8 +698,9 @@ tyrano.plugin.kag.tag.fadeinse = {
 :group
 オーディオ関連
 :title
-効果音の再生
+【非推奨】効果音の停止
 :exp
+【非推奨】です。stopseを使用して下さい
 効果音をフェードアウトします
 :sample
 [fadeoutse time=2000 ]

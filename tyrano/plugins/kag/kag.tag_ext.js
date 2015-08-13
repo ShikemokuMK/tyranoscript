@@ -46,11 +46,14 @@ tyrano.plugin.kag.tag.loadjs={
 :title
 ムービーの再生
 :exp
-mp4形式の動画を再生します。
+ogv webm mp4 などに対応します
+ただし、ブラウザやスマホなどでは正しく再生されない場合もあります。
+PCゲーム形式の場合は ogv形式 webm形式でお願いします。 mp4 に対応しません。
+
 :sample
 [movie storage="" skip=false ]
 :param
-storage=再生するmp4ファイルを指定してください,
+storage=再生するogv webm mp4ファイルを指定してください,
 skip=動画再生中に途中でスキップ可能か否かを指定します true か false を指定してください
 #[end]
 */
