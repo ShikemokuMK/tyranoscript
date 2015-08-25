@@ -1663,7 +1663,7 @@ tyrano.plugin.kag.tag.freeimage = {
 表示したテキストを消去します
 [freeimage layer = 0]
 :param
-layer=対象とするメレイヤを指定します。以上の整数を指定すると対応する前景レイヤに画像を表示します,
+layer=対象とするメレイヤを指定します。0以上の整数を指定すると対応する前景レイヤに画像を表示します,
 page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略すると"fore"であるとみなされます,
 text=表示するテキストの内容,
 x=テキストの左端位置を指定します。（ピクセル）,
@@ -1673,7 +1673,8 @@ size=フォントサイズをピクセルで指定してください,
 face=フォントの種類を指定してください。非KAG互換ですが、ウェブフォントも使用できます,
 color=フォントの色を指定します,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
-bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます
+bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます,
+overwrite=true か false を指定します。同時にnameを指定している場合既に存在するptextの内容を変更できます。デフォルトはfalse
 
 #[end]
 */
@@ -1775,6 +1776,185 @@ tyrano.plugin.kag.tag.ptext = {
 
         this.kag.ftag.nextOrder();
 
+    }
+};
+
+
+/*
+#[mtext]
+:group
+レイヤ関連
+:title
+演出テキスト
+:exp
+多彩な演出効果をもったテキストを画面上に表示します。
+
+:sample
+[mtext text="演出テキスト"]
+:param
+layer=対象とするレイヤを指定します。0以上の整数を指定すると対応する前景レイヤに画像を表示します,
+page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略すると"fore"であるとみなされます,
+text=表示するテキストの内容,
+x=テキストの左端位置を指定します。（ピクセル）,
+y=テキストの上端位置を指定します。（ピクセル）,
+vertical=true 、false のいずれかを指定してください。trueで縦書き表示されます。デフォルトは横書き,
+size=フォントサイズをピクセルで指定してください,
+face=フォントの種類を指定してください。非KAG互換ですが、ウェブフォントも使用できます,
+color=フォントの色を指定します,
+name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
+bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます
+
+
+#[end]
+*/
+
+//タグを記述していく
+tyrano.plugin.kag.tag.mtext = {
+
+    vital : ["x", "y"],
+
+    pm : {
+
+        "layer" : "0",
+        "page" : "fore",
+        "x" : 0,
+        "y" : 0,
+        "vertical" : "false",
+        "text" : "", //テキスト領域のデフォルト値を指定するためですが、、、
+        "size" : "",
+        "face" : "",
+        "color" : "",
+        "italic" : "",
+        "bold" : "",
+        "name" : "",
+        "zindex" : "9999",
+        
+        "fadeout":"true", //テキストを残すかどうか
+        "time":"2000", //テキストを表示時間しておく時間
+        
+        "in_effect":"fadeIn",
+        "in_delay":"50",
+        "in_delay_scale":"1.5",
+        "in_sync":"false",
+        "in_shuffle":"false",
+        "in_reverse":"false",
+        
+        "wait":"true",  //テキストの表示完了を待つ
+        
+        "out_effect":"fadeOut",
+        "out_delay":"50", //次の１文字が消えるタイミングへ移動する時間をミリ秒で指定します
+        "out_scale_delay":"", //１文字が消えるのにかかる時間をミリ秒で指定します
+        "out_sync":"false",
+        "out_shuffle":"false",
+        "out_reverse":"false"
+        //"visible":"true"
+
+    },
+
+    start : function(pm) {
+        
+        var that = this;
+
+        //指定がない場合はデフォルトフォントを適応する
+        
+        if(pm.face ==""){
+            pm.face=that.kag.stat.font.face;
+        }
+        
+        if(pm.color == ""){
+            pm.color=$.convertColor(that.kag.stat.font.color);
+        }else{
+            pm.color = $.convertColor(pm.color);
+        }
+        
+        var font_new_style = {
+
+            "color" : pm.color,
+            "font-weight" : pm.bold,
+            "font-style" : pm.fontstyle,
+            "font-size" : pm.size + "px",
+            "font-family" : pm.face,
+            "z-index" : "999",
+            "text" : ""
+
+        };
+
+        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+
+        var tobj = $("<p></p>");
+
+        tobj.css("position", "absolute");
+        tobj.css("top", pm.y + "px");
+        tobj.css("left", pm.x + "px");
+        tobj.css("width", "100%");
+
+        if (pm.vertical == "true") {
+            tobj.addClass("vertical_text");
+        }
+
+        //オブジェクトにクラス名をセットします
+        $.setName(tobj, pm.name);
+
+        tobj.html(pm.text);
+
+        this.kag.setStyles(tobj, font_new_style);
+        
+        if(pm.layer=="fix"){
+            tobj.addClass("fixlayer");
+        }
+        
+        //前景レイヤ
+        target_layer.append(tobj);
+        
+        //bool変換
+        for(key in pm){
+            if(pm[key]=="true"){
+                pm[key] = true;
+            }else if(pm[key] =="false"){
+                pm[key] = false;
+            }
+        }
+        
+        //tobj をアニメーションさせる
+        tobj.textillate({ 
+            
+                loop: pm["fadeout"],
+                minDisplayTime:pm["time"],
+                
+                in: { 
+                    effect: pm["in_effect"], 
+                    delayScale: pm["in_delay_scale"],
+                    delay: pm["in_delay"],
+                    sync: pm["in_sync"],
+                    shuffle: pm["in_shuffle"],
+                    reverse: pm["in_reverse"],
+                    callback:function(){
+                        if (pm.fadeout==false && pm.wait == true) {
+                            that.kag.ftag.nextOrder();
+                        }
+                    }
+                },
+                
+                out: {
+                    effect: pm["out_effect"], 
+                    delayScale: pm["out_delay_scale"],
+                    delay: pm["out_delay"],
+                    sync: pm["out_sync"],
+                    shuffle: pm["out_shuffle"],
+                    reverse: pm["out_reverse"],
+                    callback:function(){
+                        tobj.remove();
+                        if (pm.wait == true) {
+                            that.kag.ftag.nextOrder();
+                        }
+                    }
+                },
+                
+            });
+            
+        if(pm.wait != true){
+            this.kag.ftag.nextOrder();
+        }
     }
 };
 

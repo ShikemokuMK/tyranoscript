@@ -743,6 +743,8 @@ tyrano.plugin.kag ={
             
             var err ="Error:"+current_storage+":"+line+"行目:"+str;
             
+            $.error_message(err);
+            
         }
       
     },
