@@ -1934,37 +1934,37 @@ tyrano.plugin.kag.tag.mtext = {
         //tobj をアニメーションさせる
         tobj.textillate({ 
             
-                loop: pm["fadeout"],
-                minDisplayTime:pm["time"],
+                "loop":pm["fadeout"],
+                "minDisplayTime":pm["time"],
                 
-                in: { 
-                    effect: pm["in_effect"], 
-                    delayScale: pm["in_delay_scale"],
-                    delay: pm["in_delay"],
-                    sync: pm["in_sync"],
-                    shuffle: pm["in_shuffle"],
-                    reverse: pm["in_reverse"],
-                    callback:function(){
+                "in": { 
+                    "effect":pm["in_effect"], 
+                    "delayScale":pm["in_delay_scale"],
+                    "delay":pm["in_delay"],
+                    "sync":pm["in_sync"],
+                    "shuffle":pm["in_shuffle"],
+                    "reverse":pm["in_reverse"],
+                    "callback":function(){
                         if (pm.fadeout==false && pm.wait == true) {
                             that.kag.ftag.nextOrder();
                         }
                     }
                 },
                 
-                out: {
-                    effect: pm["out_effect"], 
-                    delayScale: pm["out_delay_scale"],
-                    delay: pm["out_delay"],
-                    sync: pm["out_sync"],
-                    shuffle: pm["out_shuffle"],
-                    reverse: pm["out_reverse"],
-                    callback:function(){
+                "out": {
+                    "effect": pm["out_effect"], 
+                    "delayScale": pm["out_delay_scale"],
+                    "delay": pm["out_delay"],
+                    "sync": pm["out_sync"],
+                    "shuffle": pm["out_shuffle"],
+                    "reverse": pm["out_reverse"],
+                    "callback":function(){
                         tobj.remove();
                         if (pm.wait == true) {
                             that.kag.ftag.nextOrder();
                         }
                     }
-                },
+                }
                 
             });
             
