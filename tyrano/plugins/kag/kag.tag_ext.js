@@ -1121,6 +1121,7 @@ tyrano.plugin.kag.tag.chara_new ={
 name=[chara_new]で定義したname属性を指定してください。,
 time="ミリ秒で指定します。指定した時間をかけて登場します。デフォルトは1000ミリ秒です",
 layer="キャラクターを配置するレイヤーを指定できます。デフォルトは前景レイヤ layer=0 です",
+zindex="キャラクターの重なりを指定できます。ここで指定した値が大きいほうが前に表示することができます。指定しない場合は後に登場するキャラクターが前に表示されます",
 page="foreかbackを指定します。デフォルトはforeです",
 wait="trueを指定すると、キャラクターの登場完了を待ちます。デフォルトはtrue です。",
 reflect="trueを指定すると左右反転します",
@@ -1146,6 +1147,7 @@ tyrano.plugin.kag.tag.chara_show ={
         top:"0",  
         width:"",
         height:"",
+        zindex:"",
         reflect:"",
         time:1000
         
@@ -1182,6 +1184,13 @@ tyrano.plugin.kag.tag.chara_show ={
 	    if(pm.height != ""){
 	       var height = parseInt(pm.height);
            cpm.height = height;
+	    }
+	    
+	    if(pm.zindex!=""){
+	       
+	       var zindex = parseInt(pm.zindex);
+	       img_obj.css("z-index",zindex);
+        
 	    }
 	    
 	    //反転表示
