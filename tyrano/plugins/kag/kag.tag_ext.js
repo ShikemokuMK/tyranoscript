@@ -1513,8 +1513,6 @@ tyrano.plugin.kag.tag.chara_hide ={
                                 that.kag.ftag.nextOrder();
                             }
                             
-                            
-                            
                         }
                     }//end complerte
                 }

@@ -588,7 +588,12 @@ tyrano.plugin.kag.tag.text = {
         var that = this;
 
         //バックログ用の値を格納
-        this.kag.pushBackLog(message_str);
+        var chara_name = $(".chara_name_area").html();
+        if(chara_name != ""){
+            this.kag.pushBackLog("<b>"+chara_name+"</b>："+message_str);
+        }else{
+            this.kag.pushBackLog(message_str);
+        }
 
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
         that.kag.ftag.hideNextImg();
