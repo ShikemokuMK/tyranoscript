@@ -1507,8 +1507,13 @@ tyrano.plugin.kag.tag.chara_hide ={
                             
                         }else{
                             
-                            that.kag.layer.showEventLayer();
-                            that.kag.ftag.nextOrder();
+                            //実行待の時だけ実施する
+                            if(pm.wait=="true"){
+                                that.kag.layer.showEventLayer();
+                                that.kag.ftag.nextOrder();
+                            }
+                            
+                            
                             
                         }
                     }//end complerte
