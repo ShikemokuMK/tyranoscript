@@ -561,6 +561,7 @@ tyrano.plugin.kag ={
     loadScenario:function(file_name,call_back){
         
         var that = this;
+        this.stat.is_strong_stop = true;
         
         this.stat.current_scenario = file_name;
         
@@ -584,7 +585,7 @@ tyrano.plugin.kag ={
             //ラベル情報を格納
             that.stat.map_label = map_label;
             
-            
+            that.stat.is_strong_stop = false;
             if(call_back){
                 call_back(tag_obj);
             }

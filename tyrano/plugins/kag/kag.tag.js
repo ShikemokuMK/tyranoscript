@@ -3676,8 +3676,12 @@ tyrano.plugin.kag.tag.trans = {
         if (pm.children == "false") {
             layer_num = 0;
         }
+        
+        var map_layer_fore = $.cloneObject(this.kag.layer.map_layer_fore);
+        var map_layer_back = $.cloneObject(this.kag.layer.map_layer_back);
+        
 
-        for (key in this.kag.layer.map_layer_fore ) {
+        for (key in map_layer_fore ) {
 
             //指定条件のレイヤのみ実施
             if (pm.children == true || key === pm.layer) {
@@ -3686,8 +3690,8 @@ tyrano.plugin.kag.tag.trans = {
 
                     var _key = key;
 
-                    var layer_fore = that.kag.layer.map_layer_fore[_key];
-                    var layer_back = that.kag.layer.map_layer_back[_key];
+                    var layer_fore = map_layer_fore[_key];
+                    var layer_back = map_layer_back[_key];
 
                     //メッセージレイヤの場合、カレント以外はトランスしない。むしろ非表示
                     //if((_key.indexOf("message")!=-1 && _key !== that.kag.stat.current_layer) || (_key.indexOf("message")!=-1 && layer_back.attr("l_visible") == "false") ){
