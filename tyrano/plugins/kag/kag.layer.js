@@ -403,8 +403,8 @@ tyrano.plugin.kag.layer ={
         		back_class_name = $.replaceAll(back_class_name," ",".");
                 
         		//削除
-        		//$("."+back_class_name).remove();
-        		$("." + back_class_name.replace(/ +/g, '.')).remove();
+        		$("."+back_class_name).remove();
+        		//$("." + back_class_name.replace(/ +/g, '.')).remove();
         		
         		//追加
         		this.map_layer_back[key].hide();
@@ -448,8 +448,8 @@ tyrano.plugin.kag.layer ={
                 fore_class_name = $.replaceAll(fore_class_name," ",".");
                 
                 //削除
-                //$("."+fore_class_name).remove();
-                $("." + back_class_name.replace(/ +/g, '.')).remove();
+                $("."+fore_class_name).remove();
+                //$("." + back_class_name.replace(/ +/g, '.')).remove();
                 
                 //追加
                 this.appendLayer(this.map_layer_fore[key]);
