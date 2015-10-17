@@ -144,7 +144,7 @@ function KAGWindow_config()
 // 数が多いと速度が低下したりメモリを消費しますので、必要以上に大きな数を指
 // 定しない方が良いでしょう。
 // laycount タグでシナリオ内でも変更できます。
-;numCharacterLayers = 10;
+;numCharacterLayers = 3;
 
 
 // ◆ 前景レイヤの左右中心位置指定

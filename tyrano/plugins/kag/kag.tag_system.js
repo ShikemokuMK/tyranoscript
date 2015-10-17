@@ -1169,7 +1169,7 @@ tyrano.plugin.kag.tag.edit = {
         color:"black",
         left:"0",
         top:"0",
-        size:"20px",
+        size:"20",
         width:"200",
         height:"40",
         maxchars:"1000"
@@ -1188,7 +1188,7 @@ tyrano.plugin.kag.tag.edit = {
            top:parseInt(pm.top),
            width:pm.width,
            height:pm.height,
-           "font-size":pm.size
+           "font-size":parseInt(pm.size)
        };
        
        j_text.css(new_style);
