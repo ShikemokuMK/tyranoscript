@@ -141,7 +141,7 @@ tyrano.plugin.kag.tag["close"] = {
         //最新のブラウザは、window.closeで閉じないので以下を実行。
         //※ただし、Firefoxや最新のChromeは、blankページが残る。
         //（新規で開いたページでないと、セキュリティポリシーで閉じれない）
-        window.open('about:blank','_self').close();
+        //window.open('about:blank','_self').close();
     }
 
 };
