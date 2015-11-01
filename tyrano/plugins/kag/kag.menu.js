@@ -276,7 +276,7 @@ tyrano.plugin.kag.menu ={
              data.img_data = img_code;
              
              //レイヤ部分のHTMLを取得
-             var layer_obj = that.kag.layer.getLayeyHtml();
+             var layer_obj = that.kag.layer.getLayerHtml();
              data.layer = layer_obj;
              
              that.snap= $.extend(true, {}, $.cloneObject(data));
@@ -307,7 +307,7 @@ tyrano.plugin.kag.menu ={
                     data.img_data = img_code;
                     
                     //レイヤ部分のHTMLを取得
-                    var layer_obj = that.kag.layer.getLayeyHtml();
+                    var layer_obj = that.kag.layer.getLayerHtml();
                     data.layer = layer_obj;
                     
                     that.snap= $.extend(true, {}, $.cloneObject(data));
