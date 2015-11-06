@@ -21,7 +21,7 @@ tyrano.base ={
     //画面サイズをぴったりさせます
     fitBaseSize:function(width,height){
       
-      var view_width = $.getViewPort().width;
+      	var view_width = $.getViewPort().width;
         var view_height = $.getViewPort().height;
         
         var width_f = view_width / width ;
@@ -29,7 +29,7 @@ tyrano.base ={
         
         var scale_f = 0;
         
-        $(".tyrano_base").css("transform-origin","0 0");
+        $(".tyrano_base").css("transform-origin","50 50");
         
         var space_width = 0;
         

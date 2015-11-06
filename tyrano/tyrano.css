@@ -149,9 +149,9 @@ abbr,acronym{
 body{
     background-color:black;
     -webkit-tap-highlight-color: transparent;
+    overflow:hidden;
 
 }
-
 
 /*次へのクリックを促すアイコン*/
 
@@ -168,6 +168,14 @@ body{
     -moz-user-select: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
+	
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+   
 }
 
 /* button 
