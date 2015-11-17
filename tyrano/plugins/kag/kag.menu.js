@@ -192,7 +192,7 @@ tyrano.plugin.kag.menu = {
                 data = that.snap;
                 data.save_date = $.getNowDate() + "　" + $.getNowTime();
                 array_save.data[num] = data;
-                $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save);
+                $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
             });
 
@@ -208,12 +208,12 @@ tyrano.plugin.kag.menu = {
         that.kag.menu.snapSave(saveTitle, function() {
             var data = that.snap;
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
-            $.setStorage(that.kag.config.projectID + "_tyrano_quick_save", data);
+            $.setStorage(that.kag.config.projectID + "_tyrano_quick_save", data, that.kag.config.configSave);
         });
     },
 
     loadQuickSave : function() {
-        var data = $.getStorage(this.kag.config.projectID + "_tyrano_quick_save");
+        var data = $.getStorage(this.kag.config.projectID + "_tyrano_quick_save", this.kag.config.configSave);
 
         if (data) {
             data = eval("(" + data + ")");
@@ -229,13 +229,13 @@ tyrano.plugin.kag.menu = {
 
         var data = this.snap;
         data.save_date = $.getNowDate() + "　" + $.getNowTime();
-        $.setStorage(this.kag.config.projectID + "_tyrano_auto_save", data);
+        $.setStorage(this.kag.config.projectID + "_tyrano_auto_save", data, this.kag.config.configSave);
 
     },
 
     //自動保存のデータを読み込む
     loadAutoSave : function() {
-        var data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save");
+        var data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save",this.kag.config.configSave);
 
         if (data) {
             data = eval("(" + data + ")");
@@ -507,7 +507,7 @@ tyrano.plugin.kag.menu = {
     //セーブデータを取得します
     getSaveData : function() {
 
-        var tmp_array = $.getStorage(this.kag.config.projectID + "_tyrano_data");
+        var tmp_array = $.getStorage(this.kag.config.projectID + "_tyrano_data",this.kag.config.configSave);
 
         if (tmp_array) {
 

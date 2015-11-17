@@ -16,7 +16,8 @@ tyrano.plugin.kag ={
       projectID : "tyranoproject"  ,
       preload:"on",
       skipSpeed:"30",
-      mediaFormatDefault:"ogg"
+      mediaFormatDefault:"ogg",
+      configSave:"webstorage",
         
     }, //読み込んできた値 Config.tjs の値
     
