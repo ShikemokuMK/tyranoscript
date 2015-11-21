@@ -460,7 +460,29 @@
         }
         
     };
-
+    
+    //PC版のみ。実行フォルダを取得
+    $.getProcessPath = function(){
+        var path = process.execPath;
+        var tmp_index = path.indexOf(".app");
+        var os = "mac";
+        if(tmp_index == -1){
+            tmp_index = path.indexOf(".exe");
+            os="win";
+        }
+        var tmp_path =  path.substr(0,tmp_index);
+        var path_index =0;
+        if(os=="mac"){
+            path_index = tmp_path.lastIndexOf("/");
+        }else{
+            path_index = tmp_path.lastIndexOf("\\");
+        }
+        
+        var out_path = path.substr(0,path_index);
+        return out_path;
+        
+    };
+    
     $.getStorage = function(key,type) {
         
         var gv = "null";
@@ -550,7 +572,9 @@
     $.setStorageFile = function(key, val) {
         val = JSON.stringify(val);
         var fs = require('fs');
-        fs.writeFileSync("./" + key + ".sav", escape(val));
+        
+        var out_path = $.getProcessPath();
+        fs.writeFileSync(out_path + "/" + key + ".sav", escape(val));
 
     };
 
@@ -561,9 +585,9 @@
             var gv = "null";
 
             var fs = require('fs');
-
-            if (fs.existsSync("./" + key + ".sav")) {
-                var str = fs.readFileSync("./" + key + ".sav");
+            var out_path = $.getProcessPath();
+            if (fs.existsSync(out_path+"/" + key + ".sav")) {
+                var str = fs.readFileSync(out_path+"/" + key + ".sav");
                 gv = unescape(str);
             } else {
                 gv = unescape(localStorage.getItem(key));
