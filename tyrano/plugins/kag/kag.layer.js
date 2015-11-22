@@ -37,6 +37,18 @@ tyrano.plugin.kag.layer ={
             if(that.kag.stat.is_skip == true){
                 that.kag.stat.is_skip = false; 
             }
+            
+            //オート中でクリックされた場合。オート停止
+            if(that.kag.stat.is_auto == true){
+                if(that.kag.config.autoClickStop == "true"){
+                    that.kag.ftag.startTag("autostop", {});
+                }
+            }
+            
+            //オート待ち状態なら、解除する
+            if(that.kag.stat.is_wait_auto = true){
+                that.kag.stat.is_wait_auto = false;
+            }
 
             // POSSIBLE IMPROVE
             // make "isReturn" variable
@@ -77,8 +89,8 @@ tyrano.plugin.kag.layer ={
             that.start_point.x = pageX;
             that.start_point.y = pageY;
             
-            console.log("start -------");
-            console.log(pageY);
+            //console.log("start -------");
+            //console.log(pageY);
             
         });
         
@@ -108,8 +120,6 @@ tyrano.plugin.kag.layer ={
                 that.kag.ftag.startTag("showmenu", {});
             
             }
-            
-            console.log(move_y);
         
         });
         

@@ -354,6 +354,108 @@ tyrano.plugin.kag.tag.skipstop ={
 
 
 /*
+#[autostart]
+:group
+システム操作
+:title
+オート開始
+:exp
+文字表示を一定間隔で自動的に進めます。
+進行速度はconfig.tjsのautoSpeedを確認して下さい
+:sample
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.autostart ={
+    
+    
+    pm:{
+    },
+    
+    start:function(pm){
+        
+        if(this.kag.stat.is_auto==true){
+            return false;
+        }
+        
+        //[p][l] の処理に、オート判定が入ってます
+        this.kag.stat.is_auto = true;
+        this.kag.ftag.nextOrder();
+            
+    }
+};
+
+
+/*
+#[autostop]
+:group
+システム操作
+:title
+オート停止
+:exp
+オートモードを停止します。
+:sample
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.autostop ={
+    
+    pm:{
+    },
+    
+    start:function(pm){
+        
+        this.kag.stat.is_auto = false;
+        this.kag.stat.is_wait_auto = false;
+        
+        //this.kag.ftag.nextOrder();
+            
+    }
+};
+
+/*
+#[autoconfig]
+:group
+システム操作
+:title
+オート設定
+:exp
+オートモードに関する設定
+:sample
+:param
+speed=オート時のスピードをミリ秒で指定して下さい,
+clickstop=画面クリック時にオートを停止するかどうかを指定します true(停止する デフォルト) false（停止しない）
+#[end]
+*/
+
+tyrano.plugin.kag.tag.autoconfig ={
+    
+    pm:{
+        speed:"",
+        clickstop:""
+    },
+    
+    start:function(pm){
+        
+        if(pm.speed !=""){
+            this.kag.config.autoSpeed = pm.speed;
+        }
+        
+        if(pm.clickstop!=""){
+            this.kag.config.autoClickStop = pm.clickstop;
+        }
+        
+        this.kag.ftag.nextOrder();
+            
+    }
+};
+
+
+
+
+/*
 #[anim]
 :group
 アニメーション関連

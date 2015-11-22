@@ -97,6 +97,7 @@ tyrano.plugin.kag ={
         set_text_span:false,//メッセージ中のspanを新しく作成するときに真にする
         current_scenario:"first.ks",//シナリオファイルを指定する
         is_skip:{},
+        is_auto:{},
         current_bgm:"", //現在再生中のBGM
         
         current_line:0, //実行中の命令の実際のファイル行　エラーや警告時に使用

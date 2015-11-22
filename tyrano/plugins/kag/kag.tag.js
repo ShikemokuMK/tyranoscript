@@ -875,12 +875,23 @@ tyrano.plugin.kag.tag.l = {
     cw : true,
 
     start : function() {
+        
+        var that = this;
+        
         //クリックするまで、次へすすまないようにする
         if (this.kag.stat.is_skip == true) {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
+        }else if(this.kag.stat.is_auto == true){
+            this.kag.stat.is_wait_auto = true;
+            setTimeout(function(){
+                if(that.kag.stat.is_wait_auto == true){
+                    that.kag.ftag.nextOrder();
+                }
+            }, parseInt(that.kag.config.autoSpeed));
+            
         }
-
+        
     }
 };
 
@@ -916,6 +927,14 @@ tyrano.plugin.kag.tag.p = {
         if (this.kag.stat.is_skip == true) {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
+        }else if(this.kag.stat.is_auto == true){
+            this.kag.stat.is_wait_auto = true;
+            setTimeout(function(){
+                if(that.kag.stat.is_wait_auto == true){
+                    that.kag.ftag.nextOrder();
+                }
+            }, parseInt(that.kag.config.autoSpeed));
+            
         }
     }
 };
@@ -3109,10 +3128,13 @@ tyrano.plugin.kag.tag.button = {
                     }
                     */
                    
-       
-
+                    //オートは停止
+                    if(_pm.role!="auto"){
+                        that.kag.ftag.startTag("autostop", {});
+                    }
+                    
                     switch(_pm.role) {
-
+                        
                         case "save":
                             that.kag.menu.displaySave();
                             break;
@@ -3148,6 +3170,13 @@ tyrano.plugin.kag.tag.button = {
                             break;
                         case "quickload":
                             that.kag.menu.loadQuickSave();
+                            break;
+                        case "auto":
+                            if(that.kag.stat.is_auto==true){
+                                that.kag.ftag.startTag("autostop", {});
+                            }else{
+                                that.kag.ftag.startTag("autostart", {});
+                            }
                             break;
 
                     }
