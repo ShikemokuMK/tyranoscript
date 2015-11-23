@@ -111,7 +111,7 @@ tyrano.plugin.kag ={
         
         ruby_str:"", //ここに文字列が入っている場合は、次の１文字出力時にルビとして適応する
         
-        ch_speed:30, //文字表示スピード
+        ch_speed:"", //文字表示スピード
         
         flag_glyph : "false", //クリック待ちボタンが指定されているか否か
         current_cursor:"auto", //現在のカーソル指定
@@ -335,6 +335,14 @@ tyrano.plugin.kag ={
         }
         
         /////////////システムで使用する変数の初期化設定////////////////////
+        //コンフィグ
+        
+        //システムが永続させたい変数はすぐにコンフィグに反映
+        if(that.variable.sf._system_config_bgm_volume) that.config["defaultBgmVolume"] = that.variable.sf._system_config_bgm_volume;
+        if(that.variable.sf._system_config_se_volume) that.config["defaultSeVolume"] = that.variable.sf._system_config_se_volume;
+        if(that.variable.sf._config_ch_speed) that.config["chSpeed"] = that.variable.sf._config_ch_speed;
+        if(that.variable.sf._system_config_auto_speed) that.config["autoSpeed"] = that.variable.sf._system_config_auto_speed;
+        if(that.variable.sf._system_config_auto_click) that.config["autoClickStop"] = that.variable.sf._system_config_auto_click_stop;
         
         //自動セーブのデータがあるかどうか
         var auto_save_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");

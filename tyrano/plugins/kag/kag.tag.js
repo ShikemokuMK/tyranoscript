@@ -626,9 +626,17 @@ tyrano.plugin.kag.tag.text = {
             var j_span = that.kag.getMessageCurrentSpan();
 
             j_span.css("color", that.kag.stat.font.color).css("font-weight", that.kag.stat.font.bold).css("font-size", that.kag.stat.font.size + "px").css("font-family", that.kag.stat.font.face);
-
+            
+            var ch_speed = 30;
+            
+            if(that.kag.stat.ch_speed != ""){
+                ch_speed = parseInt(that.kag.stat.ch_speed);
+            }else if(that.kag.config.chSpeed){
+                ch_speed = parseInt(that.kag.config.chSpeed);
+            }
+            
             var pchar = function(pchar) {
-
+                
                 var c = _message_str.substring(index, ++index);
 
                 //ルビ指定がされている場合
@@ -657,7 +665,7 @@ tyrano.plugin.kag.tag.text = {
                     } else {
                         setTimeout(function() {
                             pchar(pchar)
-                        }, that.kag.stat.ch_speed);
+                        }, ch_speed);
                     }
 
                 } else {
@@ -772,7 +780,7 @@ tyrano.plugin.kag.tag.text = {
                     } else {
                         setTimeout(function() {
                             pchar(pchar)
-                        }, that.kag.stat.ch_speed);
+                        }, ch_speed);
                     }
 
                 } else {
@@ -2533,6 +2541,71 @@ tyrano.plugin.kag.tag.delay = {
     start : function(pm) {
         if (pm.speed != "") {
             this.kag.stat.ch_speed = parseInt(pm.speed);
+        }
+
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+/*
+#[resetdelay]
+:group
+システム操作
+:title
+文字の表示速度をデフォルトに戻す
+:exp
+文字の表示速度をデフォルト速度に戻します
+:sample
+:param
+#[end]
+*/
+
+//文字の表示速度変更
+tyrano.plugin.kag.tag.resetdelay = {
+
+    pm : {
+        speed : ""
+    },
+
+    start : function(pm) {
+        
+        this.kag.stat.ch_speed  = "";
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+
+
+/*
+#[configdelay]
+:group
+システム操作
+:title
+デフォルトの文字の表示速度の設定
+:exp
+デフォルトの文字の表示速度を指定します。
+つまり、resetdelay時にはこの速度が指定されます。
+コンフィグ画面などで文字速度を指定する場合はこのタグをつかって指定します。
+:sample
+:param
+speed=文字の表示速度を指定します
+#[end]
+*/
+
+//文字の表示速度変更
+tyrano.plugin.kag.tag.configdelay = {
+
+    pm : {
+        speed : ""
+    },
+
+    start : function(pm) {
+        if (pm.speed != "") {
+            this.kag.stat.ch_speed = "";
+            this.kag.config.chSpeed = pm.speed;
+            this.kag.ftag.startTag("eval", {"exp":"sf._config_ch_speed = "+pm.speed});
         }
 
         this.kag.ftag.nextOrder();

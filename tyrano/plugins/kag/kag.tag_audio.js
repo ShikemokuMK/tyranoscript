@@ -782,8 +782,10 @@ tyrano.plugin.kag.tag.bgmopt = {
     start : function(pm) {
         //再生中のBGMに変更を加える
         var map_bgm = this.kag.tmp.map_bgm;
+        
         this.kag.config.defaultBgmVolume = pm.volume;
-
+        this.kag.ftag.startTag("eval", {"exp":"sf._system_config_bgm_volume = "+pm.volume});
+        
         var new_volume = parseFloat(parseInt(pm.volume) / 100);
 
         //すぐに反映 スマホアプリの場合はすぐに変更はできない
@@ -826,7 +828,8 @@ tyrano.plugin.kag.tag.seopt = {
         //再生中のBGMに変更を加える
         var map_se = this.kag.tmp.map_se;
         this.kag.config.defaultSeVolume = pm.volume;
-
+        this.kag.ftag.startTag("eval", {"exp":"sf._system_config_se_volume = "+pm.volume});
+        
         var new_volume = parseFloat(parseInt(pm.volume) / 100);
 
         //すぐに反映
