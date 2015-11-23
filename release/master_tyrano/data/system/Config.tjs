@@ -38,9 +38,12 @@ function KAGWindow_config()
 // ◆ 画面サイズ
 // scWidth に画面の幅、scHeight に画面の高さをピクセル単位で指定します。
 
-;scWidth = 640;
-;scHeight = 480;
+;scWidth = 960;
+;scHeight = 640;
 
+// ◆ 文字表示スピード 
+// delay で指定した場合はその値が優先されます。resetdelayで元に戻ります 
+;chSpeed = 30; 
 
 // ◆ 文字表示スピード (ミリ秒/文字)（未実装）
 ;chSpeeds.fast = 10; // 「高速」文字表示スピード
@@ -50,6 +53,13 @@ function KAGWindow_config()
 // ◆ スキップスピード (ミリ秒/文字)
 //スキップ時にどれくらいの早さで進むかを設定できる
 ;skipSpeed = 30;
+
+// ◆ オートスピード (ミリ秒/文字)
+//autoSpeedはオート時にどれくらいの早さで進むかをミリ秒設定できる
+//autoClickStop は 画面クリックでオートが停止するかどうかを設定。trueを指定すると、クリックでオートが停止
+;autoSpeed = 1300;
+;autoClickStop = true;
+
 
 // ◆ 自動的に読み進むウェイト ページ末ウェイトの設定値 (ミリ秒)（未実装）
 ;autoModePageWaits.fast = 400; // 「短い」

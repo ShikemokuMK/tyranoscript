@@ -441,12 +441,12 @@ tyrano.plugin.kag.tag.autoconfig ={
         
         if(pm.speed !=""){
             this.kag.config.autoSpeed = pm.speed;
-            this.kag.ftag.startTag("eval", {"exp":"sf._config_auto_speed = "+pm.speed});
+            this.kag.ftag.startTag("eval", {"exp":"sf._system_config_auto_speed = "+pm.speed});
         }
         
         if(pm.clickstop!=""){
             this.kag.config.autoClickStop = pm.clickstop;
-            this.kag.ftag.startTag("eval", {"exp":"sf._config_auto_click_stop = "+pm.clickstop});
+            this.kag.ftag.startTag("eval", {"exp":"sf._system_config_auto_click_stop = "+pm.clickstop});
         
         }
         
