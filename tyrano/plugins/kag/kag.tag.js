@@ -588,7 +588,7 @@ tyrano.plugin.kag.tag.text = {
         var that = this;
 
         //バックログ用の値を格納
-        var chara_name = $(".chara_name_area").html();
+        var chara_name = $.isNull($(".chara_name_area").html());
         if(chara_name != ""){
             this.kag.pushBackLog("<b>"+chara_name+"</b>："+message_str);
         }else{
