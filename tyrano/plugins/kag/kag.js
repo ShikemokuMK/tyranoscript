@@ -152,6 +152,10 @@ tyrano.plugin.kag ={
         play_bgm:true, //BGMを再生するか否か
         play_se:true,  //SEを再生するか否か
         
+        buff_label_name:"", //ラベル管理のもの、通過時にここに配置されて次にlabelに到達した時に記録される
+        
+        already_read:false, //現在の場所が既読済みか否かを保持する。ラベル通過時に判定
+        
         title:"" //ゲームのタイトル
         
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
@@ -343,7 +347,10 @@ tyrano.plugin.kag ={
         if(that.variable.sf._config_ch_speed) that.config["chSpeed"] = that.variable.sf._config_ch_speed;
         if(that.variable.sf._system_config_auto_speed) that.config["autoSpeed"] = that.variable.sf._system_config_auto_speed;
         if(that.variable.sf._system_config_auto_click) that.config["autoClickStop"] = that.variable.sf._system_config_auto_click_stop;
+        if(that.variable.sf._system_config_already_read_text_color) that.config["alreadyReadTextColor"] = that.variable.sf._system_config_already_read_text_color;
+        if(that.variable.sf._system_config_unread_text_skip) that.config["unReadTextSkip"] = that.variable.sf._system_config_unread_text_skip;
         
+         
         //自動セーブのデータがあるかどうか
         var auto_save_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
     	
@@ -652,6 +659,7 @@ tyrano.plugin.kag ={
         return j_span;
         
     },
+    
     
     checkMessage:function(jtext){
         

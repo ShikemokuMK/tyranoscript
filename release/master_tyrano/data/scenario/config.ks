@@ -11,6 +11,11 @@
 	tf.current_ch_speed = parseInt(TG.config.chSpeed);
 	tf.current_auto_speed = parseInt(TG.config.autoSpeed);
 	
+	tf.text_skip ="ON";
+	
+	if(TG.config.unReadTextSkip != true){
+		tf.text_skip ="OFF";
+	} 
 	
 [endscript]
 
@@ -76,6 +81,13 @@ $(".ch_"+tf.current_ch_speed).css("top",260);
 $(".auto_"+tf.current_auto_speed).css("top",320);
 
 [endscript]
+
+
+;未読スキップ
+[ptext layer=1 page=fore text="未読スキップ：" x=40 y=400 size=26 color=black visible=true]
+[ptext name="text_skip" layer=1 page=fore text="&tf.text_skip" x=230 y=400 size=26 color=black visible=true]
+[button fix="true" target="*skip_off" graphic=config/off.gif width=85  x=340 y=400  ]
+[button fix="true" target="*skip_on" graphic=config/on.gif width=85  x=440 y=400  ]
 
 
 @jump target="*common"
@@ -192,4 +204,21 @@ $(".auto_"+tf.set_auto_speed).css("top",320);
 [autoconfig speed="&tf.set_auto_speed"]
 
 [return]
+
+*skip_off
+[iscript]
+	tf.text_skip = "OFF";
+	$(".text_skip").html("OFF");
+[endscript]
+[config_record_label skip=false]
+[return]
+
+*skip_on
+[iscript]
+	tf.text_skip = "ON";
+	$(".text_skip").html("ON");
+[endscript]
+[config_record_label skip=true]
+[return]
+
 

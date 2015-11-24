@@ -626,6 +626,24 @@ tyrano.plugin.kag.tag.text = {
             var j_span = that.kag.getMessageCurrentSpan();
 
             j_span.css("color", that.kag.stat.font.color).css("font-weight", that.kag.stat.font.bold).css("font-size", that.kag.stat.font.size + "px").css("font-family", that.kag.stat.font.face);
+             
+            //既読管理中の場合、現在の場所が既読済みなら、色を変える 
+            if(that.kag.config.autoRecordLabel == "true"){
+                
+                if(that.kag.stat.already_read == true){
+                    //テキストの色調整
+                    if(that.kag.config.alreadyReadTextColor !="default"){
+                        j_span.css("color",$.convertColor(that.kag.config.alreadyReadTextColor));
+                    }
+                    
+                }else{
+                    //未読スキップがfalseの場合は、スキップ停止
+                    if(that.kag.config.unReadTextSkip == "false"){
+                        that.kag.stat.is_skip = false;
+                    }
+                }
+                
+            }
             
             var ch_speed = 30;
             
@@ -749,7 +767,16 @@ tyrano.plugin.kag.tag.text = {
             var j_span = that.kag.getMessageCurrentSpan();
 
             j_span.css("color", that.kag.stat.font.color).css("font-weight", that.kag.stat.font.bold).css("font-size", that.kag.stat.font.size + "px").css("font-family", that.kag.stat.font.face);
-
+            
+            //既読管理中の場合、現在の場所が既読済みなら、色を変える 
+            if(that.kag.config.autoRecordLabel == "true"){
+                if(that.kag.config.alreadyReadTextColor !="default"){
+                    if(that.kag.stat.already_read == true){
+                        j_span.css("color",$.convertColor(that.kag.config.alreadyReadTextColor));
+                    }
+                }
+            }
+            
             var pchar = function(pchar) {
 
                 var c = _message_str.substring(index, ++index);
@@ -841,15 +868,38 @@ tyrano.plugin.kag.tag.label = {
     //ラベル通過したよ。
     
     //ラベル記録
-    if(this.kag.config.autoRecordPageShowing == "true"){
-    
-        var sf_str = "sf.trail_"+this.kag.stat.current_scenario.replace(".ks","").replace(/\u002f/g, "").replace(/:/g,"").replace(/\./g,"")+"_"+pm.label_name +"";
+    if(this.kag.config.autoRecordLabel == "true"){
         
-        var scr_str = ""
-        + sf_str +" = "+sf_str+"  || 0;"
-        + sf_str +"++;";
-        this.kag.evalScript(scr_str);
+        var sf_tmp = "trail_"+this.kag.stat.current_scenario.replace(".ks","").replace(/\u002f/g, "").replace(/:/g,"").replace(/\./g,"");
+        var sf_buff = this.kag.stat.buff_label_name;
+        var sf_label = sf_tmp+"_"+ pm.label_name;
         
+        if(this.kag.stat.buff_label_name!=""){
+            
+            if(!this.kag.variable.sf.record){
+                    this.kag.variable.sf.record = {};
+            }
+            
+            var sf_str = "sf.record."+sf_buff;
+            
+            var scr_str = ""
+            + sf_str +" = "+sf_str+"  || 0;"
+            + sf_str +"++;";
+            this.kag.evalScript(scr_str);
+        
+        }
+        
+        if(this.kag.variable.sf.record){
+            if(this.kag.variable.sf.record[sf_label]){
+                //すでにこのラベル通過済みよ
+                this.kag.stat.already_read = true;
+            }else{
+                this.kag.stat.already_read = false;
+            }
+        }
+        
+        //pm.label_name を stat に配置して、次のラベルで記録とする
+        this.kag.stat.buff_label_name = sf_label;
     }
     
     this.kag.ftag.nextOrder();
@@ -857,6 +907,54 @@ tyrano.plugin.kag.tag.label = {
   }
     
 };
+
+
+/*
+#[config_record_label]
+
+:group
+システム関連
+:title
+既読管理の設定
+
+:exp
+既読管理に関する設定を変更できます
+
+:sample
+:param
+color=既読時のテキスト色を0x000000形式で指定してください,
+skip=未読スキップをの有効(true)、無効(false)を指定します。つまりfalseを指定すると、未読文章で止まります。
+#[end]
+
+*/
+
+tyrano.plugin.kag.tag.config_record_label = {
+
+    pm : {
+        color : "",
+        skip  : ""
+    },
+
+    start : function(pm) {
+        
+        var that = this;
+        
+        if (pm.color != "") {
+            this.kag.config.alreadyReadTextColor = pm.color;
+            this.kag.ftag.startTag("eval", {"exp":"sf._system_config_already_read_text_color = "+pm.color});
+        }
+        
+        if (pm.skip != "") {
+            this.kag.config.unReadTextSkip = pm.skip;
+            this.kag.ftag.startTag("eval", {"exp":"sf._system_config_unread_text_skip = "+pm.skip});
+        }
+        
+
+        this.kag.ftag.nextOrder();    
+        
+    }
+};
+
 
 /*
 #[l]
@@ -890,6 +988,7 @@ tyrano.plugin.kag.tag.l = {
         if (this.kag.stat.is_skip == true) {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
+            
         }else if(this.kag.stat.is_auto == true){
             this.kag.stat.is_wait_auto = true;
             setTimeout(function(){
