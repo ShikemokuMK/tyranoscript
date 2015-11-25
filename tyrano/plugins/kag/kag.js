@@ -34,7 +34,7 @@ tyrano.plugin.kag ={
     
     //動作オプション
     options:{
-        modules:["parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse","event"]
+        modules:["parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse","event","rider"]
     },
     
     
@@ -328,7 +328,12 @@ tyrano.plugin.kag ={
         this.event = object(tyrano.plugin.kag.event);
         this.event.kag = that;
         this.event.init();
-
+        
+        //rider 追加
+        this.rider = object(tyrano.plugin.kag.rider);
+        this.rider.kag = that;
+        this.rider.init();
+        
         //システム変数の初期化
         var tmpsf = $.getStorage(this.kag.config.projectID+"_sf");
         
@@ -508,6 +513,11 @@ tyrano.plugin.kag ={
             //that.kag.ftag.startTag("backlay",{});
         
         });
+        
+        
+        //ティラノライダーからの通知の場合、発生させる
+        that.rider.complete(this);
+        
         
     },
     
