@@ -3,10 +3,10 @@
 tyrano.plugin.kag ={
 
     tyrano:null,
-    
     kag:null,
-    
     sound_swf:null,
+    
+    is_rider:false, //ティラノライダーからの起動かどうか
     
     cache_html:{},
     
@@ -29,9 +29,7 @@ tyrano.plugin.kag ={
         "www":""
         
     },
-    
-
-    
+        
     //動作オプション
     options:{
         modules:["parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse","event","rider"]
@@ -225,6 +223,10 @@ tyrano.plugin.kag ={
        eval(str);
        
        this.saveSystemVariable();
+       
+       if(this.kag.is_rider){
+            this.kag.rider.pushVariableGrid();
+       }
        
     },
     

@@ -89,10 +89,16 @@ tyrano.plugin.kag.ftag = {
             var tag = $.cloneObject(this.array_tag[this.current_order_index]);
 
             this.kag.stat.current_line = tag.line;
-
-            this.kag.log("**:" + this.current_order_index + "　line:" + tag.line);
-            this.kag.log(tag);
-
+            
+            if(this.kag.is_rider){
+               
+                tag.ks_file = this.kag.stat.current_scenario;
+                this.kag.rider.pushConsoleLog(tag);
+                
+            }else{
+                this.kag.log("**:" + this.current_order_index + "　line:" + tag.line);
+                this.kag.log(tag);
+            }
             //前に改ページ指定が入っている場合はテキスト部分をクリアする
             if((tag.name=="call" && tag.pm.storage=="make.ks") || this.kag.stat.current_scenario=="make.ks"){
                 //makeです
@@ -775,6 +781,14 @@ tyrano.plugin.kag.tag.text = {
                         j_span.css("color",$.convertColor(that.kag.config.alreadyReadTextColor));
                     }
                 }
+            }
+            
+            var ch_speed = 30;
+            
+            if(that.kag.stat.ch_speed != ""){
+                ch_speed = parseInt(that.kag.stat.ch_speed);
+            }else if(that.kag.config.chSpeed){
+                ch_speed = parseInt(that.kag.config.chSpeed);
             }
             
             var pchar = function(pchar) {
