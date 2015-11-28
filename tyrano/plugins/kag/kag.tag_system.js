@@ -97,6 +97,47 @@ tyrano.plugin.kag.tag.clearsysvar = {
 
 
 /*
+#[clearstack]
+:group
+マクロ・変数・JS操作
+:title
+スタックの消去
+:exp
+システムが管理するスタックを消去します。
+スタックとはゲームを進める中で Call、マクロ呼び出し、 if 文などを通過した時に
+呼び出し元に帰ってくるために保持するメモリ領域です。
+通常のノベルゲームであれば、特に問題はおきませんが
+Call の途中でジャンプ。if文の中でジャンプ
+などを繰り返した場合、回収されないスタックが溜まっていきます。
+これらは、セーブデータの肥大化などを引き起こす場合ばあるので
+戻るべきスタックが無い場面でこのタグを配置しておくことをオススメします。
+きりの良い場所などです。（タイトル 章の始まり）
+:sample
+:param
+stack=call if macro のいづれかを指定できます。特定のスタックのみ削除することができます。指定しなければ全てのスタックを削除します。
+#[end]
+*/
+
+//システム変数の初期化
+tyrano.plugin.kag.tag.clearstack = {
+     pm:{
+        stack:""
+    },
+    start:function(pm){
+        if(pm.stack ==""){
+            this.kag.stat.stack = {"if":[],"call":[],"macro":[]};
+        }else{
+            this.kag.stat.stack[pm.stack] = [];
+        }
+        this.kag.ftag.nextOrder();
+    }
+
+};
+
+        
+
+
+/*
 #[close]
 :group
 システム操作
