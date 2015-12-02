@@ -110,7 +110,7 @@ tf.savetext = "<span style='font-size:10px'>"+tf.save_date+"</span><br />"+tf.ti
 	[if exp="tf.is_cg_open==true"]
 		[button graphic=&mp.graphic x=&mp.x y=&mp.y width=160 height=140 preexp="mp.graphic" exp="tf.selected_cg_image = preexp" storage="cg.ks" target="*clickcg" folder="bgimage" ]
 	[else]
-		[button graphic=noise.jpg x=&mp.x y=&mp.y width=160 height=140 storage="cg.ks" target="*no_image" folder="bgimage" ]
+		[button graphic=&mp.no_graphic x=&mp.x y=&mp.y width=160 height=140 storage="cg.ks" target="*no_image" folder="bgimage" ]
 	[endif]
 [endmacro]
 
@@ -143,7 +143,7 @@ tf.savetext = "<span style='font-size:10px'>"+tf.save_date+"</span><br />"+tf.ti
 	[if exp="tf.is_replay_open==true"]
 		[button graphic=&mp.graphic x=&mp.x y=&mp.y width=160 height=140 preexp="sf.replay_view[mp.name]" exp="tf.selected_replay_obj = preexp" storage="replay.ks" target="*clickcg" folder="bgimage" ]
 	[else]
-		[button graphic=noise.jpg x=&mp.x y=&mp.y width=160 height=140 storage="replay.ks" target="*no_image" folder="bgimage" ]
+		[button graphic=&mp.no_graphic x=&mp.x y=&mp.y width=160 height=140 storage="replay.ks" target="*no_image" folder="bgimage" ]
 	[endif]
 	
 [endmacro]

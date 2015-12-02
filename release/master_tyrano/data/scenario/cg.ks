@@ -2,9 +2,15 @@
 ; CG モード　画面作成
 ;=========================================
 
+@layopt layer=message0 visible=false
+
+@clearfix
+[hidemenubutton]
 [cm]
-[bg storage="cgbg.png"]
-[ptext layer=1 page=fore text="CGモード" x=20 y=20 size=26 color=white visible=true]
+
+[bg storage="cgbg.png" time=100]
+[layopt layer=1 visible=true]
+[ptext layer=1 page=fore text="CGモード" x=20 y=20 size=26 color=0xA8401C visible=true]
 
 [iscript]
     
@@ -35,16 +41,8 @@
 @jump target=&tf.target_page
 
 *page_0
-[cg_image_button graphic="toile.jpg" x=60 y=50 width=160 height=140 folder="bgimage" ]
-[cg_image_button graphic="entrance.jpg" x=250 y=50 width=160 height=140 folder="bgimage" ]
-[button target="*nextpage" graphic=nextpage.gif x=640 y=600  ]
-
-@jump target="*common"
-
-*page_1
-[cg_image_button graphic="toile.jpg" x=60 y=50 width=160 height=140 folder="bgimage" ]
-[cg_image_button graphic="entrance.jpg" x=250 y=50 width=160 height=140 folder="bgimage" ]
-[button target="*backpage" graphic=backpage.gif x=800 y=600  ]
+[cg_image_button graphic="toile.jpg" no_graphic="noise.jpg" x=60 y=100 width=160 height=140 folder="bgimage" ]
+[cg_image_button graphic="entrance.jpg" no_graphic="noise.jpg" x=250 y=100 width=160 height=140 folder="bgimage" ]
 
 @jump target="*common"
 

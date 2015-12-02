@@ -2,12 +2,15 @@
 ; 回想モード　画面作成
 ;=========================================
 *start
-
+@layopt layer=message0 visible=false
+@clearfix
+[hidemenubutton]
 [cm]
 
-[back storage="cgbg.png"]
+
+[back storage="cgbg.png" time=100]
 [layopt layer=1 visible=true]
-[ptext layer=1 page=fore text="回想モード" x=20 y=20 size=26 color=white visible=true]
+[ptext layer=1 page=fore text="回想モード" x=20 y=20 size=26 color=0xA8401C visible=true]
 
 [iscript]
     
@@ -32,21 +35,12 @@
 @jump target=&tf.target_page
 
 *page_0
-[replay_image_button name="replay1" graphic="cat.jpg" x=60 y=50 width=160 height=140 folder="bgimage" ]
-[replay_image_button name="replay2" graphic="toile.jpg" x=260 y=50 width=160 height=140 folder="bgimage" ]
-
-[button target="*nextpage" graphic=nextpage.gif x=800 y=600  ]
-
-@jump target ="*common"
-
-*page_1
-[replay_image_button name="replay1" graphic="cat.jpg" x=60 y=50 width=160 height=140 folder="bgimage" ]
-[replay_image_button name="replay2" graphic="toile.jpg" x=260 y=50 width=160 height=140 folder="bgimage" ]
-
-[button target="*backpage" graphic=backpage.gif x=640 y=600  ]
+[replay_image_button name="replay1" graphic="cat.jpg" no_graphic="noise.jpg" x=60 y=100 width=160 height=140 folder="bgimage" ]
+[replay_image_button name="replay2" graphic="toile.jpg" no_graphic="noise.jpg" x=260 y=100 width=160 height=140 folder="bgimage" ]
 
 
 @jump target ="*common"
+
 
 *common
 
@@ -71,7 +65,6 @@
 
 [iscript]
     tf.flag_replay = true;
-	
 [endscript]
 
 

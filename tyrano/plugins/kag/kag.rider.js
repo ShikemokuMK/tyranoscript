@@ -16,9 +16,11 @@ tyrano.plugin.kag.rider = {
         //alert("complete!");
         //riderからの起動かどうかを判定する必要あり
         if (window.opener.app) {
-            TYRANO.kag.is_rider = true;
-            this.app = window.opener.app;
-            this.app.completeRider(TG);
+            if(window.opener.app.config.user_config.check_debug==true){
+                TYRANO.kag.is_rider = true;
+                this.app = window.opener.app;
+                this.app.completeRider(TG);
+            }
 
         }
     },
@@ -110,6 +112,13 @@ tyrano.plugin.kag.rider = {
         //window.opener.myFunc();
 
     },
+    
+    //キャラクター情報を返却する
+    getCharaInfo:function(){
+        
+        return TYRANO.kag.stat.charas;
+        
+    },
 
     //変数を取得する
     getVariables : function() {
@@ -131,12 +140,16 @@ tyrano.plugin.kag.rider = {
 
     //変数値を更新します
     pushVariableGrid : function() {
-        this.app.rider_view.initVariableGrid();
+        //更新が合ったことを通知するだけ
+        this.app.rider_view.updateVariable();
+    },
+    
+    initSave:function(){
+        localStorage.clear();
     },
 
     //命令が実行されて、デバッグツール側にコンソールを発信する
     pushConsoleLog : function(tag) {
-        console.log(tag);
         //タグをアプリ側にプッシュします
         this.app.rider_view.pushConsoleGrid("tag", tag);
 

@@ -2,6 +2,8 @@
 ; コンフィグ モード　画面作成
 ;=========================================
 @layopt layer=message0 visible=false
+@clearfix
+
 [hidemenubutton]
 
 [iscript]
@@ -23,40 +25,39 @@
 
 [cm]
 [bg time=300 storage="cgbg.png"]
-[ptext layer=1 page=fore text="コンフィグ" x=20 y=20 size=26 color=white visible=true]
+[ptext layer=1 page=fore text="Game Config" x=20 y=20 size=32 color=0xA8401C visible=true]
 [button graphic="back_title.gif" target="*backtitle" x=730 y=20 ]
 @jump target="*config_page"
 
 *config_page
 
 ;BGM音量
-[ptext layer=1 page=fore text="BGM 音量：" x=40 y=150 size=26 color=black visible=true]
+[ptext layer=1 page=fore text="BGM 音量：" x=40 y=145 size=26 color=black visible=true]
 [ptext name="text_bgm_vol" layer=1 page=fore text="&tf.current_bgm_vol" x=190 y=150 size=26 color=black visible=true]
-[button fix="true" target="*vol_bgm_up" graphic=config/arrow_up.png width=35 height=35 x=300 y=150  ]
-[button fix="true" target="*vol_bgm_down" graphic=config/arrow_down.png width=35 height=35 x=340 y=150  ]
+[button fix="true" target="*vol_bgm_up" graphic=config/arrow_up.gif width=35 height=35 x=300 y=150  ]
+[button fix="true" target="*vol_bgm_down" graphic=config/arrow_down.gif width=35 height=35 x=340 y=150  ]
 
 ;SE音量
-[ptext layer=1 page=fore text="SE 音量：" x=40 y=200 size=26 color=black visible=true]
+[ptext layer=1 page=fore text="SE 音量：" x=40 y=195 size=26 color=black visible=true]
 [ptext name="text_se_vol" layer=1 page=fore text="&tf.current_se_vol" x=190 y=200 size=26 color=black visible=true]
-[button fix="true" target="*vol_se_up" graphic=config/arrow_up.png width=35 height=35 x=300 y=200  ]
-[button fix="true" target="*vol_se_down" graphic=config/arrow_down.png width=35 height=35 x=340 y=200  ]
+[button fix="true" target="*vol_se_up" graphic=config/arrow_up.gif width=35 height=35 x=300 y=200  ]
+[button fix="true" target="*vol_se_down" graphic=config/arrow_down.gif width=35 height=35 x=340 y=200  ]
 
 ;メッセージスピード
 [ptext layer=1 page=fore text="文字速度：" x=40 y=270 size=26 color=black visible=true]
 [ptext layer=1 page=fore text="おそい" x=300 y=270 size=16 color=black visible=true]
 [ptext layer=1 page=fore text="はやい" x=710 y=270 size=16 color=black visible=true]
 
-[button name="ch,ch_100" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=100" graphic=config/01.png width=35 height=35 x=360 y=270  ]
-[button name="ch,ch_80" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=80" graphic=config/02.png width=35 height=35 x=390 y=270  ]
-[button name="ch,ch_50" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=50" graphic=config/03.png width=35 height=35 x=420 y=270  ]
-[button name="ch,ch_40" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=40" graphic=config/04.png width=35 height=35 x=450 y=270  ]
-[button name="ch,ch_30" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=30" graphic=config/05.png width=35 height=35 x=480 y=270  ]
-[button name="ch,ch_25" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=25" graphic=config/06.png width=35 height=35 x=510 y=270  ]
-[button name="ch,ch_20" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=20" graphic=config/07.png width=35 height=35 x=540 y=270  ]
-[button name="ch,ch_11" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=11" graphic=config/08.png width=35 height=35 x=570 y=270  ]
-[button name="ch,ch_8" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=8" graphic=config/09.png width=35 height=35 x=600 y=270  ]
-[button name="ch,ch_5" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=5" graphic=config/10.png width=35 height=35 x=630 y=270  ]
-[button name="ch,ch_3" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=3" graphic=config/11.png width=35 height=35 x=660 y=270  ]
+[button name="ch,ch_100" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=100" graphic=config/01.gif width=35 height=35 x=360 y=270  ]
+[button name="ch,ch_80" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=80" graphic=config/02.gif width=35 height=35 x=390 y=270  ]
+[button name="ch,ch_50" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=50" graphic=config/03.gif width=35 height=35 x=420 y=270  ]
+[button name="ch,ch_40" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=40" graphic=config/04.gif width=35 height=35 x=450 y=270  ]
+[button name="ch,ch_30" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=30" graphic=config/05.gif width=35 height=35 x=480 y=270  ]
+[button name="ch,ch_25" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=25" graphic=config/06.gif width=35 height=35 x=510 y=270  ]
+[button name="ch,ch_20" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=20" graphic=config/07.gif width=35 height=35 x=540 y=270  ]
+[button name="ch,ch_11" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=11" graphic=config/08.gif width=35 height=35 x=570 y=270  ]
+[button name="ch,ch_8" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=8" graphic=config/09.gif width=35 height=35 x=600 y=270  ]
+[button name="ch,ch_5" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=5" graphic=config/10.gif width=35 height=35 x=630 y=270  ]
 
 
 ;オート速度
@@ -64,17 +65,16 @@
 [ptext layer=1 page=fore text="おそい" x=300 y=330 size=16 color=black visible=true]
 [ptext layer=1 page=fore text="はやい" x=710 y=330 size=16 color=black visible=true]
 
-[button fix="true" name="auto,auto_5000" target="*auto_speed_change" exp="tf.set_auto_speed=5000;tf.text_auto=0" graphic=config/01.png width=35 height=35 x=360 y=330  ]
-[button fix="true" name="auto,auto_4500" target="*auto_speed_change" exp="tf.set_auto_speed=4500;tf.text_auto=1" graphic=config/02.png width=35 height=35 x=390 y=330  ]
-[button fix="true" name="auto,auto_4000" target="*auto_speed_change" exp="tf.set_auto_speed=4000;tf.text_auto=2" graphic=config/03.png width=35 height=35 x=420 y=330  ]
-[button fix="true" name="auto,auto_3500" target="*auto_speed_change" exp="tf.set_auto_speed=3500;tf.text_auto=3" graphic=config/04.png width=35 height=35 x=450 y=330  ]
-[button fix="true" name="auto,auto_3000" target="*auto_speed_change" exp="tf.set_auto_speed=3000;tf.text_auto=4" graphic=config/05.png width=35 height=35 x=480 y=330  ]
-[button fix="true" name="auto,auto_2500" target="*auto_speed_change" exp="tf.set_auto_speed=2500;tf.text_auto=5" graphic=config/06.png width=35 height=35 x=510 y=330  ]
-[button fix="true" name="auto,auto_2000" target="*auto_speed_change" exp="tf.set_auto_speed=2000;tf.text_auto=6" graphic=config/07.png width=35 height=35 x=540 y=330  ]
-[button fix="true" name="auto,auto_1000" target="*auto_speed_change" exp="tf.set_auto_speed=1000;tf.text_auto=7" graphic=config/08.png width=35 height=35 x=570 y=330  ]
-[button fix="true" name="auto,auto_800" target="*auto_speed_change" exp="tf.set_auto_speed=800;tf.text_auto=8" graphic=config/09.png width=35 height=35 x=600 y=330  ]
-[button fix="true" name="auto,auto_500" target="*auto_speed_change" exp="tf.set_auto_speed=500;tf.text_auto=9" graphic=config/10.png width=35 height=35 x=630 y=330  ]
-[button fix="true" name="auto,auto_300" target="*auto_speed_change" exp="tf.set_auto_speed=300;tf.text_auto=10" graphic=config/11.png width=35 height=35 x=660 y=330  ]
+[button fix="true" name="auto,auto_5000" target="*auto_speed_change" exp="tf.set_auto_speed=5000;tf.text_auto=0" graphic=config/01.gif width=35 height=35 x=360 y=330  ]
+[button fix="true" name="auto,auto_4500" target="*auto_speed_change" exp="tf.set_auto_speed=4500;tf.text_auto=1" graphic=config/02.gif width=35 height=35 x=390 y=330  ]
+[button fix="true" name="auto,auto_4000" target="*auto_speed_change" exp="tf.set_auto_speed=4000;tf.text_auto=2" graphic=config/03.gif width=35 height=35 x=420 y=330  ]
+[button fix="true" name="auto,auto_3500" target="*auto_speed_change" exp="tf.set_auto_speed=3500;tf.text_auto=3" graphic=config/04.gif width=35 height=35 x=450 y=330  ]
+[button fix="true" name="auto,auto_3000" target="*auto_speed_change" exp="tf.set_auto_speed=3000;tf.text_auto=4" graphic=config/05.gif width=35 height=35 x=480 y=330  ]
+[button fix="true" name="auto,auto_2500" target="*auto_speed_change" exp="tf.set_auto_speed=2500;tf.text_auto=5" graphic=config/06.gif width=35 height=35 x=510 y=330  ]
+[button fix="true" name="auto,auto_2000" target="*auto_speed_change" exp="tf.set_auto_speed=2000;tf.text_auto=6" graphic=config/07.gif width=35 height=35 x=540 y=330  ]
+[button fix="true" name="auto,auto_1000" target="*auto_speed_change" exp="tf.set_auto_speed=1000;tf.text_auto=7" graphic=config/08.gif width=35 height=35 x=570 y=330  ]
+[button fix="true" name="auto,auto_800" target="*auto_speed_change" exp="tf.set_auto_speed=800;tf.text_auto=8" graphic=config/09.gif width=35 height=35 x=600 y=330  ]
+[button fix="true" name="auto,auto_500" target="*auto_speed_change" exp="tf.set_auto_speed=500;tf.text_auto=9" graphic=config/10.gif width=35 height=35 x=630 y=330  ]
 
 [iscript]
 $(".ch_"+tf.current_ch_speed).css("top",260);
@@ -85,9 +85,9 @@ $(".auto_"+tf.current_auto_speed).css("top",320);
 
 ;未読スキップ
 [ptext layer=1 page=fore text="未読スキップ：" x=40 y=400 size=26 color=black visible=true]
-[ptext name="text_skip" layer=1 page=fore text="&tf.text_skip" x=230 y=400 size=26 color=black visible=true]
-[button fix="true" target="*skip_off" graphic=config/off.gif width=85  x=340 y=400  ]
-[button fix="true" target="*skip_on" graphic=config/on.gif width=85  x=440 y=400  ]
+[ptext name="text_skip" layer=1 page=fore text="&tf.text_skip" x=230 y=405 size=26 color=black visible=true]
+[button fix="true" target="*skip_off" graphic=config/off.gif width=85  x=340 y=405  ]
+[button fix="true" target="*skip_on" graphic=config/on.gif width=85  x=440 y=405  ]
 
 
 @jump target="*common"
@@ -106,6 +106,8 @@ $(".auto_"+tf.current_auto_speed).css("top",320);
 *backtitle
 [cm]
 [freeimage layer=1]
+@clearfix
+
 @jump storage=title.ks
 
 *nextpage

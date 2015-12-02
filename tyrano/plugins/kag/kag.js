@@ -23,7 +23,7 @@ tyrano.plugin.kag ={
     
     //変更されることが無い静的な値
     define:{
-        TYRANO_ENGINE_VERSION:0.30,
+        TYRANO_ENGINE_VERSION:400,
         "BASE_DIV_NAME":"tyrano_base",
         FLAG_APRI : false,
         "www":""
