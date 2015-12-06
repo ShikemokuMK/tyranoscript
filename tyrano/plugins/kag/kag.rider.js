@@ -77,6 +77,8 @@ tyrano.plugin.kag.rider = {
                     _j_img.remove();
                 });
                 
+                //ドラッグを出来るように
+                $(".tyrano_base").attr("ondragstart","");
                 $(".tyrano_base").append(_j_img);
             
             })();
