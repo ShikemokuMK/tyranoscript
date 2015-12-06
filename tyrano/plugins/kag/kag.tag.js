@@ -375,7 +375,16 @@ tyrano.plugin.kag.ftag = {
     nextOrderWithLabel : function(label_name, scenario_file) {
 
         this.kag.stat.is_strong_stop = false;
-
+        
+        //Jump ラベル記録が必要な場合に記録しておく
+        if(label_name){
+            
+            if(label_name.indexOf("*")!=-1){
+                label_name = label_name.substr(1,label_name.length);
+            }
+            this.kag.ftag.startTag("label",{"label_name":label_name,"nextorder":"false"});
+        }
+        
         //セーブスナップが指定された場合
         if (label_name == "*savesnap") {
 
@@ -876,7 +885,9 @@ tyrano.plugin.kag.tag.text = {
 
 tyrano.plugin.kag.tag.label = {
 
-  pm:{},
+  pm:{
+      nextorder:"true"
+  },
   
   start:function(pm){
     //ラベル通過したよ。
@@ -916,7 +927,10 @@ tyrano.plugin.kag.tag.label = {
         this.kag.stat.buff_label_name = sf_label;
     }
     
-    this.kag.ftag.nextOrder();
+    //ラベル記録の時はNextOrderしない
+    if(pm.nextorder == "true"){
+        this.kag.ftag.nextOrder();
+    }
     
   }
     
