@@ -154,6 +154,8 @@ tyrano.plugin.kag ={
         
         already_read:false, //現在の場所が既読済みか否かを保持する。ラベル通過時に判定
         
+        visible_menu_button:false, //メニューボタンの表示状態
+        
         title:"" //ゲームのタイトル
         
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
@@ -393,7 +395,10 @@ tyrano.plugin.kag ={
         //コンフィグファイルを確認して、メニュー表示
         if(this.kag.config.configVisible=="false"){
             button_menu_obj.hide();
-        }   
+            this.kag.stat.visible_menu_button = false;
+        }else{
+            this.kag.stat.visible_menu_button = true;
+        }
             
         $("."+this.kag.define.BASE_DIV_NAME).append(button_menu_obj);
         
