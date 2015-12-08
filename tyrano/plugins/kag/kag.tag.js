@@ -1056,6 +1056,8 @@ tyrano.plugin.kag.tag.p = {
     cw : true,
 
     start : function() {
+        
+        var that = this;
         //改ページ
         this.kag.stat.flag_ref_page = true;
 
