@@ -426,6 +426,13 @@ tyrano.plugin.kag.menu = {
 
         //カーソルの復元
         this.kag.setCursor(this.kag.stat.current_cursor);
+        
+        //メニューボタンの状態
+        if(this.kag.stat.visible_menu_button == true){
+            $(".button_menu").show();
+        }else{
+            $(".button_menu").hide();
+        }
 
         //イベントの復元
         $(".event-setting-element").each(function() {
