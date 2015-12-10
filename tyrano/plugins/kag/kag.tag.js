@@ -1833,8 +1833,9 @@ vertical=true 、false のいずれかを指定してください。trueで縦�
 size=フォントサイズをピクセルで指定してください,
 face=フォントの種類を指定してください。非KAG互換ですが、ウェブフォントも使用できます,
 color=フォントの色を指定します,
-name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます,
+name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
+time=ミリ秒を指定します。指定した時間をかけて徐々に表示させることができます,
 overwrite=true か false を指定します。同時にnameを指定している場合既に存在するptextの内容を変更できます。デフォルトはfalse
 
 #[end]
@@ -1859,6 +1860,7 @@ tyrano.plugin.kag.tag.ptext = {
         "italic" : "",
         "bold" : "",
         "name" : "",
+        "time" : "",
         "zindex" : "9999",
         "overwrite" : "false" //要素を上書きするかどうか
 
@@ -1916,7 +1918,7 @@ tyrano.plugin.kag.tag.ptext = {
         tobj.css("top", pm.y + "px");
         tobj.css("left", pm.x + "px");
         tobj.css("width", "100%");
-
+        
         if (pm.vertical == "true") {
             tobj.addClass("vertical_text");
         }
@@ -1932,11 +1934,23 @@ tyrano.plugin.kag.tag.ptext = {
             tobj.addClass("fixlayer");
         }
         
-        //前景レイヤ
-        target_layer.append(tobj);
-
-        this.kag.ftag.nextOrder();
-
+        //時間指定
+        if(pm.time != ""){
+            tobj.css("opacity",0);
+            target_layer.append(tobj);
+            tobj.animate(
+                    {"opacity":1},
+                    parseInt(pm.time), 
+                    function(){
+                        that.kag.ftag.nextOrder();
+                    }
+            );
+        }else{
+            this.kag.ftag.nextOrder();
+            target_layer.append(tobj);
+        }
+        
+        
     }
 };
 
