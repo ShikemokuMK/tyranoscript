@@ -756,7 +756,10 @@ tyrano.plugin.kag.tag.text = {
 
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
         that.kag.ftag.hideNextImg();
-
+        
+        //バックログへの追加
+        this.kag.pushBackLog(message_str);
+        
         (function(jtext) {
 
             if (jtext.html() == "") {
@@ -1434,10 +1437,12 @@ tyrano.plugin.kag.tag.position = {
         };
 
         //縦書き指定
-        if (pm.vertical == "true") {
-            this.kag.stat.vertical = "true";
-        } else {
-            this.kag.stat.vertical = "false";
+        if(pm.vertical !=""){
+            if (pm.vertical == "true") {
+                this.kag.stat.vertical = "true";
+            } else {
+                this.kag.stat.vertical = "false";
+            }
         }
 
         //背景フレーム画像の設定 透明度も自分で設定する
@@ -1741,7 +1746,7 @@ tyrano.plugin.kag.tag.image = {
 [wt]
 :param
 layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
-page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます
+page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます,
 time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます、
 #[end]
 */
