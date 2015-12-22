@@ -313,20 +313,27 @@ JavaScriptの終了
 JavaScriptの記述を終了します
 :sample
 :param
+stop=endscriptに到達した時、ここにtrueを指定すると次のタグに進ませない。scriptの中でjumpした時などに指定する。デフォルトはfalse
 #[end]
 */
 
 //スクリプト終了
 tyrano.plugin.kag.tag.endscript = {
+    
+    pm:{
+        stop:"false"
+    },
+    
     start:function(pm){
         
+        this.kag.stat.is_script = false;
         //スクリプトを実行する
         this.kag.evalScript(this.kag.stat.buff_script);
-        
-        this.kag.stat.is_script = false;
         this.kag.stat.buff_script = "";
-        this.kag.ftag.nextOrder();
         
+        if(pm.stop =="false"){
+            this.kag.ftag.nextOrder();
+        }
     }
 };
 
