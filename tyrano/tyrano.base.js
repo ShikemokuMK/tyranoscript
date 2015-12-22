@@ -46,6 +46,8 @@ tyrano.base ={
         	//alert(scale_f);
         	$(".tyrano_base").css("transform","scale("+scale_f+") ");	
         
+            // 画面を右下に寄せる為に過剰スクロールする
+            window.scrollTo(width, height);
         }else if(screen_ratio =="fit"){
             
             //スクリーンサイズに合わせて自動的に調整される
