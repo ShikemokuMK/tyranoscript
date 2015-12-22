@@ -1988,14 +1988,14 @@ fadeout=テキスト表示後にフェードアウトを実行するか否かを
 time=テキストが静止している時間をミリ秒で指定します。, 
 wait=trueかfalse を指定します。trueを指定すると、テキストの演出完了を待ちます。デフォルトはtrue,
 
-in_effect=文字が表示される際のアニメーション演出を指定します。指定できるアニメーションは<a hreff='http://tyrano.jp/mtext/' target="_blank">こちら</a>,
+in_effect=文字が表示される際のアニメーション演出を指定します。指定できるアニメーションは<a href='http://tyrano.jp/mtext/' target="_blank">こちら</a>,
 in_delay=文字が表示される際の速度を指定します。何秒遅れて１文字が表示されるかをミリ秒で指定します。デフォルトは50です,
 in_delay_scale=１文字にかかるアニメーションの比率を指定します。デフォルトは1.5,
 in_sync=trueを指定すると、すべての文字が同時にアニメーションを開始します。デフォルトはfalse,
 in_shuffle=trueを指定すると、文字アニメーションのタイミングがランダムに実行されます。デフォルトはfalse,
 in_reverse=trueを指定すると、文字が後ろから表示されていきます。デフォルトはfalse",
 
-out_effect=文字が消える際のアニメーション演出を指定します。指定できるアニメーションは<a hreff='http://tyrano.jp/mtext/' target="_blank">こちら</a>,
+out_effect=文字が消える際のアニメーション演出を指定します。指定できるアニメーションは<a href='http://tyrano.jp/mtext/' target="_blank">こちら</a>,
 out_delay=文字が消える際の速度を指定します。何秒遅れて１文字が消えるかをミリ秒で指定します。デフォルトは50です,
 out_delay_scale=１文字にかかるアニメーションの比率を指定します。デフォルトは1.5,
 out_sync=trueを指定すると、すべての文字が同時にアニメーションを開始します。デフォルトはfalse,
@@ -3892,6 +3892,7 @@ message0 または message1 を指定するとメッセージレイヤにな り
 <br>
 通常は背景の変更などに使用されます。,
 method=トランジションのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
+children=falseの場合、layerで指定した場所だけtrans します。デフォルトはtrueです,
 time=トランジションを行っている時間をミリ秒で指定します。
 #[end]
 */
