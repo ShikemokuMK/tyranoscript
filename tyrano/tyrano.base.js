@@ -40,8 +40,16 @@ tyrano.base ={
         	
         	if(width_f > height_f){
                scale_f = height_f;
+                // viewport の幅から設定サイズの縮小後を引いた幅が全体の余白
+                // これを縮小前のスケールに戻し、さらに 2 分割する
+                padding = (view_width-(width*scale_f))/scale_f/2;
+                if (padding>0) $(".tyrano_base").css("padding-right", padding+"px");
              }else{
                 scale_f = width_f;
+
+                // 上に同じ
+                padding = (view_height-(height*scale_f))/scale_f/2;
+                if (padding>0) $(".tyrano_base").css("padding-bottom", padding+"px");
         	}
         	//alert(scale_f);
         	$(".tyrano_base").css("transform","scale("+scale_f+") ");	
