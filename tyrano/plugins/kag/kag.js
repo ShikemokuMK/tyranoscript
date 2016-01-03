@@ -351,8 +351,10 @@ tyrano.plugin.kag ={
         //コンフィグ
         
         //システムが永続させたい変数はすぐにコンフィグに反映
-        if(that.variable.sf._system_config_bgm_volume) that.config["defaultBgmVolume"] = that.variable.sf._system_config_bgm_volume;
-        if(that.variable.sf._system_config_se_volume) that.config["defaultSeVolume"] = that.variable.sf._system_config_se_volume;
+        if(typeof that.variable.sf._system_config_bgm_volume !== "undefined") that.config["defaultBgmVolume"] = String(that.variable.sf._system_config_bgm_volume);
+        if(typeof that.variable.sf._system_config_se_volume !== "undefined") that.config["defaultSeVolume"] = String(that.variable.sf._system_config_se_volume);
+        //if(that.variable.sf._system_config_bgm_volume) that.config["defaultBgmVolume"] = that.variable.sf._system_config_bgm_volume;
+        //if(that.variable.sf._system_config_se_volume) that.config["defaultSeVolume"] = that.variable.sf._system_config_se_volume;
         if(that.variable.sf._config_ch_speed) that.config["chSpeed"] = that.variable.sf._config_ch_speed;
         if(that.variable.sf._system_config_auto_speed) that.config["autoSpeed"] = that.variable.sf._system_config_auto_speed;
         if(that.variable.sf._system_config_auto_click) that.config["autoClickStop"] = that.variable.sf._system_config_auto_click_stop;
