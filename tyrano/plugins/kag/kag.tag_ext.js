@@ -47,24 +47,26 @@ tyrano.plugin.kag.tag.loadjs={
 ムービーの再生
 :exp
 ogv webm mp4 などに対応します
-ただし、ブラウザやスマホなどでは正しく再生されない場合もあります。
-PCゲーム形式の場合は ogv形式 webm形式でお願いします。 mp4 に対応しません。
+提供するゲームによって対応するフォーマットが異なります。
+PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
+ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
 
 :sample
 [movie storage="" skip=false ]
 :param
 storage=再生するogv webm mp4ファイルを指定してください,
-skip=動画再生中に途中でスキップ可能か否かを指定します true か false を指定してください
+skip=動画再生中に途中でスキップ可能か否かを指定します true か false を指定してください,
+volume=ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100 
 #[end]
 */
 
-//グラフィックボタン表示位置調整、テキストはできない
 tyrano.plugin.kag.tag.movie ={
     
     vital:["storage"],
     
     pm:{
         storage:"",
+        volume:"",
         skip:false
     },
     
@@ -75,6 +77,7 @@ tyrano.plugin.kag.tag.movie ={
         if($.userenv() !="pc"){
             this.kag.layer.showEventLayer();
              //クリックしないと始まらないようにする
+             //mp4で再生できる
             $('.tyrano_base').bind('click.movie', function(e){
                 that.playVideo(pm);
                 $(".tyrano_base").unbind("click.movie");
@@ -84,10 +87,9 @@ tyrano.plugin.kag.tag.movie ={
         }else{
             
             //firefoxの場合は再生できない旨、警告
-            if($.getBrowser()=="firefox"){
-                alert("ご利用のブラウザでは、ムービーを再生できません。飛ばします。");
-                that.kag.ftag.nextOrder();
-                return;
+            //firefox opera の場合、webMに変更する。
+            if($.getBrowser()=="firefox" || $.getBrowser()=="opera"){
+                pm.storage = $.replaceAll(pm.storage,".mp4",".webm");
             }
             
             that.playVideo(pm);
@@ -104,6 +106,16 @@ tyrano.plugin.kag.tag.movie ={
             var video = document.createElement('video');
             //video.setAttribute('myvideo');
             video.src = url;
+            
+            if(pm.volume != ""){
+                video.volume = parseFloat(parseInt(pm.volume) / 100);
+            }else{
+                
+                if(typeof this.kag.config.defaultMovieVolume != "undefined"){
+                    video.volume = parseFloat(parseInt(this.kag.config.defaultMovieVolume) / 100);
+                }
+            }
+            
             
             //top:0px;left:0px;width:100%;height:100%;'";
             

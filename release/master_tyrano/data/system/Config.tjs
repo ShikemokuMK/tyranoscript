@@ -101,6 +101,8 @@ function KAGWindow_config()
 // ◆ SEの音量 0 〜 100 で指定します。
 ;defaultSeVolume = 100;
 
+// ◆ 動画の音量 0 〜 100 で指定します。
+;defaultMovieVolume = 100;
 
 // ◆ コンフィグ（メニュー）機能表示
 // セーブ・ロードやタイトルに戻るといった一連の機能を表示するかを指定します
