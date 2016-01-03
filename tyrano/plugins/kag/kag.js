@@ -120,7 +120,8 @@ tyrano.plugin.kag ={
             color:"",
             bold:"",
             size:"",
-            face:""
+            face:"",
+            italic:""
         },
         
         //表示位置調整
@@ -133,7 +134,9 @@ tyrano.plugin.kag ={
         default_font:{
             color:"",
             bold:"",
-            size:""
+            size:"",
+            face:"",
+            italic:""
         },
         
         /*** キャラクター操作系 ***/

@@ -228,6 +228,16 @@
         return "";
 
     };
+    
+    $.convertItalic = function(flag) {
+
+        if (flag == "true") {
+            return "italic";
+        }
+
+        return "";
+
+    };
 
     $.send = function(url, obj, call_back) {
         //game.current_story_file = story_file;

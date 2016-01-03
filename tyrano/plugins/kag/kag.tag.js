@@ -640,7 +640,13 @@ tyrano.plugin.kag.tag.text = {
             //メッセージ領域を取得
             var j_span = that.kag.getMessageCurrentSpan();
 
-            j_span.css("color", that.kag.stat.font.color).css("font-weight", that.kag.stat.font.bold).css("font-size", that.kag.stat.font.size + "px").css("font-family", that.kag.stat.font.face);
+            j_span.css({
+                        "color":that.kag.stat.font.color,
+                        "font-weight": that.kag.stat.font.bold,
+                        "font-size": that.kag.stat.font.size + "px",
+                        "font-family": that.kag.stat.font.face,
+                        "font-style":that.kag.stat.font.italic
+                        });
              
             //既読管理中の場合、現在の場所が既読済みなら、色を変える 
             if(that.kag.config.autoRecordLabel == "true"){
@@ -2573,6 +2579,7 @@ tyrano.plugin.kag.tag.quake = {
  size=文字サイズを指定します,
  color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
  bold=太字指定。true 又は　false で指定,
+ italic=trueを指定すると、イタリック体になります。デフォルトはfalseです
  face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。
  #[end]
  */
@@ -2604,6 +2611,10 @@ tyrano.plugin.kag.tag.font = {
         if (pm.face) {
             this.kag.stat.font.face = pm.face;
         }
+        
+        if (pm.italic){
+            this.kag.stat.font["italic"] = $.convertItalic(pm.italic);
+        }
 
         this.kag.ftag.nextOrder();
         ///////////////////
@@ -2626,6 +2637,7 @@ tyrano.plugin.kag.tag.font = {
 size=文字サイズを指定します,
 color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です
 bold=太字指定。true 又は　false で指定,
+italic=trueを指定するとイタリック体で表示されます。デフォルトは
 face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。
 
 #[end]
@@ -2656,6 +2668,10 @@ tyrano.plugin.kag.tag.deffont = {
 
         if (pm.face) {
             this.kag.stat.default_font.face = pm.face;
+        }
+        
+        if (pm.italic) {
+            this.kag.stat.default_font.italic = $.convertItalic(pm.italic);
         }
 
         this.kag.ftag.nextOrder();
