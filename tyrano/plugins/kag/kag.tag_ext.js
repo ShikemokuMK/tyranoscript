@@ -1654,6 +1654,87 @@ tyrano.plugin.kag.tag.chara_hide ={
     
 };
 
+
+/*
+#[chara_hide_all]
+:group
+キャラクター操作
+:title
+キャラクターを全員退場
+:exp
+[chara_show]タグで表示したキャラクターを全員退場させます。
+:sample
+[chara_hide_all time=1000 wait=true]
+:param
+wait=trueを指定すると、キャラクターの退場を待ちます。デフォルトはtrueです。,
+time=ミリ秒で指定します。指定した時間をかけて退場します。デフォルトは1000ミリ秒です,
+layer=削除対象のレイヤ。chara_showの時にレイヤ指定した場合は、指定します。デフォルトは０
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.chara_hide_all = {
+
+    vital : [],
+
+    pm : {
+        page : "fore",
+        layer : "0", //レイヤーデフォルトは０に追加
+        wait : "true",
+        time : "1000"
+
+    },
+
+    start : function(pm) {
+
+        var that = this;
+
+        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+
+        var img_obj = target_layer.find(".tyrano_chara");
+
+        var chara_num = 0;
+        that.kag.layer.hideEventLayer();
+        var flag_complete = false;
+        //アニメーションでj表示させます
+        img_obj.animate({
+            opacity : "hide"
+        }, {
+            duration : parseInt(pm.time),
+            easing : "linear",
+            complete : function() {
+
+                img_obj.remove();
+                if (pm.wait == "true") {
+                    
+                    if(flag_complete == false){
+                        flag_complete = true;
+                        that.kag.layer.showEventLayer();
+                        that.kag.ftag.nextOrder();
+                    }
+                }
+            }
+        });
+
+        //キャラクターの表情を引き継がない
+        if (this.kag.stat.chara_memory == "false") {
+            for(key in this.kag.stat.charas ){
+                this.kag.stat.charas[key].storage = this.kag.stat.charas[key]["map_face"]["default"];
+            }
+        }
+
+        //すぐに次の命令を実行
+        if (pm.wait != "true") {
+            this.kag.layer.showEventLayer();
+            this.kag.ftag.nextOrder();
+        }
+
+        //this.kag.ftag.nextOrder();
+
+    }
+}; 
+
+
 /*
 #[chara_delete]
 :group
