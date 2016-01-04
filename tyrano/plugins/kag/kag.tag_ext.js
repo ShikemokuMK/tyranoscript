@@ -1326,7 +1326,8 @@ tyrano.plugin.kag.tag.chara_show ={
         this.kag.preload(storage_url,function(){
         	
 	        var target_layer = that.kag.layer.getLayer(pm.layer,pm.page);
-	        target_layer.append(img_obj).show();
+	        //先頭に挿入
+	        target_layer.prepend(img_obj).show();
 	        
 	        
 	        var chara_num = 1;

@@ -618,7 +618,7 @@ tyrano.plugin.kag.tag.text = {
             if (jtext.html() == "") {
 
                 //タグ作成
-                jtext.append("<p class=''></p>")
+                jtext.append("<p class=''></p>");
 
             }
 
