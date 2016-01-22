@@ -97,7 +97,7 @@ tyrano.plugin.kag.layer ={
         //スライドイベント
         layer_obj_click.bind('touchend', function(e) {
             
-            if(that.kag.config.configVisible=="false"){
+            if(that.kag.stat.visible_menu_button==false){
                 return false;
             }
             

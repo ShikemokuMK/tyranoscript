@@ -39,7 +39,7 @@ tyrano.plugin.kag.menu = {
                 //スキップを開始する
                 layer_menu.html("");
                 layer_menu.hide();
-                if (that.kag.config.configVisible == "true") {
+                if (that.kag.stat.visible_menu_button == true) {
                     $(".button_menu").show();
                 }
                 //nextOrder にして、
@@ -59,7 +59,7 @@ tyrano.plugin.kag.menu = {
 
             layer_menu.find(".menu_close").click(function(e) {
                 layer_menu.hide();
-                if (that.kag.config.configVisible == "true") {
+                if (that.kag.stat.visible_menu_button == true) {
                     $(".button_menu").show();
                 }
             });
@@ -70,7 +70,7 @@ tyrano.plugin.kag.menu = {
                 that.kag.layer.hideMessageLayers();
 
                 layer_menu.hide();
-                if (that.kag.config.configVisible == "true") {
+                if (that.kag.stat.visible_menu_button == true) {
                     $(".button_menu").show();
                 }
 
@@ -142,7 +142,7 @@ tyrano.plugin.kag.menu = {
                     var layer_menu = that.kag.layer.getMenuLayer();
                     layer_menu.hide();
                     layer_menu.empty();
-                    if (that.kag.config.configVisible == "true") {
+                    if (that.kag.stat.visible_menu_button == true) {
                         $(".button_menu").show();
                     }
                 });
@@ -350,7 +350,7 @@ tyrano.plugin.kag.menu = {
                     var layer_menu = that.kag.layer.getMenuLayer();
                     layer_menu.hide();
                     layer_menu.empty();
-                    if (that.kag.config.configVisible == "true") {
+                    if (that.kag.stat.visible_menu_button == true) {
                         $(".button_menu").show();
                     }
                 });
@@ -488,7 +488,7 @@ tyrano.plugin.kag.menu = {
 
         layer_menu.find(".menu_close").click(function(e) {
             layer_menu.hide();
-            if (that.kag.config.configVisible == "true") {
+            if (that.kag.stat.visible_menu_button == true) {
                 $(".button_menu").show();
             }
 
@@ -565,7 +565,7 @@ tyrano.plugin.kag.menu = {
 
             layer_menu.find(".menu_close").click(function() {
                 layer_menu.hide();
-                if (that.kag.config.configVisible == "true") {
+                if (that.kag.stat.visible_menu_button == true) {
                     $(".button_menu").show();
                 }
             });
