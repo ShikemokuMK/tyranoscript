@@ -356,6 +356,7 @@ tyrano.plugin.kag ={
         //システムが永続させたい変数はすぐにコンフィグに反映
         if(typeof that.variable.sf._system_config_bgm_volume !== "undefined") that.config["defaultBgmVolume"] = String(that.variable.sf._system_config_bgm_volume);
         if(typeof that.variable.sf._system_config_se_volume !== "undefined") that.config["defaultSeVolume"] = String(that.variable.sf._system_config_se_volume);
+        if(typeof that.variable.sf._system_config_movie_volume !== "undefined") that.config["defaultMovieVolume"] = String(that.variable.sf._system_config_movie_volume);
         //if(that.variable.sf._system_config_bgm_volume) that.config["defaultBgmVolume"] = that.variable.sf._system_config_bgm_volume;
         //if(that.variable.sf._system_config_se_volume) that.config["defaultSeVolume"] = that.variable.sf._system_config_se_volume;
         if(that.variable.sf._config_ch_speed) that.config["chSpeed"] = that.variable.sf._config_ch_speed;

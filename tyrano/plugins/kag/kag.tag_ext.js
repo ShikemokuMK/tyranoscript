@@ -109,6 +109,8 @@ tyrano.plugin.kag.tag.movie ={
             
             if(pm.volume != ""){
                 video.volume = parseFloat(parseInt(pm.volume) / 100);
+                this.kag.config.defaultMovieVolume = pm.volume;
+                this.kag.ftag.startTag("eval", {"exp":"sf._system_config_movie_volume = "+pm.volume});
             }else{
                 
                 if(typeof this.kag.config.defaultMovieVolume != "undefined"){
