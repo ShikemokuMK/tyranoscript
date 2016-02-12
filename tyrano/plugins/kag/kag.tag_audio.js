@@ -627,6 +627,7 @@ tyrano.plugin.kag.tag.xchgbgm = {
  [playse storage=sound.ogg loop=false ]
  :param
  storage=再生するファイルを指定してください,
+ click=スマホブラウザで効果音を鳴らす場合、クリック後でないと再生できません。スマホブラウザで音がならない場合trueを指定してみてください。デフォルトはfalse,
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
  clear=trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
  volume=BGMの再生音量を変更できます（0〜100）

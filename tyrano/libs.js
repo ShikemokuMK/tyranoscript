@@ -329,7 +329,9 @@
             return 'iphone';
         } else if (ua.indexOf('Android') > -1) {
             return 'android';
-        } else {
+        } else if(ua.indexOf('Chrome') > -1 && navigator.platform.indexOf('Linux') > -1) {
+            return 'android';
+        }else {
             return "pc";
         }
 
@@ -690,8 +692,8 @@
     /*タッチ系、一応出来たけど、動作確認よくしなければならなｋ，問題なければR9にも適応*/
     if ($.userenv() != "pc") {
         $.event.tap = function(o) {
-            o.bind('touchstart', onTouchStart_);
 
+            o.bind('touchstart', onTouchStart_);
             function onTouchStart_(e) {
                 e.preventDefault();
                 o.data('event.tap.moved', false).one('touchmove', onTouchMove_).one('touchend', onTouchEnd_);
@@ -699,7 +701,7 @@
             }
 
             function onTouchMove_(e) {
-                o.data('event.tap.moved', true);
+                //o.data('event.tap.moved', true);
                 e.stopPropagation();
             }
 
