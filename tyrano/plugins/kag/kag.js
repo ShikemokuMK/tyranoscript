@@ -147,6 +147,7 @@ tyrano.plugin.kag ={
         chara_time:"600",
         chara_memory:"false",
         chara_anim:"true",  //キャラクター追加時、位置が変わる場合にアニメーションで表示するか否か
+        chara_sort:"front", //front or back 　backを指定すると既に表示されてるキャラの後ろになる
         //定義されたキャラクター情報
         charas:{},
         
