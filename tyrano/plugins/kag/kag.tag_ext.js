@@ -1091,7 +1091,6 @@ pos_mode=true か false　を指定します。デフォルトはtrueです。tr
 ptext=発言者の名前領域のptextを指定できます。例えば[ptext name=name_space] のように定義されていた場合、その後 #yuko のように指定するだけで、ptext領域キャラクターの名前を表示することができます。,
 time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
 memory=true か false を指定します。デフォルトはfalseです。キャラクターを非表示にして再度表示した時に、表情を維持するかどうかをしていできます。falseをしていすると、[chara_new]で指定してデフォルトの表情で表示されます,
-sort=キャラクターを表示する際の順番を設定します。backを指定すると重なった場合、後からchara_showしたキャラが背後に追加されていきます。デフォルトはfront。具体的に順番を設定したい場合はchara_showのzindexパラメータを使います ,
 anim=キャラクターを自動配置する場合、キャラクターの立ち位置が変わるときにアニメーションを行うか否かを指定できます。デフォルトは true です。falseを指定するとじんわりと入れ替わる効果に切り替わります。,
 effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
 jswing
@@ -1140,8 +1139,7 @@ tyrano.plugin.kag.tag.chara_config ={
         ptext:"",
         time:"600",
         memory:"false",
-        anim:"true",
-        sort:"front"
+        anim:"true"
         
     },
     
@@ -1153,7 +1151,6 @@ tyrano.plugin.kag.tag.chara_config ={
         this.kag.stat.chara_time     = pm.time;
         this.kag.stat.chara_memory   = pm.memory;
         this.kag.stat.chara_anim     = pm.anim;
-        this.kag.stat.chara_sort     = pm.sort;
         
         this.kag.ftag.nextOrder();
         
@@ -1330,14 +1327,8 @@ tyrano.plugin.kag.tag.chara_show ={
         	
 	        var target_layer = that.kag.layer.getLayer(pm.layer,pm.page);
 	        
-	        //挿入する順番を選択できる
-	        if(that.kag.stat.chara_sort =="back"){
-	           //先頭に挿入
-               target_layer.prepend(img_obj).show();
-            }else{
-	           //最後に挿入
-               target_layer.append(img_obj).show();
-	        }
+	        //最後に挿入
+            target_layer.append(img_obj).show();
 	        
 	        var chara_num = 1;
 	        that.kag.layer.hideEventLayer();
@@ -1367,8 +1358,8 @@ tyrano.plugin.kag.tag.chara_show ={
 	            img_obj.css("left",first_left+"px");
 	            
 	            //すべてのanimationが完了するまで、次へ進めないように指定
-	            
-	            target_layer.find(".tyrano_chara").each(function(){
+	            var array_tyrano_chara = target_layer.find(".tyrano_chara").get().reverse();
+                $(array_tyrano_chara).each(function(){
 	                
 	                chara_num++;
 	                
@@ -1569,7 +1560,8 @@ tyrano.plugin.kag.tag.chara_hide ={
                                     return;
                                 }
                                 
-                                target_layer.find(".tyrano_chara").each(function(){
+                                var array_tyrano_chara = target_layer.find(".tyrano_chara").get().reverse();
+                                $(array_tyrano_chara).each(function(){
                                     
                                     chara_num++;
                                     
