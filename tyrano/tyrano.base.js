@@ -43,22 +43,26 @@ tyrano.base ={
              }else{
                 scale_f = width_f;
         	}
-        	//alert(scale_f);
-        	$(".tyrano_base").css("transform","scale("+scale_f+") ");	
-        
-            // 画面を右下に寄せる為に過剰スクロールする
-            $(".tyrano_base").css("transform","scale("+scale_f+") ");   
-            if(parseInt(view_width) < parseInt(width) ){
-                if(scale_f < 1){
-                    window.scrollTo(width, height);
-                }
-            }
 
+            setTimeout(function() {
+                
+                   $(".tyrano_base").css("transform", "scale(" + scale_f + ") ");
+                        if (parseInt(view_width) < parseInt(width)) {
+                            if (scale_f < 1) {
+                                window.scrollTo(width, height);
+                            }
+                        }
+
+            }, 100);        	
+            
         }else if(screen_ratio =="fit"){
             
             //スクリーンサイズに合わせて自動的に調整される
-            $(".tyrano_base").css("transform","scaleX("+width_f+") scaleY("+height_f+")");
-        
+            setTimeout(function() {
+                       $(".tyrano_base").css("transform","scaleX("+width_f+") scaleY("+height_f+")");
+                       window.scrollTo(width, height);
+            },100);
+            
         }else{
         	
         	//スクリーンサイズ固定
