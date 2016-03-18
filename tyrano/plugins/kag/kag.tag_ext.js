@@ -1055,7 +1055,12 @@ tyrano.plugin.kag.tag.chara_ptext ={
             if(cpm){
             //キャラクター名出力
                 $("."+this.kag.stat.chara_ptext).html(cpm.jname);
-            
+                
+                //色指定がある場合は、その色を指定する。
+                if(cpm.color!=""){
+                    $("."+this.kag.stat.chara_ptext).css("color",$.convertColor(cpm.color));
+                }
+                
             }else{
                 //存在しない場合はそのまま表示できる
                  $("."+this.kag.stat.chara_ptext).html(pm.name);
@@ -1176,6 +1181,7 @@ storage=キャラクター画像を指定してください。画像ファイル
 width=画像の横幅を指定できます,
 height=画像の高さを指定できます。,
 reflect=画像を反転します,
+color=キャラクターの名前を表示するときの色を指定できます。0xRRGGBB 形式で指定します。,
 jname=このキャラクターをネームスペースに表示する場合、適用する名称を指定できます。例えば、#yuko と指定すると　メッセージエリアに　ゆうこ　と表示できます
 #[end]
 */
@@ -1193,6 +1199,7 @@ tyrano.plugin.kag.tag.chara_new ={
         reflect:"false",
         jname:"",
         visible:"false", 
+        color:"",
         map_face:{}
     },
     
