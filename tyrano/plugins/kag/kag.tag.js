@@ -3505,11 +3505,13 @@ y=ボタンの縦位置を指定します。
 width=ボタンの横幅をピクセルで指定できます,
 height=ボタンの高さをピクセルで指定できます,
 exp=ボタンがクリックされた時に実行されるJSを指定できます。,
-clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
 size=フォントサイズを指定できます。デフォルトは３０です,
 face=フォントを指定できます。Webフォントを追加したい場合はfont.cssに定義を記述して下さい,
-
-
+graphic=ボタンの背景画像を指定します。ファイルはプロジェクトフォルダのimageフォルダに入れて下さい。画像が指定された場合はcolorは無視されます,
+enterimg=graphicが指定されている時に有効。カーソルが重なった時の画像を指定できます,
+clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
+enterse=ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
+leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。,
 #[end]
 */
 
@@ -3524,10 +3526,14 @@ tyrano.plugin.kag.tag.glink = {
         text : "",
         x : "auto",
         y : "",
-        clickse : "",
         width : "",
         height : "",
         size : 30,
+        graphic:"",
+        enterimg:"",
+        clickse:"",
+        enterse:"",
+        leavese:"",
         face:""
     },
 
@@ -3545,14 +3551,29 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
         j_button.css("font-size", pm.size + "px");
-        j_button.addClass(pm.color);
-
+        
         if (pm.height != "") {
             j_button.css("height", pm.height + "px");
         }
 
         if (pm.width != "") {
             j_button.css("width", pm.width + "px");
+        }
+        
+        //graphic 背景画像を指定できます。
+        if(pm.graphic !=""){
+            
+            //画像の読み込み
+            
+            j_button.removeClass("button").addClass("button_graphic");
+            var img_url = "./data/image/" + pm.graphic ;
+            j_button.css("background-image","url("+img_url+")");
+            j_button.css("background-repeat","no-repeat");
+            j_button.css("background-position","center center");
+            j_button.css("background-size","100% 100%");
+            
+        }else{
+            j_button.addClass(pm.color);
         }
         
         if(pm.face !=""){
@@ -3562,7 +3583,6 @@ tyrano.plugin.kag.tag.glink = {
         }
 
         if (pm.x == "auto") {
-            var chara_cnt = target_layer.find(".tyrano_chara").length;
             var sc_width = parseInt(that.kag.config.scWidth);
             var center = Math.floor(parseInt(j_button.css("width")) / 2);
             var base = Math.floor(sc_width / 2);
@@ -3637,6 +3657,39 @@ tyrano.plugin.kag.tag.glink = {
                 that.kag.ftag.startTag("jump", _pm);
 
             });
+            
+            j_button.hover(function() {
+
+                if (_pm.enterimg != "") {
+                    var enterimg_url = "./data/image/" + _pm.enterimg;
+                    j_button.css("background-image", "url(" + enterimg_url + ")");
+                }
+
+                //マウスが乗った時
+                if (_pm.enterse != "") {
+                    that.kag.ftag.startTag("playse", {
+                        "storage" : _pm.enterse,
+                        "stop" : true
+                    });
+                }
+                
+            }, 
+            function() {
+
+                if (_pm.enterimg != "") {
+                    var img_url = "./data/image/" + _pm.graphic;
+                    j_button.css("background-image", "url(" + img_url + ")");
+                }
+                //マウスが乗った時
+                if (_pm.leavese != "") {
+                    that.kag.ftag.startTag("playse", {
+                        "storage" : _pm.leavese,
+                        "stop" : true
+                    });
+                }
+            }); 
+
+            
 
         })();
         
