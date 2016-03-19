@@ -161,14 +161,18 @@ tyrano.plugin.kag.tag["close"] = {
     },
 
     start:function(pm){
-        
+        var that = this;
         if(pm.ask=="true"){
-            if(confirm($.lang("exit_game"))){
-                this.close();
-            }else{
-                //キャンセルの場合は次の命令へ
-                this.kag.ftag.nextOrder();
-            }
+            
+            $.confirm($.lang("exit_game"),
+                function(){
+                    that.close();
+                },
+                function(){
+                    that.kag.ftag.nextOrder();
+                }
+            );
+            
         }else{
             this.close();
         }
@@ -1500,6 +1504,113 @@ tyrano.plugin.kag.tag.screen_full = {
         this.kag.ftag.nextOrder();
         
     }
+    
+};
+
+/*
+#[dialog]
+:group
+システム操作
+:title
+ダイアログ表示
+:exp
+様々な機能をもったダイアログを表示します。
+ダイアログは以下のタイプがあります。
+type
+:sample
+;警告ウィンドウのメッセージ表示
+[dialog type="alert" text="メッセージ内容" ]
+
+;確認ダイアログの表示
+[dialog type="confirm" text="メッセージ内容" storage="scene2" target="ok_label" storage_cancel="" target_cancel="" ]
+
+;テキスト入力ダイアログの表示
+[dialog type="input" text="名前を教えて下さい" storage="scene2" target="ok_label" ]
+
+:param
+name=confirmを指定した時に格納する変数名を指定して下さい。
+type=ダイアログの種類を指定します。alert confirm input,
+text=メッセージとして表示するてテキストを指定して下さい,
+storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
+target=指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
+storage_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先シナリオファイルを指定します。,
+target_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.dialog = {
+    
+    vital:[],
+    
+    pm:{
+        name:"tf.dialog_value",
+        type:"alert",
+        text:"",
+        storage:"",
+        target:"",
+        storage_cancel:"",
+        target_cancel:""
+    },
+    
+    start:function(pm){
+        
+        var that = this;
+        
+        if(pm.type=="confirm"){
+            $.confirm(pm.text,
+                function(){
+                    that.finish(pm);
+                },
+                function(){
+                    pm.storage=pm.storage_cancel;
+                    pm.target =pm.target_cancel;
+                    that.finish(pm);
+                }
+            );
+        }else if(pm.type=="input"){
+            
+            alertify.prompt(pm.text, function(flag,text){
+                if(flag){
+                    
+                    var name = pm.name;
+                    var val = text;
+                    var str  = name + " = '" + val +"'";
+                    
+                    that.kag.evalScript(str);
+           
+                }else{
+                    pm.storage=pm.storage_cancel;
+                    pm.target =pm.target_cancel;
+                }
+                
+                that.finish(pm);
+                
+            });
+            
+        }else{
+            //alert
+            $.alert(pm.text,function(){
+                that.finish(pm);
+            });
+            
+        }
+        
+        
+        //this.kag.ftag.nextOrder();
+        
+    },
+    
+    //終わった後どうするか
+    finish:function(pm){
+        
+        if(pm.storage!="" || pm.target!=""){
+            this.kag.ftag.startTag("jump", pm);
+        }else{
+            this.kag.ftag.nextOrder();
+        }
+        
+    },
     
 };
 

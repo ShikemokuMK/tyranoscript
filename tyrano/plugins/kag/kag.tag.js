@@ -3384,11 +3384,15 @@ tyrano.plugin.kag.tag.button = {
                             that.kag.layer.hideMessageLayers();
                             break;
                         case "title":
-                            if (!confirm($.lang("go_title"))) {
-                                return false;
-                            }
-                            //first.ks の *start へ戻ります
-                            location.reload();
+                            
+                            $.confirm($.lang("go_title"),
+                                function(){
+                                    location.reload();
+                                },
+                                function(){
+                                    return false;
+                                }
+                            );
                             break;
                         case "menu":
                             that.kag.menu.showMenu();

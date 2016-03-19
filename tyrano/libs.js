@@ -649,6 +649,32 @@
     };
     */
 
+    $.alert = function(str,cb) {
+        alertify.alert(str,function(){;
+            if(typeof cb == "function"){
+                cb();
+            }
+        });
+    };
+    
+    $.inform =function(str,type){
+        alertify.log(str,type);
+    };
+    
+    $.confirm = function (str,cb_ok,cb_cancel){
+        
+        alertify.confirm(str,function(e){
+            if (e) {
+            // user clicked "ok"
+                cb_ok();
+            } else {
+                // user clicked "cancel"
+                cb_cancel();
+            }
+        });
+                
+    };
+
     //オブジェクトの個数をもってきます。1
     $.countObj = function(obj) {
 
