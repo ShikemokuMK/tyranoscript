@@ -165,6 +165,9 @@ tyrano.plugin.kag.tag["close"] = {
         if(pm.ask=="true"){
             if(confirm($.lang("exit_game"))){
                 this.close();
+            }else{
+                //キャンセルの場合は次の命令へ
+                this.kag.ftag.nextOrder();
             }
         }else{
             this.close();
