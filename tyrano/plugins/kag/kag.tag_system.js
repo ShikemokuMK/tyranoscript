@@ -1534,8 +1534,9 @@ text=メッセージとして表示するてテキストを指定して下さい
 storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
 target=指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
 storage_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先シナリオファイルを指定します。,
-target_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。
-
+target_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。,
+label_ok=OKボタンの名前を好きなものに指定できます。デフォルトはOKです　,
+label_cancel=キャンセルボタンの名前を好きなものに指定できます。デフォルトはCancelです　
 #[end]
 */
 
@@ -1550,7 +1551,9 @@ tyrano.plugin.kag.tag.dialog = {
         storage:"",
         target:"",
         storage_cancel:"",
-        target_cancel:""
+        target_cancel:"",
+        label_ok:"OK",
+        label_cancel:"Cancel"
     },
     
     start:function(pm){
@@ -1570,6 +1573,7 @@ tyrano.plugin.kag.tag.dialog = {
             );
         }else if(pm.type=="input"){
             
+            alertify.set({ buttonFocus: "none",labels:{ok:pm.label_ok,cancel:pm.label_cancel}});
             alertify.prompt(pm.text, function(flag,text){
                 if(flag){
                     
