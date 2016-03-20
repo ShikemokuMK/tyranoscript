@@ -58,7 +58,7 @@ tyrano.plugin.kag.ftag = {
     hideNextImg : function() {
 
         $(".img_next").remove();
-        $("#glyph_image").hide();
+        $(".glyph_image").hide();
     },
 
     //次の命令を実行する
@@ -740,7 +740,7 @@ tyrano.plugin.kag.tag.text = {
                         jtext.find("p").append("<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
 
                     } else {
-                        $("#glyph_image").show();
+                        $(".glyph_image").show();
 
                     }
 
@@ -868,7 +868,7 @@ tyrano.plugin.kag.tag.text = {
 
                     } else {
 
-                        $("#glyph_image").show();
+                        $(".glyph_image").show();
 
                     }
                     //that.kag.appendMessage(jtext,current_str+"<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
@@ -3897,13 +3897,13 @@ tyrano.plugin.kag.tag.glyph = {
 
         var that = this;
 
-        $("#glyph_image").remove();
+        $(".glyph_image").remove();
 
         if (pm.fix == "true") {
 
             var j_layer = this.kag.layer.getLayer(pm.layer);
 
-            var j_next = $("<img id='glyph_image' />");
+            var j_next = $("<img class='glyph_image' />");
             j_next.attr("src", "./tyrano/images/kag/" + pm.line);
             j_next.css("position", "absolute");
             j_next.css("z-index", 99999);
@@ -4019,6 +4019,7 @@ tyrano.plugin.kag.tag.trans = {
 
                     //メッセージレイヤの場合、カレント以外はトランスしない。むしろ非表示
                     //if((_key.indexOf("message")!=-1 && _key !== that.kag.stat.current_layer) || (_key.indexOf("message")!=-1 && layer_back.attr("l_visible") == "false") ){
+                    
                     if ((_key.indexOf("message") != -1 && layer_back.attr("l_visible") == "false")) {
 
                         comp_num++;
