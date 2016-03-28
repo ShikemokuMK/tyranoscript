@@ -67,7 +67,11 @@ tyrano.plugin.kag.tag.movie ={
     pm:{
         storage:"",
         volume:"",
-        skip:false
+        skip:"false",
+        //隠しパラメータ
+        bgmode:"false",
+        loop:"false"
+        
     },
     
     start:function(pm){
@@ -81,12 +85,10 @@ tyrano.plugin.kag.tag.movie ={
             $('.tyrano_base').bind('click.movie', function(e){
                 that.playVideo(pm);
                 $(".tyrano_base").unbind("click.movie");
-            
             });
             
         }else{
             
-            //firefoxの場合は再生できない旨、警告
             //firefox opera の場合、webMに変更する。
             if($.getBrowser()=="firefox" || $.getBrowser()=="opera"){
                 pm.storage = $.replaceAll(pm.storage,".mp4",".webm");
@@ -120,7 +122,7 @@ tyrano.plugin.kag.tag.movie ={
             //top:0px;left:0px;width:100%;height:100%;'";
             
             video.style.backgroundColor = "black";
-            video.style.zIndex=199999;
+            
             video.style.position="absolute";
             video.style.top="0px";
             video.style.left="0px";
@@ -129,23 +131,41 @@ tyrano.plugin.kag.tag.movie ={
             video.autoplay = true;
             video.autobuffer = true;
             
-            video.addEventListener("ended",function(e){
-                $(".tyrano_base").find("video").remove();
-                that.kag.ftag.nextOrder();
-        
-            });
-            
-            //スキップ可能なら、クリックで削除
-            
-            if(pm.skip == "true"){
+            if(pm.bgmode =="true"){
+                //背景モード
+                video.style.zIndex=1;
                 
-                video.addEventListener("click",function(e){
+                if(pm.loop=="true"){
+                    video.loop = true;
+                }else{
+                    video.loop = false;
+                }
+                
+            }else{
+                
+                video.style.zIndex=199999;
+                
+                video.addEventListener("ended",function(e){
                     $(".tyrano_base").find("video").remove();
                     that.kag.ftag.nextOrder();
         
                 });
-           
-           }
+                
+                //スキップ可能なら、クリックで削除
+                //bgmodeがtrueならはスキップ関係なし
+                
+                if(pm.skip == "true"){
+                    
+                    video.addEventListener("click",function(e){
+                        $(".tyrano_base").find("video").remove();
+                        that.kag.ftag.nextOrder();
+            
+                    });
+               
+               }
+                
+            }
+            
             
             document.getElementById("tyrano_base").appendChild(video);
             video.load();
@@ -154,6 +174,98 @@ tyrano.plugin.kag.tag.movie ={
     }
     
 };
+
+
+/*
+#[bgmovie]
+:group
+その他
+:title
+背景ムービーの再生
+:exp
+ogv webm mp4 などに対応します
+提供するゲームによって対応するフォーマットが異なります。
+PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
+ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
+stop_bgmovie タグを指定すると再生が終わります。
+:sample
+[bgmovie storage="" skip=false ]
+:param
+storage=再生するogv webm mp4ファイルを指定してください,
+volume=ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100 ,
+loop=背景動画をループさせるかどうかを指定します。falseを指定すると動画の最後の状態で停止します。
+#[end]
+*/
+
+tyrano.plugin.kag.tag.bgmovie ={
+    
+    vital:["storage"],
+    
+    pm:{
+        storage:"",
+        volume:"",
+        loop:"true",
+        stop:"false"  //nextorderするかしないk
+    },
+    
+    start:function(pm){
+        
+        var that = this;
+        
+        pm.skip = "false";
+        pm.bgmode   = "true";
+        
+        this.kag.stat.current_bgmovie["storage"] = pm.storage;
+        this.kag.stat.current_bgmovie["volume"]  = pm.volume;
+        
+        this.kag.ftag.startTag("movie",pm);
+        
+        if(pm.stop=="false"){
+            this.kag.ftag.nextOrder();
+        }
+                
+        
+    }
+    
+};
+
+
+
+/*
+#[stop_bgmovie]
+:group
+その他
+:title
+背景ムービーの停止
+:exp
+bgmovieで再生した背景動画を停止します。
+:sample
+[stop_bgmovie storage="" skip=false ]
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.stop_bgmovie ={
+    
+    vital:[],
+    
+    pm:{
+    },
+    
+    start:function(pm){
+        
+        var that = this;
+        
+        that.kag.stat.current_bgmovie["storage"] = "";
+        that.kag.stat.current_bgmovie["volume"] = "";
+        
+        $(".tyrano_base").find("video").remove();
+        that.kag.ftag.nextOrder();
+        
+    }
+    
+};
+
 
 
 /*
@@ -184,6 +296,8 @@ tyrano.plugin.kag.tag.showsave ={
     }
     
 };
+
+
 
 
 /*
@@ -1063,7 +1177,7 @@ tyrano.plugin.kag.tag.chara_ptext ={
                 
             }else{
                 //存在しない場合はそのまま表示できる
-                 $("."+this.kag.stat.chara_ptext).html(pm.name);
+                $("."+this.kag.stat.chara_ptext).html(pm.name);
             }
         }
         

@@ -423,6 +423,26 @@ tyrano.plugin.kag.menu = {
             this.kag.ftag.startTag("playbgm", pm);
 
         }
+        
+        //背景動画が設定中なら
+        if (this.kag.stat.current_bgmovie["storage"] !=""){
+            
+            $(".tyrano_base").find("video").remove();
+            
+            var vstorage = this.kag.stat.current_bgmovie["storage"];
+            var volume   = this.kag.stat.current_bgmovie["volume"];
+            
+            var pm = {
+                
+                storage:vstorage,
+                volume :volume,
+                stop:"true"
+                
+            };
+            
+            this.kag.ftag.startTag("bgmovie", pm);
+            
+        }
 
         //カーソルの復元
         this.kag.setCursor(this.kag.stat.current_cursor);

@@ -98,6 +98,11 @@ tyrano.plugin.kag ={
         is_auto:{},
         current_bgm:"", //現在再生中のBGM
         
+        current_bgmovie:{
+            storage:"",
+            volume:"" 
+        }, //再生中の背景動画
+        
         current_line:0, //実行中の命令の実際のファイル行　エラーや警告時に使用
         
         is_hide_message:false, //メッセージエリアが非表示状態か否か
@@ -407,6 +412,15 @@ tyrano.plugin.kag ={
             
         $("."+this.kag.define.BASE_DIV_NAME).append(button_menu_obj);
         
+        //センタリングの調整
+        /*
+        if(this.kag.config["ScreenCentering"] && this.kag.config["ScreenCentering"]=="true"){
+            
+        }else{
+            //センタリングをキャンセルする
+            this.tyrano.base.cancelCentering();
+        }
+        */
         
         
         //tyranoの大本部分の調整
