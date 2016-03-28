@@ -29,8 +29,6 @@ tyrano.base ={
         
         var scale_f = 0;
         
-        $(".tyrano_base").css("transform-origin","50 50");
-        
         var space_width = 0;
         
         var screen_ratio = this.tyrano.kag.config.ScreenRatio;

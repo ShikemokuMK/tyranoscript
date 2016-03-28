@@ -413,15 +413,20 @@ tyrano.plugin.kag ={
         $("."+this.kag.define.BASE_DIV_NAME).append(button_menu_obj);
         
         //センタリングの調整
-        /*
-        if(this.kag.config["ScreenCentering"] && this.kag.config["ScreenCentering"]=="true"){
+        
+        if(this.kag.config["ScreenCentering"] && this.kag.config["ScreenCentering"]=="false"){
+            
+            //センタリングをキャンセルする
+            $(".tyrano_base").css("transform-origin","0 0");
+            $(".tyrano_base").css({
+                margin: 0
+            });
             
         }else{
-            //センタリングをキャンセルする
-            this.tyrano.base.cancelCentering();
+            //指定がない or yes なら こっち
+            $(".tyrano_base").css("transform-origin","50 50");
+            
         }
-        */
-        
         
         //tyranoの大本部分の調整
         this.tyrano.base.setBaseSize(this.config.scWidth,this.config.scHeight);
