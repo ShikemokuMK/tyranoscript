@@ -3135,6 +3135,8 @@ tyrano.plugin.kag.tag.button = {
         leavese : "",
         clickimg : "",
         enterimg : "",
+        
+        auto_next:"yes",
 
         role : ""
 
@@ -3447,7 +3449,8 @@ tyrano.plugin.kag.tag.button = {
                        if(that.kag.stat.is_strong_stop == true){
                            _pm.auto_next = "stop";
                        }else{
-                           _pm.auto_next = "yes";
+                           //パラメータ初期値が入るようになる
+                           //_pm.auto_next = "yes";
                        }
                        
                        that.kag.ftag.startTag("call", _pm);
