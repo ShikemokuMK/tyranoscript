@@ -15,7 +15,7 @@ tyrano.plugin.kag.rider = {
         //ゲームがスタートした時にライダー側に通知する
         //alert("complete!");
         //riderからの起動かどうかを判定する必要あり
-        if (window.opener.app) {
+        if (window.opener && window.opener.app) {
             if(window.opener.app.config.user_config.check_debug==true){
                 TYRANO.kag.is_rider = true;
                 this.app = window.opener.app;

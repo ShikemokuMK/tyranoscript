@@ -1974,8 +1974,10 @@ tyrano.plugin.kag.tag.ptext = {
 演出テキスト
 :exp
 多彩な演出効果をもったテキストを画面上に表示します。
-
+[layopt layer=0 visible=true]が必要です。
 :sample
+;デフォルトは前景レイヤは配置されますので表示状態にしておく
+[layopt layer=0 visible=true]
 [mtext text="演出テキスト" x=100 y=100 in_effect="fadeIn" out_effect="fadeOut"]
 :param
 layer=対象とするレイヤを指定します。0以上の整数を指定すると対応する前景レイヤに画像を表示します,

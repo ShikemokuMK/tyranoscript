@@ -1404,6 +1404,13 @@ tyrano.plugin.kag.tag.chara_show ={
             return;
         }
         
+        //すでにキャラクターが登場している場合は無視する
+        var check_obj = $(".layer_fore").find("."+pm.name);
+        if(check_obj.get(0)){
+            that.kag.ftag.nextOrder();
+            return;
+        }
+        
         var storage_url = "./data/fgimage/"+cpm.storage;
         
          if($.isHTTP(cpm.storage)){
