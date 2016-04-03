@@ -4135,10 +4135,14 @@ tyrano.plugin.kag.tag.bg = {
             });
             
             $.trans(pm.method, j_new_bg, parseInt(pm.time), "show", function() {
+                
+                j_new_bg.css("opacity",1);
+                
                 if (pm.wait == "true") {
                     that.kag.layer.showEventLayer();
                     that.kag.ftag.nextOrder();
                 }
+                
             });
             
             //レイヤの中で、画像を取得する
