@@ -30,10 +30,10 @@ tyrano.plugin.kag.layer ={
         layer_obj_click.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
         
         
-        
-        layer_obj_click.click(function(e){
+        //スキップやオートキャンセルの停止、画面がクリックされた時。
+        $("body").click(function(){
             
-            //スキップ中にクリックされたら、速度を元に戻す
+            //スキップ中にクリックされたら元に戻す
             if(that.kag.stat.is_skip == true){
                 that.kag.stat.is_skip = false; 
             }
@@ -45,10 +45,16 @@ tyrano.plugin.kag.layer ={
                 }
             }
             
-            //オート待ち状態なら、解除する
+            //オート待ち状態なら、、解除する
             if(that.kag.stat.is_wait_auto = true){
                 that.kag.stat.is_wait_auto = false;
             }
+            
+            
+        });
+        
+        layer_obj_click.click(function(e){
+            
 
             // POSSIBLE IMPROVE
             // make "isReturn" variable
