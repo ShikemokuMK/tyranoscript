@@ -3555,7 +3555,7 @@ tyrano.plugin.kag.tag.glink = {
         target_layer = this.kag.layer.getFreeLayer();
         target_layer.css("z-index", 999999);
 
-        var j_button = $("<div class='button'>" + pm.text + "</div>");
+        var j_button = $("<div class='glink_button'>" + pm.text + "</div>");
         j_button.css("position", "absolute");
         j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
@@ -3574,7 +3574,7 @@ tyrano.plugin.kag.tag.glink = {
             
             //画像の読み込み
             
-            j_button.removeClass("button").addClass("button_graphic");
+            j_button.removeClass("glink_button").addClass("button_graphic");
             var img_url = "./data/image/" + pm.graphic ;
             j_button.css("background-image","url("+img_url+")");
             j_button.css("background-repeat","no-repeat");

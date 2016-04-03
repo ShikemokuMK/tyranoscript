@@ -180,7 +180,7 @@ body{
 
 /* button 
 ---------------------------------------------- */
-.button {
+.glink_button {
 	display: inline-block;
 	zoom: 1; /* zoom and *display = ie7 hack for display:inline-block */
 	*display: inline;
@@ -200,10 +200,10 @@ body{
 	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
 	box-shadow: 0 1px 2px rgba(0,0,0,.2);
 }
-.button:hover {
+.glink_button:hover {
 	text-decoration: none;
 }
-.button:active {
+.glink_button:active {
 	position: relative;
 	top: 1px;
 }
