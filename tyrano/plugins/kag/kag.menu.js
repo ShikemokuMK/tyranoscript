@@ -34,7 +34,7 @@ tyrano.plugin.kag.menu = {
 
             layer_menu.append(j_menu);
 
-            layer_menu.find(".menu_skip").click(function() {
+            layer_menu.find(".menu_skip").click(function(e) {
 
                 //スキップを開始する
                 layer_menu.html("");
@@ -54,6 +54,9 @@ tyrano.plugin.kag.menu = {
                     that.kag.ftag.nextOrder();
 
                 }
+                
+                e.stopPropagation();
+
 
             });
 
@@ -62,6 +65,9 @@ tyrano.plugin.kag.menu = {
                 if (that.kag.stat.visible_menu_button == true) {
                     $(".button_menu").show();
                 }
+                
+                e.stopPropagation();
+
             });
 
             layer_menu.find(".menu_window_close").click(function(e) {
@@ -73,18 +79,23 @@ tyrano.plugin.kag.menu = {
                 if (that.kag.stat.visible_menu_button == true) {
                     $(".button_menu").show();
                 }
+                
+                e.stopPropagation();
+
 
             });
 
             layer_menu.find(".menu_save").click(function(e) {
 
                 that.displaySave();
+                e.stopPropagation();
 
             });
 
             layer_menu.find(".menu_load").click(function(e) {
 
                 that.displayLoad();
+                e.stopPropagation();
 
             });
 
@@ -423,6 +434,13 @@ tyrano.plugin.kag.menu = {
             this.kag.ftag.startTag("playbgm", pm);
 
         }
+        
+        if(!this.kag.stat.current_bgmovie){
+            this.kag.stat.current_bgmovie = {
+                storage:"",
+                volume:"" 
+            };
+        }   
         
         //背景動画が設定中なら
         if (this.kag.stat.current_bgmovie["storage"] !=""){

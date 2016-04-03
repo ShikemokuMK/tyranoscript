@@ -291,7 +291,6 @@ tyrano.plugin.kag.layer ={
                 var j_message_inner = this.map_layer_fore["message"+num].find(".message_inner");
                 
                 j_message_inner
-                //.css("background-color",$.convertColor(this.config.frameColor))
                 .css("left",parseInt(j_message_outer.css("left"))+10)
                 .css("top",parseInt(j_message_outer.css("top"))+10)
                 .css("width",parseInt(j_message_outer.css("width"))-10)

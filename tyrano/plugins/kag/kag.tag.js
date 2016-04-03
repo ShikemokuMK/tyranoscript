@@ -1974,6 +1974,8 @@ tyrano.plugin.kag.tag.ptext = {
 演出テキスト
 :exp
 多彩な演出効果をもったテキストを画面上に表示します。
+指定できる演出アニメーションは<a href='http://tyrano.jp/mtext/' target="_blank">こちら</a>
+
 [layopt layer=0 visible=true]が必要です。
 :sample
 ;デフォルトは前景レイヤは配置されますので表示状態にしておく
@@ -1996,7 +1998,7 @@ fadeout=テキスト表示後にフェードアウトを実行するか否かを
 time=テキストが静止している時間をミリ秒で指定します。, 
 wait=trueかfalse を指定します。trueを指定すると、テキストの演出完了を待ちます。デフォルトはtrue,
 
-in_effect=文字が表示される際のアニメーション演出を指定します。指定できるアニメーションは<a href='http://tyrano.jp/mtext/' target="_blank">こちら</a>,
+in_effect=文字が表示される際のアニメーション演出を指定します。,
 in_delay=文字が表示される際の速度を指定します。何秒遅れて１文字が表示されるかをミリ秒で指定します。デフォルトは50です,
 in_delay_scale=１文字にかかるアニメーションの比率を指定します。デフォルトは1.5,
 in_sync=trueを指定すると、すべての文字が同時にアニメーションを開始します。デフォルトはfalse,

@@ -1516,7 +1516,7 @@ tyrano.plugin.kag.tag.screen_full = {
 :exp
 様々な機能をもったダイアログを表示します。
 ダイアログは以下のタイプがあります。
-type
+
 :sample
 ;警告ウィンドウのメッセージ表示
 [dialog type="alert" text="メッセージ内容" ]
@@ -1614,7 +1614,7 @@ tyrano.plugin.kag.tag.dialog = {
             this.kag.ftag.nextOrder();
         }
         
-    },
+    }
     
 };
 
