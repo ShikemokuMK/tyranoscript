@@ -2329,12 +2329,20 @@ tyrano.plugin.kag.tag.link = {
          
          var _target = pm.target;
          var _storage = pm.storage;
+         var that = this;
          
          j_span.bind('click', function(e) {
                 
                 //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
                 TYRANO.kag.ftag.nextOrderWithLabel(_target, _storage);
                 TYRANO.kag.layer.showEventLayer();
+                
+                //選択肢の後、スキップを継続するか否か
+                if(that.kag.stat.skip_link=="true"){
+                    e.stopPropagation();
+                }else{
+                    that.kag.stat.is_skip = false; 
+                }
                 
          });
 
@@ -3473,6 +3481,14 @@ tyrano.plugin.kag.tag.button = {
                     that.kag.ftag.startTag("jump", _pm);
 
                 }
+                
+                //選択肢の後、スキップを継続するか否か
+                if(that.kag.stat.skip_link=="true"){
+                    event.stopPropagation();
+                }else{
+                    that.kag.stat.is_skip = false; 
+                }
+                
             });
 
         })();
@@ -3640,7 +3656,7 @@ tyrano.plugin.kag.tag.glink = {
             var preexp = that.kag.embScript(pm.preexp);
             var button_clicked = false;
 
-            j_button.click(function() {
+            j_button.click(function(e) {
                 
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
@@ -3666,6 +3682,13 @@ tyrano.plugin.kag.tag.glink = {
                 that.kag.ftag.startTag("cm", {});
                 //コールを実行する
                 that.kag.ftag.startTag("jump", _pm);
+                
+                //選択肢の後、スキップを継続するか否か
+                if(that.kag.stat.skip_link=="true"){
+                    e.stopPropagation();
+                }else{
+                    that.kag.stat.is_skip = false; 
+                }
 
             });
             

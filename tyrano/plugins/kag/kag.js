@@ -116,6 +116,8 @@ tyrano.plugin.kag ={
         
         ch_speed:"", //文字表示スピード
         
+        skip_link:"true", //選択肢のあと、スキップを継続するかどうか。
+        
         flag_glyph : "false", //クリック待ちボタンが指定されているか否か
         current_cursor:"auto", //現在のカーソル指定
         
