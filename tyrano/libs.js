@@ -262,8 +262,10 @@
     };
 
     $.loadText = function(file_path, callback) {
+        
+        /*
         var httpObj = jQuery.get(file_path + "?" + Math.floor(Math.random() * 1000000), null, function(obj) {
-
+            
             var order_str = "";
 
             if (httpObj) {
@@ -283,10 +285,23 @@
             callback(order_str);
             // createOrder
         });
+        
+        */
 
-        if (httpObj.statusText === "error") {
-            alert("ファイルが見つかりませんでした");
-        }
+        $.ajax({
+            url: file_path + "?" + Math.floor(Math.random() * 1000000),
+            cache: false,
+            success: function(text){
+                order_str = text;
+                callback(order_str);
+            },
+            error:function(){
+                alert("file not found:"+file_path);
+                callback("");
+            }
+        });
+        
+        
 
     };
 
