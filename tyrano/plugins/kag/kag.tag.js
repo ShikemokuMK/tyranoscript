@@ -2527,8 +2527,8 @@ tyrano.plugin.kag.tag.quake = {
         count : 5,
         time : 300,
         timemode : "",
-        hmax : null,
-        vmax : 10,
+        hmax : "0",
+        vmax : "10",
         wait : "true"
     },
 
@@ -2536,7 +2536,7 @@ tyrano.plugin.kag.tag.quake = {
 
         var that = this;
 
-        if (pm.hmax != null) {
+        if (pm.hmax != "0") {
 
             $("." + this.kag.define.BASE_DIV_NAME).effect('shake', {
                 times : parseInt(pm.count),
@@ -2549,7 +2549,7 @@ tyrano.plugin.kag.tag.quake = {
                 }
             });
 
-        } else if (pm.vmax > 0) {
+        } else if (pm.vmax != "0") {
 
             $("." + this.kag.define.BASE_DIV_NAME).effect('shake', {
                 times : parseInt(pm.count),
