@@ -1211,6 +1211,7 @@ ptext=発言者の名前領域のptextを指定できます。例えば[ptext na
 time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
 memory=true か false を指定します。デフォルトはfalseです。キャラクターを非表示にして再度表示した時に、表情を維持するかどうかをしていできます。falseをしていすると、[chara_new]で指定してデフォルトの表情で表示されます,
 anim=キャラクターを自動配置する場合、キャラクターの立ち位置が変わるときにアニメーションを行うか否かを指定できます。デフォルトは true です。falseを指定するとじんわりと入れ替わる効果に切り替わります。,
+pos_change_time=キャラクターの位置を変更する際のスピードを調整できます。ミリ秒で指定して下さい。デフォルトは600,
 effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
 jswing
 ｜def
@@ -1258,18 +1259,21 @@ tyrano.plugin.kag.tag.chara_config ={
         ptext:"",
         time:"600",
         memory:"false",
-        anim:"true"
+        anim:"true",
+        pos_change_time:"" //立ち位置の変更時にかかる時間を指定できます
         
     },
     
     start:function(pm){
         
-        this.kag.stat.chara_pos_mode = pm.pos_mode;
-        this.kag.stat.chara_effect   = pm.effect;
-        this.kag.stat.chara_ptext    = pm.ptext;
-        this.kag.stat.chara_time     = pm.time;
-        this.kag.stat.chara_memory   = pm.memory;
-        this.kag.stat.chara_anim     = pm.anim;
+        //入力されている項目のみ、反映させる
+        if(pm.pos_mode != "true") this.kag.stat.chara_pos_mode = pm.pos_mode;
+        if(pm.effect != "swing") this.kag.stat.chara_effect   = pm.effect;
+        if(pm.ptext != "") this.kag.stat.chara_ptext    = pm.ptext;
+        if(pm.time != "600") this.kag.stat.chara_time     = pm.time;
+        if(pm.memory != "false") this.kag.stat.chara_memory   = pm.memory;
+        if(pm.anim != "true") this.kag.stat.chara_anim     = pm.anim;
+        if(pm.pos_change_time != "") this.kag.stat.pos_change_time  = pm.pos_change_time;
         
         this.kag.ftag.nextOrder();
         
@@ -1510,7 +1514,7 @@ tyrano.plugin.kag.tag.chara_show ={
                                 j_chara.css("left",left);
                        
                                 j_chara.fadeTo(
-                                    parseInt(pm.time), 
+                                    parseInt(that.kag.stat.pos_change_time), 
                                     1,
                                     function(){
                                         
@@ -1532,7 +1536,7 @@ tyrano.plugin.kag.tag.chara_show ={
     	                        left:left
     	                    }
     	                    ,
-    	                    parseInt(pm.time), 
+    	                    parseInt(that.kag.stat.pos_change_time), 
     	                    that.kag.stat.chara_effect,
     	                    function(){
     	                        chara_num--;
@@ -1711,7 +1715,7 @@ tyrano.plugin.kag.tag.chara_hide ={
                                                 j_chara.css("left",left);
                                        
                                                 j_chara.fadeTo(
-                                                    parseInt(pm.time), 
+                                                    parseInt(that.kag.stat.pos_change_time), 
                                                     1,
                                                     function(){
                                                         
@@ -1734,7 +1738,7 @@ tyrano.plugin.kag.tag.chara_hide ={
                                                 left:left
                                             }
                                             ,
-                                            parseInt(pm.time), 
+                                            parseInt(that.kag.stat.pos_change_time), 
                                             that.kag.stat.chara_effect,
                                             function(){
                                                 
