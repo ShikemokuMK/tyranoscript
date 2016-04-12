@@ -1234,6 +1234,10 @@ tyrano.plugin.kag.tag.edit = {
        
        var j_text = $("<input class='text_box form' name='"+pm.name+"' type='text' value='' />");
        
+       j_text.click(function(){
+         j_text.focus();
+       });
+       
        pm = $.minifyObject(pm);
        
        
