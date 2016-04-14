@@ -253,15 +253,19 @@ tyrano.plugin.kag.menu = {
     },
 
     //セーブ状態のスナップを保存します。
-    snapSave : function(title, call_back) {
+    snapSave : function(title, call_back,flag_thumb) {
 
         var that = this;
 
         //画面のキャプチャも取るよ
         var _current_order_index = that.kag.ftag.current_order_index - 1;
         var _stat = $.extend(true, {}, $.cloneObject(that.kag.stat));
-
-        if (this.kag.config.configThumbnail == "false") {
+        
+        if(typeof flag_thumb =="undefined"){
+            flag_thumb = this.kag.config.configThumbnail;
+        }
+        
+        if (flag_thumb == "false") {
 
             //サムネデータを保存しない
             var img_code = "";
@@ -326,6 +330,13 @@ tyrano.plugin.kag.menu = {
         }
 
     },
+    
+    setGameSleep:function(){
+        
+        this.kag.tmp.sleep_game = this.snap;
+        
+    },
+    
 
     displayLoad : function() {
 

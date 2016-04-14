@@ -52,8 +52,10 @@ tyrano.plugin.kag ={
         
         num_anim:0, //実行中のアニメーションスタック
         map_bgm:{}, //再生中の音楽オーディオ
-        map_se:{} //再生中の効果音
+        map_se:{}, //再生中の効果音
         
+        sleep_game:null, //sleepgame中はここにスナップが入る
+       
     },
     
     //逐次変化するKAGシステムの動作に必要な状況変化ファイル

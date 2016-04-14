@@ -1511,6 +1511,146 @@ tyrano.plugin.kag.tag.screen_full = {
     
 };
 
+
+/*
+#[sleepgame]
+:group
+システム操作
+:title
+ゲームの一時停止
+:exp
+
+このタグに到達した時点でゲームの状態を保存した上で、他のシナリオへ移動することができます。
+そして遷移先で[awakegame]が実行されたらgametmpから状態を再現してゲームに復帰できます。
+
+このタグは本流のゲームから一時的に画面を遷移したい場合に非常に強力に機能します。
+
+例えば、ゲームの途中でコンフィグの設定を行いたい場合などは
+sleepgameで進行状態を保持した上で、コンフィグ画面に移動します。[awakegame]タグでゲームに復帰します
+
+:sample
+:param
+storage=ゲームを中断して処理を始めるシナリオ名を記述します。省略された場合は、現在のファイル名と解釈されます,
+target=ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.sleepgame = {
+    
+    vital:[],
+    
+    pm:{
+        storage:"",
+        target:""
+    },
+    
+    start:function(pm){
+          
+          var that = this;
+          
+          //タイトルが設定されていない場合は現在のテキストを設定
+          var title= this.kag.stat.current_message_str;
+          
+          //スナップを保存。サムネは不要
+          this.kag.menu.snapSave(title,function(){
+            //保存したスナップを、sleep領域に配置したうえで、ジャンプする
+            that.kag.menu.setGameSleep();
+            that.kag.ftag.startTag("jump", pm);
+            
+          },false);
+          
+    }
+    
+    
+};
+
+
+/*
+#[awakegame]
+:group
+システム操作
+:title
+ゲームの一時停止からの復帰
+:exp
+[gamesleep]タグで一時停止していたゲームを再開します。
+ジャンプ先での変数操作 （f）については、ゲーム復旧後も反映されます。
+ゲームに戻る前にmake.ksを通過します。ジャンプ先での操作に対して戻る前に設定を行いたい場合は
+make.ksで変数fに対して、[awakegame]からの復帰かどうかの判定をいれるとよいでしょう。
+
+:sample
+:param
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.awakegame = {
+    
+    vital:[],
+    
+    pm:{
+    },
+    
+    start:function(pm){
+          
+          var that = this;
+          
+          if(this.kag.tmp.sleep_game == null){
+            //this.kag.error("保存されたゲームがありません。[awakegame]タグは無効です");
+            //データがない場合はそのまま次の命令へ
+            this.kag.ftag.nextOrder();
+          }else{
+              
+              var sleep_data = this.kag.tmp.sleep_game;
+              
+              //f変数を継承する
+              sleep_data.stat.f = this.kag.stat.f;
+              
+              this.kag.menu.loadGameData($.extend(true, {}, sleep_data));
+              this.kag.tmp.sleep_game = null;
+              
+          }
+    }
+    
+    
+};
+
+
+/*
+#[breakgame]
+:group
+システム操作
+:title
+ゲームの停止データの削除
+:exp
+[gamesleep]タグで一時停止していたゲームを削除します。
+[gameawake]しない場合、このタグで削除してください。
+
+:sample
+:param
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.breakgame = {
+    
+    vital:[],
+    
+    pm:{
+    },
+    
+    start:function(pm){
+          
+          var that = this;
+          
+          this.kag.tmp.sleep_game = null;
+          this.kag.ftag.nextOrder();
+          
+    }
+    
+};
+
+
 /*
 #[dialog]
 :group
