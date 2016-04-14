@@ -155,6 +155,13 @@ tyrano.plugin.kag ={
         chara_memory:"false",
         chara_anim:"true",  //キャラクター追加時、位置が変わる場合にアニメーションで表示するか否か
         pos_change_time:"600", //キャラクター自動配置のスピード
+        
+        chara_talk_focus:"none",
+        chara_brightness_value:"60",
+        chara_blur_value:"2",
+        
+        apply_filter_str:"", 
+        
         //定義されたキャラクター情報
         charas:{},
         

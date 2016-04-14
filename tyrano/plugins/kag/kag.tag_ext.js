@@ -1162,6 +1162,20 @@ tyrano.plugin.kag.tag.chara_ptext ={
         
         if(pm.name==""){
             $("."+this.kag.stat.chara_ptext).html("");
+            
+            //全員の明度を下げる。誰も話していないから
+            //明度設定が有効な場合
+            if (this.kag.stat.chara_talk_focus != "none") {
+
+                $("#tyrano_base").find(".tyrano_chara").css({
+                        "-webkit-filter":this.kag.stat.apply_filter_str,
+                        "-ms-filter":this.kag.stat.apply_filter_str,
+                        "-moz-filter":this.kag.stat.apply_filter_str
+                });
+
+            }
+
+            
         }else{
             
             var cpm =  this.kag.stat.charas[pm.name];
@@ -1174,6 +1188,24 @@ tyrano.plugin.kag.tag.chara_ptext ={
                 if(cpm.color!=""){
                     $("."+this.kag.stat.chara_ptext).css("color",$.convertColor(cpm.color));
                 }
+                
+                //明度設定が有効な場合
+                if(this.kag.stat.chara_talk_focus != "none"){
+                    
+                    $("#tyrano_base").find(".tyrano_chara").css({
+                        "-webkit-filter":this.kag.stat.apply_filter_str,
+                        "-ms-filter":this.kag.stat.apply_filter_str,
+                        "-moz-filter":this.kag.stat.apply_filter_str
+                    });
+                    
+                    $("#tyrano_base").find("."+pm.name+".tyrano_chara").css({
+                        "-webkit-filter":"brightness(100%) blur(0px)",
+                        "-ms-filter":"brightness(100%) blur(0px)",
+                        "-moz-filter":"brightness(100%) blur(0px)"
+                    });
+                    
+                }
+                
                 
             }else{
                 //存在しない場合はそのまま表示できる
@@ -1212,6 +1244,9 @@ time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで
 memory=true か false を指定します。デフォルトはfalseです。キャラクターを非表示にして再度表示した時に、表情を維持するかどうかをしていできます。falseをしていすると、[chara_new]で指定してデフォルトの表情で表示されます,
 anim=キャラクターを自動配置する場合、キャラクターの立ち位置が変わるときにアニメーションを行うか否かを指定できます。デフォルトは true です。falseを指定するとじんわりと入れ替わる効果に切り替わります。,
 pos_change_time=キャラクターの位置を変更する際のスピードを調整できます。ミリ秒で指定して下さい。デフォルトは600,
+talk_focus=現在話しているキャラクターの立ち絵に対して、目立たせる演出が可能になります。指定できるのは brightness（明度） blur（ぼかし） none （無効）です。デフォルトはnone　どのキャラクターが話しているかの指定は #yuko のように指定すると、chara_new時の名前とひも付きます。 ,
+brightness_value=brightnessの値を指定できます。話しているキャラクター以外の明度を指定します。0〜100 で指定して下さい。デフォルトは60,
+blur_value=blurの値を指定できます。話しているキャラクター以外のぼかし方を指定します。0〜100 で指定して下さい。デフォルトは2 値がおおきいほどぼかしが強くなります,
 effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
 jswing
 ｜def
@@ -1260,8 +1295,10 @@ tyrano.plugin.kag.tag.chara_config ={
         time:"600",
         memory:"false",
         anim:"true",
-        pos_change_time:"" //立ち位置の変更時にかかる時間を指定できます
-        
+        pos_change_time:"", //立ち位置の変更時にかかる時間を指定できます
+        talk_focus:"",
+        brightness_value:"",
+        blur_value:"",
     },
     
     start:function(pm){
@@ -1274,6 +1311,33 @@ tyrano.plugin.kag.tag.chara_config ={
         if(pm.memory != "false") this.kag.stat.chara_memory   = pm.memory;
         if(pm.anim != "true") this.kag.stat.chara_anim     = pm.anim;
         if(pm.pos_change_time != "") this.kag.stat.pos_change_time  = pm.pos_change_time;
+        
+        if(pm.brightness_value != "") this.kag.stat.chara_brightness_value  = pm.brightness_value;
+        if(pm.blur_value != "") this.kag.stat.chara_blur_value  = pm.blur_value;
+        
+        //フォーカス設定
+        if(pm.talk_focus != ""){
+            
+            if(pm.talk_focus=="none"){
+                this.kag.stat.apply_filter_str = "";
+            }else if(pm.talk_focus=="brightness"){
+                this.kag.stat.apply_filter_str ="brightness(" + this.kag.stat.chara_brightness_value + "%)";
+            }else if(pm.talk_focus=="blur"){
+                this.kag.stat.apply_filter_str ="blur(" + this.kag.stat.chara_blur_value + "px)";
+            }
+            
+            //フォーカスの指定が変わった段階で一旦すべて無効にする
+            $("#tyrano_base").find(".tyrano_chara").css({
+                        "-webkit-filter":"brightness(100%) blur(0px)",
+                        "-ms-filter":"brightness(100%) blur(0px)",
+                        "-moz-filter":"brightness(100%) blur(0px)"
+            });
+                    
+            
+            this.kag.stat.chara_talk_focus = pm.talk_focus;
+            
+        
+        }
         
         this.kag.ftag.nextOrder();
         
