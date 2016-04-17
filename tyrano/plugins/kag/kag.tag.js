@@ -950,7 +950,7 @@ tyrano.plugin.kag.tag.label = {
 #[config_record_label]
 
 :group
-システム関連
+システム操作
 :title
 既読管理の設定
 
@@ -3116,7 +3116,7 @@ leavese=ボタンの上からマウスカーソルが外れた時に再生する
 clickimg=ボタンをクリックした時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください,
 enterimg=ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。,
 visible=初期状態で表示か非表示を選択できます。trueで表示falseで非表示の初期状態となります,
-role=ボタンに特別な機能を割り当てることができます。この場合storageやtargetは無視されます。強制的にfix属性がtrueになります。指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。window(メッセージウィンドウを非表示にします)。skip(スキップの実行)。backlog（過去ログを表示）。fullscreen(フルスクリーン切り替え)。auicksave(クイックセーブ実行)。quickload(クイックロード実行)。sleepgame（ゲームの状態を保存してジャンプ）
+role=ボタンに特別な機能を割り当てることができます。この場合storageやtargetは無視されます。強制的にfix属性がtrueになります。指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。window(メッセージウィンドウを非表示にします)。skip(スキップの実行)。backlog（過去ログを表示）。fullscreen(フルスクリーン切り替え)。quicksave(クイックセーブ実行)。quickload(クイックロード実行)。sleepgame（ゲームの状態を保存してジャンプ）
 #[end]
 */
 
@@ -3365,20 +3365,9 @@ tyrano.plugin.kag.tag.button = {
                 //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
                 if (_pm.role != "") {
 
-                    //強制停止中は使用できないようにする
-                    ///処理待ち状態の時は、実行してはいけない
-                    /*
-                    if (that.kag.layer.layer_event.css("display") == "none") {
-                        return false;
-                    }
-                    */
-
-                    /*
-                    if (that.kag.stat.is_strong_stop == true) {
-                        return false;
-                    }
-                    */
-                   
+                    //roleがクリックされたら、skip停止 
+                    that.kag.stat.is_skip = false; 
+                                       
                     //オートは停止
                     if(_pm.role!="auto"){
                         that.kag.ftag.startTag("autostop", {});

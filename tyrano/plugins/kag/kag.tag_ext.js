@@ -1298,7 +1298,7 @@ tyrano.plugin.kag.tag.chara_config ={
         pos_change_time:"", //立ち位置の変更時にかかる時間を指定できます
         talk_focus:"",
         brightness_value:"",
-        blur_value:"",
+        blur_value:""
     },
     
     start:function(pm){

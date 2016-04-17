@@ -1521,14 +1521,26 @@ tyrano.plugin.kag.tag.screen_full = {
 :exp
 
 このタグに到達した時点でゲームの状態を保存した上で、他のシナリオへ移動することができます。
-そして遷移先で[awakegame]が実行されたらgametmpから状態を再現してゲームに復帰できます。
+そして遷移先で[awakegame]が実行されたらゲームに復帰できます。
 
-このタグは本流のゲームから一時的に画面を遷移したい場合に非常に強力に機能します。
+このタグはゲームから一時的に画面を遷移したい場合に非常に強力に機能します。
 
 例えば、ゲームの途中でコンフィグの設定を行いたい場合などは
 sleepgameで進行状態を保持した上で、コンフィグ画面に移動します。[awakegame]タグでゲームに復帰します
 
+sleepgameは複数実行することはできません。必ず[awakegame]を実行して下さい。
+[awakegame]を実行しない場合は[breakgame]で休止中の状態を破棄します。
+
+[button]で呼びたす場合、roleにsleepgameを指定すると、押された時にsleepgameを適応することができます。
+
 :sample
+
+[gamesleep storage="scene3.ks" target="*start" ]
+
+;buttonに紐付ける方法
+[button name="button" role="sleepgame" fix="true" graphic="button/skip.gif" x=450 y=400 storage="scene3.ks" ]
+
+
 :param
 storage=ゲームを中断して処理を始めるシナリオ名を記述します。省略された場合は、現在のファイル名と解釈されます,
 target=ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます
@@ -1660,7 +1672,7 @@ tyrano.plugin.kag.tag.breakgame = {
 :exp
 様々な機能をもったダイアログを表示します。
 ダイアログは以下のタイプがあります。
-
+alert confirm input
 :sample
 ;警告ウィンドウのメッセージ表示
 [dialog type="alert" text="メッセージ内容" ]

@@ -54,7 +54,7 @@ tyrano.plugin.kag ={
         map_bgm:{}, //再生中の音楽オーディオ
         map_se:{}, //再生中の効果音
         
-        sleep_game:null, //sleepgame中はここにスナップが入る
+        sleep_game:null //sleepgame中はここにスナップが入る
        
     },
     
