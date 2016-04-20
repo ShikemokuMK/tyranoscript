@@ -546,8 +546,12 @@ tyrano.plugin.kag.tag.text = {
 
         var j_inner_message = this.kag.getMessageInnerLayer();
 
-        //文字ステータスの設定
-        j_inner_message.css("letter-spacing", this.kag.config.defaultPitch + "px").css("line-height", parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px").css("font-family", this.kag.config.userFace);
+        //文字ステータスの設定        
+        j_inner_message.css({
+            "letter-spacing":this.kag.config.defaultPitch + "px",
+            "line-height":parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px",
+            "font-family":this.kag.config.userFace
+       });
 
         //現在表示中のテキストを格納
         this.kag.stat.current_message_str = pm.val;
