@@ -163,6 +163,11 @@ tyrano.plugin.kag.layer ={
       var layer_obj_fore = $("<div class='layer "+layer_name+"_fore layer_fore'></div>");
       var layer_obj_back = $("<div class='layer "+layer_name+"_back layer_back' style='display:none'></div>");
       
+      if(layer_name.indexOf("message")==-1){
+        layer_obj_fore.addClass("layer_camera");
+        layer_obj_back.addClass("layer_camera");
+      }
+      
       layer_obj_fore.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
       layer_obj_back.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
       
@@ -321,7 +326,7 @@ tyrano.plugin.kag.layer ={
             layer_info["map_layer_fore"][key] = this.map_layer_fore[key].outerHTML();
         }
         for( key in this.map_layer_back ){
-            layer_info["map_layer_fore"][key] = this.map_layer_fore[key].outerHTML();
+            layer_info["map_layer_back"][key] = this.map_layer_back[key].outerHTML();
         }
         
         /*

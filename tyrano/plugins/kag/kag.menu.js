@@ -408,7 +408,7 @@ tyrano.plugin.kag.menu = {
 
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
-
+        
         //その他ステータスの設定
         this.kag.stat = data.stat;
 
@@ -452,6 +452,50 @@ tyrano.plugin.kag.menu = {
                 volume:"" 
             };
         }   
+        
+        //カメラ設定を復旧 ///////////////
+        if(this.kag.config.useCamera=="true"){
+            $(".layer_camera").css({
+                        "-animation-name":"",
+                        "-animation-duration":"",
+                        "-animation-play-state":"",
+                        "-animation-delay":"",
+                        "-animation-iteration-count":"",
+                        "-animation-direction": "",
+                        "-animation-fill-mode": "",
+                        "-animation-timing-function":""
+            });
+            
+            var a3d_define = {
+                frames : {
+                    "0%" : {
+                        trans : this.kag.stat.current_camera
+                    },
+                    "100%" : {
+                        trans : this.kag.stat.current_camera
+                    }
+                },
+                
+                config : {
+                    duration : "5ms",
+                    state : "running",
+                    easing : "ease"
+                },
+                
+                complete:function(){
+                    //特に処理なし        
+                }
+                
+            };
+            
+            //アニメーションの実行
+            $(".layer_camera").css("-webkit-transform-origin", "center center");
+            $(".layer_camera").a3d(a3d_define);
+        }
+        ///////////カメラここまで
+        
+        
+        
         
         //背景動画が設定中なら
         if (this.kag.stat.current_bgmovie["storage"] !=""){

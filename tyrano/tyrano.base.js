@@ -41,6 +41,8 @@ tyrano.base ={
              }else{
                 scale_f = width_f;
         	}
+        	
+        	this.tyrano.kag.tmp.base_scale = scale_f;
 
             setTimeout(function() {
                 

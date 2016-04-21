@@ -32,7 +32,7 @@ tyrano.plugin.kag ={
         
     //動作オプション
     options:{
-        modules:["parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse","event","rider"]
+        modules:["parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse","event","rider","tag_camera"]
     },
     
     
@@ -54,7 +54,9 @@ tyrano.plugin.kag ={
         map_bgm:{}, //再生中の音楽オーディオ
         map_se:{}, //再生中の効果音
         
-        sleep_game:null //sleepgame中はここにスナップが入る
+        sleep_game:null, //sleepgame中はここにスナップが入る
+        base_scale:1 
+        
        
     },
     
@@ -104,6 +106,16 @@ tyrano.plugin.kag ={
             storage:"",
             volume:"" 
         }, //再生中の背景動画
+        
+        current_camera :{
+                x : "0",
+                y : "0",
+                scale : "1",
+                rotate:"0"
+        },
+        
+        is_move_camera:false, //カメラの演出中かどうか
+        is_wait_camera:false, //カメラの演出を待ってるかどうか
         
         current_line:0, //実行中の命令の実際のファイル行　エラーや警告時に使用
         
@@ -424,8 +436,12 @@ tyrano.plugin.kag ={
             
         $("."+this.kag.define.BASE_DIV_NAME).append(button_menu_obj);
         
-        //センタリングの調整
+        //カメラモードの調整
+        if(this.kag.config["useCamera"] && this.kag.config["useCamera"]=="true"){
+            this.kag.config["ScreenCentering"] = "false";
+        }
         
+        //センタリングの調整
         if(this.kag.config["ScreenCentering"] && this.kag.config["ScreenCentering"]=="false"){
             
             //センタリングをキャンセルする
