@@ -489,8 +489,14 @@ tyrano.plugin.kag.menu = {
             };
             
             //アニメーションの実行
-            $(".layer_camera").css("-webkit-transform-origin", "center center");
-            $(".layer_camera").a3d(a3d_define);
+            if(this.kag.stat.current_camera_layer==""){
+                $(".layer_camera").css("-webkit-transform-origin", "center center");
+                $(".layer_camera").a3d(a3d_define);
+            }else{
+                $("."+this.kag.stat.current_camera_layer+"_fore").css("-webkit-transform-origin", "center center");
+                $("."+this.kag.stat.current_camera_layer +"_fore").a3d(a3d_define);
+            }
+            
         }
         ///////////カメラここまで
         

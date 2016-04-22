@@ -113,6 +113,8 @@ tyrano.plugin.kag ={
                 scale : "1",
                 rotate:"0"
         },
+        current_camera_layer:"",
+        
         
         is_move_camera:false, //カメラの演出中かどうか
         is_wait_camera:false, //カメラの演出を待ってるかどうか

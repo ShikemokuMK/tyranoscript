@@ -43,6 +43,7 @@
  from_zoom=カメラの移動開始時の倍率を指定できます,
  from_rotate=カメラの移動開始時の傾きを指定できます,
  wait=カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行することができます。デフォルトはtrue,
+ layer=レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。,　
  ease_type=カメラの移動演出を指定できます。
  ease(開始時点と終了時点を滑らかに再生する)
  linear(一定の間隔で再生する)
@@ -71,7 +72,7 @@ tyrano.plugin.kag.tag.camera = {
         y : "",
         zoom : "",
         rotate:"",
-        
+        layer:"",
         
         wait:"true",
         ease_type : "ease",
@@ -156,9 +157,15 @@ tyrano.plugin.kag.tag.camera = {
         }
 
         //アニメーションの実行
-        $(".layer_camera").css("-webkit-transform-origin", "center center");
-        $(".layer_camera").a3d(a3d_define);
-
+        if(pm.layer==""){
+            $(".layer_camera").css("-webkit-transform-origin", "center center");
+            $(".layer_camera").a3d(a3d_define);
+            this.kag.stat.current_camera_layer = "";
+        }else{
+            $("."+pm.layer +"_fore").css("-webkit-transform-origin", "center center");
+            $("."+pm.layer +"_fore").a3d(a3d_define);
+            this.kag.stat.current_camera_layer = pm.layer;
+        }
 
     },
 
@@ -181,7 +188,8 @@ tyrano.plugin.kag.tag.camera = {
  :param
  time=初期位置にカメラが移動する時間をミリ秒で指定します。デフォルトは1000です。,
  wait=カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行することができます。デフォルトはtrue,
- ease_type=カメラの戻り方を指定できます。デフォルトはease　詳細はcameraタグを確認。
+ ease_type=カメラの戻り方を指定できます。デフォルトはease　詳細はcameraタグを確認。,
+ layer=レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。 
  #[end]
  */
 
@@ -196,6 +204,7 @@ tyrano.plugin.kag.tag.reset_camera = {
         
         wait:"true",
         ease_type : "ease",
+        layer:""
 
     },
 
@@ -273,9 +282,16 @@ tyrano.plugin.kag.tag.reset_camera = {
             that.kag.ftag.nextOrder();
         }
 
-        //アニメーションの実行
-        $(".layer_camera").css("-webkit-transform-origin", "center center");
-        $(".layer_camera").a3d(a3d_define);
+         //アニメーションの実行
+        if(pm.layer==""){
+            $(".layer_camera").css("-webkit-transform-origin", "center center");
+            $(".layer_camera").a3d(a3d_define);
+            this.kag.stat.current_camera_layer = "";
+        }else{
+            $("."+pm.layer +"_fore").css("-webkit-transform-origin", "center center");
+            $("."+pm.layer +"_fore").a3d(a3d_define);
+            this.kag.stat.current_camera_layer = "";
+        }
 
 
     },
