@@ -75,7 +75,7 @@ tyrano.plugin.kag.tag.camera = {
         layer:"",
         
         wait:"true",
-        ease_type : "ease",
+        ease_type : "ease"
         
 
     },
