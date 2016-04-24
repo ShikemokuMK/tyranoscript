@@ -455,6 +455,7 @@ tyrano.plugin.kag.menu = {
         
         //カメラ設定を復旧 ///////////////
         if(this.kag.config.useCamera=="true"){
+            
             $(".layer_camera").css({
                         "-animation-name":"",
                         "-animation-duration":"",
@@ -466,36 +467,41 @@ tyrano.plugin.kag.menu = {
                         "-animation-timing-function":""
             });
             
-            var a3d_define = {
-                frames : {
-                    "0%" : {
-                        trans : this.kag.stat.current_camera
+            for(key in this.kag.stat.current_camera){
+                
+                var a3d_define = {
+                    frames : {
+                        "0%" : {
+                            trans : this.kag.stat.current_camera[key]
+                        },
+                        "100%" : {
+                            trans : this.kag.stat.current_camera[key]
+                        }
                     },
-                    "100%" : {
-                        trans : this.kag.stat.current_camera
+                    
+                    config : {
+                        duration : "5ms",
+                        state : "running",
+                        easing : "ease"
+                    },
+                    
+                    complete:function(){
+                        //特に処理なし        
                     }
-                },
+                    
+                };
                 
-                config : {
-                    duration : "5ms",
-                    state : "running",
-                    easing : "ease"
-                },
-                
-                complete:function(){
-                    //特に処理なし        
+                //アニメーションの実行
+                if(key=="layer_camera"){
+                    $(".layer_camera").css("-webkit-transform-origin", "center center");
+                    $(".layer_camera").a3d(a3d_define);
+                }else{
+                    $("."+key+"_fore").css("-webkit-transform-origin", "center center");
+                    $("."+key +"_fore").a3d(a3d_define);
                 }
                 
-            };
-            
-            //アニメーションの実行
-            if(this.kag.stat.current_camera_layer==""){
-                $(".layer_camera").css("-webkit-transform-origin", "center center");
-                $(".layer_camera").a3d(a3d_define);
-            }else{
-                $("."+this.kag.stat.current_camera_layer+"_fore").css("-webkit-transform-origin", "center center");
-                $("."+this.kag.stat.current_camera_layer +"_fore").a3d(a3d_define);
             }
+            
             
         }
         ///////////カメラここまで

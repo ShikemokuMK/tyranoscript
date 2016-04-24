@@ -50,7 +50,7 @@
  ease-in(開始時点をゆっくり再生する)
  ease-out(終了時点をゆっくり再生する)
  ease-in-out(開始時点と終了時点をゆっくり再生する)
- デフォルトはeaseです。 ,
+ デフォルトはeaseです。 
  #[end]
  */
 
@@ -72,7 +72,7 @@ tyrano.plugin.kag.tag.camera = {
         y : "",
         zoom : "",
         rotate:"",
-        layer:"",
+        layer:"layer_camera",
         
         wait:"true",
         ease_type : "ease"
@@ -90,8 +90,17 @@ tyrano.plugin.kag.tag.camera = {
         
         //duration を確認する
         var duration = pm.time + "ms";
-
-        var to_camera = $.extend(true, {}, this.kag.stat.current_camera);
+        
+        if(typeof this.kag.stat.current_camera[pm.layer] == "undefined"){
+            this.kag.stat.current_camera[pm.layer] = {
+                x : "0",
+                y : "0",
+                scale : "1",
+                rotate:"0"
+            };
+        }
+        
+        var to_camera = $.extend(true, {}, this.kag.stat.current_camera[pm.layer]);
         
         //指定されて項目があるなら、上書きする
         if(pm.x!="") to_camera.x = "*"+parseInt(pm.x)*-1 +"px";
@@ -102,7 +111,7 @@ tyrano.plugin.kag.tag.camera = {
         
         if(pm.from_x != "0" || pm.from_y!="0" || pm.from_zoom!="1" || pm.from_rotate!="0" ){
             
-            this.kag.stat.current_camera = {
+            this.kag.stat.current_camera[pm.layer] = {
                 x : "*"+parseInt(pm.from_x)*-1 +"px",
                 y : "*"+parseInt(pm.from_y)*1+"px",
                 scale : pm.from_zoom,
@@ -118,7 +127,7 @@ tyrano.plugin.kag.tag.camera = {
             frames : {
 
                 "0%" : {
-                    trans : this.kag.stat.current_camera
+                    trans : this.kag.stat.current_camera[pm.layer]
                 },
                 "100%" : {
                     trans : to_camera
@@ -150,14 +159,14 @@ tyrano.plugin.kag.tag.camera = {
             }
         };
         
-        this.kag.stat.current_camera = to_camera;
+        this.kag.stat.current_camera[pm.layer] = to_camera;
         
         if(pm.wait =="false"){
             that.kag.ftag.nextOrder();
         }
 
         //アニメーションの実行
-        if(pm.layer==""){
+        if(pm.layer=="layer_camera"){
             $(".layer_camera").css("-webkit-transform-origin", "center center");
             $(".layer_camera").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";
@@ -204,7 +213,7 @@ tyrano.plugin.kag.tag.reset_camera = {
         
         wait:"true",
         ease_type : "ease",
-        layer:""
+        layer:"layer_camera"
 
     },
 
@@ -212,7 +221,7 @@ tyrano.plugin.kag.tag.reset_camera = {
         var that = this;
         //duration を確認する
         var duration = pm.time + "ms";
-
+        
         var to_scale   = 1;
         
         var to_camera = {
@@ -230,7 +239,7 @@ tyrano.plugin.kag.tag.reset_camera = {
             frames : {
 
                 "0%" : {
-                    trans : this.kag.stat.current_camera
+                    trans : this.kag.stat.current_camera[pm.layer]
                 },
                 "100%" : {
                     trans : to_camera
@@ -259,7 +268,7 @@ tyrano.plugin.kag.tag.reset_camera = {
                 }
                 
                 //リセットした時は、本当に消す
-                $(".layer_camera").css({
+                $("."+pm.layer).css({
                     "-animation-name":"",
                     "-animation-duration":"",
                     "-animation-play-state":"",
@@ -276,14 +285,14 @@ tyrano.plugin.kag.tag.reset_camera = {
             }
         };
         
-        this.kag.stat.current_camera = to_camera;
+        delete this.kag.stat.current_camera[pm.layer] ;
         
         if(pm.wait =="false"){
             that.kag.ftag.nextOrder();
         }
 
          //アニメーションの実行
-        if(pm.layer==""){
+        if(pm.layer=="layer_camera"){
             $(".layer_camera").css("-webkit-transform-origin", "center center");
             $(".layer_camera").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";

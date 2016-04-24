@@ -108,10 +108,6 @@ tyrano.plugin.kag ={
         }, //再生中の背景動画
         
         current_camera :{
-                x : "0",
-                y : "0",
-                scale : "1",
-                rotate:"0"
         },
         current_camera_layer:"",
         

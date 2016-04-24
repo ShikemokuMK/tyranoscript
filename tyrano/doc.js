@@ -36,7 +36,7 @@ tyrano.plugin.kag ={};
         //テキストを読み込み。スクリプトから、オブジェクト構造解析
         //同じディレクトリにある、KAG関連のデータを読み込み
         
-        var array_script = ["kag.tag.js","kag.tag_audio.js","kag.tag_ext.js","kag.tag_system.js"];
+        var array_script = ["kag.tag.js","kag.tag_audio.js","kag.tag_ext.js","kag.tag_system.js","kag.tag_camera.js"];
         
         var script_num = array_script.length;
         var loading_num = 0;
