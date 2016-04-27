@@ -55,7 +55,13 @@ tyrano.plugin.kag ={
         map_se:{}, //再生中の効果音
         
         sleep_game:null, //sleepgame中はここにスナップが入る
-        base_scale:1 
+        base_scale:1,
+        
+        is_se_play:false, //seがプレイ中か否か
+        is_se_play_wait:false, //seの終了を待ってるかどうか。
+        
+        is_bgm_play:false, //BGMがプレイ中か否か
+        is_bgm_play_wait:false //BGMの完了を待っているか否か。
         
        
     },

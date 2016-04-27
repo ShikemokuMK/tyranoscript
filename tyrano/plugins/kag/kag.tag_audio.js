@@ -113,6 +113,9 @@ tyrano.plugin.kag.tag.playbgm = {
 
         if (pm.target == "se") {
             target = "sound";
+            this.kag.tmp.is_se_play = true;
+        }else{
+            this.kag.tmp.is_bgm_play = true;
         }
 
         var volume = 1;
@@ -179,7 +182,7 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         audio_obj.play();
-
+        
         if (pm.fadein == "true") {
 
             var vars = jQuery.extend($('<div>')[0], {
@@ -202,6 +205,28 @@ tyrano.plugin.kag.tag.playbgm = {
             });
 
         }
+        
+        //再生が完了した時
+        audio_obj.addEventListener("ended",function(){
+            
+            if (pm.target == "se") {
+                that.kag.tmp.is_se_play = false;
+                
+                if(that.kag.tmp.is_se_play_wait == true){
+                    that.kag.tmp.is_se_play_wait = false;
+                    that.kag.ftag.nextOrder();
+                }
+                
+            }else if(pm.target == "bgm") {
+                that.kag.tmp.is_bgm_play = false;
+                
+                if(that.kag.tmp.is_bgm_play_wait == true){
+                    that.kag.tmp.is_bgm_play_wait = false;
+                    that.kag.ftag.nextOrder();
+                }
+                
+            }
+        });
 
         if (pm.stop == "false") {
 
@@ -377,8 +402,13 @@ tyrano.plugin.kag.tag.stopbgm = {
 
         if (pm.target == "bgm") {
             target_map = this.kag.tmp.map_bgm;
+            that.kag.tmp.is_bgm_play = false;
+            that.kag.tmp.is_bgm_play_wait = false;
+            
         } else {
             target_map = this.kag.tmp.map_se;
+            that.kag.tmp.is_se_play = false;
+            that.kag.tmp.is_se_play_wait = false;
         }
 
         var browser = $.getBrowser();
@@ -630,7 +660,7 @@ tyrano.plugin.kag.tag.xchgbgm = {
  click=スマホブラウザで効果音を鳴らす場合、クリック後でないと再生できません。スマホブラウザで音がならない場合trueを指定してみてください。デフォルトはfalse,
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
  clear=trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
- volume=BGMの再生音量を変更できます（0〜100）
+ volume=効果音の再生音量を変更できます（0〜100）
  #[end]
  */
 
@@ -848,36 +878,69 @@ tyrano.plugin.kag.tag.seopt = {
 };
 
 /*
-#[wb]
+#[wbgm]
 :group
 オーディオ関連
 :title
-BGMの再生完了を待ちます
+BGMの再生完了を待つ
 :exp
-BGMの再生完了を待ちます
+BGMの再生完了を待ちます。playbgmでループ再生している場合は永遠に止まりますのでご注意下さい。
+このタグはPCゲーム、ブラウザゲームで利用できます。
+スマホアプリでは利用できませんのでご注意ください。
 :sample
 :param
 #[end]
 */
 
 //BGMのフェード完了を待ちます
-tyrano.plugin.kag.tag.wb = {
+tyrano.plugin.kag.tag.wbgm = {
 
     pm : {
     },
     start : function() {
-        this.kag.layer.hideEventLayer();
+        
+         //今、音楽再生中なら、
+        if(this.kag.tmp.is_bgm_play == true){
+            //this.kag.layer.hideEventLayer();
+            this.kag.tmp.is_bgm_play_wait = true;
+        }else{
+            this.kag.ftag.nextOrder();
+        }
 
     }
 };
 
+/*
+#[wse]
+:group
+オーディオ関連
+:title
+効果音の再生完了を待つ
+:exp
+効果音の再生完了を待ちます。
+このタグはPCゲーム、ブラウザゲームで利用できます。
+スマホアプリでは利用できませんのでご注意ください。
+:sample
+:param
+#[end]
+*/
+
 //未実装　seの再生終了を待ちます
-tyrano.plugin.kag.tag.wc = {
+tyrano.plugin.kag.tag.wse = {
 
     pm : {
     },
     start : function() {
-        this.kag.layer.hideEventLayer();
+        
+        //今、音楽再生中なら、
+        
+        if(this.kag.tmp.is_se_play == true){
+            //this.kag.layer.hideEventLayer();
+            this.kag.tmp.is_se_play_wait = true;
+        }else{
+            this.kag.ftag.nextOrder();
+        }
+        
     }
 };
 
