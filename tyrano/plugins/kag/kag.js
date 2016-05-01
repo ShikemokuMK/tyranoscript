@@ -61,7 +61,10 @@ tyrano.plugin.kag ={
         is_se_play_wait:false, //seの終了を待ってるかどうか。
         
         is_bgm_play:false, //BGMがプレイ中か否か
-        is_bgm_play_wait:false //BGMの完了を待っているか否か。
+        is_bgm_play_wait:false, //BGMの完了を待っているか否か。
+        
+        video_playing:"",
+        
         
        
     },
@@ -179,6 +182,8 @@ tyrano.plugin.kag ={
         chara_blur_value:"2",
         
         apply_filter_str:"", 
+        
+        video_stack:null,
         
         //定義されたキャラクター情報
         charas:{},

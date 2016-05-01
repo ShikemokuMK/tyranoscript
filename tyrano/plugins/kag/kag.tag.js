@@ -4000,7 +4000,7 @@ message0 または message1 を指定するとメッセージレイヤにな り
 <br>
 通常は背景の変更などに使用されます。,
 method=トランジションのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
-children=falseの場合、layerで指定した場所だけtrans します。デフォルトはtrueです,
+children=falseの場合、layerで指定した場所だけtrans します。デフォルトはfalseです,
 time=トランジションを行っている時間をミリ秒で指定します。
 #[end]
 */
@@ -4008,12 +4008,12 @@ time=トランジションを行っている時間をミリ秒で指定します
 //トランジション
 tyrano.plugin.kag.tag.trans = {
 
-    vital : ["time"],
+    vital : ["time","layer"],
 
     pm : {
         layer : "base",
         method : "crossfade",
-        children : true,
+        children : false,
         time : 1500
     },
 

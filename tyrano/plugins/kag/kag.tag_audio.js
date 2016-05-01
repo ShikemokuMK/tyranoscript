@@ -555,6 +555,10 @@ tyrano.plugin.kag.tag.fadeinbgm = {
     },
 
     start : function(pm) {
+        
+        if(parseInt(pm.time)<=100 ){ 
+            pm.time=100;
+        }
         this.kag.ftag.startTag("playbgm", pm);
     }
 };
@@ -751,7 +755,11 @@ tyrano.plugin.kag.tag.fadeinse = {
     },
 
     start : function(pm) {
-
+        
+        if(parseInt(pm.time)<=100 ){ 
+            pm.time=100;
+        }
+        
         this.kag.ftag.startTag("playbgm", pm);
 
     }
