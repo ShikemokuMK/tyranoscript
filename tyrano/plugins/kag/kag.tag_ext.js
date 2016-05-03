@@ -230,6 +230,9 @@ tyrano.plugin.kag.tag.movie = {
  PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
  ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
  stop_bgmovie タグを指定すると再生が終わります。
+ 
+ （注意）このタグはPC限定です。スマホでは利用できません。
+ 
  :sample
  [bgmovie storage="" skip=false ]
  :param

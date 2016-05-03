@@ -1741,6 +1741,7 @@ tyrano.plugin.kag.tag.image = {
 :title
 レイヤの解放
 :exp
+
 レイヤに追加された要素をすべて削除します　レイヤ指定は必須です。
 :sample
 [backlay]
@@ -1755,7 +1756,7 @@ tyrano.plugin.kag.tag.image = {
 @trans time=2000
 [wt]
 :param
-layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
+layer=操作対象のレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
 page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます,
 time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます、
 #[end]
@@ -1818,6 +1819,107 @@ tyrano.plugin.kag.tag.freeimage = {
 
     }
 };
+
+
+//freeimageという名前がわかりにくい。freelayerという名前でもつかえるようにした。
+tyrano.plugin.kag.tag.freelayer = tyrano.plugin.kag.tag.freeimage ;
+
+
+/*
+#[free]
+:group
+レイヤ関連
+:title
+オブジェクトの解放
+:exp
+レイヤに追加されたnameで指定された要素をすべて削除します　name指定は必須です。
+:sample
+[backlay]
+;キャラクター表示
+[image name="myimage" layer=0 page=back visible=true top=100 left=300  storage = chara.png]
+[trans time=2000]
+@wt
+
+;キャラクター非表示
+[free layer=0 name="myimage"]
+
+:param
+layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
+page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます,
+time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます、
+#[end]
+*/
+
+
+
+//イメージ情報消去背景とか
+tyrano.plugin.kag.tag.free = {
+
+    vital : ["layer","name"],
+
+    pm : {
+        layer : "",
+        page : "fore",
+        name:"",
+        time:"" //徐々に非表示にする
+    },
+
+    start : function(pm) {
+        
+        var that = this;
+        
+        if (pm.layer != "base") {
+
+            //前景レイヤの場合、全部削除だよ
+            
+            //非表示にした後、削除する
+            if (pm.time == 0) pm.time = ""; // integer 0 and string "0" are equal to ""
+            if(pm.time !=""){
+                
+                var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+                j_obj = j_obj.find("."+pm.name);
+                
+                var cnt = 0;
+                var s_cnt = j_obj.length;
+                
+                j_obj.animate(
+                    {"opacity":0},
+                    parseInt(pm.time), 
+                    function(){
+                        j_obj.remove();
+                        //次へ移動ですがな
+                        cnt++;
+                        if(cnt == s_cnt){
+                            that.kag.ftag.nextOrder();
+                        }
+                    }
+                );
+                
+            }else{
+                
+                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+                 j_obj = j_obj.find("."+pm.name);
+                 j_obj.remove();
+                 
+                 //次へ移動ですがな
+                 that.kag.ftag.nextOrder();
+            }
+
+        } else {
+            
+            var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+            j_obj = j_obj.find("."+pm.name);
+            j_obj.remove();     
+            //this.kag.layer.getLayer(pm.layer, pm.page).css("background-image", "");
+            //次へ移動ですがな
+            this.kag.ftag.nextOrder();            
+        }
+        
+
+    }
+};
+
+
 
 /*
 #[ptext]
