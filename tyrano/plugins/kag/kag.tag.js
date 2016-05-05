@@ -3630,6 +3630,7 @@ tyrano.plugin.kag.tag.button = {
 
 :param
 color=ボタンの色を指定できます。デフォルトはblackです（black gray white orange red blue rosy green pink）,
+font_color=フォントの色を指定できます。0xRRGGBB 形式で指定してください。 ,
 storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
 target=ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
@@ -3654,6 +3655,7 @@ tyrano.plugin.kag.tag.glink = {
 
     pm : {
         color : "black", //クラス名でいいよ
+        font_color:"0xffffff",
         storage : null,
         target : null,
         name : "",
@@ -3685,6 +3687,7 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
         j_button.css("font-size", pm.size + "px");
+        j_button.css("color",$.convertColor(pm.font_color));
         
         if (pm.height != "") {
             j_button.css("height", pm.height + "px");
