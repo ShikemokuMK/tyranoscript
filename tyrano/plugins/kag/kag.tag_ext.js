@@ -1399,12 +1399,12 @@ tyrano.plugin.kag.tag.chara_config = {
 
     pm : {
 
-        pos_mode : "true",
-        effect : "swing",
+        pos_mode : "",
+        effect : "",
         ptext : "",
-        time : "600",
-        memory : "false",
-        anim : "true",
+        time : "",
+        memory : "",
+        anim : "",
         pos_change_time : "", //立ち位置の変更時にかかる時間を指定できます
         talk_focus : "",
         brightness_value : "",
@@ -1414,17 +1414,17 @@ tyrano.plugin.kag.tag.chara_config = {
     start : function(pm) {
 
         //入力されている項目のみ、反映させる
-        if (pm.pos_mode != "true")
+        if (pm.pos_mode != "")
             this.kag.stat.chara_pos_mode = pm.pos_mode;
-        if (pm.effect != "swing")
+        if (pm.effect != "")
             this.kag.stat.chara_effect = pm.effect;
         if (pm.ptext != "")
             this.kag.stat.chara_ptext = pm.ptext;
-        if (pm.time != "600")
+        if (pm.time != "")
             this.kag.stat.chara_time = pm.time;
-        if (pm.memory != "false")
+        if (pm.memory != "")
             this.kag.stat.chara_memory = pm.memory;
-        if (pm.anim != "true")
+        if (pm.anim != "")
             this.kag.stat.chara_anim = pm.anim;
         if (pm.pos_change_time != "")
             this.kag.stat.pos_change_time = pm.pos_change_time;
@@ -1657,7 +1657,6 @@ tyrano.plugin.kag.tag.chara_show = {
 
             //立ち位置を自動的に設定する場合
             if (that.kag.stat.chara_pos_mode == "true" && pm.top == "0" && pm.left == "0") {
-
                 //立ち位置自動調整
                 img_obj.css("bottom", "0px");
 
