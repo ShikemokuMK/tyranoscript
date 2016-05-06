@@ -128,7 +128,7 @@ tyrano.plugin.kag.tag.movie = {
 
         if (pm.bgmode == "true") {
 
-            that.kag.tmp.video_playing = "bgmovie";
+            that.kag.tmp.video_playing = true;
 
             //背景モード
             video.style.zIndex = 1;
@@ -146,42 +146,31 @@ tyrano.plugin.kag.tag.movie = {
                 //ループ完了後に、そのビデオを再生する。
                 if (that.kag.stat.video_stack == null) {
                     //$(".tyrano_base").find("video").remove();
-                    that.kag.tmp.video_playing ="";
+                    that.kag.tmp.video_playing = false;
+                    
+                    if(that.kag.stat.is_wait_bgmovie == true){
+                        that.kag.ftag.nextOrder();
+                        that.kag.stat.is_wait_bgmovie = false;
+                    }
+                                
+                    //that.kag.ftag.nextOrder();
+
                 } else {
 
-                    /*
-                     var video_pm = that.kag.stat.video_stack;
-                     if(video_pm.loop=="true"){
-                     video.loop = true;
-                     }else{
-                     video.loop = false;
-                     }
-
-                     video.src = "./data/video/"+video_pm.storage;
-                     video.load();
-                     video.play();
-                     */
-
-                    var new_video = null;
-                    if (that.kag.tmp.video_playing == "bgmovie") {
-                        new_video = document.getElementById("bgmovie2");
-                        that.kag.tmp.video_playing = "bgmovie2";
+                    var video_pm = that.kag.stat.video_stack;
+                    if (video_pm.loop == "true") {
+                        video.loop = true;
                     } else {
-                        new_video = document.getElementById("bgmovie");
-                        that.kag.tmp.video_playing = "bgmovie";
-
+                        video.loop = false;
                     }
 
-                    new_video.play();
-                    new_video.style.zIndex = 1;
-                    video.style.zIndex=-1;
-                    
-                    setTimeout(function(){
-                        video.parentNode.removeChild(video);
-                    },100);
+                    video.src = "./data/video/" + video_pm.storage;
+                    video.load();
+                    video.play();
 
                     that.kag.stat.video_stack = null;
                     that.kag.ftag.nextOrder();
+
                 }
 
             });
@@ -230,9 +219,9 @@ tyrano.plugin.kag.tag.movie = {
  PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
  ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
  stop_bgmovie タグを指定すると再生が終わります。
- 
+
  （注意）このタグはPC限定です。スマホでは利用できません。
- 
+
  :sample
  [bgmovie storage="" skip=false ]
  :param
@@ -264,82 +253,12 @@ tyrano.plugin.kag.tag.bgmovie = {
         this.kag.stat.current_bgmovie["volume"] = pm.volume;
 
         //ループ再生中のビデオがある状態で、もう一度実行した場合、videoのループが終わった後に、再生させる
-        if (this.kag.tmp.video_playing != "") {
+        if (this.kag.tmp.video_playing != false) {
 
-            var url = "./data/video/" + pm.storage;
-            var video = document.createElement('video');
-            if (this.kag.tmp.video_playing == "bgmovie") {
-
-                var old_video = document.getElementById("bgmovie");
-                old_video.loop = false;
-                video.id = "bgmovie2";
-
-            } else {
-                var old_video = document.getElementById("bgmovie2");
-                old_video.loop = false;
-                video.id = "bgmovie";
-            }
-            //video.setAttribute('myvideo');
-            video.src = url;
-
-            if (pm.volume != "") {
-                video.volume = parseFloat(parseInt(pm.volume) / 100);
-            } else {
-
-                if ( typeof this.kag.config.defaultMovieVolume != "undefined") {
-                    video.volume = parseFloat(parseInt(this.kag.config.defaultMovieVolume) / 100);
-                }
-            }
-
-            video.style.zIndex = -1;
-            video.style.backgroundColor = "black";
-            video.style.position = "absolute";
-            video.style.top = "0px";
-            video.style.left = "0px";
-            video.style.width = "100%";
-            video.style.height = "100%";
-            video.autoplay = false;
-            video.autobuffer = true;
-
-            video.addEventListener("ended", function(e) {
-
-                if (that.kag.stat.video_stack == null) {
-                    //$(".tyrano_base").find("video").remove();
-                    that.kag.tmp.video_playing ="";
-                } else {
-
-                    var new_video = null;
-                    if (that.kag.tmp.video_playing == "bgmovie") {
-                        new_video = document.getElementById("bgmovie2");
-                        that.kag.tmp.video_playing = "bgmovie2";
-                    } else {
-                        new_video = document.getElementById("bgmovie");
-                        that.kag.tmp.video_playing = "bgmovie";
-
-                    }
-
-                    new_video.play();
-                    new_video.style.zIndex = 1;
-                    video.style.zIndex=-1;
-                    
-                    setTimeout(function(){
-                        video.parentNode.removeChild(video);
-                    },100);
-                    
-                    
-                    that.kag.stat.video_stack = null;
-                    that.kag.ftag.nextOrder();
-                }
-
-                
-
-            });
-
-            document.getElementById("tyrano_base").appendChild(video);
-            video.load();
-
+            var video = document.getElementById("bgmovie");
             this.kag.stat.video_stack = pm;
             video.loop = false;
+
             return;
 
         }
@@ -366,7 +285,6 @@ tyrano.plugin.kag.tag.bgmovie = {
  #[end]
  */
 
-
 tyrano.plugin.kag.tag.wait_bgmovie = {
 
     vital : [],
@@ -379,28 +297,14 @@ tyrano.plugin.kag.tag.wait_bgmovie = {
 
         var that = this;
 
-        this.kag.stat.current_bgmovie["storage"] = pm.storage;
-        this.kag.stat.current_bgmovie["volume"] = pm.volume;
+        if (this.kag.tmp.video_playing == true) {
 
-        if (this.kag.tmp.video_playing != "") {
+            var video = document.getElementById("bgmovie");
+            this.kag.stat.is_wait_bgmovie = true;
+            video.loop = false;
 
-            //現在再生中のビデオがある状態で、もう一度実行した場合、videoのループが終わった後に、再生させる
-            if (this.kag.tmp.video_playing != "") {
-
-                var video = (this.kag.tmp.video_playing == "bgmovie") ? document.getElementById("bgmovie") : document.getElementById("bgmovie2");
-
-                if (this.kag.tmp.video_playing == "") {
-                    //終わってる
-                    this.kag.ftag.nextOrder();
-
-                } else {
-                    video.loop = false;
-                }
-
-            } else {
-                this.kag.ftag.nextOrder();
-            }
-
+        } else {
+            this.kag.ftag.nextOrder();
         }
     }
 };

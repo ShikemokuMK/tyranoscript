@@ -525,6 +525,8 @@ tyrano.plugin.kag.menu = {
                 
             };
             
+            this.kag.tmp.video_playing = false;
+            
             this.kag.ftag.startTag("bgmovie", pm);
             
         }
