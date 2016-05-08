@@ -1845,8 +1845,9 @@ tyrano.plugin.kag.tag.freelayer = tyrano.plugin.kag.tag.freeimage ;
 
 :param
 layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
-page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます,
-time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます、
+name=削除する要素のnameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。,
+time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます,
+wait=削除の完了を待つかどうかを指定できます。trueを指定すると完了を待ちます。デフォルトはtrue
 #[end]
 */
 
@@ -1861,6 +1862,7 @@ tyrano.plugin.kag.tag.free = {
         layer : "",
         page : "fore",
         name:"",
+        wait:"true",
         time:"" //徐々に非表示にする
     },
 
@@ -1890,10 +1892,17 @@ tyrano.plugin.kag.tag.free = {
                         //次へ移動ですがな
                         cnt++;
                         if(cnt == s_cnt){
-                            that.kag.ftag.nextOrder();
+                            if(pm.wait=="true"){
+                                that.kag.ftag.nextOrder();
+                            }
                         }
                     }
                 );
+                
+                //falseの時は即次へ
+                if(pm.wait=="false"){
+                    that.kag.ftag.nextOrder();
+                }
                 
             }else{
                 
@@ -3647,7 +3656,7 @@ graphic=ボタンの背景画像を指定します。ファイルはプロジェ
 enterimg=graphicが指定されている時に有効。カーソルが重なった時の画像を指定できます,
 clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
 enterse=ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
-leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。,
+leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。
 #[end]
 */
 
@@ -4213,7 +4222,7 @@ tyrano.plugin.kag.tag.trans = {
 storage=切り替えるための画像ファイルを指定します。ファイルはbgimage以下に配置してください,
 method=切り替えのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
 time=時間をミリ秒で指定します。,
-wait=背景の切り替えが完了するまで処理を待ちます,
+wait=背景の切り替えが完了するまで処理を待ちます
 #[end]
 */
 
