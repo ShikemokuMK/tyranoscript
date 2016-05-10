@@ -2089,7 +2089,7 @@ tyrano.plugin.kag.tag.ptext = {
 演出テキスト
 :exp
 多彩な演出効果をもったテキストを画面上に表示します。
-指定できる演出アニメーションは<a href='http://tyrano.jp/mtext/' target="_blank">こちら</a>
+指定できる演出アニメーションは http://tyrano.jp/mtext/ を参照
 
 [layopt layer=0 visible=true]が必要です。
 :sample

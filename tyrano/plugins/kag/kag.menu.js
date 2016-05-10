@@ -402,10 +402,15 @@ tyrano.plugin.kag.menu = {
 
     },
 
-    loadGameData : function(data) {
+    loadGameData : function(data,options) {
 
         var auto_next = "no";
-
+        
+        //普通のロードの場合
+        if(typeof options =="undefined"){
+             options={bgm_over:"false"};
+        }
+        
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
         
@@ -422,28 +427,33 @@ tyrano.plugin.kag.menu = {
 
         //一旦音楽と効果音は全て止めないと
 
-        this.kag.ftag.startTag("stopbgm", {
-            stop : "true"
-        });
-        this.kag.ftag.startTag("stopse", {
-            stop : "true"
-        });
-
-        //音楽再生
-        if (this.kag.stat.current_bgm != "") {
-
-            var mstorage = this.kag.stat.current_bgm;
-
-            var pm = {
-                loop : "true",
-                storage : mstorage,
-                /*fadein:"true",*/
-                /*time:2000,*/
+//BGMを引き継ぐかどうか。
+        if(options.bgm_over=="false"){
+            
+            this.kag.ftag.startTag("stopbgm", {
                 stop : "true"
-            };
-
-            this.kag.ftag.startTag("playbgm", pm);
-
+            });
+            this.kag.ftag.startTag("stopse", {
+                stop : "true"
+            });
+    
+            //音楽再生
+            if (this.kag.stat.current_bgm != "") {
+    
+                var mstorage = this.kag.stat.current_bgm;
+    
+                var pm = {
+                    loop : "true",
+                    storage : mstorage,
+                    /*fadein:"true",*/
+                    /*time:2000,*/
+                    stop : "true"
+                };
+    
+                this.kag.ftag.startTag("playbgm", pm);
+    
+            }
+            
         }
         
         if(!this.kag.stat.current_bgmovie){

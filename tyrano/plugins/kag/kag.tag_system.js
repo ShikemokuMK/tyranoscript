@@ -1589,10 +1589,10 @@ tyrano.plugin.kag.tag.sleepgame = {
 ジャンプ先での変数操作 （f）については、ゲーム復旧後も反映されます。
 ゲームに戻る前にmake.ksを通過します。ジャンプ先での操作に対して戻る前に設定を行いたい場合は
 make.ksで変数fに対して、[awakegame]からの復帰かどうかの判定をいれるとよいでしょう。
-
 :sample
 :param
-
+variable_over=trueかfalseを指定します。trueを指定するとsleepgame中のゲーム変数への変更を引き継ぎます。デフォルトはtrue,
+bgm_over=trueかfalseを指定します。trueを指定するとsleepgame中のBGMを再生し続けます。デフォルトはtrue。falseだとsleepgame時のBGMに切り替わります。
 #[end]
 */
 
@@ -1601,6 +1601,10 @@ tyrano.plugin.kag.tag.awakegame = {
     vital:[],
     
     pm:{
+        
+        variable_over:"true",
+        bgm_over:"true"
+        
     },
     
     start:function(pm){
@@ -1616,9 +1620,16 @@ tyrano.plugin.kag.tag.awakegame = {
               var sleep_data = this.kag.tmp.sleep_game;
               
               //f変数を継承する
-              sleep_data.stat.f = this.kag.stat.f;
+              if(pm.variable_over == "true"){
+                sleep_data.stat.f = this.kag.stat.f;
+              }
               
-              this.kag.menu.loadGameData($.extend(true, {}, sleep_data));
+              var options = {
+                bgm_over:pm.bgm_over
+              };
+              
+              this.kag.menu.loadGameData($.extend(true, {}, sleep_data),options);
+              
               this.kag.tmp.sleep_game = null;
               
           }

@@ -199,8 +199,27 @@ tyrano.plugin.kag.tag.movie = {
             }
 
         }
-
-        document.getElementById("tyrano_base").appendChild(video);
+        
+        var j_video = $(video);
+        j_video.css("opacity",0);
+        
+        //document.getElementById("tyrano_base").appendChild(video);
+        
+        $("#tyrano_base").append(j_video);
+        j_video.animate(
+            {opacity: '1'},
+            {duration: parseInt(pm.time),
+                complete: function(){
+                        //$(this).remove();
+                        //that.kag.ftag.nextOrder();
+                        //if(pm.wait=="true"){
+                        //    that.kag.ftag.nextOrder();
+                        //}
+                        
+                    }
+            }
+        );
+        
         video.load();
         video.play();
 
@@ -226,6 +245,7 @@ tyrano.plugin.kag.tag.movie = {
  [bgmovie storage="" skip=false ]
  :param
  storage=再生するogv webm mp4ファイルを指定してください,
+ time=背景動画を表示するときにフェードアウト効果を与える時間を指定します。デフォルトは1000(ミリ秒),
  volume=ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100 ,
  loop=背景動画をループさせるかどうかを指定します。falseを指定すると動画の最後の状態で停止します。
  #[end]
@@ -239,6 +259,7 @@ tyrano.plugin.kag.tag.bgmovie = {
         storage : "",
         volume : "",
         loop : "true",
+        time:"300",
         stop : "false" //nextorderするかしないk
     },
 
@@ -320,6 +341,8 @@ tyrano.plugin.kag.tag.wait_bgmovie = {
  :sample
  [stop_bgmovie storage="" skip=false ]
  :param
+ time=ミリ秒で指定すると、動画をフェードアウトして削除することが可能です。デフォルトは1000,
+ wait=trueかfalse を指定します。動画のフェードアウトを待つかどうかを指定できます。デフォルトはtrue 
  #[end]
  */
 
@@ -328,6 +351,8 @@ tyrano.plugin.kag.tag.stop_bgmovie = {
     vital : [],
 
     pm : {
+        time:"300",
+        wait:"true"
     },
 
     start : function(pm) {
@@ -338,9 +363,25 @@ tyrano.plugin.kag.tag.stop_bgmovie = {
 
         that.kag.stat.current_bgmovie["storage"] = "";
         that.kag.stat.current_bgmovie["volume"] = "";
-
-        $(".tyrano_base").find("video").remove();
-        that.kag.ftag.nextOrder();
+        
+        
+        $(".tyrano_base").find("video").animate(
+            {opacity: '0'},
+            {duration: parseInt(pm.time),
+                complete: function(){
+                        $(this).remove();
+                        
+                        if(pm.wait=="true"){
+                            that.kag.ftag.nextOrder();
+                        }
+                        
+                    }
+            }
+        ); 
+        
+        if(pm.wait=="false"){
+            that.kag.ftag.nextOrder();
+        }
 
     }
 };
