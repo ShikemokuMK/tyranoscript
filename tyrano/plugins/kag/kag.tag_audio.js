@@ -63,12 +63,11 @@ tyrano.plugin.kag.tag.playbgm = {
 
         //スマホアプリの場合
         if (that.kag.define.FLAG_APRI == true) {
-
+            
             that.playGap(pm);
 
             //スマホからのアクセスの場合は、クリックを挟む
         } else if ($.userenv() != "pc") {
-
             this.kag.layer.hideEventLayer();
             //スマホからの場合、スキップ中は音楽をならさない
             if (this.kag.stat.is_skip == true && pm.target == "se") {
@@ -178,7 +177,13 @@ tyrano.plugin.kag.tag.playbgm = {
             that.kag.stat.current_bgm = storage;
 
         } else {
-            this.kag.tmp.map_se[storage] = audio_obj;
+            //効果音の時はバッファ指定
+            //すでにバッファが存在するなら、それを消す。
+            if(this.kag.tmp.map_se[pm.buf] != null){
+                this.kag.tmp.map_se[pm.buf].pause();
+                this.kag.tmp.map_se[pm.buf] = null;
+            }
+            this.kag.tmp.map_se[pm.buf] = audio_obj;
         }
 
         audio_obj.play();
@@ -269,7 +274,7 @@ tyrano.plugin.kag.tag.playbgm = {
                 if (pm.target == "bgm") {
                     tmp_obj = that.kag.tmp.map_bgm[pm.storage];
                 } else {
-                    tmp_obj = that.kag.tmp.map_se[pm.storage];
+                    tmp_obj = that.kag.tmp.map_se[pm.buf];
                 }
 
                 if (tmp_obj != null) {
@@ -283,7 +288,7 @@ tyrano.plugin.kag.tag.playbgm = {
         if (pm.target == "bgm") {
             this.kag.tmp.map_bgm[pm.storage] = audio_obj;
         } else {
-            this.kag.tmp.map_se[pm.storage] = audio_obj;
+            this.kag.tmp.map_se[pm.buf] = audio_obj;
         }
 
         //audio_obj.play();
@@ -390,6 +395,7 @@ tyrano.plugin.kag.tag.stopbgm = {
         fadeout : "false",
         time : 2000,
         target : "bgm",
+        buf:"0",
         stop : "false" //trueの場合自動的に次の命令へ移動しない。ロード対策
 
     },
@@ -417,101 +423,113 @@ tyrano.plugin.kag.tag.stopbgm = {
         if (that.kag.define.FLAG_APRI == true) {
             //
             for (key in target_map ) {
+                
+                if(key==pm.buf){
 
-                (function() {
-
-                    var _key = key;
-                    var _audio_obj = null;
-
-                    if (pm.target === "bgm") {
-                        _audio_obj = target_map[_key];
-
-                        //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
-                        if (pm.stop == "false") {
-                            that.kag.stat.current_bgm = "";
+                    (function() {
+    
+                        var _key = key;
+                        var _audio_obj = null;
+    
+                        if (pm.target === "bgm") {
+                            _audio_obj = target_map[_key];
+    
+                            //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
+                            if (pm.stop == "false") {
+                                that.kag.stat.current_bgm = "";
+                            }
+    
+                        } else {
+                            _audio_obj = target_map[_key];
                         }
-
-                    } else {
-                        _audio_obj = target_map[_key];
-                    }
-
-                    if (pm.target === "bgm") {
-                        that.kag.tmp.map_bgm[_key] = null;
-                        delete that.kag.tmp.map_bgm[_key];
-                    } else {
-                        that.kag.tmp.map_se[_key] = null;
-                        delete that.kag.tmp.map_se[_key];
-                    }
-
-                    //上記マップを削除した後に、ストップ処理を行うといいのではないか。
-                    _audio_obj.stop();
-                    _audio_obj.release();
-
-                })();
-
+    
+                        if (pm.target === "bgm") {
+                            that.kag.tmp.map_bgm[_key] = null;
+                            delete that.kag.tmp.map_bgm[_key];
+                        } else {
+                            that.kag.tmp.map_se[_key] = null;
+                            delete that.kag.tmp.map_se[_key];
+                        }
+    
+                        //上記マップを削除した後に、ストップ処理を行うといいのではないか。
+                        _audio_obj.stop();
+                        _audio_obj.release();
+    
+                    })();
+                }
             }
 
-            //フラッシュで再生している場合
+            //オーディオで再生している場合
         } else {
 
             for (key in target_map ) {
 
-                (function() {
+                if(key==pm.buf){
 
-                    var _key = key;
-
-                    var _audio_obj = null;
-
-                    if (pm.target === "bgm") {
-                        _audio_obj = target_map[_key];
-
-                        //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
-                        if (pm.stop == "false") {
-                            that.kag.stat.current_bgm = "";
-                        }
-
-                    } else {
-                        _audio_obj = target_map[_key];
-                    }
-
-                    //フェードアウトしながら再生停止
-                    if (pm.fadeout == "true") {
-
-                        var vars = jQuery.extend($('<div>')[0], {
-                            "volume" : _audio_obj.volume
-                        });
-
-                        $(vars).stop().animate({
-                            volume : 0
-                        }, {
-                            easing : "linear",
-                            duration : parseInt(pm.time),
-                            step : function() {
-                                _audio_obj.volume = this.volume;
-                                // this == vars
-                            },
-                            complete : function() {
-                                _audio_obj.pause();
-                                //that.kag.ftag.completeTrans();
-                            }
-                        });
-
-                    } else {
-
-                        _audio_obj.pause();
-
+                    (function() {
+    
+                        var _key = key;
+    
+                        var _audio_obj = null;
+    
                         if (pm.target === "bgm") {
-                            delete that.kag.tmp.map_bgm[_key];
-
+                            _audio_obj = target_map[_key];
+    
+                            //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
+                            if (pm.stop == "false") {
+                                that.kag.stat.current_bgm = "";
+                            }
+    
                         } else {
-                            delete that.kag.tmp.map_se[_key];
-
+                            _audio_obj = target_map[_key];
                         }
-
-                    }
-
-                })();
-
+    
+                        //フェードアウトしながら再生停止
+                        if (pm.fadeout == "true") {
+    
+                            var vars = jQuery.extend($('<div>')[0], {
+                                "volume" : _audio_obj.volume
+                            });
+    
+                            $(vars).stop().animate({
+                                volume : 0
+                            }, {
+                                easing : "linear",
+                                duration : parseInt(pm.time),
+                                step : function() {
+                                    _audio_obj.volume = this.volume;
+                                    // this == vars
+                                },
+                                complete : function() {
+                                    _audio_obj.pause();
+                                    //that.kag.ftag.completeTrans();
+                                    /*
+                                    if (pm.target === "bgm") {
+                                        delete that.kag.tmp.map_bgm[_key];
+                                    } else {
+                                        delete that.kag.tmp.map_se[_key];
+                                    }
+                                    */
+                                    
+                                }
+                            });
+    
+                        } else {
+    
+                            _audio_obj.pause();
+    
+                            if (pm.target === "bgm") {
+                                delete that.kag.tmp.map_bgm[_key];
+    
+                            } else {
+                                delete that.kag.tmp.map_se[_key];
+    
+                            }
+    
+                        }
+    
+                    })();
+                }
             }
         }
 
@@ -661,6 +679,7 @@ tyrano.plugin.kag.tag.xchgbgm = {
  [playse storage=sound.ogg loop=false ]
  :param
  storage=再生するファイルを指定してください,
+ buf=効果音を再生するスロットを指定できます。デフォルトは0,
  click=スマホブラウザで効果音を鳴らす場合、クリック後でないと再生できません。スマホブラウザで音がならない場合trueを指定してみてください。デフォルトはfalse,
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
  clear=trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
@@ -677,6 +696,7 @@ tyrano.plugin.kag.tag.playse = {
         target : "se",
         volume : "",
         loop : "false",
+        buf:"0",
         clear : "false" //他のSEがなっている場合、それをキャンセルして、新しく再生します
     },
 
@@ -705,6 +725,7 @@ tyrano.plugin.kag.tag.playse = {
  :sample
  [stopse ]
  :param
+ buf=効果音を停止するスロットを指定できます。デフォルトは0
  #[end]
  */
 
@@ -714,6 +735,7 @@ tyrano.plugin.kag.tag.stopse = {
         storage : "",
         fadeout : "false",
         time : 2000,
+        buf:"0",
         target : "se"
     },
 
@@ -736,6 +758,7 @@ tyrano.plugin.kag.tag.stopse = {
  :param
  storage=次に再生するファイルを指定してください,
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
+ buf=効果音を停止するスロットを指定できます。デフォルトは0,
  time=フェードインの時間をミリ秒で指定します
  #[end]
  */
@@ -750,6 +773,7 @@ tyrano.plugin.kag.tag.fadeinse = {
         loop : "false",
         volume : "",
         fadein : "true",
+        buf:"0",
         time : "2000"
 
     },
@@ -777,6 +801,7 @@ tyrano.plugin.kag.tag.fadeinse = {
  [fadeoutse time=2000 ]
  :param
  time=フェードアウトを行なっている時間をミリ秒で指定します。
+ buf=効果音を停止するスロットを指定できます。デフォルトは0,
  #[end]
  */
 
@@ -786,6 +811,7 @@ tyrano.plugin.kag.tag.fadeoutse = {
         storage : "",
         target : "se",
         loop : "false",
+        buf:"0",
         fadeout : "true"
     },
 

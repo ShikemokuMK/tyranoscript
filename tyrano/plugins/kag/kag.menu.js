@@ -456,6 +456,7 @@ tyrano.plugin.kag.menu = {
             
         }
         
+        
         if(!this.kag.stat.current_bgmovie){
             this.kag.stat.current_bgmovie = {
                 storage:"",
