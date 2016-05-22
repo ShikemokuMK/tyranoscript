@@ -47,7 +47,7 @@ tyrano.plugin.kag.ftag = {
     //トランジション完了 だけにとどまらず、再生を強制的に再開させる
     completeTrans : function() {
         //処理停止中なら
-
+        this.kag.stat.is_trans = false;
         if (this.kag.stat.is_stop == true) {
             this.kag.layer.showEventLayer();
             this.nextOrder();
@@ -2340,7 +2340,14 @@ tyrano.plugin.kag.tag.backlay = {
 //トランジション完了を待つ
 tyrano.plugin.kag.tag.wt = {
     start : function(pm) {
-        this.kag.layer.hideEventLayer();
+        
+        if (this.kag.stat.is_trans == false) {
+            this.kag.layer.showEventLayer();
+            this.kag.ftag.nextOrder();
+        }else{
+            this.kag.layer.hideEventLayer();
+        }
+        
     }
 };
 
@@ -4115,7 +4122,7 @@ message0 または message1 を指定するとメッセージレイヤにな り
 <br>
 通常は背景の変更などに使用されます。,
 method=トランジションのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
-children=falseの場合、layerで指定した場所だけtrans します。デフォルトはfalseです,
+children=【廃止】falseの場合、layerで指定した場所だけtrans します。デフォルトはfalseです,
 time=トランジションを行っている時間をミリ秒で指定します。
 #[end]
 */
@@ -4135,7 +4142,7 @@ tyrano.plugin.kag.tag.trans = {
     start : function(pm) {
 
         this.kag.ftag.hideNextImg();
-
+        this.kag.stat.is_trans = true;
         var that = this;
 
         //backを徐々に表示して、foreを隠していく。
@@ -4184,14 +4191,9 @@ tyrano.plugin.kag.tag.trans = {
                         $.trans(pm.method, layer_back, parseInt(pm.time), "show", function() {
                             comp_num++;
                             that.kag.layer.forelay(_key);
-
-                            //すべてのトランジション完了
-                            if (layer_num <= comp_num) {
-
-                                that.kag.ftag.completeTrans();
-
-                            }
-
+                            
+                            that.kag.ftag.completeTrans();
+                            
                             that.kag.ftag.hideNextImg();
 
                         });

@@ -86,6 +86,8 @@ tyrano.plugin.kag ={
         current_page:"fore",
         is_stop:false,//停止中。クリックしても先に進ませない
         
+        is_trans:false, //trans中
+        
         is_strong_stop:false,// [s]タグで立ち止まってる状態。強力な停止中。解除するにはジャンプやマクロが呼び出せれる
         strong_stop_recover_index:0, //[s]タグ指定中に保存した場合、戻ってくるindex [_s]時のindexを保持しておく
         

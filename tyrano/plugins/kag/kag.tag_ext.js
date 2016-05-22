@@ -163,14 +163,55 @@ tyrano.plugin.kag.tag.movie = {
                     } else {
                         video.loop = false;
                     }
+                    
+                    var video2 = document.createElement("video");
+                    
+                    video2.style.backgroundColor = "black";
+                    video2.style.position = "absolute";
+                    video2.style.top = "0px";
+                    video2.style.left = "0px";
+                    video2.style.width = "100%";
+                    video2.style.height = "100%";
+                    video2.autoplay = true;
+                    video2.autobuffer = true;
+                    
+                    // プリロードを設定する
+                    video2.src = "./data/video/" + video_pm.storage;
+                    video2.load();
+                    var j_video2 = $(video2);
+                    video2.play();
+                    j_video2.css("z-index",-1);
+                    $("#tyrano_base").append(j_video2);
+                    
+                    video2.addEventListener('canplay', function() {
+                        // Video is loaded and can be played
+                        
+                        j_video2.css("z-index",1);
+                        
+                        setTimeout(function(){
+                            $("#bgmovie").remove();
+                            video2.id="bgmovie";
+                        },100);
+                        
+                        that.kag.stat.video_stack = null;
+                        that.kag.ftag.nextOrder();
 
+                        //document.getElementById("tyrano_base").appendChild(video);
+                        
+                        //$("#tyrano_base").append(j_video);
+                        
+                    }, false);
+                    
+                    //video2でも呼び出し
+                    video2.addEventListener("ended",arguments.callee);
+                    
+                    /*
                     video.src = "./data/video/" + video_pm.storage;
                     video.load();
                     video.play();
-
-                    that.kag.stat.video_stack = null;
-                    that.kag.ftag.nextOrder();
-
+                    */
+                   
+                   
                 }
 
             });
@@ -239,6 +280,8 @@ tyrano.plugin.kag.tag.movie = {
  ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
  stop_bgmovie タグを指定すると再生が終わります。
 
+bgmovieをループ中に別のbgmovieを重ねることで、ループが完了してから次の動画を再生させる事ができます。
+
  （注意）このタグはPC限定です。スマホでは利用できません。
 
  :sample
@@ -275,11 +318,10 @@ tyrano.plugin.kag.tag.bgmovie = {
 
         //ループ再生中のビデオがある状態で、もう一度実行した場合、videoのループが終わった後に、再生させる
         if (this.kag.tmp.video_playing != false) {
-
             var video = document.getElementById("bgmovie");
             this.kag.stat.video_stack = pm;
             video.loop = false;
-
+            
             return;
 
         }
