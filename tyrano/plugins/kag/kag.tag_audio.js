@@ -41,6 +41,7 @@ tyrano.plugin.kag.tag.playbgm = {
         fadein : "false",
         time : 2000,
         volume : "",
+        buf:"0",
         target : "bgm", //"bgm" or "se"
         click : "false", //音楽再生にクリックが必要か否か
         stop : "false" //trueの場合自動的に次の命令へ移動しない。ロード対策
@@ -173,7 +174,7 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         if (target === "bgm") {
-            this.kag.tmp.map_bgm[storage] = audio_obj;
+            this.kag.tmp.map_bgm[pm.buf] = audio_obj;
             that.kag.stat.current_bgm = storage;
 
         } else {
