@@ -3433,7 +3433,8 @@ tyrano.plugin.kag.tag.button = {
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
                     that.kag.ftag.startTag("playse", {
-                        "storage" : _pm.clickse
+                        "storage" : _pm.clickse,
+                        "stop" : true
                     });
                 }
 
