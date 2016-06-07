@@ -301,10 +301,18 @@ tyrano.plugin.kag ={
         
         this.stat.f ={}; //ゲーム変数
         this.variable.sf ={}; //システム変数
-        this.variable.tf ={}; //一時変数かな
         
+        //添付のシステムだけは残す
+        this.clearTmpVariable();
         this.saveSystemVariable();
         
+    },
+    
+    //添付変数の削除
+    clearTmpVariable:function(){
+        var tmp_sys = this.kag.variable.tf["system"];
+        this.kag.variable.tf = {}; //一時変数かな
+        this.kag.variable.tf["system"] = tmp_sys;
     },
     
 ///スタック管理用

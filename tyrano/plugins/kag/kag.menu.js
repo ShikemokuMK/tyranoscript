@@ -520,10 +520,11 @@ tyrano.plugin.kag.menu = {
         
         
         
+        //どの道動画削除。
+        $(".tyrano_base").find("video").remove();
+            
         //背景動画が設定中なら
         if (this.kag.stat.current_bgmovie["storage"] !=""){
-            
-            $(".tyrano_base").find("video").remove();
             
             var vstorage = this.kag.stat.current_bgmovie["storage"];
             var volume   = this.kag.stat.current_bgmovie["volume"];
@@ -585,7 +586,10 @@ tyrano.plugin.kag.menu = {
 
         //make.ks を廃止したい
         //var insert =undefined;
-
+        
+        //添付変数は消す。
+        this.kag.clearTmpVariable();
+        
         this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
 
     },

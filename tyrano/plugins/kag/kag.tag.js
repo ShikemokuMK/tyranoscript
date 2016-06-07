@@ -3484,6 +3484,7 @@ tyrano.plugin.kag.tag.button = {
                 if(that.kag.layer.layer_event.css("display") =="none" && that.kag.stat.is_strong_stop != true){
                     return false;
                 }
+                
 
                 //roleが設定されている場合は対応する処理を実行
                 //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
@@ -3495,6 +3496,19 @@ tyrano.plugin.kag.tag.button = {
                     //オートは停止
                     if(_pm.role!="auto"){
                         that.kag.ftag.startTag("autostop", {});
+                    }
+                    
+                    //文字が流れているときは、セーブ出来ないようにする。
+                    if(_pm.role =="save" || 
+                    _pm.role =="menu" || 
+                    _pm.role=="quicksave"||  
+                    _pm.role=="sleepgame"){
+                        
+                        //テキストが流れているときは実行しない
+                        if(that.kag.stat.is_adding_text == true){
+                            return false; 
+                        }
+                        
                     }
                     
                     switch(_pm.role) {
