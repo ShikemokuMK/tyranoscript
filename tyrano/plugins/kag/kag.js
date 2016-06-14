@@ -187,10 +187,10 @@ tyrano.plugin.kag ={
         
         video_stack:null,
         is_wait_bgmovie :false,
-            
         
         //定義されたキャラクター情報
         charas:{},
+        jcharas:{},
         
         play_bgm:true, //BGMを再生するか否か
         play_se:true,  //SEを再生するか否か

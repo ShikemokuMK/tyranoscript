@@ -1276,9 +1276,14 @@ tyrano.plugin.kag.tag.chara_ptext = {
             }
 
         } else {
-
+            
+            //日本語から逆変換することも可能とする
+            if(this.kag.stat.jcharas[pm.name]){
+                pm.name = this.kag.stat.jcharas[pm.name];
+            }
+            
             var cpm = this.kag.stat.charas[pm.name];
-
+            
             if (cpm) {
                 //キャラクター名出力
                 $("." + this.kag.stat.chara_ptext).html(cpm.jname);
@@ -1510,6 +1515,11 @@ tyrano.plugin.kag.tag.chara_new = {
 
         //前景レイヤ
         this.kag.stat.charas[pm.name] = pm;
+        
+        //キャラクターの日本語名とnameを紐付けるための処置
+        if(pm.jname!=""){
+            this.kag.stat.jcharas[pm.jname]=pm.name;
+        }
 
         this.kag.ftag.nextOrder();
 
