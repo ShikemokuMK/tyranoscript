@@ -177,6 +177,7 @@ tyrano.plugin.kag.tag["close"] = {
             this.close();
         }
     },
+    
     close:function() {
         window.close();
         if (typeof navigator.app != 'undefined') {
