@@ -2453,7 +2453,7 @@ tyrano.plugin.kag.tag.link = {
          var _storage = pm.storage;
          var that = this;
          
-         j_span.bind('click', function(e) {
+         j_span.bind('click touchstart', function(e) {
                 
                 //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
                 TYRANO.kag.ftag.nextOrderWithLabel(_target, _storage);
