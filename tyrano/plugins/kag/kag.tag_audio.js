@@ -171,7 +171,28 @@ tyrano.plugin.kag.tag.playbgm = {
             audio_obj.onended = function() {
                 this.play();
             };
+            
+        }else if(pm.loop=="smooth"){
+            
+            var audio_interval = setInterval(function(){
+                
+                var last_time = audio_obj.duration - audio_obj.currentTime;
+                if(last_time < 0.1){
+                    audio_obj.currentTime = 0;
+                    audio_obj.play();
+                }
+                
+            },30);
+            
+            $(audio_obj).on("pause",function() {
+                
+                clearInterval(audio_interval);
+                
+            });
+            
+            
         }
+
 
         if (target === "bgm") {
             this.kag.tmp.map_bgm[pm.buf] = audio_obj;
