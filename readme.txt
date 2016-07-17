@@ -1,4 +1,4 @@
-TyranoScript｜ティラノスクリプト　Ver4.20（C）ShikemokuMK
+TyranoScript｜ティラノスクリプト　Ver4.21（C）ShikemokuMK
 http://tyrano.jp
 
 
@@ -63,7 +63,7 @@ http://tyrano.jp/adv/next/rider
 ■利用規約■
 ティラノスクリプトは無料でご利用いただけます。
 商用利用にも制限はありません。
-改造にも制限はありません
+作品の製作が目的であれば、改造に制限はありません
 
 ■禁止事項■
 ・ティラノスクリプト自体の再配布はお控えください。
