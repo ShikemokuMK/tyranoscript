@@ -415,7 +415,6 @@ tyrano.plugin.kag.ftag = {
             this.kag.layer.hideEventLayer();
 
             this.kag.loadScenario(scenario_file, function(array_tag) {
-
                 that.kag.layer.showEventLayer();
                 that.kag.ftag.buildTag(array_tag, label_name);
 
@@ -1555,6 +1554,8 @@ height=画像の高さ位置を指定します。（ピクセル）,
 folder=好きな画像フォルダから、画像を選択できます。通常前景レイヤはfgimage　背景レイヤはbgimageと決まっていますが、ここで記述したフォルダ以下の画像ファイルを使用することができるようになります。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 time=ミリ秒を指定することで、徐々にイメージを表示させることができます。,
+wait=falseを指定すると、画像が表示されるのを待たずに、処理を進め明日。デフォルトはtrue,
+zindex=画像同士の重なりを指定できます。数値が大きい方が前に表示されます,
 pos=レイヤ位置を自動的に決定します。前景レイヤに対して使います。横方向の位置は、この属性で指定した left ( 左端 ) 、left_center ( 左より )、center ( 中央 )、 right_center ( 右より )、right ( 右端 ) の位置に表示されます。各横方向の座標の中心 位置は Config.tjs で指定することができます。
 <br>left 、left_center、 center、 right_center、 right の代わりに、それぞれ l、 lc、 c、 rc、 r を 指定することもできます ( 動作は同じです )。
 <br>この属性を指定した場合は left 属性や top 属性は無視されます。
@@ -1580,7 +1581,9 @@ tyrano.plugin.kag.tag.image = {
         "pos" : "",
         "name" : "",
         "folder" : "", //画像フォルダを明示できる
-        "time" : ""
+        "time" : "",
+        "wait": "true",
+        "zindex": ""
         //"visible":"true"
 
     },
@@ -1673,6 +1676,10 @@ tyrano.plugin.kag.tag.image = {
             if (pm.y != "") {
                 img_obj.css("top", pm.y + "px");
             }
+            
+            if(pm.zindex != ""){
+                img_obj.css("z-index",pm.zindex);
+            }
 
             //オブジェクトにクラス名をセットします
             $.setName(img_obj, pm.name);
@@ -1687,9 +1694,15 @@ tyrano.plugin.kag.tag.image = {
                     {"opacity":1},
                     parseInt(pm.time), 
                     function(){
-                        that.kag.ftag.nextOrder();
+                        if(pm.wait=="true"){
+                            that.kag.ftag.nextOrder();
+                        }
                     }
                 );
+                
+                if(pm.wait !="true"){
+                    that.kag.ftag.nextOrder();
+                }
                         
                 
             }else{
