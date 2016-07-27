@@ -11,8 +11,12 @@ tyrano.plugin.kag.menu = {
 
     showMenu : function(call_back) {
                     
-        ///処理待ち状態の時は、実行してはいけない
         if (this.kag.layer.layer_event.css("display") == "none" && this.kag.stat.is_strong_stop != true) {
+            return false;
+        }
+        
+        //wait中の時
+        if(this.kag.stat.is_wait == true){
             return false;
         }
         

@@ -85,7 +85,7 @@ tyrano.plugin.kag ={
         current_layer:"message0", //現在のメッセージレイヤ
         current_page:"fore",
         is_stop:false,//停止中。クリックしても先に進ませない
-        
+        is_wait:false, //wait中。
         is_trans:false, //trans中
         
         is_strong_stop:false,// [s]タグで立ち止まってる状態。強力な停止中。解除するにはジャンプやマクロが呼び出せれる

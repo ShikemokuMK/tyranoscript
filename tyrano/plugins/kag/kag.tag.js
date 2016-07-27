@@ -2592,10 +2592,12 @@ tyrano.plugin.kag.tag.wait = {
 
         //クリック無効
         this.kag.stat.is_strong_stop = true;
+        this.kag.stat.is_wait = true;
         this.kag.layer.hideEventLayer();
 
         setTimeout(function() {
             that.kag.stat.is_strong_stop = false;
+            that.kag.stat.is_wait = false;
             that.kag.layer.showEventLayer();
             that.kag.ftag.nextOrder();
         }, pm.time);
@@ -3517,8 +3519,8 @@ tyrano.plugin.kag.tag.button = {
                     _pm.role=="quicksave"||  
                     _pm.role=="sleepgame"){
                         
-                        //テキストが流れているときは実行しない
-                        if(that.kag.stat.is_adding_text == true){
+                        //テキストが流れているときとwait中は実行しない
+                        if(that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true){
                             return false; 
                         }
                         
@@ -3579,6 +3581,7 @@ tyrano.plugin.kag.tag.button = {
                             if(that.kag.tmp.sleep_game != null){
                                 return false;
                             }
+                            
                             
                             //ready
                             that.kag.tmp.sleep_game = {};
