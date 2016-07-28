@@ -1647,7 +1647,7 @@ tyrano.plugin.kag.tag.chara_show = {
                 cpm.reflect = "false";
             }
         }
-
+        
         //画像は事前にロードしておく必要がありそう
         this.kag.preload(storage_url, function() {
 

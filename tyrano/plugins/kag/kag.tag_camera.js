@@ -144,7 +144,11 @@ tyrano.plugin.kag.tag.camera = {
                 //アニメーションが完了しないと次へはいかない
                 if(pm.wait =="true" && flag_complete ==false){
                     flag_complete=true; //最初の一回だけwait有効
-                    that.kag.ftag.nextOrder();
+                    
+                    setTimeout(function(){
+                        that.kag.ftag.nextOrder();
+                    },300);
+                    
                 }else{
                     
                     //カメラを待ってる状態なら
