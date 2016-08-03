@@ -390,12 +390,10 @@ tyrano.plugin.kag.parser ={
             var pm_key = $.trim(tmp[0]);
             var pm_val = $.trim(tmp[1]);
             
-            var pmobj={};
-            pmobj[pm_key]= pm_val;
-            
             //特殊変換された値はそのまま代入できない
-            obj.pm[pm_key] = $.replaceAll(pm_val,"#","=");
-            
+            if(pm_val!=""){
+                obj.pm[pm_key] = $.replaceAll(pm_val,"#","=");
+            }
         }
         
         if(obj.name == "iscript"){
