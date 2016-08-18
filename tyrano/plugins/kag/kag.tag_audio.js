@@ -126,13 +126,13 @@ tyrano.plugin.kag.tag.playbgm = {
 
             //デフォルトで指定される値を設定
             if (target === "bgm") {
-                if (!this.kag.config.defaultBgmVolume) {
+                if (typeof this.kag.config.defaultBgmVolume == undefined) {
                     volume = 1;
                 } else {
                     volume = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
                 }
             } else {
-                if (!this.kag.config.defaultSeVolume) {
+                if (typeof this.kag.config.defaultSeVolume == undefined) {
                     volume = 1;
                 } else {
                     volume = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);

@@ -1210,13 +1210,17 @@ tyrano.plugin.kag.tag.jump = {
 tyrano.plugin.kag.tag.r = {
 
     start : function() {
+        
+        var that = this;
         //クリックするまで、次へすすまないようにする
         var j_inner_message = this.kag.getMessageInnerLayer();
 
         var txt = j_inner_message.find("p").find(".current_span").html() + "<br />";
         j_inner_message.find("p").find(".current_span").html(txt);
-
-        this.kag.ftag.nextOrder();
+        
+        setTimeout(function(){
+            that.kag.ftag.nextOrder();
+        },5);
     }
 };
 
@@ -2728,7 +2732,7 @@ tyrano.plugin.kag.tag.quake = {
  size=文字サイズを指定します,
  color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
  bold=太字指定。true 又は　false で指定,
- italic=trueを指定すると、イタリック体になります。デフォルトはfalseです
+ italic=trueを指定すると、イタリック体になります。デフォルトはfalseです,
  face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。
  #[end]
  */
@@ -2784,7 +2788,7 @@ tyrano.plugin.kag.tag.font = {
 :sample
 :param
 size=文字サイズを指定します,
-color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です
+color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
 bold=太字指定。true 又は　false で指定,
 italic=trueを指定するとイタリック体で表示されます。デフォルトは
 face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。
@@ -3683,6 +3687,7 @@ storage=ジャンプ先のシナリオファイルを指定します。省略す
 target=ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 text=ボタンの文字列です,
+font_color=フォントの色を指定できます,
 x=ボタンの横位置を指定します,
 y=ボタンの縦位置を指定します。
 width=ボタンの横幅をピクセルで指定できます,
@@ -3703,7 +3708,7 @@ tyrano.plugin.kag.tag.glink = {
 
     pm : {
         color : "black", //クラス名でいいよ
-        font_color:"0xffffff",
+        font_color:"",
         storage : null,
         target : null,
         name : "",
@@ -3735,7 +3740,10 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
         j_button.css("font-size", pm.size + "px");
-        j_button.css("color",$.convertColor(pm.font_color));
+        
+        if(pm.font_color !=""){
+            j_button.css("color",$.convertColor(pm.font_color));
+        }
         
         if (pm.height != "") {
             j_button.css("height", pm.height + "px");

@@ -1536,7 +1536,7 @@ sleepgameは複数実行することはできません。必ず[awakegame]を実
 
 :sample
 
-[gamesleep storage="scene3.ks" target="*start" ]
+[sleepgame storage="scene3.ks" target="*start" ]
 
 ;buttonに紐付ける方法
 [button name="button" role="sleepgame" fix="true" graphic="button/skip.gif" x=450 y=400 storage="scene3.ks" ]
