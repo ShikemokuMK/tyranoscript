@@ -719,7 +719,7 @@ tyrano.plugin.kag.menu = {
     //画面をフルスクリーンにします
     screenFull : function() {
 
-        if ($.userenv() == "pc") {
+        if ($.isNWJS() == true) {
             var gui = require("nw.gui");
             var win = gui.Window.get();
             if (win.isFullscreen) {
@@ -727,8 +727,44 @@ tyrano.plugin.kag.menu = {
             } else {
                 win.enterFullscreen();
             }
+            
+        }else{
+            
+            var isFullScreen = document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || document.fullScreenElement || false;
+            var isEnableFullScreen = document.fullscreenEnabled || document.webkitFullscreenEnabled || document.mozFullScreenEnabled || document.msFullscreenEnabled || false;
+            var elem = document.body;
+            
+            if( isEnableFullScreen ){
+                    
+                    if (elem.requestFullscreen) {
+                        if(isFullScreen){
+                            document.exitFullscreen();
+                        }else{
+                            elem.requestFullscreen();
+                        } 
+                    } else if (elem.webkitRequestFullscreen) {
+                        if(isFullScreen){
+                            document.webkitExitFullscreen();
+                        }else{
+                            elem.webkitRequestFullscreen();
+                        }
+                    } else if (elem.mozRequestFullScreen) {
+                        if(isFullScreen){
+                            document.mozCancelFullScreen();
+                        }else{
+                            elem.mozRequestFullScreen();
+                        }
+                    } else if (elem.msRequestFullscreen) {
+                        if(isFullScreen){
+                            document.msExitFullscreen();
+                        }else{
+                            elem.msRequestFullscreen(); 
+                        }                    
+                    }
+            }
+            
         }
-
+        
     },
 
     test : function() {

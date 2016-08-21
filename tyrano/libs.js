@@ -392,6 +392,31 @@
         }
 
     };
+    
+    $.isNWJS = function(){
+        // Node.js で動作しているか
+        var isNode = (typeof process !== "undefined" && typeof require !== "undefined");
+        // ブラウザ上(非Node.js)で動作しているか
+        var isBrowser = !isNode
+        // node-webkitで動作しているか
+        var isNodeWebkit;
+        try {
+            isNodeWebkit = isNode ? (typeof require('nw.gui') !== "undefined") : false;
+        } catch(e) {
+            isNodeWebkit = false;
+        }
+        
+        if (isNodeWebkit) {
+            // node-webkitで動作
+            return true;
+        } else if ( isNode) {
+            // Node.js上で動作している
+            return true;
+        } else {
+            //  通常のWebページとして動作している
+            return false;
+        }
+    },
 
     $.swfName = function(str) {
         if (navigator.appName.indexOf("Microsoft") != -1) {

@@ -138,7 +138,7 @@ function KAGWindow_config()
 // バックログ機能用にテキストの最大保持数を保存できます。
 // 保存されたデータはtf.system.backlog に配列として格納されます。
 // 0の場合、保存を行いません。
-;maxBackLogNum = 10;
+;maxBackLogNum = 50;
 
 // ◆ ラベル記録  
 // 重要：既読管理を有効にしたい場合は必ずtrueを指定して下さい
