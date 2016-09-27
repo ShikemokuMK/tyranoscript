@@ -669,7 +669,7 @@ tyrano.plugin.kag.tag.autostart = {
  :group
  システム操作
  :title
- オート停止
+ オート停止（）
  :exp
  オートモードを停止します。
  :sample
@@ -687,6 +687,8 @@ tyrano.plugin.kag.tag.autostop = {
         this.kag.stat.is_auto = false;
         this.kag.stat.is_wait_auto = false;
 
+        //↓他から直接呼ばれた時に、２重に実行されるため、コメントにしているが
+        //このタグを単独で使えないので、問題有り。 git show 2bc37170
         //this.kag.ftag.nextOrder();
 
     }

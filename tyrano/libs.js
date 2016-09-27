@@ -376,10 +376,12 @@
     $.getBrowser = function() {
 
         var userAgent = window.navigator.userAgent.toLowerCase();
-
+        
         if (userAgent.indexOf('msie') >= 0 || userAgent.indexOf('trident') >= 0) {
             return "msie";
-        } else if (userAgent.indexOf("firefox") > -1) {
+        }else if (userAgent.indexOf("edge") > -1) {
+            return "edge"; 
+        }else if (userAgent.indexOf("firefox") > -1) {
             return "firefox";
         } else if (userAgent.indexOf("opera") > -1) {
             return "opera";

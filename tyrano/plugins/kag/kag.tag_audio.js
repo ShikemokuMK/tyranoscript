@@ -148,7 +148,7 @@ tyrano.plugin.kag.tag.playbgm = {
         //ogg m4a を推奨するための対応 ogg を m4a に切り替え
         //mp3 が有効になっている場合は無視する
         if (this.kag.config.mediaFormatDefault != "mp3") {
-            if (browser == "msie" || browser == "safari") {
+            if (browser == "msie" || browser == "safari" || browser=="edge") {
                 storage = $.replaceAll(storage, ".ogg", ".m4a");
             }
         }
