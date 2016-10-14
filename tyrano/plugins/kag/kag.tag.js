@@ -4263,7 +4263,8 @@ tyrano.plugin.kag.tag.trans = {
 storage=切り替えるための画像ファイルを指定します。ファイルはbgimage以下に配置してください,
 method=切り替えのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
 time=時間をミリ秒で指定します。,
-wait=背景の切り替えが完了するまで処理を待ちます
+wait=背景の切り替えが完了するまで処理を待ちます,
+cross=true or false を指定します。デフォルトはtrue。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い背景を残しながら上に重なる形で新しい背景を表示します。CG差分などで使用する場合はfalseが良いでしょう。
 #[end]
 */
 
@@ -4276,7 +4277,8 @@ tyrano.plugin.kag.tag.bg = {
         storage : "",
         method : "crossfade",
         wait : "true",
-        time : 3000
+        time : 3000,
+        cross:"true"
     },
 
     start : function(pm) {
@@ -4315,10 +4317,13 @@ tyrano.plugin.kag.tag.bg = {
             if (pm.wait == "true") {
                 that.kag.layer.hideEventLayer();
             }
-
-            $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
-                j_old_bg.remove();
-            });
+            
+            
+            if(pm.cross=="true"){   //crossがfalseの場合は、古い背景はtransしない。
+                $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
+                    j_old_bg.remove();
+                });
+            }
             
             $.trans(pm.method, j_new_bg, parseInt(pm.time), "show", function() {
                 
@@ -4327,6 +4332,11 @@ tyrano.plugin.kag.tag.bg = {
                 if (pm.wait == "true") {
                     that.kag.layer.showEventLayer();
                     that.kag.ftag.nextOrder();
+                }
+                
+                //crossがfalseの場合は、古い背景画像を削除
+                if(pm.cross=="false"){
+                    j_old_bg.remove();
                 }
                 
             });

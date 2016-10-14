@@ -126,7 +126,7 @@ tyrano.plugin.kag.tag.movie = {
         video.autoplay = true;
         video.autobuffer = true;
         
-        video.setAttribute("webkit-playsinline","1");
+        video.setAttribute("playsinline","1");
         
         //document.createElement("video");
 
@@ -179,10 +179,7 @@ tyrano.plugin.kag.tag.movie = {
                     video2.autoplay = true;
                     video2.autobuffer = true;
                     
-                    video2.setAttribute("webkit-playsinline","1");
-        
-                    
-                    
+                    video2.setAttribute("playsinline","1");
                     
                     // プリロードを設定する
                     video2.src = "./data/video/" + video_pm.storage;
