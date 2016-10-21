@@ -526,6 +526,9 @@ tyrano.plugin.kag ={
             j_message_inner.css("word-break","break-all");
         }
         
+        //１行目の上に余裕を持たせる。rubyカクつき対策
+        $.insertRule(".message_inner p{ padding-top:"+this.kag.config.defaultLineSpacing+"px;}");
+        
         this.layer.appendObj("message0","fore",j_message_inner);
        
        /*********************************/ 

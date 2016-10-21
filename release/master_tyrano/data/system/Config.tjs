@@ -302,7 +302,7 @@ function MessageLayer_config()
 
 // ◆ 行間
 // 行間を pixel 単位で指定します。
-;defaultLineSpacing = 6; // defstyle タグの linespacing 属性に相当
+;defaultLineSpacing = 8; // defstyle タグの linespacing 属性に相当
 
 // ◆ 字間
 // 字間を pixel 単位で指定します。

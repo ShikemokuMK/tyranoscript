@@ -419,6 +419,17 @@
             return false;
         }
     },
+    
+    $.insertRule = function(css_str){
+        
+        var sheet = (function() {
+            var style = document.createElement("style");
+            document.getElementsByTagName("head")[0].appendChild(style);
+            return style.sheet;
+        })();
+        sheet.insertRule(css_str,0);
+        
+    },
 
     $.swfName = function(str) {
         if (navigator.appName.indexOf("Microsoft") != -1) {
