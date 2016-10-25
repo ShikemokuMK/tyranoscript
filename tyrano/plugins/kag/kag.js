@@ -458,9 +458,9 @@ tyrano.plugin.kag ={
         $("."+this.kag.define.BASE_DIV_NAME).append(button_menu_obj);
         
         //カメラモードの調整
-        //if(this.kag.config["useCamera"] && this.kag.config["useCamera"]=="true"){
-        //    this.kag.config["ScreenCentering"] = "false";
-        //}
+        if(this.kag.config["useCamera"] && this.kag.config["useCamera"]=="true"){
+            this.kag.config["ScreenCentering"] = "false";
+        }
         
         //センタリングの調整
         if(this.kag.config["ScreenCentering"] && this.kag.config["ScreenCentering"]=="false"){

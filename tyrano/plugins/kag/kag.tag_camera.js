@@ -12,7 +12,6 @@
  
  カメラ機能を使用するにはConfig.tjs の useCameraをtrueにする必要があります。
  また、カメラ機能を有効にした場合、画面の中央寄せ（ScreenCentering）が無効になります。
- →V4.31以降は画面中央寄せでも、カメラ使用可能。useCameraコンフィグは削除。
  
  カメラの座標は画面中央が(x:0,y:0)です。
  例えば、画面右上は x:200 y:200 　画面左下は x:-200 y:-200 という座標指定になります。
@@ -85,9 +84,8 @@ tyrano.plugin.kag.tag.camera = {
         var that = this;
         
         if(this.kag.config.useCamera == "false"){
-        //　　 カメラ使用可能
-        //    $.alert("[camera]タグエラー。カメラの使用を許可して下さい。Config.tjsのuseCameraをtrueにする必要があります");
-        //    return false;
+            $.alert("[camera]タグエラー。カメラの使用を許可して下さい。Config.tjsのuseCameraをtrueにする必要があります");
+            return false;
         }
         
         //duration を確認する
