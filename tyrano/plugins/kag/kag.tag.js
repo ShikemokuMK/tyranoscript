@@ -677,6 +677,12 @@ tyrano.plugin.kag.tag.text = {
                 ch_speed = parseInt(that.kag.config.chSpeed);
             }
             
+            if(ch_speed <= 3){
+                that.kag.stat.is_nowait = true;
+            }else{
+                that.kag.stat.is_nowait = false;
+            }
+            
             var pchar = function(pchar) {
                 
                 var c = _message_str.substring(index, ++index);

@@ -16,6 +16,7 @@
  storage=ロードするJSファイルを指定します
  #[end]
  */
+
 tyrano.plugin.kag.tag.loadjs = {
 
     vital : ["storage"],

@@ -57,7 +57,7 @@
 [button name="ch,ch_20" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=20" graphic=config/07.gif width=35 height=35 x=540 y=270  ]
 [button name="ch,ch_11" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=11" graphic=config/08.gif width=35 height=35 x=570 y=270  ]
 [button name="ch,ch_8" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=8" graphic=config/09.gif width=35 height=35 x=600 y=270  ]
-[button name="ch,ch_5" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=5" graphic=config/10.gif width=35 height=35 x=630 y=270  ]
+[button name="ch,ch_1" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=1" graphic=config/10.gif width=35 height=35 x=630 y=270  ]
 
 
 ;オート速度
