@@ -158,27 +158,33 @@ tyrano.plugin.kag ={};
                     
         }
         
+        var num_index = 0;
+        
+        //グループをつくる
         for(key in group_map){
             
-            ghtml +="<p style='font-weight:bold'>■"+key+"</p>";
+           
+            ghtml+='<li class="list-group-item list-toggle">';
+            ghtml +='<a data-toggle="collapse" data-parent="#sidebar-nav-1" href="#nav_'+num_index+'" class="collapsed" aria-expanded="false">'+key+'</a>';
                 
             var tmp = group_map[key];
             
-            ghtml +="<ul >";
+            ghtml += '<ul id="nav_'+num_index+'" class="collapse" aria-expanded="false" style="height: 0px;">';
             
             for (key2 in tmp){
                 var obj = tmp[key2];
-                ghtml +='<div style="padding:2px"><a  href="#'+key2+'">['+key2+']　<span style="font-style:italic;color:gray">('+obj.title+')</span></a></div>';
+                //ghtml +='<div style="padding:2px"><a  href="#'+key2+'">['+key2+']　<span style="font-style:italic;color:gray">('+obj.title+')</span></a></div>';
+                ghtml +='<li><a href="#'+key2+'"> ['+key2+']　'+obj.title+'</a></li>';
             }
             
             ghtml +="</ul>";
+            ghtml +="</li>";
+            
+            num_index++;
             
         }
         
-        $(".howtoNav").html(ghtml);
-        
-        console.log("=== group  =====");
-        console.log(group_map);
+        $(".area_group").html(ghtml);
         
         
         var j_root = $("<div></div>");
@@ -190,19 +196,16 @@ tyrano.plugin.kag ={};
                     
                     console.log(obj.exp.split("\n"));
                     
-                    var html =""
-                    +'<hr /><br />'
-                    +'            <a name="'+key+'"></a>'
-                    +'            <h3>【'+key+'】'+obj.title+'</h3>'
-                    +'            <p>'+$.br($.escapeHTML(obj.exp))+'</p>'
+                    var html =''
+                    +'<div  class="news-v3 bg-color-white margin-bottom-20">'
+                    +'<div class="news-v3-in"><a name="'+key+'"></a>'
+                    +'<h3 style="color:#a10f2b">['+key+']'+obj.title+'</h3>'
+                    +'<ul class="list-inline posted-info"><li>'+obj.group+'</li></ul>'
+                    +'<p>'+$.br($.escapeHTML(obj.exp))+'</p>'
+                    +'<table class="table table-bordered">'
+                    +'<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>解説</th></tr></thead>'
+                    +'<tbody>';
                     
-                    +'';
-                    
-                    html+=''
-                    
-                    +'            <table>'
-                    +'                    <tr><th>パラメータ名</th><th>必須 </th><th>説明 </th><tr>'
-                    +'';
                     
                     //繰り返し
                     
@@ -240,9 +243,7 @@ tyrano.plugin.kag ={};
                             }
                          
                          }
-                         
-                         
-                                            
+                                      
                          html+='                 <tr>'
                               +'                  <td>'+param_name+'</td>'
                               +'                  <td>'+vital+'</td>'
@@ -254,23 +255,24 @@ tyrano.plugin.kag ={};
                          
                      }//end for loop
                      
-                     html+='               </table><br />';
-                     
+                     html +='</tbody></table>';
+                    
+                    
                      if(obj.sample!=""){
                      
                       html+=''           
-                         +'           '
-                         +'           <p><span style="font-style:italic">サンプルコード</span><br />'
-                         +'               <code><br />'
+                         +'<ul class="list-inline posted-info"><li>サンプルコード</li></ul>'
+                         +'<code><br />'
                                             
                          +$.br($.escapeHTML(obj.sample))
                                             
                          +'<br /></code>'
-                         +'<p style="float:right;font-size:10px;font-style:italic">'+obj.group+'</p>'           
-                         +'<br style="clear:both">'
-                         +'</p>';
+                         +'</div></div>'           
+                         +'';
                          
                      }
+                     
+                     html +='<div class="clearfix "><hr style="margin:0"></div>';
                             
                      //htmlをぶち込みます
                      
@@ -280,7 +282,7 @@ tyrano.plugin.kag ={};
                 
                 
                 
-                $(".howtoMain").empty();
+                $(".area_ref").empty();
                 
                 //基本説明部分ｎ
                 
@@ -298,9 +300,9 @@ tyrano.plugin.kag ={};
 +'                    </p>     '
 +''
 +'</div>';
-                $(".howtoMain").append(basic_exp);
-                $(".howtoMain").append(j_root);
-                $("#src_html").val(html);
+                $(".area_ref").append(basic_exp);
+                $(".area_ref").append(j_root);
+                $("#src_html").val($(".area_main").html());
                 
                 var js_auto_complete = "";
                 for(key in master_tag ){
