@@ -160,8 +160,24 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         //音楽再生
-        var audio_obj = new Audio(storage_url);
-
+        var audio_obj =null ;
+        
+        if(target=="bgm"){
+            if(this.kag.tmp.map_bgm[pm.buf] != null){ 
+                audio_obj = this.kag.tmp.map_bgm[pm.buf];
+                audio_obj.src = storage_url;
+            }else{
+                audio_obj = new Audio(storage_url);
+            }
+        }else{
+            if(this.kag.tmp.map_se[pm.buf] != null){ 
+                audio_obj = this.kag.tmp.map_se[pm.buf];
+                audio_obj.src = storage_url;
+            }else{
+                audio_obj = new Audio(storage_url);
+            }
+        }
+        
         //音量指定
         audio_obj.volume = volume;
 
@@ -191,6 +207,10 @@ tyrano.plugin.kag.tag.playbgm = {
             });
             
             
+        }else{
+            audio_obj.loop = false;
+            audio_obj.onended = function() {
+            };
         }
 
 

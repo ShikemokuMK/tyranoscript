@@ -199,7 +199,7 @@ tyrano.plugin.kag ={};
                     var html =''
                     +'<div  class="news-v3 bg-color-white margin-bottom-20">'
                     +'<div class="news-v3-in"><a name="'+key+'"></a>'
-                    +'<h3 style="color:#a10f2b">['+key+']'+obj.title+'</h3>'
+                    +'<h3 style="color:#a10f2b">['+key+']　'+obj.title+'</h3>'
                     +'<ul class="list-inline posted-info"><li>'+obj.group+'</li></ul>'
                     +'<p>'+$.br($.escapeHTML(obj.exp))+'</p>'
                     +'<table class="table table-bordered">'
@@ -267,11 +267,11 @@ tyrano.plugin.kag ={};
                          +$.br($.escapeHTML(obj.sample))
                                             
                          +'<br /></code>'
-                         +'</div></div>'           
                          +'';
                          
                      }
                      
+                     html +="</div></div>";
                      html +='<div class="clearfix "><hr style="margin:0"></div>';
                             
                      //htmlをぶち込みます
@@ -285,10 +285,10 @@ tyrano.plugin.kag ={};
                 $(".area_ref").empty();
                 
                 //基本説明部分ｎ
-                
+               
                 var basic_exp = ''
-                +'<div>'
-+'<h2>基本</h2>'
+                +' <div class="alert alert-success fade in margin-bottom-20">'
++'<h4>基本</h4>'
 +'<p>'                        
 +'                       [ ] で囲まれた部分がタグになります。 <br/ >'
 +'                        @で始まる行も、タグとして認識しますが、１行で記述しなければなりません<br/ >'
