@@ -1788,4 +1788,164 @@ tyrano.plugin.kag.tag.dialog = {
 
 
 
+/*
+#[plugin]
+:group
+システム操作
+:title
+プラグイン読み込み
+:exp
+外部プラグインを読み込むことができます。
+プラグインはdata/others/plugin/　フォルダに配置します。
+
+また、pluginタグは引数を自由に渡すことができます。
+例えば
+[plugin name="original1" font_color="black" myname="シケモク" ]
+
+のようにすると、プラグイン先のinit.ks 内で
+mp.font_color 
+mp.myname 
+のような形で引数を利用できます。
+
+これを &mp.font_color のように使うことで、カスタマイズ可能なプラグインが作れます。
+ただ、マクロで使用可能だった%font_color のような形の使用はできませんので注意。
+
+
+:sample
+;テーマ変更
+[plugin name="original1" ]
+
+;自由に引数を渡すことも可能
+[plugin name="original1" font_color="black" arg2="aaaaaa" ]
+
+:param
+name=data/othres/theme以下の配置したフォルダ名（プラグイン名）を指定する,
+storage=最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.plugin = {
+
+    vital : ["name"],
+
+    pm : {
+
+        name : "",
+        storage : "init.ks"
+        
+    },
+
+    start : function(pm) {
+
+        var storage_url = "";
+		var name = pm.name;
+		
+		pm.storage = "../others/plugin/"+name+"/"+pm.storage;
+		
+		//引数に渡す。
+		this.kag.stat.mp = pm;
+		
+		this.kag.ftag.startTag("call",pm);
+		
+		
+    }
+};
+
+
+/*
+#[sysview]
+:group
+システム操作
+:title
+システム画面変更
+
+:exp
+システム系機能で使用するHTMLファイルを変更できます。
+
+:sample
+[sysview type="save" storage="./data/others/plugin/mytheme/html/save.html" ]
+[sysview type="load" storage="./data/others/plugin/mytheme/html/load.html" ]
+[sysview type="backlog" storage="./data/others/plugin/mytheme/html/backlog.html" ]
+[sysview type="menu" storage="./data/others/plugin/mytheme/html/menu.html]
+
+:param
+type=save load backlog menu が指定可能 ,
+storage=HTMLファイルのパスを指定します。
+#[end]
+*/
+
+tyrano.plugin.kag.tag.sysview = {
+
+    vital : ["type","storage"],
+
+    pm : {
+
+        type : "",
+        storage : ""
+        
+    },
+
+    start : function(pm) {
+
+        var type = pm.type;
+		var storage = pm.storage;
+		
+		//システムで使用するHTMLの場所を変更する
+		//HTMLキャッシュは削除する
+		if(this.kag.cache_html[type]){
+			delete this.kag.cache_html[type];
+		}
+		
+		this.kag.stat.sysview[type] = storage;
+		
+		this.kag.ftag.nextOrder();
+		
+    }
+};
+
+
+/*
+#[loadcss]
+:group
+システム操作
+:title
+CSS反映
+
+:exp
+ゲームの途中でCSSを読み込むことができます。
+:sample
+;CSSファイルの読み込み
+[loadcss file="./data/others/css/mystyle.css" ]
+
+:param
+file=読み込みたいCSSファイルを指定します
+ 
+#[end]
+*/
+
+tyrano.plugin.kag.tag.loadcss = {
+
+    vital : ["file"],
+
+    pm : {
+        file : ""        
+    },
+
+    start : function(pm) {
+
+        var file = pm.file;
+		
+		//ファイルの読み込み
+		var style = '<link rel="stylesheet" href="'+file+ "?" + Math.floor(Math.random() * 10000000)+'">';
+		$('head link:last').after(style);
+		this.kag.stat.cssload[file] = true;
+    
+		this.kag.ftag.nextOrder();
+		
+
+    }
+};
+
+
 

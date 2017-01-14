@@ -104,6 +104,7 @@ tyrano.plugin.kag ={
         is_html:false, //htmlタグ解析中
         map_html : {}, //htmlタグに関するステータス
         
+        cssload:{}, //読み込んだCSSを保持する
         
         stack:{"if":[],"call":[],"macro":[]}, //if文のスタック
         
@@ -168,6 +169,14 @@ tyrano.plugin.kag ={
             face:"",
             italic:""
         },
+        
+        //システム系で使用するHTMLの場所を保持
+        sysview:{
+			save:"./tyrano/html/save.html",
+			load:"./tyrano/html/load.html",
+			backlog:"./tyrano/html/backlog.html",
+			menu:"./tyrano/html/menu.html"
+		},
         
         /*** キャラクター操作系 ***/
         //キャラクターの立ち位置を自動的に調整する事ができます
@@ -831,7 +840,21 @@ tyrano.plugin.kag ={
                 callback($(html));
             }
         } else {
-            $.loadText("./tyrano/html/"+html_file_name+".html",function(text_str){
+	        
+	        //存在しない場合は初期化
+	        if(!this.kag.stat.sysview){
+		        this.kag.stat.sysview = {};
+		        this.kag.stat.sysview = {
+					save:"./tyrano/html/save.html",
+					load:"./tyrano/html/load.html",
+					backlog:"./tyrano/html/backlog.html",
+					menu:"./tyrano/html/menu.html"
+				};
+		    }
+	        
+	        var path_html = this.kag.stat.sysview[html_file_name];
+	        
+            $.loadText(path_html, function(text_str){
             
                 var tmpl = $.templates(text_str);
                 var html = tmpl.render(data);

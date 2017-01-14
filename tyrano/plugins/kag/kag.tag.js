@@ -589,7 +589,7 @@ tyrano.plugin.kag.tag.text = {
 
                     //画面クリア
                     this.kag.getMessageInnerLayer().html("");
-
+					
                 }
 
             }
@@ -669,6 +669,7 @@ tyrano.plugin.kag.tag.text = {
                 
             }
             
+            
             var ch_speed = 30;
             
             if(that.kag.stat.ch_speed != ""){
@@ -676,6 +677,7 @@ tyrano.plugin.kag.tag.text = {
             }else if(that.kag.config.chSpeed){
                 ch_speed = parseInt(that.kag.config.chSpeed);
             }
+            
             
             if(ch_speed <= 3){
                 that.kag.stat.is_nowait = true;

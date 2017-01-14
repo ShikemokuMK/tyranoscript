@@ -460,13 +460,24 @@ tyrano.plugin.kag.menu = {
             
         }
         
+        //読み込んだCSSがある場合
+        if(this.kag.stat.cssload){
+	    	for(file in this.kag.stat.cssload){
+		    	var style = '<link rel="stylesheet" href="'+file+ "?" + Math.floor(Math.random() * 10000000)+'">';
+				$('head link:last').after(style);
+    
+	    	}
+        
+	    }else{
+		    this.kag.stat.cssload = {};
+	    }
         
         if(!this.kag.stat.current_bgmovie){
             this.kag.stat.current_bgmovie = {
                 storage:"",
                 volume:"" 
             };
-        }   
+        }
         
         //カメラ設定を復旧 ///////////////
         if(this.kag.config.useCamera=="true"){
@@ -516,7 +527,6 @@ tyrano.plugin.kag.menu = {
                 }
                 
             }
-            
             
         }
         ///////////カメラここまで
@@ -607,12 +617,7 @@ tyrano.plugin.kag.menu = {
 
         layer_menu.empty();
 
-        var menu_html = "" + "<div class='menu_item menu_close' style='float:right;'><img src='tyrano/images/kag/menu_button_close.png' /></div>" + "<div style='clear:both'></div>" + "";
-
-        var j_menu = $(menu_html);
-        layer_menu.append(j_menu);
-
-        layer_menu.find(".menu_close").click(function(e) {
+        j_obj.find(".menu_close").click(function(e) {
             layer_menu.hide();
             if (that.kag.stat.visible_menu_button == true) {
                 $(".button_menu").show();

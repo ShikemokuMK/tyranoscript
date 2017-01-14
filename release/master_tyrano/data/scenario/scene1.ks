@@ -49,7 +49,7 @@
 帰るか。。。[p]
 
 
-[font  size="30"  color="0xffffff"  ]
+[font  size="30"   ]
 #?
 ちょっとまったーーーーー[p]
 [resetfont  ]
