@@ -509,7 +509,32 @@
 
     };
     
+    $.preloadImgCallback = function(j_menu,cb,that){
     
+        var img_storage = [];
+        
+        j_menu.find("img").each(function() {
+            img_storage.push($(this).attr("src"));
+        });
+        
+        //ロードが全て完了したら、ふわっと出す
+        var sum = 0;
+        for (var i = 0; i < img_storage.length; i++) {
+            that.kag.preload(img_storage[i], function() {
+                sum++;
+                if (img_storage.length == sum) {
+                    
+                    cb();
+        
+                }
+            });
+        }
+        
+        if(img_storage.length==0){
+            cb();
+        }
+    
+    };
     
     $.setStorage = function(key, val ,type) {
         

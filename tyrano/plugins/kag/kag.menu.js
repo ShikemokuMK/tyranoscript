@@ -112,9 +112,11 @@ tyrano.plugin.kag.menu = {
                 //first.ks の *start へ戻ります
                 location.reload();
             });
-
-            layer_menu.show();
-            $(".button_menu").hide();
+            
+            $.preloadImgCallback(j_menu,function(){
+                layer_menu.fadeIn(300);
+                $(".button_menu").hide();
+            },that);
 
         });
 
@@ -536,6 +538,8 @@ tyrano.plugin.kag.menu = {
         
         //どの道動画削除。
         $(".tyrano_base").find("video").remove();
+        this.kag.tmp.video_playing = false;
+            
             
         //背景動画が設定中なら
         if (this.kag.stat.current_bgmovie["storage"] !=""){
@@ -615,21 +619,27 @@ tyrano.plugin.kag.menu = {
 
         var layer_menu = this.kag.layer.getMenuLayer();
 
-        layer_menu.empty();
+//        layer_menu.empty();
 
         j_obj.find(".menu_close").click(function(e) {
-            layer_menu.hide();
+            
+            layer_menu.fadeOut(300,function(){
+                    layer_menu.empty();
+            });
             if (that.kag.stat.visible_menu_button == true) {
                 $(".button_menu").show();
             }
 
-            //that.kag.ftag.nextOrder();
-
         });
 
+        j_obj.hide();
         layer_menu.append(j_obj);
         layer_menu.show();
-
+        $.preloadImgCallback(layer_menu,function(){
+            j_obj.fadeIn(300);
+            layer_menu.find(".block_menu").fadeOut(300);
+        },that);
+        
     },
 
     //メニューを隠します
@@ -695,7 +705,9 @@ tyrano.plugin.kag.menu = {
             layer_menu.append(j_menu);
 
             layer_menu.find(".menu_close").click(function() {
-                layer_menu.hide();
+                layer_menu.fadeOut(300,function(){
+                    layer_menu.empty();
+                    });
                 if (that.kag.stat.visible_menu_button == true) {
                     $(".button_menu").show();
                 }
@@ -710,8 +722,11 @@ tyrano.plugin.kag.menu = {
             }
 
             layer_menu.find(".log_body").html(log_str);
-            layer_menu.show();
-
+            
+            $.preloadImgCallback(layer_menu,function(){
+                layer_menu.fadeIn(300);
+            },that);
+        
             //一番下固定させる
             layer_menu.find(".log_body").scrollTop(9999999999);
 
