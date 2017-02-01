@@ -663,8 +663,11 @@ tyrano.plugin.kag.menu = {
             var root = {
                 kind : "save"
             };
-
-            for (var i = 0; i < 5; i++) {
+            
+            //セーブ数の上限を変更する。
+            var save_slot_num = this.kag.config.configSaveSlotNum || 5;
+            
+            for (var i = 0; i < save_slot_num; i++) {
 
                 var json = {};
                 json.title = $.lang("not_saved");
