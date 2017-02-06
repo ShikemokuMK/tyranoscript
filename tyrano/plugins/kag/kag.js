@@ -106,6 +106,8 @@ tyrano.plugin.kag ={
         
         cssload:{}, //読み込んだCSSを保持する
         
+        save_img:"", //セーブイメージ。ここにパスが入っている場合はその画像をサムネに使う。
+        
         stack:{"if":[],"call":[],"macro":[]}, //if文のスタック
         
         set_text_span:false,//メッセージ中のspanを新しく作成するときに真にする

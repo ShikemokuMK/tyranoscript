@@ -303,13 +303,24 @@ tyrano.plugin.kag.menu = {
                         
                         // canvas is the final rendered <canvas> element
                         //console.log(canvas);
-                        var img_code = canvas.toDataURL();
-
-                        /*
-                         scenario = scenario || "";
-                         order_index = order_index || "";
-                         */
-
+                        var img_code = "";
+                        //サムネが既に設定されている場合は、そのサムネを優先する。
+                        if(that.kag.stat.save_img !=""){
+                            var img = new Image();
+                            img.src=_stat.save_img 
+                            var canvas = document.createElement('canvas');
+                            canvas.width  = that.kag.config.scWidth;
+                            canvas.height = that.kag.config.scHeight;
+                            // Draw Image
+                            var ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            // To Base64
+                            img_code = canvas.toDataURL("image/jpg");
+                            
+                        }else{
+                            img_code = canvas.toDataURL();
+                        }
+                        
                         var data = {};
 
                         data.title = title;

@@ -1,4 +1,3 @@
-
 /*
 #[eval]
 :group
@@ -22,25 +21,22 @@ exp=評価するTJS式を指定します。
 #[end]
 */
 
-
 //スクリプトの評価
-tyrano.plugin.kag.tag.eval={
-    
-    vital:["exp"],
-    
-    pm:{
-        exp:""
+tyrano.plugin.kag.tag.eval = {
+
+    vital : ["exp"],
+
+    pm : {
+        exp : ""
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         this.kag.evalScript(pm.exp);
         this.kag.ftag.nextOrder();
-        
-    }
-    
-};
 
+    }
+};
 
 /*
 #[clearvar]
@@ -56,21 +52,19 @@ tyrano.plugin.kag.tag.eval={
 */
 
 //すべての編集を初期化
-tyrano.plugin.kag.tag.clearvar={
-  
-  //すべての変数を削除
-  pm:{
-      
-  },
-  
-  start:function(pm){
-      this.kag.clearVariable();
-      this.kag.ftag.nextOrder();
-        
-  }
-    
-};
+tyrano.plugin.kag.tag.clearvar = {
 
+    //すべての変数を削除
+    pm : {
+
+    },
+
+    start : function(pm) {
+        this.kag.clearVariable();
+        this.kag.ftag.nextOrder();
+
+    }
+};
 
 /*
 #[clearsysvar]
@@ -88,13 +82,12 @@ tyrano.plugin.kag.tag.clearvar={
 //システム変数の初期化
 tyrano.plugin.kag.tag.clearsysvar = {
 
-    start:function(){
-        this.kag.variable.sf ={}; //システム変数
+    start : function() {
+        this.kag.variable.sf = {};
+        //システム変数
         this.kag.ftag.nextOrder();
     }
-
 };
-
 
 /*
 #[clearstack]
@@ -120,22 +113,22 @@ stack=call if macro のいづれかを指定できます。特定のスタック
 
 //システム変数の初期化
 tyrano.plugin.kag.tag.clearstack = {
-     pm:{
-        stack:""
+    pm : {
+        stack : ""
     },
-    start:function(pm){
-        if(pm.stack ==""){
-            this.kag.stat.stack = {"if":[],"call":[],"macro":[]};
-        }else{
+    start : function(pm) {
+        if (pm.stack == "") {
+            this.kag.stat.stack = {
+                "if" : [],
+                "call" : [],
+                "macro" : []
+            };
+        } else {
             this.kag.stat.stack[pm.stack] = [];
         }
         this.kag.ftag.nextOrder();
     }
-
 };
-
-        
-
 
 /*
 #[close]
@@ -152,38 +145,34 @@ ask=true を指定すると、終了するかどうかの確認をします。fa
 #[end]
 */
 
-
 //ウィンドウを閉じる命令
 tyrano.plugin.kag.tag["close"] = {
 
-    pm:{
-        ask:"true"
+    pm : {
+        ask : "true"
     },
 
-    start:function(pm){
+    start : function(pm) {
         var that = this;
-        if(pm.ask=="true"){
-            
-            $.confirm($.lang("exit_game"),
-                function(){
-                    that.close();
-                },
-                function(){
-                    that.kag.ftag.nextOrder();
-                }
-            );
-            
-        }else{
+        if (pm.ask == "true") {
+
+            $.confirm($.lang("exit_game"), function() {
+                that.close();
+            }, function() {
+                that.kag.ftag.nextOrder();
+            });
+
+        } else {
             this.close();
         }
     },
-    
-    close:function() {
+
+    close : function() {
         window.close();
-        if (typeof navigator.app != 'undefined') {
+        if ( typeof navigator.app != 'undefined') {
             navigator.app.exitApp();
         }
-        if (typeof require != 'undefined' && typeof require('nw.gui') != 'undefined') {
+        if ( typeof require != 'undefined' && typeof require('nw.gui') != 'undefined') {
             require('nw.gui').Window.get().close();
         }
 
@@ -192,10 +181,7 @@ tyrano.plugin.kag.tag["close"] = {
         //（新規で開いたページでないと、セキュリティポリシーで閉じれない）
         //window.open('about:blank','_self').close();
     }
-
 };
-
-
 
 /*
 #[trace]
@@ -219,62 +205,58 @@ exp=評価するTJS（JS）式を指定します
 
 //変数をコンソールに出力
 tyrano.plugin.kag.tag["trace"] = {
-    
-     pm:{
-        exp:""
+
+    pm : {
+        exp : ""
     },
-    
-    start:function(pm){
-    
+
+    start : function(pm) {
+
         var val = this.kag.embScript(pm.exp);
         //評価された値を代入
         //this.kag.ftag.startTag("text",{"val":val});
-        
-        this.kag.log("trace出力："+val);
-        this.kag.ftag.nextOrder();
-        
-    }
 
+        this.kag.log("trace出力：" + val);
+        this.kag.ftag.nextOrder();
+
+    }
 };
 
-
 /*
-#[title]
-:group
-システム操作
-:title
-タイトル指定
-:exp
-ゲームタイトルを指定します。
-例えば、章ごとにタイトルを変えるとプレイヤーからわかりやすくなります。
-吉里吉里の場合、アプリのウィンドウタイトル。
-ティラノスクリプトの場合、ブラウザタイトルが変わります
-:sample
-[title name="変更後のタイトル"]
-:param
-name=表示したいタイトルを指定してください
-#[end]
-*/
+ #[title]
+ :group
+ システム操作
+ :title
+ タイトル指定
+ :exp
+ ゲームタイトルを指定します。
+ 例えば、章ごとにタイトルを変えるとプレイヤーからわかりやすくなります。
+ 吉里吉里の場合、アプリのウィンドウタイトル。
+ ティラノスクリプトの場合、ブラウザタイトルが変わります
+ :sample
+ [title name="変更後のタイトル"]
+ :param
+ name=表示したいタイトルを指定してください
+ #[end]
+ */
 
 tyrano.plugin.kag.tag["title"] = {
 
-    vital:["name"],
+    vital : ["name"],
 
-    pm:{
-        name:""
+    pm : {
+        name : ""
     },
 
     //タイトルの設定
-    start:function(pm){
-        if(pm.name!=""){
+    start : function(pm) {
+        if (pm.name != "") {
             //タイトルの設定
             this.kag.setTitle(pm.name);
             this.kag.ftag.nextOrder();
         }
     }
-
 };
-
 
 /*
 #[iscript]
@@ -301,15 +283,14 @@ $("body").html();
 
 //スクリプト開始
 tyrano.plugin.kag.tag.iscript = {
-    start:function(pm){
-        
+    start : function(pm) {
+
         this.kag.stat.is_script = true;
         this.kag.stat.buff_script = "";
         this.kag.ftag.nextOrder();
-        
+
     }
 };
-
 
 /*
 #[endscript]
@@ -327,24 +308,23 @@ stop=endscriptに到達した時、ここにtrueを指定すると次のタグ�
 
 //スクリプト終了
 tyrano.plugin.kag.tag.endscript = {
-    
-    pm:{
-        stop:"false"
+
+    pm : {
+        stop : "false"
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         this.kag.stat.is_script = false;
         //スクリプトを実行する
         this.kag.evalScript(this.kag.stat.buff_script);
         this.kag.stat.buff_script = "";
-        
-        if(pm.stop =="false"){
+
+        if (pm.stop == "false") {
             this.kag.ftag.nextOrder();
         }
     }
 };
-
 
 /*
 #[html]
@@ -384,26 +364,24 @@ name=HTML領域に名前を指定することができます。この名前を�
 */
 //htmlの表示、そして、格納だわな。
 tyrano.plugin.kag.tag.html = {
-    
-    pm:{
-      layer:"",
-      top:0,
-      left:0  
+
+    pm : {
+        layer : "",
+        top : 0,
+        left : 0
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         this.kag.stat.is_html = true;
-        this.kag.stat.map_html={};
+        this.kag.stat.map_html = {};
         this.kag.stat.map_html.buff_html = "";
         this.kag.stat.map_html.buff_pm = pm;
-        
+
         this.kag.ftag.nextOrder();
-        
+
     }
 };
-
-
 
 /*
 #[endhtml]
@@ -419,88 +397,84 @@ HTMLの記述を終了します
 */
 //htmlの終了
 tyrano.plugin.kag.tag.endhtml = {
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         var that = this;
-        
+
         var tpm = this.kag.stat.map_html.buff_pm;
         var html = this.kag.stat.map_html.buff_html;
-        
+
         var html_obj = $("<div></div>");
-        html_obj.css("position","absolute");
-        html_obj.css("top",tpm.top+"px");
-        html_obj.css("left",tpm.left+"px");
-        
-        $.setName(html_obj,tpm.name);
-        
+        html_obj.css("position", "absolute");
+        html_obj.css("top", tpm.top + "px");
+        html_obj.css("left", tpm.left + "px");
+
+        $.setName(html_obj, tpm.name);
+
         html_obj.append($(html));
-        
+
         var layer_free = this.kag.layer.getFreeLayer();
-        
+
         /*
-        layer_free.unbind("click");
-        layer_free.bind("click",function(){
-           
-            that.kag.ftag.nextOrder();
-            layer_free.unbind("click");
-        
-        });
-        */
-        
-        layer_free.css("z-index",9999999);
+         layer_free.unbind("click");
+         layer_free.bind("click",function(){
+
+         that.kag.ftag.nextOrder();
+         layer_free.unbind("click");
+
+         });
+         */
+
+        layer_free.css("z-index", 9999999);
         layer_free.append(html_obj);
-        
+
         layer_free.show();
-        
+
         this.kag.stat.is_html = false;
         this.kag.stat.map_html = {};
         this.kag.ftag.nextOrder();
-        
-        
+
     }
 };
-
 
 /*
-#[emb]
-:group
-マクロ・変数・JS操作
-:title
-式評価結果の埋め込み
-:exp
-exp で示された式を評価(実行)し、その結果を埋め込みます。
-変数をシナリオ中に表示させたい場合に使います。
-:sample
-[eval exp="f.value1='変数の値だよ～ん'"]
-とどこかで書いておいて、
-[emb exp="f.value1"]
-と書くと、この emb タグが 変数の値だよ～ん という内容に置き換わります。
-:param
-exp=評価するTJS（JS）式を指定します。ここで評価された式がembタグと置き換わります
-#[end]
-*/
+ #[emb]
+ :group
+ マクロ・変数・JS操作
+ :title
+ 式評価結果の埋め込み
+ :exp
+ exp で示された式を評価(実行)し、その結果を埋め込みます。
+ 変数をシナリオ中に表示させたい場合に使います。
+ :sample
+ [eval exp="f.value1='変数の値だよ～ん'"]
+ とどこかで書いておいて、
+ [emb exp="f.value1"]
+ と書くと、この emb タグが 変数の値だよ～ん という内容に置き換わります。
+ :param
+ exp=評価するTJS（JS）式を指定します。ここで評価された式がembタグと置き換わります
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.emb = {
-    
-    vital:["exp"],
-    
-    pm:{
-        exp:""
+
+    vital : ["exp"],
+
+    pm : {
+        exp : ""
     },
-    
-    start:function(pm){
-        
-        var val = ""+this.kag.embScript(pm.exp);
+
+    start : function(pm) {
+
+        var val = "" + this.kag.embScript(pm.exp);
         //評価された値を代入
-        this.kag.ftag.startTag("text",{"val":val});
-        
+        this.kag.ftag.startTag("text", {
+            "val" : val
+        });
+
     }
-    
 };
-
-
-
 
 /*
 #[if]
@@ -511,14 +485,14 @@ tyrano.plugin.kag.tag.emb = {
 :exp
 式を評価し、その結果が true ( または 0 以外 ) ならば、 elsif・else・endif のいずれかまでにある文章やタグを実行し、 そうでない場合は無視します。
 :sample
-; 例1 
+; 例1
 [if exp="false"]
 ここは表示されない
 [else]
 ここは表示される
 [endif]
 
-; 例2 
+; 例2
 [if exp="false"]
 ここは表示されない
 [elsif exp="false"]
@@ -527,7 +501,7 @@ tyrano.plugin.kag.tag.emb = {
 ここは表示される
 [endif]
 
-; 例3 
+; 例3
 [if exp="false"]
 ここは表示されない
 [elsif exp="true"]
@@ -536,7 +510,7 @@ tyrano.plugin.kag.tag.emb = {
 ここは表示されない
 [endif]
 
-; 例4 
+; 例4
 [if exp="true"]
 ここは表示される
 [elsif exp="true"]
@@ -549,239 +523,244 @@ exp=評価する TJS 式を指定します。この式の結果が false ( ま�
 #[end]
 */
 
-
 //条件分岐
 tyrano.plugin.kag.tag["if"] = {
-    
-    vital:["exp"],
-    
-    pm:{"exp":""},
-    
-    start:function(pm){
-        
+
+    vital : ["exp"],
+
+    pm : {
+        "exp" : ""
+    },
+
+    start : function(pm) {
+
         //条件合格
-        if(this.kag.embScript(pm.exp)){
-            
+        if (this.kag.embScript(pm.exp)) {
+
             //実行済み、次にels elsif が出てきても、無視する
-            this.kag.pushStack("if",true);
-            
+            this.kag.pushStack("if", true);
+
             //普通に次の処理を実行
             this.kag.ftag.nextOrder();
-            
-        //条件ミス
-        }else{
+
+            //条件ミス
+        } else {
             //まだ、if文をぬけられない
-            this.kag.pushStack("if",false);
-            
-            for(var i=0;i<2000;i++){
-            
-                var r = this.kag.ftag.nextOrderWithTag({"else":"","elsif":"","endif":""});
-                
-                if(r == true){
+            this.kag.pushStack("if", false);
+
+            for (var i = 0; i < 2000; i++) {
+
+                var r = this.kag.ftag.nextOrderWithTag({
+                    "else" : "",
+                    "elsif" : "",
+                    "endif" : ""
+                });
+
+                if (r == true) {
                     //alert("処理が見つかった!")
                     break;
                     //指定の命令へ処理が写っていることでしょう
                 }
-                
+
             }
-            
-            if(i>1900){
+
+            if (i > 1900) {
                 this.kag.error("If文に誤りがあります");
             }
-            
+
         }
     }
-    
 };
 
-
-
-
-
 /*
-#[elsif]
-:group
-マクロ・変数・JS操作
-:title
-それまでの if の中身が実行されていなかったときに、条件付きで実行 
-:exp
-if タグと endif タグの間で用いられます。 それまでの if タグまたは elsif タグの中身がひとつも実行されていないときに 式を評価し、その結果が真ならば elsif から次の elsif・else・endif までの間を実行します。
-使い方の例については、if タグの項目を参照してください。
-:sample
-:param
-exp=評価する JS 式を指定します。
-#[end]
-*/
+ #[elsif]
+ :group
+ マクロ・変数・JS操作
+ :title
+ それまでの if の中身が実行されていなかったときに、条件付きで実行
+ :exp
+ if タグと endif タグの間で用いられます。 それまでの if タグまたは elsif タグの中身がひとつも実行されていないときに 式を評価し、その結果が真ならば elsif から次の elsif・else・endif までの間を実行します。
+ 使い方の例については、if タグの項目を参照してください。
+ :sample
+ :param
+ exp=評価する JS 式を指定します。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag["elsif"] = {
-   
-   vital:["exp"],
-   
-    pm:{"exp":""},
-    
-    start:function(pm){
-        
+
+    vital : ["exp"],
+
+    pm : {
+        "exp" : ""
+    },
+
+    start : function(pm) {
+
         //条件合格
-        if(this.kag.getStack("if") == false && this.kag.embScript(pm.exp)){
-            
-            this.kag.setStack("if",true);
+        if (this.kag.getStack("if") == false && this.kag.embScript(pm.exp)) {
+
+            this.kag.setStack("if", true);
             this.kag.ftag.nextOrder();
-            
-        //条件ミス
-        }else{
-            
-            for(var i=0;i<2000;i++){
-            
-                var r = this.kag.ftag.nextOrderWithTag({"else":"","elsif":"","endif":""});
-                
-                if(r == true){
+
+            //条件ミス
+        } else {
+
+            for (var i = 0; i < 2000; i++) {
+
+                var r = this.kag.ftag.nextOrderWithTag({
+                    "else" : "",
+                    "elsif" : "",
+                    "endif" : ""
+                });
+
+                if (r == true) {
                     //alert("処理が見つかった!")
                     break;
-                    
+
                 }
-                
+
             }
-            
-            if(i>1900){
+
+            if (i > 1900) {
                 this.kag.error("If文に誤りがあります");
             }
-            
+
         }
     }
-    
 };
 
-
 /*
-#[else]
-:group
-マクロ・変数・JS操作
-:title
-if の中身が実行されなかったときに実行
-:exp
-if タグもしくは elsif タグ と endif タグの間で用いられます。 if または elsif ブロックの中身がひとつも実行されていないとき、 else から endif までの間を実行します。
-使い方の例については、if タグの項目を参照してください。
-:sample
-:param
-#[end]
-*/
+ #[else]
+ :group
+ マクロ・変数・JS操作
+ :title
+ if の中身が実行されなかったときに実行
+ :exp
+ if タグもしくは elsif タグ と endif タグの間で用いられます。 if または elsif ブロックの中身がひとつも実行されていないとき、 else から endif までの間を実行します。
+ 使い方の例については、if タグの項目を参照してください。
+ :sample
+ :param
+ #[end]
+ */
 
 tyrano.plugin.kag.tag["else"] = {
-    
-    pm:{"exp":""},
-    
-    start:function(pm){
-        
+
+    pm : {
+        "exp" : ""
+    },
+
+    start : function(pm) {
+
         //条件合格
-        if(this.kag.getStack("if") == false){
-            
-            this.kag.setStack("if",true);
+        if (this.kag.getStack("if") == false) {
+
+            this.kag.setStack("if", true);
             this.kag.ftag.nextOrder();
-            
-        //条件ミス
-        }else{
-            
-            for(var i=0;i<2000;i++){
-            
-                var r = this.kag.ftag.nextOrderWithTag({"endif":""});
-                
-                if(r == true){
+
+            //条件ミス
+        } else {
+
+            for (var i = 0; i < 2000; i++) {
+
+                var r = this.kag.ftag.nextOrderWithTag({
+                    "endif" : ""
+                });
+
+                if (r == true) {
                     //alert("処理が見つかった!")
                     break;
                     //指定の命令へ処理が写っていることでしょう
                 }
-                
+
             }
-            
-            if(i>1900){
+
+            if (i > 1900) {
                 this.kag.error("If文に誤りがあります");
             }
-            
+
         }
     }
-    
 };
 
-
 /*
-#[endif]
-:group
-マクロ・変数・JS操作
-:title
-if文を終了します
-:exp
-if文を終了します。必ずif文の終わりに記述する必要があります
-:sample
-:param
-exp=評価する TJS 式を指定します。
-#[end]
-*/
+ #[endif]
+ :group
+ マクロ・変数・JS操作
+ :title
+ if文を終了します
+ :exp
+ if文を終了します。必ずif文の終わりに記述する必要があります
+ :sample
+ :param
+ exp=評価する TJS 式を指定します。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag["endif"] = {
-    
-    start:function(){
-        
+
+    start : function() {
+
         //普通に次の処理を実行すればいいんじゃないか
-        this.kag.popStack("if"); //スタック取り出し
+        this.kag.popStack("if");
+        //スタック取り出し
         this.kag.ftag.nextOrder();
-        
+
     }
-    
 };
 
 /*
-#[call]
-:group
-マクロ・変数・JS操作
-:title
-サブルーチンの呼び出し 
-:exp
-指定されたシナリオファイルの指定されたラベルで示される サブルーチンを呼び出します。
-呼び出されたサブルーチンは、 return タグで 呼び出し元や任意の場所に戻ることができます。
-:sample
-:param
-storage=呼び出したいサブルーチンのあるのシナリオファイルを 指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
-target=呼び出すサブルーチンのラベルを指定します。省略すると、ファイルの先頭から実行されます。
-#[end]
-*/
+ #[call]
+ :group
+ マクロ・変数・JS操作
+ :title
+ サブルーチンの呼び出し
+ :exp
+ 指定されたシナリオファイルの指定されたラベルで示される サブルーチンを呼び出します。
+ 呼び出されたサブルーチンは、 return タグで 呼び出し元や任意の場所に戻ることができます。
+ :sample
+ :param
+ storage=呼び出したいサブルーチンのあるのシナリオファイルを 指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
+ target=呼び出すサブルーチンのラベルを指定します。省略すると、ファイルの先頭から実行されます。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag["call"] = {
-    
-    pm:{
-        storage:null,
-        target:null,//ラベル名
-        countpage:true,
-        auto_next:"yes"
+
+    pm : {
+        storage : null,
+        target : null, //ラベル名
+        countpage : true,
+        auto_next : "yes"
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         var back_pm = {};
-        back_pm.index = this.kag.ftag.current_order_index ;
-        back_pm.storage = this.kag.stat.current_scenario ;
+        back_pm.index = this.kag.ftag.current_order_index;
+        back_pm.storage = this.kag.stat.current_scenario;
         back_pm.auto_next = pm.auto_next;
-        
+
         //これは行き先を入れてもしょうがないよね。今の状態を
-        this.kag.pushStack("call",back_pm);//スタックに配置する
-        
+        this.kag.pushStack("call", back_pm);
+        //スタックに配置する
+
         //コールはラベルに対して行われる
-        
-        if(pm.target == null && pm.storage!=null){
-            this.kag.ftag.nextOrderWithIndex(-1,pm.storage)
-        }else{
-            this.kag.ftag.nextOrderWithLabel(pm.target,pm.storage);
+
+        if (pm.target == null && pm.storage != null) {
+            this.kag.ftag.nextOrderWithIndex(-1, pm.storage)
+        } else {
+            this.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
         }
     }
-    
 };
-
 
 /*
 #[return]
 :group
 マクロ・変数・JS操作
 :title
-サブルーチンから戻る 
+サブルーチンから戻る
 :exp
 サブルーチンから呼び出し元に戻ります。
 KAG３の任意の場所へのリターンは廃止しました。
@@ -793,22 +772,21 @@ KAG３の任意の場所へのリターンは廃止しました。
 
 //呼び出し元に戻る
 tyrano.plugin.kag.tag["return"] = {
-    
-    start:function(){
-        
-        //マクロからの場合、ここから、呼び出さないとだめ。だからmacro で return は使えない
-        var pm = this.kag.getStack("call"); //最新のコールスタックを取得
-        //呼び出し元に戻る 
-        
-        var auto_next = pm.auto_next;
-        this.kag.ftag.nextOrderWithIndex(pm.index,pm.storage,undefined,undefined,auto_next);
-        this.kag.popStack("call");//スタックを奪い取る
-        
-    
-    }
-    
-};
 
+    start : function() {
+
+        //マクロからの場合、ここから、呼び出さないとだめ。だからmacro で return は使えない
+        var pm = this.kag.getStack("call");
+        //最新のコールスタックを取得
+        //呼び出し元に戻る
+
+        var auto_next = pm.auto_next;
+        this.kag.ftag.nextOrderWithIndex(pm.index, pm.storage, undefined, undefined, auto_next);
+        this.kag.popStack("call");
+        //スタックを奪い取る
+
+    }
+};
 
 /*
 #[macro]
@@ -836,52 +814,50 @@ name=マクロの名前を指定してください。以後この名前で新し
 #[end]
 */
 
-
 //マクロの定義
 tyrano.plugin.kag.tag.macro = {
-    
-    vital:["name"],
-    
-    pm:{
-        name:""
+
+    vital : ["name"],
+
+    pm : {
+        name : ""
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         var index = this.kag.ftag.current_order_index;
         var storage = this.kag.stat.current_scenario;
-        this.kag.stat.map_macro[pm.name] = {"storage":storage,"index":index};
-        
+        this.kag.stat.map_macro[pm.name] = {
+            "storage" : storage,
+            "index" : index
+        };
+
         this.kag.tmp.checking_macro = true;
-        
+
         //endmacroが出るまで、無視される
-        for(var i=0;i<2000;i++){
-            
-                var r = this.kag.ftag.nextOrderWithTag({"endmacro":""});
-                
-                if(r == true){
-                    //alert("endacroが見つかった");
-                    break;
-                    //指定の命令へ処理が写っていることでしょう
-                    
-                    
-                }
-                
+        for (var i = 0; i < 2000; i++) {
+
+            var r = this.kag.ftag.nextOrderWithTag({
+                "endmacro" : ""
+            });
+
+            if (r == true) {
+                //alert("endacroが見つかった");
+                break;
+                //指定の命令へ処理が写っていることでしょう
+
             }
-            
-        if(i>1900){
+
+        }
+
+        if (i > 1900) {
             this.kag.error("マクロが閉じていません");
         }
-            
-        
-        
-        //this.kag.ftag.nextOrder();
-                
-                
-    }
-    
-};
 
+        //this.kag.ftag.nextOrder();
+
+    }
+};
 
 /*
 #[endmacro]
@@ -898,40 +874,40 @@ tyrano.plugin.kag.tag.macro = {
 
 //マクロ終了
 tyrano.plugin.kag.tag.endmacro = {
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         //解析チェック中にここに来た場合は、なにもしない
-        if(this.kag.tmp.checking_macro == true){
+        if (this.kag.tmp.checking_macro == true) {
             this.kag.tmp.checking_macro = false;
             this.kag.ftag.nextOrder();
-            return ;
+            return;
         }
-        
-        var map_obj = this.kag.getStack("macro"); //最新のコールスタックを取得
-        
+
+        var map_obj = this.kag.getStack("macro");
+        //最新のコールスタックを取得
+
         //もし、スタックが溜まっている状態なら、
-        if(map_obj){
-           
+        if (map_obj) {
+
             //呼び出し元に戻る
-            this.kag.ftag.nextOrderWithIndex(map_obj.index,map_obj.storage, true);
-            this.kag.popStack("macro");//スタックを奪い取る
-            
-            this.kag.stat.mp = this.kag.getStack("macro"); //参照用パラメータを設定
-                
-            
-        }else{
-            
+            this.kag.ftag.nextOrderWithIndex(map_obj.index, map_obj.storage, true);
+            this.kag.popStack("macro");
+            //スタックを奪い取る
+
+            this.kag.stat.mp = this.kag.getStack("macro");
+            //参照用パラメータを設定
+
+        } else {
+
             //呼び出し元がない場合、普通に次の処理を行えば良い
             //endmacroの場合はだめじゃないでしょうか。。。
             //this.kag.ftag.nextOrder();
-            
+
         }
-        
-                
+
     }
 };
-
 
 /*
 #[erasemacro]
@@ -949,21 +925,17 @@ name=削除するマクロ名を記述してください
 
 //マクロの削除
 tyrano.plugin.kag.tag.erasemacro = {
-    
-    vital:["name"],
-    
-    pm:{
-        name:""
+
+    vital : ["name"],
+
+    pm : {
+        name : ""
     },
-    
-    start:function(pm){
+
+    start : function(pm) {
         delete this.kag.stat.map_macro[pm.name];
     }
-    
-    
 };
-
-
 
 /*
 #[savesnap]
@@ -981,196 +953,180 @@ title=セーブデータのタイトルを指定します。
 
 //セーブスナップの保存
 tyrano.plugin.kag.tag.savesnap = {
-    
-    vital:["title"],
-    
-    pm:{
-        title:""
+
+    vital : ["title"],
+
+    pm : {
+        title : ""
     },
-    
-    start:function(pm){
-          this.kag.menu.snapSave(pm.title);
+
+    start : function(pm) {
+        this.kag.menu.snapSave(pm.title);
     }
-    
-    
 };
 
-
 /*
-#[autosave]
-:group
-システム操作
-:title
-オートセーブ機能
-:exp
-このタグに到達した際、自動的にプレイ状況を保存します。自動セーブ機能に活用ください。
-[autosave]されたデータが存在する場合、sf.system.autosaveにtrueが格納されます。
-タイトル画面より前に、サンプルのような判定ロジックを用意しておくことで、
-スマートフォンなどで、復帰後に事前にプレイしていた状態からゲームを開始することができるようになります。
-:sample
+ #[autosave]
+ :group
+ システム操作
+ :title
+ オートセーブ機能
+ :exp
+ このタグに到達した際、自動的にプレイ状況を保存します。自動セーブ機能に活用ください。
+ [autosave]されたデータが存在する場合、sf.system.autosaveにtrueが格納されます。
+ タイトル画面より前に、サンプルのような判定ロジックを用意しておくことで、
+ スマートフォンなどで、復帰後に事前にプレイしていた状態からゲームを開始することができるようになります。
+ :sample
 
-[autosave]
+ [autosave]
 
-;autosaveされたデータが存在する場合、sf.system.autosave に trueが入ります
-[if exp="sf.system.autosave ==true"]
-	自動的に保存されたデータが存在します。ロードしますか？[l][r]
-	
-	[link target=*select1]【１】はい[endlink][r]
-	[link target=*select2]【２】いいえ[endlink][r]
+ ;autosaveされたデータが存在する場合、sf.system.autosave に trueが入ります
+ [if exp="sf.system.autosave ==true"]
+ 自動的に保存されたデータが存在します。ロードしますか？[l][r]
 
-	[s]
+ [link target=*select1]【１】はい[endlink][r]
+ [link target=*select2]【２】いいえ[endlink][r]
 
-	*select1
-	;ロードを実行します
-	[autoload]
+ [s]
 
-	*select2
-	[cm]
-	ロードをやめました[l]
-	@jump target=*noload
-[else]
-	自動的に保存されたデータはありません。[l][r]
-[endif]
+ *select1
+ ;ロードを実行します
+ [autoload]
 
-:param
-title=セーブデータのタイトルを指定します。
-#[end]
-*/
+ *select2
+ [cm]
+ ロードをやめました[l]
+ @jump target=*noload
+ [else]
+ 自動的に保存されたデータはありません。[l][r]
+ [endif]
+
+ :param
+ title=セーブデータのタイトルを指定します。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.autosave = {
-    
-    vital:[],
-    
-    pm:{
-        title:""
+
+    vital : [],
+
+    pm : {
+        title : ""
     },
-    
-    start:function(pm){
-    	  
-    	  var that = this;
-    	  
-    	  //タイトルが設定されいない場合は現在のテキストを設定
-    	  if(pm.title ==""){
-    	  	pm.title = this.kag.stat.current_message_str;
-    	  }
-		  
-          this.kag.menu.snapSave(pm.title,function(){
+
+    start : function(pm) {
+
+        var that = this;
+
+        //タイトルが設定されいない場合は現在のテキストを設定
+        if (pm.title == "") {
+            pm.title = this.kag.stat.current_message_str;
+        }
+
+        this.kag.menu.snapSave(pm.title, function() {
             that.kag.menu.doSetAutoSave();
             that.kag.ftag.nextOrder();
-          });
-          
+        });
+
     }
-    
-    
 };
 
-
 /*
-#[autoload]
-:group
-システム操作
-:title
-オートロード機能
-:exp
-[autosave]タグで保存されたデータを読み込みます
-:sample
-:param
-#[end]
-*/
+ #[autoload]
+ :group
+ システム操作
+ :title
+ オートロード機能
+ :exp
+ [autosave]タグで保存されたデータを読み込みます
+ :sample
+ :param
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.autoload = {
-    
-    vital:[],
-    
-    pm:{
-        title:""
+
+    vital : [],
+
+    pm : {
+        title : ""
     },
-    
-    start:function(pm){
-    	  
-    	  var game_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
-    	  this.kag.menu.loadAutoSave();
-    	  
+
+    start : function(pm) {
+
+        var game_data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save");
+        this.kag.menu.loadAutoSave();
+
     }
-    
 };
 
 /*
-#[ignore]
-:group
-マクロ・変数・JS操作
-:title
-条件によりシナリオを無視
-:exp
-式を評価し、その結果が true ( または 0 以外 ) ならば、endignore タグまでにある文章 やタグが無視されます。
-:sample
-:param
-exp=評価する TJS 式を指定します。この式の結果が true ( または 0 以外 )ならば、endignore タグまでの文章やタグが無視されます。
-#[end]
-*/
-
-
-
+ #[ignore]
+ :group
+ マクロ・変数・JS操作
+ :title
+ 条件によりシナリオを無視
+ :exp
+ 式を評価し、その結果が true ( または 0 以外 ) ならば、endignore タグまでにある文章 やタグが無視されます。
+ :sample
+ :param
+ exp=評価する TJS 式を指定します。この式の結果が true ( または 0 以外 )ならば、endignore タグまでの文章やタグが無視されます。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.ignore = {
-    
-    vital:["exp"],
-        
-    pm:{
-        exp:""
+
+    vital : ["exp"],
+
+    pm : {
+        exp : ""
     },
-    
-    start:function(pm){
-        
-        
-        if(this.kag.embScript(pm.exp)){
-            
-            for(var i=0;i<2000;i++){
-                
-                var r = this.kag.ftag.nextOrderWithTag({"endignore":""});
-                
-                if(r == true){
-                        break;
+
+    start : function(pm) {
+
+        if (this.kag.embScript(pm.exp)) {
+
+            for (var i = 0; i < 2000; i++) {
+
+                var r = this.kag.ftag.nextOrderWithTag({
+                    "endignore" : ""
+                });
+
+                if (r == true) {
+                    break;
                 }
             }
-            
-            if(i>1900){
+
+            if (i > 1900) {
                 this.kag.error("ignoreが閉じていません");
             }
-        }else{
-            
-            this.kag.ftag.nextOrder();
-            
-        }
-    }    
-    
-};
+        } else {
 
+            this.kag.ftag.nextOrder();
+
+        }
+    }
+};
 
 /*
-#[endignore]
-:group
-マクロ・変数・JS操作
-:title
-ignoreの終了
-:exp
-ignoreを終了します
-:sample
-:param
-#[end]
-*/
+ #[endignore]
+ :group
+ マクロ・変数・JS操作
+ :title
+ ignoreの終了
+ :exp
+ ignoreを終了します
+ :sample
+ :param
+ #[end]
+ */
 
+tyrano.plugin.kag.tag.endignore = {
 
-tyrano.plugin.kag.tag.endignore ={
-    
-    start:function(){
+    start : function() {
         this.kag.ftag.nextOrder();
     }
-    
 };
-
-
-
 
 /*
 #[edit]
@@ -1215,56 +1171,52 @@ maxchars=最大入力文字数
 
 //テキストボックス、ティラノスクリプト
 tyrano.plugin.kag.tag.edit = {
-    
-    vital:["name"],
-    
-    
-    pm:{
-        name:"",
-        length:"",//ピクセル　横幅
-        color:"black",
-        left:"0",
-        top:"0",
-        size:"20",
-        width:"200",
-        height:"40",
-        maxchars:"1000"
-    },
-    
-    start:function(pm){
-       
-       var j_text = $("<input class='text_box form' name='"+pm.name+"' type='text' value='' />");
-       
-       j_text.click(function(){
-         j_text.focus();
-       });
-       
-       pm = $.minifyObject(pm);
-       
-       
-       var new_style = {
-           color:$.convertColor(pm.color),
-           left:parseInt(pm.left),
-           top:parseInt(pm.top),
-           width:pm.width,
-           height:pm.height,
-           "font-size":parseInt(pm.size)
-       };
-       
-       j_text.css(new_style);
-       j_text.css("position","absolute");
-       
-       j_text.attr("maxlength",pm.maxchars);
-       
-       this.kag.layer.getFreeLayer().append(j_text);
-       this.kag.layer.getFreeLayer().show();
-       
-       this.kag.ftag.nextOrder();
-       
-    }
-    
-};
 
+    vital : ["name"],
+
+    pm : {
+        name : "",
+        length : "", //ピクセル　横幅
+        color : "black",
+        left : "0",
+        top : "0",
+        size : "20",
+        width : "200",
+        height : "40",
+        maxchars : "1000"
+    },
+
+    start : function(pm) {
+
+        var j_text = $("<input class='text_box form' name='" + pm.name + "' type='text' value='' />");
+
+        j_text.click(function() {
+            j_text.focus();
+        });
+
+        pm = $.minifyObject(pm);
+
+        var new_style = {
+            color : $.convertColor(pm.color),
+            left : parseInt(pm.left),
+            top : parseInt(pm.top),
+            width : pm.width,
+            height : pm.height,
+            "font-size" : parseInt(pm.size)
+        };
+
+        j_text.css(new_style);
+        j_text.css("position", "absolute");
+
+        j_text.attr("maxlength", pm.maxchars);
+
+        this.kag.layer.getFreeLayer().append(j_text);
+        this.kag.layer.getFreeLayer().show();
+
+        this.kag.ftag.nextOrder();
+
+    }
+};
 
 /*
 #[preload]
@@ -1296,534 +1248,504 @@ wait=trueを指定すると、全ての読み込みが完了するまでゲー�
 
 //画像ファイルの事前読み込み
 tyrano.plugin.kag.tag.preload = {
-    
-    vital:["storage"],
-    
-    pm:{
-        storage:"",
-        wait:"false"
+
+    vital : ["storage"],
+
+    pm : {
+        storage : "",
+        wait : "false"
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         var that = this;
-        
-        if(pm.wait == "true"){
+
+        if (pm.wait == "true") {
             this.kag.layer.hideEventLayer();
         }
-       
+
         var storage = pm.storage;
-        
+
         //配列で指定された場合
-        if(typeof storage == "object" && storage.length > 0){
-            
+        if ( typeof storage == "object" && storage.length > 0) {
+
             var sum = 0;
-            
-            for (var i=0;i<storage.length;i++){
-                
-                that.kag.preload(storage[i],function(){
+
+            for (var i = 0; i < storage.length; i++) {
+
+                that.kag.preload(storage[i], function() {
                     sum++;
-                    if(storage.length == sum){
+                    if (storage.length == sum) {
                         //すべてのプリロードが完了
-                        if(pm.wait == "true"){
+                        if (pm.wait == "true") {
                             that.kag.layer.showEventLayer();
                         }
-                        
+
                         that.kag.ftag.nextOrder();
-                        
+
                     }
                 });
             }
-            
-            
-        }else{
-            this.kag.preload(pm.storage,function(){
-                
-                if(pm.wait == "true"){
+
+        } else {
+            this.kag.preload(pm.storage, function() {
+
+                if (pm.wait == "true") {
                     that.kag.layer.showEventLayer();
                 }
                 that.kag.ftag.nextOrder();
-                
-                
+
             });
         }
-        
-        
-        
-        
-        
-    }
 
+    }
 };
 
 /*
-#[clearfix]
-:group
-レイヤ関連
-:title
-Fixレイヤーをクリアします。
-:exp
-name属性を指定することで、該当する要素のみを削除することもできます。
-:sample
+ #[clearfix]
+ :group
+ レイヤ関連
+ :title
+ Fixレイヤーをクリアします。
+ :exp
+ name属性を指定することで、該当する要素のみを削除することもできます。
+ :sample
 
-;fixレイヤーへの追加
-[ptext name="sample" layer=fix page=fore text="テキストテキスト" size=30 x=200 y=100 color=red ]
+ ;fixレイヤーへの追加
+ [ptext name="sample" layer=fix page=fore text="テキストテキスト" size=30 x=200 y=100 color=red ]
 
-;fixレイヤーのクリア
-[clearfix name="sample"]
+ ;fixレイヤーのクリア
+ [clearfix name="sample"]
 
-:param
-name=fixレイヤーへ追加した時に名前を指定した場合、適応できます。
+ :param
+ name=fixレイヤーへ追加した時に名前を指定した場合、適応できます。
 
-#[end]
-*/
+ #[end]
+ */
 
+tyrano.plugin.kag.tag.clearfix = {
 
-tyrano.plugin.kag.tag.clearfix ={
-    
-    pm:{
-        name:""
+    pm : {
+        name : ""
     },
-    
-    start:function(pm){
-       
-       if(pm.name !=""){
-           $(".fixlayer."+pm.name).remove();
-       }else{
-           $(".fixlayer").remove();
-       }
-       
-       this.kag.ftag.nextOrder();
-        
+
+    start : function(pm) {
+
+        if (pm.name != "") {
+            $(".fixlayer." + pm.name).remove();
+        } else {
+            $(".fixlayer").remove();
+        }
+
+        this.kag.ftag.nextOrder();
+
     }
-    
 };
 
-
-
 /*
-#[commit]
-:group
-入力フォーム関連
-:title
-フォームの確定
-:exp
-テキストボックスの値を確定して指定したname属性で指定した変数に値を格納します。
-注意点としてcommitが実行された段階で、テキストボックスなどのフォームが表示されている必要があります。
-:sample
-:param
+ #[commit]
+ :group
+ 入力フォーム関連
+ :title
+ フォームの確定
+ :exp
+ テキストボックスの値を確定して指定したname属性で指定した変数に値を格納します。
+ 注意点としてcommitが実行された段階で、テキストボックスなどのフォームが表示されている必要があります。
+ :sample
+ :param
 
-#[end]
-*/
+ #[end]
+ */
 
+tyrano.plugin.kag.tag.commit = {
 
-tyrano.plugin.kag.tag.commit ={
-    
-    start:function(){
-        
+    start : function() {
+
         var that = this;
-        
-        this.kag.layer.getFreeLayer().find(".form").each(function(){
-              
-           var name = $(this).attr("name");
-           var val = $(this).val();
-           
-           var str  = name + " = '" + val +"'";
-           
-           that.kag.evalScript(str);
-           
-           that.kag.ftag.nextOrder();
-           
-           //console.log($(this));
-            
+
+        this.kag.layer.getFreeLayer().find(".form").each(function() {
+
+            var name = $(this).attr("name");
+            var val = $(this).val();
+
+            var str = name + " = '" + val + "'";
+
+            that.kag.evalScript(str);
+
+            that.kag.ftag.nextOrder();
+
+            //console.log($(this));
+
         });
-        
+
     }
-    
 };
 
-
-
 /*
-#[cursor]
-:group
-システム操作
-:title
-マウスカーソルに画像を設定できいます
-:exp
-storageに指定した画像ファイルがマウスカーソルに指定されます。data/imageフォルダ以下に配置してください。ファイルは形式は gif png jpg です。
-ゲーム中に何度でも変更することが可能です。ゲームでの標準カーソルを指定する場合はsystem/Config.tjsのcursorDefaultを指定してください。
-システムの標準カーソルに戻す場合はdefaultを指定します
-:sample
-[cursor storage="my_cursor.gif"]
-:param
-storage=カーソルに指定したい画像ファイルを指定します。画像はdata/imageフォルダに配置してください。
-#[end]
-*/
+ #[cursor]
+ :group
+ システム操作
+ :title
+ マウスカーソルに画像を設定できいます
+ :exp
+ storageに指定した画像ファイルがマウスカーソルに指定されます。data/imageフォルダ以下に配置してください。ファイルは形式は gif png jpg です。
+ ゲーム中に何度でも変更することが可能です。ゲームでの標準カーソルを指定する場合はsystem/Config.tjsのcursorDefaultを指定してください。
+ システムの標準カーソルに戻す場合はdefaultを指定します
+ :sample
+ [cursor storage="my_cursor.gif"]
+ :param
+ storage=カーソルに指定したい画像ファイルを指定します。画像はdata/imageフォルダに配置してください。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.cursor = {
-    
-    vital:["storage"],
-    
-    pm:{
-        storage:"default"
+
+    vital : ["storage"],
+
+    pm : {
+        storage : "default"
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         //評価された値を代入
         this.kag.setCursor(pm.storage);
         this.kag.ftag.nextOrder();
-        
+
     }
-    
 };
 
-
 /*
-#[screen_full]
-:group
-システム操作
-:title
-フルスクリーン
-:exp
-ゲーム画面をフルスクリーンにします。PCゲームのみ動作します
-ウィンドウに戻す場合は再度呼び出すことでウィンドウに戻ります
-:sample
-[screen_full]
-:param
-#[end]
-*/
+ #[screen_full]
+ :group
+ システム操作
+ :title
+ フルスクリーン
+ :exp
+ ゲーム画面をフルスクリーンにします。PCゲームのみ動作します
+ ウィンドウに戻す場合は再度呼び出すことでウィンドウに戻ります
+ :sample
+ [screen_full]
+ :param
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.screen_full = {
-    
-    vital:[],
-    
-    pm:{
+
+    vital : [],
+
+    pm : {
     },
-    
-    start:function(pm){
-                
+
+    start : function(pm) {
+
         this.kag.menu.screenFull();
-        
+
         this.kag.ftag.nextOrder();
-        
+
     }
-    
 };
 
-
 /*
-#[sleepgame]
-:group
-システム操作
-:title
-ゲームの一時停止
-:exp
+ #[sleepgame]
+ :group
+ システム操作
+ :title
+ ゲームの一時停止
+ :exp
 
-このタグに到達した時点でゲームの状態を保存した上で、他のシナリオへ移動することができます。
-そして遷移先で[awakegame]が実行されたらゲームに復帰できます。
+ このタグに到達した時点でゲームの状態を保存した上で、他のシナリオへ移動することができます。
+ そして遷移先で[awakegame]が実行されたらゲームに復帰できます。
 
-このタグはゲームから一時的に画面を遷移したい場合に非常に強力に機能します。
+ このタグはゲームから一時的に画面を遷移したい場合に非常に強力に機能します。
 
-例えば、ゲームの途中でコンフィグの設定を行いたい場合などは
-sleepgameで進行状態を保持した上で、コンフィグ画面に移動します。[awakegame]タグでゲームに復帰します
+ 例えば、ゲームの途中でコンフィグの設定を行いたい場合などは
+ sleepgameで進行状態を保持した上で、コンフィグ画面に移動します。[awakegame]タグでゲームに復帰します
 
-sleepgameは複数実行することはできません。必ず[awakegame]を実行して下さい。
-[awakegame]を実行しない場合は[breakgame]で休止中の状態を破棄します。
+ sleepgameは複数実行することはできません。必ず[awakegame]を実行して下さい。
+ [awakegame]を実行しない場合は[breakgame]で休止中の状態を破棄します。
 
-[button]で呼びたす場合、roleにsleepgameを指定すると、押された時にsleepgameを適応することができます。
+ [button]で呼びたす場合、roleにsleepgameを指定すると、押された時にsleepgameを適応することができます。
 
-:sample
+ :sample
 
-[sleepgame storage="scene3.ks" target="*start" ]
+ [sleepgame storage="scene3.ks" target="*start" ]
 
-;buttonに紐付ける方法
-[button name="button" role="sleepgame" fix="true" graphic="button/skip.gif" x=450 y=400 storage="scene3.ks" ]
+ ;buttonに紐付ける方法
+ [button name="button" role="sleepgame" fix="true" graphic="button/skip.gif" x=450 y=400 storage="scene3.ks" ]
 
+ :param
+ storage=ゲームを中断して処理を始めるシナリオ名を記述します。省略された場合は、現在のファイル名と解釈されます,
+ target=ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます
 
-:param
-storage=ゲームを中断して処理を始めるシナリオ名を記述します。省略された場合は、現在のファイル名と解釈されます,
-target=ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます
-
-#[end]
-*/
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.sleepgame = {
-    
-    vital:[],
-    
-    pm:{
-        storage:"",
-        target:""
+
+    vital : [],
+
+    pm : {
+        storage : "",
+        target : ""
     },
-    
-    start:function(pm){
-          
-          var that = this;
-          
-          //タイトルが設定されていない場合は現在のテキストを設定
-          var title= this.kag.stat.current_message_str;
-          
-          //スナップを保存。サムネは不要
-          this.kag.menu.snapSave(title,function(){
+
+    start : function(pm) {
+
+        var that = this;
+
+        //タイトルが設定されていない場合は現在のテキストを設定
+        var title = this.kag.stat.current_message_str;
+
+        //スナップを保存。サムネは不要
+        this.kag.menu.snapSave(title, function() {
             //保存したスナップを、sleep領域に配置したうえで、ジャンプする
             that.kag.menu.setGameSleep();
             that.kag.ftag.startTag("jump", pm);
-            
-          },false);
-          
+
+        }, false);
+
     }
-    
-    
 };
 
-
 /*
-#[awakegame]
-:group
-システム操作
-:title
-ゲームの一時停止からの復帰
-:exp
-[gamesleep]タグで一時停止していたゲームを再開します。
-ジャンプ先での変数操作 （f）については、ゲーム復旧後も反映されます。
-ゲームに戻る前にmake.ksを通過します。ジャンプ先での操作に対して戻る前に設定を行いたい場合は
-make.ksで変数fに対して、[awakegame]からの復帰かどうかの判定をいれるとよいでしょう。
-:sample
-:param
-variable_over=trueかfalseを指定します。trueを指定するとsleepgame中のゲーム変数への変更を引き継ぎます。デフォルトはtrue,
-bgm_over=trueかfalseを指定します。trueを指定するとsleepgame中のBGMを再生し続けます。デフォルトはtrue。falseだとsleepgame時のBGMに切り替わります。
-#[end]
-*/
+ #[awakegame]
+ :group
+ システム操作
+ :title
+ ゲームの一時停止からの復帰
+ :exp
+ [gamesleep]タグで一時停止していたゲームを再開します。
+ ジャンプ先での変数操作 （f）については、ゲーム復旧後も反映されます。
+ ゲームに戻る前にmake.ksを通過します。ジャンプ先での操作に対して戻る前に設定を行いたい場合は
+ make.ksで変数fに対して、[awakegame]からの復帰かどうかの判定をいれるとよいでしょう。
+ :sample
+ :param
+ variable_over=trueかfalseを指定します。trueを指定するとsleepgame中のゲーム変数への変更を引き継ぎます。デフォルトはtrue,
+ bgm_over=trueかfalseを指定します。trueを指定するとsleepgame中のBGMを再生し続けます。デフォルトはtrue。falseだとsleepgame時のBGMに切り替わります。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.awakegame = {
-    
-    vital:[],
-    
-    pm:{
-        
-        variable_over:"true",
-        bgm_over:"true"
-        
+
+    vital : [],
+
+    pm : {
+
+        variable_over : "true",
+        bgm_over : "true"
+
     },
-    
-    start:function(pm){
-          
-          var that = this;
-          
-          if(this.kag.tmp.sleep_game == null){
+
+    start : function(pm) {
+
+        var that = this;
+
+        if (this.kag.tmp.sleep_game == null) {
             //this.kag.error("保存されたゲームがありません。[awakegame]タグは無効です");
             //データがない場合はそのまま次の命令へ
             this.kag.ftag.nextOrder();
-          }else{
-              
-              var sleep_data = this.kag.tmp.sleep_game;
-              
-              //f変数を継承する
-              if(pm.variable_over == "true"){
+        } else {
+
+            var sleep_data = this.kag.tmp.sleep_game;
+
+            //f変数を継承する
+            if (pm.variable_over == "true") {
                 sleep_data.stat.f = this.kag.stat.f;
-              }
-              
-              var options = {
-                bgm_over:pm.bgm_over
-              };
-              
-              this.kag.menu.loadGameData($.extend(true, {}, sleep_data),options);
-              
-              this.kag.tmp.sleep_game = null;
-              
-          }
+            }
+
+            var options = {
+                bgm_over : pm.bgm_over
+            };
+
+            this.kag.menu.loadGameData($.extend(true, {}, sleep_data), options);
+
+            this.kag.tmp.sleep_game = null;
+
+        }
     }
-    
-    
 };
 
-
 /*
-#[breakgame]
-:group
-システム操作
-:title
-ゲームの停止データの削除
-:exp
-[gamesleep]タグで一時停止していたゲームを削除します。
-[gameawake]しない場合、このタグで削除してください。
+ #[breakgame]
+ :group
+ システム操作
+ :title
+ ゲームの停止データの削除
+ :exp
+ [gamesleep]タグで一時停止していたゲームを削除します。
+ [gameawake]しない場合、このタグで削除してください。
 
-:sample
-:param
+ :sample
+ :param
 
-#[end]
-*/
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.breakgame = {
-    
-    vital:[],
-    
-    pm:{
+
+    vital : [],
+
+    pm : {
     },
-    
-    start:function(pm){
-          
-          var that = this;
-          
-          this.kag.tmp.sleep_game = null;
-          this.kag.ftag.nextOrder();
-          
+
+    start : function(pm) {
+
+        var that = this;
+
+        this.kag.tmp.sleep_game = null;
+        this.kag.ftag.nextOrder();
+
     }
-    
 };
 
-
 /*
-#[dialog]
-:group
-システム操作
-:title
-ダイアログ表示
-:exp
-様々な機能をもったダイアログを表示します。
-ダイアログは以下のタイプがあります。
-alert confirm input
-:sample
-;警告ウィンドウのメッセージ表示
-[dialog type="alert" text="メッセージ内容" ]
+ #[dialog]
+ :group
+ システム操作
+ :title
+ ダイアログ表示
+ :exp
+ 様々な機能をもったダイアログを表示します。
+ ダイアログは以下のタイプがあります。
+ alert confirm input
+ :sample
+ ;警告ウィンドウのメッセージ表示
+ [dialog type="alert" text="メッセージ内容" ]
 
-;確認ダイアログの表示
-[dialog type="confirm" text="メッセージ内容" storage="scene2" target="ok_label" storage_cancel="" target_cancel="" ]
+ ;確認ダイアログの表示
+ [dialog type="confirm" text="メッセージ内容" storage="scene2" target="ok_label" storage_cancel="" target_cancel="" ]
 
-;テキスト入力ダイアログの表示
-[dialog type="input" text="名前を教えて下さい" storage="scene2" target="ok_label" ]
+ ;テキスト入力ダイアログの表示
+ [dialog type="input" text="名前を教えて下さい" storage="scene2" target="ok_label" ]
 
-:param
-name=confirmを指定した時に格納する変数名を指定して下さい。
-type=ダイアログの種類を指定します。alert confirm input,
-text=メッセージとして表示するてテキストを指定して下さい,
-storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
-target=指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
-storage_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先シナリオファイルを指定します。,
-target_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。,
-label_ok=OKボタンの名前を好きなものに指定できます。デフォルトはOKです　,
-label_cancel=キャンセルボタンの名前を好きなものに指定できます。デフォルトはCancelです　
-#[end]
-*/
+ :param
+ name=confirmを指定した時に格納する変数名を指定して下さい。
+ type=ダイアログの種類を指定します。alert confirm input,
+ text=メッセージとして表示するてテキストを指定して下さい,
+ storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
+ target=指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
+ storage_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先シナリオファイルを指定します。,
+ target_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。,
+ label_ok=OKボタンの名前を好きなものに指定できます。デフォルトはOKです　,
+ label_cancel=キャンセルボタンの名前を好きなものに指定できます。デフォルトはCancelです　
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.dialog = {
-    
-    vital:[],
-    
-    pm:{
-        name:"tf.dialog_value",
-        type:"alert",
-        text:"",
-        storage:"",
-        target:"",
-        storage_cancel:"",
-        target_cancel:"",
-        label_ok:"OK",
-        label_cancel:"Cancel"
+
+    vital : [],
+
+    pm : {
+        name : "tf.dialog_value",
+        type : "alert",
+        text : "",
+        storage : "",
+        target : "",
+        storage_cancel : "",
+        target_cancel : "",
+        label_ok : "OK",
+        label_cancel : "Cancel"
     },
-    
-    start:function(pm){
-        
+
+    start : function(pm) {
+
         var that = this;
-        
-        if(pm.type=="confirm"){
-            $.confirm(pm.text,
-                function(){
-                    that.finish(pm);
-                },
-                function(){
-                    pm.storage=pm.storage_cancel;
-                    pm.target =pm.target_cancel;
-                    that.finish(pm);
+
+        if (pm.type == "confirm") {
+            $.confirm(pm.text, function() {
+                that.finish(pm);
+            }, function() {
+                pm.storage = pm.storage_cancel;
+                pm.target = pm.target_cancel;
+                that.finish(pm);
+            });
+        } else if (pm.type == "input") {
+
+            alertify.set({
+                buttonFocus : "none",
+                labels : {
+                    ok : pm.label_ok,
+                    cancel : pm.label_cancel
                 }
-            );
-        }else if(pm.type=="input"){
-            
-            alertify.set({ buttonFocus: "none",labels:{ok:pm.label_ok,cancel:pm.label_cancel}});
-            alertify.prompt(pm.text, function(flag,text){
-                if(flag){
-                    
+            });
+            alertify.prompt(pm.text, function(flag, text) {
+                if (flag) {
+
                     var name = pm.name;
                     var val = text;
-                    var str  = name + " = '" + val +"'";
-                    
+                    var str = name + " = '" + val + "'";
+
                     that.kag.evalScript(str);
-           
-                }else{
-                    pm.storage=pm.storage_cancel;
-                    pm.target =pm.target_cancel;
+
+                } else {
+                    pm.storage = pm.storage_cancel;
+                    pm.target = pm.target_cancel;
                 }
-                
+
                 that.finish(pm);
-                
+
             });
-            
-        }else{
+
+        } else {
             //alert
-            $.alert(pm.text,function(){
+            $.alert(pm.text, function() {
                 that.finish(pm);
             });
-            
+
         }
-        
-        
+
         //this.kag.ftag.nextOrder();
-        
+
     },
-    
+
     //終わった後どうするか
-    finish:function(pm){
-        
-        if(pm.storage!="" || pm.target!=""){
+    finish : function(pm) {
+
+        if (pm.storage != "" || pm.target != "") {
             this.kag.ftag.startTag("jump", pm);
-        }else{
+        } else {
             this.kag.ftag.nextOrder();
         }
-        
+
     }
-    
 };
 
-
-
 /*
-#[plugin]
-:group
-システム操作
-:title
-プラグイン読み込み
-:exp
-外部プラグインを読み込むことができます。
-プラグインはdata/others/plugin/　フォルダに配置します。
+ #[plugin]
+ :group
+ システム操作
+ :title
+ プラグイン読み込み
+ :exp
+ 外部プラグインを読み込むことができます。
+ プラグインはdata/others/plugin/　フォルダに配置します。
 
-また、pluginタグは引数を自由に渡すことができます。
-例えば
-[plugin name="original1" font_color="black" myname="シケモク" ]
+ また、pluginタグは引数を自由に渡すことができます。
+ 例えば
+ [plugin name="original1" font_color="black" myname="シケモク" ]
 
-のようにすると、プラグイン先のinit.ks 内で
-mp.font_color 
-mp.myname 
-のような形で引数を利用できます。
+ のようにすると、プラグイン先のinit.ks 内で
+ mp.font_color
+ mp.myname
+ のような形で引数を利用できます。
 
-これを &mp.font_color のように使うことで、カスタマイズ可能なプラグインが作れます。
-ただ、マクロで使用可能だった%font_color のような形の使用はできませんので注意。
+ これを &mp.font_color のように使うことで、カスタマイズ可能なプラグインが作れます。
+ ただ、マクロで使用可能だった%font_color のような形の使用はできませんので注意。
 
+ :sample
+ ;テーマ変更
+ [plugin name="original1" ]
 
-:sample
-;テーマ変更
-[plugin name="original1" ]
+ ;自由に引数を渡すことも可能
+ [plugin name="original1" font_color="black" arg2="aaaaaa" ]
 
-;自由に引数を渡すことも可能
-[plugin name="original1" font_color="black" arg2="aaaaaa" ]
+ :param
+ name=data/othres/theme以下の配置したフォルダ名（プラグイン名）を指定する,
+ storage=最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。
 
-:param
-name=data/othres/theme以下の配置したフォルダ名（プラグイン名）を指定する,
-storage=最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。
-
-#[end]
-*/
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.plugin = {
 
@@ -1833,119 +1755,176 @@ tyrano.plugin.kag.tag.plugin = {
 
         name : "",
         storage : "init.ks"
-        
+
     },
 
     start : function(pm) {
 
         var storage_url = "";
-		var name = pm.name;
-		
-		pm.storage = "../others/plugin/"+name+"/"+pm.storage;
-		
-		//引数に渡す。
-		this.kag.stat.mp = pm;
-		
-		this.kag.ftag.startTag("call",pm);
-		
-		
+        var name = pm.name;
+
+        pm.storage = "../others/plugin/" + name + "/" + pm.storage;
+
+        //引数に渡す。
+        this.kag.stat.mp = pm;
+
+        this.kag.ftag.startTag("call", pm);
+
     }
 };
 
-
 /*
-#[sysview]
-:group
-システム操作
-:title
-システム画面変更
+ #[sysview]
+ :group
+ システム操作
+ :title
+ システム画面変更
 
-:exp
-システム系機能で使用するHTMLファイルを変更できます。
+ :exp
+ システム系機能で使用するHTMLファイルを変更できます。
 
-:sample
-[sysview type="save" storage="./data/others/plugin/mytheme/html/save.html" ]
-[sysview type="load" storage="./data/others/plugin/mytheme/html/load.html" ]
-[sysview type="backlog" storage="./data/others/plugin/mytheme/html/backlog.html" ]
-[sysview type="menu" storage="./data/others/plugin/mytheme/html/menu.html]
+ :sample
+ [sysview type="save" storage="./data/others/plugin/mytheme/html/save.html" ]
+ [sysview type="load" storage="./data/others/plugin/mytheme/html/load.html" ]
+ [sysview type="backlog" storage="./data/others/plugin/mytheme/html/backlog.html" ]
+ [sysview type="menu" storage="./data/others/plugin/mytheme/html/menu.html]
 
-:param
-type=save load backlog menu が指定可能 ,
-storage=HTMLファイルのパスを指定します。
-#[end]
-*/
+ :param
+ type=save load backlog menu が指定可能 ,
+ storage=HTMLファイルのパスを指定します。
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.sysview = {
 
-    vital : ["type","storage"],
+    vital : ["type", "storage"],
 
     pm : {
 
         type : "",
         storage : ""
-        
+
     },
 
     start : function(pm) {
 
         var type = pm.type;
-		var storage = pm.storage;
-		
-		//システムで使用するHTMLの場所を変更する
-		//HTMLキャッシュは削除する
-		if(this.kag.cache_html[type]){
-			delete this.kag.cache_html[type];
-		}
-		
-		this.kag.stat.sysview[type] = storage;
-		
-		this.kag.ftag.nextOrder();
-		
+        var storage = pm.storage;
+
+        //システムで使用するHTMLの場所を変更する
+        //HTMLキャッシュは削除する
+        if (this.kag.cache_html[type]) {
+            delete this.kag.cache_html[type];
+        }
+
+        this.kag.stat.sysview[type] = storage;
+
+        this.kag.ftag.nextOrder();
+
     }
 };
 
-
 /*
-#[loadcss]
-:group
-システム操作
-:title
-CSS反映
+ #[loadcss]
+ :group
+ システム操作
+ :title
+ CSS反映
 
-:exp
-ゲームの途中でCSSを読み込むことができます。
-:sample
-;CSSファイルの読み込み
-[loadcss file="./data/others/css/mystyle.css" ]
+ :exp
+ ゲームの途中でCSSを読み込むことができます。
+ :sample
+ ;CSSファイルの読み込み
+ [loadcss file="./data/others/css/mystyle.css" ]
 
-:param
-file=読み込みたいCSSファイルを指定します
- 
-#[end]
-*/
+ :param
+ file=読み込みたいCSSファイルを指定します
+
+ #[end]
+ */
 
 tyrano.plugin.kag.tag.loadcss = {
 
     vital : ["file"],
 
     pm : {
-        file : ""        
+        file : ""
     },
 
     start : function(pm) {
 
         var file = pm.file;
-		
-		//ファイルの読み込み
-		var style = '<link rel="stylesheet" href="'+file+ "?" + Math.floor(Math.random() * 10000000)+'">';
-		$('head link:last').after(style);
-		this.kag.stat.cssload[file] = true;
-    
-		this.kag.ftag.nextOrder();
-		
+
+        //ファイルの読み込み
+        var style = '<link rel="stylesheet" href="' + file + "?" + Math.floor(Math.random() * 10000000) + '">';
+        $('head link:last').after(style);
+        this.kag.stat.cssload[file] = true;
+
+        this.kag.ftag.nextOrder();
 
     }
 };
 
+/*
+ #[save_img]
+ :group
+ システム操作
+ :title
+ セーブ時のキャプチャイメージ変更
 
+ :exp
+ セーブデータのサムネイルをキャプチャを変更することができます。
+ このタグで設定したイメージがセーブ時の画像として適応されます。
+ セーブ画像は「bgimage」フォルダから指定します。
+ storageに「default」としていすることで、従来の画面自動キャプチャに変更できます。
+
+ :sample
+ ;サムネイル画像の変更
+ [save_img storage="./data/others/css/mystyle.css" ]
+
+ :param
+ storage=設定したいセーブ用画像を設定します。bgimageフォルダに配置してください。「default」を指定するとオートキャプチャに戻ります。
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.save_img = {
+
+    vital : ["storage"],
+
+    pm : {
+        storage : "",
+        folder : ""
+    },
+
+    start : function(pm) {
+
+        var storage = pm.storage;
+        var folder ="";
+        var storage_url ="";
+        
+        if (pm.folder != "") {
+            folder = pm.folder;
+        } else {
+            folder = "bgimage";
+        }
+
+        //画像指定
+        if ($.isHTTP(pm.storage)) {
+            storage_url = pm.storage;
+        } else {
+            storage_url = "./data/" + folder + "/" + pm.storage;
+        }
+        
+        if(pm.storage=="default"){
+             storage_url = "";
+        }
+        
+        //画像の場所を指定する。
+        this.kag.stat.save_img = storage_url;
+
+        this.kag.ftag.nextOrder();
+
+    }
+};
 
