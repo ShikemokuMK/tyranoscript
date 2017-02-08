@@ -255,7 +255,7 @@ tyrano.plugin.kag.ftag = {
 
         if (pm["*"] == "") {
             //マクロ呼び出し元の変数から継承、引き継ぐ
-            pm = $.extend(true, $.cloneObject(pm), this.kag.stat.mp);
+            pm = $.extend(true, this.kag.stat.mp, $.cloneObject(pm));
 
         }
 

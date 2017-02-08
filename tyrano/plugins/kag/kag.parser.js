@@ -390,6 +390,10 @@ tyrano.plugin.kag.parser ={
             var pm_key = $.trim(tmp[0]);
             var pm_val = $.trim(tmp[1]);
             
+            //全引き継ぎ対応
+            if(pm_key=="*"){
+                obj.pm["*"]="";
+            }
             //特殊変換された値はそのまま代入できない
             if(pm_val!=""){
                 obj.pm[pm_key] = $.replaceAll(pm_val,"#","=");
