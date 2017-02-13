@@ -14,6 +14,8 @@ tyrano.plugin.kag.layer ={
     map_layer_back:{},
     
     //状況に応じて変化する
+    is_swipe: false,
+    timeoutId:0,
     
     //指が動いた状態を管理するための値
     start_point:{x:0,y:0},
@@ -53,81 +55,7 @@ tyrano.plugin.kag.layer ={
             
         });
         
-        layer_obj_click.click(function(e){
-            
-
-            // POSSIBLE IMPROVE
-            // make "isReturn" variable
-            // and do all if statements
-            // then do "if (isReturn) return;"
-            
-            if(that.kag.stat.is_hide_message == true){
-                that.showMessageLayers();
-                return;
-            }
-            
-            //テキスト再生中にクリックされた場合、文字列を進めて終了にする
-            if(that.kag.stat.is_adding_text == true){
-                that.kag.stat.is_click_text = true;
-                return;
-            }
-            
-            //テキストマッハ表示時もリターン。
-            if(that.kag.stat.is_click_text == true){
-                return;
-            }
-            
-            if(that.kag.stat.is_stop == true){
-                return;
-            }
-
-            that.kag.ftag.nextOrder();
-            
-        });
         
-        
-        ///マウス周り
-        //スライドイベント
-        layer_obj_click.bind('touchstart', function(e) {
-            e.preventDefault();                     // ページが動くのを止める
-            var pageX = event.changedTouches[0].pageX; // X 座標の位置
-            var pageY = event.changedTouches[0].pageY; // Y 座標の位置
-            that.start_point.x = pageX;
-            that.start_point.y = pageY;
-            
-            //console.log("start -------");
-            //console.log(pageY);
-            
-        });
-        
-        //スライドイベント
-        layer_obj_click.bind('touchend', function(e) {
-            
-            if(that.kag.stat.visible_menu_button==false){
-                return false;
-            }
-            
-            e.preventDefault();                     // ページが動くのを止める
-            var pageX = event.changedTouches[0].pageX; // X 座標の位置
-            var pageY = event.changedTouches[0].pageY; // Y 座標の位置
-            
-            that.end_point.x = pageX;
-            that.end_point.y = pageY;
-            
-            var move_x = that.end_point.x - that.start_point.x;
-            var move_y = that.end_point.y - that.start_point.y;
-            
-            ////
-            if(move_x > 250){
-                //右スライド
-                console.log("右スライド");
-            }else if(move_y > 50){
-                //縦スライド
-                that.kag.ftag.startTag("showmenu", {});
-            
-            }
-        
-        });
         
         this.layer_event = layer_obj_click ;
         this.appendLayer(this.layer_event);

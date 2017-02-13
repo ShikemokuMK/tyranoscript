@@ -739,10 +739,11 @@ tyrano.plugin.kag.menu = {
             
             $.preloadImgCallback(layer_menu,function(){
                 layer_menu.fadeIn(300);
+                //一番下固定させる
+                layer_menu.find(".log_body").scrollTop(9999999999);
+
             },that);
         
-            //一番下固定させる
-            layer_menu.find(".log_body").scrollTop(9999999999);
 
             $(".button_menu").hide();
 
