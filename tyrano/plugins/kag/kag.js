@@ -619,14 +619,25 @@ tyrano.plugin.kag ={
     },
     
     //BackLogを格納します
-    pushBackLog:function(str){
+    pushBackLog:function(str,type){
+    	
+    	type = type || "add";
     	
     	var max_back_log = parseInt(this.kag.config["maxBackLogNum"]);
     	
     	if(max_back_log < 1 ) return ;
     	
-    	this.variable.tf["system"]["backlog"].push(str);  
-		
+    	if(type=="join"){
+    	   var index = this.variable.tf.system.backlog.length-1;
+    	   if(index > 0){ //配列が存在しない場合はpushだ
+    	      var tmp = this.variable.tf["system"]["backlog"][index];
+    	      this.variable.tf["system"]["backlog"][this.variable.tf.system.backlog.length-1] = tmp + str;
+		   }else{
+		      this.variable.tf["system"]["backlog"].push(str);  
+		   }
+		}else{
+		   this.variable.tf["system"]["backlog"].push(str);  
+        }
     	//上限を超えたらFILO で処理
     	if(max_back_log < this.variable.tf["system"]["backlog"].length){
     		this.variable.tf["system"]["backlog"].shift();

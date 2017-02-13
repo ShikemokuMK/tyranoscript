@@ -470,7 +470,8 @@ tyrano.plugin.kag.tag.emb = {
         var val = "" + this.kag.embScript(pm.exp);
         //評価された値を代入
         this.kag.ftag.startTag("text", {
-            "val" : val
+            "val" : val,
+            "backlog":"join"
         });
 
     }
@@ -1876,14 +1877,15 @@ tyrano.plugin.kag.tag.loadcss = {
  セーブデータのサムネイルをキャプチャを変更することができます。
  このタグで設定したイメージがセーブ時の画像として適応されます。
  セーブ画像は「bgimage」フォルダから指定します。
- storageに「default」としていすることで、従来の画面自動キャプチャに変更できます。
+ storageに「default」と指定することで、従来の画面自動キャプチャに戻せます。
 
  :sample
  ;サムネイル画像の変更
- [save_img storage="./data/others/css/mystyle.css" ]
+ [save_img storage="my_capture.png" ]
 
  :param
- storage=設定したいセーブ用画像を設定します。bgimageフォルダに配置してください。「default」を指定するとオートキャプチャに戻ります。
+ storage=設定したいセーブ用画像を設定します。bgimageフォルダに配置してください。「default」を指定するとオートキャプチャに戻ります。,
+ folder=bgimageフォルダ以外から取得したい場合は、ここに指定します。例えば、othersやfgimage、imageなどです。
 
  #[end]
  */

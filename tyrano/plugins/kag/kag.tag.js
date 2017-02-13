@@ -514,11 +514,13 @@ tyrano.plugin.kag.tag.text = {
     //vital:["val"], //必須のタグ
 
     cw : true,
+    flag_join:false,
 
     //初期値
     pm : {
 
-        "val" : ""
+        "val" : "",
+        "backlog":"add" /*バックログ用の文字列。改行するかどうか。add join */
 
     },
 
@@ -573,7 +575,7 @@ tyrano.plugin.kag.tag.text = {
 
             }
 
-            this.showMessageVertical(pm.val);
+            this.showMessageVertical(pm.val,pm);
 
         } else {
 
@@ -594,7 +596,7 @@ tyrano.plugin.kag.tag.text = {
 
             }
 
-            this.showMessage(pm.val);
+            this.showMessage(pm.val,pm);
 
         }
 
@@ -602,15 +604,25 @@ tyrano.plugin.kag.tag.text = {
 
     },
 
-    showMessage : function(message_str) {
+    showMessage : function(message_str,pm) {
         var that = this;
 
         //バックログ用の値を格納
         var chara_name = $.isNull($(".chara_name_area").html());
         if(chara_name != ""){
-            this.kag.pushBackLog("<b>"+chara_name+"</b>："+message_str);
+            this.kag.pushBackLog("<b>"+chara_name+"</b>："+message_str,"add");
         }else{
-            this.kag.pushBackLog(message_str);
+            if(pm.backlog=="join"){
+                this.flag_join = true;
+                this.kag.pushBackLog(message_str,"join");
+            }else{
+                if(this.flag_join==true){
+                    this.kag.pushBackLog(message_str,"join");
+                    this.flag_join=false;
+                }else{
+                    this.kag.pushBackLog(message_str,"add");
+                }
+            }
         }
 
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
@@ -678,12 +690,13 @@ tyrano.plugin.kag.tag.text = {
                 ch_speed = parseInt(that.kag.config.chSpeed);
             }
             
-            
+            /*　// バグ is_nowaitが必ずtrueに戻るね。
             if(ch_speed <= 3){
                 that.kag.stat.is_nowait = true;
             }else{
                 that.kag.stat.is_nowait = false;
             }
+            */
             
             var pchar = function(pchar) {
                 
@@ -699,7 +712,7 @@ tyrano.plugin.kag.tag.text = {
                 current_str += c;
                 
                 //スキップ中は１文字ずつ追加ということはしない
-                if(that.kag.stat.is_skip != true && that.kag.stat.is_nowait!=true){
+                if(that.kag.stat.is_skip != true && that.kag.stat.is_nowait!=true && ch_speed >3){
                     that.kag.appendMessage(jtext, current_str);
                 }
                 
@@ -768,14 +781,24 @@ tyrano.plugin.kag.tag.text = {
     },
 
     //縦書き出力
-    showMessageVertical : function(message_str) {
+    showMessageVertical : function(message_str,pm) {
         var that = this;
 
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
         that.kag.ftag.hideNextImg();
         
         //バックログへの追加
-        this.kag.pushBackLog(message_str);
+        if(pm.backlog=="join"){
+            this.flag_join = true;
+            this.kag.pushBackLog(message_str,"join");
+        }else{
+            if(this.flag_join==true){
+                this.kag.pushBackLog(message_str,"join");
+                this.flag_join=false;
+            }else{
+                this.kag.pushBackLog(message_str,"add");
+            }
+        }
         
         (function(jtext) {
 
