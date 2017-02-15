@@ -126,20 +126,34 @@ tyrano.plugin.kag.tag.playbgm = {
 
             //デフォルトで指定される値を設定
             if (target === "bgm") {
-                if (typeof this.kag.config.defaultBgmVolume == undefined) {
+                if (typeof this.kag.config.defaultBgmVolume == "undefined") {
                     volume = 1;
                 } else {
                     volume = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
                 }
+                
+                //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
+                if(typeof this.kag.stat.map_bgm_volume[pm.buf] !="undefined"){
+                    volume = parseFloat(parseInt(this.kag.stat.map_bgm_volume[pm.buf])/100);
+                }
+
+                
             } else {
-                if (typeof this.kag.config.defaultSeVolume == undefined) {
+                
+                if (typeof this.kag.config.defaultSeVolume == "undefined") {
                     volume = 1;
                 } else {
                     volume = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
                 }
+                
+                //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
+                if(typeof this.kag.stat.map_se_volume[pm.buf] != "undefined"){
+                    volume = parseFloat(parseInt(this.kag.stat.map_se_volume[pm.buf])/100);
+                }
+                
             }
         }
-
+        
         var storage_url = "";
 
         var browser = $.getBrowser();
@@ -877,7 +891,8 @@ tyrano.plugin.kag.tag.fadeoutse = {
  [bgmopt volume=50 ]
  :param
  volume=BGMの再生音量を変更できます（0〜100）,
- effect=true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します
+ effect=true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
+ buf=設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
  #[end]
  */
 
@@ -885,26 +900,48 @@ tyrano.plugin.kag.tag.bgmopt = {
 
     pm : {
         volume : "100",
-        effect : "true"
+        effect : "true",
+        buf    : ""
     },
 
     start : function(pm) {
         //再生中のBGMに変更を加える
         var map_bgm = this.kag.tmp.map_bgm;
         
-        this.kag.config.defaultBgmVolume = pm.volume;
-        this.kag.ftag.startTag("eval", {"exp":"sf._system_config_bgm_volume = "+pm.volume});
         
-        var new_volume = parseFloat(parseInt(pm.volume) / 100);
+        //バッファが設定されている場合
+        if(pm.buf !=""){
+            this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
+        }else{
+            this.kag.stat.map_bgm_volume = {};
+            this.kag.config.defaultBgmVolume = pm.volume;
+        }
 
         //すぐに反映 スマホアプリの場合はすぐに変更はできない
         if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
-            for (key in map_bgm) {
-                map_bgm[key].volume = new_volume;
+    
+            var new_volume = parseFloat(parseInt(pm.volume) / 100);
+
+            if(pm.buf ==""){
+                for (key in map_bgm) {
+                    if(map_bgm[key]){
+                        map_bgm[key].volume = new_volume;
+                    }
+                }
+            }else{
+                if(map_bgm[pm.buf]){
+                    map_bgm[pm.buf].volume = new_volume;
+                }    
             }
+
+
         }
 
-        this.kag.ftag.nextOrder();
+        //this.kag.ftag.nextOrder();
+        
+        //この中でnextOrderしてる
+        this.kag.ftag.startTag("eval", {"exp":"sf._system_config_bgm_volume = "+pm.volume});
+        
 
     }
 };
@@ -922,7 +959,8 @@ tyrano.plugin.kag.tag.bgmopt = {
  [seopt volume=50 ]
  :param
  volume=SEの再生音量を変更できます（0〜100）,
- effect=true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します
+ effect=true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
+ buf=設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
  #[end]
  */
 
@@ -930,25 +968,47 @@ tyrano.plugin.kag.tag.seopt = {
 
     pm : {
         volume : "100",
-        effect : "true"
+        effect : "true",
+        buf:""
     },
 
     start : function(pm) {
         //再生中のBGMに変更を加える
         var map_se = this.kag.tmp.map_se;
-        this.kag.config.defaultSeVolume = pm.volume;
-        this.kag.ftag.startTag("eval", {"exp":"sf._system_config_se_volume = "+pm.volume});
         
-        var new_volume = parseFloat(parseInt(pm.volume) / 100);
-
+        //バッファが設定されている場合
+        if(pm.buf !=""){
+            this.kag.stat.map_se_volume[pm.buf] = pm.volume;
+        }else{
+            this.kag.stat.map_se_volume = {};
+            this.kag.config.defaultSeVolume = pm.volume;
+        }
+        
         //すぐに反映
         if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
-            for (key in map_se) {
-                map_se[key].volume = new_volume;
+        
+            var new_volume = parseFloat(parseInt(pm.volume) / 100);
+            
+            if(pm.buf ==""){
+                for (key in map_se) {
+                    
+                    if(map_se[key]){
+                        map_se[key].volume = new_volume;
+                    }
+                }
+            }else{
+                if(map_se[key]){
+                    map_se[pm.buf].volume = new_volume;    
+                }
             }
+            
         }
+        
+        //この中でnextOrderしてる
+        this.kag.ftag.startTag("eval", {"exp":"sf._system_config_se_volume = "+pm.volume});
+        
 
-        this.kag.ftag.nextOrder();
+        //this.kag.ftag.nextOrder();
 
     }
 };

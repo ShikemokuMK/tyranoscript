@@ -34,6 +34,8 @@ tyrano.plugin.kag.key_mouse = {
     is_swipe: false,
     timeoutId:0,
     
+    is_keydown:false, //キーの連続押し込み反応を防ぐ
+    
     //指が動いた状態を管理するための値
     start_point:{x:0,y:0},
     end_point:{x:0,y:0},
@@ -49,8 +51,14 @@ tyrano.plugin.kag.key_mouse = {
         this.map_mouse = this.keyconfig["mouse"];
         this.map_ges = this.keyconfig["gesture"];
 
-        $(document).keyup(function(e) {
-
+        $(document).keydown(function(e) {
+            
+            if(that.is_keydown==true){
+                return false;
+            }
+            
+            that.is_keydown = true;
+            
             var keycode = e.keyCode;
 
             //イベント登録済みなら
@@ -67,6 +75,21 @@ tyrano.plugin.kag.key_mouse = {
             }
 
         });
+        
+        //keyup はコントローラーのときや押しっぱなし対応
+        $(document).keyup(function(e) {
+            
+            that.is_keydown = false;
+            
+            var keycode = e.keyCode;
+
+            //スキップ用ホールド解除
+            if (keycode==91) {
+                that.kag.stat.is_skip = false;
+            }
+
+        });
+
 
         $(document).on("mousedown", function(e) {
             

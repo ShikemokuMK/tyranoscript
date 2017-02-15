@@ -1,5 +1,4 @@
 
-
 tyrano.plugin.kag ={
 
     tyrano:null,
@@ -205,6 +204,10 @@ tyrano.plugin.kag ={
         
         play_bgm:true, //BGMを再生するか否か
         play_se:true,  //SEを再生するか否か
+        
+        map_se_volume:{}, //セーブスロットごとにボリューム値を保持できる
+        map_bgm_volume:{}, // 同上
+        
         
         buff_label_name:"", //ラベル管理のもの、通過時にここに配置されて次にlabelに到達した時に記録される
         
