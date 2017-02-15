@@ -46,7 +46,7 @@ var __tyrano_key_config = {
         "wheel_up" : "backlog",
         "wheel_down" : "next"
     },
-
+    
     //ジェスチャー
     "gesture" : {
         "swipe_up" : {
@@ -55,15 +55,15 @@ var __tyrano_key_config = {
         },
         "swipe_left" : {
             "finger" : 1,
-            "action" : "hidemessage"
+            "action" : "auto"
         },
         "swipe_right" : {
             "finger" : 1,
-            "action" : "skip"
+            "action" : "menu"
         },
         "swipe_down" : {
             "finger" : 1,
-            "action" : "save"
+            "action" : "load"
         },
         
         "hold" : {
