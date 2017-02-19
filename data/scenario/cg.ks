@@ -8,9 +8,10 @@
 [hidemenubutton]
 [cm]
 
-[bg storage="cgbg.png" time=100]
+[bg storage="bg_base.png" time=100]
 [layopt layer=1 visible=true]
-[ptext layer=1 page=fore text="CGモード" x=20 y=20 size=26 color=0xA8401C visible=true]
+
+[image layer=1 left=0 top=0 storage="config/label_cg.png" folder="image" ]
 
 [iscript]
     
@@ -23,7 +24,7 @@
 
 *cgpage
 [cm]
-[button graphic="back_title.gif" target="*backtitle" x=800 y=20 ]
+[button graphic="config/menu_button_close.png" enterimg="config/menu_button_close2.png"  target="*backtitle" x=820 y=20 ]
 
 [iscript]
     tf.tmp_index = 0;
@@ -41,8 +42,8 @@
 @jump target=&tf.target_page
 
 *page_0
-[cg_image_button graphic="toile.jpg" no_graphic="noise.jpg" x=60 y=100 width=160 height=140 folder="bgimage" ]
-[cg_image_button graphic="entrance.jpg" no_graphic="noise.jpg" x=250 y=100 width=160 height=140 folder="bgimage" ]
+[cg_image_button graphic="toile.jpg" no_graphic="noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
+[cg_image_button graphic="entrance.jpg" no_graphic="noimage.png" x=250 y=130 width=160 height=140 folder="bgimage" ]
 
 @jump target="*common"
 

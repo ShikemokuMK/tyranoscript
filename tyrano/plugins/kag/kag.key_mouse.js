@@ -165,13 +165,13 @@ tyrano.plugin.kag.key_mouse = {
                         //console.log(direction+":"+distance+":"+duration+":"+fingerCount+":"+fingerData);
                         //$(this).text("You swiped " + direction );
                         
-                        if(that.map_ges["swipe_"+direction]){
-                            
-                            if(that.map_ges["swipe_"+direction]["finger"] == fingerCount){
-                                if(that[that.map_ges["swipe_"+direction]["action"]]){
-                                   that[that.map_ges["swipe_"+direction]["action"]](); 
-                                }
-                            }
+                        var swipe_str = "swipe_"+direction+"_"+fingerCount;
+                        
+                        
+                        if(that.map_ges[swipe_str]){
+                            if(that[that.map_ges[swipe_str]["action"]]){
+                                that[that.map_ges[swipe_str]["action"]](); 
+                            }                            
                         }
                         
                         event.stopPropagation();  

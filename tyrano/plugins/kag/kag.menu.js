@@ -164,6 +164,25 @@ tyrano.plugin.kag.menu = {
                     }
                 });
             });
+            
+            //スマホの場合はボタンの上下でスクロールできるようにする
+            j_save.find(".button_smart").hide();
+            if($.userenv()!="pc"){
+                j_save.find(".button_smart").show();
+                j_save.find(".button_arrow_up").click(function(){
+                    var now = j_save.find(".area_save_list").scrollTop();
+                    var pos = now - 160;
+                    layer_menu.find(".area_save_list").animate({scrollTop:pos},{queue:false});
+                });
+                
+                j_save.find(".button_arrow_down").click(function(){
+                    var now = j_save.find(".area_save_list").scrollTop();
+                    var pos = now + 160;
+                    j_save.find(".area_save_list").animate({scrollTop:pos},{queue:false});
+                });
+                
+            }
+            
 
             var layer_menu = that.kag.layer.getMenuLayer();
 
@@ -394,6 +413,26 @@ tyrano.plugin.kag.menu = {
                     }
                 });
             });
+            
+            
+            //スマホの場合はボタンの上下でスクロールできるようにする
+            j_save.find(".button_smart").hide();
+            if($.userenv()!="pc"){
+                j_save.find(".button_smart").show();
+                j_save.find(".button_arrow_up").click(function(){
+                    var now = j_save.find(".area_save_list").scrollTop();
+                    var pos = now - 160;
+                    layer_menu.find(".area_save_list").animate({scrollTop:pos},{queue:false});
+                });
+                
+                j_save.find(".button_arrow_down").click(function(){
+                    var now = j_save.find(".area_save_list").scrollTop();
+                    var pos = now + 160;
+                    j_save.find(".area_save_list").animate({scrollTop:pos},{queue:false});
+                });
+                
+            }
+            
 
             var layer_menu = that.kag.layer.getMenuLayer();
 
@@ -726,6 +765,24 @@ tyrano.plugin.kag.menu = {
                     $(".button_menu").show();
                 }
             });
+            
+            //スマホの場合はボタンの上下でスクロールできるようにする
+            layer_menu.find(".button_smart").hide();
+            if($.userenv()!="pc"){
+                layer_menu.find(".button_smart").show();
+                layer_menu.find(".button_arrow_up").click(function(){
+                    var now = layer_menu.find(".log_body").scrollTop();
+                    var pos = now - 60;
+                    layer_menu.find(".log_body").animate({scrollTop:pos},{queue:false});
+                });
+                
+                layer_menu.find(".button_arrow_down").click(function(){
+                    var now = layer_menu.find(".log_body").scrollTop();
+                    var pos = now + 60;
+                    layer_menu.find(".log_body").animate({scrollTop:pos},{queue:false});
+                });
+                
+            }
 
             var log_str = "";
 

@@ -120,7 +120,7 @@ tyrano.plugin.kag.tag.playbgm = {
 
         var volume = 1;
 
-        if (pm.volume != "") {
+        if (pm.volume !== "") {
             volume = parseFloat(parseInt(pm.volume) / 100);
         } else {
 

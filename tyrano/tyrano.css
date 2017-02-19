@@ -79,47 +79,61 @@ abbr,acronym{
 --------------------------*/
 /* セーブデータリスト全体の設定 */
 .save_list {
-  display: table;
-  table-layout: fixed;
-  width: 100%;
-  border-top: 1px solid #ccc;
-  font-size: 14px;
-  font-weight: normal;
+	display: table;
+	table-layout: fixed;
+	width: 70%;
+	height:76px;
+	font-size: 14px;
+	font-weight: normal;
+	border-top: 1px dotted #CCC;
 }
+
 /* セーブデータの設定 */
 .save_list_item {
-  display: table-row;
-  cursor: pointer;
+	display: table-row;
+	cursor: pointer;
 }
+
 /* セーブデータのサムネイル部分の設定 */
 .save_list_item_thumb {
-  display: table-cell;
-  width: 96px;
-  border-bottom: 1px solid #ccc;
+	display: table-cell;
+	width: 96px;
+	height:72px;
+	padding-top:5px;
+	padding-left:10px;
+	border-bottom: 1px dotted #CCC;
+
 }
+
 .save_list_item_thumb img {
-  width: 96px;
-  height: 72px;
+	width: 96px;
+	height: 72px;
+	-webkit-border-radius: 5px; 
+	-moz-border-radius: 5px;
+	border-radius: 5px;
 }
+
 /* セーブデータのテキスト部文の設定 */
 .save_list_item_area {
-  display: table-cell;
-  vertical-align: top;
-  padding: 0 10px;
-  border-bottom: 1px solid #ccc;
+	display: table-cell;
+	vertical-align: top;
+	padding: 0 10px;
+	border-bottom: 1px dotted #CCC;
 }
 /* セーブデータの日付の設定 */
 .save_list_item_date {
-  display: block;
-  padding: 5px 0;
-  line-height: 1;
+	display: block;
+	padding: 5px 0;
+	line-height: 1;
+	color:#48D1CC;
 }
 /* セーブデータのテキストの設定 */
 .save_list_item_text {
-  display: block;
-  line-height: 1.3;
-  height: 48px;
-  overflow: hidden;
+	display: block;
+	line-height: 1.3;
+	height: 48px;
+	overflow: hidden;
+	color:#666;
 }
 
 

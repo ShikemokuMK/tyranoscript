@@ -8,9 +8,10 @@
 [cm]
 
 
-[back storage="cgbg.png" time=100]
+[bg storage="bg_base.png" time=100]
 [layopt layer=1 visible=true]
-[ptext layer=1 page=fore text="回想モード" x=20 y=20 size=26 color=0xA8401C visible=true]
+
+[image layer=1 left=0 top=0 storage="config/label_recollection.png" folder="image" ]
 
 [iscript]
     
@@ -23,7 +24,7 @@
 
 *replaypage
 [cm]
-[button graphic="back_title.gif" target="*backtitle" x=800 y=20 ]
+[button graphic="config/menu_button_close.png" enterimg="config/menu_button_close2.png"  target="*backtitle" x=820 y=20 ]
 
 [iscript]
 	tf.target_page = "page_"+tf.page;
@@ -35,8 +36,8 @@
 @jump target=&tf.target_page
 
 *page_0
-[replay_image_button name="replay1" graphic="cat.jpg" no_graphic="noise.jpg" x=60 y=100 width=160 height=140 folder="bgimage" ]
-[replay_image_button name="replay2" graphic="toile.jpg" no_graphic="noise.jpg" x=260 y=100 width=160 height=140 folder="bgimage" ]
+[replay_image_button name="replay1" graphic="cat.jpg" no_graphic="noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
+[replay_image_button name="replay2" graphic="toile.jpg" no_graphic="noimage.png" x=260 y=130 width=160 height=140 folder="bgimage" ]
 
 
 @jump target ="*common"

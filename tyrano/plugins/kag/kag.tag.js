@@ -761,7 +761,7 @@ tyrano.plugin.kag.tag.text = {
                     //グリフが指定されている場合はこちらを適用
                     if (that.kag.stat.flag_glyph == "false") {
                         $(".img_next").remove();
-                        jtext.find("p").append("<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
+                        jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/nextpage.gif' />");
 
                     } else {
                         $(".glyph_image").show();
@@ -898,15 +898,14 @@ tyrano.plugin.kag.tag.text = {
                     //グリフが指定されている場合はこちらを適用
                     if (that.kag.stat.flag_glyph == "false") {
                         $(".img_next").remove();
-                        jtext.find("p").append("<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
+                        jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/nextpage.gif' />");
 
                     } else {
 
                         $(".glyph_image").show();
 
                     }
-                    //that.kag.appendMessage(jtext,current_str+"<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
-
+                    
                 }
 
             };

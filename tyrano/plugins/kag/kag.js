@@ -1,6 +1,8 @@
 
 tyrano.plugin.kag ={
-
+    
+    version:450,
+    
     tyrano:null,
     kag:null,
     sound_swf:null,
@@ -445,7 +447,7 @@ tyrano.plugin.kag ={
         this.variable.tf["system"]["backlog"] = [];
         
          //コンフィグボタン追加
-         var button_menu_obj = $("<div class='button_menu' style='z-index:100000000'><img src='./tyrano/images/kag/"+$.novel("file_button_menu")+"'  /></div>");
+         var button_menu_obj = $("<div class='button_menu' style='z-index:100000000'><img src='./tyrano/images/system/"+$.novel("file_button_menu")+"'  /></div>");
             
          //コンフィグボタンの位置を指定する
             

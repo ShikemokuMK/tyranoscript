@@ -1,12 +1,25 @@
+; ティラノスクリプト標準テーマプラグイン
+
 ;=========================================
 ; コンフィグ モード　画面作成
 ;=========================================
-@layopt layer=message0 visible=false
-@clearfix
 
-[hidemenubutton]
+;	メッセージレイヤ０を不可視に
+	[layopt layer=message0 visible=false]
+;	fixボタン消し
+	[clearfix]
+	
+;　イメージ消去
 
 [iscript]
+$(".layer_camera").empty();
+[endscript]
+
+;	メニューボタン非表示
+	[hidemenubutton]
+
+[iscript]
+
 	tf.current_bgm_vol = parseInt(TG.config.defaultBgmVolume);
 	tf.current_se_vol = parseInt(TG.config.defaultSeVolume);
 	
@@ -18,209 +31,231 @@
 	if(TG.config.unReadTextSkip != true){
 		tf.text_skip ="OFF";
 	} 
-	
+
 [endscript]
 
-[layopt layer=1 visible=true]
+;	レイヤ1を可視に
+	[layopt layer=1 visible=true]
 
 [cm]
-[bg time=300 storage="cgbg.png"]
-[ptext layer=1 page=fore text="Game Config" x=20 y=20 size=32 color=0xA8401C visible=true]
-[button graphic="back_title.gif" target="*backtitle" x=730 y=20 ]
-@jump target="*config_page"
+
+;	コンフィグ用の背景を読み込んでトランジション
+	[bg storage="bg_config.jpg" time=100]
+
+;	画面右上の「Back」ボタン
+	[button graphic="config/c_btn_back.png" enterimg="config/c_btn_back2.png" target="*backtitle" x=840 y=20]
+
+[jump target="*config_page"]
 
 *config_page
 
-;BGM音量
-[ptext layer=1 page=fore text="BGM 音量：" x=40 y=145 size=26 color=black visible=true]
-[ptext name="text_bgm_vol" layer=1 page=fore text="&tf.current_bgm_vol" x=190 y=150 size=26 color=black visible=true]
-[button fix="true" target="*vol_bgm_up" graphic=config/arrow_up.gif width=35 height=35 x=300 y=150  ]
-[button fix="true" target="*vol_bgm_down" graphic=config/arrow_down.gif width=35 height=35 x=340 y=150  ]
+;かなり横長なスクリプトになってしまったのでマクロにしたほうがスッキリします
+;c_btn.png は 4×4px の完全透明な画像です。width.heightを使って拡大しています
+;一部のスマホブラウザでは音量変更に対応していないのでご留意ください
 
-;SE音量
-[ptext layer=1 page=fore text="SE 音量：" x=40 y=195 size=26 color=black visible=true]
-[ptext name="text_se_vol" layer=1 page=fore text="&tf.current_se_vol" x=190 y=200 size=26 color=black visible=true]
-[button fix="true" target="*vol_se_up" graphic=config/arrow_up.gif width=35 height=35 x=300 y=200  ]
-[button fix="true" target="*vol_se_down" graphic=config/arrow_down.gif width=35 height=35 x=340 y=200  ]
+;------------------------------------------------------------------------------------------------------
+;▼BGM音量
+;------------------------------------------------------------------------------------------------------
+;BGM音量-1０
+[button name="bgmvol,bgmvol_10"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=300 y=170 exp="tf.current_bgm_vol = 10"]
+;BGM音量-20
+[button name="bgmvol,bgmvol_20"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=340 y=170 exp="tf.current_bgm_vol = 20"]
+;BGM音量-30
+[button name="bgmvol,bgmvol_30"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=380 y=170 exp="tf.current_bgm_vol = 30"]
+;BGM音量-40
+[button name="bgmvol,bgmvol_40"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=420 y=170 exp="tf.current_bgm_vol = 40"]
+;BGM音量-50
+[button name="bgmvol,bgmvol_50"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=460 y=170 exp="tf.current_bgm_vol = 50"]
+;BGM音量-60
+[button name="bgmvol,bgmvol_60"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=500 y=170 exp="tf.current_bgm_vol = 60"]
+;BGM音量-70
+[button name="bgmvol,bgmvol_70"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=540 y=170 exp="tf.current_bgm_vol = 70"]
+;BGM音量-80
+[button name="bgmvol,bgmvol_80"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=580 y=170 exp="tf.current_bgm_vol = 80"]
+;BGM音量-90
+[button name="bgmvol,bgmvol_90"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=620 y=170 exp="tf.current_bgm_vol = 90"]
+;BGM音量-100
+[button name="bgmvol,bgmvol_100" fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=660 y=170 exp="tf.current_bgm_vol = 100"]
 
-;メッセージスピード
-[ptext layer=1 page=fore text="文字速度：" x=40 y=270 size=26 color=black visible=true]
-[ptext layer=1 page=fore text="おそい" x=300 y=270 size=16 color=black visible=true]
-[ptext layer=1 page=fore text="はやい" x=710 y=270 size=16 color=black visible=true]
-
-[button name="ch,ch_100" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=100" graphic=config/01.gif width=35 height=35 x=360 y=270  ]
-[button name="ch,ch_80" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=80" graphic=config/02.gif width=35 height=35 x=390 y=270  ]
-[button name="ch,ch_50" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=50" graphic=config/03.gif width=35 height=35 x=420 y=270  ]
-[button name="ch,ch_40" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=40" graphic=config/04.gif width=35 height=35 x=450 y=270  ]
-[button name="ch,ch_30" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=30" graphic=config/05.gif width=35 height=35 x=480 y=270  ]
-[button name="ch,ch_25" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=25" graphic=config/06.gif width=35 height=35 x=510 y=270  ]
-[button name="ch,ch_20" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=20" graphic=config/07.gif width=35 height=35 x=540 y=270  ]
-[button name="ch,ch_11" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=11" graphic=config/08.gif width=35 height=35 x=570 y=270  ]
-[button name="ch,ch_8" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=8" graphic=config/09.gif width=35 height=35 x=600 y=270  ]
-[button name="ch,ch_5" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=5" graphic=config/10.gif width=35 height=35 x=630 y=270  ]
+;BGM音量-ミュート（音量=0）
+[button name="bgmvol,bgmvol_0"    fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=780 y=170 exp="tf.current_bgm_vol = 0"]
 
 
-;オート速度
-[ptext layer=1 page=fore text="オート速度：" x=40 y=330 size=26 color=black visible=true]
-[ptext layer=1 page=fore text="おそい" x=300 y=330 size=16 color=black visible=true]
-[ptext layer=1 page=fore text="はやい" x=710 y=330 size=16 color=black visible=true]
+;------------------------------------------------------------------------------------------------------
+;▼SE音量
+;------------------------------------------------------------------------------------------------------
+[button name="sevol,sevol_10"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=300 y=220 exp="tf.current_se_vol = 10"]
+[button name="sevol,sevol_20"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=340 y=220 exp="tf.current_se_vol = 20"]
+[button name="sevol,sevol_30"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=380 y=220 exp="tf.current_se_vol = 30"]
+[button name="sevol,sevol_40"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=420 y=220 exp="tf.current_se_vol = 40"]
+[button name="sevol,sevol_50"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=460 y=220 exp="tf.current_se_vol = 50"]
+[button name="sevol,sevol_60"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=500 y=220 exp="tf.current_se_vol = 60"]
+[button name="sevol,sevol_70"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=540 y=220 exp="tf.current_se_vol = 70"]
+[button name="sevol,sevol_80"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=580 y=220 exp="tf.current_se_vol = 80"]
+[button name="sevol,sevol_90"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=620 y=220 exp="tf.current_se_vol = 90"]
+[button name="sevol,sevol_100" fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=660 y=220 exp="tf.current_se_vol = 100"]
 
-[button fix="true" name="auto,auto_5000" target="*auto_speed_change" exp="tf.set_auto_speed=5000;tf.text_auto=0" graphic=config/01.gif width=35 height=35 x=360 y=330  ]
-[button fix="true" name="auto,auto_4500" target="*auto_speed_change" exp="tf.set_auto_speed=4500;tf.text_auto=1" graphic=config/02.gif width=35 height=35 x=390 y=330  ]
-[button fix="true" name="auto,auto_4000" target="*auto_speed_change" exp="tf.set_auto_speed=4000;tf.text_auto=2" graphic=config/03.gif width=35 height=35 x=420 y=330  ]
-[button fix="true" name="auto,auto_3500" target="*auto_speed_change" exp="tf.set_auto_speed=3500;tf.text_auto=3" graphic=config/04.gif width=35 height=35 x=450 y=330  ]
-[button fix="true" name="auto,auto_3000" target="*auto_speed_change" exp="tf.set_auto_speed=3000;tf.text_auto=4" graphic=config/05.gif width=35 height=35 x=480 y=330  ]
-[button fix="true" name="auto,auto_2500" target="*auto_speed_change" exp="tf.set_auto_speed=2500;tf.text_auto=5" graphic=config/06.gif width=35 height=35 x=510 y=330  ]
-[button fix="true" name="auto,auto_2000" target="*auto_speed_change" exp="tf.set_auto_speed=2000;tf.text_auto=6" graphic=config/07.gif width=35 height=35 x=540 y=330  ]
-[button fix="true" name="auto,auto_1000" target="*auto_speed_change" exp="tf.set_auto_speed=1000;tf.text_auto=7" graphic=config/08.gif width=35 height=35 x=570 y=330  ]
-[button fix="true" name="auto,auto_800" target="*auto_speed_change" exp="tf.set_auto_speed=800;tf.text_auto=8" graphic=config/09.gif width=35 height=35 x=600 y=330  ]
-[button fix="true" name="auto,auto_500" target="*auto_speed_change" exp="tf.set_auto_speed=500;tf.text_auto=9" graphic=config/10.gif width=35 height=35 x=630 y=330  ]
+;SEミュート
+[button name="sevol,sevol_0"     fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=780 y=220 exp="tf.current_se_vol = 0"]
+
+;------------------------------------------------------------------------------------------------------
+;▼テキスト速度
+;------------------------------------------------------------------------------------------------------
+[button name="ch,ch_100" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=100" graphic="config/c_btn.png" width=35 height=35 x=300 y=290]
+[button name="ch,ch_80" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=80"    graphic="config/c_btn.png" width=35 height=35 x=340 y=290]
+[button name="ch,ch_50" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=50"    graphic="config/c_btn.png" width=35 height=35 x=380 y=290]
+[button name="ch,ch_40" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=40"    graphic="config/c_btn.png" width=35 height=35 x=420 y=290]
+[button name="ch,ch_30" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=30"    graphic="config/c_btn.png" width=35 height=35 x=460 y=290]
+[button name="ch,ch_25" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=25"    graphic="config/c_btn.png" width=35 height=35 x=500 y=290]
+[button name="ch,ch_20" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=20"    graphic="config/c_btn.png" width=35 height=35 x=540 y=290]
+[button name="ch,ch_11" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=11"    graphic="config/c_btn.png" width=35 height=35 x=580 y=290]
+[button name="ch,ch_8" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=8"       graphic="config/c_btn.png" width=35 height=35 x=620 y=290]
+[button name="ch,ch_5" fix="true" target="*ch_speed_change" exp="tf.set_ch_speed=5"       graphic="config/c_btn.png" width=35 height=35 x=660 y=290]
+
+;------------------------------------------------------------------------------------------------------
+;▼オート速度
+;------------------------------------------------------------------------------------------------------
+[button fix="true" name="auto,auto_5000" target="*auto_speed_change" exp="tf.set_auto_speed=5000;tf.text_auto=0" graphic="config/c_btn.png" width=35 height=35 x=300 y=340]
+[button fix="true" name="auto,auto_4500" target="*auto_speed_change" exp="tf.set_auto_speed=4500;tf.text_auto=1" graphic="config/c_btn.png" width=35 height=35 x=340 y=340]
+[button fix="true" name="auto,auto_4000" target="*auto_speed_change" exp="tf.set_auto_speed=4000;tf.text_auto=2" graphic="config/c_btn.png" width=35 height=35 x=380 y=340]
+[button fix="true" name="auto,auto_3500" target="*auto_speed_change" exp="tf.set_auto_speed=3500;tf.text_auto=3" graphic="config/c_btn.png" width=35 height=35 x=420 y=340]
+[button fix="true" name="auto,auto_3000" target="*auto_speed_change" exp="tf.set_auto_speed=3000;tf.text_auto=4" graphic="config/c_btn.png" width=35 height=35 x=460 y=340]
+[button fix="true" name="auto,auto_2500" target="*auto_speed_change" exp="tf.set_auto_speed=2500;tf.text_auto=5" graphic="config/c_btn.png" width=35 height=35 x=500 y=340]
+[button fix="true" name="auto,auto_2000" target="*auto_speed_change" exp="tf.set_auto_speed=2000;tf.text_auto=6" graphic="config/c_btn.png" width=35 height=35 x=540 y=340]
+[button fix="true" name="auto,auto_1000" target="*auto_speed_change" exp="tf.set_auto_speed=1000;tf.text_auto=7" graphic="config/c_btn.png" width=35 height=35 x=580 y=340]
+[button fix="true" name="auto,auto_800"   target="*auto_speed_change" exp="tf.set_auto_speed=800;tf.text_auto=8"  graphic="config/c_btn.png" width=35 height=35 x=620 y=340]
+[button fix="true" name="auto,auto_500"   target="*auto_speed_change" exp="tf.set_auto_speed=500;tf.text_auto=9"  graphic="config/c_btn.png" width=35 height=35 x=660 y=340]
+
+;------------------------------------------------------------------------------------------------------
+;▼未読スキップ
+;------------------------------------------------------------------------------------------------------
+; 未読スキップ-OFF
+[button name="unread_off" fix="true" target="*skip_off" graphic="config/c_btn.png" width=125 height=35  x=300 y=420]
+; 未読スキップ-ON
+[button name="unread_on" fix="true" target="*skip_on" graphic="config/c_btn.png" width=125 height=35 x=435 y=420]
+
+;------------------------------------------------------------------------------------------------------
+;▼コンフィグ起動時の画面更新
+;------------------------------------------------------------------------------------------------------
+; BGM音量・SE音量・テキスト速度・オート速度・未読スキップの順
+; $(セレクタ).attr("src","画像ファイルの場所");
+
+;※画像差し替え版を使用するときは c_set.gif を c_set.png に書き換えてね
 
 [iscript]
-$(".ch_"+tf.current_ch_speed).css("top",260);
-$(".auto_"+tf.current_auto_speed).css("top",320);
+	$(".bgmvol_"+tf.current_bgm_vol).attr("src","data/image/config/c_set.png");
 
+	$(".sevol_"+tf.current_se_vol).attr("src","data/image/config/c_set.png");
+
+	$(".ch_"+tf.current_ch_speed).attr("src","data/image/config/c_set.png");
+
+	$(".auto_"+tf.current_auto_speed).attr("src","data/image/config/c_set.png");
+
+	if(tf.text_skip == 'OFF'){
+		$(".unread_off").attr("src","data/image/config/c_uts_off.png");
+		}else{
+			$(".unread_on").attr("src","data/image/config/c_uts_on.png");
+			}
 [endscript]
-
-
-;未読スキップ
-[ptext layer=1 page=fore text="未読スキップ：" x=40 y=400 size=26 color=black visible=true]
-[ptext name="text_skip" layer=1 page=fore text="&tf.text_skip" x=230 y=405 size=26 color=black visible=true]
-[button fix="true" target="*skip_off" graphic=config/off.gif width=85  x=340 y=405  ]
-[button fix="true" target="*skip_on" graphic=config/on.gif width=85  x=440 y=405  ]
-
-
-@jump target="*common"
-
-*page_2
-
-@jump target="*common"
-
-*common
-
-
-*endpage
 
 [s]
 
+;--------------------------------------------------------------------------------
+; タイトルに戻る
+;--------------------------------------------------------------------------------
 *backtitle
 [cm]
+[layopt layer=message1 visible=false]
 [freeimage layer=1]
-@clearfix
+[clearfix]
+;コンフィグの呼び出しに sleepgame を使っているので、必ず awakegame で戻してやってください
+[awakegame]
 
-@jump storage=title.ks
+;===================================================
 
-*nextpage
-[freeimage layer=1]
-[cm]
-@jump storage="first.ks" target="*start"
+;★ボタンクリック時の処理
 
-
-*backpage
-[emb exp="tf.page--;"]
-@jump target="*cgpage"
-
-*clickcg
-
-[return]
-
-*no_image
-
-;@jump  target=*cgpage
-
-*vol_bgm_down
-
+;===================================================
+;--------------------------------------------------------------------------------
+;▼BGM音量
+;--------------------------------------------------------------------------------
+*vol_bgm_change
 [iscript]
-if(tf.current_bgm_vol != 0){
-	tf.current_bgm_vol -= 10;	
-	$(".text_bgm_vol").html(tf.current_bgm_vol);
-}
-[endscript]
-
-[bgmopt volume="&tf.current_bgm_vol"]
-
-[return]
-
-*vol_bgm_up
-[iscript]
-if(tf.current_bgm_vol != 100){
-	tf.current_bgm_vol += 10;	
-	$(".text_bgm_vol").html(tf.current_bgm_vol);
-}
+	$(".bgmvol").attr("src","data/image/config/c_btn.png");
+	$(".bgmvol_"+tf.current_bgm_vol).attr("src","data/image/config/c_set.png");
 [endscript]
 [bgmopt volume="&tf.current_bgm_vol"]
-
 [return]
 
-*vol_se_down
-
+;--------------------------------------------------------------------------------
+;▼SE音量
+;--------------------------------------------------------------------------------
+*vol_se_change
 [iscript]
-if(tf.current_se_vol != 0){
-	tf.current_se_vol -= 10;	
-	$(".text_se_vol").html(tf.current_se_vol);
-}
-[endscript]
-
-[seopt volume="&tf.current_se_vol"]
-
-[return]
-
-*vol_se_up
-[iscript]
-if(tf.current_se_vol != 100){
-	tf.current_se_vol += 10;	
-	$(".text_se_vol").html(tf.current_se_vol);
-}
+	$(".sevol").attr("src","data/image/config/c_btn.png");
+	$(".sevol_"+tf.current_se_vol).attr("src","data/image/config/c_set.png");
 [endscript]
 [seopt volume="&tf.current_se_vol"]
-
 [return]
 
-
+;---------------------------------------------------------------------------------
+;▼テキスト速度
+;--------------------------------------------------------------------------------
 *ch_speed_change
 [iscript]
-$(".ch").css("top",270);
-$(".ch_"+tf.set_ch_speed).css("top",260);
+	$(".ch").attr("src","data/image/config/c_btn.png");
+	$(".ch_"+tf.set_ch_speed).attr("src","data/image/config/c_set.png");
 [endscript]
 [configdelay speed="&tf.set_ch_speed"]
 
-;テキストスピード表示
-[position layer="message0" left=10 top=520 width=940 height=220 page=fore visible=true]
-@layopt layer=message0 visible=true
-テキスト速度テスト
-[wait time=2000]
-[er]
-@layopt layer=message0 visible=false
+;	テキスト速度サンプル
+	[position layer=message1 left=40 top=490 width=880 height=110 page=fore visible=true opacity=0]
+	[layopt layer=message1 visible=true]
+	[current layer=message1]
+	[font color="0x454D51"]
+	このスピードで表示されます
 
-[return]
+		[iscript]
+		tf.system.backlog.pop(); // 上の「このスピードで表示されます」のテキストを履歴から削除
+		[endscript]
 
+	[wait time=2000]
+	[er]
+	[layopt layer=message1 visible=false]
+	[return]
 
+;--------------------------------------------------------------------------------
+;▼オート速度
+;--------------------------------------------------------------------------------
 *auto_speed_change
-
 [iscript]
-
-$(".auto").css("top",330);
-$(".auto_"+tf.set_auto_speed).css("top",320);
-
+	$(".auto").attr("src","data/image/config/c_btn.png");
+	$(".auto_"+tf.set_auto_speed).attr("src","data/image/config/c_set.png");
 [endscript]
 [autoconfig speed="&tf.set_auto_speed"]
-
 [return]
 
+;--------------------------------------------------------------------------------
+;▼スキップ処理-OFF
+;--------------------------------------------------------------------------------
 *skip_off
 [iscript]
+	$(".unread_off").attr("src","data/image/config/c_uts_off.png");
+	$(".unread_on").attr("src","data/image/config/c_btn.png");
 	tf.text_skip = "OFF";
-	$(".text_skip").html("OFF");
 [endscript]
 [config_record_label skip=false]
 [return]
 
+;--------------------------------------------------------------------------------
+;▼スキップ処理-ON
+;--------------------------------------------------------------------------------
 *skip_on
 [iscript]
+	$(".unread_off").attr("src","data/image/config/c_btn.png");
+	$(".unread_on").attr("src","data/image/config/c_uts_on.png");
 	tf.text_skip = "ON";
-	$(".text_skip").html("ON");
 [endscript]
 [config_record_label skip=true]
 [return]
-
 
