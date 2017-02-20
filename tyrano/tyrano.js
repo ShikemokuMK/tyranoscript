@@ -29,7 +29,6 @@ tyrano.core ={
         loaded_plugin:0
     },
     
-    array_plugins:["kag"], //ロードするプラグイン一覧
     
     init:function(options){
         
@@ -40,12 +39,10 @@ tyrano.core ={
         
         this.config = window.config;
         
-        var array_plugins = this.array_plugins;
         
         //スクリプトをロードして、そのオブジェクトを作成
-        this.loadPlugins(array_plugins,function(array_src){
-            that.loadModule(array_src);
-        });
+        //alert("wwwww");
+        that.loadModule();
         
     },
     
@@ -73,80 +70,33 @@ tyrano.core ={
         
     },
     
-    loadModule:function(array_src){
+    loadModule:function(){
 
         var that = this;
+        var array_src = ["kag"];
 
         for(var i=0;i<array_src.length;i++){
-            this[array_src[i]] = object(tyrano.plugin[array_src[i]]);
+        
+            var _name = array_src[i]; 
+            this[_name] = object(tyrano.plugin[_name]);
             //操作を委譲　
-            this[array_src[i]].tyrano = this;
-            
-            (function(){
-                
-                var _name = array_src[i]; 
-                
-                that.loadPluginModules(_name,that[_name].options.modules,
-                    function(){
-                        that[_name].init();
-                        that.completeLoad(_name);
-                        
-                    });
-            
-            })();
+            this[_name].tyrano = this;
+            this[_name].init();
             
         }
+        
+        this.completeLoad();
           
     },
     
-    //プラグインに付随する関連ファイル読み込み
-    loadPluginModules:function(plugin_name,array_plugin_modules,call_back){
-        
-        var that = this;
-        
-        var count_src = 0;
-        
-        //console.log(array_plugin_modules);
-
-        //読み込むモジュールがない場合、コンプリート
-        if(array_plugin_modules.length === 0){
-            
-            call_back(array_plugin_modules);
-            
-        }
-        
-        for(var i=0; i<array_plugin_modules.length; i++){
-            
-            $.getScript("./tyrano/plugins/"+plugin_name+"/"+plugin_name+"."+array_plugin_modules[i]+".js", function(){
-                
-                count_src++;
-                
-                if(count_src == array_plugin_modules.length){
-                    if(call_back){
-                        call_back(array_plugin_modules);
-                    }
-                }
-            });
-            
-        }
-        
-    },
     
     //
-    completeLoad:function(plugin_name){
+    completeLoad:function(){
         
         //console.log(plugin_name);
         
         //読み込み対象のプラグイン数分実行されたらビルド処理へ
-        
-        this.status.loaded_plugin++;
-        
-        //console.log(this.status.loaded_plugin);
-        
-        if(this.status.loaded_plugin === this.array_plugins.length){
-            
-            this.build();
-        }
+        this.build();
         
         
     },

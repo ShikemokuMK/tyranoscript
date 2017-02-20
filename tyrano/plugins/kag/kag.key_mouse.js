@@ -23,7 +23,7 @@ tyrano.plugin.kag.key_mouse = {
 
     //キーコンフィグ。デフォルトは用意しておく
     keyconfig : {
-        key : {},
+        key : {}
     },
 
     map_key : {},
@@ -42,7 +42,6 @@ tyrano.plugin.kag.key_mouse = {
     
 
     init : function() {
-
         var that = this;
 
         this.keyconfig = __tyrano_key_config;
@@ -238,16 +237,6 @@ tyrano.plugin.kag.key_mouse = {
         
     },
 
-/*
-     if ($('.button_menu').is(':visible')) {
-                    that.kag.key_mouse.showMenu();
-                } else {
-                    that.kag.key_mouse.hideMessage();
-                }
-            
- * */
-
-    //next
     next : function() {
         //指定された動作を発火させる
         if (this.kag.key_mouse.canClick()) {
@@ -417,7 +406,7 @@ tyrano.plugin.kag.key_mouse = {
             return true;
         }
         return false;
-    },
+    }
 };
 
 /*

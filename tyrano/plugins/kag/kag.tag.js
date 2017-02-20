@@ -4422,7 +4422,7 @@ tyrano.plugin.kag.tag.layermode = {
         folder:"",
         opacity:"", //opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全 に透明です。,
         time :"500", //時間,
-        wait : "true", //演出の終わりを待つかどうか
+        wait : "true" //演出の終わりを待つかどうか
         
     },
 
@@ -4515,7 +4515,9 @@ tyrano.plugin.kag.tag.layermode = {
 :title
 レイヤーモード動画
 :exp
-動画の合成を行うことができます。
+ゲーム画面に動画を合成を行うことができます。
+PCゲーム環境での推奨機能です。
+一部ブラウザIE,Edge では動作しませんのでご注意ください
 :sample
 [layermode_movie storage=fg0.png time=1500 wait=true]
 :param

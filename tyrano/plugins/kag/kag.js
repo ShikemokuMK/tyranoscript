@@ -31,10 +31,7 @@ tyrano.plugin.kag ={
         
     },
         
-    //動作オプション
-    options:{
-        modules:["parser","tag","layer","menu","tag_audio","tag_system","tag_ext","key_mouse","event","rider","tag_camera"]
-    },
+   
     
     
     //各種変数
