@@ -26,6 +26,10 @@ tyrano.plugin.kag.layer ={
         var that = this;
         //同じディレクトリにある、KAG関連のデータを読み込み
         
+        //分割用のレイヤ
+        $("#tyrano_base").append('<div id="root_layer_game" class="root_layer_game"></div>');
+        $("#tyrano_base").append('<div id="root_layer_system" class="root_layer_system"></div>');
+
         //隠しレイヤの登録
         //画面クリックのレイヤ
         var layer_obj_click = $("<div class='layer layer_event_click' style='z-index:9999;display:none'></div>");
@@ -58,20 +62,20 @@ tyrano.plugin.kag.layer ={
         
         
         this.layer_event = layer_obj_click ;
-        this.appendLayer(this.layer_event);
+        this.appendLayer(this.layer_event,"root_layer_system");
         
         
         //メニュー画面用のレイヤ
         var layer_menu = $("<div class='layer layer_menu' style='z-index:100000000;display:none'  align='center'></div>");
         layer_menu.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
         this.layer_menu = layer_menu;
-        this.appendLayer(this.layer_menu);
+        this.appendLayer(this.layer_menu,"root_layer_system");
 
         //フリーレイヤ
         var layer_free = $("<div class='layer layer_free' style='z-index:9998;display:none' ></div>");
         layer_free.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
         this.layer_free = layer_free;
-        this.appendLayer(this.layer_free);
+        this.appendLayer(this.layer_free,"root_layer_system");
         
 
     },
@@ -87,6 +91,8 @@ tyrano.plugin.kag.layer ={
     },
     
     addLayer:function(layer_name){
+        
+      var system_layer = "";
       
       var layer_obj_fore = $("<div class='layer "+layer_name+"_fore layer_fore'></div>");
       var layer_obj_back = $("<div class='layer "+layer_name+"_back layer_back' style='display:none'></div>");
@@ -94,6 +100,8 @@ tyrano.plugin.kag.layer ={
       if(layer_name.indexOf("message")==-1){
         layer_obj_fore.addClass("layer_camera");
         layer_obj_back.addClass("layer_camera");
+      }else{
+        system_layer = "root_layer_system";
       }
       
       layer_obj_fore.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
@@ -107,16 +115,21 @@ tyrano.plugin.kag.layer ={
       this.map_layer_back[layer_name].attr("l_visible","true");
       
       
-      this.appendLayer(this.map_layer_fore[layer_name]);
-      this.appendLayer(this.map_layer_back[layer_name]);
+      this.appendLayer(this.map_layer_fore[layer_name],system_layer);
+      this.appendLayer(this.map_layer_back[layer_name],system_layer);
       
     },
     
     //メッセージレイヤ追加用
-    appendLayer:function(layer_obj){
+    appendLayer:function(layer_obj,system){
         
-        $("."+this.kag.define.BASE_DIV_NAME).append(layer_obj);
+        system = system || "root_layer_game";
         
+        if(system!=""){
+            $("."+this.kag.define.BASE_DIV_NAME).find("#"+system).append(layer_obj);
+        }else{
+            $("."+this.kag.define.BASE_DIV_NAME).append(layer_obj);
+        }
     },
     
     //全景レイヤにオブジェクトを追加する
@@ -246,7 +259,8 @@ tyrano.plugin.kag.layer ={
             map_layer_fore:{},
             map_layer_back:{},
             layer_free:{},
-            layer_fix:{}
+            layer_fix:{},
+            layer_blend:{}
             
         };
         
@@ -273,12 +287,21 @@ tyrano.plugin.kag.layer ={
             
         });
         
+        var m = 0;
+        $(".blendlayer").each(function(){
+            layer_info["layer_blend"][m]  = $(this).outerHTML();
+            m++;
+            
+        });
+        
         return layer_info;
         
         
     },
     
     setLayerHtml:function(layer){
+        
+        var that = this;
         
         for(key in layer.map_layer_fore){
                 this["map_layer_fore"][key].remove();
@@ -300,12 +323,39 @@ tyrano.plugin.kag.layer ={
         });
            
 //fixlayer は復元しない 
-
         
         for(key in layer.layer_fix){
-                $("#tyrano_base").append($(layer.layer_fix[key]));
+            $("#tyrano_base").append($(layer.layer_fix[key]));
          }
-
+         
+        //ブレンド演出の復元
+         $(".blendlayer").remove();
+         for(key in layer.layer_blend){
+             
+            var obj = $(layer.layer_blend[key]);
+            if(obj.hasClass("blendvideo")){
+                //ビデオの再現
+                //console.log(obj.attr("data-video-pm"));
+                var video_pm = JSON.parse(obj.attr("data-video-pm"));
+                
+                video_pm.stop = "true";
+                video_pm.time = 10;
+                //ビデオレイヤ追加だお。
+                (function(){
+                    var _video_pm = video_pm;
+                    setTimeout(function(){
+                        that.kag.ftag.startTag("layermode_movie", _video_pm );
+                    },10);
+                })();
+                
+            }else{
+                //画像のブレンド
+                $("#tyrano_base").append(obj);
+            }
+            
+         }
+         
+         
          
          this.layer_free.remove();
          delete this.layer_free ;

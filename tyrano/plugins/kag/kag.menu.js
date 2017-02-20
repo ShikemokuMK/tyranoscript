@@ -315,11 +315,15 @@ tyrano.plugin.kag.menu = {
 
         } else {
 
+            $("#tyrano_base").find(".layer_blend_mode").css("display","none");
+                
             setTimeout(function() {
                 
                 html2canvas($("#tyrano_base").get(0), {
                     onrendered : function(canvas) {
                         
+                        $("#tyrano_base").find(".layer_blend_mode").css("display","");
+                
                         // canvas is the final rendered <canvas> element
                         //console.log(canvas);
                         var img_code = "";

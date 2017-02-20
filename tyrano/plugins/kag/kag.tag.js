@@ -4381,3 +4381,337 @@ tyrano.plugin.kag.tag.bg = {
     }
 };
 
+
+
+/*
+#[layermode]
+:group
+レイヤ関連
+:title
+レイヤーモード
+:exp
+レイヤの合成を行うことができます。
+PCゲーム環境での推奨機能です。
+一部ブラウザIE,Edge では動作しませんのでご注意ください
+:sample
+[layermode storage=fg0.png time=1500 mode=overlay]
+:param
+name=レイヤ合成に名前をつけることができます。この名前はfree_layremovdeで特定の合成のみを消したい際に使用できます,
+graphic=合成する画像ファイルを指定してください。ファイルはimageフォルダに配置しします,
+color=合成に色を指定することができます0xFFFFFF形式で指定してください,
+mode=合成方法を指定できます。デフォルトは「multiply」 次の効果が使えます→ multiply（乗算）screen（スクリーン）overlay（オーバーレイ）darken（暗く）lighten（明るく）color-dodge（覆い焼きカラー）color-burn（焼き込みカラー）hard-light（ハードライト）soft-light（ソフトライト）difference（差の絶対値）exclusion（除外）hue（色相）saturation（彩度）color（カラー）luminosity（輝度）,
+folder=graphicで指定する画像のフォルダを変更できます。例えばbgimageと指定することで、背景画像から取得することができます。,
+opacity=不透明度を 0 ～ 255 の数値で指定します。0 で完全 に透明です。デフォルトは透明度指定なしです,
+time=合成はフェードインで行われます。合成が完了する時間をミリ秒(１秒=1000ミリ秒)で指定します。デフォルトは500ミリ秒です,
+wait=合成の完了を待つか否かを指定できます。trueかfalseを指定してください。デフォルトはtrueです
+
+
+#[end]
+*/
+
+//背景変更
+tyrano.plugin.kag.tag.layermode = {
+
+    vital : [],
+
+    pm : {
+        name:"", //レイヤーモードに名前をつけることができます。
+        graphic : "", //画像をブレンドする場合は指定する。カンマで区切って複数指定にも対応。 image指定
+        color : "", //色をブレンドする場合
+        mode:"multiply", //multiply（乗算）,screen（スクリーン）,overlay（オーバーレイ）,darken（暗く）,lighten（明るく）,color-dodge（覆い焼きカラー）,color-burn（焼き込みカラー）,hard-light（ハードライト）,soft-light（ソフトライト）,difference（差の絶対値）,exclusion（除外）,hue（色相）,saturation（彩度）,color（カラー）,luminosity（輝度）
+        folder:"",
+        opacity:"", //opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全 に透明です。,
+        time :"500", //時間,
+        wait : "true", //演出の終わりを待つかどうか
+        
+    },
+
+    start : function(pm) {
+
+        this.kag.ftag.hideNextImg();
+
+        var that = this;
+        
+        var blend_layer = null;
+        
+        blend_layer = $("<div class='layer_blend_mode blendlayer' style='display:none;position:absolute;width:100%;height:100%;z-index:10'></div>");
+        
+        
+        if(pm.name!=""){
+            blend_layer.addClass("layer_blend_"+pm.name);
+        }
+        
+        if(pm.color!=""){
+            blend_layer.css("background-color",$.convertColor(pm.color));
+        }
+        
+        if(pm.opacity !=""){
+            blend_layer.css("opacity", $.convertOpacity(pm.opacity));    
+        }
+        
+        
+        if (pm.folder != "") {
+            folder = pm.folder;
+        } else {
+            folder = "image";
+        }
+        
+        var storage_url = "";
+        
+        if(pm.graphic!=""){
+            storage_url = "./data/"+folder+"/"+pm.graphic;
+            blend_layer.css("background-image","url("+storage_url+")");
+        }
+        
+        blend_layer.css("mix-blend-mode",pm.mode);
+        
+        
+        $("#tyrano_base").append(blend_layer);
+        
+        
+        //j_new_bg.css("background-image","url("+storage_url+")");
+            
+        
+        //background: #0bd url(beach-footprint.jpg) no-repeat;
+        //background-blend-mode: screen;
+        
+        if(pm.graphic!=""){
+            
+            this.kag.preload(storage_url, function(){
+                
+                blend_layer.fadeIn(parseInt(pm.time),function(){
+                    
+                    if(pm.wait=="true"){
+                        that.kag.ftag.nextOrder();
+                    }
+                    
+                });
+            });
+        
+        }else{
+        
+            blend_layer.fadeIn(parseInt(pm.time),function(){
+                
+                if(pm.wait=="true"){
+                    that.kag.ftag.nextOrder();
+                }
+                
+            });
+        
+        }
+        
+        if(pm.wait=="false"){
+            this.kag.ftag.nextOrder();
+        }
+        
+    }
+};
+
+
+/*
+#[layermode_movie]
+:group
+レイヤ関連
+:title
+レイヤーモード動画
+:exp
+動画の合成を行うことができます。
+:sample
+[layermode_movie storage=fg0.png time=1500 wait=true]
+:param
+name=レイヤ合成に名前をつけることができます。この名前はfree_layremovdeで特定の合成のみを消したい際に使用できます,
+video=合成する動画ファイルを指定してください。ファイルはvideoフォルダに配置しします,
+volume=合成する動画の音ボリュームを指定します。0〜100で指定します。デフォルトは０の消音です,
+loop=動画をループするか否かをtrueかfalseで指定します。デフォルトはtrueです。ループ指定した場合、free_layermodeを行うまで演出が残ります。,
+speed=動画の再生スピードを指定できます。デフォルトは１ つまり2を指定すると２倍速、0.5を指定すると半分の速度で再生されます,
+mode=合成方法を指定できます。デフォルトは「multiply」 次の効果が使えます→ multiply（乗算）screen（スクリーン）overlay（オーバーレイ）darken（暗く）lighten（明るく）color-dodge（覆い焼きカラー）color-burn（焼き込みカラー）hard-light（ハードライト）soft-light（ソフトライト）difference（差の絶対値）exclusion（除外）hue（色相）saturation（彩度）color（カラー）luminosity（輝度）,
+opacity=不透明度を 0 ～ 255 の数値で指定します。0 で完全 に透明です。デフォルトは透明度指定なしです,
+time=合成はフェードインで行われます。合成が完了する時間をミリ秒(１秒=1000ミリ秒)で指定します。デフォルトは500ミリ秒です,
+wait=動作効果の再生完了を待つか否かをtrueかfalseで指定できます。デフォルトはfalseです
+
+#[end]
+*/
+
+//背景変更
+tyrano.plugin.kag.tag.layermode_movie = {
+
+    vital : ["video"],
+
+    pm : {
+        name:"", 
+        mode:"multiply", 
+        opacity:"",
+        time :"500", //時間,
+        wait : "false", //演出の終わりを待つかどうか
+        video:"", //ビデオをレイヤーとして追加する。
+        volume:"",
+        loop:"true",
+        speed:"",
+        stop:"false" //trueでnextorderを無効化。ロード復帰の時用
+    },
+
+    start : function(pm) {
+
+        this.kag.ftag.hideNextImg();
+
+        var that = this;
+        
+        var blend_layer = null;
+        
+        blend_layer = $("<video class='layer_blend_mode blendlayer blendvideo' data-video-name='"+pm.name+"' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:10' ></video>");
+        var video = blend_layer.get(0);
+        var url = "./data/video/" + pm.video;
+        
+        video.src = url;
+
+        if (pm.volume != "") {
+            video.volume = parseFloat(parseInt(pm.volume) / 100);
+        } else {
+            video.volume = 0;
+        }
+        
+        if(pm.speed !=""){
+            video.defaultPlaybackRate = parseFloat(pm.speed);
+        }
+    
+        video.style.backgroundColor = "black";
+        video.style.position = "absolute";
+        video.style.top = "0px";
+        video.style.left = "0px";
+        video.style.width = "100%";
+        video.style.height = "100%";
+        video.autoplay = true;
+        video.autobuffer = true;
+        
+        video.setAttribute("playsinline","1");
+        
+        if (pm.loop == "true") {
+            video.loop = true;
+        } else {
+            video.loop = false;
+        }
+        
+        //ビデオ再生完了時
+        video.addEventListener("ended", function(e) {
+            if(pm.wait=="true"){
+                that.kag.ftag.nextOrder();
+            }
+        });
+        
+        var j_video = $(video);
+        
+        j_video.attr("data-video-pm",JSON.stringify(pm));
+        
+        j_video.hide();
+    
+        video.load();
+        video.play();
+        
+        blend_layer = j_video;
+       
+    
+        if(pm.name!=""){
+            blend_layer.addClass("layer_blend_"+pm.name);
+        }
+        
+        if(pm.opacity !=""){
+            blend_layer.css("opacity", $.convertOpacity(pm.opacity));    
+        }
+        
+        blend_layer.css("mix-blend-mode",pm.mode);
+        
+        
+        $("#tyrano_base").append(blend_layer);
+        
+        blend_layer.fadeIn(parseInt(pm.time),function(){
+                
+                if(pm.wait=="true" && pm.loop=="true"){
+                    if(pm.stop!="true"){
+                        that.kag.ftag.nextOrder();
+                    }
+                }
+                
+            });
+        
+        if(pm.wait=="false"){
+            if(pm.stop!="true"){
+                this.kag.ftag.nextOrder();
+            }
+        }
+        
+    }
+};
+
+
+
+
+/*
+#[free_layermode]
+:group
+レイヤ関連
+:title
+レイヤーモードの開放
+:exp
+レイヤの合成を取り消します
+:sample
+[free_layermode name="test"]
+:param
+name=名前を指定して合成を行っている場合、ここで特定の合成のみを削除することも可能です。指定しない場合はすべての効果が消されます,
+time=合成はフェードアウトで消えていきます。フェードアウトにかかる時間をミリ秒で指定できます。デフォルトは500ミリ秒です,
+wait=フェードアウトの完了を待つか否かをtrueかfalseで指定できます。デフォルトはtrueです。
+
+#[end]
+*/
+
+//背景変更
+tyrano.plugin.kag.tag.free_layermode = {
+
+    vital : [],
+
+    pm : {
+        name:"", //レイヤーモードに名前をつけることができます。
+        time :"500", //時間,
+        wait : "true" //演出の完了を待つかどうか
+       
+    },
+
+    start : function(pm) {
+
+        this.kag.ftag.hideNextImg();
+
+        var that = this;
+        
+        var blend_layer = {};
+        
+        if(pm.name!=""){
+            blend_layer = $(".layer_blend_"+pm.name);
+        }else{
+            blend_layer = $(".blendlayer");
+        }
+        
+        var cnt = blend_layer.size();
+        var n = 0;
+        blend_layer.each(function(){
+        
+            var blend_obj = $(this);
+            blend_obj.fadeOut(parseInt(pm.time),function(){
+                blend_obj.remove();
+                n++;
+                if(pm.wait=="true"){
+                    if(cnt==n){ 
+                        that.kag.ftag.nextOrder();
+                    }
+                }
+            });     
+        
+        });
+        
+        
+        if(pm.wait=="false"){
+            this.kag.ftag.nextOrder();
+        }
+        
+    }
+};
+
+
