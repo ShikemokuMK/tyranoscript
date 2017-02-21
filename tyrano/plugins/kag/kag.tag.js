@@ -4518,8 +4518,13 @@ tyrano.plugin.kag.tag.layermode = {
 ゲーム画面に動画を合成を行うことができます。
 PCゲーム環境での推奨機能です。
 一部ブラウザIE,Edge では動作しませんのでご注意ください
+効果を打ち消す場合は[free_layermode]タグを使用します。
+動画形式はogv webm mp4 などに対応します
+提供するゲームによって対応するフォーマットが異なります。
+PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
+ 
 :sample
-[layermode_movie storage=fg0.png time=1500 wait=true]
+[layermode_movie video=test.webm time=1500 wait=true]
 :param
 name=レイヤ合成に名前をつけることができます。この名前はfree_layremovdeで特定の合成のみを消したい際に使用できます,
 video=合成する動画ファイルを指定してください。ファイルはvideoフォルダに配置しします,
@@ -4693,6 +4698,13 @@ tyrano.plugin.kag.tag.free_layermode = {
         
         var cnt = blend_layer.size();
         var n = 0;
+        
+        //フリーにするレイヤがない場合
+        if(cnt==0){
+            that.kag.ftag.nextOrder();
+            return;
+        }
+        
         blend_layer.each(function(){
         
             var blend_obj = $(this);

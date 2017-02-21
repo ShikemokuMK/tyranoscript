@@ -55,7 +55,6 @@ $array_mini = array(
 //トップディレクトリ
 exec("cp ../index.html ".$dirname."/index.html");
 exec("cp ../readme.txt ".$dirname."/readme.txt");
-exec("cp ../novel_sound.swf ".$dirname."/novel_sound.swf");
 //exec("cp ../memo.txt ".$dirname."/うまく動かない場合.txt");
 //exec("cp ../package.json ".$dirname."/package.json");
 
