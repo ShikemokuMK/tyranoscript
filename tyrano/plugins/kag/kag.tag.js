@@ -741,7 +741,7 @@ tyrano.plugin.kag.tag.text = {
 
                     if (that.kag.stat.is_stop != "true") {
                             
-                        if(that.kag.stat.is_skip == true || that.kag.stat.is_nowait==true){
+                        if(that.kag.stat.is_skip == true || that.kag.stat.is_nowait==true || ch_speed < 3){
                             
                             that.kag.appendMessage(jtext, current_str);
                             setTimeout(function(){

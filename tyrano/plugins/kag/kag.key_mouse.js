@@ -92,6 +92,12 @@ tyrano.plugin.kag.key_mouse = {
 
         $(document).on("mousedown", function(e) {
             
+            //スキップ中にクリックされたら元に戻す
+            if(that.kag.stat.is_skip == true){
+                that.kag.stat.is_skip = false; 
+                return false;
+            }
+            
             var target = null
             
             //中央クリック
@@ -184,6 +190,13 @@ tyrano.plugin.kag.key_mouse = {
             
             
             layer_obj_click.on("touchstart", function() {
+                
+                if(that.kag.stat.is_skip == true){
+                    that.kag.stat.is_skip = false; 
+                    return false;
+                }
+            
+                
                 that.timeoutId = setTimeout(function(){
                     if(that[that.map_ges["hold"]["action"]]){
                         that.is_swipe = true;
