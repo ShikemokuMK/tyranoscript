@@ -594,7 +594,8 @@ tyrano.plugin.kag.tag.skipstart = {
 
     start : function(pm) {
 
-        if (this.kag.stat.is_skip == true) {
+        //文字追加中は、スキップしない。
+        if (this.kag.stat.is_skip == true || this.kag.stat.is_adding_text) {
             return false;
         }
 
@@ -2249,4 +2250,221 @@ tyrano.plugin.kag.tag.showlog = {
 
     }
 };
+
+
+
+
+/*
+#[filter]
+:group
+レイヤ関連
+:title
+フィルター効果演出
+:exp
+レイヤやオブジェクトを指定して、様々なフィルター効果を追加することができます。
+
+
+:sample
+
+;特定のオブジェクトを指定して、フィルター効果。
+[filter layer="0" name="chara_a"]
+
+;レイヤを指定してフィルター効果
+[filter layer="0" ]
+
+
+:param
+layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
+name=削除する要素のnameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。,
+
+grayscale=0(デフォルト)-100 を指定することで、画像の表示をグレースケールに変換することができます,
+sepia=0(デフォルト)-100を指定することで、画像の表示をセピア調に変換することができます,
+saturate=0-100(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更することができます,
+hue=0(デフォルト)-360を指定することで、画像の表示の色相を変更することができます,
+invert=0(デフォルト)-100を指定することで、画像の表示の階調を反転させることができます,
+opacity=0-100(デフォルト)を指定することで、画像の表示の透過度を変更することができます,
+brightness=0-100(デフォルト)を指定することで、画像の表示の明るさを変更することができます。元画像より暗くしたい場合に使えます,
+contrast=0-100(デフォルト)を指定することで、画像の表示のコントラストを変更することができます,
+blur=0(デフォルト)-任意の値[px] を指定することで、画像の表示をぼかすことができます
+
+
+#[end]
+*/
+
+
+//イメージ情報消去背景とか
+tyrano.plugin.kag.tag.filter = {
+
+    vital : ["layer"],
+
+    pm : {
+        layer : "",
+        page : "fore",
+        name:"",
+        
+        grayscale:"",
+        sepia:"",
+        saturate:"",
+        hue:"",
+        invert:"",
+        opacity:"",
+        brightness:"",
+        contrast:"",
+        blur:""
+        
+    },
+
+    start : function(pm) {
+        
+        var filter_str ="";
+        
+        var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+        
+        if(pm.name!=""){
+            j_obj = j_obj.find("."+pm.name);
+        }
+        
+        if(pm.grayscale!=""){
+            filter_str += "grayscale("+pm.grayscale+"%) ";    
+        }
+        
+        if(pm.sepia!=""){
+            filter_str += "sepia("+pm.sepia+"%) ";    
+        }
+        
+        if(pm.saturate!=""){
+            filter_str += "saturate("+pm.saturate+"%) ";    
+        }
+        
+        if(pm.hue!=""){
+            filter_str += "hue-rotate("+pm.hue+"deg) ";    
+        }
+        
+        if(pm.invert!=""){
+            filter_str += "invert("+pm.invert+"%) ";    
+        }
+        
+        if(pm.opacity!=""){
+            filter_str += "opacity("+pm.opacity+"%) ";    
+        }
+        
+        if(pm.brightness!=""){
+            filter_str += "brightness("+pm.brightness+"%) ";    
+        }
+        
+        if(pm.contrast!=""){
+            filter_str += "contrast("+pm.contrast+"%) ";    
+        }
+        
+        if(pm.blur!=""){
+            filter_str += "blur("+pm.blur+"px) ";    
+        }
+        
+        
+        
+        j_obj.css({
+            "-webkit-filter" : filter_str,
+            "-ms-filter" : filter_str,
+            "-moz-filter" : filter_str
+        });
+        
+        j_obj.addClass("tyrano_filter_effect");
+        
+        
+        /*
+        grayscale:"",
+        sepia:"",
+        saturate:"",
+        hue:"",
+        invert:"",
+        opacity:"",
+        brightness:"",
+        contrast:"",
+        blur:""    
+        */
+        
+        
+        this.kag.ftag.nextOrder();
+
+
+        
+    }
+};
+
+
+/*
+#[free_filter]
+:group
+レイヤ関連
+:title
+フィルター効果削除
+:exp
+レイヤやオブジェクトを指定して、filter効果を無効にします。
+指定されない場合はすべてのフィルター効果が無効化されます。
+
+:sample
+
+;特定のオブジェクトを指定して、フィルター効果。
+[filter layer="0" name="chara_a"]
+
+;レイヤを指定してフィルター効果
+[free_filter layer="0" ]
+
+
+:param
+layer=フィルターを打ち消すレイヤを指定します。指定がない場合、すべての効果が消されます,
+name=フィルターを打ち消したい、nameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。
+
+#[end]
+*/
+
+
+//イメージ情報消去背景とか
+tyrano.plugin.kag.tag.free_filter = {
+
+    vital : [],
+
+    pm : {
+        layer : "",
+        page : "fore",
+        name:""
+        
+    },
+
+    start : function(pm) {
+        
+        var filter_str ="";
+        
+        var j_obj ;
+        
+        if(pm.layer==""){
+            j_obj = $(".tyrano_filter_effect");
+        }else{
+            j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+        }
+        
+        if(pm.name!=""){
+            j_obj = j_obj.find("."+pm.name);
+        }
+         
+        
+        j_obj.css({
+            "-webkit-filter" : "",
+            "-ms-filter" : "",
+            "-moz-filter" : ""
+        });
+        
+        
+        j_obj.removeClass("tyrano_filter_effect");
+        
+        
+        this.kag.ftag.nextOrder();
+
+
+        
+    }
+};
+
+
+
 

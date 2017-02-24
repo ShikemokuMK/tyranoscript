@@ -1891,7 +1891,7 @@ tyrano.plugin.kag.tag.freelayer = tyrano.plugin.kag.tag.freeimage ;
 [free layer=0 name="myimage"]
 
 :param
-layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
+layer=操作対象のレイヤを指定します。,
 name=削除する要素のnameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。,
 time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます,
 wait=削除の完了を待つかどうかを指定できます。trueを指定すると完了を待ちます。デフォルトはtrue

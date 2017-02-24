@@ -325,6 +325,11 @@ tyrano.plugin.kag.key_mouse = {
             return false;
         }
         
+        //画面効果中は実行できないようにする
+        if(that.kag.layer.layer_event.css("display") =="none" && that.kag.stat.is_strong_stop != true){
+            return false;
+        }
+        
         that.kag.stat.is_skip = false;
         
         //オートは停止
