@@ -2267,10 +2267,10 @@ tyrano.plugin.kag.tag.showlog = {
 :sample
 
 ;特定のオブジェクトを指定して、フィルター効果。
-[filter layer="0" name="chara_a"]
+[filter layer="0" name="chara_a" grayscale=50 ]
 
 ;レイヤを指定してフィルター効果
-[filter layer="0" ]
+[filter layer="0" grayscale=50 ]
 
 
 :param
@@ -2404,11 +2404,11 @@ tyrano.plugin.kag.tag.filter = {
 
 :sample
 
-;特定のオブジェクトを指定して、フィルター効果。
-[filter layer="0" name="chara_a"]
+;特定のオブジェクトを指定して、フィルターを打ち消す。
+[free_filter layer="0" name="chara_a"]
 
-;レイヤを指定してフィルター効果
-[free_filter layer="0" ]
+;全部のフィルターを打ち消す
+[free_filter  ]
 
 
 :param

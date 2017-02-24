@@ -4093,12 +4093,12 @@ tyrano.plugin.kag.tag.clickable = {
 クリック待ち記号の指定
 :exp
 クリック待ち記号を表示する位置を設定できます
-クリック記号はプロジェクトフォルダのtyrano/images/kag/nextpage.gifを変更することで対応します
+クリック記号はプロジェクトフォルダのtyrano/images/system/nextpage.gifを変更することで対応します
 :sample
 [glyph  fix=true left=200 top=100 ]
 
 :param
-line=クリック待ちの表示画像を指定することができます。tyrano/kag/nextpage.gifと同一のフォルダに配置してください,
+line=クリック待ちの表示画像を指定することができます。tyrano/images/system/nextpage.gifと同一のフォルダに配置してください,
 fix=trueを指定すると、left、及び、topを指定した位置に表示されます。,
 left=fix 属性を true にしたときに記号を表示する位置のうち、左端位置を 指定します,
 top=fix 属性を true にしたときに記号を表示する位置のうち、上端位置を 指定します
@@ -4130,7 +4130,7 @@ tyrano.plugin.kag.tag.glyph = {
             var j_layer = this.kag.layer.getLayer(pm.layer);
 
             var j_next = $("<img class='glyph_image' />");
-            j_next.attr("src", "./tyrano/images/kag/" + pm.line);
+            j_next.attr("src", "./tyrano/images/system/" + pm.line);
             j_next.css("position", "absolute");
             j_next.css("z-index", 99999);
             j_next.css("top", pm.top + "px");
