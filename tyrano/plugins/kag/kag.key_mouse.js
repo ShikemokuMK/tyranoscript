@@ -56,6 +56,8 @@ tyrano.plugin.kag.key_mouse = {
                 return false;
             }
             
+            //メニュー系が表示されている時。
+            
             that.is_keydown = true;
             
             var keycode = e.keyCode;
@@ -296,7 +298,9 @@ tyrano.plugin.kag.key_mouse = {
         this._role("title");
     },
     skip:function(){
-        this._role("skip");
+        if(this.canClick()){
+            this._role("skip");
+        }
     },
     backlog:function(){
         this._role("backlog");
@@ -413,9 +417,12 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     canClick : function() {
-        if ($(".layer_event_click").css("display") != "none") {
+        
+        if ($(".layer_event_click").css("display") != "none" && $(".layer_menu").css("display") == "none") {
             return true;
         }
+        
+        
         return false;
     },
 

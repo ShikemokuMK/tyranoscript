@@ -319,51 +319,64 @@ tyrano.plugin.kag.menu = {
                 
             setTimeout(function() {
                 
-                html2canvas($("#tyrano_base").get(0), {
-                    onrendered : function(canvas) {
-                        
-                        $("#tyrano_base").find(".layer_blend_mode").css("display","");
-                
-                        // canvas is the final rendered <canvas> element
-                        //console.log(canvas);
-                        var img_code = "";
-                        //サムネが既に設定されている場合は、そのサムネを優先する。
-                        if(that.kag.stat.save_img !=""){
-                            var img = new Image();
-                            img.src=_stat.save_img 
-                            var canvas = document.createElement('canvas');
-                            canvas.width  = that.kag.config.scWidth;
-                            canvas.height = that.kag.config.scHeight;
-                            // Draw Image
-                            var ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0);
-                            // To Base64
-                            img_code = canvas.toDataURL("image/jpg");
-                            
-                        }else{
-                            img_code = canvas.toDataURL();
-                        }
-                        
-                        var data = {};
+                var completeImage = function(img_code){
+                    
+                    var data = {};
+    
+                    data.title = title;
+                    data.stat = _stat;
+                    data.current_order_index = _current_order_index;
+                    //１つ前
+                    data.save_date = $.getNowDate() + "　" + $.getNowTime();
+                    data.img_data = img_code;
 
-                        data.title = title;
-                        data.stat = _stat;
-                        data.current_order_index = _current_order_index;
-                        //１つ前
-                        data.save_date = $.getNowDate() + "　" + $.getNowTime();
-                        data.img_data = img_code;
+                    //レイヤ部分のHTMLを取得
+                    var layer_obj = that.kag.layer.getLayeyHtml();
+                    data.layer = layer_obj;
 
-                        //レイヤ部分のHTMLを取得
-                        var layer_obj = that.kag.layer.getLayeyHtml();
-                        data.layer = layer_obj;
+                    that.snap = $.extend(true, {}, $.cloneObject(data));
 
-                        that.snap = $.extend(true, {}, $.cloneObject(data));
-
-                        if (call_back) {
-                            call_back();
-                        }
+                    if (call_back) {
+                        call_back();
                     }
-                });
+                        
+                };
+                
+                if(that.kag.stat.save_img !=""){
+                    var img = new Image();
+                    img.src=_stat.save_img 
+                    img.onload = function(){
+                        
+                        var canvas = document.createElement('canvas');
+                        canvas.width  = that.kag.config.scWidth;
+                        canvas.height = that.kag.config.scHeight;
+                        // Draw Image
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        // To Base64
+                        var img_code = canvas.toDataURL();
+                        
+                        completeImage(img_code);
+                        
+                        
+                    };
+                
+                }else{
+                    
+                    html2canvas($("#tyrano_base").get(0), {
+                        onrendered : function(canvas) {
+                        
+                            $("#tyrano_base").find(".layer_blend_mode").css("display","");
+                            
+                            // canvas is the final rendered <canvas> element
+                            //console.log(canvas);
+                            var img_code = canvas.toDataURL();
+                            
+                            completeImage(img_code);
+                        
+                        }   
+                    });
+                }
 
             }, 20);
 
