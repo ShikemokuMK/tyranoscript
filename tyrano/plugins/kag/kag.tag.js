@@ -3603,6 +3603,7 @@ tyrano.plugin.kag.tag.button = {
                             that.kag.menu.loadQuickSave();
                             break;
                         case "auto":
+                            
                             if(that.kag.stat.is_auto==true){
                                 that.kag.ftag.startTag("autostop", {});
                             }else{

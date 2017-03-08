@@ -598,6 +598,8 @@ tyrano.plugin.kag.tag.skipstart = {
         if (this.kag.stat.is_skip == true || this.kag.stat.is_adding_text) {
             return false;
         }
+        
+        this.kag.readyAudio();
 
         this.kag.stat.is_skip = true;
         this.kag.ftag.nextOrder();
@@ -655,6 +657,8 @@ tyrano.plugin.kag.tag.autostart = {
         if (this.kag.stat.is_auto == true) {
             return false;
         }
+        
+        this.kag.readyAudio();             
 
         //[p][l] の処理に、オート判定が入ってます
         this.kag.stat.is_auto = true;

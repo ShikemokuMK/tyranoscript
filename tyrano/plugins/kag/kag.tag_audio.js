@@ -186,7 +186,11 @@ tyrano.plugin.kag.tag.playbgm = {
         }else{
             if(this.kag.tmp.map_se[pm.buf] != null){ 
                 audio_obj = this.kag.tmp.map_se[pm.buf];
+                
+                //ここで、ソースが同じ場合、ストレージを変更しないようにしておけるのでは。
+                
                 audio_obj.src = storage_url;
+                
             }else{
                 audio_obj = new Audio(storage_url);
             }
@@ -575,10 +579,10 @@ tyrano.plugin.kag.tag.stopbgm = {
                             _audio_obj.pause();
     
                             if (pm.target === "bgm") {
-                                delete that.kag.tmp.map_bgm[_key];
+                                //delete that.kag.tmp.map_bgm[_key];
     
                             } else {
-                                delete that.kag.tmp.map_se[_key];
+                                //delete that.kag.tmp.map_se[_key];
     
                             }
     

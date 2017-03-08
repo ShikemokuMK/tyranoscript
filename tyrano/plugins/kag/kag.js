@@ -660,6 +660,38 @@ tyrano.plugin.kag ={
       this.kag.tmp.num_anim++;  
     },
     
+    //スマホブラウザ向け、音楽再生設定
+    readyAudio:function(){
+        
+        if($.userenv() != "pc"){
+            var pm = {
+                loop : "false",
+                storage : "",
+                stop : "true"
+            };
+            
+            //デフォルトは実行
+            this.kag.ftag.startTag("playse", pm);
+            this.kag.ftag.startTag("playbgm", pm);
+            
+            var bgm_slot = parseInt(this.kag.config.defaultBgmSlotNum);
+            var se_slot = parseInt(this.kag.config.defaultSoundSlotNum);
+            
+            for(var i=1;i< bgm_slot;i++){
+                pm.buf = i;
+                this.kag.ftag.startTag("playbgm", pm);
+            }
+            
+            for(var i=1;i< se_slot;i++){
+                pm.buf = i;
+                this.kag.ftag.startTag("playse", pm);
+            }
+            
+            
+        }
+    
+    },
+    
     //ゲームのカーソルを指定する
     setCursor:function(cursor){
         
