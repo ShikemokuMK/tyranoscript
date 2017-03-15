@@ -350,3 +350,211 @@ tyrano.plugin.kag.tag.wait_camera = {
         }
     }
 };
+
+/*
+ #[mask]
+ :group
+ レイヤ関連
+ :title
+ スクリーンマスク表示
+ :exp
+ ゲーム画面全体を豊富な効果とともに暗転させることができます。
+ 暗転中にゲーム画面を再構築して[mask_off]タグでゲームを再開する使い方ができます。
+ :sample
+;暗転開始
+[mask effect="fadeInDownBig" time=2000]
+
+;裏で画面操作
+[bg storage="umi.jpg" time=500]
+
+;暗転解除
+[mask_off]
+
+ :param
+ time=暗転が完了するまでの時間をミリ秒で指定できます ,
+ effect=暗転の効果を指定できます。デフォルトは「fadeIn」指定できるのは次のとおりです
+fadeIn/
+fadeInDownBig/
+fadeInLeftBig/
+fadeInRightBig/
+fadeInUpBig/
+flipInX/
+flipInY/
+lightSpeedIn/
+rotateIn/
+rotateInDownLeft/
+rotateInDownRight/
+rotateInUpLeft/
+rotateInUpRight/
+zoomIn/
+zoomInDown/
+zoomInLeft/
+zoomInRight/
+zoomInUp/
+slideInDown/
+slideInLeft/
+slideInRight/
+slideInUp/
+bounceIn /
+bounceInDown/ 
+bounceInLeft/
+bounceInRight/
+bounceInUp,
+color=文字の色を指定して下さい。デフォルトは黒です。0xFFFFFF形式で指定します,
+graphic=暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください,
+folder=graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです
+
+ #[end]
+ */
+
+
+tyrano.plugin.kag.tag.mask = {
+    
+    vital : [],
+
+    pm : {
+
+        time : 1000,
+        effect:"fadeIn",
+        color:"0x000000",
+        graphic:"",
+        folder:""
+        
+    },
+
+    start : function(pm) {
+        
+        var that = this;
+        that.kag.layer.hideEventLayer();
+            
+        var j_div = $("<div class='layer layer_mask' data-effect='"+pm.effect+"' style='z-index:100000000;position:absolute;'>");
+        j_div.css("animation-duration",parseInt(pm.time)+"ms");
+        
+        var sc_width = parseInt(that.kag.config.scWidth);
+        var sc_height = parseInt(that.kag.config.scHeight);
+        
+        j_div.css({width:sc_width,height:sc_height});
+                
+        if(pm.color=="none"){
+            j_div.css("background-color","");
+        }else{
+            j_div.css("background-color",$.convertColor(pm.color));
+        }
+        
+        if(pm.graphic !=""){
+            var foler="";
+            if (pm.folder != "") {
+                folder = pm.folder;
+            } else {
+                folder = "image";
+            }
+            
+            var storage_url = "";
+            
+            if(pm.graphic!=""){
+                storage_url = "./data/"+folder+"/"+pm.graphic;
+                j_div.css("background-image","url("+storage_url+")");
+            }
+        }
+        
+        $(".tyrano_base").append(j_div);
+        
+        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+        j_div.addClass('animated ' + pm.effect).one(animationEnd, function() {
+            //$(this).removeClass('animated ' + pm.effect);
+            that.kag.ftag.nextOrder();
+        });
+        
+    }
+};
+
+/*
+ #[mask_off]
+ :group
+ レイヤ関連
+ :title
+ スクリーンマスク消去
+ :exp
+ スクリーンマスクを消去してゲームを再開します。
+ :sample
+;暗転開始
+[mask effect="fadeInDownBig" time=2000]
+
+;裏で画面操作
+[bg storage="umi.jpg" time=500]
+
+;暗転解除
+[mask_off]
+ 
+ :param
+ time=暗転が完了するまでの時間をミリ秒で指定できます ,
+ effect=暗転の効果を指定できます。デフォルトは「fadeOut」指定できるのは次のとおりです
+fadeOut/
+fadeOutDownBig/
+fadeOutLeftBig/
+fadeOutRightBig/
+fadeOutUpBig/
+flipOutX/
+flipOutY/
+lightSpeedOut/
+rotateOut/
+rotateOutDownLeft/
+rotateOutDownRight/
+rotateOutUpLeft/
+rotateOutUpRight/
+zoomOut/
+zoomOutDown/
+zoomOutLeft/
+zoomOutRight/
+zoomOutUp/
+slideOutDown/
+slideOutLeft/
+slideOutRight/
+slideOutUp/
+bounceOut /
+bounceOutDown/ 
+bounceOutLeft/
+bounceOutRight/
+bounceOutUp
+ #[end]
+ */
+
+
+tyrano.plugin.kag.tag.mask_off = {
+    
+    vital : [],
+
+    pm : {
+
+        time : 1000,
+        effect:"fadeOut"
+
+    },
+
+    start : function(pm) {
+        var that = this;
+        var j_div = $(".layer_mask");
+        
+        if (j_div.get(0)) {
+            
+            var _effect = j_div.attr("data-effect");
+            j_div.removeClass('animated '+_effect);
+            j_div.css("animation-duration",parseInt(pm.time)+"ms");
+            
+            var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+            j_div.addClass('animated ' + pm.effect).one(animationEnd, function() {
+                j_div.remove();
+                that.kag.layer.showEventLayer();
+                that.kag.ftag.nextOrder();
+            });
+                
+        }else{
+            that.kag.layer.showEventLayer();
+            that.kag.ftag.nextOrder();
+        }
+        
+    }
+    
+    
+};
+
