@@ -399,7 +399,8 @@ bounceIn /
 bounceInDown/ 
 bounceInLeft/
 bounceInRight/
-bounceInUp,
+bounceInUp/
+rollIn,
 color=文字の色を指定して下さい。デフォルトは黒です。0xFFFFFF形式で指定します,
 graphic=暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください,
 folder=graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです

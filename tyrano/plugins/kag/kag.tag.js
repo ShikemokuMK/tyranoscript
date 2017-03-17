@@ -4191,9 +4191,39 @@ message0 または message1 を指定するとメッセージレイヤにな り
 単に message とのみ指定した場合は、 current タグで指定した現在の操作対象のメッセージレイヤが 対象になります <br>
 <br>
 通常は背景の変更などに使用されます。,
-method=トランジションのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
 children=【廃止】falseの場合、layerで指定した場所だけtrans します。デフォルトはfalseです,
-time=トランジションを行っている時間をミリ秒で指定します。
+time=トランジションを行っている時間をミリ秒で指定します。,
+method=切り替えのタイプを指定します。デフォルトは"fadeIn"です。指定できる演出は次の通りです。
+（V450以降）
+fadeIn/
+fadeInDown/
+fadeInLeft/
+fadeInRight/
+fadeInUp/
+lightSpeedIn/
+rotateIn/
+rotateInDownLeft/
+rotateInDownRight/
+rotateInUpLeft/
+rotateInUpRight/
+zoomIn/
+zoomInDown/
+zoomInLeft/
+zoomInRight/
+zoomInUp/
+slideInDown/
+slideInLeft/
+slideInRight/
+slideInUp/
+bounceIn /
+bounceInDown/ 
+bounceInLeft/
+bounceInRight/
+bounceInUp/
+rollIn
+(V450以前)
+指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」
+
 #[end]
 */
 
@@ -4204,7 +4234,7 @@ tyrano.plugin.kag.tag.trans = {
 
     pm : {
         layer : "base",
-        method : "crossfade",
+        method : "fadeIn",
         children : false,
         time : 1500
     },
@@ -4253,11 +4283,13 @@ tyrano.plugin.kag.tag.trans = {
                         that.kag.layer.forelay(_key);
 
                     } else {
-
-                        $.trans(pm.method, layer_fore, parseInt(pm.time), "hide", function() {
+                        
+                        /*
+                        $.trans_old(pm.method, layer_fore, parseInt(pm.time), "hide", function() {
                         });
                         layer_back.css("display", "none");
-
+                        */
+                        
                         $.trans(pm.method, layer_back, parseInt(pm.time), "show", function() {
                             comp_num++;
                             that.kag.layer.forelay(_key);
@@ -4292,10 +4324,39 @@ tyrano.plugin.kag.tag.trans = {
 [bg storage=fg0.png time=1500 wait=true]
 :param
 storage=切り替えるための画像ファイルを指定します。ファイルはbgimage以下に配置してください,
-method=切り替えのタイプを指定します。デフォルトは"crossfade"です。指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」,
 time=時間をミリ秒で指定します。,
 wait=背景の切り替えが完了するまで処理を待ちます,
-cross=true or false を指定します。デフォルトはtrue。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い背景を残しながら上に重なる形で新しい背景を表示します。CG差分などで使用する場合はfalseが良いでしょう。
+cross=true or false を指定します。デフォルトはfalse。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い背景を残しながら上に重なる形で新しい背景を表示します。CG差分などで使用する場合はfalseが良いでしょう。,
+method=切り替えのタイプを指定します。デフォルトは"fadeIn"です。指定できる演出は次の通りです。
+（V450以降）
+fadeIn/
+fadeInDown/
+fadeInLeft/
+fadeInRight/
+fadeInUp/
+lightSpeedIn/
+rotateIn/
+rotateInDownLeft/
+rotateInDownRight/
+rotateInUpLeft/
+rotateInUpRight/
+zoomIn/
+zoomInDown/
+zoomInLeft/
+zoomInRight/
+zoomInUp/
+slideInDown/
+slideInLeft/
+slideInRight/
+slideInUp/
+bounceIn /
+bounceInDown/ 
+bounceInLeft/
+bounceInRight/
+bounceInUp/
+rollIn
+(V450以前)
+指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」
 #[end]
 */
 
@@ -4309,7 +4370,7 @@ tyrano.plugin.kag.tag.bg = {
         method : "crossfade",
         wait : "true",
         time : 3000,
-        cross:"true"
+        cross:"false"
     },
 
     start : function(pm) {

@@ -48,6 +48,7 @@ tyrano.plugin.kag ={
         
         checking_macro:false, //マクロの登録時はスタックにつまれない
         
+        ready_audio:false, //スマホブラウザ向け。オーディオ初期化を終えたか否か
         num_anim:0, //実行中のアニメーションスタック
         map_bgm:{}, //再生中の音楽オーディオ
         map_se:{}, //再生中の効果音

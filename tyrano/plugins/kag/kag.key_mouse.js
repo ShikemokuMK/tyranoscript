@@ -49,7 +49,7 @@ tyrano.plugin.kag.key_mouse = {
         this.map_key = this.keyconfig["key"];
         this.map_mouse = this.keyconfig["mouse"];
         this.map_ges = this.keyconfig["gesture"];
-
+        
         $(document).keydown(function(e) {
             
             if(that.is_keydown==true){
@@ -192,7 +192,7 @@ tyrano.plugin.kag.key_mouse = {
             
             
             layer_obj_click.on("touchstart", function() {
-                
+                                
                 if(that.kag.stat.is_skip == true){
                     that.kag.stat.is_skip = false; 
                     return false;
@@ -219,6 +219,16 @@ tyrano.plugin.kag.key_mouse = {
             // make "isReturn" variable
             // and do all if statements
             // then do "if (isReturn) return;"
+            
+            
+            if($.userenv() != "pc"){
+                if(that.kag.tmp.ready_audio==false){
+                    that.kag.readyAudio();
+                    that.kag.tmp.ready_audio = true;
+                }
+            }             
+
+
             if(that.is_swipe){
                 that.is_swipe = false;
                 return false;

@@ -170,7 +170,11 @@ tyrano.plugin.kag.tag.playbgm = {
         if ($.isHTTP(pm.storage)) {
             storage_url = storage;
         } else {
-            storage_url = "./data/" + target + "/" + storage;
+            if(storage!=""){
+                storage_url = "./data/" + target + "/" + storage;
+            }else{
+                storage_url ="";
+            }
         }
 
         //音楽再生

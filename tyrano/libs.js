@@ -439,7 +439,8 @@
         }
     };
 
-    $.trans = function(method, j_obj, time, mode, callback) {
+//古いトランス。
+    $.trans_old = function(method, j_obj, time, mode, callback) {
 
         if (method == "crossfade" || mode == "show") {
 
@@ -493,6 +494,59 @@
             }
 
         }
+
+    };
+    
+    //コンバート v450rc5以前
+    var _map_conv_method = {
+        "corssfade":"fadeIn",
+        "explode":"zoomIn",
+        "slide":"slideInLeft",
+        "blind":"bounceIn",
+        "bounce":"bounceIn",
+        "clip":"flipInX",
+        "drop":"slideInLeft",
+        "fold":"fadeIn",
+        "puff":"fadeIn",
+        "scale":"zoomIn",
+        "shake":"fadeIn",
+        "size":"zoomIn"
+    }
+
+    $.trans = function(method, j_obj, time, mode, callback) {
+        
+        if(method=="crossfade") {
+            method = "fadeIn";
+        }else if(_map_conv_method[method]){
+            method = _map_conv_method[method];
+        }
+        
+        j_obj.css("animation-duration",parseInt(time)+"ms");
+        
+        if (mode == "hide") {
+            j_obj.show();
+            method = $.replaceAll(method,"In","Out");
+            var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+            j_obj.addClass('animated ' + method).one(animationEnd, function() {
+                $(this).remove();
+                if (callback) {
+                    //callback();
+                }
+            });
+
+        } else if (mode == "show") {
+            j_obj.show();
+            var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
+            j_obj.addClass('animated ' + method).one(animationEnd, function() {
+                
+                $(this).removeClass('animated ' + method);
+                if (callback) {
+                    callback();
+                }
+            });
+        }
+
+        
 
     };
 
