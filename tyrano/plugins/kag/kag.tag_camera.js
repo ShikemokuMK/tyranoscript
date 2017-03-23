@@ -376,28 +376,28 @@ tyrano.plugin.kag.tag.wait_camera = {
 fadeIn/
 fadeInDownBig/
 fadeInLeftBig/
-fadeInRightBig/
+fadeInRightBig/<br >
 fadeInUpBig/
 flipInX/
 flipInY/
-lightSpeedIn/
+lightSpeedIn/<br >
 rotateIn/
 rotateInDownLeft/
 rotateInDownRight/
-rotateInUpLeft/
+rotateInUpLeft/<br >
 rotateInUpRight/
 zoomIn/
 zoomInDown/
-zoomInLeft/
+zoomInLeft/<br >
 zoomInRight/
 zoomInUp/
 slideInDown/
-slideInLeft/
+slideInLeft/<br >
 slideInRight/
 slideInUp/
 bounceIn /
 bounceInDown/ 
-bounceInLeft/
+bounceInLeft/<br >
 bounceInRight/
 bounceInUp/
 rollIn,
@@ -495,26 +495,26 @@ fadeOutDownBig/
 fadeOutLeftBig/
 fadeOutRightBig/
 fadeOutUpBig/
-flipOutX/
+flipOutX/<br >
 flipOutY/
 lightSpeedOut/
 rotateOut/
 rotateOutDownLeft/
-rotateOutDownRight/
+rotateOutDownRight/<br >
 rotateOutUpLeft/
 rotateOutUpRight/
 zoomOut/
-zoomOutDown/
+zoomOutDown/<br >
 zoomOutLeft/
 zoomOutRight/
 zoomOutUp/
-slideOutDown/
+slideOutDown/<br >
 slideOutLeft/
 slideOutRight/
-slideOutUp/
+slideOutUp/<br >
 bounceOut /
 bounceOutDown/ 
-bounceOutLeft/
+bounceOutLeft/<br >
 bounceOutRight/
 bounceOutUp
  #[end]

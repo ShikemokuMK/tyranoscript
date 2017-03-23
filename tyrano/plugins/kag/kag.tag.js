@@ -4199,24 +4199,24 @@ fadeIn/
 fadeInDown/
 fadeInLeft/
 fadeInRight/
-fadeInUp/
+fadeInUp/<br >
 lightSpeedIn/
 rotateIn/
 rotateInDownLeft/
 rotateInDownRight/
-rotateInUpLeft/
+rotateInUpLeft/<br >
 rotateInUpRight/
 zoomIn/
 zoomInDown/
-zoomInLeft/
+zoomInLeft/<br >
 zoomInRight/
 zoomInUp/
 slideInDown/
-slideInLeft/
+slideInLeft/<br >
 slideInRight/
 slideInUp/
 bounceIn /
-bounceInDown/ 
+bounceInDown/ <br >
 bounceInLeft/
 bounceInRight/
 bounceInUp/
@@ -4333,25 +4333,25 @@ fadeIn/
 fadeInDown/
 fadeInLeft/
 fadeInRight/
-fadeInUp/
+fadeInUp/<br >
 lightSpeedIn/
 rotateIn/
 rotateInDownLeft/
 rotateInDownRight/
-rotateInUpLeft/
+rotateInUpLeft/<br >
 rotateInUpRight/
 zoomIn/
 zoomInDown/
-zoomInLeft/
+zoomInLeft/<br >
 zoomInRight/
 zoomInUp/
 slideInDown/
 slideInLeft/
-slideInRight/
+slideInRight/<br >
 slideInUp/
 bounceIn /
 bounceInDown/ 
-bounceInLeft/
+bounceInLeft/<br >
 bounceInRight/
 bounceInUp/
 rollIn
