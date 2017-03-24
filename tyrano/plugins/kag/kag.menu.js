@@ -29,6 +29,8 @@ tyrano.plugin.kag.menu = {
         var layer_menu = this.kag.layer.getMenuLayer();
 
         layer_menu.empty();
+        
+        var button_clicked = false;
 
         this.kag.html("menu", {
             "novel" : $.novel
@@ -90,6 +92,12 @@ tyrano.plugin.kag.menu = {
             });
 
             layer_menu.find(".menu_save").click(function(e) {
+                
+                //連続クリック対策
+                if(button_clicked==true){
+                    return;
+                }
+                button_clicked = true;
 
                 that.displaySave();
                 e.stopPropagation();
@@ -97,6 +105,11 @@ tyrano.plugin.kag.menu = {
             });
 
             layer_menu.find(".menu_load").click(function(e) {
+                //連続クリック対策
+                if(button_clicked==true){
+                    return;
+                }
+                button_clicked = true;
 
                 that.displayLoad();
                 e.stopPropagation();

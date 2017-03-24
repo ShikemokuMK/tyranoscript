@@ -208,6 +208,7 @@ tyrano.plugin.kag ={
         map_se_volume:{}, //セーブスロットごとにボリューム値を保持できる
         map_bgm_volume:{}, // 同上
         
+        log_write:true, //バックログを記録するか否か
         
         buff_label_name:"", //ラベル管理のもの、通過時にここに配置されて次にlabelに到達した時に記録される
         
@@ -623,6 +624,11 @@ tyrano.plugin.kag ={
     
     //BackLogを格納します
     pushBackLog:function(str,type){
+    	
+    	//バックログを記録するか否か
+    	if(this.stat.log_write ==false){
+            return ;
+        }
     	
     	type = type || "add";
     	

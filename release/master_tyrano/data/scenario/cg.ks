@@ -8,7 +8,7 @@
 [hidemenubutton]
 [cm]
 
-[bg storage="bg_base.png" time=100]
+[bg storage="../../tyrano/images/system/bg_base.png" time=100]
 [layopt layer=1 visible=true]
 
 [image layer=1 left=0 top=0 storage="config/label_cg.png" folder="image" ]
@@ -42,8 +42,8 @@
 @jump target=&tf.target_page
 
 *page_0
-[cg_image_button graphic="toile.jpg" no_graphic="noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
-[cg_image_button graphic="entrance.jpg" no_graphic="noimage.png" x=250 y=130 width=160 height=140 folder="bgimage" ]
+[cg_image_button graphic="toile.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
+[cg_image_button graphic="entrance.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=250 y=130 width=160 height=140 folder="bgimage" ]
 
 @jump target="*common"
 

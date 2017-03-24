@@ -1930,3 +1930,133 @@ tyrano.plugin.kag.tag.save_img = {
     }
 };
 
+
+/*
+ #[nolog]
+ :group
+ システム操作
+ :title
+ バックログ記録停止
+
+ :exp
+ このタグに到達すると、バックログへ一切追加されなくなります。
+ [endnolog]タグに到達すると、バックログへの記録が再開されます。
+
+ :sample
+ ここはログに記録される[p]
+ [nolog]
+ ログに記録されない[p]
+ ここもログに記録されない[p]
+ [endnolog]
+ ここから、ログ記録再開[p]
+ 
+ :param
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.nolog = {
+
+    vital : [],
+
+    pm : {
+        
+    },
+
+    start : function(pm) {
+
+        this.kag.stat.log_write = false;
+        //記録しないフラグ追加
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+/*
+ #[endnolog]
+ :group
+ システム操作
+ :title
+ バックログ記録を再開する
+
+ :exp
+ [nolog]タグでログ記録を停止している場合
+ この[endnolog]タグで記録を再開する必要があります。
+
+ :sample
+ ここはログに記録される[p]
+ [nolog]
+ ログに記録されない[p]
+ ここもログに記録されない[p]
+ [endnolog]
+ ここから、ログ記録再開[p]
+ 
+ :param
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.endnolog = {
+
+    vital : [],
+
+    pm : {
+        
+    },
+
+    start : function(pm) {
+
+        this.kag.stat.log_write = true;
+        //記録しないフラグ追加
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+
+/*
+ #[pushlog]
+ :group
+ システム操作
+ :title
+ バックログに文字列記録
+
+ :exp
+ バックログに任意の文字列を追加できます。
+ 例えば [mtext]などは通常バックログに記録されませんが
+ このタグを内包したマクロなどにしておくと、バックログに追加した
+ 演出テキストなどが可能です。 
+
+ :sample
+ [pushlog text="ここに好きなログ文字列を記述できます"]
+ 
+ :param
+ text=バックログに追加する文字列を追加できます,
+ join=バックログを前の文字列に連結するか否かを指定できます。trueを指定すると前の文字列につなげます。デフォルトはfalse
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.pushlog = {
+
+    vital : ["text"],
+
+    pm : {
+        "text":"",
+        "join":"false"
+    },
+
+    start : function(pm) {
+        
+        if(pm.join=="true"){
+            this.kag.pushBackLog(pm.text,"join");
+        }else{
+            this.kag.pushBackLog(pm.text,"add");
+        }
+
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+
