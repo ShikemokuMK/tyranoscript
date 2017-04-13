@@ -260,7 +260,7 @@ tyrano.plugin.kag.menu = {
         var data = $.getStorage(this.kag.config.projectID + "_tyrano_quick_save", this.kag.config.configSave);
 
         if (data) {
-            data = eval("(" + data + ")");
+            data = JSON.parse(data);
         } else {
             return false;
         }
@@ -282,7 +282,7 @@ tyrano.plugin.kag.menu = {
         var data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save",this.kag.config.configSave);
 
         if (data) {
-            data = eval("(" + data + ")");
+            data = JSON.parse(data);
         } else {
             return false;
         }
@@ -731,11 +731,13 @@ tyrano.plugin.kag.menu = {
     getSaveData : function() {
 
         var tmp_array = $.getStorage(this.kag.config.projectID + "_tyrano_data",this.kag.config.configSave);
-
+        
         if (tmp_array) {
 
             // データがある場合は一覧として表示します
-            return eval("(" + tmp_array + ")");
+            //return eval("(" + tmp_array + ")");
+            return JSON.parse(tmp_array);
+
 
         } else {
             tmp_array = new Array();

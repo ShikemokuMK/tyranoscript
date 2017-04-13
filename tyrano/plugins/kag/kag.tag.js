@@ -4220,8 +4220,6 @@ bounceInDown/ <br >
 bounceInLeft/
 bounceInRight/
 bounceInUp/
-puffIn/
-vanishIn/
 rollIn
 (V450以前)
 指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」
@@ -4356,8 +4354,6 @@ bounceInDown/
 bounceInLeft/<br >
 bounceInRight/
 bounceInUp/
-puffIn/
-vanishIn/
 rollIn
 (V450以前)
 指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」

@@ -2072,7 +2072,8 @@ tyrano.plugin.kag.tag.chara_delete = {
  face=[chara_face]で定義したface属性を指定してください,
  time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
  reflect=trueを指定すると左右反転します,
- storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。
+ storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。,
+ cross=true or false を指定します。デフォルトはtrue。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い表情を残しながら上に重なる形で新しい表情を表示します。
 
  #[end]
  */
@@ -2087,7 +2088,8 @@ tyrano.plugin.kag.tag.chara_mod = {
         face : "",
         reflect : "",
         storage : "",
-        time : ""
+        time : "",
+        cross:"true"
 
     },
 
@@ -2142,31 +2144,52 @@ tyrano.plugin.kag.tag.chara_mod = {
             this.kag.ftag.nextOrder();
             return;
         }
-
-        if (chara_time != "0") {
-            var j_new_img = $(".layer_fore").find("." + pm.name).clone();
-            j_new_img.attr("src", "./data/fgimage/" + storage_url);
-            j_new_img.css("opacity", 0);
-
-            var j_img = $(".layer_fore").find("." + pm.name);
-            j_img.after(j_new_img);
-
-            j_img.fadeTo(parseInt(chara_time), 0, function() {
-                //alert("完了");
-            });
-
-            j_new_img.fadeTo(parseInt(chara_time), 1, function() {
-                j_img.remove();
+        
+        //画像は事前にロードしておく必要がありそう
+        this.kag.preload("./data/fgimage/" + storage_url, function() {
+            
+            if (chara_time != "0") {
+                var j_new_img = $(".layer_fore").find("." + pm.name).clone();
+                j_new_img.attr("src", "./data/fgimage/" + storage_url);
+                j_new_img.css("opacity", 0);
+                
+                
+                var j_img = $(".layer_fore").find("." + pm.name);
+                j_img.after(j_new_img);
+    
+                if(pm.cross=="true"){
+                    j_img.fadeTo(parseInt(chara_time), 0, function() {
+                        //alert("完了");
+                    });
+                }
+    
+                j_new_img.fadeTo(parseInt(chara_time), 1, function() {
+                    
+                    if(pm.cross=="false"){
+                        j_img.fadeTo(parseInt(chara_time),0,function(){
+                            
+                            j_img.remove();
+                            that.kag.ftag.nextOrder();
+                        
+                        });
+                        
+                    }else{
+                    
+                        j_img.remove();
+                        that.kag.ftag.nextOrder();
+                    
+                    }
+                });
+    
+            } else {
+                $(".layer_fore").find("." + pm.name).attr("src", "./data/fgimage/" + storage_url);
                 that.kag.ftag.nextOrder();
-            });
+            }
+    
+            //showする前でも、表情が適応されるようにする
+            that.kag.stat.charas[pm.name]["storage"] = storage_url;
 
-        } else {
-            $(".layer_fore").find("." + pm.name).attr("src", "./data/fgimage/" + storage_url);
-            this.kag.ftag.nextOrder();
-        }
-
-        //showする前でも、表情が適応されるようにする
-        this.kag.stat.charas[pm.name]["storage"] = storage_url;
+        });
 
     }
 };
@@ -2221,7 +2244,7 @@ tyrano.plugin.kag.tag.chara_face = {
         } else {
             storage_url = pm.storage;
         }
-
+        
         this.kag.stat.charas[pm.name]["map_face"][pm.face] = storage_url;
         this.kag.ftag.nextOrder();
 

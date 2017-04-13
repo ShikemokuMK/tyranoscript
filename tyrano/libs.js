@@ -507,7 +507,7 @@
         "clip":"flipInX",
         "drop":"slideInLeft",
         "fold":"fadeIn",
-        "puff":"puffIn",
+        "puff":"fadeIn",
         "scale":"zoomIn",
         "shake":"fadeIn",
         "size":"zoomIn"
