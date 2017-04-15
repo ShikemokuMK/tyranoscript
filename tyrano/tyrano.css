@@ -476,4 +476,8 @@ body{
 	filter: FlipH;
 }
 
+/*ダイアログボックス*/
+#alertify{
+    z-index:9999999;
+}
 
