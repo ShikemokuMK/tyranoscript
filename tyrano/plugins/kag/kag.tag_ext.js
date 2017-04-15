@@ -1327,6 +1327,16 @@ tyrano.plugin.kag.tag.chara_ptext = {
             } else {
                 //存在しない場合はそのまま表示できる
                 $("." + this.kag.stat.chara_ptext).html(pm.name);
+                
+                //存在しない場合は全員の明度を下げる。
+                if (this.kag.stat.chara_talk_focus != "none") {
+                    $("#tyrano_base").find(".tyrano_chara").css({
+                        "-webkit-filter" : this.kag.stat.apply_filter_str,
+                        "-ms-filter" : this.kag.stat.apply_filter_str,
+                        "-moz-filter" : this.kag.stat.apply_filter_str
+                    });
+                }
+                
             }
         }
 
