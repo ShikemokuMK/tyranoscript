@@ -678,20 +678,30 @@ tyrano.plugin.kag ={
             };
             
             //デフォルトは実行
-            this.kag.ftag.startTag("playse", pm);
-            this.kag.ftag.startTag("playbgm", pm);
+            if(!this.tmp.map_bgm[0]){
+                this.kag.ftag.startTag("playse", pm);
+                this.kag.ftag.startTag("playbgm", pm);
+            }
             
             var bgm_slot = parseInt(this.kag.config.defaultBgmSlotNum);
             var se_slot = parseInt(this.kag.config.defaultSoundSlotNum);
             
             for(var i=1;i< bgm_slot;i++){
+                
+                //バッファがまだない場合だけ
                 pm.buf = i;
-                this.kag.ftag.startTag("playbgm", pm);
+                if(this.tmp.map_bgm[pm.buf]){
+                    this.kag.ftag.startTag("playbgm", pm);
+                }
             }
             
             for(var i=1;i< se_slot;i++){
+                
+                //バッファがまだ無い場合だけ
                 pm.buf = i;
-                this.kag.ftag.startTag("playse", pm);
+                if(!this.tmp.map_se[pm.buf]){
+                    this.kag.ftag.startTag("playse", pm);
+                }
             }
             
             
