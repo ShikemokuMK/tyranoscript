@@ -114,6 +114,12 @@ tyrano.plugin.kag.tag.playbgm = {
         if (pm.target == "se") {
             target = "sound";
             this.kag.tmp.is_se_play = true;
+            
+            //指定されたbufがボイス用に予約されてるか否か
+            if(this.kag.stat.map_vo["vobuf"][pm.buf]){
+                this.kag.tmp.is_vo_play = true;
+            }
+            
         }else{
             this.kag.tmp.is_bgm_play = true;
         }
@@ -179,13 +185,14 @@ tyrano.plugin.kag.tag.playbgm = {
 
         //音楽再生
         var audio_obj =null ;
-        
+        var is_new_audio = false;
         if(target=="bgm"){
             if(this.kag.tmp.map_bgm[pm.buf] != null){ 
                 audio_obj = this.kag.tmp.map_bgm[pm.buf];
                 audio_obj.src = storage_url;
             }else{
                 audio_obj = new Audio(storage_url);
+                is_new_audio = true;
             }
         }else{
             if(this.kag.tmp.map_se[pm.buf] != null){ 
@@ -197,6 +204,7 @@ tyrano.plugin.kag.tag.playbgm = {
                 
             }else{
                 audio_obj = new Audio(storage_url);
+                is_new_audio = true;
             }
         }
         
@@ -276,26 +284,35 @@ tyrano.plugin.kag.tag.playbgm = {
         }
         
         //再生が完了した時
-        audio_obj.addEventListener("ended",function(){
-            
-            if (pm.target == "se") {
-                that.kag.tmp.is_se_play = false;
-                
-                if(that.kag.tmp.is_se_play_wait == true){
-                    that.kag.tmp.is_se_play_wait = false;
-                    that.kag.ftag.nextOrder();
+        if(is_new_audio == true){
+            audio_obj.addEventListener("ended",function(e){
+                  
+                if (pm.target == "se") {
+                    that.kag.tmp.is_se_play = false;
+                    that.kag.tmp.is_vo_play = false;
+                    
+                    if(that.kag.tmp.is_se_play_wait == true){
+                        that.kag.tmp.is_se_play_wait = false;
+                        that.kag.ftag.nextOrder();
+                    
+                    }else if(that.kag.tmp.is_vo_play_wait==true){
+                        that.kag.tmp.is_vo_play_wait = false;
+                        setTimeout(function(){
+                        that.kag.ftag.nextOrder();
+                        },500);
+                    }
+                    
+                }else if(pm.target == "bgm") {
+                    that.kag.tmp.is_bgm_play = false;
+                    
+                    if(that.kag.tmp.is_bgm_play_wait == true){
+                        that.kag.tmp.is_bgm_play_wait = false;
+                        that.kag.ftag.nextOrder();
+                    }
+                    
                 }
-                
-            }else if(pm.target == "bgm") {
-                that.kag.tmp.is_bgm_play = false;
-                
-                if(that.kag.tmp.is_bgm_play_wait == true){
-                    that.kag.tmp.is_bgm_play_wait = false;
-                    that.kag.ftag.nextOrder();
-                }
-                
-            }
-        });
+            });
+        }
 
         if (pm.stop == "false") {
 
@@ -1069,7 +1086,6 @@ tyrano.plugin.kag.tag.wbgm = {
 #[end]
 */
 
-//未実装　seの再生終了を待ちます
 tyrano.plugin.kag.tag.wse = {
 
     pm : {
@@ -1089,8 +1105,142 @@ tyrano.plugin.kag.tag.wse = {
 };
 
 /*
- [fadeinbgm storage="e:3" time=5000]
- 再生中・・・停止するにはクリックしてください。[l]
- [fadeoutbgm time=5000]
- */
+#[voconfig]
+:group
+オーディオ関連
+:title
+ボイスの再生設定
+:exp
+ボイスを効率的に再生するための設定ができます。
+:sample
+[voconfig sebuf=2 name="yuko" vostorage="yuko_{number}.ogg" number=0 ]
+
+#yuko
+ここで音声再生(yuko_0.ogg)[p]
+
+#yuko
+次の音声再生(yuko_1.ogg)[p]
+
+;コンフィグをリセット
+[voconfig sebuf=2 name="ゆうこ" vostorage="none" ] 
+
+[vostop]
+[vostart]
+
+:param
+sebuf=ボイスで使用するplayseのbufを指定してください,
+name=ボイスを再生するキャラクター名を指定します。[chara_new ]タグのnameパラメータです,
+vostorage="音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます",
+number="デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます"
+
+ 
+#[end]
+*/
+
+tyrano.plugin.kag.tag.voconfig = {
+
+    pm : {
+        sebuf:"0",
+        name:"",
+        vostorage:"",
+        number:""
+    },
+    start : function(pm) {
+        
+        var map_vo = this.kag.stat.map_vo; 
+        
+        //ボイスバッファに指定する
+        this.kag.stat.map_vo["vobuf"][pm.sebuf] = 1;
+        
+        if(pm.name!=""){
+            
+            var vochara = {};
+            if(this.kag.stat.map_vo["vochara"][pm.name]){
+                vochara = this.kag.stat.map_vo["vochara"][pm.name];
+            }else{
+                vochara = {
+                    "vostorage":"",
+                    "buf":pm.sebuf,
+                    "number":0
+                };
+            }
+            
+            if(pm.vostorage !=""){
+                vochara["vostorage"] = pm.vostorage;
+            }
+            
+            if(pm.number != ""){
+                vochara["number"] = pm.number;
+            }
+            
+            this.kag.stat.map_vo["vochara"][pm.name] = vochara;
+        
+        }
+        
+        /*
+        map_vo:{
+            vobuf:{},//ボイスとして指定するplayseのbuf
+            vochara:{},//キャラ毎にボイスの設定が入る。
+        },
+        */
+        
+        this.kag.ftag.nextOrder();
+        
+        
+    }
+};
+
+
+/*
+#[vostart]
+:group
+オーディオ関連
+:title
+ボイス自動再生開始
+:exp
+voconfigで指定したボイスの自動再生を開始します。
+コレ以降、#で名前を指定した場合、紐付いたボイスが再生されていきます。
+:sample
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.vostart = {
+
+    pm : {
+    },
+    start : function() {
+        
+        this.kag.stat.vostart = true;
+        this.kag.ftag.nextOrder();
+            
+    }
+};
+
+/*
+#[vostop]
+:group
+オーディオ関連
+:title
+ボイス自動再生停止
+:exp
+voconfigで指定したボイスの自動再生を停止します。
+コレ以降、#で名前を指定しても、ボイスが紐付いて再生されることを防ぎます。
+:sample
+:param
+#[end]
+*/
+
+tyrano.plugin.kag.tag.vostop = {
+
+    pm : {
+    },
+    start : function() {
+        
+        this.kag.stat.vostart = false;
+        this.kag.ftag.nextOrder();
+            
+    }
+};
+
 

@@ -1061,11 +1061,27 @@ tyrano.plugin.kag.tag.l = {
             
         }else if(this.kag.stat.is_auto == true){
             this.kag.stat.is_wait_auto = true;
+            
+            var auto_speed = that.kag.config.autoSpeed;
+            if(that.kag.config.autoSpeedWithText != "0"){
+                var cnt_text = this.kag.stat.current_message_str.length;
+                auto_speed = parseInt(auto_speed) + (parseInt(that.kag.config.autoSpeedWithText)*cnt_text);
+            }
+            
             setTimeout(function(){
+                
                 if(that.kag.stat.is_wait_auto == true){
-                    that.kag.ftag.nextOrder();
+                    //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
+                    alert(that.kag.tmp.is_vo_play);
+                    
+                    if(that.kag.tmp.is_vo_play==true){
+                        that.kag.tmp.is_vo_play_wait = true;
+                    }else{
+                        that.kag.ftag.nextOrder();
+                    }
                 }
-            }, parseInt(that.kag.config.autoSpeed));
+                
+            }, auto_speed);
             
         }
         
@@ -1108,11 +1124,25 @@ tyrano.plugin.kag.tag.p = {
             this.kag.ftag.nextOrder();
         }else if(this.kag.stat.is_auto == true){
             this.kag.stat.is_wait_auto = true;
+            
+            var auto_speed = that.kag.config.autoSpeed;
+            if(that.kag.config.autoSpeedWithText != "0"){
+                var cnt_text = this.kag.stat.current_message_str.length;
+                auto_speed = parseInt(auto_speed) + (parseInt(that.kag.config.autoSpeedWithText)*cnt_text);
+            }
+            
             setTimeout(function(){
                 if(that.kag.stat.is_wait_auto == true){
-                    that.kag.ftag.nextOrder();
+                    
+                    
+                    //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
+                    if(that.kag.tmp.is_vo_play==true){
+                        that.kag.tmp.is_vo_play_wait = true;
+                    }else{
+                        that.kag.ftag.nextOrder();
+                    }
                 }
-            }, parseInt(that.kag.config.autoSpeed));
+            }, auto_speed);
             
         }
     }

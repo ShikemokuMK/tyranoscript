@@ -1339,6 +1339,33 @@ tyrano.plugin.kag.tag.chara_ptext = {
                 
             }
         }
+        
+        
+        //ボイス設定が有効な場合
+        if(this.kag.stat.vostart == true){
+            //キャラクターのボイス設定がある場合
+            
+            if(this.kag.stat.map_vo["vochara"][pm.name]){
+                
+                var vochara = this.kag.stat.map_vo["vochara"][pm.name];
+                
+                var playsefile = $.replaceAll(vochara.vostorage,"{number}",vochara.number);
+                
+                var se_pm = {
+                    loop : "false",
+                    storage : playsefile,
+                    stop : "true",
+                    buf:vochara.buf
+                };
+                
+                this.kag.ftag.startTag("playse", se_pm);
+                
+                this.kag.stat.map_vo["vochara"][pm.name]["number"] = parseInt(vochara.number)+1;
+                
+            }
+            
+        }
+        
 
         //表情の変更もあわせてできる
         if (pm.face != "") {

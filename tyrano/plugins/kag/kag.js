@@ -59,6 +59,9 @@ tyrano.plugin.kag ={
         is_se_play:false, //seがプレイ中か否か
         is_se_play_wait:false, //seの終了を待ってるかどうか。
         
+        is_vo_play:false, //ボイス再生中か否か
+        is_vo_play_wait:false, //ボイスの終了を待ってるかどうか。
+        
         is_bgm_play:false, //BGMがプレイ中か否か
         is_bgm_play_wait:false, //BGMの完了を待っているか否か。
         
@@ -207,6 +210,13 @@ tyrano.plugin.kag ={
         
         map_se_volume:{}, //セーブスロットごとにボリューム値を保持できる
         map_bgm_volume:{}, // 同上
+        
+        //ボイス周りの設定 vocoinfig
+        map_vo:{
+            vobuf:{},//ボイスとして指定するplayseのbuf
+            vochara:{},//キャラ毎にボイスの設定が入る。
+        },
+        vostart:false, //vo管理が有効か否か
         
         log_write:true, //バックログを記録するか否か
         
