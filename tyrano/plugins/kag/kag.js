@@ -214,7 +214,7 @@ tyrano.plugin.kag ={
         //ボイス周りの設定 vocoinfig
         map_vo:{
             vobuf:{},//ボイスとして指定するplayseのbuf
-            vochara:{},//キャラ毎にボイスの設定が入る。
+            vochara:{}//キャラ毎にボイスの設定が入る。
         },
         vostart:false, //vo管理が有効か否か
         

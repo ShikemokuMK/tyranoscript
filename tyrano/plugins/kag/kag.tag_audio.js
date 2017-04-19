@@ -1112,9 +1112,16 @@ tyrano.plugin.kag.tag.wse = {
 ボイスの再生設定
 :exp
 ボイスを効率的に再生するための設定ができます。
+キャラクター名と音声ファイル名を関連させておくことで
+キャラ名表示のタイミングで音声ファイルを順番に再生させることができます。
+このタグで設定をした後、[vostart]タグで自動再生を開始しないと有効になりません。
+
 :sample
 [voconfig sebuf=2 name="akane" vostorage="akane_{number}.ogg" number=1 ]
 [voconfig sebuf=2 name="yamato" vostorage="yamato_{number}.ogg" number=1 ]
+
+;音声自動再生を開始する。必ず必要です。
+[vostart]
 
 #akane
 ここで音声再生(akane_1.ogg)[p]
@@ -1131,8 +1138,8 @@ tyrano.plugin.kag.tag.wse = {
 :param
 sebuf=ボイスで使用するplayseのbufを指定してください,
 name=ボイスを再生するキャラクター名を指定します。[chara_new ]タグのnameパラメータです,
-vostorage="音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます",
-number="デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます"
+vostorage=音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます,
+number=デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます
 
  
 #[end]
@@ -1178,12 +1185,6 @@ tyrano.plugin.kag.tag.voconfig = {
         
         }
         
-        /*
-        map_vo:{
-            vobuf:{},//ボイスとして指定するplayseのbuf
-            vochara:{},//キャラ毎にボイスの設定が入る。
-        },
-        */
         
         this.kag.ftag.nextOrder();
         

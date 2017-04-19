@@ -1072,7 +1072,6 @@ tyrano.plugin.kag.tag.l = {
                 
                 if(that.kag.stat.is_wait_auto == true){
                     //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
-                    alert(that.kag.tmp.is_vo_play);
                     
                     if(that.kag.tmp.is_vo_play==true){
                         that.kag.tmp.is_vo_play_wait = true;
