@@ -677,6 +677,17 @@ tyrano.plugin.kag ={
       this.kag.tmp.num_anim++;  
     },
     
+    //スキップ中に演出をカットする
+    cutTimeWithSkip:function(time){
+        if(this.kag.stat.is_skip == true){
+            if(this.kag.config.skipEffectIgnore =="true"){
+                //瞬時に終わるように設定
+                return 70;
+            }
+        }
+        return time;
+    },
+    
     //スマホブラウザ向け、音楽再生設定
     readyAudio:function(){
         

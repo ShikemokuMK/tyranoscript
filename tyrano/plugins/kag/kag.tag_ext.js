@@ -1739,11 +1739,11 @@ tyrano.plugin.kag.tag.chara_show = {
 
                     if (that.kag.stat.chara_anim == "false") {
 
-                        j_chara.fadeTo(parseInt(pm.time), 0, function() {
+                        j_chara.fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)), 0, function() {
 
                             j_chara.css("left", left);
 
-                            j_chara.fadeTo(parseInt(that.kag.stat.pos_change_time), 1, function() {
+                            j_chara.fadeTo(parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)), 1, function() {
 
                                 chara_num--;
                                 if (chara_num == 0) {
@@ -1758,7 +1758,7 @@ tyrano.plugin.kag.tag.chara_show = {
 
                         j_chara.animate({
                             left : left
-                        }, parseInt(that.kag.stat.pos_change_time), that.kag.stat.chara_effect, function() {
+                        }, parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)), that.kag.stat.chara_effect, function() {
                             chara_num--;
                             if (chara_num == 0) {
                                 that.kag.layer.showEventLayer();
@@ -1808,7 +1808,7 @@ tyrano.plugin.kag.tag.chara_show = {
             img_obj.animate({
                 opacity : "show"
             }, {
-                duration : parseInt(pm.time),
+                duration : parseInt(that.kag.cutTimeWithSkip(pm.time)),
                 easing : that.kag.stat.chara_effect,
                 complete : function() {
 
@@ -1880,7 +1880,7 @@ tyrano.plugin.kag.tag.chara_hide = {
         img_obj.animate({
             opacity : "hide"
         }, {
-            duration : parseInt(pm.time),
+            duration : parseInt(that.kag.cutTimeWithSkip(pm.time)),
             easing : "linear",
             complete : function() {
 
@@ -1918,11 +1918,11 @@ tyrano.plugin.kag.tag.chara_hide = {
 
                         if (that.kag.stat.chara_anim == "false") {
 
-                            j_chara.fadeTo(parseInt(pm.time), 0, function() {
+                            j_chara.fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)), 0, function() {
 
                                 j_chara.css("left", left);
 
-                                j_chara.fadeTo(parseInt(that.kag.stat.pos_change_time), 1, function() {
+                                j_chara.fadeTo(parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)), 1, function() {
 
                                     chara_num--;
                                     if (chara_num == 0) {
@@ -1937,7 +1937,7 @@ tyrano.plugin.kag.tag.chara_hide = {
 
                             j_chara.animate({
                                 left : left
-                            }, parseInt(that.kag.stat.pos_change_time), that.kag.stat.chara_effect, function() {
+                            }, parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)), that.kag.stat.chara_effect, function() {
 
                                 chara_num--;
                                 if (chara_num == 0) {
@@ -2026,7 +2026,7 @@ tyrano.plugin.kag.tag.chara_hide_all = {
         img_obj.animate({
             opacity : "hide"
         }, {
-            duration : parseInt(pm.time),
+            duration : parseInt(that.kag.cutTimeWithSkip(pm.time)),
             easing : "linear",
             complete : function() {
 
@@ -2195,15 +2195,15 @@ tyrano.plugin.kag.tag.chara_mod = {
                 j_img.after(j_new_img);
     
                 if(pm.cross=="true"){
-                    j_img.fadeTo(parseInt(chara_time), 0, function() {
+                    j_img.fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)), 0, function() {
                         //alert("完了");
                     });
                 }
     
-                j_new_img.fadeTo(parseInt(chara_time), 1, function() {
+                j_new_img.fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)), 1, function() {
                     
                     if(pm.cross=="false"){
-                        j_img.fadeTo(parseInt(chara_time),0,function(){
+                        j_img.fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)),0,function(){
                             
                             j_img.remove();
                             that.kag.ftag.nextOrder();

@@ -4441,6 +4441,9 @@ tyrano.plugin.kag.tag.bg = {
             }
             
             
+            //スキップ中は時間を短くする
+            pm.time = that.kag.cutTimeWithSkip(pm.time);
+            
             if(pm.cross=="true"){   //crossがfalseの場合は、古い背景はtransしない。
                 $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
                     j_old_bg.remove();

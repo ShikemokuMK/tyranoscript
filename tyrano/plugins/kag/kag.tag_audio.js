@@ -298,7 +298,7 @@ tyrano.plugin.kag.tag.playbgm = {
                     }else if(that.kag.tmp.is_vo_play_wait==true){
                         that.kag.tmp.is_vo_play_wait = false;
                         setTimeout(function(){
-                        that.kag.ftag.nextOrder();
+                            that.kag.ftag.nextOrder();
                         },500);
                     }
                     
@@ -1113,19 +1113,20 @@ tyrano.plugin.kag.tag.wse = {
 :exp
 ボイスを効率的に再生するための設定ができます。
 :sample
-[voconfig sebuf=2 name="yuko" vostorage="yuko_{number}.ogg" number=0 ]
+[voconfig sebuf=2 name="akane" vostorage="akane_{number}.ogg" number=1 ]
+[voconfig sebuf=2 name="yamato" vostorage="yamato_{number}.ogg" number=1 ]
 
-#yuko
-ここで音声再生(yuko_0.ogg)[p]
+#akane
+ここで音声再生(akane_1.ogg)[p]
 
-#yuko
-次の音声再生(yuko_1.ogg)[p]
+#akane
+次の音声再生(akane_2.ogg)[p]
 
-;コンフィグをリセット
-[voconfig sebuf=2 name="ゆうこ" vostorage="none" ] 
+#yamato
+やまとの音声再生(yamato_1.ogg)[p]
 
-[vostop]
-[vostart]
+#akane
+あかねの音声再生(akane_3.ogg)[p]
 
 :param
 sebuf=ボイスで使用するplayseのbufを指定してください,
