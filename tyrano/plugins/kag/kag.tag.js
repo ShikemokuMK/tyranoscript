@@ -1015,11 +1015,15 @@ tyrano.plugin.kag.tag.config_record_label = {
         }
         
         if (pm.skip != "") {
-            this.kag.config.unReadTextSkip = pm.skip;
+            if(pm.skip=="true"){
+                this.kag.config.unReadTextSkip = true;
+            }else{
+                this.kag.config.unReadTextSkip = false;
+            }
+            
             this.kag.ftag.startTag("eval", {"exp":"sf._system_config_unread_text_skip = "+pm.skip});
         }
         
-
         this.kag.ftag.nextOrder();    
         
     }
