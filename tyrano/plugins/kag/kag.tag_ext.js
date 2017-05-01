@@ -136,7 +136,7 @@ tyrano.plugin.kag.tag.movie = {
             that.kag.tmp.video_playing = true;
 
             //背景モード
-            video.style.zIndex = 1;
+            video.style.zIndex = 0;
 
             if (pm.loop == "true") {
                 video.loop = true;
