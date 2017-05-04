@@ -84,8 +84,8 @@ tyrano.plugin.kag.key_mouse = {
             
             var keycode = e.keyCode;
 
-            //スキップ用ホールド解除
-            if (keycode==91) {
+            //スキップ用ホールド解除 mac と windowsでコードが違うctrl 決め打ち
+            if (keycode==91 || keycode ==17) {
                 that.kag.stat.is_skip = false;
             }
 

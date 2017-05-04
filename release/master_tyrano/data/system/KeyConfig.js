@@ -64,8 +64,13 @@ var __tyrano_key_config = {
         "91" : "skip", //Command(Mac)  
         "17" : "skip", //Ctrl (Windows)
         "67":function(){ // c ボタン
-            //config呼び出し
+            //config呼び出し例 コメント化
+            /*
+            if (TYRANO.kag.tmp.sleep_game != null) {
+                return false;
+            }
             TYRANO.kag.ftag.startTag("sleepgame", {storage:"config.ks"});
+            */
         }
         
     },
