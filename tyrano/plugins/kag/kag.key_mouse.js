@@ -319,10 +319,10 @@ tyrano.plugin.kag.key_mouse = {
         this._role("fullscreen");
     },
     qsave:function(){
-        this._role("qsave");
+        this._role("quicksave");
     },
     qload:function(){
-        this._role("qload");
+        this._role("quickload");
     },
     auto:function(){
         this._role("auto");
