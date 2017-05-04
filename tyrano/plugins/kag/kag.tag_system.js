@@ -2059,4 +2059,82 @@ tyrano.plugin.kag.tag.pushlog = {
     }
 };
 
+/*
+ #[start_keyconfig]
+ :group
+ システム操作
+ :title
+ キーコンフィグ操作の有効化
+
+ :exp
+ キーコンフィグが無効の場合、再開することができます。
+ 
+ :sample
+ [start_keyconfig]
+ 
+ :param
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.start_keyconfig = {
+
+    
+    pm : {
+    },
+
+    start : function(pm) {
+        
+        this.kag.stat.enable_keyconfig = true;
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+
+/*
+ #[stop_keyconfig]
+ :group
+ システム操作
+ :title
+ キーコンフィグ操作の無効化
+
+ :exp
+ キーコンフィグを一時的に無効にすることができます。
+ 再開させる場合は[start_keyconfig]タグを使用してください。
+ 
+ 無効になるのは
+ ・マウス操作
+ ・キーボード操作
+ ・マウスのスワイプ操作
+  
+ :sample
+ [stop_keyconfig]
+ ここは無効。
+ ここも無効。
+ [start_keyconfig]
+ ここから、キーコンフィグ設定が有効。
+ 
+ :param
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.stop_keyconfig = {
+
+    
+    pm : {
+    },
+
+    start : function(pm) {
+        
+        this.kag.stat.enable_keyconfig = false;
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+
+
+
 

@@ -100,7 +100,7 @@ tyrano.plugin.kag.key_mouse = {
                 return false;
             }
             
-            var target = null
+            var target = null;
             
             //中央クリック
             if (e.which == 2) {
@@ -341,6 +341,11 @@ tyrano.plugin.kag.key_mouse = {
         
         //画面効果中は実行できないようにする
         if(that.kag.layer.layer_event.css("display") =="none" && that.kag.stat.is_strong_stop != true){
+            return false;
+        }
+        
+        //キーコンフィグが有効化否か
+        if(that.kag.stat.enable_keyconfig==false){
             return false;
         }
         

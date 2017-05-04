@@ -118,6 +118,8 @@ tyrano.plugin.kag ={
         is_auto:{},
         current_bgm:"", //現在再生中のBGM
         
+        enable_keyconfig:true, //キーコンフィグが有効 or 無効
+        
         current_bgmovie:{
             storage:"",
             volume:"" 
