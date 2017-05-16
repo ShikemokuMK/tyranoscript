@@ -11,7 +11,7 @@
 [bg storage="../../tyrano/images/system/bg_base.png" time=100]
 [layopt layer=1 visible=true]
 
-[image layer=1 left=0 top=0 storage="config/label_recollection.png" folder="image" ]
+[image name="label_replay" layer=1 left=0 top=0 storage="config/label_recollection.png" folder="image" ]
 
 [iscript]
     
@@ -32,7 +32,6 @@
 
 *replayview
 
-*cgview
 @jump target=&tf.target_page
 
 *page_0
@@ -68,6 +67,7 @@
     tf.flag_replay = true;
 [endscript]
 
+[free layer=1 name="label_replay"]
 
 @jump storage=&tf.selected_replay_obj.storage target=&tf.selected_replay_obj.target
 [s]

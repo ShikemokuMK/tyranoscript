@@ -99,8 +99,10 @@ tf.savetext = "<span style='font-size:10px'>"+tf.save_date+"</span><br />"+tf.ti
 	
 	[iscript]
 		
+		mp.graphic = mp.graphic.split(',');
+		
 		tf.is_cg_open = false;
-		if(sf.cg_view[mp.graphic]){
+		if(sf.cg_view[mp.graphic[0]]){
 			tf.is_cg_open = true;
 		}
 	
@@ -108,7 +110,7 @@ tf.savetext = "<span style='font-size:10px'>"+tf.save_date+"</span><br />"+tf.ti
 	
 	;渡された値を元に、CG状態を確認していく
 	[if exp="tf.is_cg_open==true"]
-		[button graphic=&mp.graphic x=&mp.x y=&mp.y width=&mp.width height=&mp.height preexp="mp.graphic" exp="tf.selected_cg_image = preexp" storage="cg.ks" target="*clickcg" folder="bgimage" ]
+		[button graphic=&mp.graphic[0] x=&mp.x y=&mp.y width=&mp.width height=&mp.height preexp="mp.graphic" exp="tf.selected_cg_image = preexp" storage="cg.ks" target="*clickcg" folder="bgimage" ]
 	[else]
 		[button graphic=&mp.no_graphic x=&mp.x y=&mp.y width=&mp.width height=&mp.height storage="cg.ks" target="*no_image" folder="bgimage" ]
 	[endif]

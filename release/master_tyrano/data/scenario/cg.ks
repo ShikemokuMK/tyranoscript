@@ -23,6 +23,8 @@
 
 
 *cgpage
+[layopt layer=1 visible=true]
+
 [cm]
 [button graphic="config/menu_button_close.png" enterimg="config/menu_button_close2.png"  target="*backtitle" x=820 y=20 ]
 
@@ -42,8 +44,8 @@
 @jump target=&tf.target_page
 
 *page_0
-[cg_image_button graphic="toile.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
-[cg_image_button graphic="entrance.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=250 y=130 width=160 height=140 folder="bgimage" ]
+[cg_image_button graphic="rouka.jpg,room.jpg,title.png" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
+[cg_image_button graphic="room.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=250 y=130 width=160 height=140 folder="bgimage" ]
 
 @jump target="*common"
 
@@ -73,9 +75,21 @@
 *clickcg
 [cm]
 
-[image storage=&tf.selected_cg_image folder="bgimage"  ]
+[layopt layer=1 visible=false]
+
+[eval exp="tf.cg_index=0"]
+
+*cg_next_image
+
+[image storage=&tf.selected_cg_image[tf.cg_index] folder="bgimage"  ]
 [l]
-[bg storage="cgbg.png" time=10]
+[bg storage="../../tyrano/images/system/bg_base.png" time=10]
+
+[eval exp="tf.cg_index++"]
+
+@jump target="cg_next_image" cond="tf.selected_cg_image.length > tf.cg_index"
+
+
 @jump  target=*cgpage
 [s]
 
