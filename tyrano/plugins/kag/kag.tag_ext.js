@@ -2532,3 +2532,61 @@ tyrano.plugin.kag.tag.free_filter = {
 
 
 
+/*
+ #[web]
+ :group
+ システム
+ :title
+ Webサイトを開く
+ :exp
+ 指定したWebサイトをブラウザで開くことができます。
+ ただし、このタグを配置する直前にクリック待ちを配置する必要があります。
+ 多くの環境で、ユーザーアクションなしにブラウザが開くことを禁止しています。
+ :sample
+ 
+ ;クリック待ちを挟む
+ 公式サイトを開きます[p]
+ [web url="http://tyrano.jp"]
+ 
+ :param
+ url=開きたいWebサイトのURLを入れてください。
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.web = {
+
+    vital : ["url"],
+
+    pm : {
+        url : ""
+    },
+
+    start : function(pm) {
+        
+        if(pm.url.indexOf("http") == -1){
+            this.kag.log("error:[web] url is not correct " + pm.url);
+        }else{
+            
+            //ブラウザの場合
+            if($.isNWJS()){
+            
+                var gui = require('nw.gui');
+                gui.Shell.openExternal(pm.url);
+            
+            }else {
+            
+                window.open(pm.url);
+            
+            }
+        }   
+        
+        this.kag.ftag.nextOrder();
+        
+        
+    }
+};
+
+
+
+
