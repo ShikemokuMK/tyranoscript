@@ -1892,7 +1892,7 @@ tyrano.plugin.kag.tag.loadcss = {
 
 tyrano.plugin.kag.tag.save_img = {
 
-    vital : ["storage"],
+    vital : [],
 
     pm : {
         storage : "",
@@ -1904,6 +1904,10 @@ tyrano.plugin.kag.tag.save_img = {
         var storage = pm.storage;
         var folder ="";
         var storage_url ="";
+        
+        if(pm.storage==""){
+            pm.storage="default";
+        }
         
         if (pm.folder != "") {
             folder = pm.folder;

@@ -3753,7 +3753,7 @@ name=ティラノスクリプトのみ。animタグなどからこの名前で�
 text=ボタンの文字列です,
 font_color=フォントの色を指定できます,
 x=ボタンの横位置を指定します,
-y=ボタンの縦位置を指定します。
+y=ボタンの縦位置を指定します。,
 width=ボタンの横幅をピクセルで指定できます,
 height=ボタンの高さをピクセルで指定できます,
 exp=ボタンがクリックされた時に実行されるJSを指定できます。,
@@ -4387,7 +4387,9 @@ bounceInDown/
 bounceInLeft/<br >
 bounceInRight/
 bounceInUp/
-rollIn
+rollIn/
+vanishIn/
+puffIn
 (V450以前)
 指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」
 #[end]
@@ -4683,10 +4685,15 @@ tyrano.plugin.kag.tag.layermode_movie = {
         video.style.position = "absolute";
         video.style.top = "0px";
         video.style.left = "0px";
-        video.style.width = "100%";
-        video.style.height = "100%";
+        video.style.width = "auto";
+        video.style.height = "auto";
+        video.style.minHeight="100%";
+        video.style.minWidth="100%";
+        video.style.backgroundSize = "cover";
+        
         video.autoplay = true;
         video.autobuffer = true;
+        
         
         video.setAttribute("playsinline","1");
         
