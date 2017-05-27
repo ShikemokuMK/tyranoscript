@@ -173,7 +173,9 @@ tyrano.plugin.kag ={
             bold:"",
             size:"",
             face:"",
-            italic:""
+            italic:"",
+            edge:"", 
+            shadow:""
         },
         
         //システム系で使用するHTMLの場所を保持
@@ -600,6 +602,28 @@ tyrano.plugin.kag ={
         this.stat.default_font.bold  = $.convertBold(this.kag.config.defaultBold);
         this.stat.default_font.size  = this.kag.config.defaultFontSize;
         this.stat.default_font.face  = this.kag.config.userFace;
+        
+        //文字のアンチエイリアス効果 
+        var smooth = this.kag.config.defaultAntialiased; //アンチエイリアス効果
+        
+        if(smooth == "2"){
+            $(".tyrano_base").css("-webkit-font-smoothing","antialiased");
+        }else if(smooth == "0"){
+            $(".tyrano_base").css("-webkit-font-smoothing","none");
+        }else{
+            $(".tyrano_base").css("-webkit-font-smoothing","subpixel-antialiased");
+        }
+        
+        //文字の影
+        if(this.kag.config.defaultShadow == "true"){
+            this.stat.default_font.shadow  = $.convertColor(this.kag.config.defaultShadowColor); 
+        }
+        
+        //文字の縁
+        if(this.kag.config.defaultEdge == "true"){
+            this.stat.default_font.edge  = $.convertColor(this.kag.config.defaultEdgeColor); 
+        }
+        
         
         this.stat.vertical    = this.kag.config.vertical;
         

@@ -654,6 +654,7 @@ tyrano.plugin.kag.tag.text = {
 
             //メッセージ領域を取得
             var j_span = that.kag.getMessageCurrentSpan();
+            
 
             j_span.css({
                         "color":that.kag.stat.font.color,
@@ -662,6 +663,20 @@ tyrano.plugin.kag.tag.text = {
                         "font-family": that.kag.stat.font.face,
                         "font-style":that.kag.stat.font.italic
                         });
+                        
+            
+            
+            if(that.kag.stat.font.edge !=""){
+            
+                var edge_color = that.kag.stat.font.edge;
+                j_span.css("text-shadow","1px 1px 0 "+edge_color+", -1px 1px 0 "+edge_color+",1px -1px 0 "+edge_color+",-1px -1px 0 "+edge_color+"");
+            
+            }else if(that.kag.stat.font.shadow != ""){
+                //j_span.css()
+                j_span.css("text-shadow","2px 2px 2px "+that.kag.stat.font.shadow);
+            }
+            
+            
              
             //既読管理中の場合、現在の場所が既読済みなら、色を変える 
             if(that.kag.config.autoRecordLabel == "true"){
@@ -2040,6 +2055,8 @@ size=フォントサイズをピクセルで指定してください,
 face=フォントの種類を指定してください。非KAG互換ですが、ウェブフォントも使用できます,
 color=フォントの色を指定します,
 bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます,
+edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。,
+shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。縁取りをしている場合は無効化されます。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 time=ミリ秒を指定します。指定した時間をかけて徐々に表示させることができます,
 overwrite=true か false を指定します。同時にnameを指定している場合既に存在するptextの内容を変更できます。デフォルトはfalse
@@ -2065,6 +2082,8 @@ tyrano.plugin.kag.tag.ptext = {
         "color" : "",
         "italic" : "",
         "bold" : "",
+        "edge" : "",
+        "shadow" : "",
         "name" : "",
         "time" : "",
         "zindex" : "9999",
@@ -2094,7 +2113,6 @@ tyrano.plugin.kag.tag.ptext = {
         }
         
         
-        
         var font_new_style = {
 
             "color" : pm.color,
@@ -2106,7 +2124,14 @@ tyrano.plugin.kag.tag.ptext = {
             "text" : ""
 
         };
-
+        
+        if(pm.edge !=""){
+            var edge_color = $.convertColor(pm.edge);
+            font_new_style["text-shadow"] = "1px 1px 0 "+edge_color+", -1px 1px 0 "+edge_color+",1px -1px 0 "+edge_color+",-1px -1px 0 "+edge_color+"";
+        }else if(pm.shadow !=""){
+            font_new_style["text-shadow"] = "2px 2px 2px " + $.convertColor(pm.shadow);    
+        }
+        
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
 
         //上書き指定
@@ -2188,6 +2213,8 @@ face=フォントの種類を指定してください。非KAG互換ですが、
 color=フォントの色を指定します,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます,
+edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します,
+shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。縁取りをしている場合は無効化されます。,
 
 fadeout=テキスト表示後にフェードアウトを実行するか否かをtrue false で指定します。デフォルトはtrueです。残った文字を消す場合はfreeimageタグを使ってlayerを消して下さい,
 time=テキストが静止している時間をミリ秒で指定します。, 
@@ -2227,6 +2254,8 @@ tyrano.plugin.kag.tag.mtext = {
         "color" : "",
         "italic" : "",
         "bold" : "",
+        "shadow" : "",
+        "edge" : "",
         "name" : "",
         "zindex" : "9999",
         
@@ -2279,6 +2308,13 @@ tyrano.plugin.kag.tag.mtext = {
             "text" : ""
 
         };
+        
+        if(pm.edge !=""){
+            var edge_color = $.convertColor(pm.edge);
+            font_new_style["text-shadow"] = "1px 1px 0 "+edge_color+", -1px 1px 0 "+edge_color+",1px -1px 0 "+edge_color+",-1px -1px 0 "+edge_color+"";
+        }else if(pm.shadow !=""){
+            font_new_style["text-shadow"] = "2px 2px 2px " + $.convertColor(pm.shadow);    
+        }
 
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
 
@@ -2796,7 +2832,10 @@ tyrano.plugin.kag.tag.quake = {
  color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
  bold=太字指定。true 又は　false で指定,
  italic=trueを指定すると、イタリック体になります。デフォルトはfalseです,
- face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。
+ face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
+ edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
+ shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください 
+
  #[end]
  */
 
@@ -2831,6 +2870,22 @@ tyrano.plugin.kag.tag.font = {
         if (pm.italic){
             this.kag.stat.font["italic"] = $.convertItalic(pm.italic);
         }
+        
+        if (pm.edge) {
+            if(pm.edge=="none" || pm.edge==""){
+                this.kag.stat.font.edge = "";
+            }else{
+                this.kag.stat.font.edge = $.convertColor(pm.edge);
+            }
+        }
+        
+        if (pm.shadow) {
+            if(pm.shadow=="none" || pm.shadow==""){
+                this.kag.stat.font.shadow = "";
+            }else{
+                this.kag.stat.font.shadow = $.convertColor(pm.shadow);
+            }
+        }
 
         this.kag.ftag.nextOrder();
         ///////////////////
@@ -2854,7 +2909,9 @@ size=文字サイズを指定します,
 color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
 bold=太字指定。true 又は　false で指定,
 italic=trueを指定するとイタリック体で表示されます。デフォルトは
-face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。
+face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
+edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
+shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください 
 
 #[end]
 */
@@ -2889,6 +2946,24 @@ tyrano.plugin.kag.tag.deffont = {
         if (pm.italic) {
             this.kag.stat.default_font.italic = $.convertItalic(pm.italic);
         }
+        
+        if (pm.edge) {
+            if(pm.edge=="none" || pm.edge==""){
+                this.kag.stat.default_font.edge = "";
+            }else{
+                this.kag.stat.default_font.edge = $.convertColor(pm.edge);
+            }
+        }
+        
+        if (pm.shadow) {
+            if(pm.shadow=="none" || pm.shadow==""){
+                this.kag.stat.default_font.shadow = "";
+            }else{
+                this.kag.stat.default_font.shadow = $.convertColor(pm.shadow);
+            }
+        }
+        
+        
 
         this.kag.ftag.nextOrder();
         ///////////////////

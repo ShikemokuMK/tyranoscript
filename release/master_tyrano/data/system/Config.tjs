@@ -44,8 +44,6 @@
 
 //-------------------------------------------- ウィンドウや動作の設定 -----
 
-function KAGWindow_config()
-{
 // ◆ 画面サイズ
 // scWidth に画面の幅、scHeight に画面の高さをピクセル単位で指定します。
 
@@ -79,23 +77,6 @@ function KAGWindow_config()
 //オート時の待ち時間を文字数に応じて調整できます。１文字あたり指定したミリ秒分がautoSpeedの時間に追加された時間待ちます
 //例えば10文字のテキストだった場合、60*10 = 600ms + autoSpeedの値 
 ;autoSpeedWithText = 60;
-
-
-
-// ◆ 自動的に読み進むウェイト ページ末ウェイトの設定値 (ミリ秒)（未実装）
-;autoModePageWaits.fast = 400; // 「短い」
-;autoModePageWaits.faster = 700; // 「やや短い」
-;autoModePageWaits.medium = 1000; // 「普通」
-;autoModePageWaits.slower = 1300; // 「やや遅い」
-;autoModePageWaits.slow = 2000; // 「遅い」
-
-
-// ◆ 自動的に読み進むウェイト [l] ウェイトの設定値 (ミリ秒)（未実装）
-;autoModeLineWaits.fast = 180; // 「短い」
-;autoModeLineWaits.faster = 240; // 「やや短い」
-;autoModeLineWaits.medium = 300; // 「普通」
-;autoModeLineWaits.slower = 360; // 「やや遅い」
-;autoModeLineWaits.slow = 500; // 「遅い」
 
 
 // ◆ マウスカーソル
@@ -237,15 +218,6 @@ function KAGWindow_config()
 ;initialMessageLayerVisible = true;
 
 
-// ◆ 利用可能な栞の数
-// メニューに表示し、ユーザーが選択可能な栞の数です。
-// save や load タグで保存可能な栞の数はこの設定には影響しません。
-// メニューによる栞の管理を行わない場合 ( ゲーム画面中で全部栞の管理などを
-// 行う場合など ) は、numBookMarks は必要な数に設定し、restoreMenu.visible と
-// storeMenu.visible を false に設定してください。
-;numBookMarks = 10;
-
-
 // ◆ 「デバッグ」
 // ここをtrueにしておくことでブラウザのコンソールログに各種値が出力されるようになります
 //　ゲームリリース時は必ずfalseにしておきましょう
@@ -254,28 +226,6 @@ function KAGWindow_config()
 
 
 //-------------------------------------------- メッセージレイヤの設定 -----
-
-
-function MessageLayer_config()
-{
-// ◆ メッセージレイヤの表示モード
-// メッセージレイヤをどのモードで表示するかを指定します。
-// ltAddAlpha は KAG3 3.23 beta 5 から指定可能なモードで、
-// ltAlpha よりも処理が若干高速です。
-// ltAlpha はそれ以前の KAG と互換性のあるモードです。
-// ltAddAlpha を指定した場合は、frameGraphic で指定する
-// メッセージ枠用の画像も、ltAddAlpha 用に作成された
-// 画像を用いる必要があります (自動的には判別されません)。
-// ltAddAlpha 用の画像は画像フォーマットコンバータで作成可能です。
-;layerType = ltAddAlpha;
-
-// ◆ メッセージ枠用の画像
-// メッセージ枠用の画像のファイル名を指定します。
-// "" を指定するとメッセージ枠の画像を使用しません。また、メッセージ枠用の
-// 画像を指定した場合、position タグでメッセージレイヤのサイズを変更すると
-// おかしな表示になると思います
-;frameGraphic = "";  // position タグの frame 属性に相当
-
 
 // ◆ メッセージレイヤの色と不透明度
 // frameColor には 0xRRGGBB 形式で ( RR GG BB はそれぞれ 2 桁の 16 進数)
@@ -286,25 +236,6 @@ function MessageLayer_config()
 ;frameOpacity = 128;  // position タグの opacity 属性に相当
 
 
-// ◆ 左右上下マージン
-// マージン (余白) を pixel 単位で指定します。メッセージ枠用の画像を指定し
-// た場合は、メッセージ枠の表示範囲内に設定する必要があります。
-// これらは、position タグの marginl, maringt, marginr, marginb 属性に対応
-// します。
-;marginL = 8; // 左余白
-;marginT = 8; // 上余白
-;marginR = 8; // 右余白
-;marginB = 8; // 下余白
-
-
-// ◆ 初期位置
-// これらは、position タグのそれぞれ left top width height の属性に対応しま
-// す。
-;ml = 16;  // 左端位置
-;mt = 16;  // 上端位置
-;mw = 960-32;   // 幅
-;mh = 640-32;   // 高さ
-
 
 // ◆ 自動改行/改ページ
 // true を設定すると、行末での自動改行、ページ末での自動改ページが行われま
@@ -313,7 +244,7 @@ function MessageLayer_config()
 ;defaultAutoReturn = true; 
 
 
-// ◆ 右文字マージン
+// ◆ 右文字マージン （未実装）
 // 禁則処理用にあけておく右端の文字数を指定します。
 // (縦書きモードでは下端の文字数であると解釈されます)
 ;marginRCh = 2;
@@ -355,49 +286,46 @@ function MessageLayer_config()
 ;defaultBold = false; // deffont タグの bold 属性に相当
 
 
-// ◆ ルビサイズ
+// ◆ ルビサイズ　（未実装）
 // ルビサイズを pixel 単位で指定します。
 ;defaultRubySize = 10; // deffont タグの rubysize に相当
 
 
-// ◆ ルビ の表示オフセット
+// ◆ ルビ の表示オフセット（未実装）
 // 負の数を指定するとその pixel 数分、本文に近い位置に表示されます。
 ;defaultRubyOffset = -2; // deffont タグの rubyoffset に相当
 
 
-// ◆ アンチエイリアス文字描画をするか
+// ◆ 文字のアンチエイリアス効果をするか（なめらかな文字表現）
+// これはゲーム全体の文字に適応されます
+// 0:無効　1:弱めのアンチエイリアス効果　2:強めのアンチエイリアス効果
+;defaultAntialiased = 1;
+
+
+// ◆ 影を描画するか
 // する場合は true, しない場合は false を指定します。
-;defaultAntialiased = true;
+// 注意：文字の縁取りと同時に使用することはできません。その場合、影は無効になります。
+;defaultShadow = false;  // deffont タグの shadow 属性に相当
 
-
-// ◆ 影の色
+// ◆ 影の色 
 // 影の色を 0xRRGGBB 形式で指定します。
 ;defaultShadowColor = 0x000000;  // deffont タグの shadowcolor に属性に相当
+
+// ◆ 縁取りをするか
+// する場合は true, しない場合は false を指定します。
+;defaultEdge = false;  // deffont タグの edge 属性に相当
 
 // ◆ 縁取りの色
 // 縁取りの色を 0xRRGGBB 形式で指定します。
 ;defaultEdgeColor = 0x000000;  // deffont タグの edgecolor に属性に相当
 
 
-// ◆ 影を描画するか
-// する場合は true, しない場合は false を指定します。
-;defaultShadow = true;  // deffont タグの shadow 属性に相当
-
-
-// ◆ 縁取りをするか
-// する場合は true, しない場合は false を指定します。KAG3 から、縁取りと影
-// を同時に描画することができなくなりました。縁取りを指定した場合は縁取りが
-// 優先されます。
-;defaultEdge = false;  // deffont タグの edge 属性に相当
-
-
-
-// ◆ リンクの強調色
+// ◆ リンクの強調色 （未実装）
 // リンクを選択したときに出る半透明矩形のデフォルトの色です。
 ;defaultLinkColor = 0x0080ff;  // link タグの color 属性に相当
 
 
-// ◆ リンクの不透明度
+// ◆ リンクの不透明度　（未実装）
 // リンクを選択したときに出る半透明矩形の不透明度です。
 ;defaultLinkOpacity = 64;
 
