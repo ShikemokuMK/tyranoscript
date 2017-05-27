@@ -2231,6 +2231,109 @@ tyrano.plugin.kag.tag.chara_mod = {
     }
 };
 
+
+
+/*
+ #[chara_move]
+ :group
+ キャラクター操作
+ :title
+ キャラクターの位置変更
+ :exp
+ 画面のキャラクター立ち位置を変更します。
+ :sample
+ [chara_move name="yuko" left=20 top=100 ]
+ :param
+ name=[chara_new]で定義したname属性を指定してください。,
+ time=0以上の数値をミリ秒で指定することで、指定時間かけて位置を移動します切り替わります。600ミリ秒です。,
+ anim=trueかfalseを指定します。デフォルトはfalse。trueを指定すると、位置を変える時にアニメーションさせることができます。アニメーション効果は[chara_config]のeffectパラメータを参照します,
+ left=移動先のヨコ位置を指定できます。「left="+=200"」「left="-=200"」のように指定すると今いる位置を基準にできます（相対指定）,
+ top=移動先のタテ位置を指定できます。「top="+=100"」「top="-=100"」のように指定すると今いる位置を基準にできます（相対指定）,
+ width=変更後の横幅を指定できます,
+ height=変更後の高さを指定できます,
+ wait=位置変更を待つか否かを指定します。true or falseで指定。デフォルトは true
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.chara_move = {
+
+    vital : ["name"],
+
+    pm : {
+
+        name : "",
+        time : "600",
+        anim : "false",
+        left : "",
+        top : "",
+        width:"",
+        height:"",
+        wait:"true"
+
+    },
+
+    start : function(pm) {
+
+        var that = this;
+
+        var target_obj = $(".layer_fore").find("." + pm.name + ".tyrano_chara");
+        var anim_style = {};
+
+        if (pm.left != "") {
+            anim_style.left = pm.left;
+        }
+        if (pm.top != "") {
+            anim_style.top = pm.top;
+        }
+        if (pm.width != "") {
+            anim_style.width = pm.width;
+        }
+        if (pm.height != "") {
+            anim_style.height = pm.height;
+        }
+
+        var target = "";
+
+        if (pm.name != "") {
+            
+            if(pm.anim=="true"){
+                target_obj.animate(anim_style, parseInt(pm.time), pm.effect, function() {
+                    
+                    if(pm.wait=="true"){
+                        that.kag.ftag.nextOrder();
+                    }
+                    
+                });
+            }else{
+                
+                target_obj.fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time))/2, 0, function() {
+                    
+                    target_obj.css(anim_style);
+                    
+                    target_obj.fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time))/2, 1,function(){
+                        if(pm.wait=="true"){
+                            that.kag.ftag.nextOrder();
+                        }
+                    });
+                    
+                });
+                
+                
+                
+            }
+
+        } 
+
+        if(pm.wait=="false"){
+            this.kag.ftag.nextOrder();
+        }
+
+    }
+};
+
+
+
 /*
  #[chara_face]
  :group
