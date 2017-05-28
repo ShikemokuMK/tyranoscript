@@ -2242,7 +2242,7 @@ tyrano.plugin.kag.tag.chara_mod = {
  :exp
  画面のキャラクター立ち位置を変更します。
  :sample
- [chara_move name="yuko" left=20 top=100 ]
+ [chara_move name="yuko" time=100 left=20 top=100 ]
  :param
  name=[chara_new]で定義したname属性を指定してください。,
  time=0以上の数値をミリ秒で指定することで、指定時間かけて位置を移動します切り替わります。600ミリ秒です。,
@@ -2281,10 +2281,10 @@ tyrano.plugin.kag.tag.chara_move = {
         var anim_style = {};
 
         if (pm.left != "") {
-            anim_style.left = pm.left;
+            anim_style.left = pm.left +"px";
         }
         if (pm.top != "") {
-            anim_style.top = pm.top;
+            anim_style.top = pm.top +"px";
         }
         if (pm.width != "") {
             anim_style.width = pm.width;
@@ -2638,7 +2638,7 @@ tyrano.plugin.kag.tag.free_filter = {
 /*
  #[web]
  :group
- システム
+ その他
  :title
  Webサイトを開く
  :exp
