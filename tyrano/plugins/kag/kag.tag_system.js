@@ -1205,6 +1205,11 @@ tyrano.plugin.kag.tag.edit = {
             height : pm.height,
             "font-size" : parseInt(pm.size)
         };
+        
+        j_text.on("keydown",function(e){
+            //バグリング停止
+            e.stopPropagation();
+        });
 
         j_text.css(new_style);
         j_text.css("position", "absolute");
@@ -1686,6 +1691,10 @@ tyrano.plugin.kag.tag.dialog = {
 
                 that.finish(pm);
 
+            });
+            
+            $(".alertify-text").on("keydown",function(e){
+                e.stopPropagation();
             });
 
         } else {
