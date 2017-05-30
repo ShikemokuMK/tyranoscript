@@ -218,6 +218,26 @@
 ;initialMessageLayerVisible = true;
 
 
+// ◆ 左右上下マージン
+// マージン (余白) を pixel 単位で指定します。メッセージ枠用の画像を指定し
+// た場合は、メッセージ枠の表示範囲内に設定する必要があります。
+// これらは、position タグの marginl, maringt, marginr, marginb 属性に対応
+// します。
+;marginL = 8; // 左余白
+;marginT = 8; // 上余白
+;marginR = 8; // 右余白
+;marginB = 8; // 下余白
+
+
+// ◆ 初期位置
+// これらは、position タグのそれぞれ left top width height の属性に対応しま
+// す。
+;ml = 16;  // 左端位置
+;mt = 16;  // 上端位置
+;mw = 960-32;   // 幅
+;mh = 640-32;   // 高さ
+
+
 // ◆ 「デバッグ」
 // ここをtrueにしておくことでブラウザのコンソールログに各種値が出力されるようになります
 //　ゲームリリース時は必ずfalseにしておきましょう

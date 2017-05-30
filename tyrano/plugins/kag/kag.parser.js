@@ -338,7 +338,7 @@ tyrano.plugin.kag.parser ={
                 
         var array = str.split(" ");
         
-        
+        //タグの名前 [xxx 
         obj.name = $.trim(array[0]);
         
         //=のみが出てきた場合は前後のをくっつけて、ひとつの変数にしてしまって良い
@@ -398,6 +398,11 @@ tyrano.plugin.kag.parser ={
             if(pm_val!=""){
                 obj.pm[pm_key] = $.replaceAll(pm_val,"#","=");
             }
+            
+            if(pm_val=="undefined"){
+                obj.pm[pm_key]="";
+            }
+            
         }
         
         if(obj.name == "iscript"){

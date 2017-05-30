@@ -2023,6 +2023,13 @@ tyrano.plugin.kag.tag.chara_hide_all = {
         that.kag.layer.hideEventLayer();
         var flag_complete = false;
         //アニメーションでj表示させます
+        
+        //キャラがいない場合、次へ
+        if (!img_obj.get(0)) {
+            that.kag.ftag.nextOrder();
+            return;
+        }
+        
         img_obj.animate({
             opacity : "hide"
         }, {
