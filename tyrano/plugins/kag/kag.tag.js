@@ -1853,7 +1853,8 @@ tyrano.plugin.kag.tag.image = {
 :param
 layer=操作対象のレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
 page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます,
-time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます、
+time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます,
+wait=完了を待つかどうかを指定できます。trueを指定すると完了を待ちます。デフォルトはtrue
 #[end]
 */
 
@@ -1865,7 +1866,8 @@ tyrano.plugin.kag.tag.freeimage = {
     pm : {
         layer : "",
         page : "fore",
-        time:"" //徐々に非表示にする
+        time:"", //徐々に非表示にする
+        wait:"true"
     },
 
     start : function(pm) {
@@ -1893,7 +1895,11 @@ tyrano.plugin.kag.tag.freeimage = {
                         //次へ移動ですがな
                         cnt++;
                         if(s_cnt == cnt){
-                            that.kag.ftag.nextOrder();
+                            
+                            if(pm.wait=="true"){
+                                that.kag.ftag.nextOrder();            
+                            }
+        
                         }
                     }
                 );
@@ -1908,6 +1914,10 @@ tyrano.plugin.kag.tag.freeimage = {
             
             this.kag.layer.getLayer(pm.layer, pm.page).css("background-image", "");
             //次へ移動ですがな
+            this.kag.ftag.nextOrder();            
+        }
+        
+        if(pm.wait=="false"){
             this.kag.ftag.nextOrder();            
         }
         

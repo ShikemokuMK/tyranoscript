@@ -367,7 +367,7 @@ tyrano.plugin.kag.menu = {
                         var ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
                         // To Base64
-                        var img_code = canvas.toDataURL();
+                        var img_code = that.createImgCode(canvas);
                         
                         completeImage(img_code);
                         
@@ -383,11 +383,14 @@ tyrano.plugin.kag.menu = {
                             
                             // canvas is the final rendered <canvas> element
                             //console.log(canvas);
-                            var img_code = canvas.toDataURL();
+                            var img_code = that.createImgCode(canvas);
                             
                             completeImage(img_code);
                         
-                        }   
+                        },
+                        height:that.kag.config.scHeight,
+                        width:that.kag.config.scWidth,
+                        
                     });
                 }
 
@@ -395,6 +398,25 @@ tyrano.plugin.kag.menu = {
 
         }
 
+    },
+    
+    //サムネ画像の作成　thanks @hororo_memocho 
+    createImgCode:function(canvas){
+        
+        var code = "";
+        
+        var q = this.kag.config.configThumbnailQuality
+        
+        if(q=="low"){
+            code = canvas.toDataURL("image/jpeg",0.3);
+        }else if(q =="middle"){
+            code = canvas.toDataURL("image/jpeg",0.7);
+        }else{
+            code = canvas.toDataURL();
+        }
+        
+        return code;
+        
     },
     
     setGameSleep:function(){
