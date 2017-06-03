@@ -40,7 +40,7 @@ $(".layer_camera").empty();
 [cm]
 
 ;	コンフィグ用の背景を読み込んでトランジション
-	[bg storage="bg_config.jpg" time=100]
+	[bg storage="../../tyrano/images/system/bg_config.jpg" time=100]
 
 ;	画面右上の「Back」ボタン
 	[button graphic="config/c_btn_back.png" enterimg="config/c_btn_back2.png" target="*backtitle" x=840 y=20]

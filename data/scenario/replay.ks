@@ -8,10 +8,10 @@
 [cm]
 
 
-[bg storage="bg_base.png" time=100]
+[bg storage="../../tyrano/images/system/bg_base.png" time=100]
 [layopt layer=1 visible=true]
 
-[image layer=1 left=0 top=0 storage="config/label_recollection.png" folder="image" ]
+[image name="label_replay" layer=1 left=0 top=0 storage="config/label_recollection.png" folder="image" ]
 
 [iscript]
     
@@ -32,12 +32,11 @@
 
 *replayview
 
-*cgview
 @jump target=&tf.target_page
 
 *page_0
-[replay_image_button name="replay1" graphic="cat.jpg" no_graphic="noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
-[replay_image_button name="replay2" graphic="toile.jpg" no_graphic="noimage.png" x=260 y=130 width=160 height=140 folder="bgimage" ]
+[replay_image_button name="replay1" graphic="cat.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=60 y=130 width=160 height=140 folder="bgimage" ]
+[replay_image_button name="replay2" graphic="toile.jpg" no_graphic="../../tyrano/images/system/noimage.png" x=260 y=130 width=160 height=140 folder="bgimage" ]
 
 
 @jump target ="*common"
@@ -68,6 +67,7 @@
     tf.flag_replay = true;
 [endscript]
 
+[free layer=1 name="label_replay"]
 
 @jump storage=&tf.selected_replay_obj.storage target=&tf.selected_replay_obj.target
 [s]

@@ -15,7 +15,7 @@ Ver4.50以降で有効
     qsave:クイックセーブ実行
     qload:クイックロード実行
     auto:オートモード開始
-    
+    hidemessage:メッセージ消去
     関数を指定することもできます。
     例えば、コンフィグ画面の表示などは、関数の中にsleepgameでコンフィグ画面のシナリオファイルを指定してください
     function(){
@@ -64,8 +64,13 @@ var __tyrano_key_config = {
         "91" : "skip", //Command(Mac)  
         "17" : "skip", //Ctrl (Windows)
         "67":function(){ // c ボタン
-            //config呼び出し
+            //config呼び出し例 コメント化
+            /*
+            if (TYRANO.kag.tmp.sleep_game != null) {
+                return false;
+            }
             TYRANO.kag.ftag.startTag("sleepgame", {storage:"config.ks"});
+            */
         }
         
     },
