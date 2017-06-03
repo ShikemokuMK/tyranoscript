@@ -95,7 +95,7 @@ tyrano.plugin.kag.key_mouse = {
         $(document).on("mousedown", function(e) {
             
             //スキップ中にクリックされたら元に戻す
-            if(that.kag.stat.is_skip == true){
+            if(that.kag.stat.is_skip == true && that.kag.stat.is_strong_stop == false){
                 that.kag.stat.is_skip = false; 
                 return false;
             }
