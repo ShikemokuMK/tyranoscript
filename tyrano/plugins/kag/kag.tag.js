@@ -420,27 +420,27 @@ tyrano.plugin.kag.ftag = {
 
             });
 
-            return;
-        }
+        }else{
 
-        //ラベル名が指定されてない場合は最初から
-        if (label_name == "") {
-
-            this.current_order_index = -1;
-            this.nextOrder();
-
-        } else if (this.kag.stat.map_label[label_name]) {
-
-            var label_obj = this.kag.stat.map_label[label_name];
-            this.current_order_index = label_obj.index;
-            this.nextOrder();
-
-        } else {
-
-            $.error_message($.lang("label")+"：'" + label_name + "'"+$.lang("not_exists"));
-
-            this.nextOrder();
-
+            //ラベル名が指定されてない場合は最初から
+            if (label_name == "") {
+    
+                this.current_order_index = -1;
+                this.nextOrder();
+    
+            } else if (this.kag.stat.map_label[label_name]) {
+    
+                var label_obj = this.kag.stat.map_label[label_name];
+                this.current_order_index = label_obj.index;
+                this.nextOrder();
+    
+            } else {
+    
+                $.error_message($.lang("label")+"：'" + label_name + "'"+$.lang("not_exists"));
+    
+                this.nextOrder();
+    
+            }
         }
 
     },
@@ -465,8 +465,8 @@ tyrano.plugin.kag.ftag = {
 
             this.kag.layer.hideEventLayer();
 
-            this.kag.loadScenario(scenario_file, function(array_tag) {
-
+            this.kag.loadScenario(scenario_file, function(tmp_array_tag) {
+                var array_tag = $.extend(true, [], tmp_array_tag);
                 if ( typeof insert == "object") {
                     
                     array_tag.splice(index + 1, 0, insert);
@@ -478,30 +478,31 @@ tyrano.plugin.kag.ftag = {
 
             });
 
-            return;
-        }
-
-        //index更新
-        this.current_order_index = index;
-
-        if (auto_next == "yes") {
-            this.nextOrder();
-        } else if (auto_next == "snap") {
-            //ストロングの場合、すすめないように
-            this.kag.stat.is_strong_stop = this.kag.menu.snap.stat.is_strong_stop;
-
-            //スキップフラグが立っている場合は進めてくださいね。
-            if (this.kag.stat.is_skip == true && this.kag.stat.is_strong_stop == false) {
-                this.kag.ftag.nextOrder();
+        }else{
+    
+            //index更新
+            this.current_order_index = index;
+    
+            if (auto_next == "yes") {
+                this.nextOrder();
+            } else if (auto_next == "snap") {
+                //ストロングの場合、すすめないように
+                this.kag.stat.is_strong_stop = this.kag.menu.snap.stat.is_strong_stop;
+    
+                //スキップフラグが立っている場合は進めてくださいね。
+                if (this.kag.stat.is_skip == true && this.kag.stat.is_strong_stop == false) {
+                    this.kag.ftag.nextOrder();
+                }
+    
+            } else if (auto_next == "stop") {
+    
+                //[s]タグで終わった人が登場してきた時
+                //this.kag.stat.is_strong_stop = true;
+                //レイヤイベントレイヤ非表示。
+                //this.current_order_index--;
+                this.kag.ftag.startTag("s",{"val":{}});
+                
             }
-
-        } else if (auto_next == "stop") {
-
-            //[s]タグで終わった人が登場してきた時
-            //this.kag.stat.is_strong_stop = true;
-            //レイヤイベントレイヤ非表示。
-            //this.current_order_index--;
-            this.kag.ftag.startTag("s",{"val":{}});
             
         }
 

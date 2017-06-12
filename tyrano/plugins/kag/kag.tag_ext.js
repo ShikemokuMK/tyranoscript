@@ -2258,8 +2258,42 @@ tyrano.plugin.kag.tag.chara_mod = {
  top=移動先のタテ位置を指定できます。「top="+=100"」「top="-=100"」のように指定すると今いる位置を基準にできます（相対指定）,
  width=変更後の横幅を指定できます,
  height=変更後の高さを指定できます,
- wait=位置変更を待つか否かを指定します。true or falseで指定。デフォルトは true
- 
+ wait=位置変更を待つか否かを指定します。true or falseで指定。デフォルトは true,
+ effect=変化のエフェクトを指定します。指定できる文字列は以下の種類です<br />
+
+ jswing
+ ｜def
+ ｜easeInQuad
+ ｜easeOutQuad
+ ｜easeInOutQuad
+ ｜easeInCubic
+ ｜easeOutCubic
+ ｜easeInOutCubic
+ ｜easeInQuart
+ ｜easeOutQuart
+ ｜easeInOutQuart
+ ｜easeInQuint
+ ｜easeOutQuint
+ ｜easeInOutQuint
+ ｜easeInSine
+ ｜easeOutSine
+ ｜easeInOutSine
+ ｜easeInExpo
+ ｜easeOutExpo
+ ｜easeInOutExpo
+ ｜easeInCirc
+ ｜easeOutCirc
+ ｜easeInOutCirc
+ ｜easeInElastic
+ ｜easeOutElastic
+ ｜easeInOutElastic
+ ｜easeInBack
+ ｜easeOutBack
+ ｜easeInOutBack
+ ｜easeInBounce
+ ｜easeOutBounce
+ ｜easeInOutBounce
+
  #[end]
  */
 
@@ -2276,6 +2310,7 @@ tyrano.plugin.kag.tag.chara_move = {
         top : "",
         width:"",
         height:"",
+        effect:"",
         wait:"true"
 
     },

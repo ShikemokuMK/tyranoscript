@@ -743,16 +743,17 @@ tyrano.plugin.kag.tag["call"] = {
         back_pm.auto_next = pm.auto_next;
 
         //これは行き先を入れてもしょうがないよね。今の状態を
-        this.kag.pushStack("call", back_pm);
-        //スタックに配置する
-
+        
         //コールはラベルに対して行われる
-
+        this.kag.pushStack("call", back_pm);
+        
         if (pm.target == null && pm.storage != null) {
             this.kag.ftag.nextOrderWithIndex(-1, pm.storage)
         } else {
             this.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
         }
+        
+        
     }
 };
 
@@ -782,8 +783,9 @@ tyrano.plugin.kag.tag["return"] = {
         //呼び出し元に戻る
 
         var auto_next = pm.auto_next;
-        this.kag.ftag.nextOrderWithIndex(pm.index, pm.storage, undefined, undefined, auto_next);
         this.kag.popStack("call");
+        
+        this.kag.ftag.nextOrderWithIndex(pm.index, pm.storage, undefined, undefined, auto_next);
         //スタックを奪い取る
 
     }
@@ -892,13 +894,14 @@ tyrano.plugin.kag.tag.endmacro = {
         if (map_obj) {
 
             //呼び出し元に戻る
-            this.kag.ftag.nextOrderWithIndex(map_obj.index, map_obj.storage, true);
             this.kag.popStack("macro");
-            //スタックを奪い取る
-
             this.kag.stat.mp = this.kag.getStack("macro");
             //参照用パラメータを設定
+            
+            this.kag.ftag.nextOrderWithIndex(map_obj.index, map_obj.storage, true);
+            //スタックを奪い取る
 
+            
         } else {
 
             //呼び出し元がない場合、普通に次の処理を行えば良い

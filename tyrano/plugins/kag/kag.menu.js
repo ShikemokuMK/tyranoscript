@@ -389,7 +389,7 @@ tyrano.plugin.kag.menu = {
                         
                         },
                         height:that.kag.config.scHeight,
-                        width:that.kag.config.scWidth,
+                        width:that.kag.config.scWidth
                         
                     });
                 }

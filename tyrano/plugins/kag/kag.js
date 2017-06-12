@@ -11,6 +11,9 @@ tyrano.plugin.kag ={
     
     cache_html:{},
     
+    cache_scenraio : {},
+    
+    
     config:{
       
       defaultStorageExtension:"jpg",
@@ -375,8 +378,8 @@ tyrano.plugin.kag ={
            return false;
         }
         
-        this.kag.ftag.nextOrderWithIndex(pm.index,pm.storage);
         this.kag.popStack("call");//スタックを奪い取る
+        this.kag.ftag.nextOrderWithIndex(pm.index,pm.storage);
         
     },
     
@@ -807,23 +810,47 @@ tyrano.plugin.kag ={
     	}else{
     		file_url = "./data/scenario/"+file_name;
     	}
-        
-        $.loadText(file_url,function(text_str){
-            
-            var result_obj = that.parser.parseScenario(text_str);
-            
-            var tag_obj = result_obj.array_s;
-            var map_label = result_obj.map_label;
-            
-            //ラベル情報を格納
-            that.stat.map_label = map_label;
-            
-            that.stat.is_strong_stop = false;
+    	
+    	//キャッシュ確認
+    	if(that.cache_scenraio[file_url]){
+        	
             if(call_back){
+                
+                var result_obj = that.cache_scenraio[file_url];
+                
+                var tag_obj = result_obj.array_s;
+                var map_label = result_obj.map_label;
+                
+                //ラベル情報を格納
+                that.stat.map_label = map_label;
+                that.stat.is_strong_stop = false;
+                
                 call_back(tag_obj);
+                
             }
             
-        });
+        }else{
+        
+            $.loadText(file_url,function(text_str){
+                
+                var result_obj = that.parser.parseScenario(text_str);
+                that.cache_scenraio[file_url] = result_obj;
+                
+                var tag_obj = result_obj.array_s;
+                var map_label = result_obj.map_label;
+                
+                //ラベル情報を格納
+                that.stat.map_label = map_label;
+                that.stat.is_strong_stop = false;
+                
+                
+                if(call_back){
+                    call_back(tag_obj);
+                }
+                
+            });
+            
+        }
         
     },
     
