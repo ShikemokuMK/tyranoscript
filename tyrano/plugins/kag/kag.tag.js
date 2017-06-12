@@ -840,7 +840,22 @@ tyrano.plugin.kag.tag.text = {
             //メッセージ領域を取得
             var j_span = that.kag.getMessageCurrentSpan();
 
-            j_span.css("color", that.kag.stat.font.color).css("font-weight", that.kag.stat.font.bold).css("font-size", that.kag.stat.font.size + "px").css("font-family", that.kag.stat.font.face);
+            j_span.css({
+                        "color":that.kag.stat.font.color,
+                        "font-weight": that.kag.stat.font.bold,
+                        "font-size": that.kag.stat.font.size + "px",
+                        "font-family": that.kag.stat.font.face,
+                        "font-style":that.kag.stat.font.italic
+                        });
+            
+            if(that.kag.stat.font.edge !=""){
+                var edge_color = that.kag.stat.font.edge;
+                j_span.css("text-shadow","1px 1px 0 "+edge_color+", -1px 1px 0 "+edge_color+",1px -1px 0 "+edge_color+",-1px -1px 0 "+edge_color+"");
+            
+            }else if(that.kag.stat.font.shadow != ""){
+                //j_span.css()
+                j_span.css("text-shadow","2px 2px 2px "+that.kag.stat.font.shadow);
+            }
             
             //既読管理中の場合、現在の場所が既読済みなら、色を変える 
             if(that.kag.config.autoRecordLabel == "true"){
