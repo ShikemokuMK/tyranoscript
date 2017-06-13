@@ -72,14 +72,14 @@ foreach($array_copy as $file){
 }
 
 //ライブラリディレクのコピー
-	exec("cp -R ../tyrano/libs/ ".$dirname."/tyrano/");
+	exec("cp -R ../tyrano/libs ".$dirname."/tyrano/");
 
 //imageディレクトリのコピー
-	exec("cp -R ../tyrano/images/ ".$dirname."/tyrano/");
-	exec("cp -R ../tyrano/html/ ".$dirname."/tyrano/");
+	exec("cp -R ../tyrano/images ".$dirname."/tyrano/");
+	exec("cp -R ../tyrano/html ".$dirname."/tyrano/");
 
 //オリジナルマスターデータのコピー	
-	exec("cp -R ./master_tyrano/data ".$dirname."/data/");
+	exec("cp -R ./master_tyrano/data ".$dirname."/data");
 	
 //ミニファイ対象のコピー
 foreach($array_mini as $file){
