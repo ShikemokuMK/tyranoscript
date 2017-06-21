@@ -157,6 +157,7 @@ tyrano.plugin.kag.menu = {
             array_save : array,
             "novel" : $.novel
         }, function(html_str) {
+            
             var j_save = $(html_str);
 
             //フォントをゲームで指定されているフォントにする。

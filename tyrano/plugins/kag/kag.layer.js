@@ -224,29 +224,46 @@ tyrano.plugin.kag.layer ={
     
     
     //メッセージレイヤのインナーを最適化する
-    refMessageLayer:function(){
+    refMessageLayer:function(target_layer){
         
         var num = 0;
         
+        if(!target_layer){
         
-        while(true){
+            while(true){
+            
+                if(this.map_layer_fore["message"+num]){
+                    
+                    var j_message_outer = this.map_layer_fore["message"+num].find(".message_outer");
+                    var j_message_inner = this.map_layer_fore["message"+num].find(".message_inner");
+                    
+                    j_message_inner
+                    .css("left",parseInt(j_message_outer.css("left"))+10)
+                    .css("top",parseInt(j_message_outer.css("top"))+10)
+                    .css("width",parseInt(j_message_outer.css("width"))-10)
+                    .css("height",parseInt(j_message_outer.css("height"))-10);
+                    
+                }else{
+                    break;
+                }
+            
+                num++;
+            }
         
-            if(this.map_layer_fore["message"+num]){
+        }else{
+            
+            if(this.map_layer_fore[target_layer]){
                 
-                var j_message_outer = this.map_layer_fore["message"+num].find(".message_outer");
-                var j_message_inner = this.map_layer_fore["message"+num].find(".message_inner");
-                
+                var j_message_outer = this.map_layer_fore[target_layer].find(".message_outer");
+                var j_message_inner = this.map_layer_fore[target_layer].find(".message_inner");
+                    
                 j_message_inner
                 .css("left",parseInt(j_message_outer.css("left"))+10)
                 .css("top",parseInt(j_message_outer.css("top"))+10)
                 .css("width",parseInt(j_message_outer.css("width"))-10)
                 .css("height",parseInt(j_message_outer.css("height"))-10);
-                
-            }else{
-                break;
             }
-        
-            num++;
+            
         }
         
     },

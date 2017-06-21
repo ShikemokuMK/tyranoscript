@@ -1534,14 +1534,18 @@ tyrano.plugin.kag.tag.position = {
         //指定のレイヤを取得
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_outer");
 
-        var new_style = {
-            left : pm.left + "px",
-            top : pm.top + "px",
-            width : pm.width + "px",
-            height : pm.height + "px",
-            "background-color" : $.convertColor(pm.color)
-
-        };
+        var new_style = {};
+        
+        if(pm.left!="")
+            new_style["left"] = pm.left+"px";
+        if(pm.top!="")
+            new_style["top"] = pm.top+"px";
+        if(pm.width!="")
+            new_style["width"] = pm.width+"px";
+        if(pm.height!="")
+            new_style["height"] = pm.height+"px";
+        if(pm.color !="")
+            new_style["background-color"] = $.convertColor(pm.color);
 
         //縦書き指定
         if(pm.vertical !=""){
@@ -1584,12 +1588,13 @@ tyrano.plugin.kag.tag.position = {
         //outer のレイヤを変更
         this.kag.setStyles(target_layer, new_style);
 
-        this.kag.layer.refMessageLayer();
-
+        //positionでこれを実行する必要はない
+        this.kag.layer.refMessageLayer(pm.layer);
+        
         //message_inner のスタイルを変更する必要もある
 
         var layer_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
-
+        
         var new_style_inner = {};
 
         /*
@@ -1602,16 +1607,18 @@ tyrano.plugin.kag.tag.position = {
 
          };
          */
+        
 
         if (pm.marginl != "0")
             new_style_inner["padding-left"] = parseInt(pm.marginl) + "px";
         if (pm.margint != "0")
             new_style_inner["padding-top"] = parseInt(pm.margint) + "px";
         if (pm.marginr != "0")
-            new_style_inner["width"] = (parseInt(layer_inner.css("width")) - parseInt(pm.marginr)) + "px";
+            new_style_inner["width"] = (parseInt(layer_inner.css("width")) - parseInt(pm.marginr) - parseInt(pm.marginl)) + "px";
         if (pm.marginb != "0")
-            new_style_inner["height"] = (parseInt(layer_inner.css("height")) - parseInt(pm.marginb)) + "px";
-
+            new_style_inner["height"] = (parseInt(layer_inner.css("height")) - parseInt(pm.marginb)) - parseInt(pm.margint) + "px";
+        
+        
         this.kag.setStyles(layer_inner, new_style_inner);
 
         //this.kag.layer.updateLayer(pm.layer,pm.page,this.kag.layer.getLayer(pm.layer,pm.page));
