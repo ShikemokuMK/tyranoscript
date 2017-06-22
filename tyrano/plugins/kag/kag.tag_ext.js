@@ -2133,7 +2133,8 @@ tyrano.plugin.kag.tag.chara_mod = {
         reflect : "",
         storage : "",
         time : "",
-        cross:"true"
+        cross:"true",
+        wait:"true"
 
     },
 
@@ -2213,25 +2214,37 @@ tyrano.plugin.kag.tag.chara_mod = {
                         j_img.fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)),0,function(){
                             
                             j_img.remove();
-                            that.kag.ftag.nextOrder();
-                        
+                            
+                            if(pm.wait=="true"){
+                                that.kag.ftag.nextOrder();
+                            }
+                            
                         });
                         
                     }else{
                     
                         j_img.remove();
-                        that.kag.ftag.nextOrder();
-                    
+                        
+                        if(pm.wait=="true"){
+                            that.kag.ftag.nextOrder();
+                        }
                     }
                 });
     
             } else {
                 $(".layer_fore").find("." + pm.name).attr("src", "./data/fgimage/" + storage_url);
-                that.kag.ftag.nextOrder();
+                
+                if(pm.wait=="true"){
+                    that.kag.ftag.nextOrder();
+                }
             }
     
             //showする前でも、表情が適応されるようにする
             that.kag.stat.charas[pm.name]["storage"] = storage_url;
+            
+            if(pm.wait=="false"){
+                that.kag.ftag.nextOrder();
+            }
 
         });
 
