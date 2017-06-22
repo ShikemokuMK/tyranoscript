@@ -2133,7 +2133,8 @@ tyrano.plugin.kag.tag.chara_mod = {
         reflect : "",
         storage : "",
         time : "",
-        cross:"true"
+        cross:"true",
+        wait:"true"
 
     },
 
@@ -2192,13 +2193,19 @@ tyrano.plugin.kag.tag.chara_mod = {
         //画像は事前にロードしておく必要がありそう
         this.kag.preload("./data/fgimage/" + storage_url, function() {
             
+            if($(".chara-mod-animation").get(0)){
+                $(".chara-mod-animation").remove();
+            }
+            
             if (chara_time != "0") {
+                
                 var j_new_img = $(".layer_fore").find("." + pm.name).clone();
                 j_new_img.attr("src", "./data/fgimage/" + storage_url);
                 j_new_img.css("opacity", 0);
                 
                 
                 var j_img = $(".layer_fore").find("." + pm.name);
+                j_img.addClass("chara-mod-animation");
                 j_img.after(j_new_img);
     
                 if(pm.cross=="true"){
@@ -2213,25 +2220,37 @@ tyrano.plugin.kag.tag.chara_mod = {
                         j_img.fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)),0,function(){
                             
                             j_img.remove();
-                            that.kag.ftag.nextOrder();
-                        
+                            
+                            if(pm.wait=="true"){
+                                that.kag.ftag.nextOrder();
+                            }
+                            
                         });
                         
                     }else{
                     
                         j_img.remove();
-                        that.kag.ftag.nextOrder();
-                    
+                        
+                        if(pm.wait=="true"){
+                            that.kag.ftag.nextOrder();
+                        }
                     }
                 });
     
             } else {
                 $(".layer_fore").find("." + pm.name).attr("src", "./data/fgimage/" + storage_url);
-                that.kag.ftag.nextOrder();
+                
+                if(pm.wait=="true"){
+                    that.kag.ftag.nextOrder();
+                }
             }
     
             //showする前でも、表情が適応されるようにする
             that.kag.stat.charas[pm.name]["storage"] = storage_url;
+            
+            if(pm.wait=="false"){
+                that.kag.ftag.nextOrder();
+            }
 
         });
 
