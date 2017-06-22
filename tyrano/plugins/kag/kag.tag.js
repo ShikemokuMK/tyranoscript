@@ -1547,14 +1547,7 @@ tyrano.plugin.kag.tag.position = {
         if(pm.color !="")
             new_style["background-color"] = $.convertColor(pm.color);
 
-        //縦書き指定
-        if(pm.vertical !=""){
-            if (pm.vertical == "true") {
-                this.kag.stat.vertical = "true";
-            } else {
-                this.kag.stat.vertical = "false";
-            }
-        }
+        
 
         //背景フレーム画像の設定 透明度も自分で設定する
 
@@ -1588,12 +1581,24 @@ tyrano.plugin.kag.tag.position = {
         //outer のレイヤを変更
         this.kag.setStyles(target_layer, new_style);
 
-        //positionでこれを実行する必要はない
+        //複数のレイヤに影響がでないように。
         this.kag.layer.refMessageLayer(pm.layer);
         
         //message_inner のスタイルを変更する必要もある
 
         var layer_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
+        
+        //縦書き指定
+        if(pm.vertical !=""){
+            if (pm.vertical == "true") {
+                this.kag.stat.vertical = "true";
+                layer_inner.find("p").addClass("vertical_text");
+            } else {
+                this.kag.stat.vertical = "false";
+                layer_inner.find("p").removeClass("vertical_text");
+            }
+        }
+        
         
         var new_style_inner = {};
 

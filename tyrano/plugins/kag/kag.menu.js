@@ -849,6 +849,9 @@ tyrano.plugin.kag.menu = {
 
             layer_menu.find(".log_body").html(log_str);
             
+            layer_menu.find(".log_body").css("font-family", that.kag.config.userFace);
+
+            
             $.preloadImgCallback(layer_menu,function(){
                 layer_menu.fadeIn(300);
                 //一番下固定させる
