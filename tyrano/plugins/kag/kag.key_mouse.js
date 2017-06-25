@@ -369,11 +369,17 @@ tyrano.plugin.kag.key_mouse = {
         switch(role) {
 
             case "save":
-                that.kag.menu.displaySave();
+                //すでにメニュー画面が見えてる場合は無効にする
+                if($(".layer_menu").css("display")=="none"){
+                    that.kag.menu.displaySave();
+                }
+                
                 break;
 
             case "load":
-                that.kag.menu.displayLoad();
+                if($(".layer_menu").css("display")=="none"){
+                    that.kag.menu.displayLoad();
+                }
                 break;
 
             case "window":
