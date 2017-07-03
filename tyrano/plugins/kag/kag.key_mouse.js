@@ -448,10 +448,26 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     canShowMenu : function() {
+        
+        
+        if (this.kag.layer.layer_event.css("display") == "none" && this.kag.stat.is_strong_stop != true) {
+            return false;
+        }
+        
+        //wait中の時
+        if(this.kag.stat.is_wait == true){
+            return false;
+        }
+        
+        return true;
+        
+        /*
         if ($(".layer_free").css("display") == "none") {
             return true;
         }
         return false;
+        
+        */
     }
 };
 
