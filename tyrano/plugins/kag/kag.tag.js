@@ -139,6 +139,21 @@ tyrano.plugin.kag.ftag = {
 
                 //必須項目チェック
                 var err_str = this.checkVital(tag);
+                
+                //バックログに入れるかどうか。
+                if(this.master_tag[tag.name].log_join){
+                    
+                    this.kag.stat.log_join = "true";
+                    
+                }else{
+                    
+                    if(tag.name=="text"){
+                        //何もしない
+                    }else{
+                        this.kag.stat.log_join ="false";
+                    }
+                    
+                }
 
                 //クリック待ち解除フラグがたってるなら
                 if (this.checkCw(tag)) {
@@ -151,6 +166,8 @@ tyrano.plugin.kag.ftag = {
 
                     this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
                 }
+                
+                
 
             } else if (this.kag.stat.map_macro[tag.name]) {
 
@@ -515,8 +532,7 @@ tyrano.plugin.kag.tag.text = {
     //vital:["val"], //必須のタグ
 
     cw : true,
-    flag_join:false,
-
+    
     //初期値
     pm : {
 
@@ -596,7 +612,8 @@ tyrano.plugin.kag.tag.text = {
                 }
 
             }
-
+            
+            
             this.showMessage(pm.val,pm);
 
         }
@@ -607,22 +624,30 @@ tyrano.plugin.kag.tag.text = {
 
     showMessage : function(message_str,pm) {
         var that = this;
-
+        
+        //特定のタグが直前にあった場合、ログの作り方に気をつける
+        if(that.kag.stat.log_join=="true"){
+            pm.backlog="join";
+        }
+        
+        
         //バックログ用の値を格納
         var chara_name = $.isNull($(".chara_name_area").html());
-        if(chara_name != ""){
+        if((chara_name != "" && pm.backlog!="join") || (chara_name!="" && this.kag.stat.f_chara_ptext=="true")){
+            
             this.kag.pushBackLog("<b>"+chara_name+"</b>："+message_str,"add");
+            
+            if(this.kag.stat.f_chara_ptext=="true"){
+                this.kag.stat.f_chara_ptext="false";
+                this.kag.stat.log_join = "true";
+            }
+            
         }else{
             if(pm.backlog=="join"){
-                this.flag_join = true;
                 this.kag.pushBackLog(message_str,"join");
             }else{
-                if(this.flag_join==true){
-                    this.kag.pushBackLog(message_str,"join");
-                    this.flag_join=false;
-                }else{
-                    this.kag.pushBackLog(message_str,"add");
-                }
+                this.kag.pushBackLog(message_str,"add");
+                
             }
         }
 
@@ -799,21 +824,25 @@ tyrano.plugin.kag.tag.text = {
     //縦書き出力
     showMessageVertical : function(message_str,pm) {
         var that = this;
-
+        
+        //特定のタグが直前にあった場合、ログの作り方に気をつける
+        if(that.kag.stat.log_join=="true"){
+            pm.backlog="join";
+        }
+        
+        if(this.kag.stat.f_chara_ptext=="true"){
+            this.kag.stat.f_chara_ptext="false";
+            this.kag.stat.log_join = "false";
+        }
+        
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
         that.kag.ftag.hideNextImg();
         
         //バックログへの追加
         if(pm.backlog=="join"){
-            this.flag_join = true;
             this.kag.pushBackLog(message_str,"join");
         }else{
-            if(this.flag_join==true){
-                this.kag.pushBackLog(message_str,"join");
-                this.flag_join=false;
-            }else{
-                this.kag.pushBackLog(message_str,"add");
-            }
+            this.kag.pushBackLog(message_str,"add");
         }
         
         (function(jtext) {
@@ -2882,7 +2911,9 @@ tyrano.plugin.kag.tag.font = {
     pm : {
 
     },
-
+    
+    log_join:"true",
+    
     start : function(pm) {
 
         this.kag.setMessageCurrentSpan();
@@ -3031,6 +3062,8 @@ tyrano.plugin.kag.tag.delay = {
         speed : ""
     },
 
+    log_join:"true",
+    
     start : function(pm) {
         if (pm.speed != "") {
             this.kag.stat.ch_speed = parseInt(pm.speed);
@@ -3060,7 +3093,9 @@ tyrano.plugin.kag.tag.resetdelay = {
     pm : {
         speed : ""
     },
-
+    
+    log_join:"true",
+    
     start : function(pm) {
         
         this.kag.stat.ch_speed  = "";
@@ -3173,7 +3208,9 @@ tyrano.plugin.kag.tag.endnowait = {
  */
 
 tyrano.plugin.kag.tag.resetfont = {
-
+    
+    log_join:"true",
+    
     start : function() {
 
         var j_span = this.kag.setMessageCurrentSpan();
@@ -3309,6 +3346,8 @@ tyrano.plugin.kag.tag["ruby"] = {
     pm : {
         text : ""
     },
+    
+    log_join:"true",
 
     start : function(pm) {
 
@@ -3504,7 +3543,7 @@ tyrano.plugin.kag.tag.button = {
         j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
         
-        //初期状態で表示か非表示蚊
+        //初期状態で表示か非表示か
         if(pm.visible=="true"){
             j_button.show();
         }else{

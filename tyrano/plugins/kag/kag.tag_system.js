@@ -460,10 +460,12 @@ tyrano.plugin.kag.tag.endhtml = {
 tyrano.plugin.kag.tag.emb = {
 
     vital : ["exp"],
-
+    
     pm : {
         exp : ""
     },
+    
+    log_join:"true",
 
     start : function(pm) {
 

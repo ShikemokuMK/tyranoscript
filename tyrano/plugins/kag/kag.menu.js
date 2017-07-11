@@ -523,9 +523,9 @@ tyrano.plugin.kag.menu = {
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
         
-        //その他ステータスの設定
-        this.kag.stat = data.stat;
-
+        //ステータスの設定、ディープに設定する
+        $.extend(true,this.kag.stat,data.stat);
+        
         //ステータスがストロングストップの場合
         if (this.kag.stat.is_strong_stop == true) {
             auto_next = "stop";

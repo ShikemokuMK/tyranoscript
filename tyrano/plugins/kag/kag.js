@@ -151,6 +151,9 @@ tyrano.plugin.kag ={
         
         skip_link:"true", //選択肢のあと、スキップを継続するかどうか。
         
+        log_join:"false", //特定のタグの時に、ログが分裂しないようにするため。trueなら前のログに連結させる
+        f_chara_ptext:"false",
+        
         flag_glyph : "false", //クリック待ちボタンが指定されているか否か
         current_cursor:"auto", //現在のカーソル指定
         
@@ -677,11 +680,11 @@ tyrano.plugin.kag ={
     	
     	if(type=="join"){
     	   var index = this.variable.tf.system.backlog.length-1;
-    	   if(index > 0){ //配列が存在しない場合はpushだ
+    	   if(index >= 0){ //配列が存在しない場合はpushだ
     	      var tmp = this.variable.tf["system"]["backlog"][index];
     	      this.variable.tf["system"]["backlog"][this.variable.tf.system.backlog.length-1] = tmp + str;
 		   }else{
-		      this.variable.tf["system"]["backlog"].push(str);  
+    		   this.variable.tf["system"]["backlog"].push(str);  
 		   }
 		}else{
 		   this.variable.tf["system"]["backlog"].push(str);  

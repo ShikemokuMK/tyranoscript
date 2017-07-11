@@ -1377,6 +1377,9 @@ tyrano.plugin.kag.tag.chara_ptext = {
             $("." + pm.name).attr("src", "./data/fgimage/" + storage_url);
             //$("."+pm.name).attr("src",storage_url);
         }
+        
+        this.kag.stat.f_chara_ptext="true";
+        
         this.kag.ftag.nextOrder();
 
     }
@@ -1704,7 +1707,7 @@ tyrano.plugin.kag.tag.chara_show = {
             //キャラのサイズを設定する必要がある。
 
             //立ち位置を自動的に設定する場合
-            if (that.kag.stat.chara_pos_mode == "true" && pm.top == "0" && pm.left == "0") {
+            if (that.kag.stat.chara_pos_mode == "true" && pm.left == "0") {
                 //立ち位置自動調整
                 img_obj.css("bottom", "0px");
 
