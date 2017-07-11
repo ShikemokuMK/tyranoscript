@@ -1708,8 +1708,14 @@ tyrano.plugin.kag.tag.chara_show = {
 
             //立ち位置を自動的に設定する場合
             if (that.kag.stat.chara_pos_mode == "true" && pm.left == "0") {
+                
                 //立ち位置自動調整
-                img_obj.css("bottom", "0px");
+                if(pm.top !="0"){
+                    img_obj.css("top",parseInt(pm.top));
+                }else{
+                    img_obj.css("bottom", "0px");
+                }
+
 
                 //既存キャラの位置を調整する
                 var chara_cnt = target_layer.find(".tyrano_chara").length;
