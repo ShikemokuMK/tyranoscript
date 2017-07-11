@@ -1514,7 +1514,7 @@ tyrano.plugin.kag.tag.sleepgame = {
             that.kag.menu.setGameSleep();
             that.kag.ftag.startTag("jump", pm);
 
-        }, false);
+        }, "false");
 
     }
 };
