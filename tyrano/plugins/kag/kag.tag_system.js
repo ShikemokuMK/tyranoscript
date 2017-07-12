@@ -534,6 +534,9 @@ tyrano.plugin.kag.tag["if"] = {
     pm : {
         "exp" : ""
     },
+    
+    log_join:"true",
+
 
     start : function(pm) {
 
@@ -598,6 +601,8 @@ tyrano.plugin.kag.tag["elsif"] = {
         "exp" : ""
     },
 
+    log_join:"true",
+
     start : function(pm) {
 
         //条件合格
@@ -653,6 +658,8 @@ tyrano.plugin.kag.tag["else"] = {
         "exp" : ""
     },
 
+    log_join:"true",
+
     start : function(pm) {
 
         //条件合格
@@ -701,6 +708,8 @@ tyrano.plugin.kag.tag["else"] = {
  */
 
 tyrano.plugin.kag.tag["endif"] = {
+
+    log_join:"true",
 
     start : function() {
 
@@ -827,6 +836,9 @@ tyrano.plugin.kag.tag.macro = {
     pm : {
         name : ""
     },
+    
+    log_join:"true",
+
 
     start : function(pm) {
 
@@ -879,6 +891,8 @@ tyrano.plugin.kag.tag.macro = {
 
 //マクロ終了
 tyrano.plugin.kag.tag.endmacro = {
+
+    log_join:"true",
 
     start : function(pm) {
 
