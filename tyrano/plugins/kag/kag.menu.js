@@ -224,7 +224,7 @@ tyrano.plugin.kag.menu = {
 
         if (this.snap == null) {
             //ここはサムネイルイメージ作成のため、callback指定する
-            this.snapSave(this.kag.stat.current_message_str, function() {
+            this.snapSave(this.kag.stat.current_save_str, function() {
                 //現在、停止中のステータスなら、[_s]ポジションからセーブデータ取得
 
                 /*
@@ -248,7 +248,7 @@ tyrano.plugin.kag.menu = {
     setQuickSave : function() {
         var that = this;
 
-        var saveTitle = that.kag.stat.current_message_str;
+        var saveTitle = that.kag.stat.current_save_str;
 
         that.kag.menu.snapSave(saveTitle, function() {
             var data = that.snap;

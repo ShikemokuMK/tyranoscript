@@ -99,6 +99,7 @@ tyrano.plugin.kag ={
         is_nowait:false, //ノーウェイト、テキスト瞬間表示状態
         
         current_message_str:"ゲームスタート", //現在表示中のメッセージ
+        current_save_str:"", //セーブの時に使用するメッセージ
         
         current_keyframe:"", //キーフレームの名前、スタートしている場合はキーフレーム名が入る
         map_keyframe:{},     //キーフレームアニメーション情報を登録
@@ -689,6 +690,10 @@ tyrano.plugin.kag ={
 		}else{
 		   this.variable.tf["system"]["backlog"].push(str);  
         }
+        
+        //セーブ用のテキストファイルを保存
+        this.stat.current_save_str = this.variable.tf["system"]["backlog"][this.variable.tf.system.backlog.length-1];
+        
     	//上限を超えたらFILO で処理
     	if(max_back_log < this.variable.tf["system"]["backlog"].length){
     		this.variable.tf["system"]["backlog"].shift();

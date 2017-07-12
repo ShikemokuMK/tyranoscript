@@ -3709,8 +3709,10 @@ tyrano.plugin.kag.tag.button = {
                     if (that.kag.stat.is_stop == true) {
                         return false;
                     }
-
-                    that.kag.menu.snapSave(that.kag.stat.current_message_str);
+                    
+                    //ここは、現在のセーブ用のメッセージを取得しよう
+                    that.kag.menu.snapSave(that.kag.stat.current_save_str);
+                    
                 }
                 
                 

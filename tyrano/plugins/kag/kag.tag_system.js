@@ -1026,7 +1026,7 @@ tyrano.plugin.kag.tag.autosave = {
 
         //タイトルが設定されいない場合は現在のテキストを設定
         if (pm.title == "") {
-            pm.title = this.kag.stat.current_message_str;
+            pm.title = this.kag.stat.current_save_str;
         }
 
         this.kag.menu.snapSave(pm.title, function() {
@@ -1506,7 +1506,7 @@ tyrano.plugin.kag.tag.sleepgame = {
         var that = this;
 
         //タイトルが設定されていない場合は現在のテキストを設定
-        var title = this.kag.stat.current_message_str;
+        var title = this.kag.stat.current_save_str;
 
         //スナップを保存。サムネは不要
         this.kag.menu.snapSave(title, function() {
