@@ -68,6 +68,8 @@ tyrano.plugin.kag ={
         is_bgm_play:false, //BGMがプレイ中か否か
         is_bgm_play_wait:false, //BGMの完了を待っているか否か。
         
+        loading_make_ref:false, 
+        
         video_playing:false
         
         

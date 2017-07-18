@@ -752,8 +752,9 @@ tyrano.plugin.kag.tag["call"] = {
         back_pm.index = this.kag.ftag.current_order_index;
         back_pm.storage = this.kag.stat.current_scenario;
         back_pm.auto_next = pm.auto_next;
+        
+        back_pm.caller = pm;
 
-        //これは行き先を入れてもしょうがないよね。今の状態を
         
         //コールはラベルに対して行われる
         this.kag.pushStack("call", back_pm);
@@ -792,7 +793,17 @@ tyrano.plugin.kag.tag["return"] = {
         var pm = this.kag.getStack("call");
         //最新のコールスタックを取得
         //呼び出し元に戻る
-
+        
+        //make.ksが終わるときの判定用
+        if(pm.caller && pm.caller.storage){
+            if(pm.caller.storage=="make.ks"){
+               if(this.kag.tmp.loading_make_ref==true){
+                   this.kag.stat.flag_ref_page = true;
+                   this.kag.tmp.loading_make_ref = false;
+               }
+            }
+        }
+        
         var auto_next = pm.auto_next;
         this.kag.popStack("call");
         

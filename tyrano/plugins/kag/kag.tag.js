@@ -103,6 +103,11 @@ tyrano.plugin.kag.ftag = {
             if((tag.name=="call" && tag.pm.storage=="make.ks") || this.kag.stat.current_scenario=="make.ks"){
                 //makeです
                 //make中は基本、メッセージクリアを行わない
+                if(this.kag.stat.flag_ref_page==true){
+                    this.kag.tmp.loading_make_ref = true;
+                    this.kag.stat.flag_ref_page = false;
+                }
+                
             }else{
             
                 if (this.kag.stat.flag_ref_page == true) {
