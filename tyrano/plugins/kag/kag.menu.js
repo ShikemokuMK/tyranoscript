@@ -288,7 +288,7 @@ tyrano.plugin.kag.menu = {
             return false;
         }
 
-        this.loadGameData($.extend(true, {}, data));
+        this.loadGameData($.extend(true, {}, data),{"auto_next":"yes"});
     },
 
     //セーブ状態のスナップを保存します。
@@ -520,6 +520,22 @@ tyrano.plugin.kag.menu = {
              options={bgm_over:"false"};
         }
         
+        if(options.auto_next){
+            auto_next = options.auto_next;
+        }
+        
+        //Live2Dモデルがある場合の後始末
+        if(typeof Live2Dcanvas != "undefined"){
+            for(model_id in Live2Dcanvas){
+                if(Live2Dcanvas[model_id]){
+                    Live2Dcanvas[model_id].check_delete = 2;
+                    Live2D.deleteBuffer(Live2Dcanvas[model_id].modelno);
+                    delete Live2Dcanvas[model_id];
+                }
+            }
+        }
+            
+        
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
         
@@ -692,6 +708,8 @@ tyrano.plugin.kag.menu = {
 
         //auto_next 一旦makeを経由するときに、auto_nextを考えておく
         //alert(auto_next);
+        
+        
         var insert = {
 
             name : "call",
@@ -712,6 +730,8 @@ tyrano.plugin.kag.menu = {
         this.kag.clearTmpVariable();
         
         this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
+        
+        
 
     },
 

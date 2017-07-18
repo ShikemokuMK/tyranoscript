@@ -1242,6 +1242,61 @@ tyrano.plugin.kag.tag.kanim = {
     }
 };
 
+
+
+
+/*
+ #[stop_kanim]
+ :group
+ アニメーション関連
+ :title
+ キーフレームアニメーションの停止
+ :exp
+ キーフレームアニメーションを停止します。
+ :sample
+ :param
+ name=アニメーションさせる停止する画像やテキストのnameを指定してください,
+ layer=nameを指定せずに、layerを指定することでそのlayerに属するエレメント全てにアニメーション停止を適用させることができます
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.stop_kanim = {
+
+    pm : {
+        "name" : "",
+        "layer" : ""
+    },
+
+    start : function(pm) {
+
+        var that = this;
+        
+        if (pm.name != "") {
+            $("."+pm.name).css("-webkit-animation-name","");
+        }else if(pm.layer!=""){
+                
+            var layer_name = pm.layer + "_fore";
+            //フリーレイヤに対して実施
+            if (pm.layer == "free") {
+                layer_name = "layer_free";
+            }
+                
+            $("." + layer_name).children().css("-webkit-animation-name","");
+            
+        }
+
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+
+
+
+
+
+
+
 //=====================================
 
 /*

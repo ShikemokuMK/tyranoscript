@@ -1076,7 +1076,7 @@ tyrano.plugin.kag.tag.autoload = {
 
         var game_data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save");
         this.kag.menu.loadAutoSave();
-
+        
     }
 };
 
