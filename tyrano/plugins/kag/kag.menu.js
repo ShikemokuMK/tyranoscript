@@ -540,7 +540,7 @@ tyrano.plugin.kag.menu = {
         this.kag.layer.setLayerHtml(data.layer);
         
         //ステータスの設定、ディープに設定する
-        $.extend(true,this.kag.stat,data.stat);
+        this.kag.stat = data.stat;
         
         //ステータスがストロングストップの場合
         if (this.kag.stat.is_strong_stop == true) {
