@@ -582,7 +582,11 @@ tyrano.plugin.kag.tag.stopbgm = {
                                     // this == vars
                                 },
                                 complete : function() {
-                                    _audio_obj.pause();
+                                    
+                                    if(_audio_obj.volume <= 0){
+                                        _audio_obj.pause();
+                                    }
+                                                                        
                                     //that.kag.ftag.completeTrans();
                                     /*
                                     if (pm.target === "bgm") {
@@ -669,7 +673,7 @@ tyrano.plugin.kag.tag.fadeinbgm = {
  :title
  :exp
  再生中のBGMをフェードアウトしながら停止します。
- 一部環境（Firefox、Sarafi等）においては対応していません。その場合、playbgmの動作となります。
+ 一部環境（Firefox、Sarafi等）においては対応していません。その場合、stopbgmの動作となります。
  :sample
  [fadeoutbgm  time=3000]
  :param
