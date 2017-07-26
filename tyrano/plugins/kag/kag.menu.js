@@ -377,9 +377,19 @@ tyrano.plugin.kag.menu = {
                 
                 }else{
                     
-                    html2canvas($("#tyrano_base").get(0), {
+                    var tmp_base = $("#tyrano_base");
+                    
+                    var tmp_left = tmp_base.css("left");
+                    var tmp_top = tmp_base.css("top");
+                    var tmp_trans = tmp_base.css("transform");
+                    
+                    tmp_base.css("left",0);
+                    tmp_base.css("top",0);
+                    tmp_base.css("transform", "");
+                    
+                    html2canvas(tmp_base.get(0), {
                         onrendered : function(canvas) {
-                        
+                            
                             $("#tyrano_base").find(".layer_blend_mode").css("display","");
                             
                             // canvas is the final rendered <canvas> element
@@ -393,6 +403,12 @@ tyrano.plugin.kag.menu = {
                         width:that.kag.config.scWidth
                         
                     });
+                    
+                    tmp_base.hide();
+                    tmp_base.css("left",tmp_left);
+                    tmp_base.css("top",tmp_top);
+                    tmp_base.css("transform", tmp_trans);
+                    tmp_base.show();
                 }
 
             }, 20);

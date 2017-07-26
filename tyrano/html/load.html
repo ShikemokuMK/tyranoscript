@@ -34,7 +34,7 @@
 
 	<script>
 	setTimeout(function(){
-		var save_list_height = parseInt($(".tyrano_base").outerHeight()) - parseInt($(".save_list").offset().top) ;
+		var save_list_height = parseInt($(".tyrano_base").outerHeight()) - parseInt($(".save_list").get(0).offsetTop) ;
 		$(".area_save_list").css("height",save_list_height);
 	},30);
 	</script>
