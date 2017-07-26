@@ -3804,7 +3804,10 @@ tyrano.plugin.kag.tag.button = {
                             break;
                             
                         case "sleepgame":
-
+                            
+                            //押されたオブジェクトのマウスオーバーをsleepgame前に解除
+                            j_button.trigger("mouseout");
+                            
                             if(that.kag.tmp.sleep_game != null){
                                 return false;
                             }
