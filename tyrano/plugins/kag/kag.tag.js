@@ -2130,6 +2130,8 @@ bold=太字指定 boldと指定してください　HTML５互換ならfont-styl
 edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。,
 shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。縁取りをしている場合は無効化されます。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
+width=テキスト表示部分の横幅をピクセルで指定します,
+align=文字の横方向に関する位置を指定できます。left（左寄せ）center（中央寄せ）right（右寄せ）デフォルトはleftです。widthパラメータで横幅を指定するのを忘れないようにしてください,
 time=ミリ秒を指定します。指定した時間をかけて徐々に表示させることができます,
 overwrite=true か false を指定します。同時にnameを指定している場合既に存在するptextの内容を変更できます。デフォルトはfalse
 
@@ -2154,10 +2156,12 @@ tyrano.plugin.kag.tag.ptext = {
         "color" : "",
         "italic" : "",
         "bold" : "",
+        "align":"left",
         "edge" : "",
         "shadow" : "",
         "name" : "",
         "time" : "",
+        "width":"",
         "zindex" : "9999",
         "overwrite" : "false" //要素を上書きするかどうか
 
@@ -2220,7 +2224,10 @@ tyrano.plugin.kag.tag.ptext = {
         tobj.css("position", "absolute");
         tobj.css("top", pm.y + "px");
         tobj.css("left", pm.x + "px");
-        tobj.css("width", "100%");
+        tobj.css("width",pm.width);
+        
+        tobj.css("text-align", pm.align);
+        
         
         if (pm.vertical == "true") {
             tobj.addClass("vertical_text");
@@ -2283,6 +2290,10 @@ vertical=true 、false のいずれかを指定してください。trueで縦�
 size=フォントサイズをピクセルで指定してください,
 face=フォントの種類を指定してください。非KAG互換ですが、ウェブフォントも使用できます,
 color=フォントの色を指定します,
+
+width=テキスト表示部分の横幅をピクセルで指定します,
+align=文字の横方向に関する位置を指定できます。left（左寄せ）center（中央寄せ）right（右寄せ）デフォルトはleftです。widthパラメータで横幅を指定するのを忘れないようにしてください,
+
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます,
 edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します,
@@ -2330,6 +2341,8 @@ tyrano.plugin.kag.tag.mtext = {
         "edge" : "",
         "name" : "",
         "zindex" : "9999",
+        "width":"",
+        "align":"left",
         
         "fadeout":"true", //テキストを残すかどうか
         "time":"2000", //テキストを表示時間しておく時間
@@ -2395,8 +2408,9 @@ tyrano.plugin.kag.tag.mtext = {
         tobj.css("position", "absolute");
         tobj.css("top", pm.y + "px");
         tobj.css("left", pm.x + "px");
-        tobj.css("width", "100%");
-
+        tobj.css("width", pm.width);
+        tobj.css("text-align", pm.align);
+        
         if (pm.vertical == "true") {
             tobj.addClass("vertical_text");
         }
