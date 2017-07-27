@@ -20,11 +20,11 @@ $(".layer_camera").empty();
 
 [iscript]
 
-	tf.current_bgm_vol = parseInt(TG.config.defaultBgmVolume);
-	tf.current_se_vol = parseInt(TG.config.defaultSeVolume);
+	tf.current_bgm_vol=parseInt(TG.config.defaultBgmVolume);
+	tf.current_se_vol=parseInt(TG.config.defaultSeVolume);
 	
-	tf.current_ch_speed = parseInt(TG.config.chSpeed);
-	tf.current_auto_speed = parseInt(TG.config.autoSpeed);
+	tf.current_ch_speed=parseInt(TG.config.chSpeed);
+	tf.current_auto_speed=parseInt(TG.config.autoSpeed);
 	
 	tf.text_skip ="ON";
 	
@@ -43,7 +43,7 @@ $(".layer_camera").empty();
 	[bg storage="../../tyrano/images/system/bg_config.jpg" time=100]
 
 ;	画面右上の「Back」ボタン
-	[button graphic="config/c_btn_back.png" enterimg="config/c_btn_back2.png" target="*backtitle" x=840 y=20]
+	[button graphic="config/c_btn_back.png" fix=true enterimg="config/c_btn_back2.png" target="*backtitle" x=840 y=20]
 
 [jump target="*config_page"]
 
@@ -57,46 +57,46 @@ $(".layer_camera").empty();
 ;▼BGM音量
 ;------------------------------------------------------------------------------------------------------
 ;BGM音量-1０
-[button name="bgmvol,bgmvol_10"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=300 y=170 exp="tf.current_bgm_vol = 10"]
+[button name="bgmvol,bgmvol_10"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=300 y=170 exp="tf.current_bgm_vol=10"]
 ;BGM音量-20
-[button name="bgmvol,bgmvol_20"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=340 y=170 exp="tf.current_bgm_vol = 20"]
+[button name="bgmvol,bgmvol_20"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=340 y=170 exp="tf.current_bgm_vol=20"]
 ;BGM音量-30
-[button name="bgmvol,bgmvol_30"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=380 y=170 exp="tf.current_bgm_vol = 30"]
+[button name="bgmvol,bgmvol_30"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=380 y=170 exp="tf.current_bgm_vol=30"]
 ;BGM音量-40
-[button name="bgmvol,bgmvol_40"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=420 y=170 exp="tf.current_bgm_vol = 40"]
+[button name="bgmvol,bgmvol_40"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=420 y=170 exp="tf.current_bgm_vol=40"]
 ;BGM音量-50
-[button name="bgmvol,bgmvol_50"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=460 y=170 exp="tf.current_bgm_vol = 50"]
+[button name="bgmvol,bgmvol_50"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=460 y=170 exp="tf.current_bgm_vol=50"]
 ;BGM音量-60
-[button name="bgmvol,bgmvol_60"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=500 y=170 exp="tf.current_bgm_vol = 60"]
+[button name="bgmvol,bgmvol_60"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=500 y=170 exp="tf.current_bgm_vol=60"]
 ;BGM音量-70
-[button name="bgmvol,bgmvol_70"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=540 y=170 exp="tf.current_bgm_vol = 70"]
+[button name="bgmvol,bgmvol_70"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=540 y=170 exp="tf.current_bgm_vol=70"]
 ;BGM音量-80
-[button name="bgmvol,bgmvol_80"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=580 y=170 exp="tf.current_bgm_vol = 80"]
+[button name="bgmvol,bgmvol_80"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=580 y=170 exp="tf.current_bgm_vol=80"]
 ;BGM音量-90
-[button name="bgmvol,bgmvol_90"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=620 y=170 exp="tf.current_bgm_vol = 90"]
+[button name="bgmvol,bgmvol_90"  fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=620 y=170 exp="tf.current_bgm_vol=90"]
 ;BGM音量-100
-[button name="bgmvol,bgmvol_100" fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=660 y=170 exp="tf.current_bgm_vol = 100"]
+[button name="bgmvol,bgmvol_100" fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=660 y=170 exp="tf.current_bgm_vol=100"]
 
 ;BGM音量-ミュート（音量=0）
-[button name="bgmvol,bgmvol_0"    fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=780 y=170 exp="tf.current_bgm_vol = 0"]
+[button name="bgmvol,bgmvol_0"    fix="true" target="*vol_bgm_change" graphic="config/c_btn.png" width=35 height=35 x=780 y=170 exp="tf.current_bgm_vol=0"]
 
 
 ;------------------------------------------------------------------------------------------------------
 ;▼SE音量
 ;------------------------------------------------------------------------------------------------------
-[button name="sevol,sevol_10"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=300 y=220 exp="tf.current_se_vol = 10"]
-[button name="sevol,sevol_20"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=340 y=220 exp="tf.current_se_vol = 20"]
-[button name="sevol,sevol_30"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=380 y=220 exp="tf.current_se_vol = 30"]
-[button name="sevol,sevol_40"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=420 y=220 exp="tf.current_se_vol = 40"]
-[button name="sevol,sevol_50"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=460 y=220 exp="tf.current_se_vol = 50"]
-[button name="sevol,sevol_60"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=500 y=220 exp="tf.current_se_vol = 60"]
-[button name="sevol,sevol_70"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=540 y=220 exp="tf.current_se_vol = 70"]
-[button name="sevol,sevol_80"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=580 y=220 exp="tf.current_se_vol = 80"]
-[button name="sevol,sevol_90"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=620 y=220 exp="tf.current_se_vol = 90"]
-[button name="sevol,sevol_100" fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=660 y=220 exp="tf.current_se_vol = 100"]
+[button name="sevol,sevol_10"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=300 y=220 exp="tf.current_se_vol=10"]
+[button name="sevol,sevol_20"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=340 y=220 exp="tf.current_se_vol=20"]
+[button name="sevol,sevol_30"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=380 y=220 exp="tf.current_se_vol=30"]
+[button name="sevol,sevol_40"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=420 y=220 exp="tf.current_se_vol=40"]
+[button name="sevol,sevol_50"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=460 y=220 exp="tf.current_se_vol=50"]
+[button name="sevol,sevol_60"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=500 y=220 exp="tf.current_se_vol=60"]
+[button name="sevol,sevol_70"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=540 y=220 exp="tf.current_se_vol=70"]
+[button name="sevol,sevol_80"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=580 y=220 exp="tf.current_se_vol=80"]
+[button name="sevol,sevol_90"   fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=620 y=220 exp="tf.current_se_vol=90"]
+[button name="sevol,sevol_100" fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=660 y=220 exp="tf.current_se_vol=100"]
 
 ;SEミュート
-[button name="sevol,sevol_0"     fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=780 y=220 exp="tf.current_se_vol = 0"]
+[button name="sevol,sevol_0"     fix="true" target="*vol_se_change" graphic="config/c_btn.png" width=35 height=35 x=780 y=220 exp="tf.current_se_vol=0"]
 
 ;------------------------------------------------------------------------------------------------------
 ;▼テキスト速度
@@ -164,12 +164,24 @@ $(".layer_camera").empty();
 ; タイトルに戻る
 ;--------------------------------------------------------------------------------
 *backtitle
+
+[iscript]
+tf.flag_back=$(".message1_fore").css("display");
+[endscript]
+
+[if exp="tf.flag_back=='none'"]
+
 [cm]
 [layopt layer=message1 visible=false]
 [freeimage layer=1]
 [clearfix]
 ;コンフィグの呼び出しに sleepgame を使っているので、必ず awakegame で戻してやってください
 [awakegame]
+
+[endif]
+
+[return]
+
 
 ;===================================================
 
@@ -242,7 +254,7 @@ $(".layer_camera").empty();
 [iscript]
 	$(".unread_off").attr("src","data/image/config/c_uts_off.png");
 	$(".unread_on").attr("src","data/image/config/c_btn.png");
-	tf.text_skip = "OFF";
+	tf.text_skip="OFF";
 [endscript]
 [config_record_label skip=false]
 [return]
@@ -254,7 +266,7 @@ $(".layer_camera").empty();
 [iscript]
 	$(".unread_off").attr("src","data/image/config/c_btn.png");
 	$(".unread_on").attr("src","data/image/config/c_uts_on.png");
-	tf.text_skip = "ON";
+	tf.text_skip="ON";
 [endscript]
 [config_record_label skip=true]
 [return]
