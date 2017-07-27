@@ -533,7 +533,9 @@ tyrano.plugin.kag.menu = {
         
         //普通のロードの場合
         if(typeof options =="undefined"){
-             options={bgm_over:"false"};
+            options={bgm_over:"false"};
+        }else if(typeof options.bgm_over == "undefined"){
+            options={bgm_over:"false"};
         }
         
         if(options.auto_next){
@@ -568,16 +570,29 @@ tyrano.plugin.kag.menu = {
 
         //一旦音楽と効果音は全て止めないと
 
-//BGMを引き継ぐかどうか。
+        //BGMを引き継ぐかどうか。
         if(options.bgm_over=="false"){
             
-            this.kag.ftag.startTag("stopbgm", {
-                stop : "true"
-            });
-            this.kag.ftag.startTag("stopse", {
-                stop : "true"
-            });
-    
+            //全BGMを一旦止める
+            var map_se = this.kag.tmp.map_se;
+            for (var key in map_se) {
+                if(map_se[key]){
+                    this.kag.ftag.startTag("stopse", {
+                        stop : "true",
+                        buf:key
+                    });
+                }
+            }
+            
+            var map_bgm = this.kag.tmp.map_bgm;
+            for (var key in map_bgm) {
+                this.kag.ftag.startTag("stopbgm", {
+                        stop : "true",
+                        buf:key
+                });
+            }
+            
+
             //音楽再生
             if (this.kag.stat.current_bgm != "") {
     
