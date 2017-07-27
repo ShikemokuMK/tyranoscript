@@ -1828,7 +1828,7 @@ tyrano.plugin.kag.tag.image = {
             //オブジェクトにクラス名をセットします
             $.setName(img_obj, pm.name);
             
-            if (pm.time == 0) pm.time = ""; // integer 0 and string "0" are equal to ""
+            if (pm.time == 0 || pm.time=="0") pm.time = ""; // integer 0 and string "0" are equal to ""
             if(pm.time != ""){
         
                 img_obj.css("opacity",0);

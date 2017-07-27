@@ -937,7 +937,6 @@ tyrano.plugin.kag.tag.bgmopt = {
         //再生中のBGMに変更を加える
         var map_bgm = this.kag.tmp.map_bgm;
         
-        
         //バッファが設定されている場合
         if(pm.buf !=""){
             this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
@@ -948,7 +947,7 @@ tyrano.plugin.kag.tag.bgmopt = {
 
         //すぐに反映 スマホアプリの場合はすぐに変更はできない
         if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
-    
+            
             var new_volume = parseFloat(parseInt(pm.volume) / 100);
 
             if(pm.buf ==""){
@@ -1026,7 +1025,7 @@ tyrano.plugin.kag.tag.seopt = {
                     }
                 }
             }else{
-                if(map_se[key]){
+                if(map_se[pm.buf]){
                     map_se[pm.buf].volume = new_volume;    
                 }
             }
