@@ -71,11 +71,11 @@ tyrano.base ={
                    }
                    
                    $(".tyrano_base").css("transform", "scale(" + scale_f + ") ");
-                        if (parseInt(view_width) < parseInt(width)) {
-                            if (scale_f < 1) {
-                                window.scrollTo(width, height);
-                            }
+                   if (parseInt(view_width) < parseInt(width)) {
+                        if (scale_f < 1) {
+                            window.scrollTo(width, height);
                         }
+                   }
 
             }, 100);        	
             

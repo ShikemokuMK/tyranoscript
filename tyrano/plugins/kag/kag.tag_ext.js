@@ -116,6 +116,7 @@ tyrano.plugin.kag.tag.movie = {
             }
         }
 
+
         //top:0px;left:0px;width:100%;height:100%;'";
 
         video.style.backgroundColor = "black";
@@ -145,7 +146,7 @@ tyrano.plugin.kag.tag.movie = {
             }
 
             video.addEventListener("ended", function(e) {
-
+                
                 //alert("ended");
                 //ビデオ再生が終わった時に、次の再生用のビデオが登録されていたら、
                 //ループ完了後に、そのビデオを再生する。
@@ -163,13 +164,9 @@ tyrano.plugin.kag.tag.movie = {
                 } else {
 
                     var video_pm = that.kag.stat.video_stack;
-                    if (video_pm.loop == "true") {
-                        video.loop = true;
-                    } else {
-                        video.loop = false;
-                    }
                     
                     var video2 = document.createElement("video");
+                     
                     
                     video2.style.backgroundColor = "black";
                     video2.style.position = "absolute";
@@ -180,7 +177,14 @@ tyrano.plugin.kag.tag.movie = {
                     video2.autoplay = true;
                     video2.autobuffer = true;
                     
+                    if (video_pm.loop == "true") {
+                        video2.loop = true;
+                    } else {
+                        video2.loop = false;
+                    }
+                    
                     video2.setAttribute("playsinline","1");
+                    
                     
                     // プリロードを設定する
                     video2.src = "./data/video/" + video_pm.storage;
@@ -190,9 +194,11 @@ tyrano.plugin.kag.tag.movie = {
                     j_video2.css("z-index",-1);
                     $("#tyrano_base").append(j_video2);
                     
-                    video2.addEventListener('canplay', function() {
-                        // Video is loaded and can be played
+                    video2.addEventListener('canplay', function(event) {
                         
+                        var arg = arguments.callee;
+                         
+                        // Video is loaded and can be played
                         j_video2.css("z-index",1);
                         
                         setTimeout(function(){
@@ -202,7 +208,10 @@ tyrano.plugin.kag.tag.movie = {
                         
                         that.kag.stat.video_stack = null;
                         that.kag.ftag.nextOrder();
-
+                        
+                        that.kag.tmp.video_playing = true;
+                        
+                        video2.removeEventListener('canplay', arg, false);
                         //document.getElementById("tyrano_base").appendChild(video);
                         
                         //$("#tyrano_base").append(j_video);
@@ -210,6 +219,7 @@ tyrano.plugin.kag.tag.movie = {
                     }, false);
                     
                     //video2でも呼び出し
+                    
                     video2.addEventListener("ended",arguments.callee);
                     
                     /*
@@ -292,7 +302,7 @@ bgmovieをループ中に別のbgmovieを重ねることで、ループが完了
  （注意）このタグはPC限定です。スマホでは利用できません。
 
  :sample
- [bgmovie storage="" skip=false ]
+ [bgmovie storage="test.webm" ]
  :param
  storage=再生するogv webm mp4ファイルを指定してください,
  time=背景動画を表示するときにフェードアウト効果を与える時間を指定します。デフォルトは1000(ミリ秒),

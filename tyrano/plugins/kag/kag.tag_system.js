@@ -1781,7 +1781,7 @@ tyrano.plugin.kag.tag.dialog = {
  [plugin name="original1" font_color="black" arg2="aaaaaa" ]
 
  :param
- name=data/othres/theme以下の配置したフォルダ名（プラグイン名）を指定する,
+ name=data/othres/plugin以下の配置したフォルダ名（プラグイン名）を指定する,
  storage=最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。
 
  #[end]
