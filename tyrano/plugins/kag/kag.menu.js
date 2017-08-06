@@ -436,7 +436,14 @@ tyrano.plugin.kag.menu = {
         
     },
     
-    setGameSleep:function(){
+    setGameSleep:function(next_flag){
+        
+        //awake時にnextOrderするか否か
+        if(next_flag){
+            this.kag.tmp.sleep_game_next = true;    
+        }else{
+            this.kag.tmp.sleep_game_next = false;    
+        }
         
         this.kag.tmp.sleep_game = this.snap;
         

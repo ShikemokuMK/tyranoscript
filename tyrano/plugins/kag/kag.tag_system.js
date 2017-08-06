@@ -1523,7 +1523,8 @@ tyrano.plugin.kag.tag.sleepgame = {
 
     pm : {
         storage : "",
-        target : ""
+        target : "",
+        next:true
     },
 
     start : function(pm) {
@@ -1536,7 +1537,7 @@ tyrano.plugin.kag.tag.sleepgame = {
         //スナップを保存。サムネは不要
         this.kag.menu.snapSave(title, function() {
             //保存したスナップを、sleep領域に配置したうえで、ジャンプする
-            that.kag.menu.setGameSleep();
+            that.kag.menu.setGameSleep(pm.next);
             that.kag.ftag.startTag("jump", pm);
 
         }, "false");
@@ -1593,6 +1594,10 @@ tyrano.plugin.kag.tag.awakegame = {
             var options = {
                 bgm_over : pm.bgm_over
             };
+            
+            if(this.kag.tmp.sleep_game_next==true){
+                options["auto_next"] ="yes";
+            }
 
             this.kag.menu.loadGameData($.extend(true, {}, sleep_data), options);
 

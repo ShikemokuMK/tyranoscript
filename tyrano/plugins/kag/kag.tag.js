@@ -2784,15 +2784,55 @@ tyrano.plugin.kag.tag.wait = {
         this.kag.stat.is_wait = true;
         this.kag.layer.hideEventLayer();
 
-        setTimeout(function() {
+
+        that.kag.tmp.wait_id = setTimeout(function() {
             that.kag.stat.is_strong_stop = false;
             that.kag.stat.is_wait = false;
             that.kag.layer.showEventLayer();
             that.kag.ftag.nextOrder();
         }, pm.time);
+        
+        
 
     }
 };
+
+
+/*
+#[wait_cancel]
+:group
+システム操作
+:title
+ウェイトをキャンセルする
+:exp
+[wait]タグで待ち状態のスタックが存在する場合、キャンセルできます。
+これは[wait]中にボタンクリックなどでジャンプした先でキャンセルするような使い方をします。
+:param
+
+#[end]
+*/
+
+//ウェイト
+tyrano.plugin.kag.tag.wait_cancel = {
+
+    vital : [],
+
+    pm : {
+    },
+
+    start : function(pm) {
+
+        var that = this;
+
+        //[wait]キャンセル
+        clearTimeout(this.kag.tmp.wait_id); 
+        this.kag.tmp.wait_id="";
+        
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
 
 /*
  #[hidemessage]
@@ -3826,9 +3866,10 @@ tyrano.plugin.kag.tag.button = {
                                 return false;
                             }
                             
-                            
                             //ready
                             that.kag.tmp.sleep_game = {};
+                            
+                            _pm.next=false;
                             
                             that.kag.ftag.startTag("sleepgame", _pm);
                             break;
