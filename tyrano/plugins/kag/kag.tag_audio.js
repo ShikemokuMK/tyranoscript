@@ -582,10 +582,9 @@ tyrano.plugin.kag.tag.stopbgm = {
                                     // this == vars
                                 },
                                 complete : function() {
-                                    
-                                    if(_audio_obj.volume <= 0){
+                                    //if(_audio_obj.volume <= 0){
                                         _audio_obj.pause();
-                                    }
+                                    //}
                                                                         
                                     //that.kag.ftag.completeTrans();
                                     /*
