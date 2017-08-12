@@ -15,6 +15,11 @@
 $(".layer_camera").empty();
 [endscript]
 
+;ゲーム中に効果が設定されている場合は無効
+[free_layermode time=0 ]
+[reset_camera time=0]
+
+
 ;	メニューボタン非表示
 	[hidemenubutton]
 
