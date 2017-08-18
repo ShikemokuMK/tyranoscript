@@ -4712,7 +4712,7 @@ tyrano.plugin.kag.tag.bg = {
 PCゲーム環境での推奨機能です。
 一部ブラウザIE,Edge では動作しませんのでご注意ください
 :sample
-[layermode storage=fg0.png time=1500 mode=overlay]
+[layermode graphic=fg0.png time=1500 mode=overlay]
 :param
 name=レイヤ合成に名前をつけることができます。この名前はfree_layremovdeで特定の合成のみを消したい際に使用できます,
 graphic=合成する画像ファイルを指定してください。ファイルはimageフォルダに配置しします,

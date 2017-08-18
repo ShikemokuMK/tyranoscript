@@ -2223,13 +2223,13 @@ tyrano.plugin.kag.tag.chara_mod = {
                 this.kag.error("指定されたキャラクター「" + pm.name + "」もしくはface:「" + pm.face + "」は定義されていません。もう一度確認をお願いします");
                 return;
             }
-            storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
+            storage_url = "./data/fgimage/" +this.kag.stat.charas[pm.name]["map_face"][pm.face];
         } else {
 
             if ($.isHTTP(pm.storage)) {
                 storage_url = pm.storage;
             } else {
-                storage_url = pm.storage
+                storage_url = "./data/fgimage/" + pm.storage;
             }
 
         }
@@ -2247,7 +2247,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         }
 
         //変更する際の画像が同じ場合は、即時表示
-        if ($(".layer_fore").find("." + pm.name).attr("src") == "./data/fgimage/" + storage_url) {
+        if ($(".layer_fore").find("." + pm.name).attr("src") == storage_url) {
             chara_time = "0";
         }
 
@@ -2266,7 +2266,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         }
         
         //画像は事前にロードしておく必要がありそう
-        this.kag.preload("./data/fgimage/" + storage_url, function() {
+        this.kag.preload(storage_url, function() {
             
             if($(".chara-mod-animation").get(0)){
                 $(".chara-mod-animation").remove();
@@ -2275,7 +2275,7 @@ tyrano.plugin.kag.tag.chara_mod = {
             if (chara_time != "0") {
                 
                 var j_new_img = $(".layer_fore").find("." + pm.name).clone();
-                j_new_img.attr("src", "./data/fgimage/" + storage_url);
+                j_new_img.attr("src", storage_url);
                 j_new_img.css("opacity", 0);
                 
                 
@@ -2313,7 +2313,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                 });
     
             } else {
-                $(".layer_fore").find("." + pm.name).attr("src", "./data/fgimage/" + storage_url);
+                $(".layer_fore").find("." + pm.name).attr("src", storage_url);
                 
                 if(pm.wait=="true"){
                     that.kag.ftag.nextOrder();
