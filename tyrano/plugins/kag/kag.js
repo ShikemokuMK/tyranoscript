@@ -454,8 +454,9 @@ tyrano.plugin.kag ={
         if(that.variable.sf._system_config_auto_speed) that.config["autoSpeed"] = that.variable.sf._system_config_auto_speed;
         if(that.variable.sf._system_config_auto_click) that.config["autoClickStop"] = that.variable.sf._system_config_auto_click_stop;
         if(that.variable.sf._system_config_already_read_text_color) that.config["alreadyReadTextColor"] = that.variable.sf._system_config_already_read_text_color;
-        if(that.variable.sf._system_config_unread_text_skip) that.config["unReadTextSkip"] = that.variable.sf._system_config_unread_text_skip;
-        
+        if(typeof that.variable.sf._system_config_unread_text_skip != "undefined"){
+            that.config["unReadTextSkip"] = that.variable.sf._system_config_unread_text_skip;
+        }
          
         //自動セーブのデータがあるかどうか
         var auto_save_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");

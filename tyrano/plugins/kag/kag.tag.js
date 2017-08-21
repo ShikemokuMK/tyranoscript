@@ -1086,7 +1086,7 @@ tyrano.plugin.kag.tag.config_record_label = {
                 this.kag.config.unReadTextSkip = "false";
             }
             
-            this.kag.ftag.startTag("eval", {"exp":"sf._system_config_unread_text_skip = "+pm.skip});
+            this.kag.ftag.startTag("eval", {"exp":"sf._system_config_unread_text_skip = '"+pm.skip+"'"});
         }
         
         this.kag.ftag.nextOrder();    

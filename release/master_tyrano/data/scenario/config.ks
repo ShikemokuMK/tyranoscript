@@ -9,16 +9,15 @@
 ;	fixボタン消し
 	[clearfix]
 	
+;ゲーム中に効果が設定されている場合は無効
+[free_layermode time=0 ]
+[reset_camera time=0]
+	
 ;　イメージ消去
 
 [iscript]
 $(".layer_camera").empty();
 [endscript]
-
-;ゲーム中に効果が設定されている場合は無効
-[free_layermode time=0 ]
-[reset_camera time=0]
-
 
 ;	メニューボタン非表示
 	[hidemenubutton]
@@ -33,7 +32,7 @@ $(".layer_camera").empty();
 	
 	tf.text_skip ="ON";
 	
-	if(TG.config.unReadTextSkip != true){
+	if(TG.config.unReadTextSkip != "true"){
 		tf.text_skip ="OFF";
 	} 
 
