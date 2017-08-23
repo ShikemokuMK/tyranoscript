@@ -70,6 +70,8 @@ tyrano.plugin.kag ={
         is_bgm_play:false, //BGMがプレイ中か否か
         is_bgm_play_wait:false, //BGMの完了を待っているか否か。
         
+        is_audio_stopping:false,//BGMがフェードアウト中かどうか。
+        
         loading_make_ref:false, 
         
         wait_id:"", //waitをキャンセルするために使います。

@@ -121,6 +121,7 @@ tyrano.plugin.kag.tag.playbgm = {
             }
             
         }else{
+            this.kag.tmp.is_audio_stopping = false;
             this.kag.tmp.is_bgm_play = true;
         }
 
@@ -567,6 +568,8 @@ tyrano.plugin.kag.tag.stopbgm = {
     
                         //フェードアウトしながら再生停止
                         if (pm.fadeout == "true") {
+                            
+                            that.kag.tmp.is_audio_stopping = true;
     
                             var vars = jQuery.extend($('<div>')[0], {
                                 "volume" : _audio_obj.volume
@@ -578,11 +581,20 @@ tyrano.plugin.kag.tag.stopbgm = {
                                 easing : "linear",
                                 duration : parseInt(pm.time),
                                 step : function() {
+                                    
+                                    if(that.kag.tmp.is_audio_stopping==false){
+                                        $(vars).stop();
+                                        return false    
+                                    }
+                                    
                                     _audio_obj.volume = this.volume;
+                                    
                                     // this == vars
                                 },
                                 complete : function() {
+                                    
                                     //if(_audio_obj.volume <= 0){
+                                        that.kag.tmp.is_audio_stopping = false;
                                         _audio_obj.pause();
                                     //}
                                                                         
