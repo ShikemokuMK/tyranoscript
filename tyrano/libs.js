@@ -805,11 +805,41 @@
     */
 
     $.alert = function(str,cb) {
-        alertify.alert(str,function(){;
+        
+        $(".remodal_title").html(str);
+        
+        $(".remodal").find(".remodal-cancel").hide();
+        $(".remodal").find(".remodal-confirm").show();
+        
+        var inst = $('[data-remodal-id=modal]').remodal();
+        inst.open();
+        
+        $(document).off('closed', '.remodal');        
+        $(document).on('closed', '.remodal', function (e) {
+            
             if(typeof cb == "function"){
                 cb();
             }
+            
         });
+        
+        
+        /*
+        if ($.userenv() != "pc") {
+            alert(str);
+            if(typeof cb == "function"){
+                cb();
+            }
+            
+        }else{
+            alertify.alert(str,function(){;
+                if(typeof cb == "function"){
+                    cb();
+                }
+            });
+        }
+        */
+        
     };
     
     $.inform =function(str,type){
@@ -818,15 +848,55 @@
     
     $.confirm = function (str,cb_ok,cb_cancel){
         
-        alertify.confirm(str,function(e){
-            if (e) {
-            // user clicked "ok"
+        $(".remodal_title").html(str);
+        
+        $(".remodal").find(".remodal-cancel").show();
+        $(".remodal").find(".remodal-confirm").show();
+        
+        var inst = $('[data-remodal-id=modal]').remodal();
+        inst.open();
+        
+        /////////OK /////////////
+        $(document).off('confirmation', '.remodal');        
+        $(document).on('confirmation', '.remodal', function (e) {
+            
+            if(typeof cb_ok == "function"){
                 cb_ok();
-            } else {
-                // user clicked "cancel"
+            }
+            
+        });
+        
+        ///////キャンセル//////////////
+        $(document).off('cancellation', '.remodal');        
+        $(document).on('cancellation', '.remodal', function (e) {
+            
+            if(typeof cb_cancel == "function"){
                 cb_cancel();
             }
+            
         });
+        
+        /*
+        if ($.userenv() != "pc") {
+            
+            if(window.confirm(str)){
+                cb_ok();
+        	}else{
+        		cb_cancel();
+        	}
+            
+        }else{
+            alertify.confirm(str,function(e){
+                if (e) {
+                // user clicked "ok"
+                    cb_ok();
+                } else {
+                    // user clicked "cancel"
+                    cb_cancel();
+                }
+            });
+        }       
+        */     
                 
     };
 

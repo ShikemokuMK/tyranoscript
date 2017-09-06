@@ -16,9 +16,15 @@
 <script type="text/javascript" src="./tyrano/libs/jquery.a3d.js"></script>
 <script type="text/javascript" src="./tyrano/libs/jsrender.min.js"></script>
 
+<!-- 廃止予定 alertify.js -->
 <link href="./tyrano/libs/alertify/alertify.core.css" rel="stylesheet" type="text/css"/>
 <link href="./tyrano/libs/alertify/alertify.default.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="./tyrano/libs/alertify/alertify.min.js"></script>
+
+<!-- remodal -->
+<link rel="stylesheet" href="./tyrano/libs/remodal/remodal.css">
+<link rel="stylesheet" href="./tyrano/libs/remodal/remodal-default-theme.css">
+<script src="./tyrano/libs/remodal/remodal.js"></script>
 
 
 <script type="text/javascript" src="./tyrano/libs/html2canvas.js"></script>
@@ -69,6 +75,21 @@ window.onload = function() { setTimeout(doScroll, 100); }
 <!--
 <input type="hidden" id="first_scenario_file" value="http://test.com/tyrano/data/scenario/first.ks">
 -->
+
+<!-- モーダル用 -->
+<div class="remodal-bg" ></div>
+<div class="remodal" data-remodal-id="modal" data-remodal-options="closeOnEscape:false, closeOnOutsideClick:false">
+  <!--
+  <button data-remodal-action="close" class="remodal-close"></button>
+  -->
+  <h1 class="remodal_title"></h1>
+  <p class="remodal_txt">
+  </p>
+  <br>
+  <button data-remodal-action="cancel" class="remodal-cancel">Cancel</button>
+  <button data-remodal-action="confirm" class="remodal-confirm">OK</button>
+</div>
+
 
 </body>
 </html>
