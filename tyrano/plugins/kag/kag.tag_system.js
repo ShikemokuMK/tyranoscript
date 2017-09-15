@@ -544,16 +544,18 @@ tyrano.plugin.kag.tag["if"] = {
         if (this.kag.embScript(pm.exp)) {
 
             //実行済み、次にels elsif が出てきても、無視する
-            this.kag.pushStack("if", true);
-
+            //this.kag.pushStack("if", true);
+            this.kag.pushStack("if", {bool: true, deep: pm.deep_if});
+			
             //普通に次の処理を実行
             this.kag.ftag.nextOrder();
 
             //条件ミス
         } else {
             //まだ、if文をぬけられない
-            this.kag.pushStack("if", false);
-
+            //this.kag.pushStack("if", false);
+            this.kag.pushStack("if", {bool: false, deep: pm.deep_if});
+			
             for (var i = 0; i < 2000; i++) {
 
                 var r = this.kag.ftag.nextOrderWithTag({
@@ -606,9 +608,9 @@ tyrano.plugin.kag.tag["elsif"] = {
     start : function(pm) {
 
         //条件合格
-        if (this.kag.getStack("if") == false && this.kag.embScript(pm.exp)) {
-
-            this.kag.setStack("if", true);
+        if (this.kag.getStack("if").bool == false && this.kag.embScript(pm.exp)) {
+			this.kag.setStack("if", {bool: true, deep: pm.deep_if});
+		    
             this.kag.ftag.nextOrder();
 
             //条件ミス
@@ -663,9 +665,9 @@ tyrano.plugin.kag.tag["else"] = {
     start : function(pm) {
 
         //条件合格
-        if (this.kag.getStack("if") == false) {
-
-            this.kag.setStack("if", true);
+        if (this.kag.getStack("if").bool == false) {
+			this.kag.setStack("if", {bool: true, deep: pm.deep_if});
+			
             this.kag.ftag.nextOrder();
 
             //条件ミス

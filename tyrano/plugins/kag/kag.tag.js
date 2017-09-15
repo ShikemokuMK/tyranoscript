@@ -249,6 +249,15 @@ tyrano.plugin.kag.ftag = {
             if (target_tags[tag.name] == "") {
 
                 if (this.master_tag[tag.name]) {
+                    
+                    switch (tag.name) {
+					case "elsif":
+					case "else":
+					case "endif":
+						var root = this.kag.getStack("if");
+						if (!root || tag.pm.deep_if != root.deep) return false;
+					};
+                    
                     //この時点で、変数の中にエンティティがあれば、置き換える必要あり
                     tag.pm = this.convertEntity(tag.pm);
                     this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));

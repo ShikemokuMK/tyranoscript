@@ -5,8 +5,8 @@ tyrano.plugin.kag.parser ={
     kag:null,
     
     flag_script:false , //スクリプト解析中なら
-        
-    
+    deep_if: 0,
+	
     init:function(){
      
         //alert("kag.parser 初期化");
@@ -269,6 +269,11 @@ tyrano.plugin.kag.parser ={
             
         };
         
+        if (this.deep_if != 0) {
+			alert("[if]と[endif]の数が一致しません。シナリオを見直してみませんか？");
+			this.deep_if = 0;
+		}
+        
         return result_obj;
         
         
@@ -411,6 +416,20 @@ tyrano.plugin.kag.parser ={
         if(obj.name == "endscript"){
             this.flag_script = false;
         }
+        
+        
+        switch (obj.name) {
+		case "if":
+			this.deep_if++;
+		case "elsif":
+		case "else":
+			obj.pm.deep_if = this.deep_if;
+			break;
+		case "endif":
+			obj.pm.deep_if = this.deep_if;
+			this.deep_if--;
+			break;
+		};
         
         return obj;
         

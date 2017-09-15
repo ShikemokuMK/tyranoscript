@@ -372,7 +372,6 @@ tyrano.plugin.kag ={
         return this.stat.stack[name][this.stat.stack[name].length-1];
     },
     
-    //催行日に値を設定
     setStack:function(name,flag){
         this.stat.stack[name][this.stat.stack[name].length-1] = flag;
     },
