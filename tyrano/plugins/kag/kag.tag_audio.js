@@ -67,7 +67,7 @@ tyrano.plugin.kag.tag.playbgm = {
             
             that.playGap(pm);
 
-            //スマホからのアクセスの場合は、クリックを挟む
+            //スマホからのアクセスの場合は、クリックを挟む →廃止
         } else if ($.userenv() != "pc") {
             this.kag.layer.hideEventLayer();
             //スマホからの場合、スキップ中は音楽をならさない
@@ -162,7 +162,7 @@ tyrano.plugin.kag.tag.playbgm = {
         }
         
         var storage_url = "";
-
+        
         var browser = $.getBrowser();
         var storage = pm.storage;
 

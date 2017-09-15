@@ -545,14 +545,14 @@
     $appendTo.append(remodal.$wrapper);
 
     // Add the event listener for the close button
-    remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="close"]', function(e) {
+    remodal.$wrapper.on('touchstart click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="close"]', function(e) {
       e.preventDefault();
 
       remodal.close();
     });
 
     // Add the event listener for the cancel button
-    remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="cancel"]', function(e) {
+    remodal.$wrapper.on('touchstart click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="cancel"]', function(e) {
       e.preventDefault();
 
       remodal.$modal.trigger(STATE_CHANGE_REASONS.CANCELLATION);
@@ -563,7 +563,7 @@
     });
 
     // Add the event listener for the confirm button
-    remodal.$wrapper.on('click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="confirm"]', function(e) {
+    remodal.$wrapper.on('touchstart click.' + NAMESPACE, '[data-' + PLUGIN_NAME + '-action="confirm"]', function(e) {
       e.preventDefault();
 
       remodal.$modal.trigger(STATE_CHANGE_REASONS.CONFIRMATION);
@@ -574,7 +574,7 @@
     });
 
     // Add the event listener for the overlay
-    remodal.$wrapper.on('click.' + NAMESPACE, function(e) {
+    remodal.$wrapper.on('touchstart click.' + NAMESPACE, function(e) {
       var $target = $(e.target);
 
       if (!$target.hasClass(namespacify('wrapper'))) {
@@ -746,7 +746,7 @@
   $(document).ready(function() {
 
     // data-remodal-target opens a modal window with the special Id
-    $(document).on('click', '[data-' + PLUGIN_NAME + '-target]', function(e) {
+    $(document).on('touchstart click', '[data-' + PLUGIN_NAME + '-target]', function(e) {
       e.preventDefault();
 
       var elem = e.currentTarget;

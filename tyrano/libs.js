@@ -389,7 +389,9 @@
             return "chrome";
         } else if (userAgent.indexOf("safari") > -1) {
             return "safari";
-        } else {
+        }else if (userAgent.indexOf("applewebkit") > -1) {
+            return "safari";
+        }else {
             return "unknown";
         }
 
@@ -857,6 +859,9 @@
         inst.open();
         
         /////////OK /////////////
+        
+        $(document).off('closed', '.remodal');        
+        
         $(document).off('confirmation', '.remodal');        
         $(document).on('confirmation', '.remodal', function (e) {
             

@@ -1648,9 +1648,10 @@ tyrano.plugin.kag.tag.breakgame = {
  :title
  ダイアログ表示
  :exp
- 様々な機能をもったダイアログを表示します。
+ 確認用のダイアログを表示します。
  ダイアログは以下のタイプがあります。
  alert confirm input
+ inputはv470以降、廃止します。使用しないでください
  :sample
  ;警告ウィンドウのメッセージ表示
  [dialog type="alert" text="メッセージ内容" ]
@@ -1658,12 +1659,13 @@ tyrano.plugin.kag.tag.breakgame = {
  ;確認ダイアログの表示
  [dialog type="confirm" text="メッセージ内容" storage="scene2" target="ok_label" storage_cancel="" target_cancel="" ]
 
+ ;V470から廃止です。使用しないでください
  ;テキスト入力ダイアログの表示
  [dialog type="input" text="名前を教えて下さい" storage="scene2" target="ok_label" ]
 
  :param
  name=confirmを指定した時に格納する変数名を指定して下さい。
- type=ダイアログの種類を指定します。alert confirm input,
+ type=ダイアログの種類を指定します。alert confirm ,
  text=メッセージとして表示するてテキストを指定して下さい,
  storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
  target=指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
