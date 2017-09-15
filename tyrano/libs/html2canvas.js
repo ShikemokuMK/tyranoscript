@@ -824,7 +824,8 @@ function cloneCanvasContents(ownerDocument, documentClone) {
             if (clonedCanvas) {
                 clonedCanvas.width = canvas.width;
                 clonedCanvas.height = canvas.height;
-                clonedCanvas.getContext("2d").putImageData(canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height), 0, 0);
+            //  clonedCanvas.getContext("2d").putImageData(canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height), 0, 0);
+                clonedCanvas.getContext("2d").drawImage(canvas, 0, 0, canvas.width, canvas.height );
             }
         } catch(e) {
             log("Unable to copy canvas content from", canvas, e);
