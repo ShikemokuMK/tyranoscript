@@ -151,7 +151,7 @@ tyrano.plugin.kag.ftag = {
                 //バックログに入れるかどうか。
                 if(this.master_tag[tag.name].log_join){
                     
-                    this.kag.stat.log_join = "true";
+                    this.kag.stat.log_join = this.master_tag[tag.name].log_join;
                     
                 }else{
                     
@@ -647,12 +647,11 @@ tyrano.plugin.kag.tag.text = {
             pm.backlog="join";
         }
         
-        
         //バックログ用の値を格納
         var chara_name = $.isNull($(".chara_name_area").html());
         if((chara_name != "" && pm.backlog!="join") || (chara_name!="" && this.kag.stat.f_chara_ptext=="true")){
             
-            this.kag.pushBackLog("<b>"+chara_name+"</b>："+message_str,"add");
+            this.kag.pushBackLog("<b class='backlog_chara_name "+chara_name+"'>"+chara_name+"</b>：<span class='backlog_text "+chara_name+"'>"+message_str+"</span>","add");
             
             if(this.kag.stat.f_chara_ptext=="true"){
                 this.kag.stat.f_chara_ptext="false";
@@ -660,10 +659,13 @@ tyrano.plugin.kag.tag.text = {
             }
             
         }else{
+            
+            var log_str = "<span class='backlog_text "+chara_name+"'>"+ message_str +"</span>";
+            
             if(pm.backlog=="join"){
-                this.kag.pushBackLog(message_str,"join");
+                this.kag.pushBackLog(log_str,"join");
             }else{
-                this.kag.pushBackLog(message_str,"add");
+                this.kag.pushBackLog(log_str,"add");
                 
             }
         }
@@ -1349,6 +1351,8 @@ tyrano.plugin.kag.tag.jump = {
 //改行を挿入
 tyrano.plugin.kag.tag.r = {
 
+    log_join:"true",
+    
     start : function() {
         
         var that = this;
@@ -3135,7 +3139,7 @@ tyrano.plugin.kag.tag.delay = {
     pm : {
         speed : ""
     },
-
+    
     log_join:"true",
     
     start : function(pm) {

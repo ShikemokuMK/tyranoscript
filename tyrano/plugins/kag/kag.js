@@ -696,15 +696,16 @@ tyrano.plugin.kag ={
         }
     	
     	if(type=="join"){
-    	   var index = this.variable.tf.system.backlog.length-1;
-    	   if(index >= 0){ //配列が存在しない場合はpushだ
-    	      var tmp = this.variable.tf["system"]["backlog"][index];
-    	      this.variable.tf["system"]["backlog"][this.variable.tf.system.backlog.length-1] = tmp + str;
-		   }else{
-    		   this.variable.tf["system"]["backlog"].push(str);  
-		   }
+        	
+    	    var index = this.variable.tf.system.backlog.length-1;
+    	    if(index >= 0){ //配列が存在しない場合はpushだ
+    	       var tmp = this.variable.tf["system"]["backlog"][index];
+    	       this.variable.tf["system"]["backlog"][this.variable.tf.system.backlog.length-1] = tmp + str;
+		    }else{
+    		    this.variable.tf["system"]["backlog"].push(str);  
+		    }
 		}else{
-		   this.variable.tf["system"]["backlog"].push(str);  
+            this.variable.tf["system"]["backlog"].push(str);  
         }
         
         //セーブ用のテキストファイルを保存
