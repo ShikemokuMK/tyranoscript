@@ -151,7 +151,7 @@ tyrano.plugin.kag.ftag = {
                 //バックログに入れるかどうか。
                 if(this.master_tag[tag.name].log_join){
                     
-                    this.kag.stat.log_join = this.master_tag[tag.name].log_join;
+                    this.kag.stat.log_join = "true";
                     
                 }else{
                     
