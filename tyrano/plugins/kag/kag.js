@@ -161,6 +161,8 @@ tyrano.plugin.kag ={
         skip_link:"true", //選択肢のあと、スキップを継続するかどうか。
         
         log_join:"false", //特定のタグの時に、ログが分裂しないようにするため。trueなら前のログに連結させる
+        log_clear:false, // p cm などの文字クリアの時は、強制的に次のログ追加をjoinではなく、addにする
+        
         f_chara_ptext:"false",
         
         flag_glyph : "false", //クリック待ちボタンが指定されているか否か
@@ -686,6 +688,12 @@ tyrano.plugin.kag ={
     	var max_back_log = parseInt(this.kag.config["maxBackLogNum"]);
     	
     	if(max_back_log < 1 ) return ;
+    	
+    	//バックログを必ずクリアしてから追加。pなどの通過後
+    	if(this.kag.stat.log_clear==true){
+        	type="add";
+            this.kag.stat.log_clear=false; 
+        }
     	
     	if(type=="join"){
     	   var index = this.variable.tf.system.backlog.length-1;

@@ -106,6 +106,7 @@ tyrano.plugin.kag.ftag = {
                 if(this.kag.stat.flag_ref_page==true){
                     this.kag.tmp.loading_make_ref = true;
                     this.kag.stat.flag_ref_page = false;
+                    
                 }
                 
             }else{
@@ -113,8 +114,10 @@ tyrano.plugin.kag.ftag = {
                 if (this.kag.stat.flag_ref_page == true) {
     
                     this.kag.stat.flag_ref_page = false;
-                    //this.startTag("cm"); //画面クリア　かつ、　画面遷移なし
-    
+                    
+                    //バックログ、画面クリア後は強制的に画面クリア
+                    this.kag.stat.log_clear = true;
+                
                     this.kag.ftag.hideNextImg();
     
                     this.kag.getMessageInnerLayer().html("");
@@ -1424,6 +1427,9 @@ tyrano.plugin.kag.tag.cm = {
         //フォントのリセット
         //カレントレイヤだけじゃなくて、全てもメッセージレイヤを消去する必要がある
         this.kag.layer.clearMessageInnerLayerAll();
+        
+        this.kag.stat.log_clear = true;
+        
         //フリーレイヤ消去
         this.kag.layer.getFreeLayer().html("").hide();
 
