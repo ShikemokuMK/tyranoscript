@@ -2846,6 +2846,9 @@ tyrano.plugin.kag.tag.wait_cancel = {
         //[wait]キャンセル
         clearTimeout(this.kag.tmp.wait_id); 
         this.kag.tmp.wait_id="";
+        this.kag.stat.is_strong_stop = false;
+        this.kag.stat.is_wait = false;
+        this.kag.layer.showEventLayer();
         
         this.kag.ftag.nextOrder();
 

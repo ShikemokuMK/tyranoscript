@@ -1431,21 +1431,27 @@ tyrano.plugin.kag.tag.chara_ptext = {
             
         }
         
-
+        this.kag.stat.f_chara_ptext="true";
+        
         //表情の変更もあわせてできる
         if (pm.face != "") {
             if (!(this.kag.stat.charas[pm.name]["map_face"][pm.face])) {
                 this.kag.error("指定されたキャラクター「" + pm.name + "」もしくはface:「" + pm.face + "」は定義されていません。もう一度確認をお願いします");
                 return;
             }
+            
             var storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
-            $("." + pm.name).attr("src", "./data/fgimage/" + storage_url);
+            
+            //chara_mod タグで実装するように調整
+            this.kag.ftag.startTag("chara_mod", {name:pm.name,face:pm.face});
+            
             //$("."+pm.name).attr("src",storage_url);
+        
+        }else{
+        
+            this.kag.ftag.nextOrder();
+        
         }
-        
-        this.kag.stat.f_chara_ptext="true";
-        
-        this.kag.ftag.nextOrder();
 
     }
 };
