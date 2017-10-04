@@ -2275,7 +2275,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         this.kag.preload(storage_url, function() {
             
             if($(".chara-mod-animation").get(0)){
-                $(".chara-mod-animation").remove();
+                $(".chara-mod-animation_"+pm.name).remove();
             }
             
             if (chara_time != "0") {
@@ -2286,7 +2286,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                 
                 
                 var j_img = $(".layer_fore").find("." + pm.name);
-                j_img.addClass("chara-mod-animation");
+                j_img.addClass("chara-mod-animation_"+pm.name);
                 j_img.after(j_new_img);
     
                 if(pm.cross=="true"){
@@ -2319,6 +2319,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                 });
     
             } else {
+                
                 $(".layer_fore").find("." + pm.name).attr("src", storage_url);
                 
                 if(pm.wait=="true"){
