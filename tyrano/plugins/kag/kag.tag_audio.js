@@ -91,7 +91,7 @@ tyrano.plugin.kag.tag.playbgm = {
 
                     that.play(pm);
                     $(".tyrano_base").unbind("click.bgm");
-                    that.kag.layer.showEventLayer();
+                    //that.kag.layer.showEventLayer();
 
                 }
 
@@ -258,6 +258,14 @@ tyrano.plugin.kag.tag.playbgm = {
             }
             this.kag.tmp.map_se[pm.buf] = audio_obj;
         }
+        
+        $(audio_obj).off("play");
+        $(audio_obj).on("play",function(){
+        	that.kag.layer.showEventLayer();
+			if (pm.stop == "false") {
+				that.kag.ftag.nextOrder();
+        	}
+        });
 
         audio_obj.play();
         
@@ -315,10 +323,6 @@ tyrano.plugin.kag.tag.playbgm = {
             });
         }
 
-        if (pm.stop == "false") {
-
-            this.kag.ftag.nextOrder();
-        }
     },
 
     //phonegapで再生する
