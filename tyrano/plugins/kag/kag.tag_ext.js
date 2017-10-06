@@ -1338,6 +1338,8 @@ tyrano.plugin.kag.tag.chara_ptext = {
     },
 
     start : function(pm) {
+        
+        this.kag.layer.hideEventLayer();
 
         if (pm.name == "") {
             $("." + this.kag.stat.chara_ptext).html("");
@@ -1448,7 +1450,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
             //$("."+pm.name).attr("src",storage_url);
         
         }else{
-        
+            this.kag.layer.showEventLayer();
             this.kag.ftag.nextOrder();
         
         }
@@ -2220,8 +2222,9 @@ tyrano.plugin.kag.tag.chara_mod = {
     },
 
     start : function(pm) {
-
+        
         var that = this;
+        that.kag.layer.hideEventLayer();
 
         var storage_url = "";
         var folder= "./data/fgimage/";
@@ -2246,6 +2249,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         if ($(".layer_fore").find("." + pm.name).size() == 0) {
             this.kag.stat.charas[pm.name]["storage"] = storage_url;
             this.kag.stat.charas[pm.name]["reflect"] = pm.reflect;
+            this.kag.layer.showEventLayer();
             this.kag.ftag.nextOrder();
             return;
         }
@@ -2306,6 +2310,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                             j_img.remove();
                             
                             if(pm.wait=="true"){
+                                that.kag.layer.showEventLayer();
                                 that.kag.ftag.nextOrder();
                             }
                             
@@ -2316,6 +2321,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                         j_img.remove();
                         
                         if(pm.wait=="true"){
+                            that.kag.layer.showEventLayer();
                             that.kag.ftag.nextOrder();
                         }
                     }
@@ -2326,6 +2332,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                 $(".layer_fore").find("." + pm.name).attr("src", folder + storage_url);
                 
                 if(pm.wait=="true"){
+                    that.kag.layer.showEventLayer();
                     that.kag.ftag.nextOrder();
                 }
             }
@@ -2334,6 +2341,7 @@ tyrano.plugin.kag.tag.chara_mod = {
             that.kag.stat.charas[pm.name]["storage"] = storage_url;
             
             if(pm.wait=="false"){
+                that.kag.layer.showEventLayer();
                 that.kag.ftag.nextOrder();
             }
 

@@ -261,7 +261,7 @@ tyrano.plugin.kag.tag.playbgm = {
         
         $(audio_obj).off("play");
         $(audio_obj).on("play",function(){
-        	that.kag.layer.showEventLayer();
+            that.kag.layer.showEventLayer();
 			if (pm.stop == "false") {
 				that.kag.ftag.nextOrder();
         	}
@@ -801,7 +801,9 @@ tyrano.plugin.kag.tag.playse = {
     },
 
     start : function(pm) {
-
+        
+        this.kag.layer.hideEventLayer();
+            
         if (pm.clear == "true") {
             this.kag.ftag.startTag("stopbgm", {
                 target : "se",

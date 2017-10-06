@@ -4130,9 +4130,12 @@ tyrano.plugin.kag.tag.glink = {
                 
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        "storage" : _pm.clickse
-                    });
+                    setTimeout(function(){
+                        that.kag.ftag.startTag("playse", {
+                            "storage" : _pm.clickse,
+                            "stop" : true
+                        });
+                    },20);
                 }
 
                 //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
