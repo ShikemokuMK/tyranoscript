@@ -2275,8 +2275,9 @@ tyrano.plugin.kag.tag.ptext = {
                     }
             );
         }else{
-            this.kag.ftag.nextOrder();
             target_layer.append(tobj);
+            this.kag.ftag.nextOrder();
+            
         }
         
         
