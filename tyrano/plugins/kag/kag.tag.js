@@ -3745,14 +3745,6 @@ tyrano.plugin.kag.tag.button = {
 
             j_button.click(function(event) {
                 
-                //クリックされた時に音が指定されていたら
-                if (_pm.clickse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        "storage" : _pm.clickse,
-                        "stop" : true
-                    });
-                }
-
                 if (_pm.clickimg != "") {
 
                     var click_img_url = "";
@@ -3897,12 +3889,28 @@ tyrano.plugin.kag.tag.button = {
                             break;
 
                     }
+                    
+                    //クリックされた時に音が指定されていたら
+                    if (_pm.clickse != "") {
+                        that.kag.ftag.startTag("playse", {
+                            "storage" : _pm.clickse,
+                            "stop" : true
+                        });
+                    }
 
                     //バグリングさせない
                     event.stopPropagation();
 
                     //ジャンプは行わない
                     return false;
+                }
+                
+                //クリックされた時に音が指定されていたら
+                if (_pm.clickse != "") {
+                    that.kag.ftag.startTag("playse", {
+                        "storage" : _pm.clickse,
+                        "stop" : true
+                    });
                 }
 
                 that.kag.layer.showEventLayer();
@@ -4130,12 +4138,10 @@ tyrano.plugin.kag.tag.glink = {
                 
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
-                    setTimeout(function(){
-                        that.kag.ftag.startTag("playse", {
-                            "storage" : _pm.clickse,
-                            "stop" : true
-                        });
-                    },20);
+                    that.kag.ftag.startTag("playse", {
+                        "storage" : _pm.clickse,
+                        "stop" : true
+                    });
                 }
 
                 //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
