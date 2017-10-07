@@ -1694,7 +1694,7 @@ tyrano.plugin.kag.tag.chara_show = {
         top : "0",
         width : "",
         height : "",
-        zindex : "",
+        zindex : "1",
         reflect : "",
         face : "",
         time : 1000

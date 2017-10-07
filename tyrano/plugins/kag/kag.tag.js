@@ -1746,7 +1746,7 @@ tyrano.plugin.kag.tag.image = {
         "folder" : "", //画像フォルダを明示できる
         "time" : "",
         "wait": "true",
-        "zindex": ""
+        "zindex": "1"
         //"visible":"true"
 
     },
