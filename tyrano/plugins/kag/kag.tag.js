@@ -782,12 +782,12 @@ tyrano.plugin.kag.tag.text = {
 
                     //再生途中にクリックされて、残りを一瞬で表示する
                     if (that.kag.stat.is_click_text == true || that.kag.stat.is_skip == true || that.kag.stat.is_nowait == true) {
-                        setTimeout(function() {
-                            pchar(pchar)
-                        }, 0);
+                        //setTimeout(function() {
+                            pchar(pchar);
+                        //}, 0);
                     } else {
                         setTimeout(function() {
-                            pchar(pchar)
+                            pchar(pchar);
                         }, ch_speed);
                     }
 
