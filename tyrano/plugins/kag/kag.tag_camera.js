@@ -224,6 +224,11 @@ tyrano.plugin.kag.tag.reset_camera = {
     start : function(pm) {
         var that = this;
         //duration を確認する
+        
+        if(parseInt(pm.time)<10){
+            pm.time=10;
+        }
+        
         var duration = pm.time + "ms";
         
         var to_scale   = 1;
