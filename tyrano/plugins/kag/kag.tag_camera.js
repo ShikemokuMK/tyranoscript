@@ -294,7 +294,12 @@ tyrano.plugin.kag.tag.reset_camera = {
             }
         };
         
-        delete this.kag.stat.current_camera[pm.layer] ;
+        if(pm.layer!="layer_camera"){
+            delete this.kag.stat.current_camera[pm.layer] ;
+        }else{
+            //全クリア
+            this.kag.stat.current_camera = {};
+        }
         
         if(pm.wait =="false"){
             that.kag.ftag.nextOrder();
