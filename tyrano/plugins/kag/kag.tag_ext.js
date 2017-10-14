@@ -933,9 +933,10 @@ tyrano.plugin.kag.tag.anim = {
 //トランジション完了を待つ
 tyrano.plugin.kag.tag.wa = {
     start : function(pm) {
-
+        
         //実行中のアニメーションがある場合だけ待つ
         if (this.kag.tmp.num_anim > 0) {
+            this.kag.stat.is_wait_anim = true;
             this.kag.layer.hideEventLayer();
         } else {
             this.kag.ftag.nextOrder();

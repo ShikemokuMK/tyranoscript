@@ -101,6 +101,8 @@ tyrano.plugin.kag ={
         is_wait:false, //wait中。
         is_trans:false, //trans中
         
+        is_wait_anim:false, //[wa]中
+        
         is_strong_stop:false,// [s]タグで立ち止まってる状態。強力な停止中。解除するにはジャンプやマクロが呼び出せれる
         strong_stop_recover_index:0, //[s]タグ指定中に保存した場合、戻ってくるindex [_s]時のindexを保持しておく
         
@@ -809,10 +811,11 @@ tyrano.plugin.kag ={
       if(this.kag.tmp.num_anim <= 0){
           
           //停止中なら
-          if(this.kag.stat.is_stop == true){
+        if(this.kag.stat.is_wait_anim == true){
+            this.kag.stat.is_wait_anim = false;
             this.kag.layer.showEventLayer();
             this.kag.ftag.nextOrder();
-          }
+        }
       }
         
     },
