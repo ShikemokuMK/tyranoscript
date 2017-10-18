@@ -978,18 +978,6 @@ tyrano.plugin.kag.tag.text = {
                         that.kag.ftag.nextOrder()
                     }
 
-                    //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
-                    //グリフが指定されている場合はこちらを適用
-                    if (that.kag.stat.flag_glyph == "false") {
-                        $(".img_next").remove();
-                        jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/nextpage.gif' />");
-
-                    } else {
-
-                        $(".glyph_image").show();
-
-                    }
-                    
                 }
 
             };
