@@ -1982,7 +1982,10 @@ tyrano.plugin.kag.tag.chara_hide = {
 
                     if (chara_cnt == 0) {
                         that.kag.layer.showEventLayer();
-                        that.kag.ftag.nextOrder();
+                        if (pm.wait == "true") {
+                            that.kag.ftag.nextOrder();
+                        }
+                        
                         return;
                     }
 
@@ -2010,7 +2013,9 @@ tyrano.plugin.kag.tag.chara_hide = {
                                     chara_num--;
                                     if (chara_num == 0) {
                                         that.kag.layer.showEventLayer();
-                                        that.kag.ftag.nextOrder();
+                                        if (pm.wait == "true") {
+                                            that.kag.ftag.nextOrder();
+                                        }
                                     }
                                 });
 
@@ -2025,7 +2030,9 @@ tyrano.plugin.kag.tag.chara_hide = {
                                 chara_num--;
                                 if (chara_num == 0) {
                                     that.kag.layer.showEventLayer();
-                                    that.kag.ftag.nextOrder();
+                                    if (pm.wait == "true") {
+                                        that.kag.ftag.nextOrder();
+                                    }
                                 }
 
                             });

@@ -60,6 +60,21 @@ tyrano.plugin.kag.ftag = {
         $(".img_next").remove();
         $(".glyph_image").hide();
     },
+    
+    showNextImg:function(){
+        
+        //グリフが指定されている場合はこちらを適用
+        if (this.kag.stat.flag_glyph == "false") {
+            $(".img_next").remove();
+            var jtext = this.kag.getMessageInnerLayer()
+            jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/nextpage.gif' />");
+
+        } else {
+            $(".glyph_image").show();
+        }
+
+
+    },
 
     //次の命令を実行する
     nextOrder : function() {
@@ -817,17 +832,7 @@ tyrano.plugin.kag.tag.text = {
                     }
 
                     //メッセージ用
-
-                    //グリフが指定されている場合はこちらを適用
-                    if (that.kag.stat.flag_glyph == "false") {
-                        $(".img_next").remove();
-                        jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/nextpage.gif' />");
-
-                    } else {
-                        $(".glyph_image").show();
-
-                    }
-
+                    
                     //that.kag.appendMessage(jtext,current_str+"<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
 
                 }
@@ -1137,12 +1142,15 @@ tyrano.plugin.kag.tag.l = {
         
         var that = this;
         
+        this.kag.ftag.showNextImg();
+        
         //クリックするまで、次へすすまないようにする
         if (this.kag.stat.is_skip == true) {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
             
         }else if(this.kag.stat.is_auto == true){
+            
             this.kag.stat.is_wait_auto = true;
             
             var auto_speed = that.kag.config.autoSpeed;
@@ -1200,11 +1208,14 @@ tyrano.plugin.kag.tag.p = {
         var that = this;
         //改ページ
         this.kag.stat.flag_ref_page = true;
-
+        
+        this.kag.ftag.showNextImg();
+            
         if (this.kag.stat.is_skip == true) {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
         }else if(this.kag.stat.is_auto == true){
+            
             this.kag.stat.is_wait_auto = true;
             
             var auto_speed = that.kag.config.autoSpeed;
