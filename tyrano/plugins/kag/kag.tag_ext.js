@@ -878,13 +878,13 @@ tyrano.plugin.kag.tag.anim = {
         if (pm.name != "") {
 
             //アニメーションスタックの積み上げ
-            that.kag.pushAnimStack();
-
-            $("." + pm.name).animate(anim_style, parseInt(pm.time), pm.effect, function() {
-
-                that.kag.popAnimStack();
-
-            });
+            $("." + pm.name ).each(function(){
+        　　　　that.kag.pushAnimStack();
+        　　　　$(this).animate(anim_style, parseInt(pm.time), pm.effect, function () {
+                  that.kag.popAnimStack()
+        　　　　})
+        　　})
+            
 
         } else if (pm.layer != "") {
 
@@ -1218,10 +1218,12 @@ tyrano.plugin.kag.tag.kanim = {
         if (pm.name != "") {
             delete pm.name;
             delete pm.keyframe;
-
-            that.kag.pushAnimStack();
-
-            $(class_name).a3d(anim);
+            
+            $(class_name).each(function(){
+                that.kag.pushAnimStack();
+                $(this).a3d(anim);
+            });
+            
 
         } else if (pm.layer != "") {
 
@@ -1779,7 +1781,7 @@ tyrano.plugin.kag.tag.chara_show = {
             that.kag.layer.hideEventLayer();
 
             //キャラのサイズを設定する必要がある。
-
+            
             //立ち位置を自動的に設定する場合
             if (that.kag.stat.chara_pos_mode == "true" && pm.left == "0") {
                 

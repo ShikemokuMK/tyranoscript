@@ -289,11 +289,14 @@ tyrano.plugin.kag.parser ={
             val:""
         };
         
+        
         var array_c = str.split("");
         
         var flag_quot_c = "";
         
         var tmp_str = "";
+        
+        var cnt_quot_c = 0;
         
         for (var j=0;j<array_c.length;j++){
             
@@ -301,6 +304,7 @@ tyrano.plugin.kag.parser ={
             
             if(flag_quot_c =="" && (c ==="\"" || c ==="'" )){
                 flag_quot_c = c;
+                cnt_quot_c = 0;
             }else{
             
                 //特殊自体発生中
@@ -311,6 +315,13 @@ tyrano.plugin.kag.parser ={
                         
                         flag_quot_c ="";
                         
+                        //""のように直後に"が出てきた場合undefinedを代入
+                        if(cnt_quot_c==0){
+                            tmp_str+="undefined";
+                        }
+                    
+                        cnt_quot_c=0;
+                    
                     }else{
                     
                         if(c =="="){
@@ -324,8 +335,11 @@ tyrano.plugin.kag.parser ={
                         }
                         
                         tmp_str +=c;
-                        
+                        cnt_quot_c++;
+                    
                     }
+                    
+                
                     
                 }else{
                     tmp_str +=c;

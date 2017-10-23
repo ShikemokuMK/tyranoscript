@@ -613,7 +613,7 @@ tyrano.plugin.kag ={
             this.layer.addLayer(""+i);
             this.layer.getLayer(""+i,"fore")
             .css("display","none")
-            .css("z-index",10); //デフォルト非表示　前景レイヤ
+            .css("z-index",10+i); //デフォルト非表示　前景レイヤ
         }
         
         //デフォルトフォントの設定
