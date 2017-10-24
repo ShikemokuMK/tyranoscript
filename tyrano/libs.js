@@ -530,6 +530,8 @@
             method = $.replaceAll(method,"In","Out");
             var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
             j_obj.addClass('animated ' + method).one(animationEnd, function() {
+                j_obj.off(animationEnd);
+                j_obj.css("animation-duration","");
                 $(this).remove();
                 if (callback) {
                     //callback();
@@ -540,7 +542,8 @@
             j_obj.show();
             var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
             j_obj.addClass('animated ' + method).one(animationEnd, function() {
-                
+                j_obj.off(animationEnd);
+                j_obj.css("animation-duration","");
                 $(this).removeClass('animated ' + method);
                 if (callback) {
                     callback();
