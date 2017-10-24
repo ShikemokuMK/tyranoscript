@@ -131,6 +131,7 @@ tyrano.plugin.kag ={
         is_skip:{},
         is_auto:{},
         current_bgm:"", //現在再生中のBGM
+        current_se:{}, //現在再生中のループ効果音
         
         enable_keyconfig:true, //キーコンフィグが有効 or 無効
         
@@ -218,6 +219,11 @@ tyrano.plugin.kag ={
         chara_talk_focus:"none",
         chara_brightness_value:"60",
         chara_blur_value:"2",
+        
+        chara_talk_anim:"none", //キャラクターが話す時にアニメーションするかどうか
+        chara_talk_anim_time:230,
+        chara_talk_anim_value:30,
+        
         
         apply_filter_str:"", 
         
@@ -614,6 +620,11 @@ tyrano.plugin.kag ={
             this.layer.getLayer(""+i,"fore")
             .css("display","none")
             .css("z-index",10+i); //デフォルト非表示　前景レイヤ
+            
+            this.layer.getLayer(""+i,"back")
+            .css("display","none")
+            .css("z-index",10+i); //デフォルト非表示　前景レイヤ
+        
         }
         
         //デフォルトフォントの設定

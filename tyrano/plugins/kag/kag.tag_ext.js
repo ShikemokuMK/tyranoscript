@@ -1342,6 +1342,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
     start : function(pm) {
         
+        var that = this;
         this.kag.layer.hideEventLayer();
 
         if (pm.name == "") {
@@ -1393,6 +1394,23 @@ tyrano.plugin.kag.tag.chara_ptext = {
                     });
 
                 }
+                
+                //指定したキャラクターでアニメーション設定があった場合
+                if(this.kag.stat.chara_talk_anim != "none"){
+                    
+                    var chara_obj = $("#tyrano_base").find("." + pm.name + ".tyrano_chara");
+                    if(chara_obj.get(0)){
+                        
+                        this.animChara(chara_obj, this.kag.stat.chara_talk_anim);
+                        
+                        if (pm.face != "") {
+                            //即表情変更、アニメーション中になるから        
+                            this.kag.ftag.startTag("chara_mod", {name:pm.name,face:pm.face,time:"0"});
+                        }
+                    }
+                    
+                }
+                
 
             } else {
                 //存在しない場合はそのまま表示できる
@@ -1448,7 +1466,9 @@ tyrano.plugin.kag.tag.chara_ptext = {
             var storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
             
             //chara_mod タグで実装するように調整
-            this.kag.ftag.startTag("chara_mod", {name:pm.name,face:pm.face});
+            if(this.kag.stat.chara_talk_anim == "none"){
+                this.kag.ftag.startTag("chara_mod", {name:pm.name,face:pm.face});
+            }
             
             //$("."+pm.name).attr("src",storage_url);
         
@@ -1458,7 +1478,40 @@ tyrano.plugin.kag.tag.chara_ptext = {
         
         }
 
+    },
+    
+    //キャラクターのアニメーション設定
+    animChara:function(chara_obj,type){
+        
+        //アニメーション
+        var that = this;
+        var tmp_top =  parseInt(chara_obj.get( 0 ).offsetTop);
+        chara_obj.css("top",tmp_top);
+        var a_obj = {};
+        var b_obj = {};
+        
+        var anim_time = this.kag.stat.chara_talk_anim_time;
+        
+        if(type=="up"){
+            a_obj["top"] = tmp_top - this.kag.stat.chara_talk_anim_value;
+            b_obj["top"] = tmp_top;
+            
+        }else if(type=="down"){
+            a_obj["top"] = tmp_top + this.kag.stat.chara_talk_anim_value;
+            b_obj["top"] = tmp_top;
+            
+        }
+        
+        
+        chara_obj.animate(a_obj, anim_time, "easeOutQuad",function(){
+            chara_obj.animate(b_obj, anim_time, "easeOutQuad",function(){
+                
+            });
+        });
+
+        
     }
+    
 };
 
 /*
@@ -1480,6 +1533,9 @@ tyrano.plugin.kag.tag.chara_ptext = {
  talk_focus=現在話しているキャラクターの立ち絵に対して、目立たせる演出が可能になります。指定できるのは brightness（明度） blur（ぼかし） none （無効）です。デフォルトはnone　どのキャラクターが話しているかの指定は #yuko のように指定すると、chara_new時の名前とひも付きます。 ,
  brightness_value=brightnessの値を指定できます。話しているキャラクター以外の明度を指定します。0〜100 で指定して下さい。デフォルトは60,
  blur_value=blurの値を指定できます。話しているキャラクター以外のぼかし方を指定します。0〜100 で指定して下さい。デフォルトは2 値がおおきいほどぼかしが強くなります,
+ talk_anim=現在話しているキャラクターの立ち絵に対して、ピョンと跳ねるような効果を与えることができます。指定できるのは up（上に跳ねる） down（下に沈む） none （無効）です。デフォルトはnone　どのキャラクターが話しているかの指定は #yuko のように指定すると、chara_new時の名前とひも付きます。
+ talk_anim_time=talk_animが有効な場合のアニメーション速度を指定できます。デフォルトは230ミリ秒。
+ talk_anim_value=talk_animが有効な場合のアニメーション量を指定できます。デフォルトは30。数値で指定してください。
  effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
  jswing
  ｜def
@@ -1530,7 +1586,11 @@ tyrano.plugin.kag.tag.chara_config = {
         pos_change_time : "", //立ち位置の変更時にかかる時間を指定できます
         talk_focus : "",
         brightness_value : "",
-        blur_value : ""
+        blur_value : "",
+        talk_anim : "",
+        talk_anim_time : "",
+        talk_anim_value : ""
+        
     },
 
     start : function(pm) {
@@ -1555,6 +1615,14 @@ tyrano.plugin.kag.tag.chara_config = {
             this.kag.stat.chara_brightness_value = pm.brightness_value;
         if (pm.blur_value != "")
             this.kag.stat.chara_blur_value = pm.blur_value;
+            
+        if (pm.talk_anim !="")
+            this.kag.stat.chara_talk_anim = pm.talk_anim;
+        if (pm.talk_anim_time !="")
+            this.kag.stat.chara_talk_anim_time = parseInt(pm.talk_anim_time);
+        if (pm.talk_anim_value !="")
+            this.kag.stat.chara_talk_anim_value = parseInt(pm.talk_anim_value);
+        
 
         //フォーカス設定
         if (pm.talk_focus != "") {

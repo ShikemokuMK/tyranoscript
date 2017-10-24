@@ -467,7 +467,9 @@ tyrano.plugin.kag.layer ={
                 //$("." + back_class_name.replace(/ +/g, '.')).remove();
                 
                 //追加
-                this.appendLayer(this.map_layer_fore[key]);
+                //this.appendLayer(this.map_layer_fore[key]);
+                this.map_layer_back[key].before(this.map_layer_fore[key]);
+                
                 
                 //バックレイヤは隠す
                 this.map_layer_back[key].css("display","none");

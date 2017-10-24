@@ -120,6 +120,17 @@ tyrano.plugin.kag.tag.playbgm = {
                 this.kag.tmp.is_vo_play = true;
             }
             
+            //ループ効果音の設定
+            if(pm.stop == "false") {
+                if(pm.loop=="true"){
+                    this.kag.stat.current_se[pm.buf] = pm;
+                }else{
+                    if(this.kag.stat.current_se[pm.buf]){
+                        delete this.kag.stat.current_se[pm.buf];
+                    }
+                }
+            }
+            
         }else{
             this.kag.tmp.is_audio_stopping = false;
             this.kag.tmp.is_bgm_play = true;
@@ -257,6 +268,7 @@ tyrano.plugin.kag.tag.playbgm = {
                 this.kag.tmp.map_se[pm.buf] = null;
             }
             this.kag.tmp.map_se[pm.buf] = audio_obj;
+                        
         }
         
         $(audio_obj).off("play");
@@ -501,6 +513,12 @@ tyrano.plugin.kag.tag.stopbgm = {
             target_map = this.kag.tmp.map_se;
             that.kag.tmp.is_se_play = false;
             that.kag.tmp.is_se_play_wait = false;
+            
+            if(pm.stop == "false") {
+                if(this.kag.stat.current_se[pm.buf]){
+                    delete this.kag.stat.current_se[pm.buf];
+                }
+            }
         }
 
         var browser = $.getBrowser();

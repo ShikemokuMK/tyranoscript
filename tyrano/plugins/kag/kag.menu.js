@@ -617,6 +617,15 @@ tyrano.plugin.kag.menu = {
     
             }
             
+            //効果音再生
+            console.log(this.kag.stat.current_se);
+            for(key in this.kag.stat.current_se){
+                var pm_obj = this.kag.stat.current_se[key];
+		        pm_obj["stop"] = "true";
+		        this.kag.ftag.startTag("playse", pm_obj);
+		        
+		    }
+            
         }
         
         //読み込んだCSSがある場合

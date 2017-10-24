@@ -4783,7 +4783,7 @@ tyrano.plugin.kag.tag.layermode = {
         
         var blend_layer = null;
         
-        blend_layer = $("<div class='layer_blend_mode blendlayer' style='display:none;position:absolute;width:100%;height:100%;z-index:10'></div>");
+        blend_layer = $("<div class='layer_blend_mode blendlayer' style='display:none;position:absolute;width:100%;height:100%;z-index:99'></div>");
         
         
         if(pm.name!=""){
@@ -4914,7 +4914,7 @@ tyrano.plugin.kag.tag.layermode_movie = {
         
         var blend_layer = null;
         
-        blend_layer = $("<video class='layer_blend_mode blendlayer blendvideo' data-video-name='"+pm.name+"' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:10' ></video>");
+        blend_layer = $("<video class='layer_blend_mode blendlayer blendvideo' data-video-name='"+pm.name+"' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>");
         var video = blend_layer.get(0);
         var url = "./data/video/" + pm.video;
         
