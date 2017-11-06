@@ -532,6 +532,12 @@ tyrano.plugin.kag ={
             $(".tyrano_base").css({
                 margin: 0
             });
+            
+        }
+        
+        //センタリングが有効な場合のみ
+        if(this.kag.config["ScreenCentering"]=="true"){
+            $("#tyrano_base").css("position","absolute");
         }
         
         //tyranoの大本部分の調整
