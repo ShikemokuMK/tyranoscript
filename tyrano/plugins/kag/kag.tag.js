@@ -1324,8 +1324,11 @@ tyrano.plugin.kag.tag.jump = {
 
     start : function(pm) {
 
-        //コールでいいじゃん。。
-        this.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
+        var that = this;
+        //ジャンプ直後のwt などでフラグがおかしくなる対策
+        setTimeout(function(){
+            that.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
+        },1);
 
     }
 };
@@ -1707,6 +1710,7 @@ tyrano.plugin.kag.tag.position = {
 storage=画像ファイル名を指定します。ファイルは背景レイヤならプロジェクトフォルダのbgimage、前景レイヤならfgimageに入れてください,
 layer=対象とするメレイヤを指定します。<br/>"base"を指定すると背景レイヤ。0以上の整数を指定すると対応する前景レイヤに画像を表示します,
 page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略すると"fore"であるとみなされます,
+visible=true or false を指定。imageは通常、非表示で始まるが、trueを指定すると最初から表示状態にできる。,
 left=画像の左端位置を指定します。（ピクセル）,
 top=画像の上端位置を指定します。（ピクセル）,
 x=画像の左端位置を指定します。leftと同様。こちらが優先度高（ピクセル）,
@@ -1964,6 +1968,14 @@ tyrano.plugin.kag.tag.freeimage = {
                 
                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page).children();
                 
+                //存在しない場合は即next
+                if(!j_obj.get(0)){
+                    if(pm.wait=="true"){
+                        that.kag.ftag.nextOrder();
+                        return;
+                    }
+                }
+                
                 var cnt = 0;
                 var s_cnt = j_obj.length;
                 
@@ -2065,6 +2077,15 @@ tyrano.plugin.kag.tag.free = {
                 
                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
                 j_obj = j_obj.find("."+pm.name);
+                
+                
+                //存在しない場合は即next
+                if(!j_obj.get(0)){
+                    if(pm.wait=="true"){
+                        that.kag.ftag.nextOrder();
+                        return;
+                    }
+                }
                 
                 var cnt = 0;
                 var s_cnt = j_obj.length;
