@@ -248,10 +248,10 @@ tyrano.plugin.kag.tag.movie = {
 
             if (pm.skip == "true") {
 
-                video.addEventListener("click", function(e) {
+                $(video).on("click touchstart", function(e) {
+                    $(video).off("click touchstart");
                     $(".tyrano_base").find("video").remove();
                     that.kag.ftag.nextOrder();
-
                 });
 
             }
