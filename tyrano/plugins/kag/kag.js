@@ -131,6 +131,7 @@ tyrano.plugin.kag ={
         is_skip:{},
         is_auto:{},
         current_bgm:"", //現在再生中のBGM
+        current_bgm_vol:"", //現在再生中のBGMボリューム
         current_se:{}, //現在再生中のループ効果音
         
         enable_keyconfig:true, //キーコンフィグが有効 or 無効

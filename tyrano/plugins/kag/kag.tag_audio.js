@@ -259,6 +259,7 @@ tyrano.plugin.kag.tag.playbgm = {
         if (target === "bgm") {
             this.kag.tmp.map_bgm[pm.buf] = audio_obj;
             that.kag.stat.current_bgm = storage;
+            that.kag.stat.current_bgm_vol = pm.volume;
 
         } else {
             //効果音の時はバッファ指定
@@ -352,6 +353,8 @@ tyrano.plugin.kag.tag.playbgm = {
 
         if (target === "bgm") {
             this.kag.stat.current_bgm = pm.storage;
+            this.kag.stat.current_bgm_vol = pm.volume;
+
         }
 
         //iphone の場合
@@ -461,6 +464,8 @@ tyrano.plugin.kag.tag.playbgm = {
 
         if (target === "bgm") {
             this.kag.stat.current_bgm = pm.storage;
+            this.kag.stat.current_bgm_vol = pm.volume;
+
             this.kag.sound_swf.playMusic(storage_url, repeat);
         } else {
             this.kag.sound_swf.playSound(storage_url, repeat);
@@ -541,6 +546,8 @@ tyrano.plugin.kag.tag.stopbgm = {
                             //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
                             if (pm.stop == "false") {
                                 that.kag.stat.current_bgm = "";
+                                that.kag.stat.current_bgm_vol = "";
+
                             }
     
                         } else {
@@ -582,6 +589,8 @@ tyrano.plugin.kag.tag.stopbgm = {
                             //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
                             if (pm.stop == "false") {
                                 that.kag.stat.current_bgm = "";
+                                that.kag.stat.current_bgm_vol = "";
+                                
                             }
     
                         } else {

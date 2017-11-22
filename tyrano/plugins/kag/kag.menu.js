@@ -604,7 +604,7 @@ tyrano.plugin.kag.menu = {
             if (this.kag.stat.current_bgm != "") {
     
                 var mstorage = this.kag.stat.current_bgm;
-    
+                
                 var pm = {
                     loop : "true",
                     storage : mstorage,
@@ -612,13 +612,17 @@ tyrano.plugin.kag.menu = {
                     /*time:2000,*/
                     stop : "true"
                 };
-    
+                
+                //ボリュームが設定されいる場合
+                if(this.kag.stat.current_bgm_vol !=""){
+                    pm["volume"] = this.kag.stat.current_bgm_vol;
+                }
+                
                 this.kag.ftag.startTag("playbgm", pm);
     
             }
             
             //効果音再生
-            console.log(this.kag.stat.current_se);
             for(key in this.kag.stat.current_se){
                 var pm_obj = this.kag.stat.current_se[key];
 		        pm_obj["stop"] = "true";
