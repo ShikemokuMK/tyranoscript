@@ -3858,7 +3858,7 @@ tyrano.plugin.kag.tag.button = {
                             
                             $.confirm($.lang("go_title"),
                                 function(){
-                                    location.reload();
+                                    location.href="./index.html";
                                 },
                                 function(){
                                     return false;
