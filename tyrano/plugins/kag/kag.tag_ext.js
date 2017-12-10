@@ -2917,7 +2917,7 @@ tyrano.plugin.kag.tag.web = {
                 var gui = require('nw.gui');
                 gui.Shell.openExternal(pm.url);
             
-            }else if($.isTyranoPlayer){
+            }else if($.isTyranoPlayer()){
                 
                 //ティラノプレイヤーなら、上に伝える
                 $.openWebFromApp(pm.url);

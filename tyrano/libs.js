@@ -353,7 +353,7 @@
     };
     
     $.isTyranoPlayer = function(){
-        if(_tyrano_player){
+        if(typeof _tyrano_player != "undefined"){
             return true;
         }else{
             return false;
