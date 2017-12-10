@@ -1401,7 +1401,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
                     var chara_obj = $("#tyrano_base").find("." + pm.name + ".tyrano_chara");
                     if(chara_obj.get(0)){
                         
-                        this.animChara(chara_obj, this.kag.stat.chara_talk_anim);
+                        this.animChara(chara_obj, this.kag.stat.chara_talk_anim, pm.name);
                         
                         if (pm.face != "") {
                             //即表情変更、アニメーション中になるから        
@@ -1481,7 +1481,12 @@ tyrano.plugin.kag.tag.chara_ptext = {
     },
     
     //キャラクターのアニメーション設定
-    animChara:function(chara_obj,type){
+    animChara:function(chara_obj,type,name){
+        
+        //アニメーション中の場合は、重ねない
+        if(typeof this.kag.tmp.map_chara_talk_top[name] != "undefined"){
+            return;
+        }
         
         //アニメーション
         var that = this;
@@ -1489,6 +1494,9 @@ tyrano.plugin.kag.tag.chara_ptext = {
         chara_obj.css("top",tmp_top);
         var a_obj = {};
         var b_obj = {};
+        
+        //アニメーション中のキャラクターを格納。
+        this.kag.tmp.map_chara_talk_top[name] = true;
         
         var anim_time = this.kag.stat.chara_talk_anim_time;
         
@@ -1505,7 +1513,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
         
         chara_obj.animate(a_obj, anim_time, "easeOutQuad",function(){
             chara_obj.animate(b_obj, anim_time, "easeOutQuad",function(){
-                
+                delete that.kag.tmp.map_chara_talk_top[name];
             });
         });
 
@@ -2903,12 +2911,17 @@ tyrano.plugin.kag.tag.web = {
             this.kag.log("error:[web] url is not correct " + pm.url);
         }else{
             
-            //ブラウザの場合
+            //PC nwjsの場合
             if($.isNWJS()){
             
                 var gui = require('nw.gui');
                 gui.Shell.openExternal(pm.url);
             
+            }else if($.isTyranoPlayer){
+                
+                //ティラノプレイヤーなら、上に伝える
+                $.openWebFromApp(pm.url);
+                
             }else {
             
                 window.open(pm.url);

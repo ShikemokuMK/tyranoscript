@@ -1190,7 +1190,8 @@ tyrano.plugin.kag.tag.endignore = {
 
 :param
 name=格納する変数名を指定して下さい,
-longth=横幅です,
+length=横幅です,
+initial=初期値を設定することができます,
 color=文字の色を指定して下さい　デフォルトは黒です,
 left=テキストボックスの横位置を指定します,
 top=テキストボックスの縦位置を指定します,
@@ -1210,6 +1211,8 @@ tyrano.plugin.kag.tag.edit = {
     pm : {
         name : "",
         length : "", //ピクセル　横幅
+        initial:"",
+        placeholder:"",
         color : "black",
         left : "0",
         top : "0",
@@ -1233,6 +1236,7 @@ tyrano.plugin.kag.tag.edit = {
             color : $.convertColor(pm.color),
             left : parseInt(pm.left),
             top : parseInt(pm.top),
+            placeholder : pm.placeholder,
             width : pm.width,
             height : pm.height,
             "font-size" : parseInt(pm.size)
@@ -1245,6 +1249,9 @@ tyrano.plugin.kag.tag.edit = {
 
         j_text.css(new_style);
         j_text.css("position", "absolute");
+        
+        //初期値の設定
+        j_text.val(pm.initial);
 
         j_text.attr("maxlength", pm.maxchars);
 

@@ -76,6 +76,8 @@ tyrano.plugin.kag ={
         
         wait_id:"", //waitをキャンセルするために使います。
         
+        map_chara_talk_top:{}, //キャラトークのアニメーション中、開始のトップ位置を保持します。
+        
         video_playing:false
         
         

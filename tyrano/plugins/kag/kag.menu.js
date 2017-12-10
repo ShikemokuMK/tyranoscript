@@ -118,12 +118,24 @@ tyrano.plugin.kag.menu = {
 
             //タイトルに戻る
             layer_menu.find(".menu_back_title").click(function() {
+                
+                $.confirm($.lang("go_title"), 
+                    
+                    function() {
+                        location.href="./index.html";
+                    }, 
+                    function() {
+                    
+                    }
+                );
 
+                /*
                 if (!confirm($.lang("go_title"))) {
                     return false;
                 }
+                */
                 //first.ks の *start へ戻ります
-                location.reload();
+                //location.reload();
             });
             
             $.preloadImgCallback(j_menu,function(){
