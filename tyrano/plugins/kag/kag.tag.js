@@ -2693,7 +2693,7 @@ tyrano.plugin.kag.tag.link = {
          
          var _target = pm.target;
          var _storage = pm.storage;
-         var that = this;
+         var that = TYRANO;
          
          j_span.bind('click touchstart', function(e) {
                 
