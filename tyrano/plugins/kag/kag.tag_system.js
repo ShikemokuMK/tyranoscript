@@ -1443,11 +1443,11 @@ tyrano.plugin.kag.tag.commit = {
 
             that.kag.evalScript(str);
 
-            that.kag.ftag.nextOrder();
-
             //console.log($(this));
 
         });
+
+        that.kag.ftag.nextOrder();
 
     }
 };
