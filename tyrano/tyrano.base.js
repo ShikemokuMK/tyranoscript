@@ -15,7 +15,12 @@ tyrano.base ={
     setBaseSize:function(width,height){
         
         this.tyrano.get(".tyrano_base").css("width",width).css("height",height).css("background-color","black");
-            
+        
+        //NW.js 以外の場合。absolute
+        if(!$.isNWJS()){
+            $(".tyrano_base").css("position","absolute");
+        }
+        
     },
     
     //画面サイズをぴったりさせます
