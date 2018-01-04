@@ -1217,6 +1217,7 @@ tyrano.plugin.kag.tag.edit = {
         left : "0",
         top : "0",
         size : "20",
+        face : "",
         width : "200",
         height : "40",
         maxchars : "1000"
@@ -1226,9 +1227,10 @@ tyrano.plugin.kag.tag.edit = {
 
         var j_text = $("<input class='text_box form' name='" + pm.name + "' type='text' value='' />");
 
-        j_text.click(function() {
-            j_text.focus();
-        });
+        //指定がない場合はデフォルトフォントを適応する
+        if (pm.face == "") {
+            pm.face = this.kag.stat.default_font.face;
+        }
 
         pm = $.minifyObject(pm);
 
@@ -1239,20 +1241,21 @@ tyrano.plugin.kag.tag.edit = {
             placeholder : pm.placeholder,
             width : pm.width,
             height : pm.height,
-            "font-size" : parseInt(pm.size)
+            "font-size" : parseInt(pm.size),
+            "font-family" : pm.face
         };
         
-        j_text.on("keydown",function(e){
-            //バグリング停止
-            e.stopPropagation();
+        //クラスとイベントを登録する
+        this.kag.event.addEventElement({
+            "tag":"edit",
+            "j_target":j_text,
+            "pm":pm
         });
+        this.setEvent(j_text,pm);
 
         j_text.css(new_style);
         j_text.css("position", "absolute");
         
-        //初期値の設定
-        j_text.val(pm.initial);
-
         j_text.attr("maxlength", pm.maxchars);
 
         this.kag.layer.getFreeLayer().append(j_text);
@@ -1260,6 +1263,29 @@ tyrano.plugin.kag.tag.edit = {
 
         this.kag.ftag.nextOrder();
 
+    },
+    
+    setEvent:function(j_text,pm){
+         
+         var that = TYRANO;
+         var _pm = pm;
+         
+         (function() {
+            
+            //初期値の設定
+            j_text.val(_pm.initial);
+            
+            j_text.click(function() {
+                j_text.focus();
+            });
+
+            j_text.on("keydown",function(e){
+                //バブリング停止
+                e.stopPropagation();
+            });
+
+        })();
+    
     }
 };
 
@@ -1417,11 +1443,11 @@ tyrano.plugin.kag.tag.commit = {
 
             that.kag.evalScript(str);
 
-            that.kag.ftag.nextOrder();
-
             //console.log($(this));
 
         });
+
+        that.kag.ftag.nextOrder();
 
     }
 };

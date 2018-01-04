@@ -2693,7 +2693,7 @@ tyrano.plugin.kag.tag.link = {
          
          var _target = pm.target;
          var _storage = pm.storage;
-         var that = this;
+         var that = TYRANO;
          
          j_span.bind('click touchstart', function(e) {
                 
@@ -3947,14 +3947,21 @@ tyrano.plugin.kag.tag.button = {
                        //callを実行する
                        //fixから遷移した場合はリターン時にnextorderしない
                        //strong_stopの場合は反応しない
+                       //今がstrong_stopかどうかは時々刻々と変化するので、毎回新しくチェックする必要がある
+                       //_pmはpmの参照コピーであるため、_pm.auto_nextを直接書き換えるわけにはいかない
+                       var _auto_next = _pm.auto_next;
                        if(that.kag.stat.is_strong_stop == true){
-                           _pm.auto_next = "stop";
+                           _auto_next = "stop";
                        }else{
                            //パラメータ初期値が入るようになる
-                           //_pm.auto_next = "yes";
+                           //_auto_next = "yes";
                        }
                        
-                       that.kag.ftag.startTag("call", _pm);
+                       that.kag.ftag.startTag("call", {
+                           storage: _storage,
+                           target: _target,
+                           auto_next: _auto_next
+                       });
                     
                     }else{
                         
