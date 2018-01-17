@@ -1909,7 +1909,9 @@ tyrano.plugin.kag.tag.chara_show = {
                                 chara_num--;
                                 if (chara_num == 0) {
                                     that.kag.layer.showEventLayer();
-                                    that.kag.ftag.nextOrder();
+                                    if (pm.wait == "true") {
+                                        that.kag.ftag.nextOrder();
+                                    }
                                 }
                             });
 
@@ -1923,7 +1925,9 @@ tyrano.plugin.kag.tag.chara_show = {
                             chara_num--;
                             if (chara_num == 0) {
                                 that.kag.layer.showEventLayer();
-                                that.kag.ftag.nextOrder();
+                                if (pm.wait == "true") {
+                                    that.kag.ftag.nextOrder();
+                                }
                             }
                         });
 
