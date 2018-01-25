@@ -703,11 +703,19 @@ tyrano.plugin.kag.menu = {
                 
                 //アニメーションの実行
                 if(key=="layer_camera"){
+                    
                     $(".layer_camera").css("-webkit-transform-origin", "center center");
-                    $(".layer_camera").a3d(a3d_define);
+                    setTimeout(function(){
+                        $(".layer_camera").a3d(a3d_define);
+                    },1);
+ 
                 }else{
+                    
                     $("."+key+"_fore").css("-webkit-transform-origin", "center center");
-                    $("."+key +"_fore").a3d(a3d_define);
+                    setTimeout(function(){
+                        $("."+key +"_fore").a3d(a3d_define);
+                    },1);
+ 
                 }
                 
             }
