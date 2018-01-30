@@ -339,10 +339,11 @@ tyrano.plugin.kag ={
         }
         
         //Webアップデートの確認も
-        patch_path = patch_path + "/" + this.kag.config.projectID + ".tg.patch";
+        patch_path = patch_path + "/" + this.kag.config.projectID + ".tpatch";
         
         //アップデートファイルの存在チェック
         var fs = require('fs');
+        var fse = require('fs-extra'); 
         if (!fs.existsSync(patch_path)) {
             call_back();
             return;   
@@ -354,7 +355,6 @@ tyrano.plugin.kag ={
             return;   
         }
         
-        var path = require('path');
         var AdmZip = require('adm-zip');
         
         var path = require('path');
@@ -362,12 +362,15 @@ tyrano.plugin.kag ={
         
         // reading archives 
         var zip = new AdmZip(patch_path);
-        zip.extractAllTo("./", true);
+        zip.extractAllTo("./update_tmp", true);
         
+        fse.copySync("./update_tmp/","./");
+		fse.removeSync("./update_tmp");
+		
         fs.writeFileSync("./updated","true");
         location.reload();
-        
-    
+      
+      
     },
     
     //スクリプトを解釈して実行する

@@ -1,6 +1,6 @@
 TyranoScript ｜ティラノスクリプト
 
-Copyright (c) 2017 STRIKEWORKS @Shikemokumk
+Copyright (c) 2018 STRIKEWORKS @Shikemokumk
 http://strikeworks.jp
 
 ■利用規約■
