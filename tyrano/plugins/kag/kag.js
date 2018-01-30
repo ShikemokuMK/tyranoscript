@@ -273,9 +273,16 @@ tyrano.plugin.kag ={
         
         //コンフィグファイルの読み込み
         this.parser.loadConfig(function(map_config){
-        
+            
             that.config = $.extend(true, that.config, map_config);
-            that.init_game();//ゲーム画面生成
+            
+            //アップデートのチェック
+            that.checkUpdate(function(){
+            
+                that.init_game(); //ゲーム画面生成
+                
+            });
+            
             
         });
         
@@ -310,8 +317,57 @@ tyrano.plugin.kag ={
             console.log(e);
         }
         
+    },
+    
+    //ローカルにアップデート用のファイルがある場合は、確認する
+    checkUpdate:function(call_back){
         
+        //NWJS環境以外では、アップデート不可
+        if(!$.isNWJS()){
+            call_back();
+            return;  
+        }
         
+        var patch_path = "";
+        var that = this;
+        
+        //Mac os Sierra 対応
+        if(process.execPath.indexOf("var/folders")!=-1){
+            patch_path = process.env.HOME+"/_TyranoGameData";
+        }else{
+            patch_path = $.getProcessPath();
+        }
+        
+        //Webアップデートの確認も
+        patch_path = patch_path + "/" + this.kag.config.projectID + ".tg.patch";
+        
+        //アップデートファイルの存在チェック
+        var fs = require('fs');
+        if (!fs.existsSync(patch_path)) {
+            call_back();
+            return;   
+        }
+        
+        //リロードの場合は、アップデート不要
+        if (fs.existsSync("./updated")) {
+            call_back();
+            return;   
+        }
+        
+        var path = require('path');
+        var AdmZip = require('adm-zip');
+        
+        var path = require('path');
+        var abspath = path.resolve("./");
+        
+        // reading archives 
+        var zip = new AdmZip(patch_path);
+        zip.extractAllTo("./", true);
+        
+        fs.writeFileSync("./updated","true");
+        location.reload();
+        
+    
     },
     
     //スクリプトを解釈して実行する
@@ -448,13 +504,14 @@ tyrano.plugin.kag ={
         this.rider.init();
         
         //システム変数の初期化
-        var tmpsf = $.getStorage(this.kag.config.projectID+"_sf");
+        var tmpsf = $.getStorage(this.kag.config.projectID+"_sf",that.config.configSave);
         
         if(tmpsf == null){
             this.variable.sf ={};
         }else{
             this.variable.sf = eval("("+tmpsf+")");
         }
+        
         
         /////////////システムで使用する変数の初期化設定////////////////////
         //コンフィグ
@@ -473,7 +530,7 @@ tyrano.plugin.kag ={
         }
          
         //自動セーブのデータがあるかどうか
-        var auto_save_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save");
+        var auto_save_data = $.getStorage(this.kag.config.projectID+"_tyrano_auto_save",this.kag.config.configSave);
     	
     	this.variable.sf["system"] ={};
     	
@@ -696,6 +753,8 @@ tyrano.plugin.kag ={
         
         
     },
+    
+    
     
     //BackLogを格納します
     pushBackLog:function(str,type){

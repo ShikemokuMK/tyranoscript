@@ -641,6 +641,25 @@
         
     };
     
+    $.getOS = function(){
+        
+        if($.isNWJS()){
+        
+            var path = process.execPath;
+            var tmp_index = path.indexOf(".app");
+            var os = "mac";
+            if(tmp_index == -1){
+                tmp_index = path.indexOf(".exe");
+                os="win";
+            }
+            
+            return os;
+            
+        }else{
+            return "";
+        }
+    };
+    
     $.getStorage = function(key,type) {
         
         var gv = "null";
@@ -770,7 +789,8 @@
                 var str = fs.readFileSync(out_path+"/" + key + ".sav");
                 gv = unescape(str);
             } else {
-                gv = unescape(localStorage.getItem(key));
+                //Fileが存在しない場合にローカルストレージから読み取る使用は破棄。
+                //gv = unescape(localStorage.getItem(key));
             }
 
             if (gv == "null")
