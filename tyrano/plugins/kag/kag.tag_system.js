@@ -2229,6 +2229,7 @@ tyrano.plugin.kag.tag.stop_keyconfig = {
  パッチファイルを手動で反映します
 
  :exp
+ V470以降で使用可
  パッケージングして配布している場合のみ有効。
  このタグに到達した時点で、パッチファイルをゲームに反映することが可能。
  dataフォルダ以外、tyrano本体をアップデートするときは
@@ -2283,13 +2284,14 @@ tyrano.plugin.kag.tag.apply_local_patch = {
  サーバーからアップデートをチェックして反映させることができます。
 
  :exp
- サーバーにアップデートパッチを配置して、更新がある場合
+ V470以降で使用可
+ サーバーにアップデートパッチを配置して更新がある場合
  自動的にメッセージを表示して、パッチの適応を促すことができます。
- 使用するにはサーバーをレンタルして json ファイルと tpatch ファイルが必要です。
- また、反映した場合はゲームを再起動する必要があります。
+ サーバーをレンタルして json ファイルと tpatch ファイルを配置します。
+ また、反映するためには、一度ゲームを再起動する必要があります。
  
  :sample
- [check_web_patch url="http://tyrano.jp/patch/mygame.tpatch" ]
+ [check_web_patch url="http://tyrano.jp/patch/mygame.json" ]
  
  :param
  url=サーバのjsonファイルのURLをhttp:// から指定してください
@@ -2320,7 +2322,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
             url: pm.url + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
             success: function(json){
-                that.checkPatch(json,pm);
+                that.checkPatch(JSON.parse(json),pm);
             },
             error:function(e){
                 console.log(e);
@@ -2340,9 +2342,6 @@ tyrano.plugin.kag.tag.check_web_patch = {
             this.kag.evalScript("sf._patch_version="+this.kag.config["game_version"]);
         }
         
-        //alert(this.kag.variable.sf._patch_version);
-        
-        //サーバーのバージョンの方が新しかったら
         if(parseFloat(this.kag.variable.sf._patch_version) < parseFloat(obj.version)){
         
             $.confirm("新しいアップデートが見つかりました。Ver:"+parseFloat(obj.version)+"「"+obj.message+"」<br />アップデートを行いますか？",
@@ -2358,6 +2357,10 @@ tyrano.plugin.kag.tag.check_web_patch = {
                     // 出力ファイル名を指定
                     var patch_path = $.localFilePath();
                     patch_path = patch_path + "/" + file;
+                    
+                    if(url.indexOf("https://")!=-1){
+                        http = require('https');
+                    }
                     
                     var outFile = fs.createWriteStream(patch_path);
                     
