@@ -17,9 +17,11 @@ tyrano.plugin.kag ={
     config:{
       
       defaultStorageExtension:"jpg",
-      projectID : "tyranoproject"  ,
+      projectID : "tyranoproject",
+      game_version:"0.0",
       preload:"on",
       skipSpeed:"30",
+      patch_apply_auto:"true",
       mediaFormatDefault:"ogg",
       configSave:"webstorage"
         
@@ -328,22 +330,28 @@ tyrano.plugin.kag ={
             return;  
         }
         
-        var patch_path = "";
-        var that = this;
-        
-        //Mac os Sierra 対応
-        if(process.execPath.indexOf("var/folders")!=-1){
-            patch_path = process.env.HOME+"/_TyranoGameData";
-        }else{
-            patch_path = $.getProcessPath();
+        //自動反映が無効の場合は反映しない
+        if(this.kag.config.patch_apply_auto=="false"){
+            call_back();
+            return;  
         }
         
-        //Webアップデートの確認も
+        var patch_path = $.localFilePath();
+        var that = this;
+        
         patch_path = patch_path + "/" + this.kag.config.projectID + ".tpatch";
+        
+        this.applyPatch(patch_path,"true",call_back)
+        
+    },
+    
+    //パッチを反映します。
+    applyPatch:function(patch_path,flag_reload,call_back){
         
         //アップデートファイルの存在チェック
         var fs = require('fs');
         var fse = require('fs-extra'); 
+        
         if (!fs.existsSync(patch_path)) {
             call_back();
             return;   
@@ -367,10 +375,14 @@ tyrano.plugin.kag ={
         fse.copySync("./update_tmp/","./");
 		fse.removeSync("./update_tmp");
 		
-        fs.writeFileSync("./updated","true");
-        location.reload();
-      
-      
+		//アップデートしたという証用
+        if(flag_reload == "true"){
+            fs.writeFileSync("./updated","true");
+            location.reload();
+        }else{
+            call_back();
+        }
+    
     },
     
     //スクリプトを解釈して実行する
@@ -408,7 +420,7 @@ tyrano.plugin.kag ={
     //システム変数を保存する
     saveSystemVariable:function(){
         
-        $.setStorage(this.kag.config.projectID+"_sf", this.variable.sf );
+        $.setStorage(this.kag.config.projectID+"_sf", this.variable.sf ,this.kag.config.configSave);
         
     },
     

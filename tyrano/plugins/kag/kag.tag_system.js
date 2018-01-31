@@ -2221,6 +2221,206 @@ tyrano.plugin.kag.tag.stop_keyconfig = {
 };
 
 
+/*
+ #[apply_local_patch]
+ :group
+ システム操作
+ :title
+ パッチファイルを手動で反映します
+
+ :exp
+ パッケージングして配布している場合のみ有効。
+ このタグに到達した時点で、パッチファイルをゲームに反映することが可能。
+ dataフォルダ以外、tyrano本体をアップデートするときは
+ このタグではなく、起動時のアップデートで対応してください。
+ パッチファイルの容量が大きい場合は一時的にゲームが停止します。ロード中といった表記を表示すると親切です。
+ 
+ :sample
+ [apply_local_patch file="test.tpatch" ]
+ 
+ :param
+ file=パッチファイルのパスを指定してください。exeファイルの階層を起点として指定します,
+ reload=true or false を指定。trueを指定すると反映後にゲームが再読込されます。デフォルトはfalse
+ 
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.apply_local_patch = {
+
+    vital : ["file"],
+
+    pm : {
+        file:"",
+        reload:"false"
+        
+    },
+
+    start : function(pm) {
+    
+        var that = this;
+        
+        if(!$.isNWJS()){
+            that.kag.ftag.nextOrder();
+        }
+        
+        var patch_path = $.localFilePath() +"/"+pm.file;
+        
+        that.kag.applyPatch(patch_path, pm.reload, function(){
+        
+            that.kag.ftag.nextOrder();
+        
+        });
+        
+    }
+};
+
+/*
+ #[check_web_patch]
+ :group
+ システム操作
+ :title
+ サーバーからアップデートをチェックして反映させることができます。
+
+ :exp
+ サーバーにアップデートパッチを配置して、更新がある場合
+ 自動的にメッセージを表示して、パッチの適応を促すことができます。
+ 使用するにはサーバーをレンタルして json ファイルと tpatch ファイルが必要です。
+ また、反映した場合はゲームを再起動する必要があります。
+ 
+ :sample
+ [check_web_patch url="http://tyrano.jp/patch/mygame.tpatch" ]
+ 
+ :param
+ url=サーバのjsonファイルのURLをhttp:// から指定してください
+ 
+ #[end]
+ */
+ 
+ 
+tyrano.plugin.kag.tag.check_web_patch = {
+
+    vital : ["url"],
+
+    pm : {
+        url:"",
+        reload:"false"
+        
+    },
+    
+    start : function(pm) {
+    
+        var that = this;
+        
+        if(!$.isNWJS()){
+            that.kag.ftag.nextOrder();
+        }
+        
+        $.ajax({
+            url: pm.url + "?" + Math.floor(Math.random() * 1000000),
+            cache: false,
+            success: function(json){
+                that.checkPatch(json,pm);
+            },
+            error:function(e){
+                console.log(e);
+                alert("file not found:"+pm.url);
+            }
+            
+        });
+        
+    },
+    
+    checkPatch:function(obj,pm){
+        
+        var that = this;
+        
+        //バージョンの確認
+        if(typeof this.kag.variable.sf._patch_version == "undefined"){
+            this.kag.evalScript("sf._patch_version="+this.kag.config["game_version"]);
+        }
+        
+        //alert(this.kag.variable.sf._patch_version);
+        
+        //サーバーのバージョンの方が新しかったら
+        if(parseFloat(this.kag.variable.sf._patch_version) < parseFloat(obj.version)){
+        
+            $.confirm("新しいアップデートが見つかりました。Ver:"+parseFloat(obj.version)+"「"+obj.message+"」<br />アップデートを行いますか？",
+                function(){
+                    
+                    var http = require('http');
+                    var fs = require('fs');
+                    
+                    var file = obj.file;
+                    // URLを指定 
+                    var url = $.getDirPath(pm.url) + file;
+                    
+                    // 出力ファイル名を指定
+                    var patch_path = $.localFilePath();
+                    patch_path = patch_path + "/" + file;
+                    
+                    var outFile = fs.createWriteStream(patch_path);
+                    
+                    // ダウンロード開始
+                    var req = http.get(url, function (res) {
+                        
+                        res.pipe(outFile);
+                        
+                        res.on('end', function () {
+                            outFile.close();
+                            //アップデートを実行
+                            that.kag.evalScript("sf._patch_version="+ obj.version);
+                            
+                            alert("アップデートが完了しました。反映するにはゲームの再起動が必要です");
+                            
+                            that.kag.ftag.nextOrder();
+                            
+                        }); 
+                        
+                        
+                        /*
+                        that.kag.applyPatch(patch_path, pm.reload, function(){
+                            that.kag.ftag.nextOrder();
+                        });
+                        */
+                        
+        
+                    });
+                    
+                    // エラーがあれば扱う。
+                    req.on('error', function (err) {
+                        console.log('Error: ', err); return;
+                    });
+
+                     
+                    
+                    
+                },function(){
+                    
+                    that.kag.ftag.nextOrder();
+                    
+                }
+            );
+        
+        }else{
+            
+            that.kag.ftag.nextOrder();
+        
+        }
+        
+        console.log(obj);
+        
+        
+        
+        //ディレクトリのみ変更して差し替えて実行。
+        //メッセージは表示するよ。
+        //バージョンを確認。未反映ならダウンロードして配置する。
+        //再起動
+        
+        
+    }
+};
+
 
 
 

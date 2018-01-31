@@ -19,6 +19,13 @@
         return str.substring(0, i + 1);
 
     };
+    
+    $.getDirPath = function(str){
+        
+        var i = str.lastIndexOf('/');
+        return str.substring(0, i + 1);
+        
+    };
 
     $.isHTTP = function(str) {
         if (str.substring(0, 4) === "http") {
@@ -32,6 +39,20 @@
 
         audio_obj.play();
 
+    };
+
+    $.localFilePath = function(){
+        
+        var path = "";
+        //Mac os Sierra 対応
+        if(process.execPath.indexOf("var/folders")!=-1){
+            path = process.env.HOME+"/_TyranoGameData";
+        }else{
+            path = $.getProcessPath();
+        }
+        
+        return path;
+        
     };
 
     $.getViewPort = function() {
