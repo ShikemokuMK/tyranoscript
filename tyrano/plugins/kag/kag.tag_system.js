@@ -2322,7 +2322,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
             url: pm.url + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
             success: function(json){
-                that.checkPatch(JSON.parse(json),pm);
+                that.checkPatch(json,pm);
             },
             error:function(e){
                 console.log(e);
@@ -2347,6 +2347,8 @@ tyrano.plugin.kag.tag.check_web_patch = {
             $.confirm("新しいアップデートが見つかりました。Ver:"+parseFloat(obj.version)+"「"+obj.message+"」<br />アップデートを行いますか？",
                 function(){
                     
+                    alert("アップデートを行います。完了後、自動的にゲームは終了します。");
+                    
                     var http = require('http');
                     var fs = require('fs');
                     
@@ -2354,40 +2356,32 @@ tyrano.plugin.kag.tag.check_web_patch = {
                     // URLを指定 
                     var url = $.getDirPath(pm.url) + file;
                     
+                    if(url.indexOf("https")!=-1){
+                        alert("エラー：SSL(https)の通信は非対応です");
+                        return;
+                    }
+                    
                     // 出力ファイル名を指定
                     var patch_path = $.localFilePath();
                     patch_path = patch_path + "/" + file;
                     
-                    if(url.indexOf("https://")!=-1){
-                        http = require('https');
-                    }
-                    
                     var outFile = fs.createWriteStream(patch_path);
                     
+                    var flag = false;
                     // ダウンロード開始
                     var req = http.get(url, function (res) {
                         
                         res.pipe(outFile);
                         
                         res.on('end', function () {
+                            
                             outFile.close();
                             //アップデートを実行
                             that.kag.evalScript("sf._patch_version="+ obj.version);
-                            
-                            alert("アップデートが完了しました。反映するにはゲームの再起動が必要です");
-                            
-                            that.kag.ftag.nextOrder();
+                            require('nw.gui').Window.get().close();
                             
                         }); 
                         
-                        
-                        /*
-                        that.kag.applyPatch(patch_path, pm.reload, function(){
-                            that.kag.ftag.nextOrder();
-                        });
-                        */
-                        
-        
                     });
                     
                     // エラーがあれば扱う。
