@@ -2321,7 +2321,13 @@ tyrano.plugin.kag.tag.check_web_patch = {
         $.ajax({
             url: pm.url + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
+            dataType: "json",
             success: function(json){
+                
+                if(typeof json!="object"){
+                    json = JSON.parse(json);
+                }   
+                
                 that.checkPatch(json,pm);
             },
             error:function(e){
