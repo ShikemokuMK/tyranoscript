@@ -225,6 +225,14 @@ tyrano.plugin.kag.key_mouse = {
                 if(that.kag.tmp.ready_audio==false){
                     that.kag.readyAudio();
                     that.kag.tmp.ready_audio = true;
+                    
+                    if(that.kag.stat.is_adding_text == true){
+                        that.kag.stat.is_click_text = true;
+                        return false;
+                    }
+                    that.kag.ftag.nextOrder();
+                    return false;
+                        
                 }
             }             
 
