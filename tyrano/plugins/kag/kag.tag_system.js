@@ -967,6 +967,7 @@ tyrano.plugin.kag.tag.erasemacro = {
 
     start : function(pm) {
         delete this.kag.stat.map_macro[pm.name];
+        this.kag.ftag.nextOrder();
     }
 };
 

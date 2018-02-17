@@ -3236,9 +3236,9 @@ tyrano.plugin.kag.tag.configdelay = {
             this.kag.stat.ch_speed = "";
             this.kag.config.chSpeed = pm.speed;
             this.kag.ftag.startTag("eval", {"exp":"sf._config_ch_speed = "+pm.speed});
+        }else{
+            this.kag.ftag.nextOrder();
         }
-
-        this.kag.ftag.nextOrder();
 
     }
 };
