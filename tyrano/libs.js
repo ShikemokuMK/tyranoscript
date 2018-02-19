@@ -451,6 +451,26 @@
         }
     },
     
+    //オブジェクトを引き継ぐ。
+    $.extendParam = function(pm,target){
+        
+        var tmp = target;
+        
+        for(key in target){
+            
+            if(pm[key]){
+                if(pm[key]!=""){
+                    target[key] = pm[key];
+                }
+            }
+            
+        }
+        
+        return target;
+        
+    };
+
+    
     $.insertRule = function(css_str){
         
         var sheet = (function() {

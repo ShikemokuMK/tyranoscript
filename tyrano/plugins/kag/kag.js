@@ -1067,6 +1067,32 @@ tyrano.plugin.kag ={
            
     },
     
+    //配列の先読み
+    preloadAll:function(storage,callbk){
+        var that = this;
+        //配列で指定された場合
+        if ( typeof storage == "object" && storage.length > 0) {
+
+            var sum = 0;
+
+            for (var i = 0; i < storage.length; i++) {
+
+                that.kag.preload(storage[i], function() {
+                    sum++;
+                    if (storage.length == sum) {
+                        callbk();
+                    }
+                });
+            }
+
+        } else {
+            this.kag.preload(pm.storage, function() {
+                callbk();
+            });
+        }
+            
+    },
+    
     //値が空白のものは設定しない
     setStyles:function(j_obj,array_style){
         

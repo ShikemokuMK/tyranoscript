@@ -1785,6 +1785,8 @@ tyrano.plugin.kag.tag.chara_show = {
         var that = this;
 
         var cpm = this.kag.stat.charas[pm.name];
+        
+        var array_storage = [];
 
         if (cpm == null) {
             this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
@@ -1812,12 +1814,22 @@ tyrano.plugin.kag.tag.chara_show = {
             }
             storage_url = "./data/fgimage/" + cpm["map_face"][pm.face];
         }
+        
+        var j_chara_root = $("<div></div>");
+        j_chara_root.css({
+            "position":"absolute",
+            "display":"none"
+        });
 
         var img_obj = $("<img />");
         img_obj.attr("src", storage_url);
-        img_obj.css("position", "absolute");
-        img_obj.css("display", "none");
+        img_obj.addClass("chara_img");
+        //img_obj.css("position", "absolute");
+        //img_obj.css("display", "none");
         //前景レイヤを表示状態にする
+        
+        //div内に追加
+        j_chara_root.append(img_obj);
 
         if (pm.width != "") {
             var width = parseInt(pm.width);
@@ -1832,9 +1844,58 @@ tyrano.plugin.kag.tag.chara_show = {
         if (pm.zindex != "") {
 
             var zindex = parseInt(pm.zindex);
-            img_obj.css("z-index", zindex);
+            j_chara_root.css("z-index", zindex);
 
         }
+        
+        ////キャラ差分の指定があれば、それを適応する。
+        //レイヤが登録されているかどうか
+        var chara_layer = {};
+        if(cpm["_layer"]){
+            chara_layer = cpm["_layer"];
+        }
+        
+        for(key in chara_layer){
+            
+            var chara_part = chara_layer[key];
+            
+            for(id in chara_part){
+                var chara_obj = chara_part[id];
+                
+                //表示指定なら、追加する。
+                if(chara_obj["visible"]=="true"){
+                    var part_storage = "./data/fgimage/"+chara_obj["storage"];
+                    array_storage.push(part_storage);
+                    
+                    var j_img = $("<img />");
+                    
+                    j_img.attr("src",part_storage);
+                    
+                    j_img.css({
+                       position:"absolute",
+                       left:0,
+                       top:0,
+                       "z-index":chara_obj.zindex
+                    });
+                    
+                    j_img.addClass("part");
+                    j_img.addClass(key); //mouse とか head 
+                    
+                    j_chara_root.append(j_img);
+                    
+                }
+                
+            }
+            //パートが登録されているかどうか
+            if(chara_layer[pm.part]){
+                chara_part = chara_layer[pm.part];    
+            }else{
+                cpm["_layer"][pm.part] = {};
+            }
+            
+        }
+        
+        
 
         //反転表示
         if (pm.reflect != "") {
@@ -1845,13 +1906,15 @@ tyrano.plugin.kag.tag.chara_show = {
             }
         }
         
+        array_storage.push(storage_url);
+        
         //画像は事前にロードしておく必要がありそう
-        this.kag.preload(storage_url, function() {
+        this.kag.preloadAll(array_storage, function() {
 
             var target_layer = that.kag.layer.getLayer(pm.layer, pm.page);
 
             //最後に挿入
-            target_layer.append(img_obj).show();
+            target_layer.append(j_chara_root).show();
 
             var chara_num = 1;
             that.kag.layer.hideEventLayer();
@@ -1861,13 +1924,28 @@ tyrano.plugin.kag.tag.chara_show = {
             //立ち位置を自動的に設定する場合
             if (that.kag.stat.chara_pos_mode == "true" && pm.left == "0") {
                 
+                //読み込み後、サイズを指定する
+                setTimeout(function(){
+                    
+                    var width = img_obj.css("width");
+                    var height = img_obj.css("height");
+                    
+                    j_chara_root.css("width",width);
+                    j_chara_root.css("height",height);
+                    
+                    j_chara_root.find(".part").css("width",width);
+                    j_chara_root.find(".part").css("height",height);
+                    
+                    
+                },1);
+                    
+                
                 //立ち位置自動調整
-                if(pm.top !="0"){
-                    img_obj.css("top",parseInt(pm.top));
+                if(pm.top !="0" ){
+                    j_chara_root.css("top",parseInt(pm.top));
                 }else{
-                    img_obj.css("bottom", "0px");
+                    j_chara_root.css("bottom", 0);
                 }
-
 
                 //既存キャラの位置を調整する
                 var chara_cnt = target_layer.find(".tyrano_chara").length;
@@ -1875,14 +1953,14 @@ tyrano.plugin.kag.tag.chara_show = {
                 var sc_width = parseInt(that.kag.config.scWidth);
                 var sc_height = parseInt(that.kag.config.scHeight);
 
-                var center = Math.floor(parseInt(img_obj.css("width")) / 2);
+                var center = Math.floor(parseInt(j_chara_root.css("width")) / 2);
 
                 //一つあたりの位置決定
                 var base = Math.floor(sc_width / (chara_cnt + 2));
                 var tmp_base = base;
                 var first_left = base - center;
 
-                img_obj.css("left", first_left + "px");
+                j_chara_root.css("left", first_left + "px");
 
                 //すべてのanimationが完了するまで、次へ進めないように指定
                 var array_tyrano_chara = target_layer.find(".tyrano_chara").get().reverse();
@@ -1937,16 +2015,16 @@ tyrano.plugin.kag.tag.chara_show = {
 
             } else {
 
-                img_obj.css("top", pm.top + "px");
-                img_obj.css("left", pm.left + "px");
+                j_chara_root.css("top", pm.top + "px");
+                j_chara_root.css("left", pm.left + "px");
 
                 //that.kag.ftag.nextOrder();
 
             }
 
             //オブジェクトにクラス名をセットします name属性は一意でなければなりません
-            $.setName(img_obj, cpm.name);
-            img_obj.addClass("tyrano_chara");
+            $.setName(j_chara_root, cpm.name);
+            j_chara_root.addClass("tyrano_chara");
             //キャラクター属性を付与。
 
             //新しいスタイルの定義
@@ -1970,7 +2048,7 @@ tyrano.plugin.kag.tag.chara_show = {
             }
 
             //アニメーションでj表示させます
-            img_obj.animate({
+            j_chara_root.animate({
                 opacity : "show"
             }, {
                 duration : parseInt(that.kag.cutTimeWithSkip(pm.time)),
@@ -2350,7 +2428,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         }
 
         //変更する際の画像が同じ場合は、即時表示
-        if ($(".layer_fore").find("." + pm.name).attr("src") == folder + storage_url) {
+        if ($(".layer_fore").find("." + pm.name).find(".chara_img").attr("src") == folder + storage_url) {
             chara_time = "0";
         }
 
@@ -2378,7 +2456,7 @@ tyrano.plugin.kag.tag.chara_mod = {
             if (chara_time != "0") {
                 
                 var j_new_img = $(".layer_fore").find("." + pm.name).clone();
-                j_new_img.attr("src", folder + storage_url);
+                j_new_img.find(".chara_img").attr("src", folder + storage_url);
                 j_new_img.css("opacity", 0);
                 
                 
@@ -2419,7 +2497,7 @@ tyrano.plugin.kag.tag.chara_mod = {
     
             } else {
                 
-                $(".layer_fore").find("." + pm.name).attr("src", folder + storage_url);
+                $(".layer_fore").find("." + pm.name).find(".chara_img").attr("src", folder + storage_url);
                 
                 if(pm.wait=="true"){
                     that.kag.layer.showEventLayer();
@@ -2634,6 +2712,210 @@ tyrano.plugin.kag.tag.chara_face = {
 
     }
 };
+
+
+/*
+ #[chara_layer]
+ :group
+ キャラクター操作
+ :title
+ キャラクターのパーツ定義
+ :exp
+ キャラクターの表情をパーツごとに管理するための定義を設定します
+ :sample
+ [chara_layer name="yuko" part=mouse id=egao storage="image/egao.png" ]
+ :param
+ name=[chara_new]で定義したname属性を指定してください。,
+ part=パーツとして登録する名を指定します。例えば「目」というpartを登録しておいて、このpartの中で他の差分をいくつも登録することができます。,
+ id=パーツの中で差分にidを登録できます。例えば「目」というpartの中で「笑顔の目」「泣いてる目」のようにidを分けてstorageを登録してください,
+ storage=差分として登録する画像を指定します。画像はfgimageフォルダの中に配置します。,
+ zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されますので一度登録すれば良いわけです。,
+ left=パーツの座標をキャラクター画像の左端を起点として配置することができます。ピクセルで指定してください。差分に[chara_new]で指定した画像と同じサイズの場合は指定は不要です。,
+ top=パーツの座標をキャラクター画像の上部を起点として配置することができます。ピクセルで指定してください。差分に[chara_new]で指定した画像と同じサイズの場合は指定は不要です。,
+ default= true or false を指定します。trueを指定するとこのタグで指定したパーツがデフォルトになります。デフォルトはfalseです,
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.chara_layer = {
+
+    vital : ["name","part","id","storage"],
+
+    pm : {
+        name : "",
+        part : "", 
+        id : "",
+        storage : "",
+        zindex : "",
+        left:"",
+        top:"",
+        is_default : "false"
+    },
+
+    start : function(pm) {
+        
+        var cpm = this.kag.stat.charas[pm.name];    
+        
+        if (cpm == null) {
+            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            return;
+        }
+        
+        var chara_layer = {};
+        
+        //レイヤが登録されているかどうか
+        if(cpm["_layer"]){
+            chara_layer = cpm["_layer"];
+        }else{
+            cpm["_layer"] = {};
+        }
+        
+        var chara_part = {};
+        
+        //パートが登録されているかどうか
+        var init_part = false;
+        if(chara_layer[pm.part]){
+            chara_part = chara_layer[pm.part];    
+        }else{
+            init_part = true;
+            cpm["_layer"][pm.part] = {};
+        }
+        
+        var chara_obj = {};
+        
+        //差分IDを登録する
+        if(chara_part[pm.id]){
+            chara_obj = chara_part[pm.id];    
+        }else{
+            
+            chara_obj = {
+                storage : "",
+                zindex : "",
+                left:"",
+                top:"",
+                is_default : "true"
+            };
+            
+            //パーツ自体が初めての場合は、showにする。
+            if(init_part==true){
+                chara_obj["visible"] = "true";
+            }else{
+                chara_obj["visible"] = "false";
+            }
+        
+        }
+        
+        
+        cpm["_layer"][pm.part][pm.id] = $.extendParam(pm,chara_obj);
+        
+        this.kag.ftag.nextOrder();
+
+
+    }
+};
+
+
+/*
+ #[chara_part]
+ :group
+ キャラクター操作
+ :title
+ キャラクターのパーツ変更
+ :exp
+ [chara_layer]で指定した差分を実際に表示切り替えする
+ :sample
+ [chara_part name="yuko" mouse=aaa eye=aaa ]
+ :param
+ name=,
+ part=
+ time=
+ wait=
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.chara_part = {
+
+    vital : ["name"],
+
+    pm : {
+        name : "",
+        
+    },
+
+    start : function(pm) {
+        
+        var that = this;
+        
+        var cpm = this.kag.stat.charas[pm.name];    
+        
+        if (cpm == null) {
+            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            return;
+        }
+        
+        //レイヤが登録されているかどうか
+        if(!cpm["_layer"]){
+            this.kag.error("指定されたキャラクター「" + pm.name + "」の差分パーツは設定されていません。[chara_layer]で定義してください");
+            return;
+        }
+        
+        var chara_part = cpm["_layer"];
+        
+        var map_part = {};
+        var array_storage = [];
+        
+        var part_num = 0;
+        
+        for(key in pm){
+            
+            if(chara_part[key]){
+                
+                var part_id = pm[key];
+                if(chara_part[key][part_id]){
+                    var part = chara_part[key][part_id];
+                    part.id = part_id;
+                    map_part[key] = part;
+                    //partの中で指定された画像を表示する
+                    array_storage.push("./data/fgimage/" + part["storage"]);
+                    part_num++;
+                }
+            }
+                
+        }
+        
+        var target_obj = $(".layer_fore").find("." + pm.name + ".tyrano_chara");
+        
+        //プリロード
+        this.kag.preloadAll(array_storage, function() {
+            
+            //指定された配列を回して、該当するオブジェクトを切り替える
+            var cnt=0;
+            for(key in map_part){
+                
+                cnt++;
+                
+                var part = map_part[key];
+                var j_img = target_obj.find(".part"+"." + key + "");
+                
+                console.log(j_img);
+                
+                j_img.attr("src","./data/fgimage/" + part.storage);
+                
+                if(part_num==cnt){
+                    that.kag.ftag.nextOrder();
+                }
+                
+            }
+        });
+
+
+        
+        
+        
+    }
+};
+
 
 /*
  #[showlog]
