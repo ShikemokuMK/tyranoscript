@@ -1859,38 +1859,32 @@ tyrano.plugin.kag.tag.chara_show = {
             
             var chara_part = chara_layer[key];
             
-            for(id in chara_part){
-                var chara_obj = chara_part[id];
+            //どれを表示すべきかを策定
+            var current_part_id = chara_part["current_part_id"];
+            var chara_obj = chara_part[current_part_id];
                 
-                //表示指定なら、追加する。
-                if(chara_obj["visible"]=="true"){
-                    var part_storage = "./data/fgimage/"+chara_obj["storage"];
-                    array_storage.push(part_storage);
-                    
-                    var j_img = $("<img />");
-                    
-                    j_img.attr("src",part_storage);
-                    
-                    j_img.css({
-                       position:"absolute",
-                       left:0,
-                       top:0,
-                       "z-index":chara_obj.zindex
-                    });
-                    
-                    j_img.addClass("part");
-                    j_img.addClass(key); //mouse とか head 
-                    
-                    j_chara_root.append(j_img);
-                    
-                }
+            if(chara_obj["storage"]!="none"){
                 
-            }
-            //パートが登録されているかどうか
-            if(chara_layer[pm.part]){
-                chara_part = chara_layer[pm.part];    
-            }else{
-                cpm["_layer"][pm.part] = {};
+                var part_storage = "./data/fgimage/"+chara_obj["storage"];
+                array_storage.push(part_storage);
+                
+                var j_img = $("<img />");
+                
+                j_img.attr("src",part_storage);
+                
+                j_img.css({
+                   position:"absolute",
+                   left:0,
+                   top:0,
+                   "z-index":chara_part.zindex
+                });
+                
+                j_img.addClass("part");
+                j_img.addClass(key); //mouse とか head 
+                
+                j_chara_root.append(j_img);
+            
+                
             }
             
         }
@@ -2440,12 +2434,13 @@ tyrano.plugin.kag.tag.chara_mod = {
             }
             this.kag.stat.charas[pm.name]["reflect"] = pm.reflect;
         }
+        
         //storageが指定されていない場合は終わり
         if (storage_url == "") {
+            that.kag.layer.showEventLayer();
             this.kag.ftag.nextOrder();
             return;
         }
-        
         
         this.kag.preload(folder + storage_url, function() {
             
@@ -2721,7 +2716,8 @@ tyrano.plugin.kag.tag.chara_face = {
  :title
  キャラクターのパーツ定義
  :exp
- キャラクターの表情をパーツごとに管理するための定義を設定します
+ キャラクターの表情をパーツごとに管理するための定義を設定します。
+ デフォルトのパーツは一番最初に登録したものになります。
  :sample
  [chara_layer name="yuko" part=mouse id=egao storage="image/egao.png" ]
  :param
@@ -2729,10 +2725,7 @@ tyrano.plugin.kag.tag.chara_face = {
  part=パーツとして登録する名を指定します。例えば「目」というpartを登録しておいて、このpartの中で他の差分をいくつも登録することができます。,
  id=パーツの中で差分にidを登録できます。例えば「目」というpartの中で「笑顔の目」「泣いてる目」のようにidを分けてstorageを登録してください,
  storage=差分として登録する画像を指定します。画像はfgimageフォルダの中に配置します。,
- zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されますので一度登録すれば良いわけです。,
- left=パーツの座標をキャラクター画像の左端を起点として配置することができます。ピクセルで指定してください。差分に[chara_new]で指定した画像と同じサイズの場合は指定は不要です。,
- top=パーツの座標をキャラクター画像の上部を起点として配置することができます。ピクセルで指定してください。差分に[chara_new]で指定した画像と同じサイズの場合は指定は不要です。,
- default= true or false を指定します。trueを指定するとこのタグで指定したパーツがデフォルトになります。デフォルトはfalseです,
+ zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されますので一度登録すれば良いわけです。
  
  #[end]
  */
@@ -2746,10 +2739,7 @@ tyrano.plugin.kag.tag.chara_layer = {
         part : "", 
         id : "",
         storage : "",
-        zindex : "",
-        left:"",
-        top:"",
-        is_default : "false"
+        zindex : ""
     },
 
     start : function(pm) {
@@ -2778,7 +2768,12 @@ tyrano.plugin.kag.tag.chara_layer = {
             chara_part = chara_layer[pm.part];    
         }else{
             init_part = true;
-            cpm["_layer"][pm.part] = {};
+            //一つ上のレイヤに配置する
+            cpm["_layer"][pm.part] = {
+                "default_part_id":pm.id,
+                "current_part_id":pm.id,
+                "zindex":pm.zindex
+            };
         }
         
         var chara_obj = {};
@@ -2791,9 +2786,6 @@ tyrano.plugin.kag.tag.chara_layer = {
             chara_obj = {
                 storage : "",
                 zindex : "",
-                left:"",
-                top:"",
-                is_default : "true"
             };
             
             //パーツ自体が初めての場合は、showにする。
@@ -2823,14 +2815,15 @@ tyrano.plugin.kag.tag.chara_layer = {
  キャラクターのパーツ変更
  :exp
  [chara_layer]で指定した差分を実際に表示切り替えする
+ このタグは特殊なパラメータ指定で[chara_layer]で定義したpart と id の組み合わせをパラメータとして自由に指定できます。
+ （例）eye=sample1 
+ 同時に複数のpartを変更することも可能です。
+ また、id登録していない、画像を直接指定することもできます。この場合パラメータのallow_storageにtrueに指定してください。
  :sample
- [chara_part name="yuko" mouse=aaa eye=aaa ]
+ [chara_part name="yuko" mouse=aaa eye=bbb ]
  :param
- name=,
- part=
- time=
- wait=
- 
+ name=[chara_new]で指定したキャラクター名を指定してください。,
+ allow_storage=true or false 。partの指定にidではなく直接画像ファイルを指定できます。fgimageに配置してください。デフォルトはfalse
  #[end]
  */
 
@@ -2840,7 +2833,7 @@ tyrano.plugin.kag.tag.chara_part = {
 
     pm : {
         name : "",
-        
+        allow_storage: "false"
     },
 
     start : function(pm) {
@@ -2873,12 +2866,24 @@ tyrano.plugin.kag.tag.chara_part = {
                 
                 var part_id = pm[key];
                 if(chara_part[key][part_id]){
+                    
                     var part = chara_part[key][part_id];
                     part.id = part_id;
                     map_part[key] = part;
                     //partの中で指定された画像を表示する
                     array_storage.push("./data/fgimage/" + part["storage"]);
                     part_num++;
+                    
+                    //デフォルトのパートを変更する
+                    this.kag.stat.charas[pm.name]["_layer"][key]["current_part_id"] = part_id;
+                    
+                }else{
+                    
+                    if(pm.allow_storage =="true"){
+                        map_part[key] = {"storage":part_id,"id":part_id};
+                        array_storage.push("./data/fgimage/" + part_id);    
+                    }
+                    
                 }
             }
                 
@@ -2898,8 +2903,6 @@ tyrano.plugin.kag.tag.chara_part = {
                 var part = map_part[key];
                 var j_img = target_obj.find(".part"+"." + key + "");
                 
-                console.log(j_img);
-                
                 j_img.attr("src","./data/fgimage/" + part.storage);
                 
                 if(part_num==cnt){
@@ -2912,6 +2915,67 @@ tyrano.plugin.kag.tag.chara_part = {
 
         
         
+        
+    }
+};
+
+
+
+/*
+ #[chara_part_reset]
+ :group
+ キャラクター操作
+ :title
+ キャラクターのパーツをデフォルトに戻す
+ :exp
+ [chara_part]で差分を変更した際、デフォルトの表情に戻すことができます。
+ キャラクターが表示されている場合は即時デフォルトに戻ります。
+ :sample
+ [chara_part_reset name="yuko" ]
+ :param
+ name=[chara_new]で指定したキャラクター名を指定してください。
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.chara_part_reset = {
+
+    vital : ["name"],
+
+    pm : {
+        name : ""
+    },
+
+    start : function(pm) {
+        
+        var that = this;
+        
+        var cpm = this.kag.stat.charas[pm.name];    
+        
+        if (cpm == null) {
+            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            return;
+        }
+        
+        //レイヤが登録されているかどうか
+        if(!cpm["_layer"]){
+            this.kag.error("指定されたキャラクター「" + pm.name + "」の差分パーツは設定されていません。[chara_layer]で定義してください");
+            return;
+        }
+        
+        var chara_part = cpm["_layer"];
+        
+        //chara_part のタグをつくって、デフォルトに戻す
+        var new_pm = {
+            "name":pm.name
+        };
+            
+        for(key in chara_part){
+            
+            new_pm[key] = chara_part[key]["default_part_id"];
+            
+        }
+        
+        this.kag.ftag.startTag("chara_part",new_pm);
         
     }
 };
