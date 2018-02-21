@@ -2612,7 +2612,10 @@ tyrano.plugin.kag.tag.chara_move = {
         var that = this;
 
         var target_obj = $(".layer_fore").find("." + pm.name + ".tyrano_chara");
+        var target_img = $(".layer_fore").find("." + pm.name + ".tyrano_chara").find("img");
+        
         var anim_style = {};
+        var img_anim_style = {};
 
         if (pm.left != "") {
             anim_style.left = pm.left +"px";
@@ -2622,9 +2625,11 @@ tyrano.plugin.kag.tag.chara_move = {
         }
         if (pm.width != "") {
             anim_style.width = pm.width;
+            img_anim_style.width = pm.width;
         }
         if (pm.height != "") {
             anim_style.height = pm.height;
+            img_anim_style.height = pm.height;
         }
 
         var target = "";
@@ -2639,17 +2644,25 @@ tyrano.plugin.kag.tag.chara_move = {
                     }
                     
                 });
+                
+                target_img.animate(img_anim_style, parseInt(pm.time), pm.effect, function() {
+                    
+                });
+                
+                
             }else{
                 
                 target_obj.fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time))/2, 0, function() {
                     
                     target_obj.css(anim_style);
+                    target_img.css(img_anim_style);
                     
                     target_obj.fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time))/2, 1,function(){
                         if(pm.wait=="true"){
                             that.kag.ftag.nextOrder();
                         }
                     });
+                    
                     
                 });
                 
@@ -2731,9 +2744,9 @@ tyrano.plugin.kag.tag.chara_face = {
  :group
  キャラクター操作
  :title
- キャラクターのパーツ定義
+ キャラクターの差分パーツ定義
  :exp
- キャラクターの表情をパーツごとに管理するための定義を設定します。
+ キャラクターの表情を差分パーツを定義します。
  デフォルトのパーツは一番最初に登録したものになります。
  :sample
  [chara_layer name="yuko" part=mouse id=egao storage="image/egao.png" ]
@@ -2742,7 +2755,7 @@ tyrano.plugin.kag.tag.chara_face = {
  part=パーツとして登録する名を指定します。例えば「目」というpartを登録しておいて、このpartの中で他の差分をいくつも登録することができます。,
  id=パーツの中で差分にidを登録できます。例えば「目」というpartの中で「笑顔の目」「泣いてる目」のようにidを分けてstorageを登録してください,
  storage=差分として登録する画像を指定します。画像はfgimageフォルダの中に配置します。noneを指定するとデフォルトそのパーツがない状態を表現することができます,
- zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されますので一度登録すれば良いわけです。
+ zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されます。
  
  #[end]
  */
@@ -2802,7 +2815,7 @@ tyrano.plugin.kag.tag.chara_layer = {
             
             chara_obj = {
                 storage : "",
-                zindex : "",
+                zindex : ""
             };
             
             //パーツ自体が初めての場合は、showにする。
@@ -2829,7 +2842,7 @@ tyrano.plugin.kag.tag.chara_layer = {
  :group
  キャラクター操作
  :title
- キャラクターのパーツ変更
+ キャラクターの差分パーツ変更
  :exp
  [chara_layer]で指定した差分を実際に表示切り替えする
  このタグは特殊なパラメータ指定で[chara_layer]で定義したpart と id の組み合わせをパラメータとして自由に指定できます。
@@ -2840,7 +2853,7 @@ tyrano.plugin.kag.tag.chara_layer = {
  [chara_part name="yuko" mouse=aaa eye=bbb ]
  :param
  name=[chara_new]で指定したキャラクター名を指定してください。,
- allow_storage=true or false 。partの指定にidではなく直接画像ファイルを指定できます。fgimageに配置してください。デフォルトはfalse
+ allow_storage=true or false 。partの指定にidではなく直接画像ファイルを指定できます。画像はfgimageフォルダに配置してください。デフォルトはfalseです。
  #[end]
  */
 
@@ -2951,7 +2964,7 @@ tyrano.plugin.kag.tag.chara_part = {
  :group
  キャラクター操作
  :title
- キャラクターのパーツをデフォルトに戻す
+ キャラクターの差分パーツをデフォルトに戻す
  :exp
  [chara_part]で差分を変更した際、デフォルトの表情に戻すことができます。
  キャラクターが表示されている場合は即時デフォルトに戻ります。
@@ -2959,7 +2972,7 @@ tyrano.plugin.kag.tag.chara_part = {
  [chara_part_reset name="yuko" ]
  :param
  name=[chara_new]で指定したキャラクター名を指定してください。,
- part=特定のpartに絞ってリセットすることが可能です。デフォルトはすべてをデフォルトに戻します。ここに記述することで指定したpartのみリセットされます。カンマで区切ると複数指定することが可能です,
+ part=特定のpartに絞ってリセットすることが可能です。デフォルトはすべてをデフォルトに戻します。ここに記述することで指定したpartのみリセットされます。カンマで区切ると複数指定することが可能です
  #[end]
  */
 
