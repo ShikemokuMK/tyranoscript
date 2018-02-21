@@ -1834,12 +1834,23 @@ tyrano.plugin.kag.tag.chara_show = {
         if (pm.width != "") {
             var width = parseInt(pm.width);
             cpm.width = width;
+                
         }
 
         if (pm.height != "") {
             var height = parseInt(pm.height);
             cpm.height = height;
+            
         }
+        
+        if(cpm.width!=""){
+            j_chara_root.css("width",cpm.width + "px");
+        }
+        
+        if(cpm.height!=""){
+            j_chara_root.css("height",cpm.height + "px");
+        }
+
 
         if (pm.zindex != "") {
 
@@ -1859,16 +1870,22 @@ tyrano.plugin.kag.tag.chara_show = {
             
             var chara_part = chara_layer[key];
             
-            //どれを表示すべきかを策定
+            //どれを表示すべきか
             var current_part_id = chara_part["current_part_id"];
             var chara_obj = chara_part[current_part_id];
-                
-            if(chara_obj["storage"]!="none"){
+            
+            if(true){
                 
                 var part_storage = "./data/fgimage/"+chara_obj["storage"];
-                array_storage.push(part_storage);
                 
                 var j_img = $("<img />");
+                
+                //noneの場合はimgオブジェクトだけ作っておく
+                if(chara_obj["storage"]=="none"){
+                    part_storage ="./tyrano/images/system/transparent.png";
+                }else{
+                    array_storage.push(part_storage);
+                }
                 
                 j_img.attr("src",part_storage);
                 
@@ -1946,7 +1963,7 @@ tyrano.plugin.kag.tag.chara_show = {
 
                 var sc_width = parseInt(that.kag.config.scWidth);
                 var sc_height = parseInt(that.kag.config.scHeight);
-
+                
                 var center = Math.floor(parseInt(j_chara_root.css("width")) / 2);
 
                 //一つあたりの位置決定
@@ -2724,7 +2741,7 @@ tyrano.plugin.kag.tag.chara_face = {
  name=[chara_new]で定義したname属性を指定してください。,
  part=パーツとして登録する名を指定します。例えば「目」というpartを登録しておいて、このpartの中で他の差分をいくつも登録することができます。,
  id=パーツの中で差分にidを登録できます。例えば「目」というpartの中で「笑顔の目」「泣いてる目」のようにidを分けてstorageを登録してください,
- storage=差分として登録する画像を指定します。画像はfgimageフォルダの中に配置します。,
+ storage=差分として登録する画像を指定します。画像はfgimageフォルダの中に配置します。noneを指定するとデフォルトそのパーツがない状態を表現することができます,
  zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されますので一度登録すれば良いわけです。
  
  #[end]
@@ -2871,7 +2888,11 @@ tyrano.plugin.kag.tag.chara_part = {
                     part.id = part_id;
                     map_part[key] = part;
                     //partの中で指定された画像を表示する
-                    array_storage.push("./data/fgimage/" + part["storage"]);
+                    
+                    if(part["storage"] != "none"){
+                        array_storage.push("./data/fgimage/" + part["storage"]);
+                    }
+                    
                     part_num++;
                     
                     //デフォルトのパートを変更する
@@ -2903,7 +2924,11 @@ tyrano.plugin.kag.tag.chara_part = {
                 var part = map_part[key];
                 var j_img = target_obj.find(".part"+"." + key + "");
                 
-                j_img.attr("src","./data/fgimage/" + part.storage);
+                if(part.storage!="none"){
+                    j_img.attr("src","./data/fgimage/" + part.storage);
+                }else{
+                    j_img.attr("src", "./tyrano/images/system/transparent.png");
+                }
                 
                 if(part_num==cnt){
                     that.kag.ftag.nextOrder();
@@ -2933,7 +2958,8 @@ tyrano.plugin.kag.tag.chara_part = {
  :sample
  [chara_part_reset name="yuko" ]
  :param
- name=[chara_new]で指定したキャラクター名を指定してください。
+ name=[chara_new]で指定したキャラクター名を指定してください。,
+ part=特定のpartに絞ってリセットすることが可能です。デフォルトはすべてをデフォルトに戻します。ここに記述することで指定したpartのみリセットされます。カンマで区切ると複数指定することが可能です,
  #[end]
  */
 
@@ -2942,7 +2968,8 @@ tyrano.plugin.kag.tag.chara_part_reset = {
     vital : ["name"],
 
     pm : {
-        name : ""
+        name : "",
+        part:""
     },
 
     start : function(pm) {
@@ -2968,10 +2995,25 @@ tyrano.plugin.kag.tag.chara_part_reset = {
         var new_pm = {
             "name":pm.name
         };
+        
+        if(pm.part==""){
             
-        for(key in chara_part){
+            for(key in chara_part){
+                
+                new_pm[key] = chara_part[key]["default_part_id"];
+                
+            }
+        
+        }else {
             
-            new_pm[key] = chara_part[key]["default_part_id"];
+            //partが指定されている
+            var array_part = pm.part.split(",");
+            for(var i=0;i<array_part.length;i++){
+                var key = array_part[i];
+                if(chara_part[key]){
+                    new_pm[key] = chara_part[key]["default_part_id"];
+                }
+            }
             
         }
         
