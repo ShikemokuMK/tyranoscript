@@ -1069,10 +1069,16 @@ tyrano.plugin.kag ={
     
     //配列の先読み
     preloadAll:function(storage,callbk){
+        
         var that = this;
         //配列で指定された場合
-        if ( typeof storage == "object" && storage.length > 0) {
-
+        if ( typeof storage == "object" && storage.length >= 0) {
+            
+            if(storage.length==0){
+                callbk();
+                return;
+            }
+            
             var sum = 0;
 
             for (var i = 0; i < storage.length; i++) {
