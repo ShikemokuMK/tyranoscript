@@ -465,7 +465,8 @@
             
         }
         
-        array_obj["translate3d"] = point["x"]+"px,"+point["y"]+"px,"+point["z"]+"px";
+        //array_obj["translate3d"] = point["x"]+"px,"+point["y"]+"px,"+point["z"]+"px";
+        array_obj["translate"] = point["x"]+"px,"+point["y"]+"px";
         
         return array_obj;
         
