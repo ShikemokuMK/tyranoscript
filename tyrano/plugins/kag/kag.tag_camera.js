@@ -83,10 +83,12 @@ tyrano.plugin.kag.tag.camera = {
     start : function(pm) {
         var that = this;
         
+        /*
         if(this.kag.config.useCamera == "false"){
             $.alert("[camera]タグエラー。カメラの使用を許可して下さい。Config.tjsのuseCameraをtrueにする必要があります");
             return false;
         }
+        */
         
         //duration を確認する
         var duration = pm.time + "ms";
@@ -103,8 +105,8 @@ tyrano.plugin.kag.tag.camera = {
         var to_camera = $.extend(true, {}, this.kag.stat.current_camera[pm.layer]);
         
         //指定されて項目があるなら、上書きする
-        if(pm.x!="") to_camera.x = "*"+parseInt(pm.x)*-1 +"px";
-        if(pm.y!="") to_camera.y = "*"+parseInt(pm.y)*1 +"px";
+        if(pm.x!="") to_camera.x = parseInt(pm.x)*-1 +"px";
+        if(pm.y!="") to_camera.y = parseInt(pm.y)*1 +"px";
         if(pm.zoom!="") to_camera.scale = pm.zoom;
         if(pm.rotate!="") to_camera.rotate = pm.rotate+"deg";
         
@@ -112,8 +114,8 @@ tyrano.plugin.kag.tag.camera = {
         if(pm.from_x != "0" || pm.from_y!="0" || pm.from_zoom!="1" || pm.from_rotate!="0" ){
             
             this.kag.stat.current_camera[pm.layer] = {
-                x : "*"+parseInt(pm.from_x)*-1 +"px",
-                y : "*"+parseInt(pm.from_y)*1+"px",
+                x : parseInt(pm.from_x)*-1 +"px",
+                y : parseInt(pm.from_y)*1+"px",
                 scale : pm.from_zoom,
                 rotate:pm.from_rotate+"deg"
             };
@@ -234,8 +236,8 @@ tyrano.plugin.kag.tag.reset_camera = {
         var to_scale   = 1;
         
         var to_camera = {
-            x:"*0px",
-            y:"*0px",
+            x:"0px",
+            y:"0px",
             scale:"1",
             rotate:"0deg"
         }
@@ -285,7 +287,8 @@ tyrano.plugin.kag.tag.reset_camera = {
                     "-animation-iteration-count":"",
                     "-animation-direction": "",
                     "-animation-fill-mode": "",
-                    "-animation-timing-function":""
+                    "-animation-timing-function":"",
+                    "transform":""
                 });
                 
                 

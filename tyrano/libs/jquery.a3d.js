@@ -285,6 +285,8 @@
                 obj.css(css_param).one(''+vendor+'AnimationEnd animationend',function(){
                     
                     if(typeof cb_complete === "function"){
+                        obj.css("transform",obj.css("transform"));
+                        obj.css("-"+vendor+"-animation-name","");
                         cb_complete.call(that);
                     }
                     
