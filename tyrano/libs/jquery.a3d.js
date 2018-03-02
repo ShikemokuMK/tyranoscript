@@ -230,6 +230,13 @@
                 obj.css(css_param).one('animationend',function(){
                     
                     if(typeof cb_complete === "function"){
+                        
+                        obj.css("transform", obj.css("transform"));
+                        for (var key in mod_styles) {
+                            obj.css(key, obj.css(key));
+                        }
+                        obj.css("animation-name","");
+                        
                         cb_complete.call(that);
                     }
                     
@@ -286,6 +293,11 @@
                     
                     if(typeof cb_complete === "function"){
                         obj.css("transform",obj.css("transform"));
+                        
+                        for (var key in mod_styles) {
+                            obj.css(key, obj.css(key));
+                        }
+                        
                         obj.css("-"+vendor+"-animation-name","");
                         cb_complete.call(that);
                     }
