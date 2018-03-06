@@ -1893,6 +1893,9 @@ tyrano.plugin.kag.tag.chara_show = {
                    position:"absolute",
                    left:0,
                    top:0,
+                   width:"100%",
+                   height:"100%",
+                   
                    "z-index":chara_part.zindex
                 });
                 
