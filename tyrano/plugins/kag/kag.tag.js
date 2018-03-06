@@ -85,11 +85,14 @@ tyrano.plugin.kag.ftag = {
         var that = this;
 
         //[s]タグ。ストップするか否か
-        if (this.kag.stat.is_strong_stop == true) {
-
+        if (this.kag.stat.is_strong_stop == true ) {
             return false;
-
         }
+        
+        if(this.kag.stat.is_adding_text == true){
+            return false
+        }
+        
 
         try {
 
