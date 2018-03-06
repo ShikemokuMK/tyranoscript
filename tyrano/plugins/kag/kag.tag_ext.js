@@ -1895,7 +1895,6 @@ tyrano.plugin.kag.tag.chara_show = {
                    top:0,
                    width:"100%",
                    height:"100%",
-                   
                    "z-index":chara_part.zindex
                 });
                 
@@ -1938,21 +1937,6 @@ tyrano.plugin.kag.tag.chara_show = {
             //立ち位置を自動的に設定する場合
             if (that.kag.stat.chara_pos_mode == "true" && pm.left == "0") {
                 
-                //読み込み後、サイズを指定する
-                setTimeout(function(){
-                    
-                    var width = img_obj.css("width");
-                    var height = img_obj.css("height");
-                    
-                    j_chara_root.css("width",width);
-                    j_chara_root.css("height",height);
-                    
-                    j_chara_root.find(".part").css("width",width);
-                    j_chara_root.find(".part").css("height",height);
-                    
-                    
-                },1);
-                    
                 
                 //立ち位置自動調整
                 if(pm.top !="0" ){
@@ -2035,6 +2019,21 @@ tyrano.plugin.kag.tag.chara_show = {
                 //that.kag.ftag.nextOrder();
 
             }
+            
+            //読み込み後、サイズを指定する
+            setTimeout(function(){
+                
+                var width = img_obj.css("width");
+                var height = img_obj.css("height");
+                
+                j_chara_root.css("width",width);
+                j_chara_root.css("height",height);
+                
+                j_chara_root.find(".part").css("width",width);
+                j_chara_root.find(".part").css("height",height);
+                
+                
+            },1);
 
             //オブジェクトにクラス名をセットします name属性は一意でなければなりません
             $.setName(j_chara_root, cpm.name);
