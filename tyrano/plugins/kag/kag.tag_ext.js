@@ -2908,8 +2908,6 @@ tyrano.plugin.kag.tag.chara_part = {
                         array_storage.push("./data/fgimage/" + part["storage"]);
                     }
                     
-                    part_num++;
-                    
                     //デフォルトのパートを変更する
                     this.kag.stat.charas[pm.name]["_layer"][key]["current_part_id"] = part_id;
                     
@@ -2917,7 +2915,7 @@ tyrano.plugin.kag.tag.chara_part = {
                     
                     if(pm.allow_storage =="true"){
                         map_part[key] = {"storage":part_id,"id":part_id};
-                        array_storage.push("./data/fgimage/" + part_id);    
+                        array_storage.push("./data/fgimage/" + part_id);  
                     }
                     
                 }
@@ -2931,10 +2929,7 @@ tyrano.plugin.kag.tag.chara_part = {
         this.kag.preloadAll(array_storage, function() {
             
             //指定された配列を回して、該当するオブジェクトを切り替える
-            var cnt=0;
             for(key in map_part){
-                
-                cnt++;
                 
                 var part = map_part[key];
                 var j_img = target_obj.find(".part"+"." + key + "");
@@ -2945,16 +2940,12 @@ tyrano.plugin.kag.tag.chara_part = {
                     j_img.attr("src", "./tyrano/images/system/transparent.png");
                 }
                 
-                if(part_num==cnt){
-                    that.kag.ftag.nextOrder();
-                }
-                
             }
+            
+            that.kag.ftag.nextOrder();
+            
         });
 
-
-        
-        
         
     }
 };
