@@ -1750,6 +1750,7 @@ tyrano.plugin.kag.tag.chara_new = {
  page="foreかbackを指定します。デフォルトはforeです",
  wait="trueを指定すると、キャラクターの登場完了を待ちます。デフォルトはtrue です。",
  face=[chara_face]で定義したface属性を指定してください。,
+ storage=変更する画像ファイルを指定してください。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。,
  reflect="trueを指定すると左右反転します",
  width="キャラクターの横幅を指定できます。",
  height="キャラクターの縦幅を指定できます。",
@@ -1776,6 +1777,7 @@ tyrano.plugin.kag.tag.chara_show = {
         zindex : "1",
         reflect : "",
         face : "",
+        storage:"",
         time : 1000
 
     },
@@ -1801,7 +1803,7 @@ tyrano.plugin.kag.tag.chara_show = {
         }
 
         var storage_url = "./data/fgimage/" + cpm.storage;
-
+        
         if ($.isHTTP(cpm.storage)) {
             storage_url = cpm.storage;
         }
@@ -1813,7 +1815,20 @@ tyrano.plugin.kag.tag.chara_show = {
                 return;
             }
             storage_url = "./data/fgimage/" + cpm["map_face"][pm.face];
+        
+        }else if(pm.storage != "") {
+
+            if ($.isHTTP(pm.storage)) {
+                folder="";
+                storage_url = pm.storage;
+            } else {
+                storage_url = "./data/fgimage/" + pm.storage;
+            }
+            
+            that.kag.stat.charas[pm.name]["storage"] = pm.storage;
+            
         }
+        
         
         var j_chara_root = $("<div></div>");
         j_chara_root.css({
