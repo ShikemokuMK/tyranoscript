@@ -31,7 +31,7 @@ html.remodal-is-locked {
 
 .remodal-overlay {
   position: fixed;
-  z-index: 9999;
+  z-index: 9999999;
   top: -5000px;
   right: -5000px;
   bottom: -5000px;
@@ -44,7 +44,7 @@ html.remodal-is-locked {
 
 .remodal-wrapper {
   position: fixed;
-  z-index: 10000;
+  z-index: 100000000;
   top: 0;
   right: 0;
   bottom: 0;

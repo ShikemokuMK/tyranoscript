@@ -1881,6 +1881,7 @@ tyrano.plugin.kag.tag.chara_show = {
             chara_layer = cpm["_layer"];
         }
         
+        
         for(key in chara_layer){
             
             var chara_part = chara_layer[key];
@@ -1888,6 +1889,15 @@ tyrano.plugin.kag.tag.chara_show = {
             //どれを表示すべきか
             var current_part_id = chara_part["current_part_id"];
             var chara_obj = chara_part[current_part_id];
+            
+            //直接ストレージが指定されている場合の表現
+            if(current_part_id=="allow_storage"){
+                chara_obj = {
+                    storage:chara_part["allow_storage"],
+                    visible:"true"
+                };
+            }
+            
             
             if(true){
                 
@@ -2929,8 +2939,13 @@ tyrano.plugin.kag.tag.chara_part = {
                 }else{
                     
                     if(pm.allow_storage =="true"){
+                        
                         map_part[key] = {"storage":part_id,"id":part_id};
                         array_storage.push("./data/fgimage/" + part_id);  
+                        
+                        this.kag.stat.charas[pm.name]["_layer"][key]["current_part_id"] = "allow_storage";
+                        this.kag.stat.charas[pm.name]["_layer"][key]["allow_storage"]   =  part_id;
+                    
                     }
                     
                 }
