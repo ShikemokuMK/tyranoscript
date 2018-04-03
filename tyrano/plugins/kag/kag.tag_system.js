@@ -27,13 +27,17 @@ tyrano.plugin.kag.tag.eval = {
     vital : ["exp"],
 
     pm : {
-        exp : ""
+        exp : "",
+        next: "true"
     },
 
     start : function(pm) {
 
         this.kag.evalScript(pm.exp);
-        this.kag.ftag.nextOrder();
+        
+        if(pm.next=="true"){
+            this.kag.ftag.nextOrder();
+        }
 
     }
 };

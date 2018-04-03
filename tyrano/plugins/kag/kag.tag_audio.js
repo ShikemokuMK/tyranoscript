@@ -121,6 +121,11 @@ tyrano.plugin.kag.tag.playbgm = {
             }
             
             //ループ効果音の設定
+            
+            if(!this.kag.stat.current_se){
+                this.kag.stat.current_se = {};    
+            }
+            
             if(pm.stop == "false") {
                 if(pm.loop=="true"){
                     this.kag.stat.current_se[pm.buf] = pm;
@@ -518,6 +523,11 @@ tyrano.plugin.kag.tag.stopbgm = {
             target_map = this.kag.tmp.map_se;
             that.kag.tmp.is_se_play = false;
             that.kag.tmp.is_se_play_wait = false;
+            
+            if(!this.kag.stat.current_se){
+                this.kag.stat.current_se = {};    
+            }
+
             
             if(pm.stop == "false") {
                 if(this.kag.stat.current_se[pm.buf]){
