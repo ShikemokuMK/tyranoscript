@@ -66,7 +66,7 @@ tyrano.plugin.kag.layer ={
         
         
         //メニュー画面用のレイヤ
-        var layer_menu = $("<div class='layer layer_menu' style='z-index:100000000;display:none'  align='center'></div>");
+        var layer_menu = $("<div class='layer layer_menu' style='z-index:1000000000;display:none'  align='center'></div>");
         layer_menu.css("width",this.kag.config.scWidth).css("height",this.kag.config.scHeight).css("position","absolute");
         this.layer_menu = layer_menu;
         this.appendLayer(this.layer_menu,"root_layer_system");

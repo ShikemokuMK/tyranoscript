@@ -465,10 +465,11 @@ tyrano.plugin.kag.tag.showsave = {
     },
 
     start : function(pm) {
-
-        this.kag.menu.displaySave();
-        this.kag.ftag.nextOrder();
-
+        var that = this;
+        this.kag.menu.displaySave(function(){
+            that.kag.ftag.nextOrder();
+        });
+        
     }
 };
 
@@ -493,9 +494,10 @@ tyrano.plugin.kag.tag.showload = {
 
     start : function(pm) {
 
-        this.kag.menu.displayLoad();
-        this.kag.ftag.nextOrder();
-
+        var that = this;
+        this.kag.menu.displayLoad(function(){
+            that.kag.ftag.nextOrder();
+        });
     }
 };
 

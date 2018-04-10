@@ -147,7 +147,7 @@ tyrano.plugin.kag.menu = {
 
     },
 
-    displaySave : function() {
+    displaySave : function(cb) {
 
         //セーブ画面作成
 
@@ -188,6 +188,11 @@ tyrano.plugin.kag.menu = {
                     if (that.kag.stat.visible_menu_button == true) {
                         $(".button_menu").show();
                     }
+                    
+                    if(typeof cb=="function"){
+                        cb();
+                    }
+                    
                 });
             });
             
@@ -212,7 +217,7 @@ tyrano.plugin.kag.menu = {
 
             var layer_menu = that.kag.layer.getMenuLayer();
 
-            that.setMenu(j_save);
+            that.setMenu(j_save,cb);
 
         });
 
@@ -462,7 +467,7 @@ tyrano.plugin.kag.menu = {
     },
     
 
-    displayLoad : function() {
+    displayLoad : function(cb) {
 
         var that = this;
 
@@ -499,6 +504,7 @@ tyrano.plugin.kag.menu = {
                     if (that.kag.stat.visible_menu_button == true) {
                         $(".button_menu").show();
                     }
+                    
                 });
             });
             
@@ -524,7 +530,7 @@ tyrano.plugin.kag.menu = {
 
             var layer_menu = that.kag.layer.getMenuLayer();
 
-            that.setMenu(j_save);
+            that.setMenu(j_save,cb);
 
         });
 
@@ -807,7 +813,7 @@ tyrano.plugin.kag.menu = {
     },
 
     //メニュー画面に指定のJクエリオブジェクト追加
-    setMenu : function(j_obj) {
+    setMenu : function(j_obj,cb) {
 
         var that = this;
 
@@ -818,7 +824,13 @@ tyrano.plugin.kag.menu = {
         j_obj.find(".menu_close").click(function(e) {
             
             layer_menu.fadeOut(300,function(){
-                    layer_menu.empty();
+                layer_menu.empty();
+                
+                if(typeof cb=="function"){
+                    //終わったタイミングでコールバックを返す
+                    cb();
+                }
+                
             });
             if (that.kag.stat.visible_menu_button == true) {
                 $(".button_menu").show();
