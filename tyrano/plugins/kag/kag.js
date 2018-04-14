@@ -54,6 +54,7 @@ tyrano.plugin.kag ={
         checking_macro:false, //マクロの登録時はスタックにつまれない
         
         ready_audio:false, //スマホブラウザ向け。オーディオ初期化を終えたか否か
+        audio_context:false, //オーディオコンテキスト。起動時一回のみ生成
         num_anim:0, //実行中のアニメーションスタック
         map_bgm:{}, //再生中の音楽オーディオ
         map_se:{}, //再生中の効果音
@@ -298,6 +299,17 @@ tyrano.plugin.kag ={
             }
         
         });
+        
+        //audio contextを設定　１回のみ実行
+        var AudioContext = window.AudioContext // Default
+        || window.webkitAudioContext // Safari and old versions of Chrome
+        || false; 
+        
+        if(AudioContext){
+            this.tmp.audio_context = new AudioContext();
+        }
+        
+        
         
         //フラッシュの設定
         try{

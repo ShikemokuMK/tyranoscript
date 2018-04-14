@@ -99,13 +99,10 @@ tyrano.plugin.kag.tag.playbgm = {
 
         } else {
             
-            var AudioContext = window.AudioContext // Default
-            || window.webkitAudioContext // Safari and old versions of Chrome
-            || false; 
+            var context = that.kag.tmp.audio_context;
             
-            if(AudioContext){
+            if(context){
                 
-                var context = new AudioContext();
                 if(context.state=="suspended"){
                     $(".tyrano_base").on("click.bgm", function() {
                     
