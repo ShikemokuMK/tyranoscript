@@ -84,10 +84,10 @@ tyrano.plugin.kag.tag.playbgm = {
                     
                     $(".tyrano_base").on("click.bgm", function() {
                         
-                            that.kag.readyAudio();
-                            that.kag.tmp.ready_audio = true;
-                            that.play(pm);
-                            $(".tyrano_base").off("click.bgm");
+                        that.kag.readyAudio();
+                        that.kag.tmp.ready_audio = true;
+                        that.play(pm);
+                        $(".tyrano_base").off("click.bgm");
                 
                     });
                     
@@ -98,8 +98,13 @@ tyrano.plugin.kag.tag.playbgm = {
             }
 
         } else {
-
-            if(window.AudioContext){
+            
+            var AudioContext = window.AudioContext // Default
+            || window.webkitAudioContext // Safari and old versions of Chrome
+            || false; 
+            
+            if(AudioContext){
+                
                 var context = new AudioContext();
                 if(context.state=="suspended"){
                     $(".tyrano_base").on("click.bgm", function() {
@@ -115,7 +120,23 @@ tyrano.plugin.kag.tag.playbgm = {
                 }
                 
             }else{
-                that.play(pm);
+                
+                if(this.kag.tmp.ready_audio == false){
+                    
+                    $(".tyrano_base").on("click.bgm", function() {
+                        
+                            that.kag.readyAudio();
+                            that.kag.tmp.ready_audio = true;
+                            that.play(pm);
+                            $(".tyrano_base").off("click.bgm");
+                
+                    });
+                    
+                }else{
+                    that.play(pm);
+                }   
+    
+                
             }   
 
 
