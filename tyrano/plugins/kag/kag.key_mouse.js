@@ -211,6 +211,16 @@ tyrano.plugin.kag.key_mouse = {
                 that.timeoutId = null;
             });
             
+            //スマホでのダブルタップ抑制
+            var t = 0;
+            $(".tyrano_base").on('touchend', function (e) {
+                var now = new Date().getTime();
+                if ((now - t) < 350){
+                    e.preventDefault();
+                }
+                t = now;
+            });  
+            
             
         }
         

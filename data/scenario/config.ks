@@ -126,7 +126,7 @@ $(".layer_camera").empty();
 [button fix="true" name="auto,auto_3000" target="*auto_speed_change" exp="tf.set_auto_speed=3000;tf.text_auto=4" graphic="config/c_btn.png" width=35 height=35 x=460 y=340]
 [button fix="true" name="auto,auto_2500" target="*auto_speed_change" exp="tf.set_auto_speed=2500;tf.text_auto=5" graphic="config/c_btn.png" width=35 height=35 x=500 y=340]
 [button fix="true" name="auto,auto_2000" target="*auto_speed_change" exp="tf.set_auto_speed=2000;tf.text_auto=6" graphic="config/c_btn.png" width=35 height=35 x=540 y=340]
-[button fix="true" name="auto,auto_1000" target="*auto_speed_change" exp="tf.set_auto_speed=1000;tf.text_auto=7" graphic="config/c_btn.png" width=35 height=35 x=580 y=340]
+[button fix="true" name="auto,auto_1300" target="*auto_speed_change" exp="tf.set_auto_speed=1300;tf.text_auto=7" graphic="config/c_btn.png" width=35 height=35 x=580 y=340]
 [button fix="true" name="auto,auto_800"   target="*auto_speed_change" exp="tf.set_auto_speed=800;tf.text_auto=8"  graphic="config/c_btn.png" width=35 height=35 x=620 y=340]
 [button fix="true" name="auto,auto_500"   target="*auto_speed_change" exp="tf.set_auto_speed=500;tf.text_auto=9"  graphic="config/c_btn.png" width=35 height=35 x=660 y=340]
 

@@ -69,37 +69,55 @@ tyrano.plugin.kag.tag.playbgm = {
 
             //スマホからのアクセスの場合は、クリックを挟む →廃止
         } else if ($.userenv() != "pc") {
+            
             this.kag.layer.hideEventLayer();
             //スマホからの場合、スキップ中は音楽をならさない
             if (this.kag.stat.is_skip == true && pm.target == "se") {
+                
                 that.kag.layer.showEventLayer();
                 that.kag.ftag.nextOrder();
 
             } else {
-
-                if (pm.click == "true") {
-
-                    $(".tyrano_base").bind("click.bgm", function() {
-
-                        that.play(pm);
-                        $(".tyrano_base").unbind("click.bgm");
-                        that.kag.layer.showEventLayer();
-
+                
+                //スマホからのアクセスで ready audio 出来ていない場合は、クリックを挟む
+                if(this.kag.tmp.ready_audio == false){
+                    
+                    $(".tyrano_base").on("click.bgm", function() {
+                        
+                            that.kag.readyAudio();
+                            that.kag.tmp.ready_audio = true;
+                            that.play(pm);
+                            $(".tyrano_base").off("click.bgm");
+                
                     });
-
-                } else {
-
+                    
+                }else{
                     that.play(pm);
-                    $(".tyrano_base").unbind("click.bgm");
-                    //that.kag.layer.showEventLayer();
-
-                }
-
+                }   
+                
             }
 
         } else {
 
-            that.play(pm);
+            if(window.AudioContext){
+                var context = new AudioContext();
+                if(context.state=="suspended"){
+                    $(".tyrano_base").on("click.bgm", function() {
+                    
+                        that.kag.readyAudio();
+                        that.play(pm);
+                        $(".tyrano_base").off("click.bgm");
+            
+                    });
+                    
+                }else{
+                    that.play(pm);
+                }
+                
+            }else{
+                that.play(pm);
+            }   
+
 
         }
 
