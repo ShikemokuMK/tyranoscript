@@ -300,6 +300,11 @@ tyrano.plugin.kag ={
         
         });
         
+        //ティラノプレイヤーを使ってるなら
+        if(typeof TyranoPlayer == "function"){
+            this.tmp.ready_audio = true;
+        }
+        
         //audio contextを設定　１回のみ実行
         var AudioContext = window.AudioContext // Default
         || window.webkitAudioContext // Safari and old versions of Chrome
