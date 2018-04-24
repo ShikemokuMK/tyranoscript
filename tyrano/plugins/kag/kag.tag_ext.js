@@ -695,6 +695,7 @@ tyrano.plugin.kag.tag.autostart = {
 tyrano.plugin.kag.tag.autostop = {
 
     pm : {
+        next:"true"
     },
 
     start : function(pm) {
@@ -704,8 +705,9 @@ tyrano.plugin.kag.tag.autostop = {
 
         //↓他から直接呼ばれた時に、２重に実行されるため、コメントにしているが
         //このタグを単独で使えないので、問題有り。 git show 2bc37170
-        //this.kag.ftag.nextOrder();
-
+        if(pm.next=="true"){
+            this.kag.ftag.nextOrder();
+        }
     }
 };
 

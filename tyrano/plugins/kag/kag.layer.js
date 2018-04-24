@@ -47,7 +47,7 @@ tyrano.plugin.kag.layer ={
             //オート中でクリックされた場合。オート停止
             if(that.kag.stat.is_auto == true){
                 if(that.kag.config.autoClickStop == "true"){
-                    that.kag.ftag.startTag("autostop", {});
+                    that.kag.ftag.startTag("autostop", {next:"false"});
                 }
             }
             

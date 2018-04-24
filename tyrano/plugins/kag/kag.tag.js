@@ -3828,7 +3828,7 @@ tyrano.plugin.kag.tag.button = {
                                        
                     //オートは停止
                     if(_pm.role!="auto"){
-                        that.kag.ftag.startTag("autostop", {});
+                        that.kag.ftag.startTag("autostop", {next:"false"});
                     }
                     
                     //文字が流れているときは、セーブ出来ないようにする。
@@ -3889,7 +3889,7 @@ tyrano.plugin.kag.tag.button = {
                         case "auto":
                             
                             if(that.kag.stat.is_auto==true){
-                                that.kag.ftag.startTag("autostop", {});
+                                that.kag.ftag.startTag("autostop", {next:"false"});
                             }else{
                                 that.kag.ftag.startTag("autostart", {});
                             }
