@@ -2828,7 +2828,8 @@ tyrano.plugin.kag.tag.chara_layer = {
         //パートが登録されているかどうか
         var init_part = false;
         if(chara_layer[pm.part]){
-            chara_part = chara_layer[pm.part];    
+            chara_part = chara_layer[pm.part];
+             
         }else{
             init_part = true;
             //一つ上のレイヤに配置する
@@ -2871,6 +2872,62 @@ tyrano.plugin.kag.tag.chara_layer = {
 
 
 /*
+ #[chara_layer_mod]
+ :group
+ キャラクター操作
+ :title
+ キャラクターの差分の定義を変更
+ :exp
+ chara_layerで定義した設定を変更することができます。
+ :sample
+ [chara_layer_mod name="yuko" part=mouse zindex=20 ]
+ :param
+ name=[chara_new]で定義したname属性を指定してください。,
+ part=パーツとして登録する名を指定します。例えば「目」というpartを登録しておいて、このpartの中で他の差分をいくつも登録することができます。,
+ zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されます。
+ 
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.chara_layer_mod = {
+
+    vital : ["name","part"],
+
+    pm : {
+        name : "",
+        part : "", 
+        zindex : ""
+    },
+
+    start : function(pm) {
+        
+        var that = this;
+        
+        var cpm = this.kag.stat.charas[pm.name];    
+        
+        if (cpm == null) {
+            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            return;
+        }
+        
+        //レイヤが登録されているかどうか
+        if(!cpm["_layer"]){
+            this.kag.error("指定されたキャラクター「" + pm.name + "」の差分パーツは設定されていません。[chara_layer]で定義してください");
+            return;
+        }
+        
+        if(cpm["_layer"][pm.part]){
+            cpm["_layer"][pm.part]["zindex"] = pm.zindex;
+        }
+        
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+
+
+/*
  #[chara_part]
  :group
  キャラクター操作
@@ -2882,10 +2939,14 @@ tyrano.plugin.kag.tag.chara_layer = {
  （例）eye=sample1 
  同時に複数のpartを変更することも可能です。
  また、id登録していない、画像を直接指定することもできます。この場合パラメータのallow_storageにtrueに指定してください。
+ 特定部位のzindexを変更して出力したい場合はpart名+_zindex という名前のパラメータに数値を代入することができます。
+ （例）eye_zindex=10 
  :sample
  [chara_part name="yuko" mouse=aaa eye=bbb ]
  :param
  name=[chara_new]で指定したキャラクター名を指定してください。,
+ time=partが表示されるまでの時間を指定できます。指定するとフェードイン扠せながら表示できます。デフォルトは指定なしです。,
+ wait=true or false を指定します。trueを指定するとtimeで指定したフェードインの完了を待ちます。デフォルトはtrueです。,
  allow_storage=true or false 。partの指定にidではなく直接画像ファイルを指定できます。画像はfgimageフォルダに配置してください。デフォルトはfalseです。
  #[end]
  */
@@ -2896,7 +2957,9 @@ tyrano.plugin.kag.tag.chara_part = {
 
     pm : {
         name : "",
-        allow_storage: "false"
+        allow_storage: "false",
+        time:"",
+        wait:"true"
     },
 
     start : function(pm) {
@@ -2955,6 +3018,7 @@ tyrano.plugin.kag.tag.chara_part = {
                     }
                     
                 }
+                
             }
                 
         }
@@ -2965,20 +3029,84 @@ tyrano.plugin.kag.tag.chara_part = {
         this.kag.preloadAll(array_storage, function() {
             
             //指定された配列を回して、該当するオブジェクトを切り替える
-            for(key in map_part){
+            if(pm.time != ""){
                 
-                var part = map_part[key];
-                var j_img = target_obj.find(".part"+"." + key + "");
+                var n=0;
+                var cnt=0;
                 
-                if(part.storage!="none"){
-                    j_img.attr("src","./data/fgimage/" + part.storage);
-                }else{
-                    j_img.attr("src", "./tyrano/images/system/transparent.png");
+                console.log(map_part);
+                
+                for(key in map_part){
+                    
+                    cnt++;
+                    var part = map_part[key];
+                    var j_img = target_obj.find(".part"+"." + key + "");
+                    var j_new_img = j_img.clone();
+                    j_new_img.css("opacity", 0);
+                    
+                    if(part.storage!="none"){
+                        j_new_img.attr("src","./data/fgimage/" + part.storage);
+                    }else{
+                        j_new_img.attr("src", "./tyrano/images/system/transparent.png");
+                    }
+                    
+                    //zindexの指定があった場合は、変更を行う
+                    if(pm[key+"_zindex"]){
+                        j_new_img.css("z-index", pm[key+"_zindex"]);
+                    }else{
+                        j_new_img.css("z-index", chara_part[key]["zindex"]);
+                    }
+                    
+                    //イメージを追加
+                    j_img.after(j_new_img);
+                    
+                    j_img.fadeTo(parseInt(pm.time), 0, function(){
+                        j_img.remove();
+                    }); 
+                    
+                    j_new_img.fadeTo(parseInt(pm.time), 1, function(){
+                        n++;
+                        if(pm.wait=="true"){
+                            if(cnt==n){ 
+                                that.kag.ftag.nextOrder();
+                            }
+                        }
+                    });
+                    
                 }
                 
-            }
+                
+                if(pm.wait=="false"){
+                    that.kag.ftag.nextOrder();
+                }
             
-            that.kag.ftag.nextOrder();
+                
+            }else{
+                
+                for(key in map_part){
+                    
+                    var part = map_part[key];
+                    var j_img = target_obj.find(".part"+"." + key + "");
+                    
+                    if(part.storage!="none"){
+                        j_img.attr("src","./data/fgimage/" + part.storage);
+                    }else{
+                        j_img.attr("src", "./tyrano/images/system/transparent.png");
+                    }
+                    
+                    //zindexの指定があった場合は、変更を行う
+                    if(pm[key+"_zindex"]){
+                        j_img.css("z-index", pm[key+"_zindex"]);
+                    }else{
+                        j_img.css("z-index", chara_part[key]["zindex"]);
+                    }
+                    
+                }
+                
+                that.kag.ftag.nextOrder();
+            
+                
+            }
             
         });
 

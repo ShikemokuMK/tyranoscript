@@ -5064,7 +5064,6 @@ tyrano.plugin.kag.tag.free_layermode = {
         name:"", //レイヤーモードに名前をつけることができます。
         time :"500", //時間,
         wait : "true" //演出の完了を待つかどうか
-       
     },
 
     start : function(pm) {
@@ -5076,7 +5075,7 @@ tyrano.plugin.kag.tag.free_layermode = {
         var blend_layer = {};
         
         if(pm.name!=""){
-            blend_layer = $(".layer_blend_"+pm.name);
+            blend_layer = $(".layer_blend_" + pm.name);
         }else{
             blend_layer = $(".blendlayer");
         }
