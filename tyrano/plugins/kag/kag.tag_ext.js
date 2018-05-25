@@ -466,7 +466,10 @@ tyrano.plugin.kag.tag.showsave = {
 
     start : function(pm) {
         var that = this;
+        
+        that.kag.stat.load_auto_next = true;
         this.kag.menu.displaySave(function(){
+            that.kag.stat.load_auto_next = false;
             that.kag.ftag.nextOrder();
         });
         

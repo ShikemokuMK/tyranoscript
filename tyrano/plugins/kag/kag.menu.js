@@ -181,7 +181,7 @@ tyrano.plugin.kag.menu = {
                     var num = $(this).attr("data-num");
 
                     that.snap = null;
-                    that.doSave(num);
+                    
                     var layer_menu = that.kag.layer.getMenuLayer();
                     layer_menu.hide();
                     layer_menu.empty();
@@ -189,9 +189,14 @@ tyrano.plugin.kag.menu = {
                         $(".button_menu").show();
                     }
                     
-                    if(typeof cb=="function"){
-                        cb();
-                    }
+                    that.doSave(num,function(){
+                        
+                        if(typeof cb=="function"){
+                            cb();
+                        }
+                        
+                    });
+                    
                     
                 });
             });
@@ -232,7 +237,7 @@ tyrano.plugin.kag.menu = {
     },
 
     //セーブを実行する
-    doSave : function(num) {
+    doSave : function(num,cb) {
 
         var array_save = this.getSaveData();
 
@@ -255,9 +260,21 @@ tyrano.plugin.kag.menu = {
                 data.save_date = $.getNowDate() + "　" + $.getNowTime();
                 array_save.data[num] = data;
                 $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
+                
+                if(typeof cb=="function"){
+                    //終わったタイミングでコールバックを返す
+                    cb();
+                }
 
             });
 
+        }else{
+            
+            if(typeof cb=="function"){
+                //終わったタイミングでコールバックを返す
+                cb();
+            }
+            
         }
 
     },
@@ -547,8 +564,14 @@ tyrano.plugin.kag.menu = {
         if (array[num].save_date == "") {
             return;
         }
-
-        this.loadGameData($.extend(true, {}, array[num]));
+        
+        var auto_next = "no";
+        
+        if(array[num].stat.load_auto_next==true){
+            auto_next = "yes";
+        }
+        
+        this.loadGameData($.extend(true, {}, array[num]),{"auto_next":auto_next});
 
     },
 
@@ -560,7 +583,7 @@ tyrano.plugin.kag.menu = {
         if(typeof options =="undefined"){
             options={bgm_over:"false"};
         }else if(typeof options.bgm_over == "undefined"){
-            options={bgm_over:"false"};
+            options["bgm_over"] = "false";
         }
         
         if(options.auto_next){

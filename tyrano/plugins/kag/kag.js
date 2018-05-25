@@ -139,6 +139,8 @@ tyrano.plugin.kag ={
         current_bgm_vol:"", //現在再生中のBGMボリューム
         current_se:{}, //現在再生中のループ効果音
         
+        load_auto_next:false,// ロード時にオートネクストするかどうか。showsave周りのときtrueになる。
+        
         enable_keyconfig:true, //キーコンフィグが有効 or 無効
         
         current_bgmovie:{
