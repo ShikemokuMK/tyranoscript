@@ -512,6 +512,12 @@ tyrano.plugin.kag.menu = {
 
                 $(this).click(function(e) {
                     var num = $(this).attr("data-num");
+                    
+                    //セーブデータが存在しない場合
+                    if(array[num]["save_date"]==""){
+                        return ;
+                    }
+                    
                     that.snap = null;
                     that.loadGame(num);
 

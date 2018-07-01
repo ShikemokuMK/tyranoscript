@@ -207,7 +207,7 @@ tyrano.plugin.kag.tag.movie = {
                         },100);
                         
                         that.kag.stat.video_stack = null;
-                        that.kag.ftag.nextOrder();
+                        //that.kag.ftag.nextOrder();
                         
                         that.kag.tmp.video_playing = true;
                         
@@ -339,6 +339,7 @@ tyrano.plugin.kag.tag.bgmovie = {
             this.kag.stat.video_stack = pm;
             video.loop = false;
             
+            that.kag.ftag.nextOrder();
             return;
 
         }
@@ -437,6 +438,11 @@ tyrano.plugin.kag.tag.stop_bgmovie = {
                     }
             }
         ); 
+        
+        if(!$(".tyrano_base").find("video").get(0)){
+            that.kag.ftag.nextOrder();
+            return ;
+        }
         
         if(pm.wait=="false"){
             that.kag.ftag.nextOrder();
@@ -2650,6 +2656,12 @@ tyrano.plugin.kag.tag.chara_move = {
         var target_obj = $(".layer_fore").find("." + pm.name + ".tyrano_chara");
         var target_img = $(".layer_fore").find("." + pm.name + ".tyrano_chara").find("img");
         
+        //存在しない場合は、即移動
+        if(!target_obj.get(0)){
+            that.kag.ftag.nextOrder();
+            return;
+        }
+        
         var anim_style = {};
         var img_anim_style = {};
 
@@ -2886,8 +2898,8 @@ tyrano.plugin.kag.tag.chara_layer = {
  [chara_layer_mod name="yuko" part=mouse zindex=20 ]
  :param
  name=[chara_new]で定義したname属性を指定してください。,
- part=パーツとして登録する名を指定します。例えば「目」というpartを登録しておいて、このpartの中で他の差分をいくつも登録することができます。,
- zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されます。
+ part=変更したいパーツとして登録した名を指定します。,
+ zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。この設定は即時反映されず、次回表示時、反映されます。
  
  #[end]
  */
@@ -2948,7 +2960,7 @@ tyrano.plugin.kag.tag.chara_layer_mod = {
  [chara_part name="yuko" mouse=aaa eye=bbb ]
  :param
  name=[chara_new]で指定したキャラクター名を指定してください。,
- time=partが表示されるまでの時間を指定できます。指定するとフェードイン扠せながら表示できます。デフォルトは指定なしです。,
+ time=パーツが表示されるまでの時間を指定できます。ミリ秒で指定してください。指定するとフェードインしながら表示できます。デフォルトは指定なしです。,
  wait=true or false を指定します。trueを指定するとtimeで指定したフェードインの完了を待ちます。デフォルトはtrueです。,
  allow_storage=true or false 。partの指定にidではなく直接画像ファイルを指定できます。画像はfgimageフォルダに配置してください。デフォルトはfalseです。
  #[end]
