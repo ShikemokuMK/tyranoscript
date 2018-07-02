@@ -118,16 +118,20 @@ tyrano.plugin.kag.menu = {
 
             //タイトルに戻る
             layer_menu.find(".menu_back_title").click(function() {
-                
-                $.confirm($.lang("go_title"), 
-                    
-                    function() {
-                        location.href="./index.html";
-                    }, 
-                    function() {
-                    
-                    }
-                );
+                if ("appJsInterface" in window) {
+                    appJsInterface.finishGame();
+                }
+                else{
+                    $.confirm($.lang("go_title"),
+
+                        function() {
+                            location.href="./index.html";
+                        },
+                        function() {
+
+                        }
+                    );
+                }
 
                 /*
                 if (!confirm($.lang("go_title"))) {
