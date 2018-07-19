@@ -4739,14 +4739,14 @@ tyrano.plugin.kag.tag.bg = {
                 
                 j_new_bg.css("opacity",1);
                 
-                if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
-                }
-                
                 //crossがfalseの場合は、古い背景画像を削除
                 if(pm.cross=="false"){
                     j_old_bg.remove();
+                }
+                
+                if (pm.wait == "true") {
+                    that.kag.layer.showEventLayer();
+                    that.kag.ftag.nextOrder();
                 }
                 
             });
