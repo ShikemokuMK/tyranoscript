@@ -1223,6 +1223,10 @@ tyrano.plugin.kag.tag.kanim = {
             pm.duration = parseInt(pm.time) + "ms";
         }
 
+        if (pm.delay) {
+            pm.delay = parseInt(pm.delay) + "ms";
+        }
+
         //アニメーション完了したら、
         anim.complete = function() {
 
