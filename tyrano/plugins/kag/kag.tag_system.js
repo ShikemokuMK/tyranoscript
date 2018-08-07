@@ -1704,7 +1704,7 @@ tyrano.plugin.kag.tag.breakgame = {
  [dialog type="input" text="名前を教えて下さい" storage="scene2" target="ok_label" ]
 
  :param
- name=confirmを指定した時に格納する変数名を指定して下さい。
+ name=confirmを指定した時に格納する変数名を指定して下さい。,
  type=ダイアログの種類を指定します。alert confirm ,
  text=メッセージとして表示するてテキストを指定して下さい,
  storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
@@ -1735,6 +1735,9 @@ tyrano.plugin.kag.tag.dialog = {
     start : function(pm) {
 
         var that = this;
+        
+        $(".remodal").find(".remodal-confirm").html(pm.label_ok);
+        $(".remodal").find(".remodal-cancel").html(pm.label_cancel);
 
         if (pm.type == "confirm") {
             $.confirm(pm.text, function() {
