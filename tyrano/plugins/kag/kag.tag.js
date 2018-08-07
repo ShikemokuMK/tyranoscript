@@ -161,7 +161,10 @@ tyrano.plugin.kag.ftag = {
             if (this.master_tag[tag.name]) {
 
                 //この時点で、変数の中にエンティティがあれば、置き換える必要あり
-                tag.pm = this.convertEntity(tag.pm);
+                // iscript - endscript 内ではエンティティは置き換えない
+                if (!this.kag.stat.is_script) {
+                    tag.pm = this.convertEntity(tag.pm);
+                }
 
                 //必須項目チェック
                 var err_str = this.checkVital(tag);
