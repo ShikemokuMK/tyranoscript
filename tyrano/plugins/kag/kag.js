@@ -11,7 +11,7 @@ tyrano.plugin.kag ={
     
     cache_html:{},
     
-    cache_scenraio : {},
+    cache_scenario : {},
     
     
     config:{
@@ -138,6 +138,8 @@ tyrano.plugin.kag ={
         current_bgm:"", //現在再生中のBGM
         current_bgm_vol:"", //現在再生中のBGMボリューム
         current_se:{}, //現在再生中のループ効果音
+        
+        load_auto_next:false,// ロード時にオートネクストするかどうか。showsave周りのときtrueになる。
         
         enable_keyconfig:true, //キーコンフィグが有効 or 無効
         
@@ -955,11 +957,11 @@ tyrano.plugin.kag ={
     	}
     	
     	//キャッシュ確認
-    	if(that.cache_scenraio[file_url]){
+    	if(that.cache_scenario[file_url]){
         	
             if(call_back){
                 
-                var result_obj = that.cache_scenraio[file_url];
+                var result_obj = that.cache_scenario[file_url];
                 
                 var tag_obj = result_obj.array_s;
                 var map_label = result_obj.map_label;
@@ -977,7 +979,7 @@ tyrano.plugin.kag ={
             $.loadText(file_url,function(text_str){
                 
                 var result_obj = that.parser.parseScenario(text_str);
-                that.cache_scenraio[file_url] = result_obj;
+                that.cache_scenario[file_url] = result_obj;
                 
                 var tag_obj = result_obj.array_s;
                 var map_label = result_obj.map_label;

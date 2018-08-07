@@ -937,6 +937,9 @@
         $(document).off('confirmation', '.remodal');        
         $(document).on('confirmation', '.remodal', function (e) {
             
+            $(document).off('confirmation', '.remodal');        
+            $(document).off('cancellation', '.remodal');        
+            
             if(typeof cb_ok == "function"){
                 cb_ok();
             }
@@ -946,6 +949,9 @@
         ///////キャンセル//////////////
         $(document).off('cancellation', '.remodal');        
         $(document).on('cancellation', '.remodal', function (e) {
+            
+            $(document).off('confirmation', '.remodal');        
+            $(document).off('cancellation', '.remodal');        
             
             if(typeof cb_cancel == "function"){
                 cb_cancel();
