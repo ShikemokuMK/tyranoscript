@@ -612,7 +612,8 @@ tyrano.plugin.kag.menu = {
         this.kag.layer.setLayerHtml(data.layer);
         
         //バックログの初期化
-        this.kag.variable.tf.system.backlog = [];
+        //awakegame考慮もれ。一旦戻す
+        //this.kag.variable.tf.system.backlog = [];
         
         //ステータスの設定、ディープに設定する
         this.kag.stat = data.stat;
