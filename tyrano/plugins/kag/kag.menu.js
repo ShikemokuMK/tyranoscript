@@ -622,8 +622,11 @@ tyrano.plugin.kag.menu = {
             this.kag.stat.is_strong_stop = false;
         }
 
+        //タイトルの復元
+        this.kag.setTitle(this.kag.stat.title);
+        
         //一旦音楽と効果音は全て止めないと
-
+        
         //BGMを引き継ぐかどうか。
         if(options.bgm_over=="false"){
             
