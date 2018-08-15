@@ -3262,7 +3262,7 @@ tyrano.plugin.kag.tag.showlog = {
 
 
 :param
-layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
+layer=効果を追加するレイヤを指定します。指定しない場合、もしくは「all」と指定するとゲーム画面全てに効果がかかります,
 name=削除する要素のnameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。,
 
 grayscale=0(デフォルト)-100 を指定することで、画像の表示をグレースケールに変換することができます,
@@ -3283,10 +3283,10 @@ blur=0(デフォルト)-任意の値[px] を指定することで、画像の表
 //イメージ情報消去背景とか
 tyrano.plugin.kag.tag.filter = {
 
-    vital : ["layer"],
+    vital : [],
 
     pm : {
-        layer : "",
+        layer : "all",
         page : "fore",
         name:"",
         
@@ -3305,8 +3305,15 @@ tyrano.plugin.kag.tag.filter = {
     start : function(pm) {
         
         var filter_str ="";
+
+        var j_obj = {};
         
-        var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+        if(pm.layer=="all"){
+            j_obj = $(".layer_camera");
+        }else{
+            j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+        }
+
         
         if(pm.name!=""){
             j_obj = j_obj.find("."+pm.name);
