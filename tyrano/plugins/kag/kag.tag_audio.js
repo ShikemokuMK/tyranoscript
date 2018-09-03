@@ -181,37 +181,40 @@ tyrano.plugin.kag.tag.playbgm = {
 
         if (pm.volume !== "") {
             volume = parseFloat(parseInt(pm.volume) / 100);
-        } else {
+        }
+        
+        var ratio = 1;
 
             //デフォルトで指定される値を設定
             if (target === "bgm") {
                 if (typeof this.kag.config.defaultBgmVolume == "undefined") {
-                    volume = 1;
+                    ratio = 1;
                 } else {
-                    volume = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
+                    ratio = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
                 }
                 
                 //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
                 if(typeof this.kag.stat.map_bgm_volume[pm.buf] !="undefined"){
-                    volume = parseFloat(parseInt(this.kag.stat.map_bgm_volume[pm.buf])/100);
+                    ratio = parseFloat(parseInt(this.kag.stat.map_bgm_volume[pm.buf])/100);
                 }
 
                 
             } else {
                 
                 if (typeof this.kag.config.defaultSeVolume == "undefined") {
-                    volume = 1;
+                    ratio = 1;
                 } else {
-                    volume = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
+                    ratio = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
                 }
                 
                 //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
                 if(typeof this.kag.stat.map_se_volume[pm.buf] != "undefined"){
-                    volume = parseFloat(parseInt(this.kag.stat.map_se_volume[pm.buf])/100);
+                    ratio = parseFloat(parseInt(this.kag.stat.map_se_volume[pm.buf])/100);
                 }
                 
             }
-        }
+        
+        volume *= ratio;
         
         var storage_url = "";
         
@@ -448,28 +451,32 @@ tyrano.plugin.kag.tag.playbgm = {
 
     playAudio : function(audio_obj,pm,target) {
         
-        var volume =1;
         
         //ボリュームの設定
+        var volume =1;
         if (pm.volume != "") {
             volume = parseFloat(parseInt(pm.volume) / 100);
-        } else {
+        }
+        
+        //コンフィグ音量の適用
+        var ratio =1;
             
             //デフォルトで指定される値を設定
             if (target === "bgm") {
                 if (!this.kag.config.defaultBgmVolume) {
-                    volume = 1;
+                    ratio = 1;
                 } else {
-                    volume = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
+                    ratio = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
                 }
             } else {
                 if (!this.kag.config.defaultSeVolume) {
-                    volume = 1;
+                    ratio = 1;
                 } else {
-                    volume = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
+                    ratio = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
                 }
             }
-        }
+        
+        volume *= ratio;
         
         audio_obj.setVolume(volume);
         audio_obj.play();
