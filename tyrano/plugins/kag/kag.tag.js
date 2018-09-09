@@ -1986,11 +1986,11 @@ tyrano.plugin.kag.tag.freeimage = {
                     {"opacity":0},
                     parseInt(pm.time), 
                     function(){
-                        that.kag.layer.getLayer(pm.layer, pm.page).empty();
+                        $(this).remove();
                         //次へ移動ですがな
                         cnt++;
                         if(s_cnt == cnt){
-                            
+                            that.kag.layer.getLayer(pm.layer, pm.page).empty();
                             if(pm.wait=="true"){
                                 that.kag.ftag.nextOrder();            
                             }
@@ -2000,7 +2000,9 @@ tyrano.plugin.kag.tag.freeimage = {
                 );
                 
             }else{
-                 that.kag.layer.getLayer(pm.layer, pm.page).empty();
+              var layer = that.kag.layer.getLayer(pm.layer, pm.page)
+              layer.find(":animated").finish();
+              layer.empty();
                  //次へ移動ですがな
                  that.kag.ftag.nextOrder();
             }
