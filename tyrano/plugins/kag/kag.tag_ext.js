@@ -2328,7 +2328,6 @@ tyrano.plugin.kag.tag.chara_hide_all = {
 
         var chara_num = 0;
         that.kag.layer.hideEventLayer();
-        var flag_complete = false;
         //アニメーションでj表示させます
         
         //キャラがいない場合、次へ
@@ -2336,19 +2335,17 @@ tyrano.plugin.kag.tag.chara_hide_all = {
             that.kag.ftag.nextOrder();
             return;
         }
-        
+        var removeCount = 0;
         img_obj.animate({
             opacity : "hide"
         }, {
             duration : parseInt(that.kag.cutTimeWithSkip(pm.time)),
             easing : "linear",
             complete : function() {
-
-                img_obj.remove();
+                $(this).remove();
+                removeCount++;
                 if (pm.wait == "true") {
-
-                    if (flag_complete == false) {
-                        flag_complete = true;
+                    if (removeCount === img_obj.length) {
                         that.kag.layer.showEventLayer();
                         that.kag.ftag.nextOrder();
                     }
