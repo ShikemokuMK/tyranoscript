@@ -2000,11 +2000,11 @@ tyrano.plugin.kag.tag.freeimage = {
                 );
                 
             }else{
-              var layer = that.kag.layer.getLayer(pm.layer, pm.page)
-              layer.find(":animated").finish();
-              layer.empty();
-                 //次へ移動ですがな
-                 that.kag.ftag.nextOrder();
+                var layer = that.kag.layer.getLayer(pm.layer, pm.page)
+                layer.find(":animated").finish();
+                layer.empty();
+                //次へ移動ですがな
+                that.kag.ftag.nextOrder();
             }
 
         } else {
