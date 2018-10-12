@@ -103,7 +103,8 @@ tyrano.plugin.kag.tag.playbgm = {
             
             if(context){
                 
-                if(context.state=="suspended"){
+                var browser = $.getBrowser();
+                if(browser!="safari" && context.state=="suspended"){
                     $(".tyrano_base").on("click.bgm", function() {
                     
                         that.kag.readyAudio();

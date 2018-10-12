@@ -77,13 +77,19 @@ tyrano.plugin.kag.tag.movie = {
 
         if ($.userenv() != "pc") {
             this.kag.layer.showEventLayer();
-            //クリックしないと始まらないようにする
+            
             //mp4で再生できる
-            $('.tyrano_base').bind('click.movie', function(e) {
+            //ティラノプレイヤーの場合は、そのまま再生できる。
+            if($.isTyranoPlayer()){
                 that.playVideo(pm);
-                $(".tyrano_base").unbind("click.movie");
-            });
-
+            }else{
+                this.kag.layer.showEventLayer();
+                $(".tyrano_base").bind("click.movie", function (e) {
+                    that.playVideo(pm);
+                    $(".tyrano_base").unbind("click.movie")
+                });
+            }
+            
         } else {
 
             //firefox opera の場合、webMに変更する。
