@@ -3858,16 +3858,9 @@ tyrano.plugin.kag.tag.button = {
                             that.kag.layer.hideMessageLayers();
                             break;
                         case "title":
-                            
-                            $.confirm($.lang("go_title"),
-                                function(){
-                                    location.href="./index.html";
-                                },
-                                function(){
-                                    return false;
-                                }
-                            );
+                            that.kag.backTitle();
                             break;
+                           
                         case "menu":
                             that.kag.menu.showMenu();
                             break;

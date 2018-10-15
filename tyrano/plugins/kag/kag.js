@@ -847,7 +847,32 @@ tyrano.plugin.kag ={
     },
     
     pushAnimStack:function(){
-      this.kag.tmp.num_anim++;  
+        this.kag.tmp.num_anim++;
+    },
+    
+    backTitle:function(){
+        
+        if ("appJsInterface" in window) {
+            appJsInterface.finishGame();
+        } else {
+            
+            if(typeof TyranoPlayer == "function"){
+                //iphone
+                location.href = "tyranoplayer-back://endgame";
+            }else{
+                //その他
+                $.confirm($.lang("go_title"),
+                    function(){
+                        location.href="./index.html";
+                    },
+                    function(){
+                          return false;
+                    }
+                );
+            }
+            
+        }
+        
     },
     
     //スキップ中に演出をカットする
