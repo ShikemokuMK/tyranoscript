@@ -889,6 +889,8 @@ tyrano.plugin.kag ={
     //スマホブラウザ向け、音楽再生設定
     readyAudio:function(){
         
+        this.tmp.ready_audio = true;
+        
         if($.userenv() != "pc"){
             var pm = {
                 loop : "false",

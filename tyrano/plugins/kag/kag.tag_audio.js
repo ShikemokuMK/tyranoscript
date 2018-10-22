@@ -92,7 +92,9 @@ tyrano.plugin.kag.tag.playbgm = {
                     });
                     
                 }else{
+                    
                     that.play(pm);
+                
                 }   
                 
             }
