@@ -4617,6 +4617,8 @@ tyrano.plugin.kag.tag.trans = {
     }
 };
 
+
+
 /*
 #[bg]
 :group
@@ -4718,6 +4720,195 @@ tyrano.plugin.kag.tag.bg = {
                 that.kag.layer.hideEventLayer();
             }
             
+            
+            //スキップ中は時間を短くする
+            pm.time = that.kag.cutTimeWithSkip(pm.time);
+            
+            if(pm.cross=="true"){   //crossがfalseの場合は、古い背景はtransしない。
+                $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
+                    j_old_bg.remove();
+                });
+            }
+            
+            $.trans(pm.method, j_new_bg, parseInt(pm.time), "show", function() {
+                
+                j_new_bg.css("opacity",1);
+                
+                //crossがfalseの場合は、古い背景画像を削除
+                if(pm.cross=="false"){
+                    j_old_bg.remove();
+                }
+                
+                if (pm.wait == "true") {
+                    that.kag.layer.showEventLayer();
+                    that.kag.ftag.nextOrder();
+                }
+                
+            });
+            
+            //レイヤの中で、画像を取得する
+            
+        });
+        
+        if (pm.wait == "false") {
+            this.kag.ftag.nextOrder();
+        }
+    }
+};
+
+
+
+/*
+#[bg2]
+:group
+レイヤ関連
+:title
+背景の切り替え
+:exp
+背景の切り替えを簡易的に実行できます。
+常にforeのレイヤに対して切り替えが実行されます
+:sample
+[bg storage=fg0.png time=1500 wait=true]
+:param
+name=animタグなどからこの名前でアニメーションさせることができます。また、名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
+storage=切り替えるための画像ファイルを指定します。ファイルはbgimage以下に配置してください,
+left=画像の左端位置を指定します。デフォルトは０です（ピクセル）,
+top=画像の上端位置を指定します。デフォルトは０です（ピクセル）,
+width=画像の横幅を指定します。（ピクセル）指定しない場合はゲーム画面に一致するサイズが設定されます,
+height=画像の高さ位置を指定します。（ピクセル）指定しない場合はゲーム画面に一致するサイズが設定されます,
+time=時間をミリ秒で指定します。,
+wait=背景の切り替えが完了するまで処理を待ちます,
+cross=true or false を指定します。デフォルトはfalse。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い背景を残しながら上に重なる形で新しい背景を表示します。CG差分などで使用する場合はfalseが良いでしょう。,
+method=切り替えのタイプを指定します。デフォルトは"fadeIn"です。指定できる演出は次の通りです。
+（V450以降）
+fadeIn/
+fadeInDown/
+fadeInLeft/
+fadeInRight/
+fadeInUp/<br >
+lightSpeedIn/
+rotateIn/
+rotateInDownLeft/
+rotateInDownRight/
+rotateInUpLeft/<br >
+rotateInUpRight/
+zoomIn/
+zoomInDown/
+zoomInLeft/<br >
+zoomInRight/
+zoomInUp/
+slideInDown/
+slideInLeft/
+slideInRight/<br >
+slideInUp/
+bounceIn /
+bounceInDown/ 
+bounceInLeft/<br >
+bounceInRight/
+bounceInUp/
+rollIn/
+vanishIn/
+puffIn
+(V450以前)
+指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」
+#[end]
+*/
+
+//背景変更
+tyrano.plugin.kag.tag.bg2 = {
+
+    vital : ["storage"],
+
+    pm : {
+        name:"",
+        storage : "",
+        method : "crossfade",
+        wait : "true",
+        time : 3000,
+        
+        width:"",
+        height:"",
+        left:"",
+        top:"",
+        
+        cross:"false"
+    },
+
+    start : function(pm) {
+
+        this.kag.ftag.hideNextImg();
+
+        var that = this;
+        
+        // time=0 and wait=true conflicts
+        // may be some code refactor needed
+        if (pm.time == 0) pm.wait = "false";
+
+        //現在の背景画像の要素を取得
+
+        //クローンして、同じ階層に配置する
+        var storage_url = "./data/bgimage/"+pm.storage;
+        if($.isHTTP(pm.storage)){
+            storage_url = pm.storage;  
+        }
+        
+        //jquery で一つを削除して、もう一方を復活させる
+        this.kag.preload(storage_url, function(){
+            
+            var j_old_bg = that.kag.layer.getLayer("base", "fore");
+            var j_new_bg = j_old_bg.clone(false);
+            
+            //オブジェクトに変更
+            var j_bg_img = $("<img />");
+            j_bg_img.css("positioin","absolute");
+            
+            var scWidth = parseInt(that.kag.config.scWidth);
+            var scHeight = parseInt(that.kag.config.scHeight);
+            var left= 0;
+            var top = 0; 
+            
+            if(pm.width!=""){
+                scWidth = parseInt(pm.width);
+            }
+            
+            if(pm.height!=""){
+                scHeight = parseInt(pm.height);
+            }
+            
+            if(pm.left!=""){
+                left = parseInt(pm.left);
+            }
+            
+            if(pm.top!=""){
+                top = parseInt(pm.top);
+            }
+            
+            j_bg_img.css({
+                width:scWidth,
+                height:scHeight,
+                left:left,
+                top:top
+            });
+            
+            j_bg_img.attr("src",storage_url);
+            
+            $.setName(j_new_bg, pm.name);
+        
+            j_new_bg.find("img").remove();
+            j_new_bg.append(j_bg_img);
+            
+            
+            ////ここまで
+            j_new_bg.css("display","none");
+            
+            j_old_bg.after(j_new_bg);
+            
+            that.kag.ftag.hideNextImg();
+            that.kag.layer.updateLayer("base","fore",j_new_bg);
+
+            if (pm.wait == "true") {
+                that.kag.layer.hideEventLayer();
+            }
             
             //スキップ中は時間を短くする
             pm.time = that.kag.cutTimeWithSkip(pm.time);
