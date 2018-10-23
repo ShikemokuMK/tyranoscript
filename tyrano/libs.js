@@ -748,6 +748,49 @@
 
     };
     
+    $.playerHtmlPath = function(html){
+     
+        if ("appJsInterface" in window) {
+            //Android
+        } else {
+            
+            if(typeof TyranoPlayer == "function"){
+            
+                //playerの場合HTMLを修正する必要がある
+                var result_html ="";
+                while(1){
+                    var index = html.indexOf("file:///");
+                    if(index==-1){
+                        result_html += html;
+                        break;
+                    }else{
+                        
+                        result_html += html.substring(0,index);
+                        html = html.substring(index,html.length);
+                        
+                        var replace_index = html.indexOf("TyranoPlayerFramework.app/game");
+                        tmp_html = html.substring(replace_index + "TyranoPlayerFramework.app/game".length,html.length);
+                        html = "./"+tmp_html;
+                        
+                        
+                    }
+                    
+                }
+                
+                if(result_html !=""){
+                    html = result_html;
+                }
+                
+            }
+            
+            
+        }
+        
+        return html;
+        
+    };
+    
+    
     $.confirmSaveClear = function(){
         if(confirm('セーブデータが壊れている可能性があります。セーブデータを初期化しますか？')){
            alert("初期化");

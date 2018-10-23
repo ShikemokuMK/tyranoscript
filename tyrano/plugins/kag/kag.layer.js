@@ -282,10 +282,10 @@ tyrano.plugin.kag.layer ={
         };
         
         for( key in this.map_layer_fore ){
-            layer_info["map_layer_fore"][key] = this.map_layer_fore[key].outerHTML();
+            layer_info["map_layer_fore"][key] = $.playerHtmlPath(this.map_layer_fore[key].outerHTML());
         }
         for( key in this.map_layer_back ){
-            layer_info["map_layer_back"][key] = this.map_layer_back[key].outerHTML();
+            layer_info["map_layer_back"][key] = $.playerHtmlPath(this.map_layer_back[key].outerHTML());
         }
         
         /*
@@ -294,19 +294,19 @@ tyrano.plugin.kag.layer ={
         }
         */
         
-        layer_info["layer_free"] = this.layer_free.outerHTML();
+        layer_info["layer_free"] = $.playerHtmlPath(this.layer_free.outerHTML());
         
         var n = 0;
         $(".fixlayer").each(function(){
         
-            layer_info["layer_fix"][n]  = $(this).outerHTML();
+            layer_info["layer_fix"][n]  = $.playerHtmlPath($(this).outerHTML());
             n++;
             
         });
         
         var m = 0;
         $(".blendlayer").each(function(){
-            layer_info["layer_blend"][m]  = $(this).outerHTML();
+            layer_info["layer_blend"][m]  = $.playerHtmlPath($(this).outerHTML());
             m++;
             
         });
