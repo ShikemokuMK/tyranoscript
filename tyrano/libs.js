@@ -768,9 +768,9 @@
                         result_html += html.substring(0,index);
                         html = html.substring(index,html.length);
                         
-                        var replace_index = html.indexOf("TyranoPlayerFramework.app/game");
-                        tmp_html = html.substring(replace_index + "TyranoPlayerFramework.app/game".length,html.length);
-                        html = "./"+tmp_html;
+                        var replace_index = html.indexOf("/game/data");
+                        tmp_html = html.substring(replace_index + "/game/data".length,html.length);
+                        html = "./data"+tmp_html;
                         
                         
                     }
