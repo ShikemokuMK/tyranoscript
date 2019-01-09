@@ -84,10 +84,10 @@ tyrano.plugin.kag.tag.movie = {
                 that.playVideo(pm);
             }else{
                 this.kag.layer.showEventLayer();
-                $(".tyrano_base").bind("click.movie", function (e) {
+                //$(".tyrano_base").bind("click.movie", function (e) {
                     that.playVideo(pm);
                     $(".tyrano_base").unbind("click.movie")
-                });
+                //});
             }
             
         } else {
@@ -131,6 +131,7 @@ tyrano.plugin.kag.tag.movie = {
         video.style.left = "0px";
         video.style.width = "100%";
         video.style.height = "100%";
+        video.style.display = "none";
         video.autoplay = true;
         video.autobuffer = true;
         
@@ -285,7 +286,13 @@ tyrano.plugin.kag.tag.movie = {
         );
         
         video.load();
-        video.play();
+        
+        //アンドロイドで一瞬再生ボタンが表示される対策
+        video.addEventListener('canplay',function(){
+            video.style.display = "";
+            video.play();
+        });
+        
 
     }
 };
