@@ -627,7 +627,7 @@ tyrano.plugin.kag.tag.text = {
 
             }
 
-            this.showMessageVertical(pm.val,pm);
+            this.showMessage(pm.val,pm,true);
 
         } else {
 
@@ -649,7 +649,7 @@ tyrano.plugin.kag.tag.text = {
             }
             
             
-            this.showMessage(pm.val,pm);
+            this.showMessage(pm.val,pm,false);
 
         }
 
@@ -657,7 +657,7 @@ tyrano.plugin.kag.tag.text = {
 
     },
 
-    showMessage : function(message_str,pm) {
+    showMessage : function(message_str,pm,isVertical) {
         var that = this;
         
         //特定のタグが直前にあった場合、ログの作り方に気をつける
@@ -694,13 +694,13 @@ tyrano.plugin.kag.tag.text = {
         (function(jtext) {
 
             if (jtext.html() == "") {
-
                 //タグ作成
-                jtext.append("<p class=''></p>");
-
+                if (isVertical) {
+                    jtext.append("<p class='vertical_text'></p>");
+                } else {
+                    jtext.append("<p class=''></p>");
+                }
             }
-
-            var _message_str = message_str;
 
             var current_str = "";
 
@@ -709,9 +709,6 @@ tyrano.plugin.kag.tag.text = {
                 current_str = jtext.find("p").find(".current_span").html();
 
             }
-
-            var index = 0;
-            //jtext.html("");
 
             that.kag.checkMessage(jtext);
 
@@ -740,7 +737,6 @@ tyrano.plugin.kag.tag.text = {
             }
             
             
-             
             //既読管理中の場合、現在の場所が既読済みなら、色を変える 
             if(that.kag.config.autoRecordLabel == "true"){
                 
@@ -759,7 +755,6 @@ tyrano.plugin.kag.tag.text = {
                 
             }
             
-            
             var ch_speed = 30;
             
             if(that.kag.stat.ch_speed != ""){
@@ -768,47 +763,53 @@ tyrano.plugin.kag.tag.text = {
                 ch_speed = parseInt(that.kag.config.chSpeed);
             }
             
-            /*　// バグ is_nowaitが必ずtrueに戻るね。
-            if(ch_speed <= 3){
-                that.kag.stat.is_nowait = true;
-            }else{
-                that.kag.stat.is_nowait = false;
-            }
-            */
-            
-            var pchar = function(pchar) {
-                
-                var c = _message_str.substring(index, ++index);
-
+            var append_str = "";
+            for (var i = 0; i < message_str.length; i++) {
+                var c = message_str.charAt(i);
                 //ルビ指定がされている場合
                 if (that.kag.stat.ruby_str != "") {
                     c = "<ruby><rb>" + c + "</rb><rt>" + that.kag.stat.ruby_str + "</rt></ruby>";
                     that.kag.stat.ruby_str = "";
-
                 }
 
-                current_str += c;
-                
-                //スキップ中は１文字ずつ追加ということはしない
-                if(that.kag.stat.is_skip != true && that.kag.stat.is_nowait!=true && ch_speed >3){
-                    that.kag.appendMessage(jtext, current_str);
+                append_str += "<span style='visibility: hidden'>" + c + "</span>";
+            }
+            current_str += "<span>" + append_str + "</span>";
+
+            // hidden状態で全部追加する
+            that.kag.appendMessage(jtext, current_str);
+            var append_span = j_span.children('span:last-child');
+            var makeVisible = function(index) {
+                append_span.children("span:eq(" + index + ")").css('visibility', 'visible');
+            };
+            var makeVisibleAll = function() {
+                append_span.children("span").css('visibility', 'visible');
+            };
+
+            var pchar = function(index) {
+                // 一文字ずつ表示するか？
+                var isOneByOne = (
+                    that.kag.stat.is_skip != true
+                    && that.kag.stat.is_nowait != true
+                    && ch_speed >= 3
+                );
+
+                if (isOneByOne) {
+                    makeVisible(index);
                 }
                 
-                if (index <= _message_str.length) {
+                if (index <= message_str.length) {
 
                     that.kag.stat.is_adding_text = true;
 
                     //再生途中にクリックされて、残りを一瞬で表示する
                     if (that.kag.stat.is_click_text == true || that.kag.stat.is_skip == true || that.kag.stat.is_nowait == true) {
-                        //setTimeout(function() {
-                            pchar(pchar);
-                        //}, 0);
+                        pchar(++index);
                     } else {
                         setTimeout(function() {
-                            pchar(pchar);
+                            pchar(++index);
                         }, ch_speed);
                     }
-
                 } else {
 
                     that.kag.stat.is_adding_text = false;
@@ -818,177 +819,22 @@ tyrano.plugin.kag.tag.text = {
                     //すべて表示完了 ここまではイベント残ってたな
 
                     if (that.kag.stat.is_stop != "true") {
-                            
-                        if(that.kag.stat.is_skip == true || that.kag.stat.is_nowait==true || ch_speed < 3){
-                            
-                            that.kag.appendMessage(jtext, current_str);
+                        if(!isOneByOne){
+                            makeVisibleAll();
                             setTimeout(function(){
                                 if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
-                             }, parseInt(that.kag.config.skipSpeed));
+                            }, parseInt(that.kag.config.skipSpeed));
                             
                         }else{
                             if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
                         }
-
-                    } else {
-
                     }
-
-                    //メッセージ用
-                    
-                    //that.kag.appendMessage(jtext,current_str+"<img class='img_next' src='./tyrano/images/kag/nextpage.gif' />");
-
                 }
-
             };
 
-            pchar(pchar);
+            pchar(0);
 
         })(this.kag.getMessageInnerLayer());
-
-    },
-
-    //縦書き出力
-    showMessageVertical : function(message_str,pm) {
-        var that = this;
-        
-        //特定のタグが直前にあった場合、ログの作り方に気をつける
-        if(that.kag.stat.log_join=="true"){
-            pm.backlog="join";
-        }
-        
-        if(this.kag.stat.f_chara_ptext=="true"){
-            this.kag.stat.f_chara_ptext="false";
-            this.kag.stat.log_join = "false";
-        }
-        
-        //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
-        that.kag.ftag.hideNextImg();
-        
-        //バックログへの追加
-        if(pm.backlog=="join"){
-            this.kag.pushBackLog(message_str,"join");
-        }else{
-            this.kag.pushBackLog(message_str,"add");
-        }
-        
-        (function(jtext) {
-
-            if (jtext.html() == "") {
-                //タグ作成
-                jtext.append("<p class='vertical_text'></p>");
-
-            }
-
-            var _message_str = message_str;
-
-            var current_str = "";
-
-            if (jtext.find("p").find(".current_span").length != 0) {
-                current_str = jtext.find("p").find(".current_span").html();
-            }
-
-            var index = 0;
-            //jtext.html("");
-
-            that.kag.checkMessage(jtext);
-
-            //メッセージ領域を取得
-            var j_span = that.kag.getMessageCurrentSpan();
-
-            j_span.css({
-                        "color":that.kag.stat.font.color,
-                        "font-weight": that.kag.stat.font.bold,
-                        "font-size": that.kag.stat.font.size + "px",
-                        "font-family": that.kag.stat.font.face,
-                        "font-style":that.kag.stat.font.italic
-                        });
-            
-            if(that.kag.stat.font.edge !=""){
-                var edge_color = that.kag.stat.font.edge;
-                j_span.css("text-shadow","1px 1px 0 "+edge_color+", -1px 1px 0 "+edge_color+",1px -1px 0 "+edge_color+",-1px -1px 0 "+edge_color+"");
-            
-            }else if(that.kag.stat.font.shadow != ""){
-                //j_span.css()
-                j_span.css("text-shadow","2px 2px 2px "+that.kag.stat.font.shadow);
-            }
-            
-            //既読管理中の場合、現在の場所が既読済みなら、色を変える 
-            if(that.kag.config.autoRecordLabel == "true"){
-                if(that.kag.config.alreadyReadTextColor !="default"){
-                    if(that.kag.stat.already_read == true){
-                        j_span.css("color",$.convertColor(that.kag.config.alreadyReadTextColor));
-                    }
-                }
-            }
-            
-            var ch_speed = 30;
-            
-            if(that.kag.stat.ch_speed != ""){
-                ch_speed = parseInt(that.kag.stat.ch_speed);
-            }else if(that.kag.config.chSpeed){
-                ch_speed = parseInt(that.kag.config.chSpeed);
-            }
-            
-            var pchar = function(pchar) {
-
-                var c = _message_str.substring(index, ++index);
-
-                //ルビ指定がされている場合
-                if (that.kag.stat.ruby_str != "") {
-                    c = "<ruby><rb>" + c + "</rb><rt>" + that.kag.stat.ruby_str + "</rt></ruby>";
-                    that.kag.stat.ruby_str = "";
-
-                }
-
-                current_str += c;
-
-                //スキップ中は１文字ずつ追加ということはしない
-                if(that.kag.stat.is_skip != true && that.kag.stat.is_nowait!=true){
-                    that.kag.appendMessage(jtext, current_str);
-                }
-                
-                if (index <= _message_str.length) {
-
-                    that.kag.stat.is_adding_text = true;
-
-                    //再生途中にクリックされて、残りを一瞬で表示する
-                    if (that.kag.stat.is_click_text == true || that.kag.stat.is_skip == true) {
-                        setTimeout(function() {
-                            pchar(pchar)
-                        }, 0);
-                    } else {
-                        setTimeout(function() {
-                            pchar(pchar)
-                        }, ch_speed);
-                    }
-
-                } else {
-
-                    that.kag.stat.is_adding_text = false;
-                    that.kag.stat.is_click_text = false;
-                        
-                    //すべて表示完了
-                    
-                     if(that.kag.stat.is_skip == true || that.kag.stat.is_nowait==true){
-                            
-                         that.kag.appendMessage(jtext, current_str);
-                         setTimeout(function(){
-                             that.kag.ftag.nextOrder()
-                         }, parseInt(that.kag.config.skipSpeed));
-                            
-                    }else{
-                        that.kag.ftag.nextOrder()
-                    }
-
-                }
-
-            };
-
-            pchar(pchar);
-
-        })(this.kag.getMessageInnerLayer());
-
     },
 
     nextOrder : function() {
