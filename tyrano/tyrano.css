@@ -45,7 +45,7 @@ abbr,acronym{
     writing-mode:vertical-rl ;
     -webkit-writing-mode:vertical-rl ;
     float:right;
-    /*height : 960px ;*/
+    height:100%;
 
 }
 
