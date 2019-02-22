@@ -103,6 +103,7 @@ tyrano.plugin.kag.tag.playbgm = {
             
             var context = that.kag.tmp.audio_context;
             
+            /*
             if(context){
                 
                 var browser = $.getBrowser();
@@ -120,24 +121,28 @@ tyrano.plugin.kag.tag.playbgm = {
                 }
                 
             }else{
+            */
+               
+            if(this.kag.tmp.ready_audio == false){
                 
-                if(this.kag.tmp.ready_audio == false){
+                $(".tyrano_base").on("click.bgm", function() {
                     
-                    $(".tyrano_base").on("click.bgm", function() {
-                        
-                            that.kag.readyAudio();
-                            that.kag.tmp.ready_audio = true;
-                            that.play(pm);
-                            $(".tyrano_base").off("click.bgm");
+                        that.kag.readyAudio();
+                        that.kag.tmp.ready_audio = true;
+                        that.play(pm);
+                        $(".tyrano_base").off("click.bgm");
+            
+                });
                 
-                    });
-                    
-                }else{
-                    that.play(pm);
-                }   
-    
-                
+            }else{
+                that.play(pm);
             }   
+    
+            
+            /*    
+            } 
+            
+            */  
 
 
         }
