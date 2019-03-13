@@ -442,7 +442,7 @@ tyrano.plugin.kag ={
     //システム変数を保存する
     saveSystemVariable:function(){
         
-        $.setStorage(this.kag.config.projectID+"_sf", this.variable.sf ,this.kag.config.configSave);
+        $.setStorage(this.kag.config.projectID+"_config", this.variable.sf ,this.kag.config.configSave);
         
     },
     
@@ -541,7 +541,7 @@ tyrano.plugin.kag ={
         this.rider.init();
         
         //システム変数の初期化
-        var tmpsf = $.getStorage(this.kag.config.projectID+"_sf",that.config.configSave);
+        var tmpsf = $.getStorage(this.kag.config.projectID+"_config",that.config.configSave);
         
         if(tmpsf == null){
             this.variable.sf ={};

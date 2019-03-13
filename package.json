@@ -1,14 +1,15 @@
 {
 	"name": "tyranoscript",
-	"main": "app://./index.html",
+	"main": "index.html",
 	"window": {
-		"title": "setup tyrano engine",
+		"title": "tyranoscript",
 		"icon": "link.png",
+		"fullscreen": true,
 		"toolbar": false,
 		"frame": true,
 		"width": 640,
 		"height": 480,
-		"position": "mouse",
+		"position": "center",
 		"min_width": 640,
 		"min_height": 480
 	},
