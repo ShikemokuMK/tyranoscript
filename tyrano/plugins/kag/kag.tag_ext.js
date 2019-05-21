@@ -2186,6 +2186,12 @@ tyrano.plugin.kag.tag.chara_hide = {
 
         var img_obj = target_layer.find("." + pm.name);
 
+         //キャラがいない場合、次へ
+        if (!img_obj.get(0)) {
+            that.kag.ftag.nextOrder();
+            return;
+        }
+
         var chara_num = 0;
         that.kag.layer.hideEventLayer();
 
