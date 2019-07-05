@@ -1354,3 +1354,82 @@ tyrano.plugin.kag.tag.vostop = {
 };
 
 
+
+/*
+ #[speak_on]
+ :group
+ オーディオ関連
+ :title
+ 読み上げ機能の有効化
+ :exp
+ ストーリーのシナリオを音声で読み上げることができます。
+ ＊ブラウザのみ動作。PC版パッケージ版では動作しません。
+ :sample
+ [speak_on ]
+ :param
+ volume=読み上げのボリュームを設定できます(まだ実装)。
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.speak_on = {
+
+    vital : [],
+
+    pm : {
+        volume : ""
+    },
+
+    start : function(pm) {
+
+        var that = this;
+        
+        if ($.isNWJS()!=true && 'speechSynthesis' in window) {
+            that.kag.stat.play_speak = true;
+        }else{
+            console.error("*error:この環境は[speak_on]の読み上げ機能に対応していません");
+        }
+        
+        this.kag.ftag.nextOrder();
+        
+        
+    }
+};
+
+
+/*
+ #[speak_off]
+ :group
+ オーディオ関連
+ :title
+ 読み上げ機能の無効化
+ :exp
+ シナリオの読み上げをオフにします。
+ ＊ブラウザのみ動作。PC版パッケージ版では動作しません。
+ :sample
+ [speak_off ]
+ :param
+ volume=読み上げのボリュームを設定できます。
+ #[end]
+ */
+
+tyrano.plugin.kag.tag.speak_off = {
+
+    vital : [],
+
+    pm : {
+        volume : ""
+    },
+
+    start : function(pm) {
+
+        var that = this;
+        
+        this.kag.stat.play_speak = false;
+        this.kag.ftag.nextOrder();
+        
+        
+    }
+};
+
+
+

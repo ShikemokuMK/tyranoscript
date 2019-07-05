@@ -1403,7 +1403,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
             
             if (cpm) {
                 //キャラクター名出力
-                $("." + this.kag.stat.chara_ptext).html(cpm.jname);
+                $("." + this.kag.stat.chara_ptext).html($.escapeHTML(cpm.jname));
 
                 //色指定がある場合は、その色を指定する。
                 if (cpm.color != "") {
@@ -1446,7 +1446,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
             } else {
                 //存在しない場合はそのまま表示できる
-                $("." + this.kag.stat.chara_ptext).html(pm.name);
+                $("." + this.kag.stat.chara_ptext).html($.escapeHTML(pm.name));
                 
                 //存在しない場合は全員の明度を下げる。
                 if (this.kag.stat.chara_talk_focus != "none") {
@@ -2181,9 +2181,9 @@ tyrano.plugin.kag.tag.chara_hide = {
     start : function(pm) {
 
         var that = this;
-
+        
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
-
+        
         var img_obj = target_layer.find("." + pm.name);
 
          //キャラがいない場合、次へ

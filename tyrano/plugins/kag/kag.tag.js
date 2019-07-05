@@ -687,6 +687,12 @@ tyrano.plugin.kag.tag.text = {
                 
             }
         }
+        
+        //読み上げ機能が有効な場合
+        if(that.kag.stat.play_speak==true){
+            speechSynthesis.speak(new SpeechSynthesisUtterance(message_str));  
+        }
+        
 
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
         that.kag.ftag.hideNextImg();
@@ -2101,7 +2107,7 @@ tyrano.plugin.kag.tag.ptext = {
         //上書き指定
         if (pm.overwrite == "true" && pm.name != "") {
             if ($("." + pm.name).size() > 0) {
-                $("." + pm.name).html(pm.text);
+                $("." + pm.name).html($.escapeHTML(pm.text));
                 this.kag.ftag.nextOrder();
                 return false;
             }
@@ -2124,7 +2130,7 @@ tyrano.plugin.kag.tag.ptext = {
         //オブジェクトにクラス名をセットします
         $.setName(tobj, pm.name);
 
-        tobj.html(pm.text);
+        tobj.html($.escapeHTML(pm.text));
 
         this.kag.setStyles(tobj, font_new_style);
         

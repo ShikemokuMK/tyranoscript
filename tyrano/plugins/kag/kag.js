@@ -245,6 +245,8 @@ tyrano.plugin.kag ={
         play_bgm:true, //BGMを再生するか否か
         play_se:true,  //SEを再生するか否か
         
+        play_speak:false, // 読み上げを行うか否か
+        
         map_se_volume:{}, //セーブスロットごとにボリューム値を保持できる
         map_bgm_volume:{}, // 同上
         
@@ -928,9 +930,13 @@ tyrano.plugin.kag ={
                 }
             }
             
+            if ($.isNWJS()!=true && 'speechSynthesis' in window) {
+                //最初のクリックで有効化するための処理。読み上げ機能。
+                speechSynthesis.speak(new SpeechSynthesisUtterance(""));  
+            }
             
         }
-    
+        
     },
     
     //ゲームのカーソルを指定する
