@@ -2108,9 +2108,9 @@ tyrano.plugin.kag.tag.chara_show = {
             }
 
             if (cpm.reflect == "true") {
-                img_obj.addClass("reflect");
+                j_chara_root.addClass("reflect");
             } else {
-                img_obj.removeClass("reflect");
+                j_chara_root.removeClass("reflect");
             }
 
             if (pm.wait != "true") {
