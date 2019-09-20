@@ -2108,6 +2108,24 @@ tyrano.plugin.kag.tag.ptext = {
         if (pm.overwrite == "true" && pm.name != "") {
             if ($("." + pm.name).size() > 0) {
                 $("." + pm.name).html($.escapeHTML(pm.text));
+                
+                //サイズとか位置とかも調整できるならやっとく
+                if(pm.x!=0){
+                    $("." + pm.name).css("left",parseInt(pm.x));
+                }
+                
+                if(pm.y!=0){
+                    $("." + pm.name).css("top",parseInt(pm.y));
+                }
+                
+                if(pm.color!=""){
+                    $("." + pm.name).css("color",$.convertColor(pm.color));
+                }
+                
+                if(pm.size!=""){
+                    $("." + pm.name).css("font-size",parseInt(pm.size));
+                }
+                
                 this.kag.ftag.nextOrder();
                 return false;
             }
