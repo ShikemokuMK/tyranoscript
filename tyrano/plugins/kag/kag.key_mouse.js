@@ -230,9 +230,10 @@ tyrano.plugin.kag.key_mouse = {
             // and do all if statements
             // then do "if (isReturn) return;"
             
-            
-            if($.userenv() != "pc"){
-                if(that.kag.tmp.ready_audio==false){
+            if(that.kag.tmp.ready_audio==false){
+                
+                if($.isNeedClickAudio()){
+                
                     that.kag.readyAudio();
                     that.kag.tmp.ready_audio = true;
                     

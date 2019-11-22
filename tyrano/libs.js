@@ -427,6 +427,12 @@
     };
     
     $.isNWJS = function(){
+        
+        //Electronならfalse
+        if($.isElectron()){
+            return false;
+        }
+        
         // Node.js で動作しているか
         var isNode = (typeof process !== "undefined" && typeof require !== "undefined");
         // ブラウザ上(非Node.js)で動作しているか
@@ -449,6 +455,32 @@
             //  通常のWebページとして動作している
             return false;
         }
+    },
+    
+    $.isNeedClickAudio = function (){
+        
+        //プレイヤーはクリックの必要なし
+        if($.isTyranoPlayer()){
+            return false;
+        }
+        
+        //ブラウザやスマホアプリは必要
+        if($.isElectron() || $.isNWJS()){
+            return false;
+        }
+        
+        return true;
+        
+        
+    }
+    
+    $.isElectron = function(){
+        if(navigator.userAgent.indexOf("TyranoErectron")!=-1){
+            return true;
+        }else{
+            return false
+        }
+        
     },
     
     //オブジェクトを引き継ぐ。

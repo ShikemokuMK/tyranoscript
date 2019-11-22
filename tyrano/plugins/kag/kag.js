@@ -8,6 +8,7 @@ tyrano.plugin.kag ={
     sound_swf:null,
     
     is_rider:false, //ティラノライダーからの起動かどうか
+    is_studio:false, //ティラノスタジオからの起動かどうか
     
     cache_html:{},
     
@@ -542,6 +543,12 @@ tyrano.plugin.kag ={
         this.rider.kag = that;
         this.rider.init();
         
+        //studio 追加
+        this.studio = object(tyrano.plugin.kag.studio);
+        this.studio.kag = that;
+        this.studio.init();
+        
+        
         //システム変数の初期化
         var tmpsf = $.getStorage(this.kag.config.projectID+"_sf",that.config.configSave);
         
@@ -775,6 +782,11 @@ tyrano.plugin.kag ={
         //cursorの設定
         this.setCursor(this.config["cursorDefault"]);
         
+        //オーディオでワンクリックが必要かどうかの判定
+        if(!$.isNeedClickAudio()){
+            this.tmp.ready_audio = true;
+        }
+        
         var first_scenario_file = "first.ks";
         
         if($("#first_scenario_file").size() >0){
@@ -896,46 +908,17 @@ tyrano.plugin.kag ={
         
         this.tmp.ready_audio = true;
         
-        if($.userenv() != "pc"){
-            var pm = {
-                loop : "false",
-                storage : "",
-                stop : "true"
-            };
+        if($.isNeedClickAudio()){
             
-            //デフォルトは実行
-            if(!this.tmp.map_bgm[0]){
-                this.kag.ftag.startTag("playse", pm);
-                this.kag.ftag.startTag("playbgm", pm);
-            }
-            
-            var bgm_slot = parseInt(this.kag.config.defaultBgmSlotNum);
-            var se_slot = parseInt(this.kag.config.defaultSoundSlotNum);
-            
-            for(var i=1;i< bgm_slot;i++){
-                
-                //バッファがまだない場合だけ
-                pm.buf = i;
-                if(this.tmp.map_bgm[pm.buf]){
-                    this.kag.ftag.startTag("playbgm", pm);
-                }
-            }
-            
-            for(var i=1;i< se_slot;i++){
-                
-                //バッファがまだ無い場合だけ
-                pm.buf = i;
-                if(!this.tmp.map_se[pm.buf]){
-                    this.kag.ftag.startTag("playse", pm);
-                }
-            }
-            
-            if ($.isNWJS()!=true && 'speechSynthesis' in window) {
-                //最初のクリックで有効化するための処理。読み上げ機能。
-                speechSynthesis.speak(new SpeechSynthesisUtterance(""));  
-            }
+            var audio_obj = new Howl({
+                src: "./tyrano/audio/silent.mp3",
+                volume:0.1
+            });
+    
+            audio_obj.play();
             
         }
+            
         
     },
     
