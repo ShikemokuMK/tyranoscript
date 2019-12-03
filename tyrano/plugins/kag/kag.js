@@ -777,7 +777,7 @@ tyrano.plugin.kag ={
         
         var first_scenario_file = "first.ks";
         
-        if($("#first_scenario_file").size() >0){
+        if($("#first_scenario_file").length >0){
         	first_scenario_file = $("#first_scenario_file").val();
         }
         
@@ -1112,9 +1112,9 @@ tyrano.plugin.kag ={
         
         var that = this;
         
-        $('<img />').attr('src', src).load(function(e){
+        $('<img />').attr('src', src).on("load",function(e){
                 if(callbk) callbk();
-         }).error(function(e){
+         }).on("error",function(e){
              
                 //画像が見つからなかった時のエラー
                 //that.kag.message(画像ファイル「"+src+"」が見つかりません");
