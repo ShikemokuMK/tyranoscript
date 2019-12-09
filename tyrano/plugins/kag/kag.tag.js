@@ -93,8 +93,9 @@ tyrano.plugin.kag.ftag = {
             return false
         }
         
-
+/*
         try {
+*/
 
             this.current_order_index++;
 
@@ -231,10 +232,12 @@ tyrano.plugin.kag.ftag = {
                 this.nextOrder();
             }
 
+/*
         } catch(e) {
             console.log(e);
             that.kag.error($.lang("error_occurred"));
         }
+*/
 
         //ラベルといった、先行してオンメモリにしておく必要が有る命令に関しては、ここで精査しておく
 
@@ -2112,7 +2115,7 @@ tyrano.plugin.kag.tag.ptext = {
 
         //上書き指定
         if (pm.overwrite == "true" && pm.name != "") {
-            if ($("." + pm.name).size() > 0) {
+            if ($("." + pm.name).length > 0) {
                 $("." + pm.name).html($.escapeHTML(pm.text));
                 
                 //サイズとか位置とかも調整できるならやっとく
@@ -5140,7 +5143,7 @@ tyrano.plugin.kag.tag.free_layermode = {
             blend_layer = $(".blendlayer");
         }
         
-        var cnt = blend_layer.size();
+        var cnt = blend_layer.length;
         var n = 0;
         
         //フリーにするレイヤがない場合

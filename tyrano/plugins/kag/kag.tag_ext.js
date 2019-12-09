@@ -2490,7 +2490,7 @@ tyrano.plugin.kag.tag.chara_mod = {
 
         }
         
-        if ($(".layer_fore").find("." + pm.name).size() == 0) {
+        if ($(".layer_fore").find("." + pm.name).length == 0) {
             this.kag.stat.charas[pm.name]["storage"] = storage_url;
             this.kag.stat.charas[pm.name]["reflect"] = pm.reflect;
             this.kag.layer.showEventLayer();

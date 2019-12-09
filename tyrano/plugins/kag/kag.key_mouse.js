@@ -132,7 +132,7 @@ tyrano.plugin.kag.key_mouse = {
             }
             
             //メニュー表示中は無効にする
-            if ($(".menu_close").size() > 0 && $(".layer_menu").css("display") != "none") {
+            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 return ;
             }
             
@@ -290,7 +290,7 @@ tyrano.plugin.kag.key_mouse = {
 
     showmenu : function() {
         if (this.canShowMenu()) {
-            if ($(".menu_close").size() > 0 && $(".layer_menu").css("display") != "none") {
+            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
                 $(".button_menu").click();
@@ -300,7 +300,7 @@ tyrano.plugin.kag.key_mouse = {
 
     hidemessage : function() {
         if (this.canShowMenu()) {
-            if ($(".menu_close").size() > 0 && $(".layer_menu").css("display") != "none") {
+            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
                 if (!this.kag.stat.is_strong_stop) {
