@@ -251,7 +251,7 @@ tyrano.plugin.kag.menu = {
                 data = that.snap;
                 data.save_date = $.getNowDate() + "　" + $.getNowTime();
                 array_save.data[num] = data;
-                $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
+                $.setStorage(that.kag.config.projectID + "_game", array_save, that.kag.config.configSave);
                 
                 if(typeof cb=="function"){
                     //終わったタイミングでコールバックを返す
@@ -884,7 +884,7 @@ tyrano.plugin.kag.menu = {
     //セーブデータを取得します
     getSaveData : function() {
 
-        var tmp_array = $.getStorage(this.kag.config.projectID + "_tyrano_data",this.kag.config.configSave);
+        var tmp_array = $.getStorage(this.kag.config.projectID + "_game",this.kag.config.configSave);
         
         if (tmp_array) {
 
