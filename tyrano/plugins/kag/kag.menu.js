@@ -412,22 +412,21 @@ tyrano.plugin.kag.menu = {
                     tmp_base.css("left",0);
                     tmp_base.css("top",0);
                     tmp_base.css("transform", "");
-                    
-                    html2canvas(tmp_base.get(0), {
-                        onrendered : function(canvas) {
-                            
-                            $("#tyrano_base").find(".layer_blend_mode").css("display","");
-                            
-                            // canvas is the final rendered <canvas> element
-                            //console.log(canvas);
-                            var img_code = that.createImgCode(canvas);
-                            
-                            completeImage(img_code);
-                        
-                        },
+                    var opt = {
                         height:that.kag.config.scHeight,
                         width:that.kag.config.scWidth
+                    };
+                    
+                    html2canvas(tmp_base.get(0),opt).then(function(canvas) {
+                                
+                        $("#tyrano_base").find(".layer_blend_mode").css("display","");
                         
+                        // canvas is the final rendered <canvas> element
+                        //console.log(canvas);
+                        var img_code = that.createImgCode(canvas);
+                        
+                        completeImage(img_code);
+                    
                     });
                     
                     tmp_base.hide();

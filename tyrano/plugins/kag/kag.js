@@ -284,7 +284,9 @@ tyrano.plugin.kag ={
             
             that.config = $.extend(true, that.config, map_config);
             
+            //alert("wwwwwwwww");
             //アップデートのチェック
+            
             that.checkUpdate(function(){
             
                 that.init_game(); //ゲーム画面生成
@@ -413,20 +415,26 @@ tyrano.plugin.kag ={
     //スクリプトを解釈して実行する
     evalScript:function(str){
       
-      var TG = this;
+        var TG = this;
      
-       var f = this.stat.f;
-       var sf = this.variable.sf;
-       var tf = this.variable.tf;
-       var mp = this.stat.mp;
+        var f = this.stat.f;
+        var sf = this.variable.sf;
+        var tf = this.variable.tf;
+        var mp = this.stat.mp;
+        
+        eval(str);
        
-       eval(str);
+        this.saveSystemVariable();
        
-       this.saveSystemVariable();
-       
-       if(this.kag.is_rider){
+        /*
+        if(this.kag.is_rider){
             this.kag.rider.pushVariableGrid();
-       }
+        }
+        */
+       
+        if(this.kag.is_studio){
+            this.kag.studio.notifyChangeVariable();
+        }
        
     },
     
@@ -804,7 +812,8 @@ tyrano.plugin.kag ={
         
         
         //ティラノライダーからの通知の場合、発生させる
-        that.rider.complete(this);
+        //that.rider.complete(this);
+        that.studio.complete(this);
         
         
     },
