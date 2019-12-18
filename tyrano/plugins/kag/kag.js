@@ -1104,17 +1104,43 @@ tyrano.plugin.kag ={
         
         var that = this;
         
-        $('<img />').attr('src', src).on("load",function(e){
+        var ext = $.getExt(src);
+        
+        if(ext=="mp3" || ext=="ogg" || ext=="m4a"){
+            
+            var howl_opt = {
+                "src": src,
+                preload:true
+            };
+            let obj = new Howl(howl_opt);
+            
+            obj.on("load",function(){
                 if(callbk) callbk();
-         }).on("error",function(e){
-             
-                //画像が見つからなかった時のエラー
-                //that.kag.message(画像ファイル「"+src+"」が見つかりません");
-                that.kag.error("画像ファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png");
+            });
+            
+            obj.on("loaderror",function(){
                 
+                that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
                 if(callbk) callbk();
-                
-           });
+                    
+            });
+            
+
+        }else{
+        
+            $('<img />').attr('src', src).on("load",function(e){
+                    if(callbk) callbk();
+             }).on("error",function(e){
+                 
+                    //画像が見つからなかった時のエラー
+                    //that.kag.message(画像ファイル「"+src+"」が見つかりません");
+                    that.kag.error("画像ファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png");
+                    
+                    if(callbk) callbk();
+                    
+               });
+               
+        }
            
     },
     

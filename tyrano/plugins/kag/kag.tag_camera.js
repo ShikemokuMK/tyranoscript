@@ -51,6 +51,10 @@
  ease-out(終了時点をゆっくり再生する)
  ease-in-out(開始時点と終了時点をゆっくり再生する)
  デフォルトはeaseです。 
+ 
+ :demo
+2,kaisetsu/01_camera
+ 
  #[end]
  */
 
@@ -205,6 +209,10 @@ tyrano.plugin.kag.tag.camera = {
  wait=カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行することができます。デフォルトはtrue,
  ease_type=カメラの戻り方を指定できます。デフォルトはease　詳細はcameraタグを確認。,
  layer=レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。 
+ 
+:demo
+2,kaisetsu/01_camera
+ 
  #[end]
  */
 
@@ -348,6 +356,11 @@ tyrano.plugin.kag.tag.reset_camera = {
  カメラの演出が終わったので進行[p]
  
  :param
+ 
+ :demo
+ 2,kaisetsu/01_camera
+
+ 
  #[end]
  */
 
@@ -417,6 +430,10 @@ rollIn,
 color=文字の色を指定して下さい。デフォルトは黒です。0xFFFFFF形式で指定します,
 graphic=暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください,
 folder=graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです
+
+ :demo
+ 2,kaisetsu/05_mask
+
 
  #[end]
  */
@@ -530,6 +547,10 @@ bounceOutDown/
 bounceOutLeft/<br >
 bounceOutRight/
 bounceOutUp
+
+:demo
+ 2,kaisetsu/05_mask
+
  #[end]
  */
 

@@ -40,6 +40,16 @@
         audio_obj.play();
 
     };
+    
+    $.toBoolean = function(str){
+        
+        if(str=="true"){
+            return true;
+        }else{
+            return false;
+        }    
+        
+    };
 
     $.localFilePath = function(){
         
@@ -194,6 +204,11 @@
 
         return text.replace(new RegExp(searchString, "g"), replacement);
 
+    };
+    
+    //確証しを取得
+    $.getExt = function(str) {
+        return str.split(".").pop();
     };
 
     //指定した拡張子を付ける。拡張子がなければ

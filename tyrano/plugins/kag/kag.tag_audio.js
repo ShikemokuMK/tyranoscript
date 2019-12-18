@@ -25,8 +25,9 @@ Confit.tjs の mediaFormatDefaultをmp3に変更して下さい。
 :param
 storage=再生する音楽ファイルを指定してください,
 loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます。smoothを指定すると、ループが滑らかになります。,
-click=スマートフォンのブラウザから閲覧した場合のみ動作（アプリの場合不要）true またはfalse（デフォルト）を指定してください。trueの場合、スマートフォン（ブラウザ）から閲覧した場合、再生前にクリックが必要になります。これは、スマートフォンの仕様上、クリックしないと音が鳴らせない縛りがあるため、例えば、背景変更後に音楽再生をしたい場合はtrueを指定しないと音はなりません。通常のテキストの中で音楽再生の場合はfalseで大丈夫です。スマートフォンから閲覧して音楽が鳴らない場合はtrueにしてみてください,
+sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
 volume=再生する音量を指定できます。0〜100 の範囲で指定して下さい。（デフォルトは100）
+
 #[end]
 */
 
@@ -43,6 +44,9 @@ tyrano.plugin.kag.tag.playbgm = {
         volume : "",
         buf:"0",
         target : "bgm", //"bgm" or "se"
+        
+        sprite_time:"", //200-544 
+        
         click : "false", //音楽再生にクリックが必要か否か
         stop : "false" //trueの場合自動的に次の命令へ移動しない。ロード対策
 
@@ -218,13 +222,29 @@ tyrano.plugin.kag.tag.playbgm = {
         //音楽再生
         var audio_obj =null ;
         
-        audio_obj = new Howl({
+        var howl_opt = {
+            
             src: storage_url,
             volume:(volume),
             onend:(e)=>{
                 //this.j_btnPreviewBgm.parent().removeClass("soundOn");   
             }
-        });
+            
+        };
+        
+        //スプライトが指定されている場合
+        if(pm.sprite_time!=""){
+            
+            let array_sprite = pm.sprite_time.split("-");
+            let sprite_from = parseInt($.trim(array_sprite[0]));
+            let sprite_to = parseInt($.trim(array_sprite[1]));
+            let duration = sprite_to - sprite_from;
+            
+            howl_opt["sprite"] = {"sprite_default":[sprite_from, duration, $.toBoolean(pm.loop) ]}
+            
+        }
+        
+        audio_obj = new Howl(howl_opt);
         
         if (pm.loop == "true") {
             audio_obj.loop(true);
@@ -263,7 +283,11 @@ tyrano.plugin.kag.tag.playbgm = {
         	}
         });
 
-        audio_obj.play();
+        if(pm.sprite_time!==""){
+            audio_obj.play("sprite_default");
+        }else{
+            audio_obj.play();
+        }
         
         if (pm.fadein == "true") {
         
@@ -493,7 +517,7 @@ tyrano.plugin.kag.tag.stopbgm = {
  :group
  オーディオ関連
  :title
- BGMにフェードイン
+ BGMをフェードイン再生
  :exp
  BGMを徐々に再生します。
  一部環境（Firefox、Sarafi等）においては対応していません。その場合、playbgmの動作となります。
@@ -502,7 +526,7 @@ tyrano.plugin.kag.tag.stopbgm = {
  :param
  storage=再生する音楽ファイルを指定してください,
  loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます,
- click=スマートフォンのブラウザから閲覧した場合のみ動作（アプリの場合不要）true またはfalse（デフォルト）を指定してください。trueの場合、スマートフォン（ブラウザ）から閲覧した場合、再生前にクリックが必要になります。
+ sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
  これは、スマートフォンの仕様上、クリックしないと音が鳴らせない縛りがあるため、例えば、背景変更後に音楽再生をしたい場合はtrueを指定しないと音はなりません。通常のテキストの中で音楽再生の場合はfalseで大丈夫です。スマートフォンから閲覧して音楽が鳴らない場合はtrueにしてみてください,
  time=フェードインを行なっている時間をミリ秒で指定します。,
  volume=BGMの再生音量を変更できます（0〜100）
@@ -518,6 +542,7 @@ tyrano.plugin.kag.tag.fadeinbgm = {
         loop : "true",
         storage : "",
         fadein : "true",
+        sprite_time:"", //200-544 
         time : 2000
     },
 
@@ -535,6 +560,7 @@ tyrano.plugin.kag.tag.fadeinbgm = {
  :group
  オーディオ関連
  :title
+ BGMをフェードアウト停止
  :exp
  再生中のBGMをフェードアウトしながら停止します。
  一部環境（Firefox、Sarafi等）においては対応していません。その場合、stopbgmの動作となります。
@@ -576,8 +602,6 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
  :param
  storage=次に再生するファイルを指定してください,
  loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます,
- click=スマートフォンのブラウザから閲覧した場合のみ動作（アプリの場合不要）true またはfalse（デフォルト）を指定してください。trueの場合、スマートフォン（ブラウザ）から閲覧した場合、再生前にクリックが必要になります。
- これは、スマートフォンの仕様上、クリックしないと音が鳴らせない縛りがあるため、例えば、背景変更後に音楽再生をしたい場合はtrueを指定しないと音はなりません。通常のテキストの中で音楽再生の場合はfalseで大丈夫です。スマートフォンから閲覧して音楽が鳴らない場合はtrueにしてみてください,
  time=クロスフェードを行なっている時間をミリ秒で指定します。
  #[end]
  */
@@ -629,8 +653,8 @@ tyrano.plugin.kag.tag.xchgbgm = {
  :param
  storage=再生するファイルを指定してください,
  buf=効果音を再生するスロットを指定できます。デフォルトは0,
- click=スマホブラウザで効果音を鳴らす場合、クリック後でないと再生できません。スマホブラウザで音がならない場合trueを指定してみてください。デフォルトはfalse,
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
+ sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
  clear=trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
  volume=効果音の再生音量を変更できます（0〜100）
  #[end]
@@ -646,6 +670,7 @@ tyrano.plugin.kag.tag.playse = {
         volume : "",
         loop : "false",
         buf:"0",
+        sprite_time:"", //200-544 
         clear : "false" //他のSEがなっている場合、それをキャンセルして、新しく再生します
     },
 
@@ -709,6 +734,7 @@ tyrano.plugin.kag.tag.stopse = {
  :param
  storage=次に再生するファイルを指定してください,
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
+ sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
  buf=効果音を停止するスロットを指定できます。デフォルトは0,
  time=フェードインの時間をミリ秒で指定します
  #[end]
@@ -725,6 +751,7 @@ tyrano.plugin.kag.tag.fadeinse = {
         volume : "",
         fadein : "true",
         buf:"0",
+        sprite_time:"", //200-544 
         time : "2000"
 
     },
@@ -1010,6 +1037,9 @@ name=ボイスを再生するキャラクター名を指定します。[chara_ne
 vostorage=音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます,
 number=デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます
 
+:demo
+2,kaisetsu/19_voconfig
+
  
 #[end]
 */
@@ -1073,6 +1103,10 @@ voconfigで指定したボイスの自動再生を開始します。
 コレ以降、#で名前を指定した場合、紐付いたボイスが再生されていきます。
 :sample
 :param
+
+:demo
+2,kaisetsu/19_voconfig
+
 #[end]
 */
 

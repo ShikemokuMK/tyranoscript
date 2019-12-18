@@ -55,6 +55,7 @@ tyrano.plugin.kag.studio = {
                 
             });
             
+            //ステータスのロード
             this.ipc.ipcRenderer.on("status-load-save",(event,arg)=>{
                 
                 let data = JSON.parse(arg);
@@ -70,6 +71,24 @@ tyrano.plugin.kag.studio = {
                 }, 100);
             
             });
+            
+            //タグの実行
+            this.ipc.ipcRenderer.on("exe-tag",(event,arg)=>{
+                
+                let data = JSON.parse(arg);
+                let tag_text = data["tag_text"];
+                
+                this.cutTyranoScript(tag_text);
+                
+            });
+            
+            
+            setInterval((e)=>{
+                
+                let charas = this.kag.stat.charas;
+                this.send("chara-update-charas",charas);
+                
+            },5000);
             
             //初期化
             this.send('init-variable', {});
@@ -133,6 +152,24 @@ tyrano.plugin.kag.studio = {
         
         this.send("load-complete",init_data);
     
+    },
+    
+    cutTyranoTag : function(tag, pm) {
+
+        TYRANO.kag.ftag.startTag(tag, pm);
+
+    },
+
+    cutTyranoScript : function(str) {
+
+        var result = TYRANO.kag.parser.parseScenario(str);
+
+        var array_s = result.array_s;
+        for (var i = 0; i < array_s.length; i++) {
+            var tag = array_s[i];
+            this.cutTyranoTag(tag.name, tag.pm);
+        }
+
     },
 
     

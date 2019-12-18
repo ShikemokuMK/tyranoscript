@@ -61,13 +61,11 @@ tyrano.plugin.kag ={};
                         
                         if(line_str ==="#[end]"){
                            
-                           
                            //終了時点で登録すべきデータが残っていた場合は入れておく
                            map_doc[flag_tag][flag_param] = tmp_str;
                            
                            flag_tag ="";
                            flag_param ="";
-                           
                            
                         }
                         else if(flag_tag!=""){
@@ -79,6 +77,7 @@ tyrano.plugin.kag ={};
                                     if(flag_param!=""){
                                         map_doc[flag_tag][flag_param] = tmp_str;
                                     }
+                                
                                 }
                                 
                                 flag_param ="";
@@ -118,15 +117,74 @@ tyrano.plugin.kag ={};
                     }
                 
                 }
-                
-                console.log(map_doc);
-                
+              
                 //macdoc を　解析して、HTMLを作成
                 
                 loading_num++;
                 
                 if(loading_num == script_num){
+                    
+                    //HTML作成
                     $.putHtml(map_doc,master_tag);
+                    
+                    ////////スタジオ用データ作成
+                    for(var key in map_doc){
+                        
+                        var tag = map_doc[key];
+                        tag.array_param = [];
+                        
+                        var array_param = tag.param.split(",");
+                        
+                        for(var k=0;k<array_param.length;k++){
+                            
+                            var tmp_array = array_param[k].split("=");
+                            var param_name = $.trim(tmp_array[0]);
+                            var param_value =$.trim(tmp_array[1]);
+                            
+                            if(param_name==""){
+                                continue;
+                            }
+                            
+                            var pm_obj = {
+                                "name":param_name,
+                                "value":param_value,
+                                "vital":"×",
+                                "default":"",
+                            };
+                            
+                            if(master_tag[key].pm && master_tag[key].pm[param_name]){
+                                pm_obj["default"] = master_tag[key].pm[param_name];
+                            }
+                                 
+                            if(master_tag[key]!=null && master_tag[key]["vital"]!=null){
+                                
+                                var array_vital = master_tag[key]["vital"];
+                                
+                                for(var j=0;j<array_vital.length;j++){
+                                
+                                    if(master_tag[key].vital[j]==param_name){
+                                 
+                                        pm_obj["vital"] ="◯";
+                                        break;
+                                    }
+                                
+                                }
+                             
+                             }
+                             
+                             tag.array_param.push(pm_obj);
+                             
+                             delete tag["param"];
+                             
+                        }
+                         
+                    }//end for loop
+                    
+                    console.log("ww  map_doc  wwwwwwww");
+                    console.log(map_doc);
+                    
+                    $("#studio_json").val(JSON.stringify(map_doc,undefined,4))
+                    
                 }
                 
                 
@@ -194,15 +252,21 @@ tyrano.plugin.kag ={};
                 
                     var obj = map_doc[key];
                     
-                    console.log(obj.exp.split("\n"));
-                    
                     var html =''
                     +'<div  class="news-v3 bg-color-white margin-bottom-20">'
                     +'<div class="news-v3-in"><a name="'+key+'"></a>'
                     +'<h3 style="color:#a10f2b">['+key+']　'+obj.title+'</h3>'
                     +'<ul class="list-inline posted-info"><li>'+obj.group+'</li></ul>'
-                    +'<p>'+$.br($.escapeHTML(obj.exp))+'</p>'
-                    +'<table class="table table-bordered">'
+                    +'<p>'+$.br($.escapeHTML(obj.exp))+'</p>';
+                    
+                    //デモ用のURLがあるなら差し込む
+                    if(typeof obj.demo != "undefined"){
+                        var array_demo = obj.demo.split(",");
+                        var demo_url = "/demogame/tech_samples_"+$.trim(array_demo[0])+"_v5/index.html?storage="+$.trim(array_demo[1]);
+                        html+='<p><a href="'+demo_url+'" target="_blank"">解説チュートリアル</a></p>';
+                    }
+                    
+                    html+='<table class="table table-bordered">'
                     +'<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>解説</th></tr></thead>'
                     +'<tbody>';
                     
