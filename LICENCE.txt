@@ -23,7 +23,7 @@ http://strikeworks.jp
 クレジット ----------------
 
 TyranoScript 
-Copyright (c) 2012-2017 STRIKEWORKS / Shikemokumk
+Copyright (c) 2012-2019 STRIKEWORKS / Shikemokumk
 http://tyrano.jp
 
 ---------------
@@ -40,10 +40,7 @@ Copyright (c) 2015 Niklas von Hertzen
 Released under MIT License
 
 ----------------
-jQuery v1.10.2 | (c) 2005, 2013 jQuery Foundation, Inc. | jquery.org/license
-
-----------------
-jQuery v2.0.3 | (c) 2005, 2013 jQuery Foundation, Inc. | jquery.org/license
+jQuery v3.4.1 | (c) JS Foundation and other contributors | jquery.org/license
 
 ----------------
 jQuery UI - v1.10.3 - 2013-05-03
@@ -81,7 +78,6 @@ MIT licensed
 Copyright (C) 2012-2013 Jordan Schroter
  
 ----------------
-
 Remodal - v1.1.1
 Responsive, lightweight, fast, synchronized with CSS animations, fully cust
 omizable modal window plugin with declarative configuration and hash tracking.
@@ -90,7 +86,22 @@ http://vodkabears.github.io/remodal/
 Made by Ilya Makarov
 Under MIT License
 
+-----------------
+howler.js v2.1.2
+howlerjs.com
+
+(c) 2013-2019, James Simpson of GoldFire Studios
+goldfirestudios.com
+
+MIT License
+
+-----------------
+
+ 
+
 ================
+
+
 
 
 ----------------

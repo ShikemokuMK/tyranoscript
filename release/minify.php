@@ -47,6 +47,7 @@ $array_mini = array(
 "plugins/kag/kag.tag_system.js",
 "plugins/kag/kag.key_mouse.js",
 "plugins/kag/kag.rider.js",
+"plugins/kag/kag.studio.js",
 "plugins/kag/kag.tag_camera.js",
 
 
@@ -87,8 +88,8 @@ foreach($array_mini as $file){
 	//echo "cp --parents ../tyrano/".$file." ".$dirname."/tyrano/";
 	//コピーする
 	//exec("cp ../tyrano/".$file." ".$dirname."/tyrano/");
-	exec("java -jar compiler-latest/compiler.jar --js=../tyrano/".$file." --js_output_file=".$dirname."/tyrano/".$file." --compilation_level WHITESPACE_ONLY");
-	
+//	exec("java -jar compiler-latest/compiler.jar --js=../tyrano/".$file." --js_output_file=".$dirname."/tyrano/".$file." --compilation_level WHITESPACE_ONLY");
+    exec("uglifyjs --compress --mangle -- ../tyrano/".$file." > ".$dirname."/tyrano/".$file."");	
 
 }
 
