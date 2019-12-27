@@ -82,7 +82,19 @@ tyrano.plugin.kag.studio = {
                 
             });
             
+            this.ipc.ipcRenderer.on("material-preview-position",(event,arg)=>{
+                
+                let data = JSON.parse(arg);
+                
+                let file = data["file"];
+                let category = data["category"];
+                
+                this.insertElement(category,file);
+                
+                
+            });
             
+            //キャラの情報をアップデートする
             setInterval((e)=>{
                 
                 let charas = this.kag.stat.charas;
@@ -92,6 +104,8 @@ tyrano.plugin.kag.studio = {
             
             //初期化
             this.send('init-variable', {});
+            
+            
             
         }
         
@@ -104,6 +118,94 @@ tyrano.plugin.kag.studio = {
         
     
     },
+    
+    
+    
+    insertElement : function(category, file) {
+        
+        var path = "./data/" + category + "/" + file;
+            
+        if(category=="fgimage" || category =="image"){
+            var j_img = $("<div style='position:absolute;z-index:9999999999;'><div class='area_pos' style='position:absolute;width:100px;opacity:0.5;background-color:black;color:white'></div><div class='button_delete' style='position:absolute;right:0px;border:solid 1px gray;background-color:white;width:20px;height:20px;cursor:pointer' >×</div><img style='width:100%;border:solid 1px green;' src='"+path+"' /></div>");
+            
+            (()=>{
+                
+                var _j_img = j_img;
+                var _category = category;
+                var _file = file;
+                
+                
+                j_img.draggable({
+        
+                    scroll : false,
+                    //containment:".tyrano_base",
+                    stop : (e, ui) => {
+                        
+                        //j_x.html(ui.position.left);
+                        //j_y.html(ui.position.top);
+                        let left = Math.floor(ui.position.left);
+                        let top  = Math.floor(ui.position.top);
+                        
+                        _j_img.find(".area_pos").html("x:"+left+" y:"+top);
+                        
+                        let obj = {
+                            "left":left,
+                            "top":top
+                        }
+                        
+                        this.send("material-update-pos",obj);
+                        
+                        //タグのプレビューがここに表示される
+                        //元に渡す
+                        
+                    }
+                });
+                
+                
+                j_img.resizable({
+                    
+                    aspectRatio:true,
+                    handles:"all",
+                    resize:(e,ui)=>{
+                        var target = $(e.target);
+                        var width = parseInt(target.css("width"));
+                        var height = parseInt(target.css("height"));
+                        
+                        let obj = {
+                            "width":width,
+                            "height":height
+                        }
+                        
+                        this.send("material-update-size",obj);
+                        
+                        //j_text_width.val(that.map_anim["width"]);
+                        //j_text_height.val(that.map_anim["height"]);
+                                            
+                     }
+                 });
+                
+                
+                
+                _j_img.find(".button_delete").click(function(){
+                    _j_img.remove();
+                });
+                
+                //ドラッグを出来るように
+                $(".tyrano_base").attr("ondragstart","");
+                $(".tyrano_base").append(_j_img);
+            
+            })();
+            
+        }else if(category =="bgimage"){
+            //背景画像変更
+            var j_new_bg = TYRANO.kag.layer.getLayer("base", "fore");
+            j_new_bg.css("background-image","url("+path+")");
+            
+        }
+    
+    },
+    
+    
     
     send:function(key,json_obj){
         
@@ -138,13 +240,10 @@ tyrano.plugin.kag.studio = {
         
     },
     
-
+    //完了時に入ってくる
     complete : function(TG) {
         
-        console.log(TG);
         let array_save = TG.kag.menu.getSaveData();
-        
-        console.log(array_save);
         
         let init_data = {
             "array_save":array_save

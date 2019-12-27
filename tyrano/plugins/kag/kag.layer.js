@@ -316,6 +316,30 @@ tyrano.plugin.kag.layer ={
         
     },
     
+    //スタジオから利用。レイヤーの情報を取得する予定
+    getLayerInfo(){
+        
+        var layer_info ={
+            
+            "map_layer_fore":this.map_layer_fore,
+            "layer_free":this.layer_free,
+            "layer_blend":this.layer_blend,
+            "layer_fix":{},
+            
+        };
+        
+        var n = 0;
+        $(".fixlayer").each(function(){
+        
+            layer_info["layer_fix"][n]  = $(this);
+            n++;
+            
+        });
+        
+        return layer_info;
+    
+    },
+    
     setLayerHtml:function(layer){
         
         var that = this;

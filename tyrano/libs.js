@@ -58,7 +58,7 @@
         if(process.execPath.indexOf("var/folders")!=-1){
             path = process.env.HOME+"/_TyranoGameData";
         }else{
-            path = $.getProcessPath();
+            path = $.getExePath();
         }
         
         return path;
@@ -202,7 +202,16 @@
 
     $.replaceAll = function(text, searchString, replacement) {
 
-        return text.replace(new RegExp(searchString, "g"), replacement);
+        if ( typeof text != "string"){
+            return text;
+        }
+        
+        
+        //置換のコード変えてみた
+        var result = text.split(searchString).join(replacement);
+        
+        return result;
+        
 
     };
     
@@ -708,6 +717,7 @@
     };
     
     //PC版のみ。実行フォルダを取得
+    /*
     $.getProcessPath = function(){
         var path = process.execPath;
         var tmp_index = path.indexOf(".app");
@@ -728,19 +738,18 @@
         return out_path;
         
     };
+    */
     
     $.getOS = function(){
         
-        if($.isNWJS()){
-        
-            var path = process.execPath;
-            var tmp_index = path.indexOf(".app");
-            var os = "mac";
-            if(tmp_index == -1){
-                tmp_index = path.indexOf(".exe");
-                os="win";
-            }
+        if($.isElectron()){
+            let os ="";
             
+            if(process.platform == "darwin"){
+                os="mac";    
+            }else{
+                os="win";
+            }
             return os;
             
         }else{
@@ -869,6 +878,8 @@
                 return null;
 
         } catch(e) {
+            console.log("==============")
+            console.log(e);
             alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             $.confirmSaveClear();
         }
@@ -876,13 +887,80 @@
         return gv;
 
     };
+    
+    $.getExtWithFile = function(str){
+        
+        var filename = "";
+        if(str.indexOf("/") != -1){
+            filename = str.split("/").pop();
+        }else{
+            filename = str;
+        }
+        
+        var dir_name = $.replaceAll(str,filename,"");
+        
+        var ext = "";
+        if(filename.indexOf(".") != -1){
+            ext = str.split(".").pop();
+        }else{
+            ext = "";
+            //拡張子がない場合はディレクトリ名とする。
+            dir_name = str;
+        }
+        var name = $.replaceAll(filename,"."+ext,"");
+        
+        
+        return {filename:filename, ext:ext, name:name, dir_name:dir_name};
+        
+        
+    };
+    
+    //PC用の実行パスを取得
+    $.getExePath = function(){
+        
+        const _app = require('electron').remote.app;
+        
+        //TyranoStudio.app/Contents/Resources/app
+        let path = _app.getAppPath();
+        let platform ="";
+        //alert(process.platform);
+        //console.log(process.platform)
+        console.log(path);
+        
+        if(process.platform == "darwin"){
+            
+            platrofm = "mac";
+            //TyranoStudio-darwin-x64.asar
+            if(path.indexOf(".asar")!=-1){
+                path = $.replaceAll(path,"/Contents/Resources/app.asar","");
+            }else{
+                path = $.replaceAll(path,"/Contents/Resources/app","");
+            }
+            
+            path = $.getExtWithFile(path).dir_name;
+            console.log(path);
+            
+            
+        }else if(process.platform == "win32"){
+
+            if(path.indexOf(".asar")!=-1){
+                path = $.replaceAll(path,"\\resources\\app.asar","");
+            }else{
+                path = $.replaceAll(path,"\\resources\\app","");
+            }
+            
+        }
+        
+        return path ;
+            
+    };
 
     $.setStorageFile = function(key, val) {
         val = JSON.stringify(val);
         var fs = require('fs');
         
-        var out_path = "";
-        
+        var out_path = $.getExePath();
+                
         //mac os Sierra 対応
         if(process.execPath.indexOf("var/folders")!=-1){
             out_path = process.env.HOME+"/_TyranoGameData";
@@ -890,14 +968,15 @@
                 fs.mkdirSync(out_path);
             }
         }else{
-            out_path = $.getProcessPath();
+            out_path = $.getExePath();
         }
         
         
         fs.writeFileSync(out_path + "/" + key + ".sav", escape(val));
 
     };
-
+    
+    
     $.getStorageFile = function(key) {
 
         try {
@@ -905,15 +984,16 @@
             var gv = "null";
             var fs = require('fs');
             var out_path = "";
-        
-            //Mac os Sierra 対応
+            
+            var out_path = $.getExePath();
+            
             if(process.execPath.indexOf("var/folders")!=-1){
                 out_path = process.env.HOME+"/_TyranoGameData";
                 if(!fs.existsSync(out_path)){
                     fs.mkdirSync(out_path);
                 }
             }else{
-                out_path = $.getProcessPath();
+                out_path = $.getExePath();
             }
             
             if (fs.existsSync(out_path+"/" + key + ".sav")) {
@@ -924,10 +1004,12 @@
                 //gv = unescape(localStorage.getItem(key));
             }
 
-            if (gv == "null")
+            if (gv == "null"){
                 return null;
+            }
 
         } catch(e) {
+            console.log(e);
             alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             $.confirmSaveClear();
         }

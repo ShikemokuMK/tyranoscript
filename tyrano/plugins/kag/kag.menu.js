@@ -999,7 +999,9 @@ tyrano.plugin.kag.menu = {
     //画面をフルスクリーンにします
     screenFull : function() {
 
-        if ($.isNWJS() == true) {
+        //V5以降は使用しない
+        if (false) {
+            
             var gui = require("nw.gui");
             var win = gui.Window.get();
             if (win.isFullscreen) {

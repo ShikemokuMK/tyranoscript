@@ -301,7 +301,8 @@ tyrano.plugin.kag.ftag = {
             }
 
         } catch(e) {
-            console.log(this.array_tag);
+            //console.log(this.array_tag);
+            console.log(e);
             return false;
         }
 
@@ -5175,14 +5176,19 @@ tyrano.plugin.kag.tag.layermode_movie = {
             video.loop = false;
         }
         
+        var j_video = $(video);
+        
         //ビデオ再生完了時
         video.addEventListener("ended", function(e) {
+            
+            if(pm.loop=="false"){
+                j_video.remove();
+            }
+            
             if(pm.wait=="true"){
                 that.kag.ftag.nextOrder();
             }
         });
-        
-        var j_video = $(video);
         
         j_video.attr("data-video-pm",JSON.stringify(pm));
         
@@ -5285,7 +5291,6 @@ tyrano.plugin.kag.tag.free_layermode = {
         }
         
         blend_layer.each(function(){
-        
             var blend_obj = $(this);
             blend_obj.fadeOut(parseInt(pm.time),function(){
                 blend_obj.remove();

@@ -813,8 +813,10 @@ tyrano.plugin.kag ={
         
         //ティラノライダーからの通知の場合、発生させる
         //that.rider.complete(this);
-        that.studio.complete(this);
         
+        if(this.kag.is_studio){
+            that.studio.complete(this);
+        }
         
     },
     
