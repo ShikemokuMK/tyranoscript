@@ -224,7 +224,7 @@ tyrano.plugin.kag.key_mouse = {
             
         }
         
-        layer_obj_click.click(function(e){
+        layer_obj_click.on("click",function(e){
             // POSSIBLE IMPROVE
             // make "isReturn" variable
             // and do all if statements

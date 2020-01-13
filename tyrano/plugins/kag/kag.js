@@ -1,7 +1,7 @@
 
 tyrano.plugin.kag ={
     
-    version:450,
+    version:500,
     
     tyrano:null,
     kag:null,
@@ -265,6 +265,13 @@ tyrano.plugin.kag ={
         already_read:false, //現在の場所が既読済みか否かを保持する。ラベル通過時に判定
         
         visible_menu_button:false, //メニューボタンの表示状態
+        
+        vchat:{
+            is_active:false,
+            chara_name_color:"0x70c7ff", //キャラネーム欄の色
+            max_log_count:200, //最大ログ数。200を超えると削除されていく
+            charas:{}, //キャラ一覧
+        },
         
         title:"" //ゲームのタイトル
         
@@ -625,12 +632,6 @@ tyrano.plugin.kag ={
             
         $("."+this.kag.define.BASE_DIV_NAME).append(button_menu_obj);
         
-        //カメラモードの調整
-        /*
-        if(this.kag.config["useCamera"] && this.kag.config["useCamera"]=="true"){
-            this.kag.config["ScreenCentering"] = "false";
-        }
-        */
         
         //センタリングの調整
         if(this.kag.config["ScreenCentering"] && this.kag.config["ScreenCentering"]=="false"){
@@ -794,6 +795,35 @@ tyrano.plugin.kag ={
         if(!$.isNeedClickAudio()){
             this.tmp.ready_audio = true;
         }
+        
+        
+        //ビジュアルチャット形式/////////////////
+        if(this.kag.config["vchat"] && this.kag.config["vchat"]=="true"){
+            this.kag.config["ScreenCentering"] = "false";
+            this.kag.config["ScreenRatio"] = "fix";
+            
+            this.kag.stat.vchat.is_active = true;
+            
+            $("#vchat_base").css({
+                "background-color":"#EEEEEE",
+                "overflow":"scroll",
+            });
+            
+            $("#vchat_base").show();
+            
+            //イベントを消す
+            $("body").get(0).ontouchmove="";
+            
+            this.kag.ftag.startTag("vchat_in",{});
+            
+            //テキスト部分にクリックイベントを挿入
+            $("#vchat_base").on("touchstart",(e)=>{
+                $(".layer_event_click").trigger("touchstart");
+                e.preventDefault();
+            });
+            
+        }
+        /////////////////////////////
         
         var first_scenario_file = "first.ks";
         
@@ -1030,11 +1060,22 @@ tyrano.plugin.kag ={
     },
     
     getMessageInnerLayer:function(){
-        return this.layer.getLayer(this.stat.current_layer,this.stat.current_page).find(".message_inner");  
+        
+        //vchat形式の場合
+        if(this.stat.vchat.is_active){
+            var j_msg_inner = $("#vchat_base").find(".current_vchat"); //.find(".vchat-text-inner").html(current_str);
+            //j_msg_inner.show();
+            return j_msg_inner;
+        }else{
+            return this.layer.getLayer(this.stat.current_layer,this.stat.current_page).find(".message_inner");  
+        }
+        
+        
     },
     
     getMessageOuterLayer:function(){
-      return this.layer.getLayer(this.stat.current_layer,this.stat.current_page).find(".message_outer");  
+        //console.trace();
+        return this.layer.getLayer(this.stat.current_layer,this.stat.current_page).find(".message_outer");  
     },
     
     getMessageCurrentSpan:function(){

@@ -13,6 +13,7 @@
 <link href="./tyrano/libs/jquery-ui.css" rel="stylesheet" type="text/css"/>
 
 <script type="text/javascript" src="./tyrano/libs/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="./tyrano/libs/jquery-migrate-3.1.0.js"></script>
 
 <script>
 try{
@@ -60,6 +61,7 @@ try{
 <script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_camera.js" ></script>
 <script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ext.js" ></script>
 <script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_system.js" ></script>
+<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_vchat.js" ></script>
 <script type="text/javascript" src="./tyrano/plugins/kag/kag.tag.js" ></script>
 
 <link href="./tyrano/libs/textillate/assets/animate.css" rel="stylesheet">
@@ -82,6 +84,25 @@ window.onload = function() { setTimeout(doScroll, 100); }
 <body onselectstart="return false" onContextmenu="return false" ontouchmove="event.preventDefault()" >
 
 <div id="tyrano_base" class="tyrano_base" style="overflow:hidden" unselectable="on" ondragstart="return false" ></div>
+<div id="vchat_base" class="vchat_base layer_event_click" style="overflow:hidden" unselectable="on" ondragstart="return false" >
+    
+    <!--
+    <div style="right: 0px; margin-right: 20px;" class="vchat やまと vchat_talked">
+    <figure class="v_chat_face vchat-img-right" style="width: 100px; height: 100px;">
+        <img class="face_img" src="./data/fgimage/chat/yamato/normal.png" alt="">                    
+        <figcaption class=" vchat_name_text="" vchat-img-description"="">                    
+        <div class="v_chat_name" style="justify-content: center; display: flex; width: 100px; color: rgb(0, 0, 0); font-family: メイリオ, sans-serif;"><p>やまと</p>
+        </div>                                     
+    </figure>                 
+    <div class="v_chat_text vchat-text-left" style="margin-top: 25px; margin-right: 120px; margin-left: 100px; background-color: rgb(255, 255, 255);">                   <div class="text_f-before vchat-text-left-f-before"></div>                   <p class="vchat-text-inner" style="color: rgb(36, 36, 36); font-size: 26px; font-family: メイリオ, sans-serif; display: block;">おーい。きゃああああああああああ</p>                   
+    <div class="text_f-after vchat-text-left-f-after" style="border-left: 10px solid rgb(255, 255, 255);"></div>                 </div>                
+    </div> 
+    -->
+
+
+</div> <!-- end vchat_base -->
+
+
 
 
 <!--  First シナリオファイルに外部ファイルを利用したい場合は、こちらにシナリオファイルのURLを指定できます-->

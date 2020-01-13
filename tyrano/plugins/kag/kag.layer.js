@@ -37,6 +37,7 @@ tyrano.plugin.kag.layer ={
         
         
         //スキップやオートキャンセルの停止、画面がクリックされた時。
+        /*
         $("body").click(function(){
             
             //スキップ中にクリックされたら元に戻す
@@ -58,6 +59,7 @@ tyrano.plugin.kag.layer ={
             
             
         });
+        */
         
         
         

@@ -136,6 +136,23 @@
         return h + "：" + m + "：" + s;
 
     };
+    
+    $.convertRem = function(px_val){
+        
+        function getRootElementFontSize() {
+          // Returns a number
+          return parseFloat(
+            // of the computed font-size, so in px
+            getComputedStyle(
+              // for the root <html> element
+              document.documentElement
+            ).fontSize
+          );
+        }
+        
+        return px_val * getRootElementFontSize();
+            
+    };
 
     $.convertSecToString = function(val) {
         if (val == 0) {

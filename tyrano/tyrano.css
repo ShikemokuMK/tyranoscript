@@ -192,6 +192,8 @@ body{
    
 }
 
+
+
 /* button 
 ---------------------------------------------- */
 .glink_button {
@@ -480,4 +482,115 @@ body{
 #alertify{
     z-index:9999999;
 }
+
+
+/*vchat **************************/
+
+/*——————–
+ 吹き出しを作る
+——————–*/
+
+.vchat_base{
+    
+    width:100%;
+    height:100px;
+    background-color:red;
+    position:relative;
+    display:none;
+    overflow:scroll;    
+       
+}
+
+/* 全体のスタイル */
+.vchat {
+  margin-top: 25px;
+}
+
+/*名前欄*/
+.vchat-name {
+    margin-top:20px;
+}
+
+/*吹き出しテキスト */
+.vchat-text {
+  -webkit-text-size-adjust:none;
+  position: relative;
+  margin-left: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  margin-right: 12%;
+  box-shadow: 0px 3px 3px -3px rgba(0,0,0,0.6);
+  -webkit-box-shadow: 0px 3px 3px -3px rgba(0,0,0,0.6);
+  -moz-box-shadow: 0px 3px 3px -3px rgba(0,0,0,0.6);
+  font-size:"xx-large";
+ 
+  word-break: keep-all;
+  line-break: strict;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  /*float: left;*/
+}
+
+.ribbon20-wrapper {  
+  display: block;
+  position: relative;
+  margin: 0 auto;
+  padding: 20px 0;
+  width: 300px;
+  background: #f1f1f1;
+  }
+.ribbon20 {
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  top: 5px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  margin: 0;
+  height: 40px;
+  line-height: 40px;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  color: white;
+  background: #70c7ff;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.12);
+}
+.ribbon20:before {
+  position: absolute;
+  content: '';
+  top: 0;
+  left: -7px;
+  border: none;
+  height: 40px;
+  width: 7px;
+  background: inherit;
+  border-radius: 5px 0 0 5px;
+}
+
+/*
+.ribbon20:after {
+  position: absolute;
+  content: '';
+  bottom: -7px;
+  left: -5px;
+  border: none;
+  height: 7px;
+  width: 5px;
+  background: #4d99ca;
+  border-radius: 5px 0 0 5px;
+}
+*/
+
+/* 回り込み解除 */
+.vchat:after,.vchat:before {
+  clear: both;
+  content: "";
+  display: block;
+}
+
+
+
+
+
 

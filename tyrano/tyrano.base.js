@@ -17,7 +17,7 @@ tyrano.base ={
         this.tyrano.get(".tyrano_base").css("width",width).css("height",height).css("background-color","black");
         
         //NW.js 以外の場合。absolute
-        if(!$.isNWJS()){
+        if(!$.isNWJS() && !$.isElectron()){
             $(".tyrano_base").css("position","absolute");
         }
         
@@ -25,7 +25,7 @@ tyrano.base ={
     
     //画面サイズをぴったりさせます
     fitBaseSize:function(width,height){
-       
+        
         var that = this;
       	var view_width = $.getViewPort().width;
         var view_height = $.getViewPort().height;
@@ -52,35 +52,54 @@ tyrano.base ={
 
             setTimeout(function() {
                     
-                   //中央寄せなら、画面サイズ分を引く。
-                   if(that.tyrano.kag.config["ScreenCentering"] && that.tyrano.kag.config["ScreenCentering"]=="true"){
-                       
-                       $(".tyrano_base").css("transform-origin","0 0");
-                       $(".tyrano_base").css({
-                           margin: 0
-                       });
-                       
-                       var width = Math.abs(parseInt(window.innerWidth) - parseInt(that.tyrano.kag.config.scWidth*scale_f))/2;
-                       var height = Math.abs(parseInt(window.innerHeight) - parseInt(that.tyrano.kag.config.scHeight*scale_f))/2;
-                       
-                       if(width_f > height_f){
-                            $(".tyrano_base").css("left",width+"px");
-                            $(".tyrano_base").css("top","0px");
-                       }else{
-                            
-                            $(".tyrano_base").css("left","0px");
-                            $(".tyrano_base").css("top",height+"px");
-                            
-                       }
-                       
+                //中央寄せなら、画面サイズ分を引く。
+                if(that.tyrano.kag.config["ScreenCentering"] && that.tyrano.kag.config["ScreenCentering"]=="true"){
+                   
+                    $(".tyrano_base").css("transform-origin","0 0");
+                    $(".tyrano_base").css({
+                        margin: 0
+                    });
+                   
+                    var width = Math.abs(parseInt(window.innerWidth) - parseInt(that.tyrano.kag.config.scWidth*scale_f))/2;
+                    var height = Math.abs(parseInt(window.innerHeight) - parseInt(that.tyrano.kag.config.scHeight*scale_f))/2;
+                   
+                    if(width_f > height_f){
+                        $(".tyrano_base").css("left",width+"px");
+                        $(".tyrano_base").css("top","0px");
+                    }else{
+                        
+                        $(".tyrano_base").css("left","0px");
+                        $(".tyrano_base").css("top",height+"px");
+                        
                    }
                    
-                   $(".tyrano_base").css("transform", "scale(" + scale_f + ") ");
-                   if (parseInt(view_width) < parseInt(width)) {
-                        if (scale_f < 1) {
-                            window.scrollTo(width, height);
-                        }
+                }
+               
+                
+                $(".tyrano_base").css("transform", "scale(" + scale_f + ") ");
+                if (parseInt(view_width) < parseInt(width)) {
+                    if (scale_f < 1) {
+                        window.scrollTo(width, height);
                    }
+                }
+               
+                //vchat形式が有効ならそのエリアも調整する
+                if(that.tyrano.kag.config["vchat"] && that.tyrano.kag.config["vchat"]=="true"){
+                    
+                    var base_height = Math.round(parseInt($("#tyrano_base").css("height"))*scale_f);
+                    
+                    var vchat_height = (view_height - base_height); 
+                    
+                    $("#vchat_base").css({
+                        "margin-top":base_height,
+                        "height":vchat_height
+                    });
+                    
+                    
+                    
+                }
+             
+            
 
             }, 100);        	
             
