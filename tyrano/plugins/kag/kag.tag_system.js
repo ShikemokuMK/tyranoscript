@@ -51,11 +51,13 @@ tyrano.plugin.kag.tag.eval = {
 :group
 マクロ・変数・JS操作
 :title
-ゲーム変数の全消去
+変数の消去
 :exp
-ゲーム変数をすべて消去します
+ゲーム変数を消去します。
+パラメータを指定しない場合はすべての編集が消去されます。
 :sample
 :param
+exp=変数名を指定できます。変数名を指定した場合はその変数だけを消去します。例えば「f.name」「sf.flag」のように指定します。省略した場合はすべての変数が消去されます。
 #[end]
 */
 
@@ -64,11 +66,16 @@ tyrano.plugin.kag.tag.clearvar = {
 
     //すべての変数を削除
     pm : {
-
+        exp:"",
     },
 
     start : function(pm) {
-        this.kag.clearVariable();
+        if(pm.exp==""){
+            this.kag.clearVariable();
+        }else{
+            this.kag.evalScript("delete "+pm.exp);
+        }
+            
         this.kag.ftag.nextOrder();
 
     }

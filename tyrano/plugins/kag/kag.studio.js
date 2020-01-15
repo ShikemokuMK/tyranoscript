@@ -8,6 +8,9 @@ tyrano.plugin.kag.studio = {
     rider_view : {},
     ipc:{},
     
+    flag_push_console:true,
+    last_push_console_obj:{},
+    
     map_watch:{},
     
     init : function() {
@@ -20,8 +23,6 @@ tyrano.plugin.kag.studio = {
             this.ipc = require('electron');
             
             this.ipc.ipcRenderer.on('ping', (event, arg) => {
-                //console.log("wwwwwwwwwwwwwww");
-                //console.log(arg);
                 this.send('asynchronous-reply', JSON.stringify(arg));
             });
             
@@ -236,7 +237,15 @@ tyrano.plugin.kag.studio = {
     
     pushConsole:function(obj){
         
-        this.send("replay-console",obj);
+        this.last_push_console_obj = obj;
+        
+        if(this.flag_push_console==true){
+           this.flag_push_console = false;
+           setTimeout((e)=>{
+                    this.flag_push_console = true;
+                    this.send("replay-console",this.last_push_console_obj);
+            },1000);
+        } 
         
     },
     
