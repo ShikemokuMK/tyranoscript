@@ -448,12 +448,18 @@ tyrano.plugin.kag ={
     //式を評価して値を返却します
     embScript:function(str,preexp){
        
-       var f = this.stat.f;
-       var sf = this.variable.sf;
-       var tf = this.variable.tf;
-       var mp = this.stat.mp;
-       
-       return eval(str);
+        try{
+        
+            var f = this.stat.f;
+            var sf = this.variable.sf;
+            var tf = this.variable.tf;
+            var mp = this.stat.mp;
+        
+            return eval(str);
+        
+        }catch(e){
+            return undefined;   
+        }
         
     },
     

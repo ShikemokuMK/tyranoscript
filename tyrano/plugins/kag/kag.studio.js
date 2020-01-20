@@ -95,6 +95,22 @@ tyrano.plugin.kag.studio = {
                 
             });
             
+            this.ipc.ipcRenderer.on("variable-add-all",(event,arg)=>{
+                
+                //すべての変数を読み込んでスタジオに通知する
+                var map_variable = TYRANO.kag.variable;
+        
+                var f = TYRANO.kag.stat.f;
+                var mp = TYRANO.kag.stat.mp;
+        
+                map_variable.f = f;
+                map_variable.mp = mp;
+                
+                this.send("init-variable-all",map_variable);
+                
+                
+            });
+            
             //キャラの情報をアップデートする
             setInterval((e)=>{
                 
@@ -102,6 +118,28 @@ tyrano.plugin.kag.studio = {
                 this.send("chara-update-charas",charas);
                 
             },5000);
+            
+            
+            //リロードボタンの配置
+            var j_reload_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;'><button style='cursor:pointer'><span style=''>リロード</span></button></div>");
+            j_reload_button.draggable({
+        
+                scroll : false,
+                //containment:".tyrano_base",
+                stop : (e, ui) => {
+                    
+                }
+            });
+            
+            j_reload_button.find("button").on("click",(e)=>{
+                location.reload();
+            });
+            
+            $("body").append(j_reload_button);
+            
+            ////////////////
+            
+            
             
             //初期化
             this.send('init-variable', {});
@@ -220,11 +258,16 @@ tyrano.plugin.kag.studio = {
         let data = {};
         let array_name = [];
         
+        
         for(let key in this.map_watch){
             
-            let val = this.kag.embScript(key);
-            this.map_watch[key] = val;
+            if(typeof this.map_watch[key] =="undefined"){
+                this.map_watch[key]="";
+            }
             
+            let val = this.kag.embScript(key);
+            
+            this.map_watch[key] = val;
             array_name.push({"name":key,"val":val});
             
         }

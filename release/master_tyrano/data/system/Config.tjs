@@ -1,7 +1,7 @@
 // Config.tjs - ティラノスクリプト 設定
 // Copyright (C) 2012-2017 ShikemokuMK  
 
-;global.config_version = "4.50"; // この行を消さないでください
+;global.config_version = "5.00"; // この行を消さないでください
 
 // ティラノスクリプトの基本設定になります。
 // 吉里吉里で動かす場合は同一フォルダ内のKirikiri_Config.tjs を使用して下さい
