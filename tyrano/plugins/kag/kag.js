@@ -802,6 +802,11 @@ tyrano.plugin.kag ={
             this.tmp.ready_audio = true;
         }
         
+        //index.htmlでのvchat定義を確認
+        if($("#vchat_mode").length>0 && $("#vchat_mode").val()=="true"){
+            this.kag.config["vchat"]="true";
+        }
+        
         
         //ビジュアルチャット形式/////////////////
         if(this.kag.config["vchat"] && this.kag.config["vchat"]=="true"){
@@ -819,6 +824,14 @@ tyrano.plugin.kag ={
             
             //イベントを消す
             $("body").get(0).ontouchmove="";
+            
+            //縦書きを無効にする
+            this.stat.vertical ="false";
+            
+            //縦書きは無効化
+            this.kag.config.vertical = "false";
+            this.stat.vertical = "false";
+            
             
             this.kag.ftag.startTag("vchat_in",{});
             

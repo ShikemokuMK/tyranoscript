@@ -636,7 +636,9 @@ tyrano.plugin.kag.tag.text = {
                 var limit_width = parseInt(j_outer_message.css("width")) * 0.8;
                 var current_width = parseInt(j_inner_message.find("p").css("width"));
 
-                if (current_width > limit_width) {
+                if(this.kag.stat.vchat.is_active){
+                    this.kag.ftag.startTag("vchat_in",{});
+                }else{
                     this.kag.getMessageInnerLayer().html("");
                 }
 
@@ -684,8 +686,10 @@ tyrano.plugin.kag.tag.text = {
             pm.backlog="join";
         }
         
-        //バックログ用の値を格納
-        var chara_name = $.isNull($("." + this.kag.stat.chara_ptext).html());
+        var chara_name = "";
+        if(this.kag.stat.chara_ptext!=""){
+            chara_name = $.isNull($("." + this.kag.stat.chara_ptext).html());
+        }
         
         if((chara_name != "" && pm.backlog!="join") || (chara_name!="" && this.kag.stat.f_chara_ptext=="true")){
             
