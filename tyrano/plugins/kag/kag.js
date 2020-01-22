@@ -823,8 +823,8 @@ tyrano.plugin.kag ={
             this.kag.ftag.startTag("vchat_in",{});
             
             //テキスト部分にクリックイベントを挿入
-            $("#vchat_base").on("touchstart",(e)=>{
-                $(".layer_event_click").trigger("touchstart");
+            $("#vchat_base").on("click",(e)=>{
+                $(".layer_event_click").trigger("click");
                 e.preventDefault();
             });
             

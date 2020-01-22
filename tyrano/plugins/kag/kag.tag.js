@@ -657,8 +657,12 @@ tyrano.plugin.kag.tag.text = {
                 if (current_height > limit_height) {
 
                     //画面クリア
-                    this.kag.getMessageInnerLayer().html("");
-					
+                    if(this.kag.stat.vchat.is_active){
+                        this.kag.ftag.startTag("vchat_in",{});
+                    }else{
+                        this.kag.getMessageInnerLayer().html("");
+                    }
+                    
                 }
 
             }
