@@ -38,7 +38,7 @@ abbr,acronym{
 /*smart novel original css */
 
 .vertical_text{
-
+    
     font-family:'@ＭＳ 明朝';
     /*color:white;*/
     writing-mode:tb-rl;
@@ -182,8 +182,10 @@ body{
     -moz-user-select: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
-    
-	position: absolute;
+  
+    -webkit-text-size-adjust:none;
+  
+  	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;

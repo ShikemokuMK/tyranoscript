@@ -635,11 +635,15 @@ tyrano.plugin.kag.tag.text = {
 
                 var limit_width = parseInt(j_outer_message.css("width")) * 0.8;
                 var current_width = parseInt(j_inner_message.find("p").css("width"));
-
-                if(this.kag.stat.vchat.is_active){
-                    this.kag.ftag.startTag("vchat_in",{});
-                }else{
-                    this.kag.getMessageInnerLayer().html("");
+                
+                if (current_width > limit_width) {
+    
+                    if(this.kag.stat.vchat.is_active){
+                        this.kag.ftag.startTag("vchat_in",{});
+                    }else{
+                        this.kag.getMessageInnerLayer().html("");
+                    }
+                
                 }
 
             }
