@@ -3075,41 +3075,43 @@ tyrano.plugin.kag.tag.chara_part = {
                 console.log(map_part);
                 
                 for(key in map_part){
-                    
-                    cnt++;
-                    var part = map_part[key];
-                    var j_img = target_obj.find(".part"+"." + key + "");
-                    var j_new_img = j_img.clone();
-                    j_new_img.css("opacity", 0);
-                    
-                    if(part.storage!="none"){
-                        j_new_img.attr("src","./data/fgimage/" + part.storage);
-                    }else{
-                        j_new_img.attr("src", "./tyrano/images/system/transparent.png");
-                    }
-                    
-                    //zindexの指定があった場合は、変更を行う
-                    if(pm[key+"_zindex"]){
-                        j_new_img.css("z-index", pm[key+"_zindex"]);
-                    }else{
-                        j_new_img.css("z-index", chara_part[key]["zindex"]);
-                    }
-                    
-                    //イメージを追加
-                    j_img.after(j_new_img);
-                    
-                    j_img.fadeTo(parseInt(pm.time), 0, function(){
-                        j_img.remove();
-                    }); 
-                    
-                    j_new_img.fadeTo(parseInt(pm.time), 1, function(){
-                        n++;
-                        if(pm.wait=="true"){
-                            if(cnt==n){ 
-                                that.kag.ftag.nextOrder();
-                            }
+
+                    (function() {
+                        cnt++;
+                        var part = map_part[key];
+                        var j_img = target_obj.find(".part"+"." + key + "");
+                        var j_new_img = j_img.clone();
+                        j_new_img.css("opacity", 0);
+                        
+                        if(part.storage!="none"){
+                            j_new_img.attr("src","./data/fgimage/" + part.storage);
+                        }else{
+                            j_new_img.attr("src", "./tyrano/images/system/transparent.png");
                         }
-                    });
+                        
+                        //zindexの指定があった場合は、変更を行う
+                        if(pm[key+"_zindex"]){
+                            j_new_img.css("z-index", pm[key+"_zindex"]);
+                        }else{
+                            j_new_img.css("z-index", chara_part[key]["zindex"]);
+                        }
+                        
+                        //イメージを追加
+                        j_img.after(j_new_img);
+                        
+                        j_img.fadeTo(parseInt(pm.time), 0, function(){
+                            j_img.remove();
+                        }); 
+                        
+                        j_new_img.fadeTo(parseInt(pm.time), 1, function(){
+                            n++;
+                            if(pm.wait=="true"){
+                                if(cnt==n){ 
+                                    that.kag.ftag.nextOrder();
+                                }
+                            }
+                        });
+                    })();
                     
                 }
                 
