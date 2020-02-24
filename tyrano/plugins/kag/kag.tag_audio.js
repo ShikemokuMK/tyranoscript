@@ -301,6 +301,7 @@ tyrano.plugin.kag.tag.playbgm = {
             audio_obj.on("end",function(e){
                 
                 if (pm.target == "se") {
+                    
                     that.kag.tmp.is_se_play = false;
                     that.kag.tmp.is_vo_play = false;
                     
@@ -452,6 +453,9 @@ tyrano.plugin.kag.tag.stopbgm = {
             
         } else {
             target_map = this.kag.tmp.map_se;
+            
+            that.kag.tmp.is_vo_play = false;
+                    
             that.kag.tmp.is_se_play = false;
             that.kag.tmp.is_se_play_wait = false;
             

@@ -359,7 +359,7 @@ tyrano.plugin.kag ={
     checkUpdate:function(call_back){
         
         //NWJS環境以外では、アップデート不可
-        if(!$.isNWJS()){
+        if(!$.isNWJS() && !$.isElectron()){
             call_back();
             return;  
         }
@@ -384,15 +384,26 @@ tyrano.plugin.kag ={
         
         //アップデートファイルの存在チェック
         var fs = require('fs');
-        var fse = require('fs-extra'); 
         
         if (!fs.existsSync(patch_path)) {
             call_back();
             return;   
         }
         
+        var fse = require('fs-extra'); 
+        
         //リロードの場合は、アップデート不要
-        if (fs.existsSync("./updated")) {
+        
+        var unzip_path = $.getUnzipPath();
+        
+        //asar化している場合は上書きできない
+        if(unzip_path=="asar"){
+            alert("ゲームファイルが隠匿されているため、パッチは適応できません");
+            call_back();
+            return;   
+        }
+        
+        if (fs.existsSync(unzip_path+"/updated")) {
             call_back();
             return;   
         }
@@ -404,14 +415,14 @@ tyrano.plugin.kag ={
         
         // reading archives 
         var zip = new AdmZip(patch_path);
-        zip.extractAllTo("./update_tmp", true);
+        zip.extractAllTo(unzip_path+"/update_tmp", true);
         
-        fse.copySync("./update_tmp/","./");
-		fse.removeSync("./update_tmp");
+        fse.copySync(unzip_path+"/update_tmp/",unzip_path+"/");
+		fse.removeSync(unzip_path+"/update_tmp");
 		
 		//アップデートしたという証用
         if(flag_reload == "true"){
-            fs.writeFileSync("./updated","true");
+            fs.writeFileSync(unzip_path+"/updated","true");
             location.reload();
         }else{
             call_back();

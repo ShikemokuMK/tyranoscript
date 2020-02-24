@@ -2350,8 +2350,9 @@ tyrano.plugin.kag.tag.apply_local_patch = {
     
         var that = this;
         
-        if(!$.isNWJS()){
+        if(!$.isNWJS()&&!$.isElectron()){
             that.kag.ftag.nextOrder();
+            return;
         }
         
         var patch_path = $.localFilePath() +"/"+pm.file;
@@ -2403,8 +2404,9 @@ tyrano.plugin.kag.tag.check_web_patch = {
     
         var that = this;
         
-        if(!$.isNWJS()){
+        if(!$.isNWJS() && !$.isElectron()){
             that.kag.ftag.nextOrder();
+            return ;
         }
         
         $.ajax({
@@ -2473,7 +2475,10 @@ tyrano.plugin.kag.tag.check_web_patch = {
                             outFile.close();
                             //アップデートを実行
                             that.kag.evalScript("sf._patch_version="+ obj.version);
-                            require('nw.gui').Window.get().close();
+                            
+                            window.close();
+        
+                            //require('nw.gui').Window.get().close();
                             
                         }); 
                         

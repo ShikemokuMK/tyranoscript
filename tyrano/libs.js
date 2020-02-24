@@ -971,6 +971,19 @@
         return path ;
             
     };
+    
+    //展開先のパスを返す。
+    $.getUnzipPath = function(){
+        
+        let path = __dirname;
+        
+        if(path.indexOf(".asar")!=-1){
+            return "asar";
+        }
+        
+        return path;
+        
+    };
 
     $.setStorageFile = function(key, val) {
         val = JSON.stringify(val);

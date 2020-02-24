@@ -1147,7 +1147,6 @@ tyrano.plugin.kag.tag.p = {
             setTimeout(function(){
                 if(that.kag.stat.is_wait_auto == true){
                     
-                    
                     //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
                     if(that.kag.tmp.is_vo_play==true){
                         that.kag.tmp.is_vo_play_wait = true;
