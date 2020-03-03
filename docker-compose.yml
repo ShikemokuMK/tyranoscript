@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  tyranoscript-nginx:
+    image: nginx
+    container_name: tyranoscript-nginx
+    ports:
+    - 8080:80
+    volumes:
+    - .:/var/www/tyranoscript:cached
+    - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
