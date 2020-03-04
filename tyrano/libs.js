@@ -942,7 +942,7 @@
         let platform ="";
         //alert(process.platform);
         //console.log(process.platform)
-        console.log(path);
+        //console.log(path);
         
         if(process.platform == "darwin"){
             

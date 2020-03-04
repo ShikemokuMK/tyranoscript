@@ -57,6 +57,7 @@ tyrano.plugin.kag.tag.loadjs = {
  :param
  storage=再生するogv webm mp4ファイルを指定してください,
  skip=動画再生中に途中でスキップ可能か否かを指定します true か false を指定してください,
+ mute=true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。,
  volume=ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100
  #[end]
  */
@@ -69,6 +70,7 @@ tyrano.plugin.kag.tag.movie = {
         storage : "",
         volume : "",
         skip : "false",
+        mute:"false",
         //隠しパラメータ
         bgmode : "false",
         loop : "false"
@@ -141,6 +143,11 @@ tyrano.plugin.kag.tag.movie = {
         
         video.setAttribute("playsinline","1");
         
+        if(pm.mute=="true"){
+            video.muted = true;
+        }
+        
+        
         //document.createElement("video");
 
         if (pm.bgmode == "true") {
@@ -195,6 +202,10 @@ tyrano.plugin.kag.tag.movie = {
                     }
                     
                     video2.setAttribute("playsinline","1");
+                    
+                    if(video_pm.mute=="true"){
+                        video2.muted = true;
+                    }
                     
                     
                     // プリロードを設定する
@@ -323,6 +334,7 @@ bgmovieをループ中に別のbgmovieを重ねることで、ループが完了
  :param
  storage=再生するogv webm mp4ファイルを指定してください,
  time=背景動画を表示するときにフェードアウト効果を与える時間を指定します。デフォルトは1000(ミリ秒),
+ mute=true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。,
  volume=ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100 ,
  loop=背景動画をループさせるかどうかを指定します。falseを指定すると動画の最後の状態で停止します。
  #[end]

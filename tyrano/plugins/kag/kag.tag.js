@@ -5162,6 +5162,7 @@ PCゲーム形式の場合は webm形式を使ってください。 mp4 に対�
 name=レイヤ合成に名前をつけることができます。この名前はfree_layremovdeで特定の合成のみを消したい際に使用できます,
 video=合成する動画ファイルを指定してください。ファイルはvideoフォルダに配置しします,
 volume=合成する動画の音ボリュームを指定します。0〜100で指定します。デフォルトは０の消音です,
+mute=true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。,
 loop=動画をループするか否かをtrueかfalseで指定します。デフォルトはtrueです。ループ指定した場合、free_layermodeを行うまで演出が残ります。,
 speed=動画の再生スピードを指定できます。デフォルトは１ つまり2を指定すると２倍速、0.5を指定すると半分の速度で再生されます,
 mode=合成方法を指定できます。デフォルトは「multiply」 次の効果が使えます→ multiply（乗算）screen（スクリーン）overlay（オーバーレイ）darken（暗く）lighten（明るく）color-dodge（覆い焼きカラー）color-burn（焼き込みカラー）hard-light（ハードライト）soft-light（ソフトライト）difference（差の絶対値）exclusion（除外）hue（色相）saturation（彩度）color（カラー）luminosity（輝度）,
@@ -5189,6 +5190,7 @@ tyrano.plugin.kag.tag.layermode_movie = {
         video:"", //ビデオをレイヤーとして追加する。
         volume:"",
         loop:"true",
+        mute:"false",
         speed:"",
         stop:"false" //trueでnextorderを無効化。ロード復帰の時用
     },
@@ -5232,6 +5234,10 @@ tyrano.plugin.kag.tag.layermode_movie = {
         
         
         video.setAttribute("playsinline","1");
+        
+        if(pm.mute=="true"){
+            video.muted = true;
+        }
         
         if (pm.loop == "true") {
             video.loop = true;
