@@ -348,6 +348,7 @@ tyrano.plugin.kag.tag.bgmovie = {
         storage : "",
         volume : "",
         loop : "true",
+        mute : "false",
         time:"300",
         stop : "false" //nextorderするかしないk
     },

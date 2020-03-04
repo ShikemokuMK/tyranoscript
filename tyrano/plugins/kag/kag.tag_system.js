@@ -1247,6 +1247,7 @@ initial=初期値を設定することができます,
 color=文字の色を指定して下さい　デフォルトは黒です,
 left=テキストボックスの横位置を指定します,
 top=テキストボックスの縦位置を指定します,
+autocomplete=入力の履歴を表示するか否か。trueで表示します。デフォルトはfalse,
 size=文字のサイズを指定します　デフォルト２０px,
 width=テキストボックスの幅サイズを指定します,
 height=テキストボックスの高さを指定します,
@@ -1275,6 +1276,7 @@ tyrano.plugin.kag.tag.edit = {
         size : "20",
         face : "",
         width : "200",
+        autocomplete:"false",
         height : "40",
         maxchars : "1000"
     },
@@ -1313,6 +1315,12 @@ tyrano.plugin.kag.tag.edit = {
         j_text.css("position", "absolute");
         
         j_text.attr("maxlength", pm.maxchars);
+
+        if(pm.autocomplete=="true"){
+            j_text.attr('autocomplete', 'on');
+        }else{
+            j_text.attr('autocomplete', 'off');
+        }
 
         this.kag.layer.getFreeLayer().append(j_text);
         this.kag.layer.getFreeLayer().show();
