@@ -1687,6 +1687,8 @@ name=ティラノスクリプトのみ。animタグなどからこの名前で�
 time=ミリ秒を指定することで、徐々にイメージを表示させることができます。,
 wait=falseを指定すると、画像が表示されるのを待たずに、処理を進め明日。デフォルトはtrue,
 zindex=画像同士の重なりを指定できます。数値が大きい方が前に表示されます,
+depth="zindexが同一な場合の重なりを指定できます。front（最前面）/back（最後面）で指定します。デフォルトはfront",
+reflect="trueを指定すると左右反転します",
 pos=レイヤ位置を自動的に決定します。前景レイヤに対して使います。横方向の位置は、この属性で指定した left ( 左端 ) 、left_center ( 左より )、center ( 中央 )、 right_center ( 右より )、right ( 右端 ) の位置に表示されます。各横方向の座標の中心 位置は Config.tjs で指定することができます。
 <br>left 、left_center、 center、 right_center、 right の代わりに、それぞれ l、 lc、 c、 rc、 r を 指定することもできます ( 動作は同じです )。
 <br>この属性を指定した場合は left 属性や top 属性は無視されます。
@@ -1718,6 +1720,8 @@ tyrano.plugin.kag.tag.image = {
         "folder" : "", //画像フォルダを明示できる
         "time" : "",
         "wait": "true",
+        "depth":"front",
+        "reflect":"",
         "zindex": "1"
         //"visible":"true"
 
@@ -1815,6 +1819,12 @@ tyrano.plugin.kag.tag.image = {
             if(pm.zindex != ""){
                 img_obj.css("z-index",pm.zindex);
             }
+            
+            if (pm.reflect != "") {
+                if (pm.reflect == "true") {
+                    img_obj.addClass("reflect");
+                }
+            }
 
             //オブジェクトにクラス名をセットします
             $.setName(img_obj, pm.name);
@@ -1823,7 +1833,13 @@ tyrano.plugin.kag.tag.image = {
             if(pm.time != ""){
         
                 img_obj.css("opacity",0);
-                this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
+                
+                if(pm.depth=="back"){
+                    this.kag.layer.getLayer(pm.layer, pm.page).prepend(img_obj);
+                }else{
+                    this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
+                }
+                
                 
                 img_obj.animate(
                     {"opacity":1},
@@ -1841,7 +1857,13 @@ tyrano.plugin.kag.tag.image = {
                         
                 
             }else{
-                this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
+                
+                if(pm.depth=="back"){
+                    this.kag.layer.getLayer(pm.layer, pm.page).prepend(img_obj);
+                }else{
+                    this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
+                }
+                
                 this.kag.ftag.nextOrder();
 
             }

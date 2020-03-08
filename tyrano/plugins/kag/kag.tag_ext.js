@@ -1816,6 +1816,7 @@ tyrano.plugin.kag.tag.chara_new = {
  time="ミリ秒で指定します。指定した時間をかけて登場します。デフォルトは1000ミリ秒です",
  layer="キャラクターを配置するレイヤーを指定できます。デフォルトは前景レイヤ layer=0 です",
  zindex="キャラクターの重なりを指定できます。ここで指定した値が大きいほうが前に表示することができます。指定しない場合は後に登場するキャラクターが前に表示されます",
+ depth="zindexが同一な場合の重なりを指定できます。front（最前面）/back（最後面）で指定します。デフォルトはfront",
  page="foreかbackを指定します。デフォルトはforeです",
  wait="trueを指定すると、キャラクターの登場完了を待ちます。デフォルトはtrue です。",
  face=[chara_face]で定義したface属性を指定してください。,
@@ -1848,6 +1849,7 @@ tyrano.plugin.kag.tag.chara_show = {
         width : "",
         height : "",
         zindex : "1",
+        depth:"front",
         reflect : "",
         face : "",
         storage:"",
@@ -2025,8 +2027,13 @@ tyrano.plugin.kag.tag.chara_show = {
             var target_layer = that.kag.layer.getLayer(pm.layer, pm.page);
 
             //最後に挿入
-            target_layer.append(j_chara_root).show();
-
+            //div内に追加。深さを指定する。
+            if(pm.depth=="back"){
+                target_layer.prepend(j_chara_root).show();
+            }else{
+                target_layer.append(j_chara_root).show();
+            }
+            
             var chara_num = 1;
             that.kag.layer.hideEventLayer();
 
