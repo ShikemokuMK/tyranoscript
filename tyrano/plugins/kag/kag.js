@@ -813,14 +813,20 @@ tyrano.plugin.kag ={
             this.tmp.ready_audio = true;
         }
         
-        //index.htmlでのvchat定義を確認
-        if($("#vchat_mode").length>0 && $("#vchat_mode").val()=="true"){
-            this.kag.config["vchat"]="true";
-        }
+        
+        //index.htmlでのvchat定義を確認。index.htmlでコンフィグを調整したい。
+        $("[tyrano='config']").each(function(){
+            
+            var key = $(this).attr("key");
+            var val = $(this).val();
+            that.kag.config[key]= ""+ val;
+            
+        });
         
         
         //ビジュアルチャット形式/////////////////
         if(this.kag.config["vchat"] && this.kag.config["vchat"]=="true"){
+            
             this.kag.config["ScreenCentering"] = "false";
             this.kag.config["ScreenRatio"] = "fix";
             
@@ -853,6 +859,104 @@ tyrano.plugin.kag ={
             });
             
         }
+        
+        //vchat形式で便利なメニューの表示。
+        if(this.kag.config["vchatMenuVisible"] && this.kag.config["vchatMenuVisible"]=="true"){
+            
+            //コンフィグを表示する。
+            setTimeout(function(){
+           
+                (function() {
+                
+                    var player_back_cnt = 0;
+                    var j_menu_button = $("<div id='player_menu_button' class='player_menu_area' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>メニュー</span></div>");
+                    var j_end_button = $("<div class='player_menu_area' id='player_end_button' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px 10px 10px 10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>タイトルへ</span></div>");
+                    var j_auto_button = $("<div class='player_menu_area' id='player_auto_button' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:60px 10px 10px 10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>オート</span></div>");
+                    var j_skip_button = $("<div class='player_menu_area' id='player_skip_button' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:110px 10px 10px 10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>スキップ</span></div>");
+                    
+                    function hide_menu(){
+                        j_end_button.hide();
+                        j_auto_button.hide();
+                        j_skip_button.hide();
+                        j_menu_button.hide();
+                        player_back_cnt = 0;
+                    }
+                    
+                    j_menu_button.click(function(e) {
+                        j_menu_button.hide();
+                        j_end_button.show();
+                        j_auto_button.show();
+                        j_skip_button.show();
+                                        
+                    });
+                    
+                    j_end_button.click(function(e) {
+                        
+                        //アンドロイドとiOSで処理分け
+                        hide_menu();
+                        location.reload();
+                        e.stopPropagation();
+                                   
+                    });
+                    
+                    j_auto_button.click(function(e) {
+                                        
+                        hide_menu();
+                        TYRANO.kag.ftag.startTag("autostart", {});
+                        e.stopPropagation();
+                        
+                    });
+                    
+                    j_skip_button.click(function(e) {
+                                        
+                        hide_menu();
+                        TYRANO.kag.ftag.startTag("skipstart", {});
+                        e.stopPropagation();
+                    
+                    });
+                    
+                    $("body").append(j_menu_button);
+                    
+                    $("body").append(j_end_button);
+                    $("body").append(j_auto_button);
+                    $("body").append(j_skip_button);
+                    
+                    $("#tyrano_base").on("click.player", function() {
+                                         
+                         if(player_back_cnt > 8){
+                            hide_menu();
+                         }
+                         
+                         player_back_cnt = 0;
+                         
+                    });
+                    
+                    //10秒操作がなかったら、ボタンを表示する。
+                    setInterval(function() {
+                        if (player_back_cnt == 9) {
+                            j_menu_button.show();
+                        } else if (player_back_cnt > 3) {
+                        
+                        }
+                                
+                        player_back_cnt++;
+                                
+                    }, 1000);
+                
+                })();
+               
+               
+               $("#tyrano_base").on("click.player", function() {
+                    player_back_cnt = 0;
+                });
+               
+               
+            },1000);
+
+            
+        }
+        
+        
         /////////////////////////////
         
         var first_scenario_file = "first.ks";

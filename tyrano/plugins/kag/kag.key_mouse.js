@@ -94,11 +94,7 @@ tyrano.plugin.kag.key_mouse = {
 
         $(document).on("mousedown", function(e) {
             
-            //スキップ中にクリックされたら元に戻す
-            if(that.kag.stat.is_skip == true && that.kag.stat.is_strong_stop == false){
-                that.kag.stat.is_skip = false; 
-                return false;
-            }
+            that.clearSkip();          
             
             var target = null;
             
@@ -193,11 +189,9 @@ tyrano.plugin.kag.key_mouse = {
             
             layer_obj_click.on("touchstart", function() {
                                 
-                if(that.kag.stat.is_skip == true){
-                    that.kag.stat.is_skip = false; 
-                    return false;
-                }
-            
+                //スキップ中にクリックされたら元に戻す
+                that.clearSkip();
+                
                 
                 that.timeoutId = setTimeout(function(){
                     if(that[that.map_ges["hold"]["action"]]){
@@ -464,6 +458,31 @@ tyrano.plugin.kag.key_mouse = {
         
         
         return false;
+    },
+    
+    //スキップやオートをクリアする
+    clearSkip:function(){
+        
+        var that = this;
+        
+        //スキップ中にクリックされたら元に戻す
+        if(that.kag.stat.is_skip == true && that.kag.stat.is_strong_stop == false){
+            that.kag.stat.is_skip = false; 
+            return false;
+        }
+        
+        //オート中でクリックされた場合。オート停止
+        if(that.kag.stat.is_auto == true){
+            if(that.kag.config.autoClickStop == "true"){
+                that.kag.ftag.startTag("autostop", {next:"false"});
+            }
+        }
+        
+        //オート待ち状態なら、、解除する
+        if(that.kag.stat.is_wait_auto == true){
+            that.kag.stat.is_wait_auto = false;
+        }
+        
     },
 
     canShowMenu : function() {

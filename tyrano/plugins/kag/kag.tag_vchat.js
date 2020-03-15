@@ -86,7 +86,7 @@ tyrano.plugin.kag.tag.vchat_in = {
             "font-size": "2em",
             "margin":"1em",
             "line-height":"1.5em",
-            "font-family": that.kag.stat.font.face,
+        /*    "font-family": that.kag.stat.font.face,*/
         };
         
         j_vchat_text.css(font_style);
@@ -95,7 +95,7 @@ tyrano.plugin.kag.tag.vchat_in = {
         
         j_vchat.find(".vchat_chara_name").css({
             "font-size":"1.8em",
-            "font-family":that.kag.stat.font.face,
+        /*  "font-family":that.kag.stat.font.face,*/
         });
         
         
