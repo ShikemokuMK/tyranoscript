@@ -1347,7 +1347,14 @@ tyrano.plugin.kag.tag.stop_kanim = {
         var that = this;
         
         if (pm.name != "") {
-            $("."+pm.name).css("-webkit-animation-name","");
+            $("."+pm.name).css({
+                "animation-name":"",
+                "animation-play-state":"",
+                "animation-iteration-count":"",
+                "animation-fill-mode":"",
+                "animation-timing-function":"",
+                "transform":""
+            });
         }else if(pm.layer!=""){
                 
             var layer_name = pm.layer + "_fore";
@@ -1356,8 +1363,14 @@ tyrano.plugin.kag.tag.stop_kanim = {
                 layer_name = "layer_free";
             }
                 
-            $("." + layer_name).children().css("-webkit-animation-name","");
-            
+            $("." + layer_name).css({
+                "animation-name":"",
+                "animation-play-state":"",
+                "animation-iteration-count":"",
+                "animation-fill-mode":"",
+                "animation-timing-function":"",
+                "transform":""
+            });
         }
 
         this.kag.ftag.nextOrder();
