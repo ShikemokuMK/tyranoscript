@@ -799,16 +799,15 @@ tyrano.plugin.kag.tag.text = {
                 "font-style":that.kag.stat.font.italic
                 });
                 
-            }
-            
-            
-            if(that.kag.stat.font.edge !=""){
-                var edge_color = that.kag.stat.font.edge;
-                j_span.css("text-shadow","1px 1px 0 "+edge_color+", -1px 1px 0 "+edge_color+",1px -1px 0 "+edge_color+",-1px -1px 0 "+edge_color+"");
-            
-            }else if(that.kag.stat.font.shadow != ""){
-                //j_span.css()
-                j_span.css("text-shadow","2px 2px 2px "+that.kag.stat.font.shadow);
+                if(that.kag.stat.font.edge !=""){
+                    var edge_color = that.kag.stat.font.edge;
+                    j_span.css("text-shadow","1px 1px 0 "+edge_color+", -1px 1px 0 "+edge_color+",1px -1px 0 "+edge_color+",-1px -1px 0 "+edge_color+"");
+                
+                }else if(that.kag.stat.font.shadow != ""){
+                    //j_span.css()
+                    j_span.css("text-shadow","2px 2px 2px "+that.kag.stat.font.shadow);
+                }
+                    
             }
             
             
