@@ -869,25 +869,43 @@ tyrano.plugin.kag ={
                 (function() {
                 
                     var player_back_cnt = 0;
-                    var j_menu_button = $("<div id='player_menu_button' class='player_menu_area' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>メニュー</span></div>");
-                    var j_end_button = $("<div class='player_menu_area' id='player_end_button' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px 10px 10px 10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>タイトルへ</span></div>");
-                    var j_auto_button = $("<div class='player_menu_area' id='player_auto_button' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:60px 10px 10px 10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>オート</span></div>");
-                    var j_skip_button = $("<div class='player_menu_area' id='player_skip_button' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:110px 10px 10px 10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white'><span style='color:#6495ED'>スキップ</span></div>");
+                    var j_menu_button = $("<div id='player_menu_button' class='player_menu_area' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white;font-size:2em'><span style='color:#6495ED'>メニュー</span></div>");
+                    var j_menu_area = $("<div style='display:none;position:absolute;left:10px;top:10px;font-size:2em'></div>");
+                    
+                    var j_end_button = $("<div class='player_menu_area' id='player_end_button' style='opacity:0.6;border-radius:5px;padding:10px;margin:10px 10px 10px 10px;cursor:pointer;left:0px;top:0px;background-color:white;'><span style='color:#6495ED'>タイトルへ</span></div>");
+                    var j_auto_button = $("<div class='player_menu_area' id='player_auto_button' style='opacity:0.6;border-radius:5px;padding:10px;margin:10px 10px 10px 10px;cursor:pointer;left:0px;top:0px;background-color:white;'><span style='color:#6495ED'>オート</span></div>");
+                    var j_skip_button = $("<div class='player_menu_area' id='player_skip_button' style='opacity:0.6;border-radius:5px;padding:10px;margin:10px 10px 10px 10px;cursor:pointer;left:0px;top:0px;background-color:white;'><span style='color:#6495ED'>スキップ</span></div>");
+                    
+                    j_menu_area.append(j_end_button);
+                    j_menu_area.append(j_auto_button);
+                    j_menu_area.append(j_skip_button);
+                    
                     
                     function hide_menu(){
+                        
+                        j_menu_area.hide();
+                        
+                        /*
                         j_end_button.hide();
                         j_auto_button.hide();
                         j_skip_button.hide();
+                        */
+                        
                         j_menu_button.hide();
                         player_back_cnt = 0;
+                        
                     }
                     
                     j_menu_button.click(function(e) {
                         j_menu_button.hide();
+                        j_menu_area.show();
+                        
+                        /*
                         j_end_button.show();
                         j_auto_button.show();
                         j_skip_button.show();
-                                        
+                        */
+                                      
                     });
                     
                     j_end_button.click(function(e) {
@@ -917,9 +935,7 @@ tyrano.plugin.kag ={
                     
                     $("body").append(j_menu_button);
                     
-                    $("body").append(j_end_button);
-                    $("body").append(j_auto_button);
-                    $("body").append(j_skip_button);
+                    $("body").append(j_menu_area);
                     
                     $("#tyrano_base").on("click.player", function() {
                                          
