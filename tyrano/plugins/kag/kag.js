@@ -291,9 +291,6 @@ tyrano.plugin.kag ={
             
             that.config = $.extend(true, that.config, map_config);
             
-            //alert("wwwwwwwww");
-            //アップデートのチェック
-            
             that.checkUpdate(function(){
             
                 that.init_game(); //ゲーム画面生成
@@ -391,43 +388,103 @@ tyrano.plugin.kag ={
         }
         
         var fse = require('fs-extra'); 
-        
+        var _path = require('path');
         //リロードの場合は、アップデート不要
         
         var unzip_path = $.getUnzipPath();
         
+        
         //asar化している場合は上書きできない
         if(unzip_path=="asar"){
-            alert("ゲームファイルが隠匿されているため、パッチは適応できません");
-            call_back();
+            
+            const asar = require('asar');
+ 
+            let path = __dirname;
+        
+            let asar_files = fs.readdirSync(path);
+            
+            let out_path = $.localFilePath();
+            
+            if(process.platform == "darwin"){
+                
+            }else{
+                out_path = out_path + "/";
+            }
+            
+            fse.mkdirSync(_path.resolve(out_path + "/update_tmp"));
+            
+            (async () => {
+                await asar.extractAll(_path.resolve(path), _path.resolve(out_path + "/update_tmp/"));
+            })();
+            
+            //ファイル全部コピーする
+            var AdmZip = require('adm-zip');
+            
+            // reading archives  ファイルを上書きしている。
+            var zip = new AdmZip(patch_path);
+            
+            //console.log(_path.resolve(out_path + "update_tmp/"));
+            
+            
+            zip.extractAllTo(_path.resolve(out_path + "update_tmp/"), true);
+            
+            const src = _path.resolve(out_path + "update_tmp/");
+            const dest = _path.resolve(path);
+            
+            (async () => {
+                await asar.createPackage(src, dest);
+            })();
+            
+            $.alert("パッチを適応しました。再度、起動してください。",function(){
+                //パッチの削除。
+        		fse.removeSync(_path.resolve(patch_path));
+        		
+        		//作業ディレクトリ削除
+        		fse.removeSync(_path.resolve(out_path + "update_tmp"));
+        		
+                window.close();
+            });
+            
+            
+    		//fse.removeSync(unzip_path+"/update_tmp");
+    		//call_back();
+            
             return;   
-        }
         
-        if (fs.existsSync(unzip_path+"/updated")) {
-            call_back();
-            return;   
-        }
-        
-        var AdmZip = require('adm-zip');
-        
-        var path = require('path');
-        var abspath = path.resolve("./");
-        
-        // reading archives 
-        var zip = new AdmZip(patch_path);
-        zip.extractAllTo(unzip_path+"/update_tmp", true);
-        
-        fse.copySync(unzip_path+"/update_tmp/",unzip_path+"/");
-		fse.removeSync(unzip_path+"/update_tmp");
-		
-		//アップデートしたという証用
-        if(flag_reload == "true"){
-            fs.writeFileSync(unzip_path+"/updated","true");
-            location.reload();
         }else{
-            call_back();
+        
+            var AdmZip = require('adm-zip');
+            
+            var path = require('path');
+            var abspath = path.resolve("./");
+            
+            // reading archives 
+            var zip = new AdmZip(patch_path);
+            zip.extractAllTo(unzip_path+"/update_tmp", true);
+            
+            //ファイルを上書きしている
+            fse.copySync(unzip_path+"/update_tmp/",unzip_path+"/");
+    		fse.removeSync(unzip_path+"/update_tmp");
+    		
+    		//パッチの削除。
+    		fse.removeSync(patch_path);
+    		
+    		$.alert("パッチを適応しました。再起動します。",function(){
+                location.reload();
+    		});
+    		
+    		//アップデートしたという証用
+    		/*
+            if(flag_reload == "true"){
+                fs.writeFileSync(unzip_path+"/updated","true");
+                location.reload();
+            }else{
+                call_back();
+            }
+            */
+        
         }
-    
+            
     },
     
     //スクリプトを解釈して実行する
