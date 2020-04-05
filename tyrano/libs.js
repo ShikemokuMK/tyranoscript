@@ -955,7 +955,6 @@
             }
             
             path = $.getExtWithFile(path).dir_name;
-            console.log(path);
             
             
         }else if(process.platform == "win32"){

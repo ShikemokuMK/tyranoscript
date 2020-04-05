@@ -13,7 +13,7 @@
 @showmenubutton
 
 ;メッセージウィンドウの設定
-[position layer="message0" left=20 top=400 width=920 height=200 page=fore visible=true]
+[position layer="message0" left=160 top=500 width=1000 height=200 page=fore visible=true]
 
 ;文字が表示される領域を調整
 [position layer=message0 page=fore margint="45" marginl="50" marginr="70" marginb="60"]
@@ -23,7 +23,7 @@
 @layopt layer=message0 visible=true
 
 ;キャラクターの名前が表示される文字領域
-[ptext name="chara_name_area" layer="message0" color="white" size=24 x=50 y=410]
+[ptext name="chara_name_area" layer="message0" color="white" size=28 bold=true x=180 y=510]
 
 ;上記で定義した領域がキャラクターの名前表示であることを宣言（これがないと#の部分でエラーになります）
 [chara_config ptext="chara_name_area"]
@@ -64,9 +64,9 @@
 #あかね
 もしかして、ノベルゲームの開発に興味があるの？[p]
 
-[glink  color="blue"  storage="scene1.ks"  size="20"  x="260"  width="400"  y="100"  text="はい。興味あります"  target="*selectinterest"  ]
-[glink  color="blue"  storage="scene1.ks"  size="20"  x="260"  width="400"  y="170"  text="興味あります！"  target="*selectinterest"  ]
-[glink  color="blue"  storage="scene1.ks"  size="20"  x="260"  width="400"  y="240"  text="どちらかと言うと興味あり"  target="*selectinterest"  ]
+[glink  color="blue"  storage="scene1.ks"  size="28"  x="360"  width="500"  y="150"  text="はい。興味あります"  target="*selectinterest"  ]
+[glink  color="blue"  storage="scene1.ks"  size="28"  x="360"  width="500"  y="250"  text="興味あります！"  target="*selectinterest"  ]
+[glink  color="blue"  storage="scene1.ks"  size="28"  x="360"  width="500"  y="350"  text="どちらかと言うと興味あり"  target="*selectinterest"  ]
 [s  ]
 *selectinterest
 
@@ -177,7 +177,7 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 
 
 ;メッセージを全画面に切り替え
-[position layer="message0" left=20 top=40 width=920 height=560 page=fore visible=true ]
+[position layer="message0" left=20 top=40 width=1200 height=660 page=fore visible=true ]
 
 どうかな? 物語をじっくり読ませたい場合はこの方式が便利ですね[l][r]
 ティラノスクリプトは非常に強力で、柔軟な表現が可能です。[l][cm]
@@ -216,16 +216,19 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 [font color="0x454D51"]
 [deffont color="0x454D51"]
 
-;名前の表示位置も変更
+
+;名前部分のメッセージレイヤ削除
 [free name="chara_name_area" layer="message0"]
 
-[position layer=message0 width=960 height=210 top=430 left=0]
-[position layer=message0 page=fore frame="frame.png" margint="45" marginl="50" marginr="70" marginb="60" opacity=230 ]
-
+;メッセージウィンドウの設定
+[position layer="message0" width="1280" height="210" top="510" left="0"]
+[position layer="message0" frame="frame.png" margint="50" marginl="100" marginr="100" opacity="230" page="fore"]
 
 ;名前枠の設定
-[ptext name="chara_name_area" layer="message0"  color="0xFAFAFA"  size=24 x=40 y=435]
+[ptext name="chara_name_area" layer="message0" color="0xFAFAFA" size="28" bold="true" x="100" y="514"]
 [chara_config ptext="chara_name_area"]
+
+
 
 どうかな？[p]
 ゲームに合わせて自分の好きなデザインを作ってくださいね[p]
@@ -237,41 +240,45 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 @hidemenubutton
 
 ;ロールボタン追加;;;;;;;;;;;;;;
-	
-[button name="role_button" role="skip" graphic="button/skip.png" enterimg="button/skip2.png" x=35 y=610]
 
-;	オート
-[button name="role_button" role="auto" graphic="button/auto.png" enterimg="button/auto2.png" x=110 y=610]
 
-;	セーブ
-[button name="role_button" role="save" graphic="button/save.png" enterimg="button/save2.png" x=185 y=610]
+; ロールボタン配置
 
-;ロード
-[button name="role_button" role="load" graphic="button/load.png" enterimg="button/load2.png" x=260 y=610]
+;クイックセーブボタン
+[button name="role_button" role="quicksave" graphic="button/qsave.png" enterimg="button/qsave2.png" x="40" y="690"]
 
-;クイックセーブ
-[button name="role_button" role="quicksave" graphic="button/qsave.png" enterimg="button/qsave2.png" x=335 y=610]
+;クイックロードボタン
+[button name="role_button" role="quickload" graphic="button/qload.png" enterimg="button/qload2.png" x="140" y="690"]
 
-;クイックロード
-[button name="role_button" role="quickload" graphic="button/qload.png" enterimg="button/qload2.png" x=410 y=610]
+;セーブボタン
+[button name="role_button" role="save" graphic="button/save.png" enterimg="button/save2.png" x="240" y="690"]
 
-;バックログ
-[button name="role_button" role="backlog" graphic="button/log.png" enterimg="button/log2.png" x=485 y=610]
+;ロードボタン
+[button name="role_button" role="load" graphic="button/load.png" enterimg="button/load2.png" x="340" y="690"]
 
-;メッセージウィンドウ非表示
-[button name="role_button" role="window" graphic="button/close.png" enterimg="button/close2.png" x=560 y=610]
+;オートボタン
+[button name="role_button" role="auto" graphic="button/auto.png" enterimg="button/auto2.png" x="440" y="690"]
 
-;フルスクリーン切替
-[button name="role_button" role="fullscreen" graphic="button/screen.png" enterimg="button/screen2.png" x=635 y=610]
+;スキップボタン
+[button name="role_button" role="skip" graphic="button/skip.png" enterimg="button/skip2.png" x="540" y="690"]
 
-;メニュー呼び出し（※ロールボタンを使うなら不要）
-[button name="role_button" role="menu" graphic="button/menu.png" enterimg="button/menu2.png" x=710 y=610]
+;バックログボタン
+[button name="role_button" role="backlog" graphic="button/log.png" enterimg="button/log2.png" x="640" y="690"]
 
-;コンフィグ（※sleepgame を使用して config.ks を呼び出しています）
-[button name="role_button" role="sleepgame" graphic="button/sleep.png" enterimg="button/sleep2.png" x=785 y=610 storage="config.ks"]
+;フルスクリーン切替ボタン
+[button name="role_button" role="fullscreen" graphic="button/screen.png" enterimg="button/screen2.png" x="740" y="690"]
 
-;タイトルに戻る
-[button name="role_button" role="title" graphic="button/title.png" enterimg="button/title2.png" x=860 y=610]
+;コンフィグボタン（※sleepgame を使用して config.ks を呼び出しています）
+[button name="role_button" role="sleepgame" graphic="button/sleep.png" enterimg="button/sleep2.png" storage="config.ks" x="840" y="690"]
+
+;メニュー呼び出しボタン（※ロールボタンを使うなら不要）
+[button name="role_button" role="menu" graphic="button/menu.png" enterimg="button/menu2.png" x="940" y="690"]
+
+;メッセージウィンドウ非表示ボタン
+[button name="role_button" role="window" graphic="button/close.png" enterimg="button/close2.png" x="1040" y="690"]
+
+;タイトルに戻るボタン
+[button name="role_button" role="title" graphic="button/title.png" enterimg="button/title2.png" x="1140" y="690"]
 
 ;;ロールボタン追加終わり
 

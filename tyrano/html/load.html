@@ -1,60 +1,54 @@
 <div>
 	
-    <div class='menu_item' style='float:right'><img class="menu_close" src='tyrano/images/system/menu_button_close.png' /></div>
-    <div style='clear:both'></div>
-    
-    <img class="button_smart button_arrow_up"   src='tyrano/images/system/arrow_up.png' style='cursor:pointer;left:670px;top:20px;position:absolute;'>
-    <img class="button_smart button_arrow_down" src='tyrano/images/system/arrow_down.png' style='cursor:pointer;left:760px;top:15px;position:absolute;'>
-    
-    
-    <div class="area_save_list" style="margin-top:50px;overflow:auto">
-    	
-    	<ul class='save_list'>
-    		{{for array_save}}
-    			<li class='save_display_area save_list_item' data-num='{{:num}}'>
-    				
-    				<span class='save_list_item_thumb'>
-    				{{if img_data != ""}}
-    					<img src="{{:img_data}}">
-    				{{/if}}
-    				</span>
-    				
-    				<span class='save_list_item_area'>
-    					<span class='save_list_item_date'>{{:save_date}}</span>
-    					<span class='save_list_item_text'>{{:title}}</span>
-    				</span>
-    			</li>
-    		{{/for}}
-    	</ul>
-    
-    </div>
+	<div class="menu_item menu_close" style="float:right; margin: 20px 10px 0 0;">
+	<img src="tyrano/images/system/menu_button_close.png" />
+	</div>
 
-    <img class="img_label img_label_load" src='tyrano/images/system/label_load.png' style='left:0;top:0;position:absolute;'>
-	<img class="img_bg_base" src='tyrano/images/system/bg_base.png' style='z-index:-1;left:0;top:0;width:100%;height:100%;position:absolute;'>
+	<div style='clear:both'></div>
 
-	<script>
-	setTimeout(function(){
-		var save_list_height = parseInt($(".tyrano_base").outerHeight()) - parseInt($(".save_list").get(0).offsetTop) ;
-		$(".area_save_list").css("height",save_list_height);
-	},30);
-	</script>
+	<img class="button_smart button_arrow_up"   src="tyrano/images/system/arrow_up.png" style="cursor:pointer;left:670px;top:20px;position:absolute;">
+	<img class="button_smart button_arrow_down" src="tyrano/images/system/arrow_down.png" style="cursor:pointer;left:800px;top:15px;position:absolute;">
+
+
+	<div class="area_save_list">
+
+		<ul class="save_list">
+			{{for array_save}}
+				<li class="save_display_area save_list_item" data-num="{{:num}}">
+
+					<span class="save_list_item_thumb">
+					{{if img_data != ""}}
+						<img src="{{:img_data}}">
+					{{/if}}
+					</span>
+
+					<span class="save_list_item_area">
+						<span class="save_list_item_date">{{:save_date}}</span>
+						<span class="save_list_item_text">{{:title}}</span>
+					</span>
+				</li>
+			{{/for}}
+		</ul>
+
+	</div>
+
+	<img class="img_label img_label_load" src="tyrano/images/system/label_load.png" style="left:0;top:0;position:absolute;">
+	<img class="img_bg_base" src="tyrano/images/system/bg_base.png" style="z-index:-1;left:0;top:0;width:100%;height:100%;position:absolute;">
+
+
+<script class="menu_close">
+	var tmp_src = "";
 	
-	<style>
-	
-	/*両方共通（はみ出したらスクロールさせる）*/
-		.area_save_list::-webkit-scrollbar{ 
-		    width: 15px;
-		}
-		.area_save_list::-webkit-scrollbar-thumb{ 
-		    background: #6495ED;
-		    border-radius: 10px;
-		}
-		.area_save_list::-webkit-scrollbar-track-piece:start{
-		    background: gray;
-		}
-		.area_save_list::-webkit-scrollbar-track-piece:end{
-		    background: #fff;
-		}
-	</style>
+	$(".menu_item").hover(function(){
+		tmp_src = $(this).find("img").attr("src");
+		var img_src = tmp_src.replace(".png","2.png");
+		$(this).find("img").attr("src",img_src);
+	},
+	function(){
+		
+		//もとにもどす
+		$(this).find("img").attr("src",tmp_src);
+	});
+</script>
 
 </div>

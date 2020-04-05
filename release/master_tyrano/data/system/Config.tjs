@@ -56,8 +56,8 @@
 // ◆ 画面サイズ
 // scWidth に画面の幅、scHeight に画面の高さをピクセル単位で指定します。
 
-;scWidth = 960;
-;scHeight = 640;
+;scWidth = 1280;
+;scHeight = 720;
 
 // ◆ チャットノベル形式
 //　V5より。trueにするとチャットストーリー形式でゲームがプレイできます。
@@ -295,7 +295,7 @@
 
 // ◆ 文字の大きさ
 // デフォルトの文字の大きさ ( 高さ ) を pixel 単位で指定します。
-;defaultFontSize = 24;  // deffont タグの size 属性に相当
+;defaultFontSize = 28;  // deffont タグの size 属性に相当
 
 
 // ◆ 行間
@@ -316,7 +316,7 @@
 // userFace の設定を変更し、適用したい場合はシステム変数ファイル
 // カンマで区切って複数のフォントを指定することができます。その場合は、最初
 // の方に書いたフォントが存在すれば、優先されます。
-;userFace = Quicksand, 游ゴシック体, "Yu Gothic", YuGothic, "ヒラギノ角ゴシック Pro", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif; 
+;userFace = Quicksand, 游ゴシック体, "Yu Gothic", YuGothic, "ヒラギノ角ゴシック Pro", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif, Arial; 
 
 
 // ◆ 文字の色

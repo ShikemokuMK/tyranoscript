@@ -1161,7 +1161,6 @@ tyrano.plugin.kag.tag.vostop = {
  読み上げ機能の有効化
  :exp
  ストーリーのシナリオを音声で読み上げることができます。
- ＊ブラウザのみ動作。PC版パッケージ版では動作しません。
  :sample
  [speak_on ]
  :param
@@ -1181,7 +1180,7 @@ tyrano.plugin.kag.tag.speak_on = {
 
         var that = this;
         
-        if ($.isNWJS()!=true && 'speechSynthesis' in window) {
+        if ('speechSynthesis' in window) {
             that.kag.stat.play_speak = true;
         }else{
             console.error("*error:この環境は[speak_on]の読み上げ機能に対応していません");

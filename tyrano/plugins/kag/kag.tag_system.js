@@ -2462,9 +2462,11 @@ tyrano.plugin.kag.tag.check_web_patch = {
                     var url = $.getDirPath(pm.url) + file;
                     
                     if(url.indexOf("https")!=-1){
-                        alert("エラー：SSL(https)の通信は非対応です");
-                        return;
+                        http = require('https');
+                        //alert("エラー：SSL(https)の通信は非対応です");
+                        //return;
                     }
+                    
                     
                     // 出力ファイル名を指定
                     var patch_path = $.localFilePath();

@@ -24,7 +24,7 @@
 
 *replaypage
 [cm]
-[button graphic="config/menu_button_close.png" enterimg="config/menu_button_close2.png"  target="*backtitle" x=820 y=20 ]
+[button graphic="config/menu_button_close.png" enterimg="config/menu_button_close2.png"  target="*backtitle" x=1150 y=40 ]
 
 [iscript]
 	tf.target_page = "page_"+tf.page;

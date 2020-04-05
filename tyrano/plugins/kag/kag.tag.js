@@ -119,6 +119,9 @@ tyrano.plugin.kag.ftag = {
                 tag.ks_file = this.kag.stat.current_scenario;
                 this.kag.studio.pushConsole(tag);
                 
+                this.kag.log("**:" + this.current_order_index + "　line:" + tag.line);
+                this.kag.log(tag);
+                
                 
             }else{
                 this.kag.log("**:" + this.current_order_index + "　line:" + tag.line);

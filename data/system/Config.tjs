@@ -1,7 +1,7 @@
 // Config.tjs - ティラノスクリプト 設定
 // Copyright (C) 2012-2017 ShikemokuMK  
 
-;global.config_version = "4.50"; // この行を消さないでください
+;global.config_version = "5.00"; // この行を消さないでください
 
 // ティラノスクリプトの基本設定になります。
 // 吉里吉里で動かす場合は同一フォルダ内のKirikiri_Config.tjs を使用して下さい
@@ -56,8 +56,16 @@
 // ◆ 画面サイズ
 // scWidth に画面の幅、scHeight に画面の高さをピクセル単位で指定します。
 
-;scWidth = 960;
-;scHeight = 640;
+;scWidth = 1280;
+;scHeight = 720;
+
+// ◆ チャットノベル形式
+//　V5より。trueにするとチャットストーリー形式でゲームがプレイできます。
+;vchat = false;
+
+// ◆ チャットノベル形式のメニュー
+// チャットノベルで便利なセーブやロードなどを備えたメニューを表示するか否か。
+;vchatMenuVisible = false;
 
 // ◆ 文字表示スピード 
 // delay で指定した場合はその値が優先されます。resetdelayで元に戻ります 
@@ -184,7 +192,7 @@
 ;unReadTextSkip = false 　
 
 //既読のテキストの色(0x000000形式)を変更できます。default を指定すると既読テキストでも色は変わりません。
-;alreadyReadTextColor = 0x87cefa 
+;alreadyReadTextColor = default 
 
 // ◆ 初期状態の前景レイヤの数
 // 必要なければ 0 を指定してかまいません。
@@ -287,7 +295,7 @@
 
 // ◆ 文字の大きさ
 // デフォルトの文字の大きさ ( 高さ ) を pixel 単位で指定します。
-;defaultFontSize = 24;  // deffont タグの size 属性に相当
+;defaultFontSize = 28;  // deffont タグの size 属性に相当
 
 
 // ◆ 行間
@@ -308,7 +316,7 @@
 // userFace の設定を変更し、適用したい場合はシステム変数ファイル
 // カンマで区切って複数のフォントを指定することができます。その場合は、最初
 // の方に書いたフォントが存在すれば、優先されます。
-;userFace = メイリオ,sans-serif; // deffont タグの face 属性に相当
+;userFace = Quicksand, 游ゴシック体, "Yu Gothic", YuGothic, "ヒラギノ角ゴシック Pro", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif, Arial; 
 
 
 // ◆ 文字の色
