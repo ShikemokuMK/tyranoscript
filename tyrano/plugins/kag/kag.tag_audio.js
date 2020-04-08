@@ -320,8 +320,6 @@ tyrano.plugin.kag.tag.playbgm = {
                     
                     that.kag.tmp.is_bgm_play = false;
                     
-                    console.log(that.kag.tmp.is_bgm_play_wait);
-                    
                     if(that.kag.tmp.is_bgm_play_wait == true){
                         that.kag.tmp.is_bgm_play_wait = false;
                         that.kag.ftag.nextOrder();

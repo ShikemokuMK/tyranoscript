@@ -78,6 +78,8 @@ foreach($array_copy as $file){
 //imageディレクトリのコピー
 	exec("cp -R ../tyrano/images ".$dirname."/tyrano/");
 	exec("cp -R ../tyrano/html ".$dirname."/tyrano/");
+	exec("cp -R ../tyrano/audio ".$dirname."/tyrano/");
+	
 
 //オリジナルマスターデータのコピー	
 	exec("cp -R ./master_tyrano/data ".$dirname."/data");

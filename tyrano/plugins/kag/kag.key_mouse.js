@@ -178,6 +178,13 @@ tyrano.plugin.kag.key_mouse = {
                 return ;
             }
             
+            //キーコンフィグが有効化否か
+            if(that.kag.stat.enable_keyconfig==false){
+                return ;
+            }
+            
+
+            
             //メニュー表示中は無効にする
             if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 return ;
