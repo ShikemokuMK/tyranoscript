@@ -1193,6 +1193,23 @@
         }
         return num;
     };
+    
+    $.getUrlQuery = function(url){
+        
+        var hash  = url.slice(1).split('&');    
+        var max = hash.length;
+        var vars = {};
+        var array ="";
+        
+        for (var i = 0; i < max; i++) {
+            array = hash[i].split('=');   
+            vars[array[0]] = array[1];    
+        }
+        
+        return vars;
+
+        
+    }
 
     //渡されたJqueryオブジェクトにクラスをセットします
     $.setName = function(jobj, str) {

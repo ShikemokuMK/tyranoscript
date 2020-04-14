@@ -403,6 +403,42 @@ tyrano.plugin.kag.menu = {
                 
                 }else{
                     
+                    //ビデオをキャプチャするための仕組み
+                    let canvas = document.createElement('canvas'); // declare a canvas element in your html
+                    let ctx = canvas.getContext('2d');
+                    let videos = document.querySelectorAll('video');
+                    let w, h
+                    for (let i = 0, len = videos.length; i < len; i++) {
+                        const v = videos[i];
+                        //if (!v.src) continue // no video here
+                        try {
+                            w = v.videoWidth;
+                            h = v.videoHeight;
+                            
+                            canvas.style.left = v.style.left;
+                            canvas.style.top = v.style.top;
+                            
+                            canvas.style.width = v.style.width;
+                            canvas.style.height = v.style.height;
+                            
+                            canvas.width = w
+                            canvas.height = h
+                            
+                            ctx.fillRect(0, 0, w, h)
+                            ctx.drawImage(v, 0, 0, w, h)
+                            v.style.backgroundImage = `url(${canvas.toDataURL()})` // here is the magic
+                            v.style.backgroundSize = 'cover' 
+                            v.classList.add("tmp_video_canvas");
+                            
+                            ctx.clearRect(0, 0, w, h); // clean the canvas
+                        
+                        } catch (e) {
+                            continue
+                        }
+                        
+                    }
+                    
+                    
                     var tmp_base = $("#tyrano_base");
                     
                     var tmp_left = tmp_base.css("left");
@@ -417,9 +453,11 @@ tyrano.plugin.kag.menu = {
                         width:that.kag.config.scWidth
                     };
                     
+                    
                     html2canvas(tmp_base.get(0),opt).then(function(canvas) {
                                 
                         $("#tyrano_base").find(".layer_blend_mode").css("display","");
+                        $("#tyrano_base").find(".tmp_video_canvas").css("backgroundImage","");
                         
                         // canvas is the final rendered <canvas> element
                         //console.log(canvas);
@@ -565,6 +603,7 @@ tyrano.plugin.kag.menu = {
         var auto_next = "no";
         
         if(array[num].stat.load_auto_next==true){
+            array[num].stat.load_auto_next = false; 
             auto_next = "yes";
         }
         
@@ -756,9 +795,6 @@ tyrano.plugin.kag.menu = {
         }
         ///////////カメラここまで
         
-        
-        
-        
         //どの道動画削除。
         $(".tyrano_base").find("video").remove();
         this.kag.tmp.video_playing = false;
@@ -783,7 +819,16 @@ tyrano.plugin.kag.menu = {
             this.kag.ftag.startTag("bgmovie", pm);
             
         }
-
+        
+        //カメラが設定中なら
+        if(this.kag.stat.current_bgcamera !=""){
+            
+            this.kag.stat.current_bgcamera["stop"]= "true";
+            this.kag.ftag.startTag("bgcamera", this.kag.stat.current_bgcamera);
+            
+        }
+        
+        
         //カーソルの復元
         this.kag.setCursor(this.kag.stat.current_cursor);
         

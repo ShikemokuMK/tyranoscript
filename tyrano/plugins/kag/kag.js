@@ -82,6 +82,8 @@ tyrano.plugin.kag ={
         
         map_chara_talk_top:{}, //キャラトークのアニメーション中、開始のトップ位置を保持します。
         
+        camera_stream:false, //カメラストリームが有効化否か
+        
         video_playing:false
         
         
@@ -142,6 +144,8 @@ tyrano.plugin.kag ={
         
         load_auto_next:false,// ロード時にオートネクストするかどうか。showsave周りのときtrueになる。
         
+        current_bgcamera:"", //bgcamerの有効性
+        
         enable_keyconfig:true, //キーコンフィグが有効 or 無効
         
         current_bgmovie:{
@@ -188,6 +192,11 @@ tyrano.plugin.kag ={
             size:"",
             face:"",
             italic:""
+        },
+        
+        //qr系の設定
+        qr:{
+           "mode":"off" 
         },
         
         //表示位置調整
