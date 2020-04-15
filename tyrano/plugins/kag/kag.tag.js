@@ -12,10 +12,10 @@ tyrano.plugin.kag.ftag = {
 
         // タグの種類を確定させる
         for (var order_type in tyrano.plugin.kag.tag) {
-
+        
             this.master_tag[order_type] = object(tyrano.plugin.kag.tag[order_type]);
             this.master_tag[order_type].kag = this.kag;
-
+        
         }
 
     },
