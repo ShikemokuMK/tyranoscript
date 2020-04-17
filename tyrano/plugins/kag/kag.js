@@ -196,7 +196,8 @@ tyrano.plugin.kag ={
         
         //qr系の設定
         qr:{
-           "mode":"off" 
+           "mode":"off",
+           "define":{}
         },
         
         //表示位置調整

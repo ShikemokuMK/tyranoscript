@@ -50,7 +50,7 @@ $array_mini = array(
 "plugins/kag/kag.studio.js",
 "plugins/kag/kag.tag_camera.js",
 "plugins/kag/kag.tag_vchat.js",
-
+"plugins/kag/kag.tag_ar.js",
 
 );
 
@@ -79,6 +79,8 @@ foreach($array_copy as $file){
 	exec("cp -R ../tyrano/images ".$dirname."/tyrano/");
 	exec("cp -R ../tyrano/html ".$dirname."/tyrano/");
 	exec("cp -R ../tyrano/audio ".$dirname."/tyrano/");
+	exec("cp -R ../tyrano/css ".$dirname."/tyrano/");
+	
 	
 
 //オリジナルマスターデータのコピー	
