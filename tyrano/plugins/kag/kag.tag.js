@@ -1523,6 +1523,7 @@ tyrano.plugin.kag.tag.current = {
  margint=メッセージレイヤの上余白を指定します。,
  marginr=メッセージレイヤの右余白を指定します。,
  marginb=メッセージレイヤの下余白を指定します。,
+ raduis=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります,
  vertical=メッセージレイヤを縦書きにモードにするには "true" を指定します。 横書きにするには "false" を指定してください。,
  visible=true に設定すると、メッセージレイヤが可視(表示状態)になります。<br >false に設定すると、メッセージレイヤは不可視(非表示状態)になります。
 :demo
@@ -1544,6 +1545,7 @@ tyrano.plugin.kag.tag.position = {
         opacity : "",
         vertical : "",
         frame : "",
+        radius:"",
         marginl : "0", //左余白
         margint : "0", //上余白
         marginr : "0", //右余白
@@ -1568,7 +1570,10 @@ tyrano.plugin.kag.tag.position = {
             new_style["height"] = pm.height+"px";
         if(pm.color !="")
             new_style["background-color"] = $.convertColor(pm.color);
-
+            
+        if(pm.radius !=""){
+            target_layer.css("border-radius", parseInt(pm.radius) + "px");
+        }
         
 
         //背景フレーム画像の設定 透明度も自分で設定する
@@ -1599,7 +1604,7 @@ tyrano.plugin.kag.tag.position = {
         if (pm.opacity != "") {
             target_layer.css("opacity", $.convertOpacity(pm.opacity));
         }
-
+        
         //outer のレイヤを変更
         this.kag.setStyles(target_layer, new_style);
 
@@ -1644,7 +1649,6 @@ tyrano.plugin.kag.tag.position = {
             new_style_inner["width"] = (parseInt(layer_inner.css("width")) - parseInt(pm.marginr) - parseInt(pm.marginl)) + "px";
         if (pm.marginb != "0")
             new_style_inner["height"] = (parseInt(layer_inner.css("height")) - parseInt(pm.marginb)) - parseInt(pm.margint) + "px";
-        
         
         this.kag.setStyles(layer_inner, new_style_inner);
 
