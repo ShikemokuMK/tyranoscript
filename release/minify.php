@@ -26,8 +26,6 @@ $array_copy = array(
 "tyrano.base.js",
 "tyrano.js",
 "tyrano.css",
-"animate.css",
-"font.css",
 "lang.js",
 
 );
