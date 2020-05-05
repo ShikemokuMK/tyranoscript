@@ -1523,7 +1523,7 @@ tyrano.plugin.kag.tag.current = {
  margint=メッセージレイヤの上余白を指定します。,
  marginr=メッセージレイヤの右余白を指定します。,
  marginb=メッセージレイヤの下余白を指定します。,
- raduis=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります,
+ radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります,
  vertical=メッセージレイヤを縦書きにモードにするには "true" を指定します。 横書きにするには "false" を指定してください。,
  visible=true に設定すると、メッセージレイヤが可視(表示状態)になります。<br >false に設定すると、メッセージレイヤは不可視(非表示状態)になります。
 :demo
@@ -4083,6 +4083,11 @@ tyrano.plugin.kag.tag.button = {
 ただし、x、y が指定されている場合は、そちらが優先されます。
 ここから、移動した場合はコールスタックに残りません。つまり、リターンできないのでご注意ください
 ジャンプ後は自動的に[cm]タグが実行され、ボタンは消失します
+
+glinkはV501c以降で大幅にデザインが追加されています。colorに指定できるサンプルは
+https://tyrano.jp/sample2/code/siryou/1
+をご確認ください。
+
 :sample
 
 [glink target="j1" text="選択肢１" size=20  width="500" y=300]
@@ -4092,7 +4097,7 @@ tyrano.plugin.kag.tag.button = {
 [s]
 
 :param
-color=ボタンの色を指定できます。デフォルトはblackです（black gray white orange red blue rosy green pink）,
+color=ボタンの色を指定できます。デフォルトはblackです（black gray white orange red blue rosy green pink）V501c以降で200パターン以上のデザイン追加。詳しくは→ https://tyrano.jp/sample2/code/siryou/1 ,
 font_color=フォントの色を指定できます。0xRRGGBB 形式で指定してください。 ,
 storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
 target=ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。,
