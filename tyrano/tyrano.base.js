@@ -49,7 +49,7 @@ tyrano.base ={
         	}
         	
         	this.tyrano.kag.tmp.base_scale = scale_f;
-
+            
             setTimeout(function() {
                     
                 //中央寄せなら、画面サイズ分を引く。
@@ -64,17 +64,24 @@ tyrano.base ={
                     var height = Math.abs(parseInt(window.innerHeight) - parseInt(that.tyrano.kag.config.scHeight*scale_f))/2;
                    
                     if(width_f > height_f){
-                        $(".tyrano_base").css("left",width+"px");
-                        $(".tyrano_base").css("top","0px");
+                        $(".tyrano_base").css("margin-left",width+"px");
+                        $(".tyrano_base").css("margin-top","0px");
                     }else{
                         
-                        $(".tyrano_base").css("left","0px");
-                        $(".tyrano_base").css("top",height+"px");
+                        $(".tyrano_base").css("margin-left","0px");
+                        $(".tyrano_base").css("margin-top",height+"px");
                         
                    }
                    
                 }
-               
+                
+                /*
+                if(scale_f > 1){
+                    $(".tyrano_base").css("position","");    
+                }else{
+                    $(".tyrano_base").css("position","absolute");
+                }
+                */
                 
                 $(".tyrano_base").css("transform", "scale(" + scale_f + ") ");
                 if (parseInt(view_width) < parseInt(width)) {
