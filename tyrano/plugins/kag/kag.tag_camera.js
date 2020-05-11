@@ -272,19 +272,6 @@ tyrano.plugin.kag.tag.reset_camera = {
             },
             
             complete:function(){
-                //アニメーションが完了しないと次へはいかない
-                 if(pm.wait =="true" && flag_complete ==false){
-                    flag_complete=true; //最初の一回だけwait有効
-                    that.kag.ftag.nextOrder();
-                }else{
-                    
-                    //カメラを待ってる状態なら
-                    if(that.kag.stat.is_wait_camera == true){
-                        that.kag.stat.is_wait_camera = false;
-                        that.kag.ftag.nextOrder();
-                    }
-                    
-                }
                 
                 //リセットした時は、本当に消す
                 $("."+pm.layer).css({
@@ -298,6 +285,20 @@ tyrano.plugin.kag.tag.reset_camera = {
                     "-animation-timing-function":"",
                     "transform":""
                 });
+                
+                //アニメーションが完了しないと次へはいかない
+                if(pm.wait =="true" && flag_complete ==false){
+                    flag_complete=true; //最初の一回だけwait有効
+                    that.kag.ftag.nextOrder();
+                }else{
+                    
+                    //カメラを待ってる状態なら
+                    if(that.kag.stat.is_wait_camera == true){
+                        that.kag.stat.is_wait_camera = false;
+                        that.kag.ftag.nextOrder();
+                    }
+                    
+                }
                 
                 
                 that.kag.stat.is_move_camera = false;
