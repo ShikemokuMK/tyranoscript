@@ -153,6 +153,39 @@
         return px_val * getRootElementFontSize();
             
     };
+    
+    //複数のスクリプトを一括して読み込み
+    $.getMultiScripts = function(arr,cb) {
+        
+        var cnt_script = arr.length;
+        var load_cnt = 0;
+        
+        function getScript(src){
+            
+            $.getScript(arr[load_cnt],function(e){
+            
+                load_cnt++;
+                
+                if(cnt_script==load_cnt){
+                    
+                    if(typeof cb=="function"){
+                        cb();    
+                    }
+                    
+                }else{
+                    getScript(arr[load_cnt]);
+                }
+                
+            });
+            
+            
+        }
+        
+        getScript(arr[0]);
+        
+        
+    
+    }
 
     $.convertSecToString = function(val) {
         if (val == 0) {

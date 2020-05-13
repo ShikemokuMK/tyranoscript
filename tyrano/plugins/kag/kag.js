@@ -84,7 +84,12 @@ tyrano.plugin.kag ={
         
         camera_stream:false, //カメラストリームが有効化否か
         
-        video_playing:false
+        video_playing:false,
+        
+        three:{
+            is_load:false,
+            models:{},
+        },
         
         
        
