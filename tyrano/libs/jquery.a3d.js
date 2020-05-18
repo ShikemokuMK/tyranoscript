@@ -10,7 +10,7 @@
  */
 
 (function($){
-    var vendor = (/webkit/i).test(navigator.appVersion) ? 'webkit' : (/firefox/i).test(navigator.userAgent) ? 'Moz' : (/Trident/i).test(navigator.userAgent) ? 'ms' : 'opera' in window ? 'O' : '';  
+    var vendor = (/webkit/i).test(navigator.appVersion) ? 'webkit' : (/firefox/i).test(navigator.userAgent) ? 'moz' : (/Trident/i).test(navigator.userAgent) ? 'ms' : 'opera' in window ? 'O' : '';  
     $.fn.a3d=function(arg){
   
         var base_point = null;
@@ -225,64 +225,7 @@
             
             $.data(this,"point",point);
             
-            if(vendor == "Moz"){
-                
-                obj.css(css_param).one('animationend',function(){
-                    
-                    if(typeof cb_complete === "function"){
-                        
-                        obj.css("transform", obj.css("transform"));
-                        for (var key in mod_styles) {
-                            obj.css(key, obj.css(key));
-                        }
-                        obj.css("animation-name","");
-                        
-                        cb_complete.call(that);
-                    }
-                    
-                });
-                obj.css(css_param).bind('animationiteration',function(){
-                    
-                    if(typeof cb_iteration === "function"){
-                        cb_iteration.call(that);
-                    }
-                    
-                    //タイムアウト呼び起こし
-                    var tanim = $.data(that,"ext_array");
-                    
-                    if(tanim.length>0){
-                        for(var i=0;i<tanim.length;i++){
-
-                            tanim[i]();
-                            
-                        }
-                    }
-
-                    
-                });
-                
-                obj.css(css_param).one('animationstart',function(){
-                    
-                    
-                    if(typeof cb_start === "function"){
-                        cb_start.call(that);
-                        
-                    }
-                    //タイムアウト呼び起こし
-                    var tanim = $.data(that,"ext_array");
-                    
-                    if(tanim.length>0){
-                        for(var i=0;i<tanim.length;i++){
-
-                            tanim[i]();
-                            
-                        }
-                    }
-
-                    
-                });
-                
-            }else{
+            if(true){
                 
                 //if(vendor =="ms") vendor="";
                 //alert(vendor);
