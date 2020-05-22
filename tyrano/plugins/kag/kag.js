@@ -88,7 +88,9 @@ tyrano.plugin.kag ={
         
         three:{
             is_load:false,
+            start_event :true,
             models:{},
+            evt:{},
         },
         
         

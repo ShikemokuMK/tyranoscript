@@ -4,10 +4,18 @@ class ThreeModel {
 
     constructor(obj){
         
+        /*
         this.name  = obj.name;
         this.model = obj.model;
         this.mixer = obj.mixer;
         this.gltf  = obj.gltf;
+        */
+        
+        for(let key in obj){
+	    	this[key] = obj[key];
+	    }
+        
+        this.setUserData("name",obj.name);
         
         this.visible = false;
         
@@ -45,7 +53,7 @@ class ThreeModel {
     
 	}
 	
-	fade(direction,options){
+	fade(direction,options,cb){
         
         options = options || {};
         // set and check 
@@ -71,14 +79,24 @@ class ThreeModel {
                     this.opacity(now);
                 },
                 complete:()=> {
+	                
                     j_obj.remove();
                     
                     if(direction!="in"){
 						this.visible=false;
-                    }
+						
+                    }else{
+	                	this.visible=true;
+	                
+	                }
+                    
+                    if(typeof cb=="function"){
+	                	cb();
+	                }
                     
                 }
             }
+            
         );
         
         
@@ -208,8 +226,40 @@ class ThreeModel {
             }
         });
         
-        
     }
+    
+    setUserData(key,val){
+		
+		this.model.traverse(function(node) {
+            
+            node.userData[key] = val;
+            
+        });
+
+		
+	}
+    
+    //アップデートが必要なときに呼び出す。
+    needsUpdate(){
+		
+		this.model.traverse(function(node) {
+            if(node.isMesh){
+                node.material.needsUpdate = true;
+            }
+        });
+        
+	}
+	
+	//tone 
+	setToneMaped(flag){
+		
+		this.model.traverse(function(node) {
+            if(node.isMesh){
+                node.material.toneMapped = flag;
+            }
+        });
+		
+	}
 
 
 }
