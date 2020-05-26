@@ -204,7 +204,7 @@ tyrano.plugin.kag.ftag = {
                 if (err_str != "") {
                     this.kag.error(err_str);
                 } else {
-
+					tag.pm["_tag"] = tag.name;
                     this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
                 }
                 
@@ -298,6 +298,7 @@ tyrano.plugin.kag.ftag = {
                     
                     //この時点で、変数の中にエンティティがあれば、置き換える必要あり
                     tag.pm = this.convertEntity(tag.pm);
+                    tag.pm["_tag"] = tag.name;
                     this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
                     return true;
                 } else {
@@ -435,7 +436,12 @@ tyrano.plugin.kag.ftag = {
 
     //タグを指定して直接実行
     startTag : function(name, pm) {
-
+		
+		if(typeof pm=="undefined"){
+			pm = {};
+		}
+		
+		pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
 
     },

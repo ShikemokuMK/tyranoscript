@@ -160,6 +160,11 @@
         var cnt_script = arr.length;
         var load_cnt = 0;
         
+        if(cnt_script==0){
+	        cb();
+	    	return;
+	    }
+        
         function getScript(src){
             
             $.getScript(arr[load_cnt],function(e){

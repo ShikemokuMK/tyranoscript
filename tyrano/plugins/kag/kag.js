@@ -36,8 +36,6 @@ tyrano.plugin.kag ={
         "www":""
         
     },
-        
-   
     
     
     //各種変数
@@ -87,8 +85,13 @@ tyrano.plugin.kag ={
         video_playing:false,
         
         three:{
-            is_load:false,
-            start_event :true,
+            
+            stat:{
+            	is_load:false,
+            	canvas_show:false,
+            	start_event :true,
+            },
+            
             models:{},
             evt:{},
         },
@@ -1055,14 +1058,41 @@ tyrano.plugin.kag ={
         	first_scenario_file = $("#first_scenario_file").val();
         }
         
-        //シナリオファイルの読み込み。parser から、シナリオを解析して、タグ管理画面を作る。
-        this.loadScenario(first_scenario_file,function(array_tag){
-            
-            that.ftag.buildTag(array_tag);
-            //最初にレイヤをコピーしておく、、、その必要はない！コメント化20122119
-            //that.kag.ftag.startTag("backlay",{});
         
-        });
+        //追加分のプロジェクトファイルの読み込み
+        var array_scripts = [];
+        
+        if(this.kag.config["3d"]=="true"){
+	        
+	        array_scripts = [
+		
+			    "./tyrano/libs/three/three.js",
+			    
+			    "./tyrano/libs/three/loader/GLTFLoader.js",
+			    "./tyrano/libs/three/loader/ObjLoader.js",
+			    "./tyrano/libs/three/loader/MTLLoader.js",
+			    //"./tyrano/libs/three/loader/MMDLoader.js",
+			    
+			    "./tyrano/libs/three/controls/OrbitControls.js",
+			    "./tyrano/libs/three/classes/ThreeModel.js",
+			    
+			];
+			
+		}
+		        
+		
+		$.getMultiScripts(array_scripts,()=> {
+			
+	        //シナリオファイルの読み込み。parser から、シナリオを解析して、タグ管理画面を作る。
+	        this.loadScenario(first_scenario_file,function(array_tag){
+	            
+	            that.ftag.buildTag(array_tag);
+	            //最初にレイヤをコピーしておく、、、その必要はない！コメント化20122119
+	            //that.kag.ftag.startTag("backlay",{});
+	        
+	        });
+	        
+		});
         
         
         //ティラノライダーからの通知の場合、発生させる

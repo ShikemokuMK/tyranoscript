@@ -1,7 +1,5 @@
 
 
-
-
 $.three_pos = function(str){
     
     var obj = {};
@@ -33,21 +31,28 @@ $.checkThreeModel = function(name){
 	if(TYRANO.kag.tmp.three.models[name]){
 		return true;
 	}else{
-		alert("model「"+name+"」は未定義です。[model_new]で定義してください。");
+		alert("model「"+name+"」は未定義です。宣言してください。");
 	}
 }
 
-
+	        
 
 /*
  #[3d_init]
  :group
- 3D操作
+ 3D関連
+ 
  :title
- 3Dの初期化
+ 3D機能の初期化
+ 
  :exp
  3D関連の機能を使用するために必要な宣言です。
- first.ks などで宣言しておくと安全です。
+ このタグを通過時、ゲーム内に3Dを表示するためのシーンが追加されます。
+ また、タグを配置していないと3d_xxx で始まるタグを使用できません。
+ 
+ 3D機能を使用する直前に宣言するようにしましょう。
+ また3D機能の仕様が終わった段階で[3d_close]を行いましょう。
+ 
  :sample
  [3d_init layer=0 ]
  
@@ -55,6 +60,7 @@ $.checkThreeModel = function(name){
  layer=3Dモデルを配置するレイヤを指定できます。
   
  :demo
+ 
  
  #[end]
  */
@@ -66,6 +72,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
     pm : {
         
         layer:"0",
+        page:"fore"
         
     },
     
@@ -74,115 +81,107 @@ tyrano.plugin.kag.tag["3d_init"] = {
     start : function(pm) {
         
         var that = this;
-            
+        
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
         
-        var array_scripts = [
-            "./tyrano/libs/three/three.js",
-            
-            "./tyrano/libs/three/loader/GLTFLoader.js",
-            "./tyrano/libs/three/loader/ObjLoader.js",
-            "./tyrano/libs/three/loader/MTLLoader.js",
-            //"./tyrano/libs/three/loader/MMDLoader.js",
-            
-            "./tyrano/libs/three/controls/OrbitControls.js",
-            "./tyrano/libs/three/classes/ThreeModel.js",
-            
-        ];
+        /*
+        if(this.kag.tmp.three.stat.is_load == true){
+            return;
+        }
+        */
         
-        $.getMultiScripts(array_scripts,(e)=> {
-            
-            if(this.kag.tmp.three.is_load == true){
-                return;
-            }
-            
-            this.clock = new THREE.Clock();
-            
-            //3Dモデル用のシーンを挿入する。
-            var j_canvas = $("<canvas id='three'></canvas>");
-            
-            var sc_width = parseInt(this.kag.config.scWidth);
-            var sc_height = parseInt(this.kag.config.scHeight);
-                
-            j_canvas.css({
-                "position":"absolute",
-                "width":sc_width,
-                "height":sc_height,
-            });
-            
-            target_layer.append(j_canvas);
-            
-            
-            const renderer = new THREE.WebGLRenderer({
-                canvas: document.querySelector('#three'),
-                alpha:true,
-                antialias: true,
-            });
-            
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(sc_width, sc_height);
+        this.clock = new THREE.Clock();
         
-            // シーンを作成
-            const scene = new THREE.Scene();
+        //3Dモデル用のシーンを挿入する。
+        var j_canvas = $("<canvas id='three'></canvas>");
         
-            // カメラを作成
-            const camera = new THREE.PerspectiveCamera(45, sc_width / sc_height);
-            camera.position.set(0, 0, +1000);
+        var sc_width = parseInt(this.kag.config.scWidth);
+        var sc_height = parseInt(this.kag.config.scHeight);
             
-            this.kag.tmp.three.models["camera"] = new ThreeModel({"name":"camera","model":camera,"mixer":null,"gltf":null});
-            
-        
-            //指定のレイヤは表示状態にもっていけ。
-            target_layer.show();
-            
-            
-            var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-            scene.add( directionalLight );
-            
-            const amb_light = new THREE.AmbientLight(0xFFFFFF, 1);
-            scene.add(amb_light);
-            
-            /*
-            var directionalLightShadowHelper = new THREE.CameraHelper( directionalLight.shadow.camera);
-            scene.add( directionalLightShadowHelper);
-             
-            var directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight);
-            scene.add( directionalLightHelper);
-            */
-            
-            
-            this.kag.tmp.three.is_load = true;
-            
-            this.kag.tmp.three.camera = camera;
-            this.kag.tmp.three.scene = scene;
-            this.kag.tmp.three.renderer = renderer;
-            
-            this.kag.tmp.three.target_layer = target_layer;
-            this.kag.tmp.three.j_canvas = j_canvas;
-            
-            
-            tick();
-            
-            // 毎フレーム時に実行されるループイベントです
-            function tick() {
-                
-                if(three.orbit_controls){
-	            	three.orbit_controls.update();	    
-	            } 
-                
-                that.updateFrame();
-                
-                renderer.render(scene, camera); // レンダリング
-                requestAnimationFrame(tick);
-            }
-            
-            //イベント検知用の処理
-            this.initEvent(this.kag.tmp.three);
-            
-            this.kag.ftag.nextOrder();
-            
-            
+        j_canvas.css({
+            "position":"absolute",
+            "width":sc_width,
+            "height":sc_height,
         });
+        
+        target_layer.append(j_canvas);
+        
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#three'),
+            alpha:true,
+            antialias: true,
+            preserveDrawingBuffer:true 
+        });
+        
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(sc_width, sc_height);
+    
+        // シーンを作成
+        const scene = new THREE.Scene();
+    
+        // カメラを作成
+        const camera = new THREE.PerspectiveCamera(45, sc_width / sc_height);
+        camera.position.set(0, 0, +1000);
+        
+        this.kag.tmp.three.models["camera"] = new ThreeModel({"name":"camera","model":camera,"mixer":null,"gltf":null,"pm":pm},three);
+        
+    
+        //指定のレイヤは表示状態に移行。
+        target_layer.show();
+        
+        
+        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+        scene.add( directionalLight );
+        
+        const amb_light = new THREE.AmbientLight(0xFFFFFF, 1);
+        scene.add(amb_light);
+        
+        /*
+        var directionalLightShadowHelper = new THREE.CameraHelper( directionalLight.shadow.camera);
+        scene.add( directionalLightShadowHelper);
+         
+        var directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight);
+        scene.add( directionalLightHelper);
+        */
+        
+        
+        this.kag.tmp.three.stat.is_load = true;
+        this.kag.tmp.three.stat.canvas_show = true;
+        this.kag.tmp.three.stat.layer = pm.layer;
+        
+        this.kag.tmp.three.camera = camera;
+        this.kag.tmp.three.scene = scene;
+        this.kag.tmp.three.renderer = renderer;
+        
+        this.kag.tmp.three.target_layer = target_layer;
+        this.kag.tmp.three.j_canvas = j_canvas;
+        
+        var three = this.kag.tmp.three;
+        
+        tick();
+        
+        // 毎フレーム時に実行されるループイベントです
+        function tick() {
+            
+            if(three.stat.is_load == false){
+            	return;
+            }
+            
+            if(three.orbit_controls){
+            	three.orbit_controls.update();	    
+            } 
+            
+            that.updateFrame();
+            
+            renderer.render(scene, camera); // レンダリング
+            requestAnimationFrame(tick);
+            
+        }
+        
+        //イベント検知用の処理
+        this.initEvent(this.kag.tmp.three);
+        
+        this.kag.ftag.nextOrder();
         
         
     },
@@ -216,11 +215,10 @@ tyrano.plugin.kag.tag["3d_init"] = {
 			 
 			// cube1がクリックされたらcube1を消してcube2を表示
 			if(intersects.length>0){
-				console.log(intersects[0].object);
+				//console.log(intersects[0].object);
 				var name = intersects[0].object.userData["name"];
 				if(that.kag.stat.is_strong_stop == true){
 				
-					console.log("name:"+name);
 					if(three.evt[name]){
 						that.kag.layer.showEventLayer();
                 		that.kag.ftag.startTag("jump", three.evt[name]);
@@ -229,7 +227,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
 					
 				}else{
 					
-					console.log("none");
+					//console.log("none");
 					
 				}
 				
@@ -265,40 +263,56 @@ tyrano.plugin.kag.tag["3d_init"] = {
 
 
 /*
- #[3d_init]
+ #[3d_model_new]
  :group
- 3D操作
+ 3D関連
+ 
  :title
- 3Dの初期化
+ 3Dモデルの作成
+ 
  :exp
- 3D関連の機能を使用するために必要な宣言です。
- first.ks などで宣言しておくと安全です。
+ 外部ファイル形式の3Dモデルを読み込んで定義します。
+ 実行時はゲーム画面には表示されません。表示するには[3d_show ]が必要です。
+ 3Dモデルファイルは data/others/3d/modelフォルダに配置します。
+ 
  :sample
- [3d_init layer=0 ]
+ [3d_init layer=0]
+ 
+ [3d_model_new name="mymodel" storage="mymodel/scene.gltf" ]
+ [3d_show name="mymodel" pos="100,20,20" rot="1,1,1" scale=10 ] 
  
  :param
- layer=3Dモデルを配置するレイヤを指定できます。
+ name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+ storage=3Dファイルを指定します。gltf obj 形式に対応します。ファイルはothers/3d/modelフォルダに配置してください。,
+ pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+ tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。,
+ motion=ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適応されます。,
+ folder=ファイルの配置フォルダを変更できます。
   
  :demo
  
+ 
+
  #[end]
  */
  
-tyrano.plugin.kag.tag["model_new"] = {
+tyrano.plugin.kag.tag["3d_model_new"] = {
 
-    vital : [],
+    vital : ["name","storage"],
      	
     pm : {
         
         name:"",
         storage:"",
         
-        scale:"100", //100,100,100 //みたいな感じで指定できる。
-        pos:"0",  // 100,40,50
+        pos:"0", 
         rot:"0",
+        scale:"100", 
         tonemap:"true",
         motion:"",
-        
+        next:"true",
         folder:"",
         
     },
@@ -336,8 +350,6 @@ tyrano.plugin.kag.tag["model_new"] = {
 	            model.scale.set(scale.x,scale.y,scale.z);
 	            model.rotation.set(rot.x,rot.y,rot.z);
 	            
-	            console.log(model);
-	            
 	            const animations = gltf.animations;
 	            let mixer = new THREE.AnimationMixer(model);
 	            
@@ -365,9 +377,8 @@ tyrano.plugin.kag.tag["model_new"] = {
 	                mixer=undefined;
 	            }
 	            
-	            three.scene.add(model);
-	            
-	            this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model,"mixer":mixer,"gltf":gltf});
+	            //three.scene.add(model);
+	            this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model,"mixer":mixer,"gltf":gltf,"pm":pm},three);
 	            
 	            if(pm.tonemap=="true"){
 	            	this.kag.tmp.three.models[pm.name].setToneMaped(true);
@@ -375,7 +386,9 @@ tyrano.plugin.kag.tag["model_new"] = {
 		        	this.kag.tmp.three.models[pm.name].setToneMaped(false);
 	            }
 	            
-	            this.kag.ftag.nextOrder();
+	            if(pm.next == "true"){
+					this.kag.ftag.nextOrder();
+	        	}
 	            
 	            
 	        });
@@ -407,9 +420,8 @@ tyrano.plugin.kag.tag["model_new"] = {
 		            model.scale.set(scale.x,scale.y,scale.z);
 		            model.rotation.set(rot.x,rot.y,rot.z);
 		            
-		            three.scene.add(model);
-		            
-		            this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model });
+		            //three.scene.add(model);
+		            this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model,"pm":pm },three);
 		            
 		            
 		            if(pm.tonemap=="true"){
@@ -418,7 +430,9 @@ tyrano.plugin.kag.tag["model_new"] = {
 			            this.kag.tmp.three.models[pm.name].setToneMaped(false);
 		            }
 		            
-		            this.kag.ftag.nextOrder();
+		            if(pm.next == "true"){
+						this.kag.ftag.nextOrder();
+			        }
 		            
 		        } /*, onProgress, onError */ );
 		        
@@ -447,7 +461,43 @@ tyrano.plugin.kag.tag["model_new"] = {
 };
 
 
-//球体をつくる
+/*
+ #[3d_sphere_new]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dモデル(球体)
+ 
+ :exp
+ 球体の3Dモデルを定義します
+ 
+ :sample
+ 
+[3d_sphere_new name="tama" ]
+[3d_show name=tama pos="365,145,0" rot="0.92,-4.3,0" scale="0.77,0.77,0.77" time=2000]
+
+ :param
+ name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+ texture=球体にテクスチャを貼ることができます。画像は「others/3d/texture」以下に配置してください。サイズは256x256 や 512x512 といったサイズを推奨します。,
+ color=色を指定できます。0xRRGGBB 形式で指定します。,
+ pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+ 
+ radius=球体の半径を指定します。デフォルトは300,
+ width=球体の横幅を指定します。デフォルトは30,
+ height=球体の高さを指定します。デフォルトは30,
+ 
+ tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。,
+  
+ :demo
+ 
+ 
+
+ #[end]
+ */
+
 tyrano.plugin.kag.tag["3d_sphere_new"] = {
 
     vital : ["name"],
@@ -489,10 +539,42 @@ tyrano.plugin.kag.tag["3d_sphere_new"] = {
 };
 
 
+/*
+ #[3d_sprite_new]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dモデル(スプライト)
+ 
+ :exp
+ スプライトの3Dモデルを定義します。
+ イメージとの違いはスプライトの場合、オブジェクトが常にカメラの方を向きます。
+ 
+ :sample
+ 
+[3d_sprite_new name="yamato" storage="doki.png"]
+[3d_show name="yamato"]
+
+ :param
+ name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+ storage=表示する画像ファイルを指定します。ファイルは「othres/3d/sprite」フォルダ以下に配置してください。,
+ pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+ tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。,
+ folder=ファイルの配置フォルダを変更できます。,
+  
+ :demo
+ 
+
+ #[end]
+ */
+
 //スプライトを配置する
 tyrano.plugin.kag.tag["3d_sprite_new"] = {
 
-    vital : ["name"],
+    vital : ["name","storage"],
      	
     pm : {
         
@@ -502,8 +584,8 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
         scale:"1", 
         pos:"0",  
         rot:"0",
-        
-        doubleside:"false",
+        tonemap:"false",
+        next:"true",
         
         folder:"",
         
@@ -552,11 +634,13 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
 			var three = this.kag.tmp.three;
 	        var scene = three.scene;
 	                
-			scene.add(model);
+			//scene.add(model);
 	        
-	        this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model});
-	            
-	        this.kag.ftag.nextOrder();
+	        this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model,"pm":pm},three);
+	        
+	        if(pm.next == "true"){
+				this.kag.ftag.nextOrder();
+	        }
 			
 				
         });
@@ -568,7 +652,61 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
 };
 
 
-//イベントを取得する。
+
+/*
+ #[3d_event]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dイベント定義
+ 
+ :exp
+ 3Dシーン上のオブジェクトがクリックされたときに、イベントを発火させることができます。
+ イベントは[s]タグに到達していないと発火しません。
+ また、一度イベントが発火すると自動的に全イベントが無効化されます（イベント定義自体は残っている）
+ 再度イベントを発生させたい場合は[3d_event_start]を通過する必要があります。 
+ 
+ :sample
+ 
+;3Dモデルの定義と表示
+[3d_model_new name="miruku" storage="miruku/scene.gltf" scale=300 pos="0,-300,500" ]
+[3d_event name="miruku" target="miruku"]
+
+;ボックスの表示
+[3d_box_new name="box" width=100 height=100 depth=100 scale=2 tone=false color="0xFFFFFF"]
+[3d_show name="box" time=2000 ]
+
+;イベントの定義 
+[3d_event name="miruku" target="miruku_click"]
+[3d_event name="box" target="box_click"]
+
+[s]
+
+*miruku_click
+3Dモデルがクリックされた[p]
+
+@jump target="common"
+
+*box_click
+ボックスがクリックされた[p]
+
+*common
+
+イベントを再開する[p]
+@3d_event_start
+
+:param
+name=3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトのnameを指定してください。,
+storage=移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます,
+target=ジャンプ先のラベル名を指定します。省略すると先頭から実行されます
+
+:demo
+ 
+
+ #[end]
+ */
+ 
 tyrano.plugin.kag.tag["3d_event"] = {
 
     vital : ["name"],
@@ -585,7 +723,7 @@ tyrano.plugin.kag.tag["3d_event"] = {
         
         var three = this.kag.tmp.three;
         
-        three.start_event = true;
+        three.stat.start_event = true;
         three.evt[pm.name] = pm;
         
         this.kag.ftag.nextOrder();
@@ -596,23 +734,99 @@ tyrano.plugin.kag.tag["3d_event"] = {
         
 };
 
-//イベントを取得する。
-tyrano.plugin.kag.tag["3d_event_start"] = {
+
+/*
+ #[3d_event_delete]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dイベントの削除
+ 
+ :exp
+ 登録した3Dイベントを無効化します。
+ 
+ :sample
+ 
+;ボックスの表示
+[3d_box_new name="box" width=100 height=100 depth=100 scale=2 tone=false color="0xFFFFFF"]
+[3d_show name="box" time=2000 ]
+
+;イベントの定義の削除。これ移行はクリックしても反応しなくなります。
+[3d_event_delete name="box" ]
+
+[s]
+
+
+:param
+name=3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定してください。
+
+:demo
+ 
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_event_delete"] = {
 
     vital : ["name"],
      	
     pm : {
         
         name:"",
-        storage:"",
-        target:"",
         
     },
 
     start : function(pm) {
         
         var three = this.kag.tmp.three;
-        three.start_event = true;
+        
+        delete three.evt[pm.name];
+        
+        this.kag.ftag.nextOrder();
+        
+        
+    },
+    
+        
+};
+
+
+/*
+ #[3d_event_start]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dイベントの開始
+ 
+ :exp
+ 登録した3Dイベントを開始します。
+ イベントが実行された後は必ず全イベントが無効化されるため、このタグで再度受付を開始する必要があります。
+ 
+ :sample
+
+
+ :param
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_event_start"] = {
+
+    vital : [],
+     	
+    pm : {
+        
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        three.stat.start_event = true;
         this.kag.ftag.nextOrder();
         
     },
@@ -621,23 +835,42 @@ tyrano.plugin.kag.tag["3d_event_start"] = {
 };
 
 
+/*
+ #[3d_event_stop]
+ :group
+ 3D関連
+ 
+:title
+ 3Dイベントの停止
+ 
+:exp
+ 登録した3Dイベントを停止します。
+ [3d_event_start]で再開できます。
+ 登録したイベント自体は消えません。
+ 
+:sample
+ 
+:param
+
+:demo
+ 
+
+ #[end]
+ */
+ 
 //イベントを取得する。
 tyrano.plugin.kag.tag["3d_event_stop"] = {
 
-    vital : ["name"],
+    vital : [],
      	
     pm : {
-        
-        name:"",
-        storage:"",
-        target:"",
         
     },
 
     start : function(pm) {
         
         var three = this.kag.tmp.three;
-        three.start_event = false;
+        three.stat.start_event = false;
         this.kag.ftag.nextOrder();
         
     },
@@ -646,8 +879,48 @@ tyrano.plugin.kag.tag["3d_event_stop"] = {
 };
 
 
+/*
+ #[3d_box_new]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dモデル(ボックス)
+ 
+ :exp
+ 立方体の3Dモデルを定義します。
+ 
+ :sample
 
-//球体をつくる
+;ボックスの定義と表示 
+[3d_box_new name="mybox1" ]
+[3d_show name="mybox1" pos="365,145,0" rot="0.92,-4.3,0" scale="0.77,0.77,0.77" time=2000]
+
+;テクスチャの６面に異なる画像を使う場合の例
+[3d_box_new name="mybox2" width=100 height=100 depth=100 texture="dice/1.png,dice/2.png,dice/3.png,dice/4.png,dice/5.png,dice/6.png" ]
+[3d_show name="mybox2" time=2000 ]
+
+
+ :param
+ name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+ texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます,
+ color=色を指定できます。0xRRGGBB 形式で指定します。,
+ width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
+ height=3Dオブジェクトの高さを指定します。デフォルトは1です,
+ depth=3Dオブジェクトの深さを指定します。デフォルトは1です,
+ 
+ pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+ 
+ tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
 tyrano.plugin.kag.tag["3d_box_new"] = {
 
     vital : ["name"],
@@ -669,8 +942,6 @@ tyrano.plugin.kag.tag["3d_box_new"] = {
         pos:"0",  
         rot:"0",
         
-        doubleside:"false",
-        
         folder:"",
         
     },
@@ -691,6 +962,41 @@ tyrano.plugin.kag.tag["3d_box_new"] = {
 };
 
 
+/*
+ #[3d_image_new]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dモデル(イメージ)
+ 
+ :exp
+ イメージの3Dモデルを定義します。
+ 平面の板が3Dシーンに追加されるイメージです。
+ 
+ :sample
+
+;3Dイメージ
+[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ] 
+[3d_show name="myimg" ]
+
+ :param
+ name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+ texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。,
+ width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
+ height=3Dオブジェクトの高さを指定します。省略した場合は画像サイズの比率を保った形で表示できます。,
+ 
+ pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+ doubleside=テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。,
+ tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。
+ 
+ :demo
+ 
+
+ #[end]
+ */
 
 //球体をつくる
 tyrano.plugin.kag.tag["3d_image_new"] = {
@@ -704,19 +1010,16 @@ tyrano.plugin.kag.tag["3d_image_new"] = {
         type:"PlaneGeometry",
         
         texture:"",
-        color:"0x00ff00",
         
         width:"",
         height:"",
         
-        scale:"1", 
-        pos:"0",  
+        scale:"1",
+        pos:"0",
         rot:"0",
         
         doubleside:"false",
         tonemap:"false",
-        
-        folder:"",
         
     },
 
@@ -788,6 +1091,8 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
         motion:"",
         
         folder:"",
+        
+        next:"true",
         
     },
 
@@ -865,12 +1170,13 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
         model.rotation.set(rot.x,rot.y,rot.z);
 		
 		// 3D空間にメッシュを追加
-		scene.add(model);
+		//scene.add(model);
         
-        this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model});
+        this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model,"pm":pm},three);
             
-        this.kag.ftag.nextOrder();
-        
+        if(pm.next == "true"){
+			this.kag.ftag.nextOrder();
+	    }
         
         //読み込んだシーンが暗いので、明るくする
         //three.render.gammaOutput = true;
@@ -886,8 +1192,38 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
 
 
 
+/*
+ #[3d_show]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dオブジェクト表示
+ 
+ :exp
+ 定義した3Dオブジェクトを実際にゲーム画面に登場させます。
+ 
+ :sample
 
-tyrano.plugin.kag.tag["model_show"] = {
+;3Dイメージ
+[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ] 
+[3d_show name="myimg" ]
+
+ :param
+ name=3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定してください,
+ time=表示させるまでの時間をミリ秒で指定します。デフォルトは500,
+ wait=表示の完了を待つか否か。デフォルトはtrue。,
+ pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_show"] = {
 
     vital : ["name"],
      	
@@ -896,8 +1232,8 @@ tyrano.plugin.kag.tag["model_show"] = {
         name:"",
         time:"500",
         
-        scale:"", //100,100,100 //みたいな感じで指定できる。
-        pos:"",  // 100,40,50
+        scale:"",
+        pos:"", 
         rot:"",
         
         wait:"true",
@@ -913,8 +1249,9 @@ tyrano.plugin.kag.tag["model_show"] = {
 	    }
         
         var model = this.kag.tmp.three.models[pm.name];
-        
-        var options = {
+        three.scene.add(model.model);
+	    
+	    var options = {
             duration:parseInt(pm.time)
         };
         
@@ -945,7 +1282,6 @@ tyrano.plugin.kag.tag["model_show"] = {
 			this.kag.ftag.nextOrder();
         
 		}   
-            
         
         
     },
@@ -956,7 +1292,40 @@ tyrano.plugin.kag.tag["model_show"] = {
 };
 
 
-tyrano.plugin.kag.tag["model_hide"] = {
+
+/*
+ #[3d_hide]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dオブジェクト非表示
+ 
+ :exp
+ 3Dオブジェクトをゲーム画面から退場させます。
+ このタグを実行しても定義自体は削除されません。
+ もう一度表示する場合は[3d_show]タグを使ってください。
+ 
+ :sample
+
+;3Dイメージ
+[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ] 
+[3d_show name="myimg" ]
+
+非表示にします。[p]
+[3d_hide name="myimg"]
+
+ :param
+ name=3Dオブジェクトの名前です。退場させたいオブジェクトのnameを指定してください,
+ time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
+ wait=退場の完了を待つか否か。デフォルトはtrue。
+ :demo
+ 
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_hide"] = {
 
     vital : ["name"],
      	
@@ -964,7 +1333,7 @@ tyrano.plugin.kag.tag["model_hide"] = {
         
         name:"",
         time:"500",
-        
+        next:"true",
         wait:"true"
         
     },
@@ -985,13 +1354,17 @@ tyrano.plugin.kag.tag["model_hide"] = {
         
         if(pm.wait=="true"){
 	    	
-	    	model.fade("in",options,()=>{
+	    	model.fade("out",options,(_model)=>{
 		    	this.kag.ftag.nextOrder();
+		    	three.scene.remove( _model);
 			});
 			
 	    }else{
 			
-			model.fade("in",options);
+			model.fade("out",options,(_model)=>{
+				three.scene.remove( _model);
+    		});
+			
 			this.kag.ftag.nextOrder();
         
 		}   
@@ -999,13 +1372,434 @@ tyrano.plugin.kag.tag["model_hide"] = {
         
     },
     
-    
+        
+};
+
+
+
+
+/*
+ #[3d_hide_all]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dオブジェクト全非表示
+ 
+ :exp
+ すべての3Dオブジェクトをゲーム画面から退場させます。
+ このタグを実行しても定義自体は削除されません。
+ もう一度表示する場合は[3d_show]タグを使ってください。
+ 
+ :sample
+
+ :param
+ time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
+ wait=退場の完了を待つか否か。デフォルトはtrue。
+ :demo
+ 
+
+ #[end]
+ */
+ 
+ 
+
+tyrano.plugin.kag.tag["3d_hide_all"] = {
+
+    vital : [],
+     	
+    pm : {
+        
+        time:"500",
+        wait:"true",
+        
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        
+        var options = {
+            duration:parseInt(pm.time)
+        };
+        
+        var models = this.kag.tmp.three.models;
+        
+        var cnt_fade = 0;
+        var fin_fade = 0;
+        
+        for(let key in models){
+        	
+        	if(key=="camera") continue;
+        	
+        	cnt_fade++;
+        	
+	        if(pm.wait=="true"){
+		    	
+		    	models[key].fade("out",options,(_model)=>{
+			    	
+			    	three.scene.remove(_model);
+			    	fin_fade++;
+			    	
+			    	if(cnt_fade==fin_fade){
+				    	this.kag.ftag.nextOrder();
+				    }
+			    	
+				});
+				
+		    }else{
+				
+				models[key].fade("out",options,(_model)=>{
+					
+					three.scene.remove(_model);
+					fin_fade++;
+					
+	    		});
+				
+				this.kag.ftag.nextOrder();
+				
+			}   
+			
+		}
+		
+		if(cnt_fade==0){
+			this.kag.ftag.nextOrder();
+		}
+        
+    },
     
         
 };
 
 
-//Threeオブジェクトをアニメーションさせる命令
+/*
+ #[3d_delete]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dオブジェクト削除
+ 
+ :exp
+ 3Dオブジェクトを削除します。
+ このタグは定義からも削除されるので、再度使用する場合は
+ もう一度 new タグで定義する必要があります。
+ 使用しなくなった3Dオブジェクトはこまめに削除することで軽量な動作が期待できます。
+ 
+ :sample
+
+;3Dイメージ
+[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ] 
+[3d_show name="myimg" ]
+
+非表示にします。[p]
+[3d_hide name="myimg"]
+
+定義からも削除[p]
+[3d_delete name="myimg"]
+
+ :param
+ name=3Dオブジェクトの名前です。削除していオブジェクトのnameを指定してください,
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_delete"] = {
+
+    vital : ["name"],
+     	
+    pm : {
+        
+        name:"",
+        
+    },
+
+    start : function(pm) {
+        
+        if($.checkThreeModel(pm.name) == false){
+	    	return;  
+	    }
+        
+        var three = this.kag.tmp.three;
+        
+        var model = this.kag.tmp.three.models[pm.name];
+        three.scene.remove(model.model);
+        
+        delete this.kag.tmp.three.models[pm.name];
+        this.kag.ftag.nextOrder();
+        
+        
+    },
+    
+        
+};
+
+
+
+/*
+ #[3d_delete_all]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dオブジェクト全削除
+ 
+ :exp
+ 3Dオブジェクトをすべて削除します。
+ 3Dシーンをリセットするときに利用します。
+ 
+ :sample
+
+ :param
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_delete_all"] = {
+
+    vital : [],
+     	
+    pm : {
+        
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        
+        var models = this.kag.tmp.three.models;
+        
+        for(let key in models){
+        	
+        	if(key=="camera") continue;
+        	
+        	var model = models[key];
+	        three.scene.remove(model.model);
+	        
+	        delete three.models[key];
+	    	
+		}
+        
+        this.kag.ftag.nextOrder();
+	    
+    },
+    
+        
+};
+
+
+
+/*
+ #[3d_canvas_show]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dキャンバス表示
+ 
+ :exp
+ 3Dキャンバスを表示にします。
+ 例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
+ 
+ :sample
+ time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
+ 
+ :param
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_canvas_show"] = {
+
+    vital : [],
+     	
+    pm : {
+        time:"1000"
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        this.kag.tmp.three.stat.canvas_show = true;
+        
+        three.j_canvas.fadeIn(parseInt(pm.time),()=>{
+	    	this.kag.ftag.nextOrder();
+	    });
+        
+    },
+    
+        
+};
+
+
+/*
+ #[3d_canvas_hide]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dキャンバス非表示
+ 
+ :exp
+ 3Dキャンバスを非表示にします。
+ 3Dシーン自体は維持されます。
+ 例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
+ 
+ :sample
+ time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
+ 
+ :param
+ 
+ :demo
+
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["3d_canvas_hide"] = {
+
+    vital : [],
+     	
+    pm : {
+        time:"1000"
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        this.kag.tmp.three.stat.canvas_show = false;
+        
+        three.j_canvas.fadeOut(parseInt(pm.time),()=>{
+	    	this.kag.ftag.nextOrder();
+	    });
+        
+    },
+    
+        
+};
+
+
+/*
+ #[3d_close]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dシーン削除
+ 
+ :exp
+ 3Dシーンをすべて削除します。
+ このタグを使用すると3D系の機能は全て使えなくなります。
+ もう一度使用する場合は[3d_init]タグを通過させてください。
+ 
+ :sample
+ 
+ :param
+ 
+ :demo
+
+ #[end]
+ */
+
+
+tyrano.plugin.kag.tag["3d_close"] = {
+
+    vital : [],
+     	
+    pm : {
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        
+        three.stat.is_load = false;
+        three.stat.canvas_show = false;
+        
+        three.j_canvas.remove();
+        
+        this.kag.ftag.nextOrder();
+	    
+    },
+    
+        
+};
+
+
+
+/*
+ #[3d_anim]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dアニメーション
+ 
+ :exp
+ シーン上の3Dオブジェクトをアニメーションさせることができます。
+ 
+ :sample
+ 
+ [3d_model_new name="mymodel" storage="mymodel/scene.gltf" ]
+ [3d_anim name="miruku" pos="79,-458,727" scale="318.45,318.45,318.45" rot="0.13,-0.64,0" effect="easeInCubic" wait=true] 
+ 
+
+ :param
+ name=3Dオブジェクトの名前です。この名前の3Dオブジェクトをアニメーションさせます。カメラをアニメーションさせる場合は「camera」という名前を指定します。,
+ pos=アニメーション後、3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=アニメーション後、3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ scale=アニメーション後、3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+ time=アニメーションにかける時間をミリ秒で指定します。デフォルトは1000です。,
+ wait=アニメーションの完了を待つか否か。true or false デフォルトはtrueです。,
+ lookat=ameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。,
+ effect= 変化のエフェクトを指定します。指定できる文字列は以下の種類です<br />
+ jswing
+ ｜def
+ ｜easeInQuad
+ ｜easeOutQuad
+ ｜easeInOutQuad
+ ｜easeInCubic
+ ｜easeOutCubic
+ ｜easeInOutCubic
+ ｜easeInQuart
+ ｜easeOutQuart
+ ｜easeInOutQuart
+ ｜easeInQuint
+ ｜easeOutQuint
+ ｜easeInOutQuint
+ ｜easeInSine
+ ｜easeOutSine
+ ｜easeInOutSine
+ ｜easeInExpo
+ ｜easeOutExpo
+ ｜easeInOutExpo
+ ｜easeInCirc
+ ｜easeOutCirc
+ ｜easeInOutCirc
+ ｜easeInElastic
+ ｜easeOutElastic
+ ｜easeInOutElastic
+ ｜easeInBack
+ ｜easeOutBack
+ ｜easeInOutBack
+ ｜easeInBounce
+ ｜easeOutBounce
+ ｜easeInOutBounce
+ 
+ :demo
+
+
+ #[end]
+ */
+ 
 
 tyrano.plugin.kag.tag["3d_anim"] = {
 
@@ -1017,15 +1811,9 @@ tyrano.plugin.kag.tag["3d_anim"] = {
         time:"1000",
         effect:"linear",
         
-        type:"", //pos or rot or scale
-        
         pos:"", 
         rot:"",
         scale:"",
-        
-        x:"",
-        y:"",
-        z:"",
         
         wait:"true",
         
@@ -1044,59 +1832,71 @@ tyrano.plugin.kag.tag["3d_anim"] = {
 	    	"easing":pm.effect
 	    };
 	    
-	    var type = pm.type;
-        
-        if(type==""){
-	    	
-	    	if(pm.pos!="") type="position";
-	    	if(pm.rot!="") type="rotation";
-	    	if(pm.scale!="") type="scale";
-	    	
-	    	if(type==""){
-		    	alert("[three_anim]タグにパラメータ typeの指定が必要です。");
-		    	return;
-		    }
-	    }
-        
-        //修復してあげる
-        if(type=="pos") type="position";
-        if(type=="rot") type="rotation";
-        
-        var pos = {};
-        
-        if(type=="position" && pm.pos!=""){
-	    	pos = $.three_pos(pm.pos);   
-	    }else if(type=="rotation" && pm.rot!=""){
-			pos = $.three_pos(pm.rot);   
-	    }else if(type=="scale" && pm.scale!=""){
-			pos = $.three_pos(pm.scale);   
-	    }
+	    var map_type = {};
 	    
-	    if(pm.x!=""){
-			pos.x = parseFloat(pm.x);
-		}
-	    
-	    if(pm.y!=""){
-			pos.y = parseFloat(pm.y);
-		}
-	    
-	    if(pm.z!=""){
-			pos.z = parseFloat(pm.z);
-		}
-	    
-	    
-        this.kag.tmp.three.models[pm.name].toAnim(type, pos, options, ()=>{
+	    if(pm.pos!=""){ 
+		    
+		    if(pm.name=="camera" && pm.lookat !=""){
+				
+				if(three.models[pm.lookat]){
+					var model = three.models[pm.lookat].model;
+					var pos = {x:0,y:0,z:0};
+					pos.x = model.position.x;
+					pos.y = model.position.y;
+					pos.z = model.position.z;
+					
+					map_type["position"] = pos;
+					
+				}else{
+					//座標を直接し指定
+					map_type["position"] = $.three_pos(pm.lookat);
+				}
+				
+				
+			}else{
+				
+				map_type["position"] = $.three_pos(pm.pos);  	
 			
-			if(pm.wait=="true"){
-        		this.kag.ftag.nextOrder();
-       		}
-        	
-	    });
+			}
+		    
+	    }
+	    
+    	if(pm.rot!=""){
+	    	map_type["rotation"] = $.three_pos(pm.rot);
+	    }
+	   	
+    	if(pm.scale!=""){
+	    	map_type["scale"] = $.three_pos(pm.scale);
+	    }
+	    
+	    var cnt_fin = 0;
+	    var cnt_type = Object.keys(map_type).length;
+	    
+	    for(let key in map_type){
+	    	
+		    var pos = map_type[key];
+		    var type = key;
+	        
+	        this.kag.tmp.three.models[pm.name].toAnim(type, pos, options, ()=>{
+				
+				cnt_fin++;
+				
+				if(cnt_fin >= cnt_type ){
+				
+					if(pm.wait=="true"){
+		        		this.kag.ftag.nextOrder();
+		       		}
+		       		
+	       		}
+	        	
+		    });
+	        
+	    }
         
         if(pm.wait!="true"){
-        	this.kag.ftag.nextOrder();
-       	}
-        
+	    	this.kag.ftag.nextOrder();
+	    }
+	       	
         
     },
     
@@ -1106,17 +1906,92 @@ tyrano.plugin.kag.tag["3d_anim"] = {
 };
 
 
+
+
 /*
+ #[3d_anim_stop]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dアニメ停止
+ 
+ :exp
+ アニメーション中の3Dオブジェクトを停止することができます。
+ 
+ :sample
+ 
+ :param
+ name=アニメーションを停止する3Dオブジェクトの名前を指定します。 ,
+ finish=true or false を指定します。falseを指定するとアニメーション停止の位置でオブジェクトが停止します。trueだとアニメーションする予定の位置まで移動します。デフォルトはtrue。
+ 
+ :demo
+ 
 
-.NoToneMapping
-THREE.LinearToneMapping
-THREE.ReinhardToneMapping
-THREE.Uncharted2ToneMapping
-THREE.CineonToneMapping
-THREE.ACESFilmicToneMapping
-	
-*/
+ #[end]
+ */
+ 
+tyrano.plugin.kag.tag["3d_anim_stop"] = {
 
+    vital : ["name"],
+    
+    pm : {
+        
+        name:"",
+    	finish:"true",
+    	
+    },
+
+    start : function(pm) {
+        
+        if($.checkThreeModel(pm.name) == false){
+	    	return;  
+	    }
+        
+        var three = this.kag.tmp.three;
+        
+        this.kag.tmp.three.models[pm.name].stopAnim(pm.finish);
+        
+        this.kag.ftag.nextOrder();
+       	
+    },
+    
+    
+    
+        
+};
+
+
+
+
+/*
+ #[3d_camera]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dカメラ
+ 
+ :exp
+ 3Dシーンのカメラを設定できます。
+ カメラの座標を確認したい場合は[camera_debug]をつかって、座標や傾きをテストするのがおすすめです。
+ 
+ :sample
+ 
+[3d_camera pos="10,20,30" ]
+
+ :param
+ pos=カメラを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+ rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+ tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
+ lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。
+ 
+ :demo
+ 
+
+ #[end]
+ */
+ 
 
 //カメラの設定を変更
 tyrano.plugin.kag.tag["3d_camera"] = {
@@ -1125,11 +2000,12 @@ tyrano.plugin.kag.tag["3d_camera"] = {
      	
     pm : {
         
-        scale:"", //100,100,100 //みたいな感じで指定できる。
         pos:"",   // 100,40,50
         rot:"",   //
-        lookat:"",  //モデル名を設定。どの場所をみるか。 モデル名　か positionを直指定
+        lookat:"",  //モデル名を設定。どの場所をみるか。 モデル名　か positionを直指定。
         tonemap:"",
+        
+        next:"true",
         
     },
 
@@ -1145,10 +2021,12 @@ tyrano.plugin.kag.tag["3d_camera"] = {
         	camera.position.set(pos.x,pos.y,pos.z);
         }
         
+        /*
         if(pm.scale!=""){
 	        let scale = $.three_pos(pm.scale);
             camera.scale.set(scale.x,scale.y,scale.z);
 		}
+		*/
 		
 		if(pm.rot !=""){
 	        let rot = $.three_pos(pm.rot);
@@ -1163,7 +2041,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 		    	z:0
 	    	};
 	    	
-	    	if(TYRANO.kag.tmp.three.models[pm.lookat]){
+	    	if(three.models[pm.lookat]){
 				var model = TYRANO.kag.tmp.three.models[pm.lookat].model;
 				
 				pos.x = model.position.x;
@@ -1174,8 +2052,6 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 				//座標を直接し指定
 				pos = $.three_pos(pm.lookat);
 			}
-			
-			console.log(pos);
 			
 			camera.lookAt(new THREE.Vector3(pos.x,pos.y,pos.z));
 	     
@@ -1195,9 +2071,10 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 			
 		}
         
+        if(pm.next == "true"){
+			this.kag.ftag.nextOrder();
+	    }
         
-        this.kag.ftag.nextOrder();
-            
         
         
     },
@@ -1208,15 +2085,46 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 };
 
 
-//カメラのコントロール
+
+/*
+ #[3d_camera_debug]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dカメラデバッグ
+ 
+ :exp
+ 3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら、調整することができます。
+ デバッグを終了する場合は画面左上のボタンを押します。
+ マウス操作
+ 左クリック：カメラの向き(rot)
+ 右クリック：カメラの位置(pos)
+ 中央クリック：ポジションのz軸
+
+ 
+ :sample
+ 
+[3d_camera pos="10,20,30" ]
+
+ :param
+ button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」 
+ 
+ :demo
+ 
+
+ #[end]
+ */
+ 
+ 
+ 
 tyrano.plugin.kag.tag["3d_camera_debug"] = {
 
     vital : [],
      	
     pm : {
         
-        name:"",
-        time:"500",
+        button_text:"3Dインスペクタを閉じる",
         
     },
 
@@ -1254,7 +2162,7 @@ tyrano.plugin.kag.tag["3d_camera_debug"] = {
         j_canvas.on("mouseup",evt_mouseup);
         
         
-        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>3Dインスペクタを閉じる</span></button></div>");
+        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
         j_close_button.draggable({
     
             scroll : false,
@@ -1298,8 +2206,39 @@ tyrano.plugin.kag.tag["3d_camera_debug"] = {
 };
 
 
-//モーションが登録されている場合変更する
-tyrano.plugin.kag.tag["model_motion"] = {
+
+/*
+ #[3d_motion]
+ :group
+ 3D関連
+ 
+ :title
+ モーション変更
+ 
+ :exp
+ 3Dモデルのモーションを変更することができます。
+ 
+ :sample
+
+;モデルの定義。最初はRunningというモーションで表示。 
+[3d_model_new name="Robot" storage="Robot.glb" pos="0,0,0" scale="2" motion="Running" ]
+[3d_show name="Robot" rot="0.28,0.67,0" pos="-129,-24,910" scale="9.68" ]
+
+モーションを変更します。[p]
+
+[3d_motion name="Robot" motion="Punch"]
+
+ :param
+ name=3Dオブジェクトの名前を指定します。 ,
+ motion=モーション名を指定してください。
+ 
+ :demo
+ 
+
+ #[end]
+ */
+ 
+tyrano.plugin.kag.tag["3d_motion"] = {
 
     vital : ["name","motion"],
      	
@@ -1326,52 +2265,55 @@ tyrano.plugin.kag.tag["model_motion"] = {
     },
     
     
-    
-        
 };
 
 
 
-//再生中の3Dアニメを停止します。
+/*
+ #[3d_debug]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dデバッグ
+ 
+ :exp
+ 3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整することができます。
+ デバッグを終了する場合は画面左上のボタンを押します。
+ マウス操作
+ 左クリック：カメラの向き(rot)
+ 右クリック：カメラの位置(pos)
+ 中央クリック：ポジションのz軸
+ スクロール：拡大縮小（scale）
+ 
+ :sample
+ 
+[3d_model_new name="Robot" storage="Robot.glb" ]
+[3d_show name="Robot" rot="0.28,0.67,0" pos="-129,-24,910" scale="9.68" ]
 
-tyrano.plugin.kag.tag["3d_anim_stop"] = {
+モーションを変更します。[p]
 
-    vital : ["name"],
-    
-    pm : {
-        
-        name:"",
-    	finish:"true", //アニメーション予定だった最後まで移動させるかどか。
-    	    
-    },
+[3d_debug name="Robot" ]
 
-    start : function(pm) {
-        
-        if($.checkThreeModel(pm.name) == false){
-	    	return;  
-	    }
-        
-        var three = this.kag.tmp.three;
-        
-        this.kag.tmp.three.models[pm.name].stopAnim(pm.finish);
-        
-        this.kag.ftag.nextOrder();
-       	
-    },
-    
-    
-    
-        
-};
+ :param
+ name=デバッグする3Dオブジェクトのnameを指定してください。
+ button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」 
+ 
+ :demo
+ 
 
-
-tyrano.plugin.kag.tag["model_debug"] = {
+ #[end]
+ */
+ 
+ 
+tyrano.plugin.kag.tag["3d_debug"] = {
 
     vital : ["name"],
      	
     pm : {
         
         name:"",
+        button_text:"3Dインスペクタを閉じる",
         
     },
 
@@ -1389,7 +2331,6 @@ tyrano.plugin.kag.tag["model_debug"] = {
 		j_canvas.css("z-index",9999999);
 		target_layer.css("z-index",9999999);
 		
-        
         var model_obj = this.kag.tmp.three.models[pm.name]; 
         var model = model_obj.model;
         
@@ -1557,12 +2498,11 @@ tyrano.plugin.kag.tag["model_debug"] = {
         renderer.domElement.addEventListener('mousemove', evt_mousemove,false);
         
 	    
-	    
         //デバッグ終了ボタンを押すと、nextOrderする。
         //リロードボタンの配置
         //メッセージエリア非表示。
         
-        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>3Dインスペクタを閉じる</span></button></div>");
+        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
         j_close_button.draggable({
     
             scroll : false,

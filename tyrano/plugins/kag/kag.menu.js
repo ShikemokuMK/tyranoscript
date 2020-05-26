@@ -326,6 +326,34 @@ tyrano.plugin.kag.menu = {
         var _current_order_index = that.kag.ftag.current_order_index - 1;
         var _stat = $.extend(true, {}, $.cloneObject(that.kag.stat));
         
+        
+        //3Dオブジェクトが実装されてる場合復元させる。////////////////////
+        
+        var three = this.kag.tmp.three;
+        var models = three.models;
+       
+        var three_save = {};
+        
+        three_save.stat = three.stat;
+        three_save.evt  = three.evt;
+        
+        var three = this.kag.tmp.three;
+        
+        var save_models = {};
+       
+        for(var key in models){
+	    	
+	    	var model = models[key];
+	    	save_models[key] = model.toSaveObj();
+	    	
+	    }
+        
+        three_save.models = save_models;
+        
+        /////////////////////////////////////////////////////////////
+            
+       
+        
         if(typeof flag_thumb =="undefined"){
             flag_thumb = this.kag.config.configThumbnail;
         }
@@ -338,6 +366,7 @@ tyrano.plugin.kag.menu = {
 
             data.title = title;
             data.stat = _stat;
+            data.three = three_save;
             data.current_order_index = _current_order_index;
             //１つ前
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
@@ -365,6 +394,8 @@ tyrano.plugin.kag.menu = {
     
                     data.title = title;
                     data.stat = _stat;
+                    data.three = three_save;
+            
                     data.current_order_index = _current_order_index;
                     //１つ前
                     data.save_date = $.getNowDate() + "　" + $.getNowTime();
@@ -373,7 +404,7 @@ tyrano.plugin.kag.menu = {
                     //レイヤ部分のHTMLを取得
                     var layer_obj = that.kag.layer.getLayeyHtml();
                     data.layer = layer_obj;
-
+					
                     that.snap = $.extend(true, {}, $.cloneObject(data));
 
                     if (call_back) {
@@ -636,7 +667,6 @@ tyrano.plugin.kag.menu = {
                 }
             }
         }
-            
         
         //layerの復元
         this.kag.layer.setLayerHtml(data.layer);
@@ -828,6 +858,52 @@ tyrano.plugin.kag.menu = {
             
         }
         
+        
+        //3Dモデルの復元/////////////////////////////////////////////
+        this.kag.stat.is_strong_stop = true;
+        
+        var three = data.three;
+        this.kag.ftag.startTag("3d_init",{layer:three.stat.layer});
+        var models = three.models;
+        
+        if(three.stat.is_load==true){
+	    	
+	    	for(var key in models){
+	    		
+	    		var model = models[key];
+	    		var pm = model.pm
+	    		
+	    		pm["pos"] = model.pos;
+	    		pm["rot"] = model.rot;
+	    		pm["scale"] = model.scale;
+	    		
+	    		var tag = pm._tag;
+	    		
+	    		if(key=="camera"){
+		    		tag="3d_camera";	
+		    	}
+		    	
+		    	pm["next"]="false";
+	    		
+	    		this.kag.ftag.startTag(tag,pm);
+			
+			}
+        
+	    }
+        
+        if(three.stat.canvas_show){
+	    	this.kag.tmp.three.j_canvas.show();
+	    }else{
+			this.kag.tmp.three.j_canvas.hide();
+		}
+	    
+	    this.kag.tmp.three.stat = three.stat;
+	    this.kag.tmp.three.evt  = three.evt;
+	    
+        
+        this.kag.stat.is_strong_stop = false;
+        
+        ////////////////////////
         
         //カーソルの復元
         this.kag.setCursor(this.kag.stat.current_cursor);

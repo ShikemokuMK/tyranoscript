@@ -2,24 +2,32 @@
 //コンバート実行機能
 class ThreeModel {
 
-    constructor(obj){
+    constructor(obj,three){
         
         /*
         this.name  = obj.name;
         this.model = obj.model;
         this.mixer = obj.mixer;
         this.gltf  = obj.gltf;
+        this.pm    = obj.pm;
         */
         
         for(let key in obj){
 	    	this[key] = obj[key];
 	    }
         
+        this.model.name = obj.name;
         this.setUserData("name",obj.name);
         
-        this.visible = false;
-        
-        this.opacity(0);
+        if(this.pm.visible == true){
+	    	this.visible = true;
+			this.opacity(1);
+			three.scene.add(this.model);
+        }else{
+			this.visible = false;
+			this.opacity(0);
+        }
+	    
         
         this.anim_obj = {};
         
@@ -91,7 +99,7 @@ class ThreeModel {
 	                }
                     
                     if(typeof cb=="function"){
-	                	cb();
+	                	cb(this.model);
 	                }
                     
                 }
@@ -146,6 +154,7 @@ class ThreeModel {
 		
         
         var arr = ["x","y","z"];
+        var cnt_fin = 0;
         
         this.anim_obj[type] = {};
 				
@@ -170,11 +179,15 @@ class ThreeModel {
 						},
 		                complete:()=> {
 			                
-		                    j_obj.remove();
+			                j_obj.remove();
 		                    delete this.anim_obj[key];
 		                    
-		                    if(typeof cb =="function"){
-			                	cb();
+		                    cnt_fin++;
+		                    
+		                    if(arr.length == cnt_fin){
+			                    if(typeof cb =="function"){
+				                	cb();
+				                }
 			                }
 		                }
 		            }
@@ -219,12 +232,33 @@ class ThreeModel {
     
     opacity(val){
         
-        this.model.traverse(function(node) {
-            if(node.isMesh){
-                node.material.transparent = true;
-                node.material.opacity = val;
-            }
-        });
+        
+        if(this.model.isMesh){
+	    	
+	    	var mat = this.model.material;
+	    	
+	    	if(!Array.isArray(mat)){
+		    	mat = [mat];
+		    }
+	    	
+	    	for(var i=0; i < mat.length;i++){
+	    		
+	    		var node = mat[i];
+	    		node.transparent = true;
+	            node.opacity = val;
+	                
+	        }
+	        
+	    }else{
+        
+	        this.model.traverse(function(node) {
+	            if(node.isMesh){
+	                node.material.transparent = true;
+	                node.material.opacity = val;
+	            }
+	        });
+	        
+        }
         
     }
     
@@ -261,5 +295,22 @@ class ThreeModel {
 		
 	}
 
+	toSaveObj(){
+		
+		var obj = {};
+		var m = this.model;
+		
+		obj["name"]  = this.name;
+		obj["pos"]   = m.position.x+","+m.position.y+","+m.position.z;
+		obj["rot"]   = m.rotation.x+","+m.rotation.y+","+m.rotation.z;
+		obj["scale"] = m.scale.x+","+m.scale.y+","+m.scale.z;
+		
+		obj.pm = this.pm;
+		obj.pm["visible"] = this.visible;
+		
+		return obj;
+		
+	
+	}
 
 }

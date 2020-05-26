@@ -364,6 +364,12 @@ tyrano.plugin.kag.layer ={
         $(".fixlayer").each(function(){
             $(this).remove();
         });
+        
+//canvasは削除
+		$("canvas").each(function(){
+            $(this).remove();
+        });
+        
            
 //fixlayer は復元しない 
         
