@@ -19,6 +19,18 @@ $.three_pos = function(str){
     
 };
 
+$.setVector = function(model){
+	
+	var vector = {};
+	
+	vector["pos"] = {"x":model.position.x,"y":model.position.y,"z":model.position.z};
+	vector["rot"] = {"x":model.rotation.x,"y":model.rotation.y,"z":model.rotation.z};
+	vector["scale"] = {"x":model.scale.x,"y":model.scale.y,"z":model.scale.z};
+	
+	return vector;
+	
+}
+
 
 $.orgFloor = function(value, base) {
 	
@@ -57,8 +69,11 @@ $.checkThreeModel = function(name){
  [3d_init layer=0 ]
  
  :param
- layer=3Dモデルを配置するレイヤを指定できます。
-  
+ layer=3Dモデルを配置するレイヤを指定できます。,
+ camera=カメラのモードを指定できます。「Perspective」（遠近感あり）「Orthographic」（遠近感なしの平行投影）デフォルトはPerspective,
+ near=カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１,
+ far=カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000
+ 
  :demo
  
  
@@ -72,7 +87,10 @@ tyrano.plugin.kag.tag["3d_init"] = {
     pm : {
         
         layer:"0",
-        page:"fore"
+        page:"fore",
+        camera:"Perspective",
+        near:"1",
+        far:"5000",
         
     },
     
@@ -119,39 +137,37 @@ tyrano.plugin.kag.tag["3d_init"] = {
         // シーンを作成
         const scene = new THREE.Scene();
     
-        // カメラを作成
-        const camera = new THREE.PerspectiveCamera(45, sc_width / sc_height);
+		//
+		const camera_mode = pm.camera+"Camera";
+        
+        // カメラを作成 Perspective or Orthographic 
+        const camera = new THREE[camera_mode](45, sc_width / sc_height, parseFloat(pm.near), parseFloat(pm.far) );
+        camera.rotation.order = 'YXZ';
+	    
         camera.position.set(0, 0, +1000);
         
         this.kag.tmp.three.models["camera"] = new ThreeModel({"name":"camera","model":camera,"mixer":null,"gltf":null,"pm":pm},three);
         
-    
+        
         //指定のレイヤは表示状態に移行。
         target_layer.show();
         
+        //環境光
+        const light_amb = new THREE.AmbientLight(0xFFFFFF, 1);
+        scene.add(light_amb);
         
-        var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-        scene.add( directionalLight );
-        
-        const amb_light = new THREE.AmbientLight(0xFFFFFF, 1);
-        scene.add(amb_light);
-        
-        /*
-        var directionalLightShadowHelper = new THREE.CameraHelper( directionalLight.shadow.camera);
-        scene.add( directionalLightShadowHelper);
-         
-        var directionalLightHelper = new THREE.DirectionalLightHelper( directionalLight);
-        scene.add( directionalLightHelper);
-        */
-        
+        //並行方向からの光
+        const light = new THREE.DirectionalLight(0xFFFFFF, 1);
+		scene.add(light);
         
         this.kag.tmp.three.stat.is_load = true;
         this.kag.tmp.three.stat.canvas_show = true;
-        this.kag.tmp.three.stat.layer = pm.layer;
+        this.kag.tmp.three.stat.init_pm = pm;
         
         this.kag.tmp.three.camera = camera;
         this.kag.tmp.three.scene = scene;
         this.kag.tmp.three.renderer = renderer;
+        this.kag.tmp.three.light_amb = light_amb;
         
         this.kag.tmp.three.target_layer = target_layer;
         this.kag.tmp.three.j_canvas = j_canvas;
@@ -359,6 +375,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 		            
 		            //モーションが指定されている場合はそれを再生する
 		            if(pm.motion!=""){
+			            
 			        	for(var i=0;i<animations.length;i++){
 				        	var name = animations[i].name;
 				        	
@@ -605,7 +622,9 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
         
         // マテリアルを作成する
         const material = new THREE.SpriteMaterial({
-        	map: new THREE.TextureLoader().load(storage_url)
+        	map: new THREE.TextureLoader().load(storage_url),
+        	alphaTest:0.01 ,
+			transparent:true
         });
         
         
@@ -1031,6 +1050,7 @@ tyrano.plugin.kag.tag["3d_image_new"] = {
 	    	var texture_url = "./data/others/3d/texture/" + pm.texture;
         
 			$("<img />").attr("src",texture_url).on("load",(e)=>{
+				
              	var width = $(e.currentTarget).get(0).width;
                 var height = $(e.currentTarget).get(0).height;
 				
@@ -1136,7 +1156,9 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
 				const texture = loader.load(texture_url);
 				// マテリアルにテクスチャーを設定
 				material = new THREE.MeshStandardMaterial({
-				    map: texture
+				    map: texture ,
+				    alphaTest:0.01 ,
+				    transparent:true
 				});
 				
 			}
@@ -1285,8 +1307,6 @@ tyrano.plugin.kag.tag["3d_show"] = {
         
         
     },
-    
-    
     
         
 };
@@ -1510,7 +1530,7 @@ tyrano.plugin.kag.tag["3d_hide_all"] = {
 tyrano.plugin.kag.tag["3d_delete"] = {
 
     vital : ["name"],
-     	
+    
     pm : {
         
         name:"",
@@ -1815,6 +1835,8 @@ tyrano.plugin.kag.tag["3d_anim"] = {
         rot:"",
         scale:"",
         
+        lookat:"",
+        
         wait:"true",
         
     },
@@ -1963,6 +1985,124 @@ tyrano.plugin.kag.tag["3d_anim_stop"] = {
 
 
 
+/*
+ #[3d_scene]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dシーン設定
+ 
+ :exp
+ 3Dのシーン全体に影響する設定を行うことができます。
+ 
+ :sample
+ 
+ [3d_scene light_amb="2" tonemap=""]
+
+ :param
+ 
+ tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
+ tonemap_value=トーンマッピングの強さを設定します。デフォルトは0.8です。,
+ light_amb=環境光の強さを指定します。デフォルトは1。例えば 0.5 だと暗め。2だとかなり明るくなります。
+ 
+ 
+ :demo
+ 
+
+ #[end]
+ */
+ 
+
+//カメラの設定を変更
+tyrano.plugin.kag.tag["3d_scene"] = {
+
+    vital : [],
+     	
+    pm : {
+        
+        tonemap:"",
+        tonemap_value:"0.8",
+        
+        light_amb:"",   // 100,40,50
+        
+        fog:"",   //
+        fog_range:"1,3000",
+        fog_color:"0xFFFFFF",   
+        
+        next:"true",
+        
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
+        var camera = three.camera;
+        var renderer = three.renderer;
+        
+        if(pm.light_amb!=""){
+	    	
+	    	three.stat.scene_pm["light_amb"] = pm.light_amb;
+	    	
+	    	//オブジェクトに設定を入れる。
+			three.light_amb.intensity = parseFloat(pm.light_amb);
+			
+	    		
+	    }
+	    
+        if(pm.tonemap!=""){
+			
+			three.stat.scene_pm["tonemap"] = pm.tonemap;
+		
+			//表示の方法
+	        renderer.toneMapping = THREE[pm.tonemap + "ToneMapping"];
+			renderer.toneMappingExposure = parseFloat(pm.tonemap_value);
+			
+			//needs update 
+			for(let key in three.models){
+				three.models[key].needsUpdate();
+			}
+			
+		}
+		
+		if(pm.fog != ""){
+			
+			if(pm.fog=="true"){
+				
+				three.stat.scene_pm["fog"] = pm.fog;
+				three.stat.scene_pm["fog_color"] = pm.fog_color;
+				three.stat.scene_pm["fog_range"] = pm.fog_range;
+				
+				var fog_tmp = pm.fog_range.split(",");
+				scene.fog = new THREE.Fog(parseInt(pm.fog_color), parseFloat(fog_tmp[0]), parseFloat(fog_tmp[1]));
+				
+			}else{
+				
+				three.stat.scene_pm["fog"];
+				
+				scene.fog.near = 0.1;
+				scene.fog.far = 0;
+				
+			}
+		
+		}
+        
+        if(pm.next=="true"){
+        	this.kag.ftag.nextOrder();
+	    }
+	    
+        
+    },
+    
+    
+    
+        
+};
+
+
+
+
 
 /*
  #[3d_camera]
@@ -1984,7 +2124,7 @@ tyrano.plugin.kag.tag["3d_anim_stop"] = {
  pos=カメラを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
  rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
  tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
- lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。
+ lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。,
  
  :demo
  
@@ -2003,7 +2143,6 @@ tyrano.plugin.kag.tag["3d_camera"] = {
         pos:"",   // 100,40,50
         rot:"",   //
         lookat:"",  //モデル名を設定。どの場所をみるか。 モデル名　か positionを直指定。
-        tonemap:"",
         
         next:"true",
         
@@ -2014,7 +2153,6 @@ tyrano.plugin.kag.tag["3d_camera"] = {
         var three = this.kag.tmp.three;
         var camera = three.camera;
         var renderer = three.renderer;
-        
         
         if(pm.pos!=""){
         	let pos = $.three_pos(pm.pos);
@@ -2032,6 +2170,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 	        let rot = $.three_pos(pm.rot);
             camera.rotation.set(rot.x,rot.y,rot.z);
         }
+		
         
         if(pm.lookat!=""){
 	    	
@@ -2057,20 +2196,6 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 	     
 	    }
 	    
-	    if(pm.tonemap!=""){
-			
-			//表示の方法
-	        renderer.toneMapping = THREE[pm.tonemap + "ToneMapping"];
-			renderer.toneMappingExposure = 0.8;
-			
-			//needs update 
-			for(let key in three.models){
-				three.models[key].needsUpdate();
-			}
-			
-			
-		}
-        
         if(pm.next == "true"){
 			this.kag.ftag.nextOrder();
 	    }
@@ -2087,7 +2212,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 
 
 /*
- #[3d_camera_debug]
+ #[3d_debug_camera]
  :group
  3D関連
  
@@ -2108,7 +2233,8 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 [3d_camera pos="10,20,30" ]
 
  :param
- button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」 
+ button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「カメラインスペクタを閉じる」 ,
+ menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) 
  
  :demo
  
@@ -2116,15 +2242,284 @@ tyrano.plugin.kag.tag["3d_camera"] = {
  #[end]
  */
  
+
  
  
-tyrano.plugin.kag.tag["3d_camera_debug"] = {
+tyrano.plugin.kag.tag["3d_debug_camera"] = {
 
     vital : [],
      	
     pm : {
         
-        button_text:"3Dインスペクタを閉じる",
+        name:"camera",
+        button_text:"カメラインスペクタを閉じる",
+        menu:"true",
+    },
+
+    start : function(pm) {
+        
+        
+        var three = this.kag.tmp.three;
+        
+        //一番前にもってきて、うごかせるようにする。
+		var j_canvas = three.j_canvas;
+		var target_layer = three.target_layer;
+		
+		var old_target_layer_zindex = target_layer.css("z-index");
+		var old_canvas_zindex = j_canvas.css("z-index");
+		
+		j_canvas.css("z-index",9999999);
+		target_layer.css("z-index",9999999);
+		
+        var model_obj = this.kag.tmp.three.models[pm.name]; 
+        var model = model_obj.model;
+        
+        var renderer = three.renderer;
+        var camera   = three.camera;
+        
+        var sc_width = parseInt(this.kag.config.scWidth);
+        var sc_height = parseInt(this.kag.config.scHeight);
+            
+        // オブジェクトの回転
+        var prevPosition ={};
+        var mousedown = false;
+        var button = 0;
+
+        //オブジェクトの移動
+        var vec = new THREE.Vector3(); // create once and reuse
+        var pos = new THREE.Vector3(); // create once and reuse
+        
+        var original_pos = new THREE.Vector3(); // create once and reuse
+        
+        var hen_pos = {
+            
+            x:0,
+            y:0,
+            z:0,
+            
+        }
+        
+        var original_v = $.setVector(model);
+        
+        var first_client_x = 0;
+        var first_client_y = 0;
+         
+        var first_model_x = 0;
+        var first_model_y = 0;
+        var first_model_z = 0;
+        
+        //var first_model_z = 0;
+        
+        function evt_mousewheel(e){
+	    	
+	    	var delta = e.wheelDelta;
+            
+            if(delta < 0){
+                model.position.z += 5;
+            }else{
+	            model.position.z -= 5;
+            }
+            
+            evt_mouseup();
+	    	e.preventDefault();
+	    
+	    }
+        
+        
+        function evt_mousedown(e){
+	    
+	    	if (e.button == 0) {
+                
+                button = 0;
+                
+                first_client_x = e.clientX;
+                first_client_y = e.clientY;
+                
+                first_model_x = model.rotation.x;
+                first_model_y = model.rotation.y;
+                
+                
+            }
+            else if (e.button == 1) {
+                //target.innerHTML = "中ボタンが押されました。";
+                button = 1;
+                first_client_y = e.clientY;
+                first_model_z = model.position.z;
+                
+            }
+            else if (e.button == 2) {
+	            
+                button = 2;
+                
+                first_client_x = e.clientX;
+                first_client_y = e.clientY;
+                
+                first_model_x = model.position.x;
+                first_model_y = model.position.y;
+                                
+            }
+            
+            mousedown = true;
+            
+	    
+	    }
+	    
+        function evt_mousemove(e){
+	    
+	    	if (!mousedown) return;
+            
+            if(button==0){
+
+                var hen_x = first_client_x - e.clientX;
+	        	model.rotation.y = first_model_y + hen_x * 0.005;
+	        	
+                var hen_y = first_client_y - e.clientY;
+	        	model.rotation.x = first_model_x + hen_y * 0.005;
+	        	
+	        	
+            }else if(button==1){
+	        	
+	        	var hen_y = first_client_y - e.clientY;
+	        	model.position.z = first_model_z + hen_y;
+                
+	        }else if(button ==2){
+                
+                
+                var hen_x = first_client_x - e.clientX;
+	        	model.position.x = first_model_x + hen_x * 1;
+	        	
+                var hen_y = first_client_y - e.clientY;
+	        	model.position.y = first_model_y + hen_y * -1;
+	        	
+	        	model.position.x = $.orgFloor(model.position.x, 1);
+                model.position.y = $.orgFloor(model.position.y, 1);
+                
+			}
+	    
+	    }
+        
+        function evt_mouseup(e){
+	    	
+	    	first_client_x = 0;
+	    	first_client_y = 0;
+	    	
+	    	if(button==0){
+                
+                var str = $.orgFloor(model.rotation.x,100) + "," + $.orgFloor(model.rotation.y,100) + "," + model.rotation.z;
+                
+            }else if(button ==2 || button==1){
+            	
+                
+            }
+            
+            var msg_pos = model.position.x + "," + model.position.y + "," + model.position.z;
+			var msg_rot = $.orgFloor(model.rotation.x,100) + "," + $.orgFloor(model.rotation.y,100) + "," + $.orgFloor(model.rotation.z,100);
+			var msg_scale = $.orgFloor(model.scale.x,100) + "," + $.orgFloor(model.scale.y,100) + "," + $.orgFloor(model.scale.z,100);
+			
+			var msg = 'pos="'+msg_pos+'" rot="'+msg_rot+'" scale="'+msg_scale+'" ';
+			j_debug_msg.find("input").val(msg);
+            
+            mousedown = false;
+	    	
+	    }
+	    
+	    
+	    ///マウスホイール
+        renderer.domElement.addEventListener("mousewheel",evt_mousewheel,false);
+            
+        renderer.domElement.addEventListener('mousedown',evt_mousedown,false);
+        
+        renderer.domElement.addEventListener('mouseup', evt_mouseup,false);
+        
+        renderer.domElement.addEventListener('mousemove', evt_mousemove,false);
+        
+	    
+        //デバッグ終了ボタンを押すと、nextOrderする。
+        //リロードボタンの配置
+        //メッセージエリア非表示。
+        
+        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
+        j_close_button.draggable({
+    
+            scroll : false,
+            //containment:".tyrano_base",
+            stop : (e, ui) => {
+                
+            }
+        });
+        
+        var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
+        var j_copy_button = $("<input type='button' value='コピー' />");
+        
+        j_copy_button.on("click",(e)=>{
+	    	
+	    	evt_mouseup();
+	    	
+	    	j_debug_msg.find("input").select();
+			// コピー
+			document.execCommand("copy");
+	    	
+	    });
+	    
+	    var j_reset_button = $("<input type='button' value='リセット' />");
+        j_reset_button.on("click",(e)=>{
+	    	
+	    	//モデルを最初の位置に戻す
+	    	//document.execCommand("copy");
+	    	model.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z ); 
+	    	model.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z ); 
+	    	model.scale.set(original_v.scale.x, original_v.scale.y, original_v.scale.z ); 
+	    	
+	    });
+        
+        
+        j_close_button.find("button").on("click",(e)=>{
+            j_close_button.remove();
+            
+			j_canvas.css("z-index",old_canvas_zindex);
+			target_layer.css("z-index",old_target_layer_zindex);
+			
+            
+            renderer.domElement.removeEventListener("mousedown",evt_mousedown);
+            renderer.domElement.removeEventListener("mouseup",evt_mouseup);
+            renderer.domElement.removeEventListener("mousemove",evt_mousemove);
+            renderer.domElement.removeEventListener("mousewheel",evt_mousewheel);
+            
+            this.kag.ftag.nextOrder();
+            
+        });
+        
+        if(pm.menu=="true") { 
+	        
+	        j_close_button.append("<span style='font-size:10px'>｜</span>");
+	        j_close_button.append(j_copy_button);
+	        j_close_button.append(j_reset_button);
+	        j_close_button.append(j_debug_msg);
+	        
+        }
+        
+        $("body").append(j_close_button);
+        
+            
+        
+        
+    },
+    
+    
+    
+        
+};
+
+
+ 
+ 
+tyrano.plugin.kag.tag["3d_debug_camera_bk"] = {
+
+    vital : [],
+     	
+    pm : {
+        
+        button_text:"カメラインスペクタを閉じる",
         
     },
 
@@ -2147,6 +2542,8 @@ tyrano.plugin.kag.tag["3d_camera_debug"] = {
 		
         this.kag.tmp.three.orbit_controls = controls;
         
+        var original_v = $.setVector(camera);
+        
         function evt_mouseup(e){
 	    	
             var msg_pos = $.orgFloor(camera.position.x,1) + "," + $.orgFloor(camera.position.y,1) + "," + $.orgFloor(camera.position.z,1);
@@ -2161,7 +2558,6 @@ tyrano.plugin.kag.tag["3d_camera_debug"] = {
         
         j_canvas.on("mouseup",evt_mouseup);
         
-        
         var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
         j_close_button.draggable({
     
@@ -2173,6 +2569,30 @@ tyrano.plugin.kag.tag["3d_camera_debug"] = {
         });
         
         var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
+        
+        var j_copy_button = $("<input type='button' value='コピー' />");
+        j_copy_button.on("click",(e)=>{
+	    	
+	    	evt_mouseup();
+	    	
+	    	j_debug_msg.find("input").select();
+			// コピー
+			document.execCommand("copy");
+	    	
+	    });
+        
+        var j_reset_button = $("<input type='button' value='リセット' />");
+        j_reset_button.on("click",(e)=>{
+	    	
+	    	//モデルを最初の位置に戻す
+	    	//document.execCommand("copy");
+	    	camera.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z ); 
+	    	camera.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z ); 
+	    	camera.scale.set(original_v.scale.x, original_v.scale.y, original_v.scale.z ); 
+	    	
+	    	evt_mouseup();
+	    	
+	    });
         
         
         j_close_button.find("button").on("click",(e)=>{
@@ -2188,6 +2608,13 @@ tyrano.plugin.kag.tag["3d_camera_debug"] = {
             this.kag.ftag.nextOrder();
             
         });
+        
+        
+        j_close_button.append("<span style='font-size:10px'>｜</span>");
+        
+        j_close_button.append(j_copy_button);
+        
+        j_close_button.append(j_reset_button);
         
         j_close_button.append(j_debug_msg);
         
@@ -2297,7 +2724,8 @@ tyrano.plugin.kag.tag["3d_motion"] = {
 
  :param
  name=デバッグする3Dオブジェクトのnameを指定してください。
- button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」 
+ button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」,
+ menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) 
  
  :demo
  
@@ -2314,7 +2742,7 @@ tyrano.plugin.kag.tag["3d_debug"] = {
         
         name:"",
         button_text:"3Dインスペクタを閉じる",
-        
+        menu:"true", 
     },
 
     start : function(pm) {
@@ -2359,6 +2787,8 @@ tyrano.plugin.kag.tag["3d_debug"] = {
             
         }
         
+        var original_v = $.setVector(model);
+        
         var first_client_y = 0; 
         var first_model_z = 0;
         
@@ -2380,6 +2810,8 @@ tyrano.plugin.kag.tag["3d_debug"] = {
             
             }
             
+            evt_mouseup();
+	    	
             e.preventDefault();
 	    
 	    }
@@ -2469,11 +2901,10 @@ tyrano.plugin.kag.tag["3d_debug"] = {
 	    	if(button==0){
                 
                 var str = $.orgFloor(model.rotation.x,100) + "," + $.orgFloor(model.rotation.y,100) + "," + model.rotation.z;
-                console.log('rot="'+str+'"');
     
             }else if(button ==2 || button==1){
-            
-                
+            	
+            	   
             }
             
             var msg_pos = model.position.x + "," + model.position.y + "," + model.position.z;
@@ -2513,6 +2944,28 @@ tyrano.plugin.kag.tag["3d_debug"] = {
         });
         
         var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
+        var j_copy_button = $("<input type='button' value='コピー' />");
+        
+        j_copy_button.on("click",(e)=>{
+	    	
+	    	evt_mouseup();
+	    	
+	    	j_debug_msg.find("input").select();
+			// コピー
+			document.execCommand("copy");
+	    	
+	    });
+	    
+	    var j_reset_button = $("<input type='button' value='リセット' />");
+        j_reset_button.on("click",(e)=>{
+	    	
+	    	//モデルを最初の位置に戻す
+	    	//document.execCommand("copy");
+	    	model.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z ); 
+	    	model.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z ); 
+	    	model.scale.set(original_v.scale.x, original_v.scale.y, original_v.scale.z ); 
+	    	
+	    });
         
         
         j_close_button.find("button").on("click",(e)=>{
@@ -2531,7 +2984,15 @@ tyrano.plugin.kag.tag["3d_debug"] = {
             
         });
         
-        j_close_button.append(j_debug_msg);
+        if(pm.menu=="true"){
+	        
+	        j_close_button.append("<span>｜</span>");
+	        j_close_button.append(j_copy_button);
+	        j_close_button.append(j_reset_button);
+	        
+	        j_close_button.append(j_debug_msg);
+	        
+        }
         
         $("body").append(j_close_button);
         

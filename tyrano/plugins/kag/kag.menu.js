@@ -863,8 +863,16 @@ tyrano.plugin.kag.menu = {
         this.kag.stat.is_strong_stop = true;
         
         var three = data.three;
-        this.kag.ftag.startTag("3d_init",{layer:three.stat.layer});
+        var init_pm = three.stat.init_pm;
+        
+        this.kag.ftag.startTag("3d_init",init_pm);
+        
         var models = three.models;
+        
+        var scene_pm = three.stat.scene_pm;
+        scene_pm["next"] = "false";
+        
+        this.kag.ftag.startTag("3d_scene",scene_pm);
         
         if(three.stat.is_load==true){
 	    	

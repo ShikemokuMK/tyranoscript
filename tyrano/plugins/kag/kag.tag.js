@@ -5214,6 +5214,7 @@ left=エフェクトをかける位置を指定することができます。（
 top=エフェクトをかける位置を指定することができます。（ピクセル）,
 width=エフェクトの幅を指定します。（ピクセル）,
 height=エフェクトの高さを指定します。（ピクセル）, 
+fit=true or false 演出を画面いっぱいに引き伸ばすことができます。デフォルトはtrue ,
 wait=動作効果の再生完了を待つか否かをtrueかfalseで指定できます。デフォルトはfalseです
 
 :demo
@@ -5238,6 +5239,8 @@ tyrano.plugin.kag.tag.layermode_movie = {
         loop:"true",
         mute:"false",
         speed:"",
+        
+        fit:"true",
         
         width:"",
         height:"",

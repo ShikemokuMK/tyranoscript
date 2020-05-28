@@ -90,6 +90,9 @@ tyrano.plugin.kag ={
             	is_load:false,
             	canvas_show:false,
             	start_event :true,
+				
+				scene_pm:{}, //シーン情報の設定
+				init_pm:{},//初期設定のpm
             },
             
             models:{},
