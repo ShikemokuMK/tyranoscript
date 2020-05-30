@@ -84,15 +84,30 @@ tyrano.plugin.kag ={
         
         video_playing:false,
         
+        angle:0 , //スマホの場合盾持ちか否か。0なら盾持ち。
+        
         three:{
             
             stat:{
+	            
             	is_load:false,
             	canvas_show:false,
             	start_event :true,
 				
 				scene_pm:{}, //シーン情報の設定
 				init_pm:{},//初期設定のpm
+				
+				
+				
+				gyro:{
+					
+					pm:{},
+					x:0,
+					y:0,
+					enable:-1
+					
+				},
+				
             },
             
             models:{},
@@ -759,11 +774,17 @@ tyrano.plugin.kag ={
         //tyranoの大本部分の調整
         this.tyrano.base.setBaseSize(this.config.scWidth,this.config.scHeight);
         
+		that.tmp.angle = $.getAngle();
+		
+        
         //スマホの場合は、実施。 PCの場合でも画面を一致させる処理→すべての画面フィットさせる仕様に変更
 //       if($.userenv() !="pc"){
             this.tyrano.base.fitBaseSize(that.config.scWidth,that.config.scHeight);
             //スマホの場合、傾いた時に再計算させる
             $(window).bind("load orientationchange resize",function(){
+	            
+	            that.tmp.angle = $.getAngle();
+		        
                 if(Math.abs(window.orientation) === 90){
                     if(window.pageYOffset===0){window.scrollTo(0,1);}
                     that.tyrano.base.fitBaseSize(that.config.scWidth,that.config.scHeight);
@@ -1072,7 +1093,7 @@ tyrano.plugin.kag ={
 			    "./tyrano/libs/three/three.js",
 			    
 			    "./tyrano/libs/three/loader/GLTFLoader.js",
-			    "./tyrano/libs/three/loader/ObjLoader.js",
+			    "./tyrano/libs/three/loader/OBJLoader.js",
 			    "./tyrano/libs/three/loader/MTLLoader.js",
 			    //"./tyrano/libs/three/loader/MMDLoader.js",
 			    

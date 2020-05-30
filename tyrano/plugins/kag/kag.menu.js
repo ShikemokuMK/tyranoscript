@@ -865,53 +865,78 @@ tyrano.plugin.kag.menu = {
         var three = data.three;
         var init_pm = three.stat.init_pm;
         
-        this.kag.ftag.startTag("3d_init",init_pm);
+        //一度全て停止
+        this.kag.ftag.startTag("3d_close",{});
         
-        var models = three.models;
+        setTimeout((e)=>{
+	        
+	        init_pm["next"] = "false";
+	        this.kag.ftag.startTag("3d_init",init_pm);
         
-        var scene_pm = three.stat.scene_pm;
-        scene_pm["next"] = "false";
-        
-        this.kag.ftag.startTag("3d_scene",scene_pm);
-        
-        if(three.stat.is_load==true){
-	    	
-	    	for(var key in models){
-	    		
-	    		var model = models[key];
-	    		var pm = model.pm
-	    		
-	    		pm["pos"] = model.pos;
-	    		pm["rot"] = model.rot;
-	    		pm["scale"] = model.scale;
-	    		
-	    		var tag = pm._tag;
-	    		
-	    		if(key=="camera"){
-		    		tag="3d_camera";	
-		    	}
+	        var models = three.models;
+	        
+	        var scene_pm = three.stat.scene_pm;
+	        scene_pm["next"] = "false";
+	        
+	        this.kag.ftag.startTag("3d_scene",scene_pm);
+	        
+	        if(three.stat.is_load==true){
 		    	
-		    	pm["next"]="false";
-	    		
-	    		this.kag.ftag.startTag(tag,pm);
-			
+		    	for(var key in models){
+		    		
+		    		var model = models[key];
+		    		var pm = model.pm
+		    		
+		    		pm["pos"] = model.pos;
+		    		pm["rot"] = model.rot;
+		    		pm["scale"] = model.scale;
+		    		
+		    		var tag = pm._tag;
+		    		
+		    		if(key=="camera"){
+			    		tag="3d_camera";	
+			    	}
+			    	
+			    	pm["next"]="false";
+			    	
+			    	console.log("=========");
+			    	console.log(tag);
+			    	console.log(pm);
+		    		
+		    		this.kag.ftag.startTag(tag,pm);
+				
+				}
+	        
+		    }
+		    
+		    //ジャイロの復元
+		    var gyro = three.stat.gyro;
+		    if(gyro.enable==1){
+		    	//復活させる。
+		    	var gyro_pm = gyro.pm;
+		    	gyro_pm["next"] = "false";
+		    	this.kag.ftag.startTag("3d_gyro",gyro_pm);
 			}
-        
-	    }
-        
-        if(three.stat.canvas_show){
-	    	this.kag.tmp.three.j_canvas.show();
-	    }else{
-			this.kag.tmp.three.j_canvas.hide();
-		}
+		    
+		    
+	        if(three.stat.canvas_show){
+		    	this.kag.tmp.three.j_canvas.show();
+		    }else{
+				this.kag.tmp.three.j_canvas.hide();
+			}
+		    
+		    this.kag.tmp.three.stat = three.stat;
+		    this.kag.tmp.three.evt  = three.evt;
+		    
+	        
+	        this.kag.stat.is_strong_stop = false;
+	        
+	        
 	    
-	    this.kag.tmp.three.stat = three.stat;
-	    this.kag.tmp.three.evt  = three.evt;
-	    
+	    },10);
         
-        this.kag.stat.is_strong_stop = false;
         
-        ////////////////////////
+        /////////////////////////////////////////////
         
         //カーソルの復元
         this.kag.setCursor(this.kag.stat.current_cursor);

@@ -92,6 +92,8 @@ tyrano.plugin.kag.tag["3d_init"] = {
         near:"1",
         far:"5000",
         
+        next:"true",
+        
     },
     
     clock:{},
@@ -177,11 +179,10 @@ tyrano.plugin.kag.tag["3d_init"] = {
         tick();
         
         // 毎フレーム時に実行されるループイベントです
+        //ランダムな数字
+        var t = Math.random() ;
+        
         function tick() {
-            
-            if(three.stat.is_load == false){
-            	return;
-            }
             
             if(three.orbit_controls){
             	three.orbit_controls.update();	    
@@ -190,15 +191,23 @@ tyrano.plugin.kag.tag["3d_init"] = {
             that.updateFrame();
             
             renderer.render(scene, camera); // レンダリング
-            requestAnimationFrame(tick);
+            
+            var req_id = requestAnimationFrame(tick);
+            
+            if(three.stat.is_load == false){
+	        	window.cancelAnimationFrame(req_id);
+            }
+            
+            
             
         }
         
         //イベント検知用の処理
         this.initEvent(this.kag.tmp.three);
         
-        this.kag.ftag.nextOrder();
-        
+        if(pm.next=="true"){
+        	this.kag.ftag.nextOrder();
+        }
         
     },
     
@@ -255,13 +264,12 @@ tyrano.plugin.kag.tag["3d_init"] = {
     
     updateFrame:function(){
         
-        
-        
+        var three = this.kag.tmp.three;
+        var camera = three.camera;
         //対応が必要なフレーム処理をここで実施する。
-        var models = this.kag.tmp.three.models;
+        var models = three.models;
         
         var delta = this.clock.getDelta();
-        
         
         for(key in models){
             
@@ -270,6 +278,14 @@ tyrano.plugin.kag.tag["3d_init"] = {
             }
             
         }
+        
+        //フレームアップデートのタイミングでジャイロ
+        if(three.stat.gyro.enable == 1){
+	    	
+	    	camera.rotation.x = three.stat.gyro.x;
+	    	camera.rotation.y = three.stat.gyro.y;
+	    	
+	    }
             
     }
     
@@ -598,7 +614,7 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
         name:"",
         storage:"",
         
-        scale:"1", 
+        scale:"", 
         pos:"0",  
         rot:"0",
         tonemap:"false",
@@ -642,13 +658,17 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
             var height = $(e.currentTarget).get(0).height;
 			
 			let pos = $.three_pos(pm.pos);
-	        let scale = $.three_pos(pm.scale);
 	        let rot = $.three_pos(pm.rot);
 				
 			model.position.set(pos.x,pos.y,pos.z);
 	        model.rotation.set(rot.x,rot.y,rot.z);
 			
-			model.scale.set((parseInt(width)*scale.x),(parseInt(height)*scale.y),scale.z);
+			if(pm.scale==""){
+				model.scale.set((parseInt(width)*1),(parseInt(height)*1),1);
+	        }else{
+		    	let scale = $.three_pos(pm.scale);
+				model.scale.set(scale.x,scale.y,scale.z);
+		    }
 	        
 			var three = this.kag.tmp.three;
 	        var scene = three.scene;
@@ -2125,7 +2145,6 @@ tyrano.plugin.kag.tag["3d_scene"] = {
  rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
  tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
  lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。,
- 
  :demo
  
 
@@ -2171,6 +2190,8 @@ tyrano.plugin.kag.tag["3d_camera"] = {
             camera.rotation.set(rot.x,rot.y,rot.z);
         }
 		
+		
+		
         
         if(pm.lookat!=""){
 	    	
@@ -2210,6 +2231,271 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 };
 
 
+
+
+/*
+ #[3d_gyro]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dジャイロ
+ 
+ :exp
+ スマホ限定
+ スマホの傾きでカメラを制御することができます。
+ 
+ :sample
+ 
+[3d_gyro max_x="20" max_y="20" ]
+
+ :param
+ max_x=X軸方向の傾き上限を角度で指定します。デフォルトは30,
+ max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
+
+//カメラの設定を変更
+tyrano.plugin.kag.tag["3d_gyro"] = {
+
+    vital : [],
+     	
+    pm : {
+        
+        max_x:"30",
+        max_y:"30",
+        
+        next:"true",
+        
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        var camera = three.camera;
+        var renderer = three.renderer;
+        
+//ジャイロ設定
+		if(true){
+			
+			const GyroMonitor = () => {
+			
+				//var first_pos = {x:}
+		    	var first_beta = 0;
+		    	var first_gamma = 0;
+		    	var first_flag = true;
+		    	var cnt = 0;
+		    	
+		    	var max_y = parseFloat(pm.max_y);
+		    	var max_x = parseFloat(pm.max_x);
+		    	
+		    	var default_camera_y = camera.rotation.y ;
+		    	var default_camera_x = camera.rotation.x ;
+		    	
+		    	var angle = 0;
+		    	
+		    	var frame = parseInt(pm.frame);
+		    	
+		    	three.stat.gyro.pm = pm;
+		    	
+		    	//１回だけ実行されればOKなので
+		    	if(three.stat.gyro.enable != -1){
+			    	
+			    	//カメラの有効化。
+					three.stat.gyro.enable = 1;
+				
+			    	return;
+			    }
+			    
+			    //カメラの有効化。
+				three.stat.gyro.enable = 1;
+				
+				const orientEvent = (e) =>{
+				
+					if(first_flag == true){
+					    	
+				    	first_flag = false;
+				    	first_beta = e.beta;
+				    	first_gamma = e.gamma;
+				    	
+				    	angle = this.kag.tmp.angle;
+	
+				    }
+		        	
+		        	/*
+		        	if(cnt > 50){
+						console.log("hen_x:" + hen_x);
+						console.log("gamma:" + e.gamma);
+						cnt=0;
+						console.log(angle);
+					}
+					*/
+					
+		        	if(angle != this.kag.tmp.angle){
+						first_flag = true;
+						return;
+					}
+					
+					
+					if(angle!=0){
+						var t_gamma = e.gamma;
+						if(t_gamma < 0 ){
+							return ;
+						}
+					}
+					
+					var hen_y = first_beta - e.beta;
+					var hen_x = first_gamma - e.gamma;
+					
+					
+					if(Math.abs(hen_y) > max_y){
+						 if(hen_y>0){ hen_y = max_y }else{hen_y=(-1*max_y)}
+					}
+					
+					if(Math.abs(hen_x) > max_x){
+						 if(hen_x>0){ hen_x = max_x }else{hen_x=(-1*max_x)}
+					}
+					
+					
+					//カメラのローテーション
+					var gyro_x = 0;
+					var gyro_y = 0;
+					
+					
+					//縦持ち
+					if(angle==0){
+		        		
+		        		//camera.rotation.y = default_camera_x - (hen_x * ( Math.PI / 180 ));
+		        		//camera.rotation.x = default_camera_y - (hen_y * ( Math.PI / 180 ));
+						
+						gyro_y = default_camera_x - (hen_x * ( Math.PI / 180 ));
+						gyro_x = default_camera_y - (hen_y * ( Math.PI / 180 ));
+						
+					
+		        	}else{
+			        	
+						//camera.rotation.y = default_camera_y + (hen_y * ( Math.PI / 180 ));
+		        		//camera.rotation.x = default_camera_x - (hen_x * ( Math.PI / 180 ));
+						
+						gyro_y = default_camera_y + (hen_y * ( Math.PI / 180 ));
+		        		gyro_x = default_camera_x - (hen_x * ( Math.PI / 180 ));
+						
+					}
+					
+					three.stat.gyro.x = gyro_x;
+					three.stat.gyro.y = gyro_y;
+				
+				}
+				
+				
+				window.removeEventListener('deviceorientation', orientEvent);
+		    	window.addEventListener('deviceorientation', orientEvent, true);
+		    	
+				
+			}
+			
+			    
+			const requestDeviceMotionPermission = () => {
+				
+				if (DeviceMotionEvent) {
+					
+					if(typeof DeviceMotionEvent.requestPermission === 'function'){
+					
+						DeviceMotionEvent.requestPermission().then(permissionState => {
+							
+							if (permissionState === 'granted') {
+								GyroMonitor();
+						  	} else {
+						    	// 許可を得られなかった場合の処理
+						  	}
+						})
+						.catch(console.error) // https通信でない場合などで許可を取得できなかった場合
+						
+					}else{
+					
+						//アンドロイド
+						GyroMonitor();
+					}
+					
+				} else {
+					
+						  	
+				}
+			
+			}
+			
+			
+			requestDeviceMotionPermission();
+			
+		}
+		
+		if(pm.next=="true"){
+			this.kag.ftag.nextOrder();
+        }
+        
+	}
+	
+},
+
+
+
+/*
+ #[3d_gyro_stop]
+ :group
+ 3D関連
+ 
+ :title
+ 3Dジャイロ停止
+ 
+ :exp
+ スマホ限定
+ ジャイロの動きを停止します。
+ カメラの位置も戻したい場合はこのタグの直後に3d_cameraで指定してください。
+ 再度ジャイロを有効にしたい場合は 3d_gyro タグです。
+ 
+ :sample
+ 
+ :param
+ 
+ :demo
+ 
+
+ #[end]
+ */
+
+
+//カメラの設定を変更
+tyrano.plugin.kag.tag["3d_gyro_stop"] = {
+
+    vital : [],
+     	
+    pm : {
+        
+        max_x:"30",
+        max_y:"30",
+        frame:"1",
+        next:"true",
+        
+    },
+
+    start : function(pm) {
+        
+        var three = this.kag.tmp.three;
+        var camera = three.camera;
+        var renderer = three.renderer;
+        
+		three.stat.gyro.enable = 0;
+					
+		this.kag.ftag.nextOrder();
+            
+	}
+	
+},
 
 /*
  #[3d_debug_camera]
@@ -3003,6 +3289,8 @@ tyrano.plugin.kag.tag["3d_debug"] = {
     
         
 };
+
+
 
 
 

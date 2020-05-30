@@ -26,6 +26,7 @@
         return str.substring(0, i + 1);
         
     };
+    
 
     $.isHTTP = function(str) {
         if (str.substring(0, 4) === "http") {
@@ -50,6 +51,17 @@
         }    
         
     };
+    
+    $.getAngle = function(){
+	  	
+        let angle = screen && screen.orientation && screen.orientation.angle;
+		if ( angle === undefined ) {
+		  angle = window.orientation;    // iOS用
+		}
+		
+		return angle; 
+	
+	};
 
     $.localFilePath = function(){
         
