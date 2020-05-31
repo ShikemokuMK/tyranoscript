@@ -280,10 +280,15 @@ tyrano.plugin.kag.tag["3d_init"] = {
         }
         
         //フレームアップデートのタイミングでジャイロ
-        if(three.stat.gyro.enable == 1){
+        if(three.stat.gyro.mode == 1){
 	    	
 	    	camera.rotation.x = three.stat.gyro.x;
 	    	camera.rotation.y = three.stat.gyro.y;
+	    	
+	    }else if(three.stat.gyro.mode == 2){
+	    	
+	    	camera.position.x = three.stat.gyro.x;
+	    	camera.position.y = three.stat.gyro.y;
 	    	
 	    }
             
@@ -2242,8 +2247,8 @@ tyrano.plugin.kag.tag["3d_camera"] = {
  3Dジャイロ
  
  :exp
- スマホ限定
  スマホの傾きでカメラを制御することができます。
+ PCゲームの場合はマウスの位置でジャイロを再現することができます。
  
  :sample
  
@@ -2252,6 +2257,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
  :param
  max_x=X軸方向の傾き上限を角度で指定します。デフォルトは30,
  max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30
+ mode=position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。
  
  :demo
  
@@ -2270,6 +2276,8 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
         max_x:"30",
         max_y:"30",
         
+        mode:"rotation", // rotation or position 
+        
         next:"true",
         
     },
@@ -2280,10 +2288,16 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
         var camera = three.camera;
         var renderer = three.renderer;
         
+        if(pm.mode=="rotation"){
+	    	three.stat.gyro.mode = 1;
+	    }else{
+			three.stat.gyro.mode = 2;
+	    }
+        
 //ジャイロ設定
 		if(true){
 			
-			const GyroMonitor = () => {
+			const GyroMonitor = (device_type) => {
 			
 				//var first_pos = {x:}
 		    	var first_beta = 0;
@@ -2297,6 +2311,9 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 		    	var default_camera_y = camera.rotation.y ;
 		    	var default_camera_x = camera.rotation.x ;
 		    	
+		    	var default_camera_pos_y = camera.position.y;
+		    	var default_camera_pos_x = camera.position.x;
+		    			    	
 		    	var angle = 0;
 		    	
 		    	var frame = parseInt(pm.frame);
@@ -2367,23 +2384,40 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 					var gyro_y = 0;
 					
 					
-					//縦持ち
-					if(angle==0){
-		        		
-		        		//camera.rotation.y = default_camera_x - (hen_x * ( Math.PI / 180 ));
-		        		//camera.rotation.x = default_camera_y - (hen_y * ( Math.PI / 180 ));
-						
-						gyro_y = default_camera_x - (hen_x * ( Math.PI / 180 ));
-						gyro_x = default_camera_y - (hen_y * ( Math.PI / 180 ));
-						
+					if(three.stat.gyro.mode == 1 ){
 					
-		        	}else{
-			        	
-						//camera.rotation.y = default_camera_y + (hen_y * ( Math.PI / 180 ));
-		        		//camera.rotation.x = default_camera_x - (hen_x * ( Math.PI / 180 ));
+						//縦持ち
+						if(angle==0){
+			        		
+							gyro_y = default_camera_x - (hen_x * ( Math.PI / 180 ));
+							gyro_x = default_camera_y - (hen_y * ( Math.PI / 180 ));
+							
 						
-						gyro_y = default_camera_y + (hen_y * ( Math.PI / 180 ));
-		        		gyro_x = default_camera_x - (hen_x * ( Math.PI / 180 ));
+			        	}else{
+				        	
+							gyro_y = default_camera_y + (hen_y * ( Math.PI / 180 ));
+			        		gyro_x = default_camera_x - (hen_x * ( Math.PI / 180 ));
+							
+						}
+						
+					}else if(three.stat.gyro.mode == 2 ){
+						
+						//縦持ち
+						if(angle==0){
+			        		
+			        		//position  変更
+							gyro_y =  default_camera_pos_y + hen_x ;
+							gyro_x =  default_camera_pos_x + hen_y ;
+						
+						
+			        	}else{
+				        	
+				        	//position  変更
+							gyro_y =  default_camera_pos_y + hen_x  ;
+							gyro_x =  default_camera_pos_x + hen_y  ;
+						
+						}
+						
 						
 					}
 					
@@ -2392,39 +2426,104 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 				
 				}
 				
+				var sc_width = parseInt(this.kag.config.scWidth);
+				var sc_height = parseInt(this.kag.config.scHeight);
 				
-				window.removeEventListener('deviceorientation', orientEvent);
-		    	window.addEventListener('deviceorientation', orientEvent, true);
+				var sc_x = sc_width/2;
+				var sc_y = sc_height/2;
+				
+				//PC版のイベントマウス動かします。
+				const mouseMoveEvent = (e) => {
+					
+					//マウスがどう動いたか
+					var x = e.clientX; 
+					var y = e.clientY;
+					
+					x = x - sc_x;
+					y = (y - sc_y)*-1;
+					
+					//-1 〜 1 の間で進捗を出す。
+ 					var p_x = x / sc_x ;
+ 					var p_y = y / sc_y ;
+ 					
+ 					//座標を調整する。
+					var max_x = parseFloat(pm.max_x);
+		    		var max_y = parseFloat(pm.max_y);
+					
+					var gyro_x = 0;
+					var gyro_y = 0;
+					
+					
+					if(three.stat.gyro.mode == 1 ){
+					
+						//rotation 変更
+						gyro_x = default_camera_x + (max_x * p_x * ( Math.PI / 180 ));
+						gyro_y = default_camera_y - (max_y * p_y * ( Math.PI / 180 ));
+					
+					}else if(three.stat.gyro.mode == 2 ){
+						
+						//position  変更
+						gyro_y =  default_camera_pos_x + max_x * p_x  ;
+						gyro_x =  default_camera_pos_y + max_y * p_y  ;
+					
+					}
+					
+					three.stat.gyro.x = gyro_y;
+					three.stat.gyro.y = gyro_x;
+					
+					
+				
+				}
+				
+				if(device_type =="pc"){
+				
+					//イベントの登録と削除。マシンの場合
+					$(".tyrano_base").get(0).removeEventListener('mousemove', mouseMoveEvent);
+					$(".tyrano_base").get(0).addEventListener('mousemove', mouseMoveEvent, true);
 		    	
+				}else{
+					
+					//イベントの登録と削除。マシンの場合
+					window.removeEventListener('deviceorientation', orientEvent);
+					window.addEventListener('deviceorientation', orientEvent, true);
+		    	
+				}
+				
 				
 			}
 			
 			    
 			const requestDeviceMotionPermission = () => {
 				
-				if (DeviceMotionEvent) {
-					
-					if(typeof DeviceMotionEvent.requestPermission === 'function'){
-					
-						DeviceMotionEvent.requestPermission().then(permissionState => {
-							
-							if (permissionState === 'granted') {
-								GyroMonitor();
-						  	} else {
-						    	// 許可を得られなかった場合の処理
-						  	}
-						})
-						.catch(console.error) // https通信でない場合などで許可を取得できなかった場合
+				//PCと
+				if($.userenv()!="pc"){
+					if (DeviceMotionEvent) {
 						
-					}else{
-					
-						//アンドロイド
-						GyroMonitor();
+						if(typeof DeviceMotionEvent.requestPermission === 'function'){
+						
+							DeviceMotionEvent.requestPermission().then(permissionState => {
+								
+								if (permissionState === 'granted') {
+									GyroMonitor("sp");
+							  	} else {
+							    	// 許可を得られなかった場合の処理
+							  	}
+							})
+							.catch(console.error) // https通信でない場合などで許可を取得できなかった場合
+							
+						}else{
+						
+							//アンドロイド
+							GyroMonitor("sp");
+						}
+						
+					} else {
+						
 					}
+				}else{
 					
-				} else {
+					GyroMonitor("pc");
 					
-						  	
 				}
 			
 			}

@@ -104,7 +104,9 @@ tyrano.plugin.kag ={
 					pm:{},
 					x:0,
 					y:0,
-					enable:-1
+					enable:-1,
+					mode:1,
+					
 					
 				},
 				
