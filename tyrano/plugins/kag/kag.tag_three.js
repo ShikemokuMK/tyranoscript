@@ -2275,12 +2275,6 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
         var camera = three.camera;
         var renderer = three.renderer;
         
-        if(pm.mode=="rotation"){
-	    	three.stat.gyro.mode = 1;
-	    }else{
-			three.stat.gyro.mode = 2;
-	    }
-        
 //ジャイロ設定
 		if(true){
 			
@@ -2307,18 +2301,6 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 		    	
 		    	three.stat.gyro.pm = pm;
 		    	
-		    	//１回だけ実行されればOKなので
-		    	if(three.stat.gyro.enable != -1){
-			    	
-			    	//カメラの有効化。
-					three.stat.gyro.enable = 1;
-				
-			    	return;
-			    }
-			    
-			    //カメラの有効化。
-				three.stat.gyro.enable = 1;
-				
 				const orientEvent = (e) =>{
 				
 					if(first_flag == true){
@@ -2328,6 +2310,12 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 				    	first_gamma = e.gamma;
 				    	
 				    	angle = this.kag.tmp.angle;
+				    	
+				        if(pm.mode=="rotation"){
+					    	three.stat.gyro.mode = 1;
+					    }else{
+							three.stat.gyro.mode = 2;
+					    }
 	
 				    }
 		        	
@@ -2430,7 +2418,21 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 					
 					var gyro_x = 0;
 					var gyro_y = 0;
+
 					
+					if(first_flag==true){
+						
+						first_flag = false;
+						
+						if(pm.mode=="rotation"){
+					    	three.stat.gyro.mode = 1;
+					    }else{
+							three.stat.gyro.mode = 2;
+					    }
+	
+					
+					}
+
 					
 					//最大値以上になってたら、止める
 					if(three.stat.gyro.mode == 1 ){
@@ -2439,10 +2441,6 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 						gyro_x = default_camera_x + (max_x * p_x * ( Math.PI / 180 ));
 						gyro_y = default_camera_y - (max_y * p_y * ( Math.PI / 180 ));
 						
-						console.log(gyro_x);
-						
-						
-					
 					}else if(three.stat.gyro.mode == 2 ){
 						
 						//position  変更
@@ -2450,7 +2448,7 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 						gyro_x =  default_camera_pos_y + max_y * p_y  ;
 					
 					}
-					
+										
 					three.stat.gyro.x = gyro_y;
 					three.stat.gyro.y = gyro_x;
 					
@@ -2571,7 +2569,7 @@ tyrano.plugin.kag.tag["3d_gyro_stop"] = {
         var camera = three.camera;
         var renderer = three.renderer;
         
-		three.stat.gyro.enable = 0;
+		three.stat.gyro.mode = 0;
 					
 		this.kag.ftag.nextOrder();
             
