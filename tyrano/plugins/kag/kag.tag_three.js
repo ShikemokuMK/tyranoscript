@@ -104,12 +104,6 @@ tyrano.plugin.kag.tag["3d_init"] = {
         
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
         
-        /*
-        if(this.kag.tmp.three.stat.is_load == true){
-            return;
-        }
-        */
-        
         this.clock = new THREE.Clock();
         
         //3Dモデル用のシーンを挿入する。
@@ -139,7 +133,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
         // シーンを作成
         const scene = new THREE.Scene();
     
-		//
+		//カメラの種類
 		const camera_mode = pm.camera+"Camera";
         
         // カメラを作成 Perspective or Orthographic 
@@ -155,11 +149,11 @@ tyrano.plugin.kag.tag["3d_init"] = {
         target_layer.show();
         
         //環境光
-        const light_amb = new THREE.AmbientLight(0xFFFFFF, 1);
+        const light_amb = new THREE.AmbientLight(0xffffff, 1);
         scene.add(light_amb);
         
         //並行方向からの光
-        const light = new THREE.DirectionalLight(0xFFFFFF, 1);
+        const light = new THREE.DirectionalLight(0xffffff, 1);
 		scene.add(light);
         
         this.kag.tmp.three.stat.is_load = true;
@@ -178,10 +172,9 @@ tyrano.plugin.kag.tag["3d_init"] = {
         
         tick();
         
-        // 毎フレーム時に実行されるループイベントです
-        //ランダムな数字
         var t = Math.random() ;
         
+        //毎フレーム時に実行されるループイベントです
         function tick() {
             
             if(three.orbit_controls){
@@ -233,12 +226,13 @@ tyrano.plugin.kag.tag["3d_init"] = {
 			 
 			// Raycasterインスタンス作成
 			var raycaster = new THREE.Raycaster();
+			
 			// 取得したX、Y座標でrayの位置を更新
 			raycaster.setFromCamera( mouse, camera );
+			
 			// オブジェクトの取得
 			var intersects = raycaster.intersectObjects( scene.children ,true);
 			 
-			// cube1がクリックされたらcube1を消してcube2を表示
 			if(intersects.length>0){
 				//console.log(intersects[0].object);
 				var name = intersects[0].object.userData["name"];
@@ -264,9 +258,10 @@ tyrano.plugin.kag.tag["3d_init"] = {
     
     updateFrame:function(){
         
+        //対応が必要なフレーム処理をここで実施する。
+        
         var three = this.kag.tmp.three;
         var camera = three.camera;
-        //対応が必要なフレーム処理をここで実施する。
         var models = three.models;
         
         var delta = this.clock.getDelta();
@@ -279,7 +274,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
             
         }
         
-        //フレームアップデートのタイミングでジャイロ
+        //フレームアップデートのタイミングでジャイロ反映
         if(three.stat.gyro.mode == 1){
 	    	
 	    	camera.rotation.x = three.stat.gyro.x;
@@ -415,7 +410,6 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 	                mixer=undefined;
 	            }
 	            
-	            //three.scene.add(model);
 	            this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model,"mixer":mixer,"gltf":gltf,"pm":pm},three);
 	            
 	            if(pm.tonemap=="true"){
@@ -486,6 +480,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 		}else{
 			alert("エラー："+ext+"はサポートしていないファイル形式です");
 		}
+		
         //読み込んだシーンが暗いので、明るくする
         //three.render.gammaOutput = true;
 
@@ -527,7 +522,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
  width=球体の横幅を指定します。デフォルトは30,
  height=球体の高さを指定します。デフォルトは30,
  
- tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。,
+ tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。
   
  :demo
  
@@ -601,7 +596,7 @@ tyrano.plugin.kag.tag["3d_sphere_new"] = {
  rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
  scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
  tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。,
- folder=ファイルの配置フォルダを変更できます。,
+ folder=ファイルの配置フォルダを変更できます。
   
  :demo
  
@@ -677,8 +672,6 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
 	        
 			var three = this.kag.tmp.three;
 	        var scene = three.scene;
-	                
-			//scene.add(model);
 	        
 	        this.kag.tmp.three.models[pm.name] = new ThreeModel({"name":pm.name,"model":model,"pm":pm},three);
 	        
@@ -1109,7 +1102,7 @@ tyrano.plugin.kag.tag["3d_image_new"] = {
 };
 
 
-//基本図形
+//基本図形 直接タグで実行することはない。
 tyrano.plugin.kag.tag["obj_model_new"] = {
 
     vital : ["name","type"],
@@ -1190,7 +1183,7 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
 			
 		}else{
 			
-			material = new THREE.MeshStandardMaterial( { color:parseInt(pm.color)} );
+			material = new THREE.MeshStandardMaterial( { color:parseInt(pm.color.toLowerCase())} );
 			
 		}
 		
@@ -1224,10 +1217,6 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
         if(pm.next == "true"){
 			this.kag.ftag.nextOrder();
 	    }
-        
-        //読み込んだシーンが暗いので、明るくする
-        //three.render.gammaOutput = true;
-
         
         
     },
@@ -1544,7 +1533,7 @@ tyrano.plugin.kag.tag["3d_hide_all"] = {
 [3d_delete name="myimg"]
 
  :param
- name=3Dオブジェクトの名前です。削除していオブジェクトのnameを指定してください,
+ name=3Dオブジェクトの名前です。削除していオブジェクトのnameを指定してください
  
  :demo
  
@@ -1953,8 +1942,6 @@ tyrano.plugin.kag.tag["3d_anim"] = {
 };
 
 
-
-
 /*
  #[3d_anim_stop]
  :group
@@ -2149,7 +2136,7 @@ tyrano.plugin.kag.tag["3d_scene"] = {
  pos=カメラを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
  rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
  tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
- lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。,
+ lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。
  :demo
  
 
@@ -2256,7 +2243,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 
  :param
  max_x=X軸方向の傾き上限を角度で指定します。デフォルトは30,
- max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30
+ max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30,
  mode=position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。
  
  :demo
@@ -2344,15 +2331,6 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 	
 				    }
 		        	
-		        	/*
-		        	if(cnt > 50){
-						console.log("hen_x:" + hen_x);
-						console.log("gamma:" + e.gamma);
-						cnt=0;
-						console.log(angle);
-					}
-					*/
-					
 		        	if(angle != this.kag.tmp.angle){
 						first_flag = true;
 						return;
@@ -2454,11 +2432,16 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 					var gyro_y = 0;
 					
 					
+					//最大値以上になってたら、止める
 					if(three.stat.gyro.mode == 1 ){
 					
 						//rotation 変更
 						gyro_x = default_camera_x + (max_x * p_x * ( Math.PI / 180 ));
 						gyro_y = default_camera_y - (max_y * p_y * ( Math.PI / 180 ));
+						
+						console.log(gyro_x);
+						
+						
 					
 					}else if(three.stat.gyro.mode == 2 ){
 						
@@ -2483,7 +2466,7 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 		    	
 				}else{
 					
-					//イベントの登録と削除。マシンの場合
+					//スマホの場合
 					window.removeEventListener('deviceorientation', orientEvent);
 					window.addEventListener('deviceorientation', orientEvent, true);
 		    	
@@ -2555,7 +2538,7 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
  スマホ限定
  ジャイロの動きを停止します。
  カメラの位置も戻したい場合はこのタグの直後に3d_cameraで指定してください。
- 再度ジャイロを有効にしたい場合は 3d_gyro タグです。
+ 再度ジャイロを有効にしたい場合は [3d_gyro] タグです。
  
  :sample
  
@@ -2615,7 +2598,7 @@ tyrano.plugin.kag.tag["3d_gyro_stop"] = {
  
  :sample
  
-[3d_camera pos="10,20,30" ]
+[3d_debug_camera ]
 
  :param
  button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「カメラインスペクタを閉じる」 ,
@@ -2693,8 +2676,6 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
         var first_model_y = 0;
         var first_model_z = 0;
         
-        //var first_model_z = 0;
-        
         function evt_mousewheel(e){
 	    	
 	    	var delta = e.wheelDelta;
@@ -2754,7 +2735,7 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
 	    	if (!mousedown) return;
             
             if(button==0){
-
+				
                 var hen_x = first_client_x - e.clientX;
 	        	model.rotation.y = first_model_y + hen_x * 0.005;
 	        	
@@ -2811,11 +2792,8 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
 	    
 	    ///マウスホイール
         renderer.domElement.addEventListener("mousewheel",evt_mousewheel,false);
-            
         renderer.domElement.addEventListener('mousedown',evt_mousedown,false);
-        
         renderer.domElement.addEventListener('mouseup', evt_mouseup,false);
-        
         renderer.domElement.addEventListener('mousemove', evt_mousemove,false);
         
 	    
@@ -2885,128 +2863,6 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
         
         $("body").append(j_close_button);
         
-            
-        
-        
-    },
-    
-    
-    
-        
-};
-
-
- 
- 
-tyrano.plugin.kag.tag["3d_debug_camera_bk"] = {
-
-    vital : [],
-     	
-    pm : {
-        
-        button_text:"カメラインスペクタを閉じる",
-        
-    },
-
-    start : function(pm) {
-        
-        var three = this.kag.tmp.three;
-        var camera = three.camera;
-        var target_layer = three.target_layer;
-		var j_canvas = three.j_canvas;
-		
-        var old_target_layer_zindex = target_layer.css("z-index");
-		var old_canvas_zindex = j_canvas.css("z-index");
-		
-		j_canvas.css("z-index",9999999);
-		target_layer.css("z-index",9999999);
-		
-        const controls = new THREE.OrbitControls(camera,j_canvas.get(0));
-		controls.enableDamping = true;
-		controls.dampingFactor = 0.2;
-		
-        this.kag.tmp.three.orbit_controls = controls;
-        
-        var original_v = $.setVector(camera);
-        
-        function evt_mouseup(e){
-	    	
-            var msg_pos = $.orgFloor(camera.position.x,1) + "," + $.orgFloor(camera.position.y,1) + "," + $.orgFloor(camera.position.z,1);
-			var msg_rot = $.orgFloor(camera.rotation.x,100) + "," + $.orgFloor(camera.rotation.y,100) + "," + $.orgFloor(camera.rotation.z,100);
-			var msg_scale = $.orgFloor(camera.scale.x,100) + "," + $.orgFloor(camera.scale.y,100) + "," + $.orgFloor(camera.scale.z,100);
-			
-			var msg = 'pos="'+msg_pos+'" rot="'+msg_rot+'" scale="'+msg_scale+'" ';
-			j_debug_msg.find("input").val(msg);
-            
-	    }
-        
-        
-        j_canvas.on("mouseup",evt_mouseup);
-        
-        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
-        j_close_button.draggable({
-    
-            scroll : false,
-            //containment:".tyrano_base",
-            stop : (e, ui) => {
-                
-            }
-        });
-        
-        var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
-        
-        var j_copy_button = $("<input type='button' value='コピー' />");
-        j_copy_button.on("click",(e)=>{
-	    	
-	    	evt_mouseup();
-	    	
-	    	j_debug_msg.find("input").select();
-			// コピー
-			document.execCommand("copy");
-	    	
-	    });
-        
-        var j_reset_button = $("<input type='button' value='リセット' />");
-        j_reset_button.on("click",(e)=>{
-	    	
-	    	//モデルを最初の位置に戻す
-	    	//document.execCommand("copy");
-	    	camera.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z ); 
-	    	camera.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z ); 
-	    	camera.scale.set(original_v.scale.x, original_v.scale.y, original_v.scale.z ); 
-	    	
-	    	evt_mouseup();
-	    	
-	    });
-        
-        
-        j_close_button.find("button").on("click",(e)=>{
-            j_close_button.remove();
-            j_canvas.off("mouseup");
-            
-			j_canvas.css("z-index",old_canvas_zindex);
-			target_layer.css("z-index",old_target_layer_zindex);
-			
-			this.kag.tmp.three.orbit_controls.dispose();
-			this.kag.tmp.three.orbit_controls = null;
-			
-            this.kag.ftag.nextOrder();
-            
-        });
-        
-        
-        j_close_button.append("<span style='font-size:10px'>｜</span>");
-        
-        j_close_button.append(j_copy_button);
-        
-        j_close_button.append(j_reset_button);
-        
-        j_close_button.append(j_debug_msg);
-        
-        $("body").append(j_close_button);
-        
-        
-        //this.kag.ftag.nextOrder();
             
         
         
@@ -3108,10 +2964,12 @@ tyrano.plugin.kag.tag["3d_motion"] = {
 [3d_debug name="Robot" ]
 
  :param
- name=デバッグする3Dオブジェクトのnameを指定してください。
+ name=デバッグする3Dオブジェクトのnameを指定してください。,
  button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」,
- menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) 
- 
+ menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) ,
+ overlap=true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase,
+ reset=true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。
+  
  :demo
  
 
@@ -3128,6 +2986,8 @@ tyrano.plugin.kag.tag["3d_debug"] = {
         name:"",
         button_text:"3Dインスペクタを閉じる",
         menu:"true", 
+        overlap:"false",
+        reset:"false",
     },
 
     start : function(pm) {
@@ -3141,8 +3001,10 @@ tyrano.plugin.kag.tag["3d_debug"] = {
 		var old_target_layer_zindex = target_layer.css("z-index");
 		var old_canvas_zindex = j_canvas.css("z-index");
 		
+		/*
 		j_canvas.css("z-index",9999999);
 		target_layer.css("z-index",9999999);
+		*/
 		
         var model_obj = this.kag.tmp.three.models[pm.name]; 
         var model = model_obj.model;
@@ -3226,8 +3088,14 @@ tyrano.plugin.kag.tag["3d_debug"] = {
                 
                 vec.sub(camera.position).normalize();
                 
-                var distance = - camera.position.z / vec.z;
+                var distance = 0;
                 
+                if(camera.position.z > 0){
+	                distance =  - camera.position.z / vec.z;
+	            }else{
+		            distance =  camera.position.z / vec.z;
+	            }
+	            
                 original_pos.copy( camera.position ).add(vec.multiplyScalar( distance));
                 
                 hen_pos.x = model.position.x - original_pos.x;
@@ -3237,7 +3105,7 @@ tyrano.plugin.kag.tag["3d_debug"] = {
             }
             
             mousedown = true;
-            prevPosition = {x: e.pageX, y: e.pageY};
+            prevPosition = {x: e.clientX, y: e.clientY};
                 
 	    
 	    }
@@ -3248,10 +3116,10 @@ tyrano.plugin.kag.tag["3d_debug"] = {
             
             if(button==0){
 
-                moveDistance = {x: prevPosition.x - e.pageX, y: prevPosition.y - e.pageY};
+                moveDistance = {x: prevPosition.x - e.clientX, y: prevPosition.y - e.clientY};
                 model.rotation.x += moveDistance.y * 0.01;
                 model.rotation.y -= moveDistance.x * 0.01;
-                prevPosition = {x: e.pageX, y: e.pageY};
+                prevPosition = {x: e.clientX, y: e.clientY};
                 
             }else if(button==1){
 	        	
@@ -3269,13 +3137,19 @@ tyrano.plugin.kag.tag["3d_debug"] = {
                 
                 vec.sub(camera.position).normalize();
                 
-                var distance = - camera.position.z / vec.z;
+                var distance = 0;
+                
+                if(camera.position.z > 0){
+	                distance =  - camera.position.z / vec.z;
+	            }else{
+		            distance =  camera.position.z / vec.z;
+	            }
                 
                 pos.copy( camera.position ).add(vec.multiplyScalar( distance));
                 
-                model.position.x = $.orgFloor(hen_pos.x + pos.x,1);
-                model.position.y = $.orgFloor(hen_pos.y + pos.y,1);
-                
+	            model.position.x = $.orgFloor(hen_pos.x + pos.x,1);
+	            model.position.y = $.orgFloor(hen_pos.y + pos.y,1);
+	            
             }
 	    
 	    
@@ -3303,15 +3177,21 @@ tyrano.plugin.kag.tag["3d_debug"] = {
 	    	
 	    }
 	    
+	    if(pm.overlap=="true"){
+	    	j_canvas.css("z-index",9999999);
+			target_layer.css("z-index",9999999);
+		}
+		
+		//デバッグ用のレイヤ
+	    var j_three_debug_layer = $("<div style='width:100%;height:100%;position:absolute;z-index:9999999;'></div>");
+	    $(".tyrano_base").append(j_three_debug_layer);
+	    var three_debug_layer = j_three_debug_layer.get(0);
 	    
 	    ///マウスホイール
-        renderer.domElement.addEventListener("mousewheel",evt_mousewheel,false);
-            
-        renderer.domElement.addEventListener('mousedown',evt_mousedown,false);
-        
-        renderer.domElement.addEventListener('mouseup', evt_mouseup,false);
-        
-        renderer.domElement.addEventListener('mousemove', evt_mousemove,false);
+        three_debug_layer.addEventListener("mousewheel",evt_mousewheel,false);
+        three_debug_layer.addEventListener('mousedown',evt_mousedown,false);
+        three_debug_layer.addEventListener('mouseup', evt_mouseup,false);
+        three_debug_layer.addEventListener('mousemove', evt_mousemove,false);
         
 	    
         //デバッグ終了ボタンを押すと、nextOrderする。
@@ -3354,16 +3234,22 @@ tyrano.plugin.kag.tag["3d_debug"] = {
         
         
         j_close_button.find("button").on("click",(e)=>{
+	        
+	        j_three_debug_layer.remove();
+	        
+	        if(pm.reset=="true"){
+		    	j_reset_button.trigger("click");
+		    }
+	        
             j_close_button.remove();
             
 			j_canvas.css("z-index",old_canvas_zindex);
 			target_layer.css("z-index",old_target_layer_zindex);
 			
-            
-            renderer.domElement.removeEventListener("mousedown",evt_mousedown);
-            renderer.domElement.removeEventListener("mouseup",evt_mouseup);
-            renderer.domElement.removeEventListener("mousemove",evt_mousemove);
-            renderer.domElement.removeEventListener("mousewheel",evt_mousewheel);
+            three_debug_layer.removeEventListener("mousedown",evt_mousedown);
+            three_debug_layer.removeEventListener("mouseup",evt_mouseup);
+            three_debug_layer.removeEventListener("mousemove",evt_mousemove);
+            three_debug_layer.removeEventListener("mousewheel",evt_mousewheel);
             
             this.kag.ftag.nextOrder();
             

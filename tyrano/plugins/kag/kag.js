@@ -105,7 +105,7 @@ tyrano.plugin.kag ={
 					x:0,
 					y:0,
 					enable:-1,
-					mode:1,
+					mode:0,
 					
 					
 				},
@@ -1088,7 +1088,7 @@ tyrano.plugin.kag ={
         //追加分のプロジェクトファイルの読み込み
         var array_scripts = [];
         
-        if(this.kag.config["3d"]=="true"){
+        if(this.kag.config["use3D"]=="true"){
 	        
 	        array_scripts = [
 		
