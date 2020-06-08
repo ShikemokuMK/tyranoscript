@@ -860,28 +860,27 @@ tyrano.plugin.kag.menu = {
         
         
         //3Dモデルの復元/////////////////////////////////////////////
-        this.kag.stat.is_strong_stop = true;
-        
         var three = data.three;
-        var init_pm = three.stat.init_pm;
-        
-        //一度全て停止
-        this.kag.ftag.startTag("3d_close",{});
-        
-        setTimeout((e)=>{
+	    if(three.stat.is_load == true){
+	    
+		    this.kag.stat.is_strong_stop = true;
+	        var init_pm = three.stat.init_pm;
+	            
+	        this.kag.ftag.startTag("3d_close",{});
 	        
-	        init_pm["next"] = "false";
-	        this.kag.ftag.startTag("3d_init",init_pm);
-        
-	        var models = three.models;
+	        //setTimeout((e)=>{
+		        
+		        init_pm["next"] = "false";
+		        this.kag.ftag.startTag("3d_init",init_pm);
 	        
-	        var scene_pm = three.stat.scene_pm;
-	        scene_pm["next"] = "false";
-	        
-	        this.kag.ftag.startTag("3d_scene",scene_pm);
-	        
-	        if(three.stat.is_load==true){
-		    	
+		        var models = three.models;
+		        
+		        var scene_pm = three.stat.scene_pm;
+		        scene_pm["next"] = "false";
+		        
+		        this.kag.ftag.startTag("3d_scene",scene_pm);
+		        
+		        	
 		    	for(var key in models){
 		    		
 		    		var model = models[key];
@@ -907,35 +906,35 @@ tyrano.plugin.kag.menu = {
 				
 				}
 	        
-		    }
+			    //ジャイロの復元
+			    var gyro = three.stat.gyro;
+			    if(gyro.enable==1){
+			    	//復活させる。
+			    	var gyro_pm = gyro.pm;
+			    	gyro_pm["next"] = "false";
+			    	this.kag.ftag.startTag("3d_gyro",gyro_pm);
+				}
+			    
+			    
+		        if(three.stat.canvas_show){
+			    	this.kag.tmp.three.j_canvas.show();
+			    }else{
+					this.kag.tmp.three.j_canvas.hide();
+				}
+			    
+			    this.kag.tmp.three.stat = three.stat;
+			    this.kag.tmp.three.evt  = three.evt;
+			    
+			    //イベントが再開できるかどうか。
+		        
+		        this.kag.stat.is_strong_stop = false;
+		        
+		        
 		    
-		    //ジャイロの復元
-		    var gyro = three.stat.gyro;
-		    if(gyro.enable==1){
-		    	//復活させる。
-		    	var gyro_pm = gyro.pm;
-		    	gyro_pm["next"] = "false";
-		    	this.kag.ftag.startTag("3d_gyro",gyro_pm);
-			}
-		    
-		    
-	        if(three.stat.canvas_show){
-		    	this.kag.tmp.three.j_canvas.show();
-		    }else{
-				this.kag.tmp.three.j_canvas.hide();
-			}
-		    
-		    this.kag.tmp.three.stat = three.stat;
-		    this.kag.tmp.three.evt  = three.evt;
-		    
-	        
-	        this.kag.stat.is_strong_stop = false;
-	        
-	        
-	    
-	    },10);
+		    //},10);
         
-        
+		}
+		
         /////////////////////////////////////////////
         
         //カーソルの復元

@@ -74,8 +74,7 @@ $.checkThreeModel = function(name){
  near=カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１,
  far=カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000
  
- :demo
- 
+  
  
  #[end]
  */
@@ -323,8 +322,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
  motion=ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適応されます。,
  folder=ファイルの配置フォルダを変更できます。
   
- :demo
- 
+  
  
 
  #[end]
@@ -524,8 +522,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
  
  tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。
   
- :demo
- 
+  
  
 
  #[end]
@@ -598,8 +595,7 @@ tyrano.plugin.kag.tag["3d_sphere_new"] = {
  tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。,
  folder=ファイルの配置フォルダを変更できます。
   
- :demo
- 
+  
 
  #[end]
  */
@@ -738,7 +734,6 @@ name=3Dオブジェクトの名前です。イベントを発生させる3Dオ�
 storage=移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます,
 target=ジャンプ先のラベル名を指定します。省略すると先頭から実行されます
 
-:demo
  
 
  #[end]
@@ -798,7 +793,6 @@ tyrano.plugin.kag.tag["3d_event"] = {
 :param
 name=3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定してください。
 
-:demo
  
 
  #[end]
@@ -846,8 +840,7 @@ tyrano.plugin.kag.tag["3d_event_delete"] = {
 
  :param
  
- :demo
- 
+  
 
  #[end]
  */
@@ -889,7 +882,6 @@ tyrano.plugin.kag.tag["3d_event_start"] = {
  
 :param
 
-:demo
  
 
  #[end]
@@ -952,8 +944,7 @@ tyrano.plugin.kag.tag["3d_event_stop"] = {
  
  tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。
  
- :demo
- 
+  
 
  #[end]
  */
@@ -1029,8 +1020,7 @@ tyrano.plugin.kag.tag["3d_box_new"] = {
  doubleside=テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。,
  tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。
  
- :demo
- 
+  
 
  #[end]
  */
@@ -1253,8 +1243,7 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
  rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
  scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。
  
- :demo
- 
+  
 
  #[end]
  */
@@ -1353,8 +1342,7 @@ tyrano.plugin.kag.tag["3d_show"] = {
  name=3Dオブジェクトの名前です。退場させたいオブジェクトのnameを指定してください,
  time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
  wait=退場の完了を待つか否か。デフォルトはtrue。
- :demo
- 
+  
 
  #[end]
  */
@@ -1430,8 +1418,7 @@ tyrano.plugin.kag.tag["3d_hide"] = {
  :param
  time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
  wait=退場の完了を待つか否か。デフォルトはtrue。
- :demo
- 
+  
 
  #[end]
  */
@@ -1535,8 +1522,7 @@ tyrano.plugin.kag.tag["3d_hide_all"] = {
  :param
  name=3Dオブジェクトの名前です。削除していオブジェクトのnameを指定してください
  
- :demo
- 
+  
 
  #[end]
  */
@@ -1589,8 +1575,7 @@ tyrano.plugin.kag.tag["3d_delete"] = {
 
  :param
  
- :demo
- 
+  
 
  #[end]
  */
@@ -1646,8 +1631,7 @@ tyrano.plugin.kag.tag["3d_delete_all"] = {
  
  :param
  
- :demo
- 
+  
 
  #[end]
  */
@@ -1693,8 +1677,7 @@ tyrano.plugin.kag.tag["3d_canvas_show"] = {
  
  :param
  
- :demo
-
+ 
  #[end]
  */
 
@@ -1738,8 +1721,7 @@ tyrano.plugin.kag.tag["3d_canvas_hide"] = {
  
  :param
  
- :demo
-
+ 
  #[end]
  */
 
@@ -1758,7 +1740,9 @@ tyrano.plugin.kag.tag["3d_close"] = {
         three.stat.is_load = false;
         three.stat.canvas_show = false;
         
-        three.j_canvas.remove();
+        if(three.j_canvas){
+        	three.j_canvas.remove();
+        }
         
         this.kag.ftag.nextOrder();
 	    
@@ -1828,8 +1812,7 @@ tyrano.plugin.kag.tag["3d_close"] = {
  ｜easeOutBounce
  ｜easeInOutBounce
  
- :demo
-
+ 
 
  #[end]
  */
@@ -1959,8 +1942,7 @@ tyrano.plugin.kag.tag["3d_anim"] = {
  name=アニメーションを停止する3Dオブジェクトの名前を指定します。 ,
  finish=true or false を指定します。falseを指定するとアニメーション停止の位置でオブジェクトが停止します。trueだとアニメーションする予定の位置まで移動します。デフォルトはtrue。
  
- :demo
- 
+  
 
  #[end]
  */
@@ -2019,8 +2001,7 @@ tyrano.plugin.kag.tag["3d_anim_stop"] = {
  light_amb=環境光の強さを指定します。デフォルトは1。例えば 0.5 だと暗め。2だとかなり明るくなります。
  
  
- :demo
- 
+  
 
  #[end]
  */
@@ -2137,8 +2118,7 @@ tyrano.plugin.kag.tag["3d_scene"] = {
  rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
  tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
  lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。
- :demo
- 
+  
 
  #[end]
  */
@@ -2246,8 +2226,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
  max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30,
  mode=position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。
  
- :demo
- 
+  
 
  #[end]
  */
@@ -2542,8 +2521,7 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
  
  :param
  
- :demo
- 
+  
 
  #[end]
  */
@@ -2602,8 +2580,7 @@ tyrano.plugin.kag.tag["3d_gyro_stop"] = {
  button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「カメラインスペクタを閉じる」 ,
  menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) 
  
- :demo
- 
+  
 
  #[end]
  */
@@ -2898,8 +2875,7 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
  name=3Dオブジェクトの名前を指定します。 ,
  motion=モーション名を指定してください。
  
- :demo
- 
+  
 
  #[end]
  */
@@ -2968,8 +2944,7 @@ tyrano.plugin.kag.tag["3d_motion"] = {
  overlap=true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase,
  reset=true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。
   
- :demo
- 
+  
 
  #[end]
  */
