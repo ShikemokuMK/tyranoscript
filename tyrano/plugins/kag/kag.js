@@ -97,8 +97,6 @@ tyrano.plugin.kag ={
 				scene_pm:{}, //シーン情報の設定
 				init_pm:{},//初期設定のpm
 				
-				
-				
 				gyro:{
 					
 					pm:{},
@@ -728,8 +726,8 @@ tyrano.plugin.kag ={
              button_menu_obj.css("left",parseInt(this.kag.config.configLeft));
              button_menu_obj.css("top",parseInt(this.kag.config.configTop));
          }else{
-             button_menu_obj.css("left",this.config.scWidth -35);
-             button_menu_obj.css("top",this.config.scHeight -35);
+             button_menu_obj.css("left",this.config.scWidth -70);
+             button_menu_obj.css("top",this.config.scHeight -70);
          }
             
          button_menu_obj.click(function(){
