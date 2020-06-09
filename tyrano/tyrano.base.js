@@ -46,7 +46,9 @@ tyrano.base ={
         	this.tyrano.kag.tmp.base_scale = scale_f;
             
             setTimeout(function() {
-                    
+                 
+                var margin_top = document.documentElement.clientHeight - window.innerHeight;
+                 
                 //中央寄せなら、画面サイズ分を引く。
                 if(that.tyrano.kag.config["ScreenCentering"] && that.tyrano.kag.config["ScreenCentering"]=="true"){
                    
@@ -60,7 +62,7 @@ tyrano.base ={
                    
                     if(width_f > height_f){
                         $(".tyrano_base").css("margin-left",width+"px");
-                        $(".tyrano_base").css("margin-top","0px");
+                        $(".tyrano_base").css("margin-top",margin_top + "px");
                     }else{
                         
                         $(".tyrano_base").css("margin-left","0px");

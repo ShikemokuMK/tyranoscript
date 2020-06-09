@@ -773,6 +773,22 @@ tyrano.plugin.kag ={
         }
         */
         
+        //スマホの場合
+        if($.userenv()!="pc"){
+	    
+	    	//absolute指定
+	    	$("#tyrano_base").css("position","absolute");
+	    	
+	    	function noScroll(event) {
+			     event.preventDefault();
+			}
+			// スクロール禁止(SP) vchatのときは例外
+			if(this.kag.config["vchat"]!="true"){
+				document.addEventListener('touchmove', noScroll, { passive: false });
+			}
+			
+        }
+        
         //tyranoの大本部分の調整
         this.tyrano.base.setBaseSize(this.config.scWidth,this.config.scHeight);
         
@@ -788,7 +804,7 @@ tyrano.plugin.kag ={
 	            that.tmp.angle = $.getAngle();
 		        
                 if(Math.abs(window.orientation) === 90){
-                    if(window.pageYOffset===0){window.scrollTo(0,1);}
+                    window.scrollTo(0,1);
                     that.tyrano.base.fitBaseSize(that.config.scWidth,that.config.scHeight);
                 }
                 else{

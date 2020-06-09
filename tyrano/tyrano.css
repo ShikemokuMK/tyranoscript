@@ -327,9 +327,11 @@ abbr,acronym{
 /*ゲーム枠の外側の色を指定します*/
 
 body{
+	
     background-color:black;
     -webkit-tap-highlight-color: transparent;
     overflow:hidden;
+    touch-action: manipulation;
 
 }
 
