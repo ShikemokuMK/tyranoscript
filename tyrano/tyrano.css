@@ -449,9 +449,9 @@ body{
   box-sizing: border-box;
   padding: 0 12px;
   margin: 0;
-  height: 40px;
-  line-height: 40px;
-  font-size: 18px;
+  height: 24px;
+  line-height: 24px;
+  font-size: 14px;
   letter-spacing: 0.1em;
   color: white;
   background: #70c7ff;
@@ -463,7 +463,7 @@ body{
   top: 0;
   left: -7px;
   border: none;
-  height: 40px;
+  height: 24px;
   width: 7px;
   background: inherit;
   border-radius: 5px 0 0 5px;

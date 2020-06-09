@@ -83,18 +83,19 @@ tyrano.plugin.kag.tag.vchat_in = {
         var font_style = {
             "color":"black",
             "font-weight": "normal",
-            "font-size": "2em",
-            "margin":"1em",
-            "line-height":"1.5em",
+            "font-size": "16px",
+            "margin":"0.2em",
+            "line-height":"1.2em",
         /*    "font-family": that.kag.stat.font.face,*/
         };
         
         j_vchat_text.css(font_style);
         
-        j_vchat_text.css("margin-top",30);
+        //もし、キャラ名がない場合は間をあけない。
+        //j_vchat_text.css("margin-top","2em");
         
         j_vchat.find(".vchat_chara_name").css({
-            "font-size":"1.8em",
+        /*    "font-size":"1.8em",*/
         /*  "font-family":that.kag.stat.font.face,*/
         });
         

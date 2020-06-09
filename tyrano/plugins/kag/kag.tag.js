@@ -773,7 +773,7 @@ tyrano.plugin.kag.tag.text = {
                 j_span = jtext.find(".current_span");
                 if(chara_name==""){
                     $(".current_vchat").find(".vchat_chara_name").remove();
-                    $(".current_vchat").find(".vchat-text-inner").css("margin-top","1em");
+                    $(".current_vchat").find(".vchat-text-inner").css("margin-top","0.2em");
                 }else{
                     $(".current_vchat").find(".vchat_chara_name").html(chara_name);
                     
