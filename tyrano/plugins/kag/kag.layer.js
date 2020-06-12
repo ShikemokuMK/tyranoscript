@@ -365,8 +365,8 @@ tyrano.plugin.kag.layer ={
             $(this).remove();
         });
         
-//canvasは削除
-		$("canvas").each(function(){
+//canvasは削除 → 3Dレイヤのcanvasは削除
+		$(".three_canvas").each(function(){
             $(this).remove();
         });
         

@@ -105,8 +105,15 @@ tyrano.plugin.kag.tag["3d_init"] = {
         
         this.clock = new THREE.Clock();
         
+        //すでにthreelayerが存在する場合は無視する
+        if($(".three_canvas").length > 0){
+	    	//２重登録
+	    	this.kag.ftag.nextOrder();
+	    	return;
+	    }
+        
         //3Dモデル用のシーンを挿入する。
-        var j_canvas = $("<canvas id='three'></canvas>");
+        var j_canvas = $("<canvas id='three' class='three_canvas'></canvas>");
         
         var sc_width = parseInt(this.kag.config.scWidth);
         var sc_height = parseInt(this.kag.config.scHeight);
