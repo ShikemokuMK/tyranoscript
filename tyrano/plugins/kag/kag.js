@@ -445,6 +445,28 @@ tyrano.plugin.kag ={
             
             if(process.platform == "darwin"){
                 
+                alert("パッチを適応するゲーム実行ファイル（.app）の場所を選択してください。");
+                    
+                //実行パスを選択させる
+                let dialog = require('electron').remote.dialog;
+                
+                let filenames = dialog.showOpenDialogSync(null, {
+                    properties: ['openFile'],
+                    title: "パッチを適応するゲームの実行ファイル（app）を選択してください。",
+                    filters: [
+                        {name: '', extensions: ["app"]}
+                    ]
+                });
+                
+                if (typeof filenames == "undefined") {
+                    alert("パッチの適応を中止します");
+                    call_back();
+					return;   
+                }
+        
+                path = filenames[0]+"/Contents/Resources/app.asar";
+                out_path = out_path + "/";
+                
             }else{
                 out_path = out_path + "/";
             }
@@ -462,7 +484,6 @@ tyrano.plugin.kag ={
             var zip = new AdmZip(patch_path);
             
             //console.log(_path.resolve(out_path + "update_tmp/"));
-            
             
             zip.extractAllTo(_path.resolve(out_path + "update_tmp/"), true);
             
@@ -1210,7 +1231,9 @@ tyrano.plugin.kag ={
             
             if(typeof TyranoPlayer == "function"){
                 //iphone
-                location.href = "tyranoplayer-back://endgame";
+                //location.href = "tyranoplayer-back://endgame";
+                webkit.messageHandlers.backHandler.postMessage("endgame");
+                
             }else{
                 //その他
                 $.confirm($.lang("go_title"),
