@@ -24,7 +24,7 @@ Confit.tjs の mediaFormatDefaultをmp3に変更して下さい。
 [playbgm storage="music.ogg"]
 :param
 storage=再生する音楽ファイルを指定してください,
-loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます。smoothを指定すると、ループが滑らかになります。,
+loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます。,
 sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
 volume=再生する音量を指定できます。0〜100 の範囲で指定して下さい。（デフォルトは100）
 

@@ -18,6 +18,14 @@ tyrano.plugin.kag.studio = {
         
         if(window.navigator.userAgent.indexOf("TyranoStudio") !=-1){
             
+            //スタジオ拡張用。iframeで読み込んだときの対応
+            try {
+                this.ipc = require('electron');
+            } catch (e) {
+                return false;
+            }
+            
+            
             TYRANO.kag.is_studio = true;
             
             this.ipc = require('electron');

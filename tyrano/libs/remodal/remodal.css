@@ -14,7 +14,8 @@
 /* Hide scroll bar */
 
 html.remodal-is-locked {
-  overflow: hidden;
+
+/* overflow: hidden; */
 
   -ms-touch-action: none;
   touch-action: none;

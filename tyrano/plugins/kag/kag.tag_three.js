@@ -47,6 +47,35 @@ $.checkThreeModel = function(name){
 	}
 }
 
+/*
+$.getAngle = function(){
+	
+	
+	let disp = 0;
+
+	switch(window.orientation) {
+	  case 0:
+	   disp += 0;
+	   break;
+	
+	  case -90:
+	   disp = 1;
+	   break;
+	
+	  case 90:
+	   disp = 2;
+	   break;
+	
+	  case 180:
+	   disp = 3;
+	   break;
+	
+	}
+	
+	return disp;
+		
+}
+*/
 	        
 
 /*
@@ -1281,6 +1310,7 @@ tyrano.plugin.kag.tag["3d_show"] = {
 	    }
         
         var model = this.kag.tmp.three.models[pm.name];
+        
         three.scene.add(model.model);
 	    
 	    var options = {
@@ -2288,7 +2318,11 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 		    	three.stat.gyro.pm = pm;
 		    	
 				const orientEvent = (e) =>{
-				
+					
+					
+		    		//let angle_code = $.getAngle();
+					//console.log(angle);
+					
 					if(first_flag == true){
 					    	
 				    	first_flag = false;
@@ -2302,6 +2336,17 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 					    }else{
 							three.stat.gyro.mode = 2;
 					    }
+					    
+					    if(angle!=0){
+							
+							//値の入れ替え
+							[max_x, max_y] = [max_y, max_x];
+				        
+						}else {
+							
+							max_x = pm.max_x;
+							max_y = pm.max_y;
+						}
 	
 				    }
 		        	
@@ -2310,13 +2355,22 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 						return;
 					}
 					
-					
 					if(angle!=0){
+						
 						var t_gamma = e.gamma;
-						if(t_gamma < 0 ){
-							return ;
-						}
+						
+						if(angle==-90){
+							if(t_gamma < 0 ){
+								return ;
+							}
+						}else if(angle==90){
+							if(t_gamma > 0 ){
+								return ;
+							}
+						}							
 					}
+					
+					
 					
 					var hen_y = first_beta - e.beta;
 					var hen_x = first_gamma - e.gamma;
@@ -2345,12 +2399,18 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 							gyro_x = default_camera_y - (hen_y * ( Math.PI / 180 ));
 							
 						
-			        	}else{
+			        	}else if(angle==-90){
 				        	
-							gyro_y = default_camera_y + (hen_y * ( Math.PI / 180 ));
+				        	gyro_y = default_camera_y + (hen_y * ( Math.PI / 180 ));
 			        		gyro_x = default_camera_x - (hen_x * ( Math.PI / 180 ));
-							
+			        	
+			        	}else if(angle==90){
+				        	
+							gyro_y = default_camera_y + (hen_y*-1 * ( Math.PI / 180 ));
+			        		gyro_x = default_camera_x - (hen_x*-1 * ( Math.PI / 180 ));
+			        		
 						}
+						
 						
 					}else if(three.stat.gyro.mode == 2 ){
 						
@@ -2358,15 +2418,20 @@ tyrano.plugin.kag.tag["3d_gyro"] = {
 						if(angle==0){
 			        		
 			        		//position  変更
-							gyro_y =  default_camera_pos_y + hen_x ;
-							gyro_x =  default_camera_pos_x + hen_y ;
+							gyro_x =  default_camera_pos_y + (hen_x*10) ;
+							gyro_y =  default_camera_pos_x + (hen_y*10) ;
 						
 						
-			        	}else{
+			        	}else if(angle==-90){
+				        	
+				        	gyro_y =  default_camera_pos_y + (hen_x*10)  ;
+							gyro_x =  default_camera_pos_x + (hen_y*10)  ;
+							
+				        }else if(angle==90){
 				        	
 				        	//position  変更
-							gyro_y =  default_camera_pos_y + hen_x  ;
-							gyro_x =  default_camera_pos_x + hen_y  ;
+							gyro_y =  default_camera_pos_y + (hen_x*10)  ;
+							gyro_x =  default_camera_pos_x + (hen_y*10)  ;
 						
 						}
 						
@@ -2783,7 +2848,7 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
         //リロードボタンの配置
         //メッセージエリア非表示。
         
-        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
+        var j_close_button = $("<div class='area_three_debug' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
         j_close_button.draggable({
     
             scroll : false,
@@ -2791,6 +2856,7 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
             stop : (e, ui) => {
                 
             }
+            
         });
         
         var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
@@ -3094,8 +3160,10 @@ tyrano.plugin.kag.tag["3d_debug"] = {
 	    
 	    	if (!mousedown) return;
             
+            j_close_button.hide();
+            
             if(button==0){
-
+				
                 moveDistance = {x: prevPosition.x - e.clientX, y: prevPosition.y - e.clientY};
                 model.rotation.x += moveDistance.y * 0.01;
                 model.rotation.y -= moveDistance.x * 0.01;
@@ -3137,6 +3205,8 @@ tyrano.plugin.kag.tag["3d_debug"] = {
         
         function evt_mouseup(e){
 	    	
+	    	j_close_button.show();
+	    	
 	    	if(button==0){
                 
                 var str = $.orgFloor(model.rotation.x,100) + "," + $.orgFloor(model.rotation.y,100) + "," + model.rotation.z;
@@ -3149,6 +3219,13 @@ tyrano.plugin.kag.tag["3d_debug"] = {
             var msg_pos = model.position.x + "," + model.position.y + "," + model.position.z;
 			var msg_rot = $.orgFloor(model.rotation.x,100) + "," + $.orgFloor(model.rotation.y,100) + "," + $.orgFloor(model.rotation.z,100);
 			var msg_scale = $.orgFloor(model.scale.x,100) + "," + $.orgFloor(model.scale.y,100) + "," + $.orgFloor(model.scale.z,100);
+			
+			//pmを更新する
+			var _pm = model_obj["pm"];
+			_pm["pos"] = msg_pos;
+			_pm["rot"] = msg_rot;
+			_pm["scale"] = msg_scale;
+			model_obj["pm"] = _pm;
 			
 			var msg = 'pos="'+msg_pos+'" rot="'+msg_rot+'" scale="'+msg_scale+'" ';
 			j_debug_msg.find("input").val(msg);
@@ -3178,7 +3255,7 @@ tyrano.plugin.kag.tag["3d_debug"] = {
         //リロードボタンの配置
         //メッセージエリア非表示。
         
-        var j_close_button = $("<div style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
+        var j_close_button = $("<div class='area_three_debug' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+pm.button_text+"</span></button></div>");
         j_close_button.draggable({
     
             scroll : false,
@@ -3246,6 +3323,10 @@ tyrano.plugin.kag.tag["3d_debug"] = {
         }
         
         $("body").append(j_close_button);
+        
+        
+        //初期値を設定する。
+        evt_mouseup();
         
         
     },
