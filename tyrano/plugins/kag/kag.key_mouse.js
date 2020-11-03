@@ -336,8 +336,9 @@ tyrano.plugin.kag.key_mouse = {
     next : function() {
         //指定された動作を発火させる
         if (this.kag.key_mouse.canClick()) {
-            $(".layer_event_click").click();
-        }
+	        this.clearSkip();          
+            $(".layer_event_click").trigger("click");
+	    }
     },
 
     showmenu : function() {
