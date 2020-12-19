@@ -855,18 +855,32 @@ tyrano.plugin.kag.tag.text = {
                     that.kag.stat.ruby_str = "";
                 }
 
-                append_str += "<span style='visibility: hidden'>" + c + "</span>";
+                append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
             }
             current_str += "<span>" + append_str + "</span>";
+
+			//アニメーション設定。無効な場合がある
+			if(typeof that.kag.stat.font.anim =="undefined" || that.kag.stat.font.anim =="none" ){
+				that.kag.stat.font.anim = "";
+			}
 
             // hidden状態で全部追加する
             that.kag.appendMessage(jtext, current_str);
             var append_span = j_span.children('span:last-child');
             var makeVisible = function(index) {
-                append_span.children("span:eq(" + index + ")").css('visibility', 'visible');
+	            
+	            //append_span.children("span:eq(" + index + ")").addClass("fadeIn");
+	            //append_span.children("span:eq(" + index + ")").css('animation','rollIn 0.2s ease 0s 1 normal forwards');
+	            
+	            if(that.kag.stat.font.anim!=""){
+		        	append_span.children("span:eq(" + index + ")").css('animation', "t"+that.kag.stat.font.anim+' '+that.kag.stat.font.anim_speed+' ease 0s 1 normal forwards');
+	            }else{
+	            	append_span.children("span:eq(" + index + ")").css({'visibility':'visible','opacity':'1'});
+				}
+				
             };
             var makeVisibleAll = function() {
-                append_span.children("span").css('visibility', 'visible');
+                append_span.children("span").css({'visibility':'visible','opacity':'1'});
             };
 
             var pchar = function(index) {
@@ -3065,7 +3079,9 @@ tyrano.plugin.kag.tag.quake = {
  italic=trueを指定すると、イタリック体になります。デフォルトはfalseです,
  face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
  edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
- shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください 
+ shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください,
+ anim=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
+fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none, 
 
 :demo
 1,kaisetsu/02_decotext
@@ -3106,6 +3122,21 @@ tyrano.plugin.kag.tag.font = {
         if (pm.italic){
             this.kag.stat.font["italic"] = $.convertItalic(pm.italic);
         }
+        
+        if(pm.anim){
+	    	
+	    	if(pm.anim=="none"){
+	    		this.kag.stat.font["anim"] = "";
+			}else{
+				this.kag.stat.font["anim"] = pm.anim;
+			}
+	    
+	    }
+	    
+	    if(pm.anim_speed){
+	    	this.kag.stat.font["anim_speed"] = pm.anim_speed;
+	    }
+	    
         
         if (pm.edge) {
             if(pm.edge=="none" || pm.edge==""){
@@ -3185,6 +3216,22 @@ tyrano.plugin.kag.tag.deffont = {
         if (pm.italic) {
             this.kag.stat.default_font.italic = $.convertItalic(pm.italic);
         }
+        
+        if(pm.anim){
+	    	
+	    	if(pm.anim=="none"){
+	    		this.kag.stat.default_font["anim"] = "";
+			}else{
+				this.kag.stat.default_font["anim"] = pm.anim;
+			}
+	    
+	    }
+	    
+	    if(pm.anim_speed){
+	    	this.kag.stat.default_font["anim_speed"] = pm.anim_speed;
+	    }
+	    
+        
         
         if (pm.edge) {
             if(pm.edge=="none" || pm.edge==""){

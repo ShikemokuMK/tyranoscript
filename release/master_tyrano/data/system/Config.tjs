@@ -80,6 +80,17 @@
 ;chSpeeds.normal = 30; // 「普通」文字表示スピード
 ;chSpeeds.slow = 50; // 「遅い」文字表示スピード
 
+// ◆ 文字表示の演出
+// テキストの表示演出を指定できます。noneを指定すると演出が無効になります。
+// 指定できる名前
+// fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none
+;defaultChAnim = none; 
+
+// ◆ 文字表示の演出スピード
+// defaultChAnimの演出が有効な場合、演出にかける時間を指定します。sは秒を表します。 
+;defaultChAnimSpeed = 0.2s; 
+
+
 // ◆ スキップスピード (ミリ秒/文字)
 //スキップ時にどれくらいの早さで進むかを設定できる
 ;skipSpeed = 30;

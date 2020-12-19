@@ -219,7 +219,9 @@ tyrano.plugin.kag ={
             bold:"",
             size:"",
             face:"",
-            italic:""
+            italic:"",
+            anim:"",
+            anim_speed:"0.2s",
         },
         
         //qr系の設定
@@ -242,7 +244,10 @@ tyrano.plugin.kag ={
             face:"",
             italic:"",
             edge:"", 
-            shadow:""
+            shadow:"",
+            anim:"",
+            anim_speed:"",
+        
         },
         
         //システム系で使用するHTMLの場所を保持
@@ -912,6 +917,10 @@ tyrano.plugin.kag ={
         this.stat.default_font.bold  = $.convertBold(this.kag.config.defaultBold);
         this.stat.default_font.size  = this.kag.config.defaultFontSize;
         this.stat.default_font.face  = this.kag.config.userFace;
+        
+        this.stat.default_font.anim  = this.kag.config.defaultChAnim;
+        this.stat.default_font.anim_speed  = this.kag.config.defaultChAnimSpeed;
+        
         
         //文字のアンチエイリアス効果 
         var smooth = this.kag.config.defaultAntialiased; //アンチエイリアス効果
