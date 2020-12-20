@@ -759,8 +759,15 @@ tyrano.plugin.kag.tag.text = {
 
             if (jtext.find("p").find(".current_span").length != 0) {
 
+				//アニメーションは強制停止させる。
+				jtext.find("p").find(".current_span").find("span").css({
+					"opacity":1,
+					"visibility":"visible",
+					"animation":""
+				});
+						
                 current_str = jtext.find("p").find(".current_span").html();
-
+				
             }
 
             that.kag.checkMessage(jtext);
@@ -857,23 +864,37 @@ tyrano.plugin.kag.tag.text = {
 
                 append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
             }
+            
             current_str += "<span>" + append_str + "</span>";
 
 			//アニメーション設定。無効な場合がある
-			if(typeof that.kag.stat.font.anim =="undefined" || that.kag.stat.font.anim =="none" ){
-				that.kag.stat.font.anim = "";
+			if(typeof that.kag.stat.font.effect =="undefined" || that.kag.stat.font.effect =="none" ){
+				that.kag.stat.font.effect = "";
 			}
 
             // hidden状態で全部追加する
             that.kag.appendMessage(jtext, current_str);
+            
             var append_span = j_span.children('span:last-child');
             var makeVisible = function(index) {
 	            
 	            //append_span.children("span:eq(" + index + ")").addClass("fadeIn");
 	            //append_span.children("span:eq(" + index + ")").css('animation','rollIn 0.2s ease 0s 1 normal forwards');
 	            
-	            if(that.kag.stat.font.anim!=""){
-		        	append_span.children("span:eq(" + index + ")").css('animation', "t"+that.kag.stat.font.anim+' '+that.kag.stat.font.anim_speed+' ease 0s 1 normal forwards');
+	            if(that.kag.stat.font.effect!=""){
+		            
+		        	append_span.children("span:eq(" + index + ")").on("animationend",function(e){
+						
+						$(e.target).css({
+							"opacity":1,
+							"visibility":"visible",
+							"animation":""
+						});
+						
+					});
+					
+					append_span.children("span:eq(" + index + ")").css('animation', "t"+that.kag.stat.font.effect+' '+that.kag.stat.font.effect_speed+' ease 0s 1 normal forwards');
+					
 	            }else{
 	            	append_span.children("span:eq(" + index + ")").css({'visibility':'visible','opacity':'1'});
 				}
@@ -3080,8 +3101,10 @@ tyrano.plugin.kag.tag.quake = {
  face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
  edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
  shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください,
- anim=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
-fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none, 
+ effect=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
+fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
+ effect_speed=effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。
+ 
 
 :demo
 1,kaisetsu/02_decotext
@@ -3123,18 +3146,18 @@ tyrano.plugin.kag.tag.font = {
             this.kag.stat.font["italic"] = $.convertItalic(pm.italic);
         }
         
-        if(pm.anim){
+        if(pm.effect){
 	    	
-	    	if(pm.anim=="none"){
-	    		this.kag.stat.font["anim"] = "";
+	    	if(pm.effect=="none"){
+	    		this.kag.stat.font["effect"] = "";
 			}else{
-				this.kag.stat.font["anim"] = pm.anim;
+				this.kag.stat.font["effect"] = pm.effect;
 			}
 	    
 	    }
 	    
-	    if(pm.anim_speed){
-	    	this.kag.stat.font["anim_speed"] = pm.anim_speed;
+	    if(pm.effect_speed){
+	    	this.kag.stat.font["effect_speed"] = pm.effect_speed;
 	    }
 	    
         
@@ -3179,6 +3202,9 @@ italic=trueを指定するとイタリック体で表示されます。デフォ
 face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
 edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
 shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください 
+effect=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
+fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
+effect_speed=effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。
 
 :demo
 1,kaisetsu/22_font
@@ -3217,18 +3243,18 @@ tyrano.plugin.kag.tag.deffont = {
             this.kag.stat.default_font.italic = $.convertItalic(pm.italic);
         }
         
-        if(pm.anim){
+        if(pm.effect){
 	    	
-	    	if(pm.anim=="none"){
-	    		this.kag.stat.default_font["anim"] = "";
+	    	if(pm.effect=="none"){
+	    		this.kag.stat.default_font["effect"] = "";
 			}else{
-				this.kag.stat.default_font["anim"] = pm.anim;
+				this.kag.stat.default_font["effect"] = pm.effect;
 			}
 	    
 	    }
 	    
-	    if(pm.anim_speed){
-	    	this.kag.stat.default_font["anim_speed"] = pm.anim_speed;
+	    if(pm.effect_speed){
+	    	this.kag.stat.default_font["effect_speed"] = pm.effect_speed;
 	    }
 	    
         

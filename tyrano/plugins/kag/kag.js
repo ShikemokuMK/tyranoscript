@@ -220,8 +220,8 @@ tyrano.plugin.kag ={
             size:"",
             face:"",
             italic:"",
-            anim:"",
-            anim_speed:"0.2s",
+            effect:"",
+            effect_speed:"0.2s",
         },
         
         //qr系の設定
@@ -245,8 +245,8 @@ tyrano.plugin.kag ={
             italic:"",
             edge:"", 
             shadow:"",
-            anim:"",
-            anim_speed:"",
+            effect:"",
+            effect_speed:"",
         
         },
         
@@ -918,8 +918,8 @@ tyrano.plugin.kag ={
         this.stat.default_font.size  = this.kag.config.defaultFontSize;
         this.stat.default_font.face  = this.kag.config.userFace;
         
-        this.stat.default_font.anim  = this.kag.config.defaultChAnim;
-        this.stat.default_font.anim_speed  = this.kag.config.defaultChAnimSpeed;
+        this.stat.default_font.effect  = this.kag.config.defaultChEffect;
+        this.stat.default_font.effect_speed  = this.kag.config.defaultChEffectSpeed;
         
         
         //文字のアンチエイリアス効果 
