@@ -862,7 +862,11 @@ tyrano.plugin.kag.tag.text = {
                     that.kag.stat.ruby_str = "";
                 }
 
-                append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
+				if(c==" "){
+					append_str += "<span style='opacity:0'>" + c + "</span>";
+				}else{
+                	append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
+				}
             }
             
             current_str += "<span>" + append_str + "</span>";
@@ -3102,7 +3106,7 @@ tyrano.plugin.kag.tag.quake = {
  edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
  shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください,
  effect=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
-fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
+fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn<br />/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
  effect_speed=effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。
  
 
@@ -3203,7 +3207,7 @@ face=フォントの種類を指定。非KAG互換でウェブフォントも利
 edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
 shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください 
 effect=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
-fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
+fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/<br />zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
 effect_speed=effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。
 
 :demo

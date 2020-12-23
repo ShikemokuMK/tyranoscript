@@ -81,7 +81,6 @@ foreach($array_copy as $file){
 	exec("cp -R ../tyrano/audio ".$dirname."/tyrano/");
 	exec("cp -R ../tyrano/css ".$dirname."/tyrano/");
 	
-	
 
 //オリジナルマスターデータのコピー	
 	exec("cp -R ./master_tyrano/data ".$dirname."/data");
@@ -93,7 +92,7 @@ foreach($array_mini as $file){
 	//コピーする
 	//exec("cp ../tyrano/".$file." ".$dirname."/tyrano/");
 //	exec("java -jar compiler-latest/compiler.jar --js=../tyrano/".$file." --js_output_file=".$dirname."/tyrano/".$file." --compilation_level WHITESPACE_ONLY");
-    exec("uglifyjs --compress --mangle -- ../tyrano/".$file." > ".$dirname."/tyrano/".$file."");	
+    exec("terser ../tyrano/".$file." -c toplevel,sequences=false > ".$dirname."/tyrano/".$file."");	
 
 }
 
