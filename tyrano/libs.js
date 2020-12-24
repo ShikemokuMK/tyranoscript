@@ -824,6 +824,15 @@
         }
     };
     
+    $.makeSaveKey = function(){
+		
+		var S="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		var N=16;
+		let key = Array.from(Array(N)).map(()=>S[Math.floor(Math.random()*S.length)]).join('');
+		return key;
+		
+	};
+    
     $.getStorage = function(key,type) {
         
         var gv = "null";
@@ -1035,6 +1044,7 @@
     };
 
     $.setStorageFile = function(key, val) {
+	    
         val = JSON.stringify(val);
         var fs = require('fs');
         

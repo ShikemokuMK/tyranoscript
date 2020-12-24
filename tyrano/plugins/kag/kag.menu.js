@@ -1049,7 +1049,8 @@ tyrano.plugin.kag.menu = {
             tmp_array = new Array();
 
             var root = {
-                kind : "save"
+                kind : "save",
+                hash : this.kag.save_key_val
             };
             
             //セーブ数の上限を変更する。

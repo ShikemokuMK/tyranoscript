@@ -10,6 +10,9 @@ tyrano.plugin.kag ={
     is_rider:false, //ティラノライダーからの起動かどうか
     is_studio:false, //ティラノスタジオからの起動かどうか
     
+    save_key_id:"",
+    save_key_val:"", //セーブデータ用のキー
+    
     cache_html:{},
     
     cache_scenario : {},
@@ -701,6 +704,46 @@ tyrano.plugin.kag ={
         this.studio.kag = that;
         this.studio.init();
         
+        //セーブデータ認証用のKey確認（ローカルストレージ）
+        if($.isElectron()){
+	        
+	        //PC
+	        if(process.execPath.indexOf("var/folders")!=-1){
+	        	that.save_key_id = that.kag.config.projectID+"_save_key";
+	        }else{
+		    	that.save_key_id = $.getExePath()+"_"+that.kag.config.projectID;
+		    }
+	    
+		    if (localStorage.getItem(that.save_key_id)) {
+	        	that.save_key_val = localStorage.getItem(that.save_key_id);
+	        }else{
+		        
+		        //認証キーの書き出し
+		        that.save_key_val = $.makeSaveKey();
+		        localStorage.setItem(that.save_key_id,that.save_key_val);
+		        
+		        //セーブデータ上書き
+		        var tmp_array = that.menu.getSaveData();
+		        //ハッシュを上書き
+				tmp_array["hash"] = that.save_key_val;
+				$.setStorage(that.kag.config.projectID + "_tyrano_data", tmp_array, that.kag.config.configSave);
+	            
+		    }
+		    
+		    //ハッシュに差分があったら、警告を表示して上書きするか確認。
+			var tmp_array = that.menu.getSaveData();
+			
+			if(tmp_array["hash"] != that.save_key_val){
+				
+				alert('不正なセーブデータの改変を検知しました。ゲームの起動を中止します');
+				alert("起動を中止しました。セーブデータを削除してもう一度、起動してください");
+				return false;
+			    
+			}
+		
+				
+		}
+    	
         
         //システム変数の初期化
         var tmpsf = $.getStorage(this.kag.config.projectID+"_sf",that.config.configSave);
@@ -708,7 +751,8 @@ tyrano.plugin.kag ={
         if(tmpsf == null){
             this.variable.sf ={};
         }else{
-            this.variable.sf = eval("("+tmpsf+")");
+            this.variable.sf = JSON.parse(tmpsf);
+        
         }
         
         
