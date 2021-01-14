@@ -853,6 +853,17 @@ tyrano.plugin.kag.tag.text = {
                 ch_speed = parseInt(that.kag.config.chSpeed);
             }
             
+            //アニメーション設定。無効な場合がある
+			if(typeof that.kag.stat.font.effect =="undefined" || that.kag.stat.font.effect =="none" ){
+				that.kag.stat.font.effect = "";
+			}
+
+            //禁則処理を有効にするための処置。エフェクトによっては有効にできないようにする
+            var flag_in_block = true;
+            if(that.kag.stat.font.effect=="" || that.kag.stat.font.effect=="fadeIn"){
+	        	flag_in_block=false;
+	        }
+            
             var append_str = "";
             for (var i = 0; i < message_str.length; i++) {
                 var c = message_str.charAt(i);
@@ -865,17 +876,19 @@ tyrano.plugin.kag.tag.text = {
 				if(c==" "){
 					append_str += "<span style='opacity:0'>" + c + "</span>";
 				}else{
-                	append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
-				}
+					
+					if(flag_in_block){
+						append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
+					}else{
+						append_str += "<span style='opacity:0'>" + c + "</span>";
+					}
+					
+                }
             }
             
             current_str += "<span>" + append_str + "</span>";
 
-			//アニメーション設定。無効な場合がある
-			if(typeof that.kag.stat.font.effect =="undefined" || that.kag.stat.font.effect =="none" ){
-				that.kag.stat.font.effect = "";
-			}
-
+			
             // hidden状態で全部追加する
             that.kag.appendMessage(jtext, current_str);
             

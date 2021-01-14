@@ -735,8 +735,9 @@ tyrano.plugin.kag ={
 			
 			if(tmp_array["hash"] != that.save_key_val){
 				
-				alert('不正なセーブデータの改変を検知しました。ゲームの起動を中止します');
-				alert("起動を中止しました。セーブデータを削除してもう一度、起動してください");
+				alert($.lang("save_file_violation_1"));
+				alert($.lang("save_file_violation_2"));
+			
 				return false;
 			    
 			}
