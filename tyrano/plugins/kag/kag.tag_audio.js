@@ -26,6 +26,7 @@ Confit.tjs の mediaFormatDefaultをmp3に変更して下さい。
 storage=再生する音楽ファイルを指定してください,
 loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます。,
 sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
+html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
 volume=再生する音量を指定できます。0〜100 の範囲で指定して下さい。（デフォルトは100）
 
 #[end]
@@ -46,6 +47,8 @@ tyrano.plugin.kag.tag.playbgm = {
         target : "bgm", //"bgm" or "se"
         
         sprite_time:"", //200-544 
+        
+        html5:"false", 
         
         click : "false", //音楽再生にクリックが必要か否か
         stop : "false" //trueの場合自動的に次の命令へ移動しない。ロード対策
@@ -232,6 +235,11 @@ tyrano.plugin.kag.tag.playbgm = {
             
         };
         
+        //HTML5 audioを強制する
+        if (pm.html5 == "true") {
+        	howl_opt["html5"] = true;
+        }
+        
         //スプライトが指定されている場合
         if(pm.sprite_time!=""){
             
@@ -243,6 +251,8 @@ tyrano.plugin.kag.tag.playbgm = {
             howl_opt["sprite"] = {"sprite_default":[sprite_from, duration, $.toBoolean(pm.loop) ]}
             
         }
+        
+        
         
         audio_obj = new Howl(howl_opt);
         
@@ -261,6 +271,7 @@ tyrano.plugin.kag.tag.playbgm = {
             this.kag.tmp.map_bgm[pm.buf] = audio_obj;
             that.kag.stat.current_bgm = storage;
             that.kag.stat.current_bgm_vol = pm.volume;
+            
 
         } else {
             //効果音の時はバッファ指定
@@ -529,6 +540,7 @@ tyrano.plugin.kag.tag.stopbgm = {
  storage=再生する音楽ファイルを指定してください,
  loop=true（デフォルト）またはfalse を指定してください。trueを指定すると繰り返し再生されます,
  sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
+ html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
  time=フェードインを行なっている時間をミリ秒で指定します。,
  volume=BGMの再生音量を変更できます（0〜100）
  
@@ -544,6 +556,7 @@ tyrano.plugin.kag.tag.fadeinbgm = {
         storage : "",
         fadein : "true",
         sprite_time:"", //200-544 
+        html5:"false",
         time : 2000
     },
 
@@ -657,6 +670,7 @@ tyrano.plugin.kag.tag.xchgbgm = {
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
  sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
  clear=trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
+ html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
  volume=効果音の再生音量を変更できます（0〜100）
  #[end]
  */
@@ -672,6 +686,7 @@ tyrano.plugin.kag.tag.playse = {
         loop : "false",
         buf:"0",
         sprite_time:"", //200-544 
+        html5:"false",
         clear : "false" //他のSEがなっている場合、それをキャンセルして、新しく再生します
     },
 
@@ -737,6 +752,7 @@ tyrano.plugin.kag.tag.stopse = {
  loop=trueまたはfalse （デフォルト）を指定してください。trueを指定すると繰り返し再生されます,
  sprite_time=再生の開始時間と終了時間を指定することができます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
  buf=効果音を停止するスロットを指定できます。デフォルトは0,
+ html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
  time=フェードインの時間をミリ秒で指定します
  #[end]
  */
@@ -753,6 +769,7 @@ tyrano.plugin.kag.tag.fadeinse = {
         fadein : "true",
         buf:"0",
         sprite_time:"", //200-544 
+        html5:"false",
         time : "2000"
 
     },
