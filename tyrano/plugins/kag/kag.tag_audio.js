@@ -271,6 +271,7 @@ tyrano.plugin.kag.tag.playbgm = {
             this.kag.tmp.map_bgm[pm.buf] = audio_obj;
             that.kag.stat.current_bgm = storage;
             that.kag.stat.current_bgm_vol = pm.volume;
+            that.kag.stat.current_bgm_html5 = pm.html5;
             
 
         } else {

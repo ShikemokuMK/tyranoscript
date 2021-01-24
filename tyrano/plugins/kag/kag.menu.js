@@ -722,6 +722,7 @@ tyrano.plugin.kag.menu = {
                 var pm = {
                     loop : "true",
                     storage : mstorage,
+                    html5:this.kag.stat.current_bgm_html5,
                     /*fadein:"true",*/
                     /*time:2000,*/
                     stop : "true"
