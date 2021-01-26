@@ -430,6 +430,7 @@ bounceInUp/
 rollIn,
 color=文字の色を指定して下さい。デフォルトは黒です。0xFFFFFF形式で指定します,
 graphic=暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください,
+behind=true or falseで指定。maskで隠された裏を描画するかどうかを指定します。デフォルトはfalse。maskに透過画像を使用する場合等はtrueを指定してください,
 folder=graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです
 
  :demo
@@ -450,6 +451,7 @@ tyrano.plugin.kag.tag.mask = {
         effect:"fadeIn",
         color:"0x000000",
         graphic:"",
+        behind:"false",
         folder:""
         
     },
@@ -489,11 +491,21 @@ tyrano.plugin.kag.tag.mask = {
             }
         }
         
+        //外に線が見える対応
+        if(pm.behind=="false"){
+        	j_div.css("transform", "scale(1.02)");
+        }
+        
         $(".tyrano_base").append(j_div);
         
         var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
         j_div.addClass('animated ' + pm.effect).one(animationEnd, function() {
             //$(this).removeClass('animated ' + pm.effect);
+            
+            if(pm.behind=="false"){
+        	    $("#root_layer_game").hide();
+            }
+            
             that.kag.ftag.nextOrder();
         });
         
@@ -570,13 +582,15 @@ tyrano.plugin.kag.tag.mask_off = {
     start : function(pm) {
         var that = this;
         var j_div = $(".layer_mask");
-        
+   		
+   		$("#root_layer_game").show();
+             
         if (j_div.get(0)) {
             
             var _effect = j_div.attr("data-effect");
             j_div.removeClass('animated '+_effect);
             j_div.css("animation-duration",parseInt(pm.time)+"ms");
-            
+   
             var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
             j_div.addClass('animated ' + pm.effect).one(animationEnd, function() {
                 j_div.remove();
