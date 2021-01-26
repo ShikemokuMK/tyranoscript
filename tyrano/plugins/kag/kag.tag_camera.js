@@ -430,7 +430,6 @@ bounceInUp/
 rollIn,
 color=文字の色を指定して下さい。デフォルトは黒です。0xFFFFFF形式で指定します,
 graphic=暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください,
-behind=true or falseで指定。maskで隠された裏を描画するかどうかを指定します。デフォルトはfalse。maskに透過画像を使用する場合等はtrueを指定してください,
 folder=graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです
 
  :demo
@@ -451,7 +450,6 @@ tyrano.plugin.kag.tag.mask = {
         effect:"fadeIn",
         color:"0x000000",
         graphic:"",
-        behind:"false",
         folder:""
         
     },
@@ -466,6 +464,8 @@ tyrano.plugin.kag.tag.mask = {
         
         var sc_width = parseInt(that.kag.config.scWidth);
         var sc_height = parseInt(that.kag.config.scHeight);
+        
+        var behind=false;
         
         j_div.css({width:sc_width,height:sc_height});
                 
@@ -489,10 +489,14 @@ tyrano.plugin.kag.tag.mask = {
                 storage_url = "./data/"+folder+"/"+pm.graphic;
                 j_div.css("background-image","url("+storage_url+")");
             }
+            
+            //画像が設定されている場合
+            behind=true;
+            
         }
         
         //外に線が見える対応
-        if(pm.behind=="false"){
+        if(behind==false){
         	j_div.css("transform", "scale(1.02)");
         }
         
@@ -502,7 +506,7 @@ tyrano.plugin.kag.tag.mask = {
         j_div.addClass('animated ' + pm.effect).one(animationEnd, function() {
             //$(this).removeClass('animated ' + pm.effect);
             
-            if(pm.behind=="false"){
+            if(behind==false){
         	    $("#root_layer_game").hide();
             }
             
