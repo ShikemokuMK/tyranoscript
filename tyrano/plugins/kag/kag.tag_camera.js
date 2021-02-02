@@ -507,7 +507,7 @@ tyrano.plugin.kag.tag.mask = {
             //$(this).removeClass('animated ' + pm.effect);
             
             if(behind==false){
-        	    $("#root_layer_game").hide();
+        	    $("#root_layer_game").css("opacity",0);
             }
             
             that.kag.ftag.nextOrder();
@@ -587,8 +587,8 @@ tyrano.plugin.kag.tag.mask_off = {
         var that = this;
         var j_div = $(".layer_mask");
    		
-   		$("#root_layer_game").show();
-             
+   		$("#root_layer_game").css("opacity",1);
+            
         if (j_div.get(0)) {
             
             var _effect = j_div.attr("data-effect");
