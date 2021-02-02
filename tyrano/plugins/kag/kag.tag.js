@@ -2319,7 +2319,7 @@ tyrano.plugin.kag.tag.ptext = {
         //上書き指定
         if (pm.overwrite == "true" && pm.name != "") {
             if ($("." + pm.name).length > 0) {
-                $("." + pm.name).html($.escapeHTML(pm.text));
+                $("." + pm.name).html(pm.text);
                 
                 //サイズとか位置とかも調整できるならやっとく
                 if(pm.x!=0){
@@ -2360,7 +2360,7 @@ tyrano.plugin.kag.tag.ptext = {
         //オブジェクトにクラス名をセットします
         $.setName(tobj, pm.name);
 
-        tobj.html($.escapeHTML(pm.text));
+        tobj.html(pm.text);
 
         this.kag.setStyles(tobj, font_new_style);
         
