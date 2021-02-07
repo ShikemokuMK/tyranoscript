@@ -458,7 +458,11 @@ tyrano.plugin.kag.tag.mask = {
         
         var that = this;
         that.kag.layer.hideEventLayer();
-            
+        
+        if(pm.time=="0"){
+	        pm.time="1";
+	    }
+        
         var j_div = $("<div class='layer layer_mask' data-effect='"+pm.effect+"' style='z-index:100000000;position:absolute;'>");
         j_div.css("animation-duration",parseInt(pm.time)+"ms");
         
@@ -586,6 +590,10 @@ tyrano.plugin.kag.tag.mask_off = {
     start : function(pm) {
         var that = this;
         var j_div = $(".layer_mask");
+        
+        if(pm.time=="0"){
+	    	pm.time="1";
+	    }
    		
    		$("#root_layer_game").css("opacity",1);
             
