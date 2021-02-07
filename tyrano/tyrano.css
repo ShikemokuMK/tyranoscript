@@ -81,7 +81,7 @@ abbr,acronym{
 }
 
 /* セーブ */
-.menu_save {
+.menu_save_outer {
 	display: inline-block;
 	position: absolute;
 	margin: 0;
@@ -91,7 +91,7 @@ abbr,acronym{
 }
 
 /* ロード */
-.menu_load {
+.menu_load_outer {
 	display: inline-block;
 	position: absolute;
 	margin: 0;
@@ -101,7 +101,7 @@ abbr,acronym{
 }
 
 /* テキスト消去 */
-.menu_window_close {
+.menu_window_close_outer {
 	display: inline-block;
 	position: absolute;
 	margin: 0;
@@ -111,7 +111,7 @@ abbr,acronym{
 }
 
 /* メッセージスキップ */
-.menu_skip {
+.menu_skip_outer {
 	display: inline-block;
 	position: absolute;
 	margin: 0;
@@ -121,7 +121,7 @@ abbr,acronym{
 }
 
 /* タイトルに戻る */
-.menu_back_title {
+.menu_back_title_outer {
 	display: inline-block;
 	position: absolute;
 	margin: 0;
