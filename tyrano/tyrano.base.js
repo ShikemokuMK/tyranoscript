@@ -18,8 +18,18 @@ tyrano.base ={
         
     },
     
-    //画面サイズをぴったりさせます
     fitBaseSize:function(width,height){
+		
+		var that = this;
+		setTimeout(function(){
+			that._fitBaseSize(width,height);
+		},100);
+		  
+	},
+    
+    
+    //画面サイズをぴったりさせます
+    _fitBaseSize:function(width,height){
         
         var that = this;
       	var view_width = $.getViewPort().width;
