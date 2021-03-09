@@ -63,72 +63,22 @@ abbr,acronym{
 }
 
 
+/*メニュー*/
+.menu_item {position:relative;margin-top:2%;text-align:center;}
+.menu_item img {cursor:pointer}
 
-/*メニュ－ボタン系*/
-.menu_item {
-	position: relative;
-	margin-top: 2%;
-	text-align: center;
-	cursor: pointer;
+/*
+.menu_item img {width:auto;max-width:80%;max-height:10%;}
+.display_menu .button:first-child {margin-top:0;}
+.display_menu{
+    overflow:visible;padding:0;
+    z-index: 10000;
+    width:100%;
+    height:100%;
+    position: absolute;
+    display:block;
 }
-
-.menu_item img {
-	width: auto;
-	height: auto;
-	max-width: 100%;
-	max-height: 100%;
-	margin-right: 10px;
-}
-
-/* セーブ */
-.menu_save_outer {
-	display: inline-block;
-	position: absolute;
-	margin: 0;
-	padding: 0;
-	top: 200px;
-	left: 380px;
-}
-
-/* ロード */
-.menu_load_outer {
-	display: inline-block;
-	position: absolute;
-	margin: 0;
-	padding: 0;
-	top: 280px;
-	left: 380px;
-}
-
-/* テキスト消去 */
-.menu_window_close_outer {
-	display: inline-block;
-	position: absolute;
-	margin: 0;
-	padding: 0;
-	top: 360px;
-	left: 380px;
-}
-
-/* メッセージスキップ */
-.menu_skip_outer {
-	display: inline-block;
-	position: absolute;
-	margin: 0;
-	padding: 0;
-	top: 440px;
-	left: 380px;
-}
-
-/* タイトルに戻る */
-.menu_back_title_outer {
-	display: inline-block;
-	position: absolute;
-	margin: 0;
-	padding: 0;
-	top: 520px;
-	left: 380px;
-}
+*/
 
 
 /* バックログ画面
