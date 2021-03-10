@@ -4627,7 +4627,7 @@ tyrano.plugin.kag.tag.glyph = {
             var j_next = $("<img class='glyph_image' />");
             j_next.attr("src", "./tyrano/images/system/" + pm.line);
             j_next.css("position", "absolute");
-            j_next.css("z-index", 99999);
+            j_next.css("z-index", 9998);
             j_next.css("top", pm.top + "px");
             j_next.css("left", pm.left + "px");
             j_next.css("display", "none");
