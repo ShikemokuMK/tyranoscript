@@ -12,7 +12,8 @@ window.tyrano_lang = {
         "label_double":"は同一シナリオファイル内に重複しています",
         "error_occurred":"エラーが発生しました",
         "save_file_violation_1":"不正なセーブデータの改変を検知しました。ゲームの起動を中止します",
-        "save_file_violation_2":"起動を中止しました。セーブデータを削除してもう一度、起動してください"
+        "save_file_violation_2":"起動を中止しました。セーブデータを削除してもう一度、起動してください",
+        "reload":"リロード",
     },
 
     novel : {

@@ -501,22 +501,20 @@ tyrano.plugin.kag ={
             const dest = _path.resolve(path);
             
             (async () => {
+	            
                 await asar.createPackage(src, dest);
+				
+				$.alert("パッチを適応しました。再度、起動してください。",function(){
+	                //パッチの削除。
+	        		fse.removeSync(_path.resolve(patch_path));
+	        		
+	        		//作業ディレクトリ削除
+	        		fse.removeSync(_path.resolve(out_path + "update_tmp"));
+	        		
+	                window.close();
+	            });
+	            
             })();
-            
-            $.alert("パッチを適応しました。再度、起動してください。",function(){
-                //パッチの削除。
-        		fse.removeSync(_path.resolve(patch_path));
-        		
-        		//作業ディレクトリ削除
-        		fse.removeSync(_path.resolve(out_path + "update_tmp"));
-        		
-                window.close();
-            });
-            
-            
-    		//fse.removeSync(unzip_path+"/update_tmp");
-    		//call_back();
             
             return;   
         

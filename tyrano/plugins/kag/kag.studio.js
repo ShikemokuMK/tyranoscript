@@ -129,7 +129,7 @@ tyrano.plugin.kag.studio = {
             
             
             //リロードボタンの配置
-            var j_reload_button = $("<div style='position:absolute;z-index:999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>リロード</span></button></div>");
+            var j_reload_button = $("<div style='position:absolute;z-index:999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>"+$.lang("reload")+"</span></button></div>");
             j_reload_button.draggable({
         
                 scroll : false,
