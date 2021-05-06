@@ -99,7 +99,7 @@ tyrano.plugin.kag.tag.movie = {
         } else {
 
             //firefox opera の場合、webMに変更する。
-            if ($.getBrowser() == "firefox" || $.getBrowser() == "opera") {
+            if ($.getBrowser() == "opera") {
                 pm.storage = $.replaceAll(pm.storage, ".mp4", ".webm");
             }
 
