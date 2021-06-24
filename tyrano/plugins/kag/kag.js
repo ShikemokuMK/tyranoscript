@@ -36,7 +36,6 @@ tyrano.plugin.kag ={
         TYRANO_ENGINE_VERSION:400,
         "BASE_DIV_NAME":"tyrano_base",
         FLAG_APRI : false,
-        "www":""
         
     },
     
