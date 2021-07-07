@@ -1903,7 +1903,9 @@ tyrano.plugin.kag.tag.chara_show = {
                 return;
             }
             storage_url = "./data/fgimage/" + cpm["map_face"][pm.face];
-        
+            if ($.isHTTP(cpm["map_face"][pm.face])) {
+              storage_url = cpm["map_face"][pm.face];
+            }
         }else if(pm.storage != "") {
 
             if ($.isHTTP(pm.storage)) {
@@ -2546,6 +2548,9 @@ tyrano.plugin.kag.tag.chara_mod = {
                 return;
             }
             storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
+            if ($.isHTTP(storage_url)) {
+                folder="";
+            }
         } else {
 
             if ($.isHTTP(pm.storage)) {
