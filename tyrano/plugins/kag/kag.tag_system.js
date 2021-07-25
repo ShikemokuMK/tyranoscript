@@ -1414,27 +1414,42 @@ tyrano.plugin.kag.tag.preload = {
                         //すべてのプリロードが完了
                         if (pm.wait == "true") {
                             that.kag.layer.showEventLayer();
-                        }
-
-                        that.kag.ftag.nextOrder();
+							that.kag.ftag.nextOrder();
+						}
 
                     }
                 });
+                
             }
+            
+            if(pm.wait=="false"){
+	            that.kag.layer.showEventLayer();
+				that.kag.ftag.nextOrder();    
+	        }
+                
 
         } else {
+	        
             this.kag.preload(pm.storage, function() {
 
                 if (pm.wait == "true") {
                     that.kag.layer.showEventLayer();
-                }
-                that.kag.ftag.nextOrder();
-
+					that.kag.ftag.nextOrder();
+				}
+                
             });
+            
+            if (pm.wait == "false") {
+               that.kag.layer.showEventLayer();
+               that.kag.ftag.nextOrder();
+           }
+           
         }
 
     }
 };
+
+
 
 /*
  #[clearfix]

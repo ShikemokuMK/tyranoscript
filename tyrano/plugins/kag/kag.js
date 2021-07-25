@@ -1539,7 +1539,17 @@ tyrano.plugin.kag ={
             });
             
 
-        }else{
+        }else if("mp4" == ext || "ogv" == ext || "webm" == ext){
+	        
+	       //動画ファイルプリロード
+	       $("<video />").attr("src", src).on("loadeddata", (function (e) {
+	           callbk && callbk();
+	       })).on("error", (function (e) {
+	           that.kag.error("動画ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/video/file.mp4");
+	           callbk && callbk();
+	       }));
+	       
+   		}else{
         
             $('<img />').attr('src', src).on("load",function(e){
                     if(callbk) callbk();
