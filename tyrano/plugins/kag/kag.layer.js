@@ -172,6 +172,11 @@ tyrano.plugin.kag.layer ={
     //メッセージレイヤの消去
     hideMessageLayers:function(){
         
+        //link表示中はダメ。
+        if(this.kag.stat.display_link==true){
+	    	return false;
+	    }
+        
         this.kag.stat.is_hide_message = true ;
         
         var num_message_layer = parseInt(this.kag.config.numMessageLayers);

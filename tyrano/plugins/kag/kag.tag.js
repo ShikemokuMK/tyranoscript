@@ -2762,12 +2762,12 @@ tyrano.plugin.kag.tag.link = {
     start : function(pm) {
 
         var that = this;
-
-        //this.kag.stat.set_text_span = true;
-
-        //即時にスパンを設定しないとダメねw
+		
+        //即時にスパンを設定しないとダメね
         var j_span = this.kag.setMessageCurrentSpan();
-
+		
+		that.kag.stat.display_link = true;
+		
         j_span.css("cursor", "pointer");
 
         (function() {
@@ -2799,6 +2799,8 @@ tyrano.plugin.kag.tag.link = {
          
          j_span.bind('click touchstart', function(e) {
                 
+                that.kag.stat.display_link = false;
+		
                 //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
                 TYRANO.kag.ftag.nextOrderWithLabel(_target, _storage);
                 TYRANO.kag.layer.showEventLayer();

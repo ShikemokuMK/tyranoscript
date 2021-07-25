@@ -277,11 +277,7 @@ tyrano.plugin.kag.key_mouse = {
         }
         
         layer_obj_click.click(function(e){
-            // POSSIBLE IMPROVE
-            // make "isReturn" variable
-            // and do all if statements
-            // then do "if (isReturn) return;"
-            
+	        
             if(that.kag.tmp.ready_audio==false){
                 
                 if($.isNeedClickAudio()){
