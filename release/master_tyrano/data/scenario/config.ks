@@ -20,6 +20,7 @@
 ;	前景レイヤの中身をすべて空に
 	[iscript]
 	$(".layer_camera").empty();
+	$("#bgmovie").remove();
 	[endscript]
 
 ;	メニューボタン非表示
