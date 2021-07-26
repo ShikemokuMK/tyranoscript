@@ -214,6 +214,8 @@ tyrano.plugin.kag ={
         f_chara_ptext:"false",
         
         flag_glyph : "false", //クリック待ちボタンが指定されているか否か
+        path_glyph : "nextpage.gif", //glyph画像ファイル名
+        
         current_cursor:"auto", //現在のカーソル指定
         
         //表示フォント指定

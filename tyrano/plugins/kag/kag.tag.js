@@ -67,7 +67,7 @@ tyrano.plugin.kag.ftag = {
         if (this.kag.stat.flag_glyph == "false") {
             $(".img_next").remove();
             var jtext = this.kag.getMessageInnerLayer()
-            jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/nextpage.gif' />");
+            jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/"+this.kag.stat.path_glyph+"' />");
 
         } else {
             $(".glyph_image").show();
@@ -4641,6 +4641,9 @@ tyrano.plugin.kag.tag.glyph = {
         } else {
 
             this.kag.stat.flag_glyph = "false";
+			this.kag.stat.path_glyph = pm.line;
+			            
+            
 
         }
 
