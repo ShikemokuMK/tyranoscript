@@ -480,8 +480,9 @@ tyrano.plugin.kag.menu = {
                     tmp_base.css("top",0);
                     tmp_base.css("transform", "");
                     var opt = {
+                        scale:1,
                         height:that.kag.config.scHeight,
-                        width:that.kag.config.scWidth
+                        width:that.kag.config.scWidth,
                     };
                     
                     
