@@ -76,9 +76,11 @@ tyrano.plugin.kag.tag.playbgm = {
             
             if (this.kag.stat.is_skip == true && pm.target == "se") {
                 
-                that.kag.layer.showEventLayer();
-                that.kag.ftag.nextOrder();
-
+                if(pm.stop == "false") {
+					that.kag.layer.showEventLayer();
+                	that.kag.ftag.nextOrder();
+				}
+				
             } else {
                 
                 //スマホからのアクセスで ready audio 出来ていない場合は、クリックを挟む
