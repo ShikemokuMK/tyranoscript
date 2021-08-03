@@ -1421,6 +1421,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
         this.kag.layer.hideEventLayer();
 
         if (pm.name == "") {
+	        
             $("." + this.kag.stat.chara_ptext).html("");
 
             //全員の明度を下げる。誰も話していないから
@@ -1777,8 +1778,10 @@ tyrano.plugin.kag.tag.chara_new = {
         reflect : "false",
         jname : "",
         visible : "false",
+        
         color : "",
-        map_face : {}
+        map_face : {},
+        fuki:{enable:"false"}
     },
 
     start : function(pm) {
@@ -1791,17 +1794,31 @@ tyrano.plugin.kag.tag.chara_new = {
         if ($.isHTTP(pm.storage)) {
             storage_url = pm.storage;
         }
-
+		
         pm.map_face["default"] = pm.storage;
 
-        this.kag.preload(storage_url);
+        this.kag.preload(storage_url,(img_obj)=>{
+	    	
+	    	if(img_obj){
+		    	
+		    	let img_width = $(img_obj).get(0).width;
+		    	let img_height = $(img_obj).get(0).height;
+		    	
+		    	this.kag.stat.charas[pm.name]["origin_width"] = img_width;
+		    	this.kag.stat.charas[pm.name]["origin_height"] = img_height;
+		    	
+		    	this.kag.stat.charas[pm.name]["fuki"]["left"] = Math.round(img_width/2);
+		    	this.kag.stat.charas[pm.name]["fuki"]["top"] = Math.round(img_height/3);
+		    	
+		    }
+		    
+	    });
 
         //即座に追加
         if (pm.visible == "true") {
 
         }
 
-        //前景レイヤ
         this.kag.stat.charas[pm.name] = pm;
         
         //キャラクターの日本語名とnameを紐付けるための処置

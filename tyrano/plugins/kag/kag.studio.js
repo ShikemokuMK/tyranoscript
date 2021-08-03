@@ -255,9 +255,7 @@ tyrano.plugin.kag.studio = {
     
     
     send:function(key,json_obj){
-        
         this.ipc.ipcRenderer.send(key, JSON.stringify(json_obj));
-        
     },
     
     

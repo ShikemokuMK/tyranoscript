@@ -66,7 +66,7 @@ tyrano.plugin.kag.ftag = {
         //グリフが指定されている場合はこちらを適用
         if (this.kag.stat.flag_glyph == "false") {
             $(".img_next").remove();
-            var jtext = this.kag.getMessageInnerLayer()
+            var jtext = this.kag.getMessageInnerLayer();
             jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/"+this.kag.stat.path_glyph+"' />");
 
         } else {
@@ -166,7 +166,7 @@ tyrano.plugin.kag.ftag = {
             }
 
             //メッセージ非表示状態の場合は、表示して、テキスト表示
-            if (this.kag.stat.is_hide_message == true) {
+            if (this.kag.stat.is_hide_message == true && that.kag.stat.fuki.active!=true) {
 
                 this.kag.layer.showMessageLayers();
                 this.kag.stat.is_hide_message = false;
@@ -754,6 +754,16 @@ tyrano.plugin.kag.tag.text = {
                     jtext.append("<p class=''></p>");
                 }
             }
+            
+            //吹き出しが有効な場合
+            /*
+            if(that.kag.stat.fuki.active){
+	        	
+	        	//jtext.find(".current_text_p").css("max-width",300);
+	        	//jtext.find(".current_text_p").css("display","table");
+	        	
+	        }
+	        */
 
             var current_str = "";
 
@@ -805,6 +815,7 @@ tyrano.plugin.kag.tag.text = {
                 }
                 
             }else{
+	            
                 j_span = that.kag.getMessageCurrentSpan();
                 
                 j_span.css({
@@ -892,6 +903,242 @@ tyrano.plugin.kag.tag.text = {
             // hidden状態で全部追加する
             that.kag.appendMessage(jtext, current_str);
             
+            
+	        //吹き出しが有効な場合は位置を自動調整
+	        if(that.kag.stat.fuki.active){
+		    	
+		    	//メッセージレイヤの表示
+                that.kag.layer.showMessageLayers();
+                that.kag.stat.is_hide_message = false;
+				
+				let chara_fuki = {};
+						
+		    	//位置を調整。
+		    	let is_chara_show = false;
+		    	
+		    	if(chara_name==""){
+                	is_chara_show = false;
+                	
+                }else{
+                	
+                	let original_name = chara_name;
+                	
+                	if(that.kag.stat.jcharas[chara_name]){
+						original_name = that.kag.stat.jcharas[chara_name];
+        			}
+                	
+                	var chara_obj ;
+                	
+                	try{
+                		chara_obj = $(".layer_fore").find("." + original_name);
+                	}catch(e){
+	                	console.log(e);
+	                	chara_obj = undefined;
+	                }
+                	
+			        if ((typeof chara_obj !="undefined" && chara_obj.get(0)) && that.kag.stat.charas[original_name]["fuki"]["enable"]=="true") {
+				        
+				        is_chara_show = true;
+				        
+				        //chara_p_textを排除
+						$(".tyrano_base").find(".chara_name_area").hide();
+						
+						chara_fuki = that.kag.stat.charas[original_name]["fuki"];
+	                	
+	                	if(chara_fuki["fix_width"]!=""){
+		                	j_msg_inner.css("max-width","");
+							j_msg_inner.css("width",parseInt(chara_fuki["fix_width"]));
+						}else{
+			                j_msg_inner.css("width","");
+						    j_msg_inner.css("max-width",parseInt(chara_fuki["max_width"]));
+						}
+						
+						//縦書きの場合はheightだけ無視で。
+						if(that.kag.stat.vertical =="true"){
+							j_msg_inner.css("height","");
+							j_msg_inner.css("max-height",parseInt(chara_fuki["max_width"]));
+							
+						}else{
+							j_msg_inner.css("width","");
+							j_msg_inner.css("height","");
+						}
+						
+						//吹き出しの大きさを自動調整。
+				    	let width = j_msg_inner.css("width");
+				    	let height = j_msg_inner.css("height");
+				    	
+						//20 はアイコンの文
+						width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
+						height= parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
+						
+						var j_outer_message = that.kag.getMessageOuterLayer();
+						
+				    	j_outer_message.css("width",width);
+				    	j_outer_message.css("height",height);
+				    	
+						
+	                	chara_left = parseInt(chara_obj.css("left"));
+	                	chara_top = parseInt(chara_obj.css("top"));
+	                	
+	                	
+	                	let fuki_left = chara_fuki["left"];
+	                	let fuki_top  = chara_fuki["top"];
+	                	
+	                	let fuki_sippo_left = chara_fuki["sippo_left"];
+	                	let fuki_sippo_top  = chara_fuki["sippo_top"];
+	                	
+	                	let chara_width = parseInt(chara_obj.find("img").css("width"));
+	                	let chara_height = parseInt(chara_obj.find("img").css("height"));
+	                	
+	                	let origin_width = that.kag.stat.charas[original_name]["origin_width"];
+	                	let origin_height = that.kag.stat.charas[original_name]["origin_height"];
+	                	
+	                	//相対位置はキャラのサイズによって座標を調整する
+	                	let per_width = chara_width / origin_width;
+	                	let per_height = chara_height / origin_height;
+	                	
+	                	fuki_left = fuki_left * per_width;
+	                	fuki_top = fuki_top * per_height;
+	                	
+	                	fuki_left2 = chara_left + fuki_left;
+	                	fuki_top2 = chara_top + fuki_top;
+	                	
+	                	let outer_width = parseInt(j_outer_message.css("width"));
+	                	let outer_height = parseInt(j_outer_message.css("height"));
+	                	
+	                	//吹き出し位置によって位置を変更
+	                	let sippo = chara_fuki["sippo"];
+	                	if(sippo=="bottom"){
+		                	fuki_top2 = fuki_top2 - outer_height;
+		                }else if(sippo=="left"){
+			            	fuki_left2 = fuki_left2 + parseInt(chara_fuki["sippo_left"]);
+		                }else if(sippo=="right"){
+			            	fuki_left2 = fuki_left2 - outer_width;
+		                }
+		                
+	                	//左端と下端の座標
+	                	let fuki_right = fuki_left2 + outer_width;
+	                	let fuki_bottom = fuki_top2 + outer_height;
+	                	
+	                	let sc_width = parseInt(that.kag.config.scWidth);
+						let sc_height = parseInt(that.kag.config.scHeight);
+						
+						let sippo_left = 0;
+                    	let sippo_top = 0;
+                    	
+	                	//右端に飛び出ていたら
+	                	
+	                	if(fuki_right >= sc_width){
+		                	
+		                	fuki_left2 = fuki_left2 - (fuki_right - sc_width) -10;
+		                	sippo_left = (fuki_right - sc_width)+10; //はみ出たぶんだけプラス
+		                }
+	                	
+	                	if(fuki_bottom >= sc_height){
+		                	fuki_top2 = fuki_top2 - (fuki_bottom - sc_height) -10;
+		                	//sippo_left = (fuki_bottom - -50;
+						
+						}
+		                
+		                if(fuki_left2 <= 0){
+			            	
+							//しっぽの位置はマイナスさせる
+			            	sippo_left = (fuki_left2)-10;
+			            	fuki_left2 = 10;
+							
+						}
+			            
+			            if(fuki_top2 <= 0){
+			            
+			            	fuki_top2 = 10;   
+			            
+			            }
+				            
+	                	
+	                	//alert(fuki_left);
+	                	j_outer_message.css("left", fuki_left2);
+	                	j_outer_message.css("top", fuki_top2);
+	                	
+	                	//innerの情報
+	                	j_msg_inner.css({
+		                	"left":parseInt(j_outer_message.css("left"))+10,
+		                	"top":parseInt(j_outer_message.css("top"))+10
+		                });
+						
+						//調整値。はみ出し多分
+						
+						that.setFukiStyle(j_outer_message,chara_fuki);
+	                
+						//ふきだしの位置を調整//////////////
+						that.kag.updateFuki(original_name,{"sippo_left":sippo_left});
+						
+	                	
+			        }else{
+				        
+				        is_chara_show = false;
+			        	
+                	}
+                		
+                }
+		    	
+		    	//othersのポジションに戻す。
+			    if(is_chara_show==false){
+				    
+				    //chara_p_textを排除
+					$(".tyrano_base").find(".chara_name_area").hide();
+					
+					let others_style = that.kag.stat.fuki.others_style;
+					let def_style = that.kag.stat.fuki.def_style;
+				    
+				    let nwidth = others_style.max_width || def_style.width;
+					let nleft = others_style.left || def_style.left;
+					let ntop = others_style.top || def_style.top;
+					
+					
+					if(others_style["fix_width"]!=""){
+						j_msg_inner.css("max-width","");
+	                    j_msg_inner.css("width",parseInt(others_style["fix_width"]));
+					}else{
+		                j_msg_inner.css("width","");
+					    j_msg_inner.css("max-width",parseInt(nwidth));
+					}
+					
+					//吹き出しの大きさを自動調整。
+					width = j_msg_inner.css("width");
+					height = j_msg_inner.css("height");
+					
+					
+					//20 はアイコンの文
+					width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
+					height= parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
+				
+					var j_outer_message = that.kag.getMessageOuterLayer();
+					
+			    	j_outer_message.css("width",width);
+			    	j_outer_message.css("height",height);
+			    	
+					j_outer_message.css("left", parseInt(nleft));
+	                j_outer_message.css("top", parseInt(ntop));
+	                
+                	//通常のポジションに戻す
+                	j_msg_inner.css({
+	                	"left":parseInt(j_outer_message.css("left"))+10,
+	                	"top":parseInt(j_outer_message.css("top"))+10
+	                });
+	                
+	                chara_fuki = that.kag.stat.fuki.others_style;
+	                
+					that.setFukiStyle(j_outer_message,chara_fuki);
+	                
+	                //ふきだしを消す
+                	that.kag.updateFuki("others",{"sippo":"none"});
+					
+                }
+                
+                
+		    }
+            
+            
             var append_span = j_span.children('span:last-child');
             var makeVisible = function(index) {
 	            
@@ -976,8 +1223,30 @@ tyrano.plugin.kag.tag.text = {
 
     },
 
-    test : function() {
-
+    setFukiStyle : function(j_outer_message,chara_fuki) {
+		
+        //見た目の指定がある場合は設定する
+        if(typeof chara_fuki["color"] !="undefined"){
+        	j_outer_message.css("background-color",$.convertColor(chara_fuki["color"]));
+        }
+        
+        if(typeof chara_fuki["opacity"]!="undefined"){
+        	j_outer_message.css("opacity", $.convertOpacity(chara_fuki["opacity"]));
+        }
+        
+        if(typeof chara_fuki["border_size"]!="undefined"){
+        	j_outer_message.css("border-width", parseInt(chara_fuki["border_size"]));
+			j_outer_message.css("border-style", "solid");
+        }
+        
+        if(typeof chara_fuki["border_color"]!="undefined"){
+	        j_outer_message.css("border-color", $.convertColor(chara_fuki["border_color"]));
+		}
+        
+        if(typeof chara_fuki["radius"]!="undefined"){
+        	j_outer_message.css("border-radius", parseInt(chara_fuki["radius"]));
+		}
+		
     }
 };
 
@@ -1575,7 +1844,9 @@ tyrano.plugin.kag.tag.current = {
  width=メッセージレイヤの幅を指定します。（ピクセル）,
  height=メッセージレイヤの高さを指定します。（ピクセル）,
  frame=メッセージレイヤのフレーム画像として表示させる画像を指定します。<br>メッセージエリアをカスタマイズしたい場合に利用できます。<br />画像サイズはwidthとheight属性に準じて調整して下さい。<br />さらに、margin属性で実際にメッセージが表示される箇所の調整も行いましょう<br />また、"none"と指定することで標準枠に戻すこともできます。違う枠画像をしていすると切り替えることもできます,
- color=メッセージレイヤの表示色を 0xRRGGBB 形式で指定 します。 ,
+ color=メッセージレイヤの表示色を 0xRRGGBB 形式で指定します。 ,
+ border_color=外枠の線が有効な場合の色を 0xRRGGBB 形式で指定します。border_sizeの指定が同時に必要です,
+ border_size=外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0です。,
  opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全に透明です。,
  marginl=メッセージレイヤの左余白を指定します。,
  margint=メッセージレイヤの上余白を指定します。,
@@ -1604,10 +1875,14 @@ tyrano.plugin.kag.tag.position = {
         vertical : "",
         frame : "",
         radius:"",
+        border_color:"",
+        border_size:"",
         marginl : "0", //左余白
         margint : "0", //上余白
         marginr : "0", //右余白
-        marginb : "0" //下余白
+        marginb : "0", //下余白
+        
+        next:"true",
 
     },
 
@@ -1630,9 +1905,18 @@ tyrano.plugin.kag.tag.position = {
             new_style["background-color"] = $.convertColor(pm.color);
             
         if(pm.radius !=""){
-            target_layer.css("border-radius", parseInt(pm.radius) + "px");
+	        new_style["border-radius"] = parseInt(pm.radius) + "px";
         }
         
+        if(pm.border_size !=""){
+        	
+        	new_style["border-width"] = parseInt(pm.border_size) + "px";
+        	target_layer.css("border-style", "solid");
+        }
+        
+        if(pm.border_color !=""){
+	        new_style["border-color"] = $.convertColor(pm.border_color);
+        }
 
         //背景フレーム画像の設定 透明度も自分で設定する
 
@@ -1660,12 +1944,15 @@ tyrano.plugin.kag.tag.position = {
         }
 
         if (pm.opacity != "") {
-            target_layer.css("opacity", $.convertOpacity(pm.opacity));
+            new_style["opacity"] = $.convertOpacity(pm.opacity);
         }
         
         //outer のレイヤを変更
         this.kag.setStyles(target_layer, new_style);
-
+        
+        //outerレイヤを保存
+        this.kag.stat.fuki.def_style = $.extend(true, this.kag.stat.fuki.def_style , new_style);
+		
         //複数のレイヤに影響がでないように。
         this.kag.layer.refMessageLayer(pm.layer);
         
@@ -1687,37 +1974,256 @@ tyrano.plugin.kag.tag.position = {
         
         var new_style_inner = {};
 
-        /*
-         var new_style_inner = {
-
-         "padding-left":parseInt(pm.marginl)+"px", //左余白
-         "padding-top":parseInt(pm.margint)+"px", //上余白
-         "width":parseInt(layer_inner.css("width")) - parseInt(pm.marginr)+"px", //右余白
-         "height":parseInt(layer_inner.css("height")) - parseInt(pm.marginb)+"px" //下余白
-
-         };
-         */
-        
-
         if (pm.marginl != "0")
             new_style_inner["padding-left"] = parseInt(pm.marginl) + "px";
         if (pm.margint != "0")
             new_style_inner["padding-top"] = parseInt(pm.margint) + "px";
-        if (pm.marginr != "0")
+        
+        if (pm.marginr != "0"){
             new_style_inner["width"] = (parseInt(layer_inner.css("width")) - parseInt(pm.marginr) - parseInt(pm.marginl)) + "px";
-        if (pm.marginb != "0")
+            this.kag.stat.fuki.marginr = parseInt(pm.marginr);
+        }
+        
+        if (pm.marginb != "0"){
             new_style_inner["height"] = (parseInt(layer_inner.css("height")) - parseInt(pm.marginb)) - parseInt(pm.margint) + "px";
+			this.kag.stat.fuki.marginb = parseInt(pm.marginb);
+        }
         
         this.kag.setStyles(layer_inner, new_style_inner);
-
-        //this.kag.layer.updateLayer(pm.layer,pm.page,this.kag.layer.getLayer(pm.layer,pm.page));
-
+        
+		//innerレイヤを保存
+		this.kag.stat.fuki.def_style_inner = $.extend(true, this.kag.stat.fuki.def_style_inner , new_style_inner);
+		
+		
         //レイヤーをリフレッシュする
+		
+		if(pm.next=="true"){
+        	this.kag.ftag.nextOrder();
+		}
+    }
+};
 
+
+/*
+ #[fuki_start]
+ :group
+ メッセージ関連
+ :title
+ メッセージレイヤをふきだし化する
+ :exp
+ メッセージレイヤを漫画のふきだし風に表現できます。<br />
+ このタグでふきだし表示を有効にする前に[fuki_chara]タグで個別に設定が必要です。
+ ふきだしのデザインは[position]タグの設定が引き継がれますが、[fuki_chara]タグでデザインを個別に設定することも可能です。
+ :sample
+
+;通常のメッセージレイヤに対して、ふきだしに適応したいデザインを設定する
+[font color="black"]
+[position layer="message0" page=fore radius=15 visible=true color="white" opacity=255 border_size="3" border_color="black" ]
+
+;ふきだしの表示位置をキャラごとに設定する
+[fuki_chara name="akane" left=200 top=270 sippo_left=30 sippo_top=30 sippo="top" max_width=300 radius=15]
+[fuki_chara name="yamato" left=350 top=280  sippo_left=30 sippo_top=30 sippo="top" ]
+
+;キャラクターが画面上に存在しない場合に適応するふきだし設定 name=others 
+[fuki_chara name="others" left=250 top=500 max_width=700 fix_width=700 radius=0 ]
+
+;ふきだし表示を開始する
+[fuki_start ]
+
+ :param
+ layer=対象とするメッセージレイヤを指定します。デフォルトはmessage0
+ :demo
+
+ #[end]
+ */
+tyrano.plugin.kag.tag.fuki_start = {
+
+    pm : {
+
+        layer : "message0",
+        page : "fore",
+        
+    },
+
+    start : function(pm) {
+		
+		this.kag.stat.fuki.active = true;
+        
+        //どこに表示するか
+        //指定のレイヤを取得
+        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_outer");
+		target_layer.addClass("fuki_box");
+        
+        var j_msg_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
+		j_msg_inner.css("width","");
+		j_msg_inner.css("height","");
+						
         this.kag.ftag.nextOrder();
 
     }
 };
+
+
+/*
+ #[fuki_stop]
+ :group
+ メッセージ関連
+ :title
+ メッセージレイヤのふきだし化を無効にする
+ :exp
+ ふきだし表示を停止します。
+ メッセージレイヤのスタイルは[fuki_start]前の状態に戻ります。
+ :sample
+ :param
+ :demo
+
+ #[end]
+ */
+tyrano.plugin.kag.tag.fuki_stop = {
+
+    pm : {
+        
+    },
+
+    start : function(pm) {
+		
+		this.kag.stat.fuki.active = false;
+        
+        var j_outer_layer = this.kag.getMessageOuterLayer();
+		j_outer_layer.removeClass("fuki_box");
+        
+        //スタイルをもとに戻す
+        let def_style = this.kag.stat.fuki.def_style;
+		this.kag.setStyles(j_outer_layer,def_style);
+		
+		var j_inner_layer = this.kag.getMessageInnerLayer();
+		
+		j_inner_layer.css("max-width","");
+        
+		//スタイルをもとに戻す
+        let def_style_inner = this.kag.stat.fuki.def_style_inner;
+        
+        j_inner_layer
+        .css("left",parseInt(j_outer_layer.css("left"))+10)
+        .css("top",parseInt(j_outer_layer.css("top"))+10)
+        
+        this.kag.setStyles(j_inner_layer,def_style_inner);
+		
+		//名前表示エリアを復元する。
+		$(".tyrano_base").find(".chara_name_area").show();
+							    				
+        this.kag.ftag.nextOrder();
+
+    }
+};
+
+/*
+ #[fuki_chara ]
+ :group
+ メッセージ関連
+ :title
+ ふきだしのキャラクター登録
+ :exp
+ ふきだしを有効にしたとき、表示形式をキャラクター毎に設定できます。
+ nameに「others」指定すると画面上にキャラクターが登場していない場合のスタイルを設定することができます。
+ :sample
+
+;ふきだしの表示位置をキャラごとに設定する
+[fuki_chara name="akane" left=200 top=270 sippo_left=30 sippo_top=30 sippo="top" max_width=300 radius=15]
+[fuki_chara name="yamato" left=350 top=280  sippo_left=30 sippo_top=30 sippo="top" ]
+
+;キャラクターが画面上に存在しない場合に適応するふきだし設定 name=others 
+[fuki_chara name="others" left=250 top=500 max_width=700 fix_width=700 radius=0 ]
+
+ :param
+ name=キャラクター名を指定。othersを指定するとキャラクターが見つからなかったときの位置を指定できる,
+ left=ふきだし機能が有効な場合、どの位置にふきだしを表示するか指定します。画像ファイルの左端からの相対位置となります。,
+ top=ふきだし機能が有効な場合、どの位置にふきだしを表示するか指定します。画像ファイルの上端からの相対位置となります。,
+ sippo=しっぽをどの場所に表示するかを指定するtop（上） bottom（下） left（左） right（右） ,
+ sippo_left=ふきだし機能が有効な場合かつ、ふきだしの位置がtopかbottomの場合、しっぽを表示する左端からの位置を指定できます。デフォルトは40,
+ sippo_top=ふきだし機能が有効な場合かつ、ふきだしの位置がleftかrightの場合、しっぽを表示する上端からの位置を指定できます。デフォルトは40,
+ sippo_width=しっぽの幅を指定できます。デフォルトは12,
+ sippo_top=しっぽの高さを指定できます。デフォルトは20,
+ max_width=ふきだしのサイズは自動的に調整されますが、横幅の上限サイズを指定することができます。デフォルトは300,
+ fix_width=デフォルトのふきだし横幅は自動的に調整されますが、fix_widthパラメータを指定することで固定の幅を確保することができます。この値が指定されている場合はふきだしサイズの自動調整は行われません。,
+ color=メッセージレイヤの表示色を 0xRRGGBB 形式で指定します。 ,
+ border_color=外枠の線が有効な場合の色を 0xRRGGBB 形式で指定します。border_sizeの指定が同時に必要です,
+ border_size=外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0です。,
+ opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全に透明です。,
+ radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります
+ 
+:demo
+
+ #[end]
+ */
+ 
+tyrano.plugin.kag.tag.fuki_chara = {
+	
+	vital:["name"],
+	
+    pm : {
+		
+		name:"",
+		
+		//left:"",
+        //top:"",
+        
+        sippo:"top", // top bottom left right none
+        sippo_left:"40",
+        sippo_top:"40",
+        
+        sippo_width:"12", //border-left-width
+        sippo_height:"20", //border-top-width
+        
+        //指定しない場合はデフォルトのスタイルが適応される。
+        enable:"true",
+        
+        max_width:"300", //ふきだしの最大幅
+        fix_width:"", //ふきだしを固定にするか否か
+        
+        color:"",
+        opacity:"",
+        border_size:"",
+        border_color:"",
+        radius:"",
+        
+    },
+
+    start : function(pm) {
+		
+		var storage_url = "";
+		
+		//見た目は継承させない
+        if(pm.color=="") delete pm.color;
+        if(pm.opacity=="") delete pm.opacity;
+        if(pm.border_size=="") delete pm.border_size;
+        if(pm.border_color=="") delete pm.border_color;
+        if(pm.radius=="") delete pm.radius;
+        
+        if(pm.name=="others"){
+	    	this.kag.stat.fuki.others_style = $.extend(this.kag.stat.fuki.others_style, pm);
+	    }else{
+
+	        var cpm = this.kag.stat.charas[pm.name];    
+	        
+	        if (cpm == null) {
+	            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+	            return;
+	        }
+	        
+	        let _cpm = cpm["fuki"];
+	        
+	        //パラメータ更新
+	        this.kag.stat.charas[pm.name]["fuki"] = $.extend(_cpm,pm);
+	        
+        }
+        
+        this.kag.ftag.nextOrder();
+		
+
+    }
+};
+
 
 /*
 #[image]
