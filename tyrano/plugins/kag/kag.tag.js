@@ -955,6 +955,9 @@ tyrano.plugin.kag.tag.text = {
 						
 						//縦書きの場合はheightだけ無視で。
 						if(that.kag.stat.vertical =="true"){
+							//safariでも表示させるための処置
+							let w = j_msg_inner.find(".vertical_text").css("width");
+							j_msg_inner.css("width",w);
 							j_msg_inner.css("height","");
 							j_msg_inner.css("max-height",parseInt(chara_fuki["max_width"]));
 							
@@ -2003,7 +2006,6 @@ tyrano.plugin.kag.tag.position = {
     }
 };
 
-
 /*
  #[fuki_start]
  :group
@@ -2029,6 +2031,16 @@ tyrano.plugin.kag.tag.position = {
 
 ;ふきだし表示を開始する
 [fuki_start ]
+
+#akane
+あかねの位置にふきだしを表示[p]
+
+#yamato
+やまとのいちにふきだしを表示[p]
+
+#
+othersで設定した位置にふきだしを表示[p]
+
 
  :param
  layer=対象とするメッセージレイヤを指定します。デフォルトはmessage0
