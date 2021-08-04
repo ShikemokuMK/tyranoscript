@@ -302,6 +302,11 @@ body{
   
     -webkit-text-size-adjust:none;
 
+/*Mac safari でtyrano_base の overfllow:hiddenが効かない対策*/
+	-webkit-transform: translateZ(0);
+	-webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
+
+
 /*  
   	position: absolute;
 */
