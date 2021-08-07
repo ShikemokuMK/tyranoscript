@@ -2044,8 +2044,7 @@ othersで設定した位置にふきだしを表示[p]
 
  :param
  layer=対象とするメッセージレイヤを指定します。デフォルトはmessage0
- :demo
-
+ 
  #[end]
  */
 tyrano.plugin.kag.tag.fuki_start = {
@@ -2087,7 +2086,6 @@ tyrano.plugin.kag.tag.fuki_start = {
  メッセージレイヤのスタイルは[fuki_start]前の状態に戻ります。
  :sample
  :param
- :demo
 
  #[end]
  */
@@ -2163,8 +2161,6 @@ tyrano.plugin.kag.tag.fuki_stop = {
  border_size=外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0です。,
  opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全に透明です。,
  radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります
- 
-:demo
 
  #[end]
  */
