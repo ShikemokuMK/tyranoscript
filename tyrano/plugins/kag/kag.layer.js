@@ -423,7 +423,7 @@ tyrano.plugin.kag.layer ={
          this.layer_free.remove();
          delete this.layer_free ;
          this.layer_free = $(layer.layer_free);
-         this.appendLayer(this.layer_free);
+         this.appendLayer(this.layer_free,"root_layer_system");
          
         
     },
