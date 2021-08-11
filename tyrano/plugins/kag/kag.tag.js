@@ -2419,7 +2419,7 @@ tyrano.plugin.kag.tag.image = {
                 }
                 
                 
-                img_obj.animate(
+                img_obj.stop(true,true).animate(
                     {"opacity":1},
                     parseInt(pm.time), 
                     function(){
@@ -2553,7 +2553,7 @@ tyrano.plugin.kag.tag.freeimage = {
                 var cnt = 0;
                 var s_cnt = j_obj.length;
                 
-                j_obj.animate(
+                j_obj.stop(true,true).animate(
                     {"opacity":0},
                     parseInt(pm.time), 
                     function(){
@@ -2668,7 +2668,7 @@ tyrano.plugin.kag.tag.free = {
                 var cnt = 0;
                 var s_cnt = j_obj.length;
                 
-                j_obj.animate(
+                j_obj.stop(true,true).animate(
                     {"opacity":0},
                     parseInt(pm.time), 
                     function(){
@@ -2886,7 +2886,7 @@ tyrano.plugin.kag.tag.ptext = {
         if(pm.time != ""){
             tobj.css("opacity",0);
             target_layer.append(tobj);
-            tobj.animate(
+            tobj.stop(true,true).animate(
                     {"opacity":1},
                     parseInt(pm.time), 
                     function(){
@@ -5763,7 +5763,7 @@ tyrano.plugin.kag.tag.layermode = {
             
             this.kag.preload(storage_url, function(){
                 
-                blend_layer.fadeIn(parseInt(pm.time),function(){
+                blend_layer.stop(true,true).fadeIn(parseInt(pm.time),function(){
                     
                     if(pm.wait=="true"){
                         that.kag.ftag.nextOrder();
@@ -5774,7 +5774,7 @@ tyrano.plugin.kag.tag.layermode = {
         
         }else{
         
-            blend_layer.fadeIn(parseInt(pm.time),function(){
+            blend_layer.stop(true,true).fadeIn(parseInt(pm.time),function(){
                 
                 if(pm.wait=="true"){
                     that.kag.ftag.nextOrder();
@@ -5975,7 +5975,7 @@ tyrano.plugin.kag.tag.layermode_movie = {
         
         $("#tyrano_base").append(blend_layer);
         
-        blend_layer.fadeIn(parseInt(pm.time),function(){
+        blend_layer.stop(true,true).fadeIn(parseInt(pm.time),function(){
                 
                 if(pm.wait=="true" && pm.loop=="true"){
                     if(pm.stop!="true"){
