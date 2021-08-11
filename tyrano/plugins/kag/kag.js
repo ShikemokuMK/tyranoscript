@@ -1688,22 +1688,24 @@ tyrano.plugin.kag ={
         
         if(ext=="mp3" || ext=="ogg" || ext=="m4a"){
             
+             // 相対パスの場合"./"を補完
+            if (src.indexOf("http://") !== 0 && src.indexOf("https://") !== 0 && src.indexOf("./") !== 0) {
+                src = "./" + src;
+            }
+            
             var howl_opt = {
                 "src": src,
-                preload:true
+                preload:true,
+                onload: () => {
+                    if(callbk) callbk();
+                },
+                onloaderror: () => {
+                    that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
+                    if(callbk) callbk(obj);
+                },
             };
+            
             let obj = new Howl(howl_opt);
-            
-            obj.on("load",function(){
-                if(callbk) callbk();
-            });
-            
-            obj.on("loaderror",function(){
-                
-                that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
-                if(callbk) callbk(obj);
-                    
-            });
             
 
         }else if("mp4" == ext || "ogv" == ext || "webm" == ext){
