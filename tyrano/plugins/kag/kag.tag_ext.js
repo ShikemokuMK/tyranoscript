@@ -1928,7 +1928,6 @@ tyrano.plugin.kag.tag.chara_show = {
 			return;
 		}
 		
-
         var storage_url = "./data/fgimage/" + cpm.storage;
         
         if ($.isHTTP(cpm.storage)) {
@@ -2665,6 +2664,9 @@ tyrano.plugin.kag.tag.chara_mod = {
             
             if (chara_time != "0") {
                 
+                //アニメーションの停止
+                $(".layer_fore").find("." + pm.name).stop(true,true);
+                
                 var j_new_img = $(".layer_fore").find("." + pm.name).clone();
                 j_new_img.find(".chara_img").attr("src", folder + storage_url);
                 j_new_img.css("opacity", 0);
@@ -2706,6 +2708,9 @@ tyrano.plugin.kag.tag.chara_mod = {
                 });
     
             } else {
+                
+                //アニメーションの停止
+                $(".layer_fore").find("." + pm.name).stop(true,true);
                 
                 $(".layer_fore").find("." + pm.name).find(".chara_img").attr("src", folder + storage_url);
                 
@@ -2841,6 +2846,7 @@ tyrano.plugin.kag.tag.chara_move = {
         if (pm.name != "") {
             
             if(pm.anim=="true"){
+	            
                 target_obj.stop(true,true).animate(anim_style, parseInt(pm.time), pm.effect, function() {
                     
                     if(pm.wait=="true"){
