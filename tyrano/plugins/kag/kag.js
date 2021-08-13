@@ -1700,7 +1700,7 @@ tyrano.plugin.kag ={
                     if(callbk) callbk();
                 },
                 onloaderror: () => {
-                    that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
+                    //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
                     if(callbk) callbk(obj);
                 },
             };
