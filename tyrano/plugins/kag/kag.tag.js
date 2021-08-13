@@ -2796,8 +2796,34 @@ tyrano.plugin.kag.tag.ptext = {
         //visible true が指定されている場合は表示状態に持っていけ
         //これはレイヤのスタイル
         
-        //指定がない場合はデフォルトフォントを適応する
+        //上書き指定
+        if (pm.overwrite == "true" && pm.name != "") {
+            if ($("." + pm.name).length > 0) {
+                $("." + pm.name).html(pm.text);
+                
+                //サイズとか位置とかも調整できるならやっとく
+                if(pm.x!=0){
+                    $("." + pm.name).css("left",parseInt(pm.x));
+                }
+                
+                if(pm.y!=0){
+                    $("." + pm.name).css("top",parseInt(pm.y));
+                }
+                
+                if(pm.color!=""){
+                    $("." + pm.name).css("color",$.convertColor(pm.color));
+                }
+                
+                if(pm.size!=""){
+                    $("." + pm.name).css("font-size",parseInt(pm.size));
+                }
+                
+                this.kag.ftag.nextOrder();
+                return false;
+            }
+        }
         
+        //指定がない場合はデフォルトフォントを適応する
         if(pm.face ==""){
             pm.face=that.kag.stat.font.face;
         }
@@ -2830,32 +2856,7 @@ tyrano.plugin.kag.tag.ptext = {
         
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
 
-        //上書き指定
-        if (pm.overwrite == "true" && pm.name != "") {
-            if ($("." + pm.name).length > 0) {
-                $("." + pm.name).html(pm.text);
-                
-                //サイズとか位置とかも調整できるならやっとく
-                if(pm.x!=0){
-                    $("." + pm.name).css("left",parseInt(pm.x));
-                }
-                
-                if(pm.y!=0){
-                    $("." + pm.name).css("top",parseInt(pm.y));
-                }
-                
-                if(pm.color!=""){
-                    $("." + pm.name).css("color",$.convertColor(pm.color));
-                }
-                
-                if(pm.size!=""){
-                    $("." + pm.name).css("font-size",parseInt(pm.size));
-                }
-                
-                this.kag.ftag.nextOrder();
-                return false;
-            }
-        }
+        
 
         var tobj = $("<p></p>");
 
@@ -6054,7 +6055,7 @@ tyrano.plugin.kag.tag.free_layermode = {
         
         blend_layer.each(function(){
             var blend_obj = $(this);
-            blend_obj.fadeOut(parseInt(pm.time),function(){
+            blend_obj.stop(true,true).fadeOut(parseInt(pm.time),function(){
                 blend_obj.remove();
                 n++;
                 if(pm.wait=="true"){

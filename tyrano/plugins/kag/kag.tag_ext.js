@@ -1896,9 +1896,6 @@ tyrano.plugin.kag.tag.chara_show = {
 
         var cpm = this.kag.stat.charas[pm.name];
         
-        console.log("cpm:==================");
-        console.log(cpm)
-        
         var array_storage = [];
 
         if (cpm == null) {
@@ -1920,7 +1917,10 @@ tyrano.plugin.kag.tag.chara_show = {
 				return;
 	        }
 	        
-        }
+        }else{
+	        //別の方法で消された場合
+	    	cpm.is_show="false";
+	    }
         
         //スキップ時にロードとの間で分身するやつ
 		if(cpm.is_show == "true"){

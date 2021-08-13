@@ -461,7 +461,7 @@ tyrano.plugin.kag.tag.stop_bgcamera = {
         
         that.kag.tmp.camera_stream = false;
         
-        $(".tyrano_base").find("#bgcamera").fadeOut(parseInt(pm.time),function(){
+        $(".tyrano_base").find("#bgcamera").stop(true,true).fadeOut(parseInt(pm.time),function(){
             
             $(this)[0].srcObject.getVideoTracks().forEach((track) => {
                 track.stop();
