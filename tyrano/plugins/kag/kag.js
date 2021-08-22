@@ -27,7 +27,8 @@ tyrano.plugin.kag ={
       skipSpeed:"30",
       patch_apply_auto:"true",
       mediaFormatDefault:"ogg",
-      configSave:"webstorage"
+      configSave:"webstorage",
+      configSaveOverwrite:"false",
         
     }, //読み込んできた値 Config.tjs の値
     
@@ -721,7 +722,7 @@ tyrano.plugin.kag ={
         this.studio.init();
         
         //セーブデータ認証用のKey確認（ローカルストレージ）
-        if($.isElectron()){
+        if($.isElectron() && that.kag.config.configSave =="file"){
 	        
 	        //PC
 	        if(process.execPath.indexOf("var/folders")!=-1){
@@ -752,10 +753,26 @@ tyrano.plugin.kag ={
 			if(tmp_array["hash"] != that.save_key_val){
 				
 				alert($.lang("save_file_violation_1"));
-				alert($.lang("save_file_violation_2"));
-			
-				return false;
-			    
+				
+				if(that.kag.config.configSaveOverwrite=="true"){
+				
+					if(confirm($.lang("save_file_violation_2"))){
+						
+						tmp_array["hash"] = that.save_key_val;
+						$.setStorage(that.kag.config.projectID + "_tyrano_data", tmp_array, that.kag.config.configSave);
+		            
+					}else{
+					
+						alert($.lang("save_file_violation_3"));
+						return false;
+				    
+					}
+				
+				}else{
+					alert($.lang("save_file_violation_3"));
+					return false;
+				}
+				
 			}
 		
 				
