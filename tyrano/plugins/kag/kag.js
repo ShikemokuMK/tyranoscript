@@ -1788,12 +1788,11 @@ tyrano.plugin.kag ={
     //値が空白のものは設定しない
     setStyles:function(j_obj,array_style){
         
-        
         for( key in array_style ){
             
-            if(array_style[key]){
-                if(array_style[key]==""){
-                    
+            if(typeof array_style[key] !="undefined"){
+                if(array_style[key]===""){
+                
                 }else{
                     j_obj.css(key,array_style[key]);
                 }

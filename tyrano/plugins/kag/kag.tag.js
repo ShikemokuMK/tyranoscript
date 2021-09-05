@@ -1945,7 +1945,7 @@ tyrano.plugin.kag.tag.position = {
             target_layer.css("background-color", "");
 
         }
-
+		
         if (pm.opacity != "") {
             new_style["opacity"] = $.convertOpacity(pm.opacity);
         }
