@@ -4729,7 +4729,8 @@ graphic=ボタンの背景画像を指定します。ファイルはプロジェ
 enterimg=graphicが指定されている時に有効。カーソルが重なった時の画像を指定できます,
 clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
 enterse=ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
-leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。
+leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。,
+cm=デフォルトはtrue。glinkは通常、ボタンをクリック後、自動的に[cm]タグが実行されます。falseを指定するとこの[cm]を実行しません。プレイヤー入力などの決定をglinkで行いたい場合はfalseを指定しておき、[commit]後に手動で[cm]を実行してボタンや入力ボックスを消してください。
 
 :demo
 1,kaisetsu/14_select
@@ -4754,6 +4755,7 @@ tyrano.plugin.kag.tag.glink = {
         size : 30,
         graphic:"",
         enterimg:"",
+        cm:"true",
         clickse:"",
         enterse:"",
         leavese:"",
@@ -4880,7 +4882,10 @@ tyrano.plugin.kag.tag.glink = {
 
                 that.kag.layer.showEventLayer();
 
-                that.kag.ftag.startTag("cm", {});
+				if(pm.cm=="true"){
+                	that.kag.ftag.startTag("cm", {});
+                }
+                
                 //コールを実行する
                 that.kag.ftag.startTag("jump", _pm);
                 
