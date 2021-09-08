@@ -1250,6 +1250,15 @@ tyrano.plugin.kag.tag.text = {
         	j_outer_message.css("border-radius", parseInt(chara_fuki["radius"]));
 		}
 		
+		//内部設定
+		if(typeof chara_fuki["font_color"]!="undefined"){
+        	j_outer_message.parent().find(".message_inner").find(".current_span").css("color",$.convertColor(chara_fuki["font_color"]));
+		}
+		
+		if(typeof chara_fuki["font_size"]!="undefined"){
+        	j_outer_message.parent().find(".message_inner").find(".current_span").css("font-size",parseInt(["font_size"]));
+		}
+		
     }
 };
 
@@ -2160,7 +2169,10 @@ tyrano.plugin.kag.tag.fuki_stop = {
  border_color=外枠の線が有効な場合の色を 0xRRGGBB 形式で指定します。border_sizeの指定が同時に必要です,
  border_size=外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0です。,
  opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全に透明です。,
- radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります
+ radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります,
+ font_color=フォントの色を指定できます。0xRRGGBB 形式で指定してください。 ,
+ font_size=フォントサイズを指定できます。
+
 
  #[end]
  */
@@ -2189,6 +2201,9 @@ tyrano.plugin.kag.tag.fuki_chara = {
         max_width:"300", //ふきだしの最大幅
         fix_width:"", //ふきだしを固定にするか否か
         
+        font_color:"",
+        font_size:"",
+        
         color:"",
         opacity:"",
         border_size:"",
@@ -2207,6 +2222,9 @@ tyrano.plugin.kag.tag.fuki_chara = {
         if(pm.border_size=="") delete pm.border_size;
         if(pm.border_color=="") delete pm.border_color;
         if(pm.radius=="") delete pm.radius;
+        
+        if(pm.font_size=="") delete pm.font_size;
+        if(pm.font_color=="") delete pm.font_color;
         
         if(pm.name=="others"){
 	    	this.kag.stat.fuki.others_style = $.extend(this.kag.stat.fuki.others_style, pm);
