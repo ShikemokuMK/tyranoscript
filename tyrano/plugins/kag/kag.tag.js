@@ -1256,7 +1256,7 @@ tyrano.plugin.kag.tag.text = {
 		}
 		
 		if(typeof chara_fuki["font_size"]!="undefined"){
-        	j_outer_message.parent().find(".message_inner").find(".current_span").css("font-size",parseInt(["font_size"]));
+        	j_outer_message.parent().find(".message_inner").find(".current_span").css("font-size",parseInt(chara_fuki["font_size"]));
 		}
 		
     }

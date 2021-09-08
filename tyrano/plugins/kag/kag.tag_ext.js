@@ -1777,7 +1777,6 @@ tyrano.plugin.kag.tag.chara_new = {
         height : "",
         reflect : "false",
         jname : "",
-        visible : "false",
         
         color : "",
         map_face : {},
@@ -1790,7 +1789,7 @@ tyrano.plugin.kag.tag.chara_new = {
     start : function(pm) {
 
         //イメージの追加
-
+		
         var storage_url = "./data/fgimage/" + pm.storage;
 
         //HTTP対応
@@ -1799,7 +1798,14 @@ tyrano.plugin.kag.tag.chara_new = {
         }
 		
         pm.map_face["default"] = pm.storage;
-
+        
+        this.kag.stat.charas[pm.name] = pm;
+        
+        //キャラクターの日本語名とnameを紐付けるための処置
+        if(pm.jname!=""){
+            this.kag.stat.jcharas[pm.jname]=pm.name;
+        }
+        
         this.kag.preload(storage_url,(img_obj)=>{
 	    	
 	    	if(img_obj){
@@ -1815,21 +1821,10 @@ tyrano.plugin.kag.tag.chara_new = {
 		    	
 		    }
 		    
+			this.kag.ftag.nextOrder();
+
 	    });
 
-        //即座に追加
-        if (pm.visible == "true") {
-
-        }
-
-        this.kag.stat.charas[pm.name] = pm;
-        
-        //キャラクターの日本語名とnameを紐付けるための処置
-        if(pm.jname!=""){
-            this.kag.stat.jcharas[pm.jname]=pm.name;
-        }
-
-        this.kag.ftag.nextOrder();
 
     }
 };
