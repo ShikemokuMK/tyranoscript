@@ -1,5 +1,5 @@
 TyranoScript｜ティラノスクリプト　Ver5.00（C）ShikemokuMK
-http://tyrano.jp
+https://tyrano.jp
 
 
 ■主な特徴■
@@ -32,18 +32,18 @@ AppStoreやアンドロイドマーケットで販売することができます
 公式ページにチュートリアルとタグリファレンスがありますので参考にしてください
 
 【タグリファレンス】
-http://tyrano.jp/home/tag
+https://tyrano.jp/tag
 
 【使い方＆チュートリアル】
-http://tyrano.jp/usage/tutorial
+https://tyrano.jp/usage/tutorial
 
 
 ■ティラノビルダー■
-http://b.tyrano.jp
+https://b.tyrano.jp
 ティラノスクリプトの公式開発ツールです。ゲーム制作が楽になります。
 
 ■ティラノライダー■
-http://tyrano.jp/adv/next/rider
+https://tyrano.jp/usage/tech/rider
 公式デバッグツールです。変数ウォッチなどの開発をサポートする機能があります。
 
 ■利用規約■
@@ -68,7 +68,7 @@ http://tyrano.jp/adv/next/rider
 shikemokumk@gmail.com
 
 Twitter
-http://twitter.com/shikemokumk
+https://twitter.com/shikemokumk
 
 
 
