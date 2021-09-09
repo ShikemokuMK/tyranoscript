@@ -962,8 +962,13 @@ tyrano.plugin.kag.tag.text = {
 							j_msg_inner.css("max-height",parseInt(chara_fuki["max_width"]));
 							
 						}else{
-							j_msg_inner.css("width","");
-							j_msg_inner.css("height","");
+							
+							if(chara_fuki["fix_width"]==""){
+							
+								j_msg_inner.css("width","");
+								j_msg_inner.css("height","");
+							
+							}
 						}
 						
 						//吹き出しの大きさを自動調整。
