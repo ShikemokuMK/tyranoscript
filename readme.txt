@@ -6,7 +6,7 @@ https://tyrano.jp
 
 ①　HTMLとJavaScriptで動作します
 
-iphone、ipad、アンドロイドなどの端末で動作させることが可能です。
+iPhone、iPad、アンドロイドなどの端末で動作させることが可能です。
 また、PhoneGapなどのツールを使うことでアプリ化して
 AppStoreやアンドロイドマーケットで販売することができます。
 
