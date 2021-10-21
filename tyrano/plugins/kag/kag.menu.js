@@ -170,18 +170,35 @@ tyrano.plugin.kag.menu = {
             j_save.find(".save_display_area").each(function() {
 
                 $(this).click(function(e) {
+	                
                     var num = $(this).attr("data-num");
 
                     that.snap = null;
                     
+                    /*
                     var layer_menu = that.kag.layer.getMenuLayer();
                     layer_menu.hide();
                     layer_menu.empty();
                     if (that.kag.stat.visible_menu_button == true) {
                         $(".button_menu").show();
                     }
+                    */
                     
-                    that.doSave(num,function(){
+                    that.doSave(num,function(save_data){
+                        
+                        var j_slot = layer_menu.find("[data-num='"+num+"']");
+                        
+                        if(j_slot.find(".save_list_item_thumb").find("img").get(0)){
+	                    	j_slot.find(".save_list_item_thumb").find("img").attr("src",save_data["img_data"]);
+                        }else{
+		                	j_slot.find(".save_list_item_thumb").css("background-image","");
+		                	j_slot.find(".save_list_item_thumb").append("<img>");
+		                	j_slot.find(".save_list_item_thumb").find("img").attr("src",save_data["img_data"]);
+                        	
+		                }
+                        
+                        j_slot.find(".save_list_item_date").html(save_data["save_date"]);
+                        j_slot.find(".save_list_item_text").html(save_data["title"]);
                         
                         if(typeof cb=="function"){
                             cb();
@@ -255,7 +272,7 @@ tyrano.plugin.kag.menu = {
                 
                 if(typeof cb=="function"){
                     //終わったタイミングでコールバックを返す
-                    cb();
+                    cb(data);
                 }
 
             });
@@ -351,8 +368,6 @@ tyrano.plugin.kag.menu = {
         three_save.models = save_models;
         
         /////////////////////////////////////////////////////////////
-            
-       
         
         if(typeof flag_thumb =="undefined"){
             flag_thumb = this.kag.config.configThumbnail;
@@ -470,7 +485,9 @@ tyrano.plugin.kag.menu = {
                     }
                     
                     
-                    var tmp_base = $("#tyrano_base");
+                    var tmp_base = $("#tyrano_base").clone();
+                    tmp_base.addClass("snap_tmp_base");
+                    $("body").append(tmp_base);
                     
                     var tmp_left = tmp_base.css("left");
                     var tmp_top = tmp_base.css("top");
@@ -479,6 +496,8 @@ tyrano.plugin.kag.menu = {
                     tmp_base.css("left",0);
                     tmp_base.css("top",0);
                     tmp_base.css("transform", "");
+                    tmp_base.find(".layer_menu").hide();
+                    
                     var opt = {
                         scale:1,
                         height:that.kag.config.scHeight,
@@ -503,6 +522,9 @@ tyrano.plugin.kag.menu = {
                     tmp_base.css("left",tmp_left);
                     tmp_base.css("top",tmp_top);
                     tmp_base.css("transform", tmp_trans);
+                    tmp_base.find(".layer_menu").show();
+                    $("body").find(".snap_tmp_base").remove();
+                    
                     tmp_base.show();
                 }
 
@@ -891,6 +913,7 @@ tyrano.plugin.kag.menu = {
 		    		pm["pos"] = model.pos;
 		    		pm["rot"] = model.rot;
 		    		pm["scale"] = model.scale;
+		    		pm["_load"] = "true";
 		    		
 		    		var tag = pm._tag;
 		    		
@@ -900,12 +923,8 @@ tyrano.plugin.kag.menu = {
 			    	
 			    	pm["next"]="false";
 			    	
-			    	console.log("=========");
-			    	console.log(tag);
-			    	console.log(pm);
-		    		
 		    		this.kag.ftag.startTag(tag,pm);
-				
+					
 				}
 	        
 			    //ジャイロの復元
