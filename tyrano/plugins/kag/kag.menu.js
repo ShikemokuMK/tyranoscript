@@ -188,21 +188,25 @@ tyrano.plugin.kag.menu = {
                         
                         var j_slot = layer_menu.find("[data-num='"+num+"']");
                         
-                        if(j_slot.find(".save_list_item_thumb").find("img").get(0)){
-	                    	j_slot.find(".save_list_item_thumb").find("img").attr("src",save_data["img_data"]);
-                        }else{
-		                	j_slot.find(".save_list_item_thumb").css("background-image","");
-		                	j_slot.find(".save_list_item_thumb").append("<img>");
-		                	j_slot.find(".save_list_item_thumb").find("img").attr("src",save_data["img_data"]);
-                        	
-		                }
+                        if(save_data["img_data"]!=""){
+                        
+	                        if(j_slot.find(".save_list_item_thumb").find("img").get(0)){
+		                    	j_slot.find(".save_list_item_thumb").find("img").attr("src",save_data["img_data"]);
+	                        }else{
+			                	j_slot.find(".save_list_item_thumb").css("background-image","");
+			                	j_slot.find(".save_list_item_thumb").append("<img>");
+			                	j_slot.find(".save_list_item_thumb").find("img").attr("src",save_data["img_data"]);
+	                        }
+
+                        }
                         
                         j_slot.find(".save_list_item_date").html(save_data["save_date"]);
-                        j_slot.find(".save_list_item_text").html(save_data["title"]);
-                        
-                        if(typeof cb=="function"){
-                            cb();
-                        }
+	                    j_slot.find(".save_list_item_text").html(save_data["title"]);
+	                        
+	                    if(typeof cb=="function"){
+	                        cb();
+	                    }
+
                         
                     });
                     
