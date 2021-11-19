@@ -3637,6 +3637,9 @@ tyrano.plugin.kag.tag.free_filter = {
  公式サイトを開きます[p]
  [web url="http://tyrano.jp"]
  
+ ;ローカルのファイルを開きたい場合
+ [web url="./data/bgimage/room.jpg"]
+ 
  :param
  url=開きたいWebサイトのURLを入れてください。
  
@@ -3658,7 +3661,10 @@ tyrano.plugin.kag.tag.web = {
     start : function(pm) {
         
         if(pm.url.indexOf("http") == -1){
-            this.kag.log("error:[web] url is not correct " + pm.url);
+            
+            //this.kag.log("error:[web] url is not correct " + pm.url);
+            window.open(pm.url);
+            
         }else{
             
             //PC nwjsの場合
