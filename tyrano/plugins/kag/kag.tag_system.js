@@ -1046,7 +1046,12 @@ tyrano.plugin.kag.tag.savesnap = {
     },
 
     start : function(pm) {
-        this.kag.menu.snapSave(pm.title);
+        
+        var that = this;
+        this.kag.menu.snapSave(pm.title,function(){
+            that.kag.ftag.nextOrder();
+        });
+        
     }
 };
 

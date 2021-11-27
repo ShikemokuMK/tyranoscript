@@ -283,9 +283,14 @@ tyrano.plugin.kag.menu = {
 
         }else{
             
+            data = that.snap;
+            data.save_date = $.getNowDate() + "　" + $.getNowTime();
+            array_save.data[num] = data;
+            $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
+            
             if(typeof cb=="function"){
                 //終わったタイミングでコールバックを返す
-                cb();
+                cb(data);
             }
             
         }
@@ -301,6 +306,10 @@ tyrano.plugin.kag.menu = {
             var data = that.snap;
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
             $.setStorage(that.kag.config.projectID + "_tyrano_quick_save", data, that.kag.config.configSave);
+            
+            var layer_menu = that.kag.layer.getMenuLayer();
+            layer_menu.hide();
+                                
         });
     },
 
@@ -488,10 +497,26 @@ tyrano.plugin.kag.menu = {
                         
                     }
                     
+                    //canvasがある場合は、オリジナルをクローン。画面サイズによっては、カクつく問題が残る
+                    var flag_canvas = false;
+                    var array_canvas = [];
+                    $("#tyrano_base").find("canvas").each(function(index, element){
+                        array_canvas.push(element);
+                    });
+                    if(array_canvas.length > 0){
+                        flag_canvas = true;
+                    }
                     
-                    var tmp_base = $("#tyrano_base").clone();
-                    tmp_base.addClass("snap_tmp_base");
-                    $("body").append(tmp_base);
+                    var tmp_base ;
+                                        
+                    //canvasがある場合。
+                    if(flag_canvas){
+                        tmp_base = $("#tyrano_base");
+                    }else{
+                        tmp_base = $("#tyrano_base").clone();
+                        tmp_base.addClass("snap_tmp_base");
+                        $("body").append(tmp_base);
+                    }
                     
                     var tmp_left = tmp_base.css("left");
                     var tmp_top = tmp_base.css("top");
@@ -508,7 +533,6 @@ tyrano.plugin.kag.menu = {
                         width:that.kag.config.scWidth,
                     };
                     
-                    
                     html2canvas(tmp_base.get(0),opt).then(function(canvas) {
                                 
                         $("#tyrano_base").find(".layer_blend_mode").css("display","");
@@ -523,6 +547,7 @@ tyrano.plugin.kag.menu = {
                     });
                     
                     tmp_base.hide();
+                    
                     tmp_base.css("left",tmp_left);
                     tmp_base.css("top",tmp_top);
                     tmp_base.css("transform", tmp_trans);
@@ -530,6 +555,7 @@ tyrano.plugin.kag.menu = {
                     $("body").find(".snap_tmp_base").remove();
                     
                     tmp_base.show();
+                    
                 }
 
             }, 20);
