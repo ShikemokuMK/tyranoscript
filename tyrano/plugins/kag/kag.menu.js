@@ -331,6 +331,9 @@ tyrano.plugin.kag.menu = {
         var data = this.snap;
         data.save_date = $.getNowDate() + "　" + $.getNowTime();
         $.setStorage(this.kag.config.projectID + "_tyrano_auto_save", data, this.kag.config.configSave);
+        
+        var layer_menu = this.kag.layer.getMenuLayer();
+        layer_menu.hide();
 
     },
 
