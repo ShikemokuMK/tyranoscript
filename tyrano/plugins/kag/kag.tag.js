@@ -883,11 +883,21 @@ tyrano.plugin.kag.tag.text = {
                     c = "<ruby><rb>" + c + "</rb><rt>" + that.kag.stat.ruby_str + "</rt></ruby>";
                     that.kag.stat.ruby_str = "";
                 }
+                
 
 				if(c==" "){
 					append_str += "<span style='opacity:0'>" + c + "</span>";
 				}else{
-					
+    				
+    				if(that.kag.stat.mark == 1){
+        				
+        				var mark_style= that.kag.stat.style_mark;
+        				c = "<mark style='"+mark_style+"'>" + c + "</mark>";
+                    
+                    }else if(that.kag.stat.mark == 2){
+                        that.kag.stat.mark = 0;
+                    }
+
 					if(flag_in_block){
 						append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
 					}else{
@@ -898,7 +908,7 @@ tyrano.plugin.kag.tag.text = {
             }
             
             current_str += "<span>" + append_str + "</span>";
-
+            
 			
             // hidden状態で全部追加する
             that.kag.appendMessage(jtext, current_str);
@@ -4173,6 +4183,116 @@ tyrano.plugin.kag.tag["ruby"] = {
 
     }
 };
+
+
+
+/*
+#[mark]
+:group
+メッセージ関連
+:title
+テキストマーカー
+:exp
+テキストに蛍光ペンでマーカーを引いたような効果をつけることができます。
+色やサイズも指定可能
+:sample
+ここはまだです。[mark]ここにマーカーがひかれています。[endmark]ここはひかれません。
+
+[mark color="0xff7f50" size=70 ]マーカーの色やサイズを指定することもできます。[endmark]
+
+:param
+color=マーカーの色を指定します。デフォルトは黄色です。0xRRGGBB 形式で指定してください。 ,
+font_color=マーカーを引いたときのフォントの色を指定できます。0xRRGGBB 形式で指定してください。指定しないときはゲーム中のフォント色を継承します。,
+size=マーカーのサイズを指定できます。0〜100の間で指定してください。例えば50だとテキストの半分までマーカーがひかれます。90だと 
+
+:demo
+
+#[end]
+*/
+
+//ルビ指定
+tyrano.plugin.kag.tag["mark"] = {
+
+    vital : [],
+
+    pm : {
+        color : "0xFFFF00",
+        font_color:"",
+        size:"",
+    },
+    
+    
+    start : function(pm) {
+
+        var str = pm.text;
+        
+        this.kag.stat.mark = 1;
+        
+        var style_mark ="margin-right:-1px;";
+        style_mark += "background-color:"+$.convertColor(pm.color)+";";
+        
+        if(pm.font_color!=""){
+            style_mark += "color:"+$.convertColor(pm.font_color)+";";
+        }
+        
+        if(pm.size!=""){
+            style_mark += "background: linear-gradient(transparent "+(100 - parseInt(pm.size))+"%, "+$.convertColor(pm.color)+" 0%)";
+        }
+        
+        style_mark +="padding-top:4px;padding-bottom:4px;";
+        
+        this.kag.stat.style_mark = style_mark;
+        
+        this.kag.ftag.nextOrder();
+        
+    }
+};
+
+
+/*
+#[endmark]
+:group
+メッセージ関連
+:title
+テキストマーカー終了
+:exp
+[mark]タグで開始したテキストマーカーを終了します。
+
+:sample
+ここはまだです。[mark]ここにマーカーがひかれています。[endmark]ここはひかれません。
+
+[mark color="0xff7f50" size=70 ]マーカーの色やサイズを指定することもできます。[endmark]
+
+:param
+
+:demo
+
+#[end]
+*/
+
+//ルビ指定
+tyrano.plugin.kag.tag["endmark"] = {
+
+    vital : [],
+
+    pm : {
+    },
+    
+    
+    start : function(pm) {
+
+        var str = pm.text;
+        
+        //ここに文字が入っている場合、ルビを設定してから、テキスト表示する
+        if(this.kag.stat.mark==1){
+            this.kag.stat.mark = 2;
+        }
+        
+        this.kag.ftag.nextOrder();
+        
+    }
+};
+
 
 /*
  #[cancelskip]
