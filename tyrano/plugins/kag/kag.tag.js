@@ -4203,7 +4203,7 @@ tyrano.plugin.kag.tag["ruby"] = {
 :param
 color=マーカーの色を指定します。デフォルトは黄色です。0xRRGGBB 形式で指定してください。 ,
 font_color=マーカーを引いたときのフォントの色を指定できます。0xRRGGBB 形式で指定してください。指定しないときはゲーム中のフォント色を継承します。,
-size=マーカーのサイズを指定できます。0〜100の間で指定してください。例えば50だとテキストの半分までマーカーがひかれます。90だと 
+size=マーカーのサイズを指定できます。0〜100の間で指定してください。例えば50だとテキストの半分までマーカーがひかれます。10だと下線になります。 
 
 :demo
 
@@ -4236,7 +4236,7 @@ tyrano.plugin.kag.tag["mark"] = {
         }
         
         if(pm.size!=""){
-            style_mark += "background: linear-gradient(transparent "+(100 - parseInt(pm.size))+"%, "+$.convertColor(pm.color)+" 0%)";
+            style_mark += "background: linear-gradient(transparent "+(100 - parseInt(pm.size))+"%, "+$.convertColor(pm.color)+" 0%);";
         }
         
         style_mark +="padding-top:4px;padding-bottom:4px;";
