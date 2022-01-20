@@ -238,6 +238,84 @@ tyrano.plugin.kag.tag["trace"] = {
 };
 
 /*
+ #[body]
+ :group
+ システム操作
+ :title
+ ゲーム画面外の設定
+ :exp
+ ゲーム描画領域の外側をカスタマイズすることができます。
+ 例えば、背景画像を設定するなど。
+ 重要な点として必ずfirst.ksなど、ゲーム起動時に通過する場所で設定してください。このタグはロード時は復元されません。
+ :sample
+ [body bgimage="back.png" bgcolor="black" ]
+ :param
+ bgimage=ゲーム画面外の背景に画像を設定することができます。bgimageフォルダに配置してください。,
+ bgrepeat=背景に画像を指定した際の表示パターンを指定します。デフォルトは縦横に繰り返し表示されます。repeat-x:水平方向のみ繰り返し。repeat-y:垂直方向のみ繰り返し。round:比率を崩して覆うように全画面繰り返し。no-repeat:繰り返しなし,
+ bgcolor=背景色を指定できます。0x000000形式で指定してください。なお、bgimageが設定されている場合は無視されます。,
+ bgcover= true or false。デフォルトはfalse 。trueを指定すると１枚が全画面に引き伸ばして配置されます 
+        
+ #[end]
+ */
+
+tyrano.plugin.kag.tag["body"] = {
+
+    vital : [],
+    
+    pm : {
+    
+        bgimage : "",
+        bgrepeat: "",
+        bgcolor : "",
+        bgcover : "false",
+        
+    },
+
+    start : function(pm) {
+        
+        if(pm.bgcolor!=""){
+            $("body").css("background-color",$.convertColor(pm.bgcolor));    
+        }
+        
+        if(pm.bgimage!=""){
+            
+            if(pm.bgimage=="transparent"){
+                
+                //背景透過設定
+                this.kag.layer.getLayer("base", "fore").hide();
+                $("body").css("background-color","transparent");    
+                $(".tyrano_base").css("background-color","transparent");
+        
+            }else{
+            
+                var img_url =""
+                //画像指定
+                if ($.isHTTP(pm.bgimage)) {
+                    img_url = pm.bgimage;
+                } else {
+                    img_url = "./data/bgimage/" + pm.bgimage;
+                }
+                 
+                $("body").css("background-image",'url("'+img_url+'")');
+                
+            }
+            
+        }
+        
+        if(pm.bgrepeat!=""){
+            $("body").css("background-repeat",pm.bgrepeat);
+        }
+        
+        if(pm.bgcover=="true"){
+            $("body").css("background-size","cover");
+        }
+        
+        this.kag.ftag.nextOrder();
+        
+    }
+};
+
+/*
  #[title]
  :group
  システム操作
