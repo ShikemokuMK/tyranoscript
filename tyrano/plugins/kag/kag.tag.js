@@ -4233,6 +4233,9 @@ tyrano.plugin.kag.tag["mark"] = {
         
         if(pm.font_color!=""){
             style_mark += "color:"+$.convertColor(pm.font_color)+";";
+        }else{
+            style_mark += "color:"+this.kag.stat.font.color+";";
+        
         }
         
         if(pm.size!=""){
