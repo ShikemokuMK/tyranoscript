@@ -62,6 +62,20 @@
 		return angle; 
 	
 	};
+	
+	//横幅の方が大きければtrue;
+	$.getLargeScreenWidth = function(){
+        
+        let w = parseInt(window.innerWidth);
+        let h = parseInt(window.innerHeight);
+        
+        if(w>h){
+            return true;
+        }else{
+            return false;
+        }
+        
+    };
 
     $.localFilePath = function(){
         

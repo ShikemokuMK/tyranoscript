@@ -88,6 +88,7 @@ tyrano.plugin.kag ={
         video_playing:false,
         
         angle:0 , //スマホの場合盾持ちか否か。0なら盾持ち。
+        largerWidth:false,// 横幅の方が大きければ
         
         three:{
             
@@ -333,6 +334,13 @@ tyrano.plugin.kag ={
         already_read:false, //現在の場所が既読済みか否かを保持する。ラベル通過時に判定
         
         visible_menu_button:false, //メニューボタンの表示状態
+        
+        resizecall:{
+        
+            storage:"",
+            target:"",
+            
+        },
         
         vchat:{
             is_active:false,
@@ -898,16 +906,91 @@ tyrano.plugin.kag ={
         this.tyrano.base.setBaseSize(this.config.scWidth,this.config.scHeight);
         
 		that.tmp.angle = $.getAngle();
+		that.tmp.largerWidth = $.getLargeScreenWidth();
 		
         
         //スマホの場合は、実施。 PCの場合でも画面を一致させる処理→すべての画面フィットさせる仕様に変更
 //       if($.userenv() !="pc"){
             this.tyrano.base.fitBaseSize(that.config.scWidth,that.config.scHeight);
             //スマホの場合、傾いた時に再計算させる
+            
+            //繰り返し実行用の関数
+            var  timerId = null;
+            
             $(window).bind("load orientationchange resize",function(){
 	            
 	            that.tmp.angle = $.getAngle();
-		        
+	            
+	            //リサイズコールの仕組み
+        		if(that.tmp.largerWidth != $.getLargeScreenWidth()){
+            		
+            		//resizecallが設定されていれば呼び出す。
+            		if(that.stat.resizecall["storage"] != "") {
+                        
+                        //画面変化中にリサイズするとすぐに反映されない仕組みを実装。
+                        //クリックできない状態のときは実行しない
+                        if(that.kag.layer.layer_event.css("display") =="none" && that.kag.stat.is_strong_stop != true){
+                            timerId = setTimeout(function(){
+                                $(window).trigger("resize");
+                            }, 1000);
+                            return false;
+                        }
+                        
+                        //テキストが流れているときとwait中は実行しない
+                        if(that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true){
+                            timerId = setTimeout(function(){
+                                $(window).trigger("resize");
+                            }, 1000);
+                            return false; 
+                        }
+                            
+                        //that.kag.ftag.nextOrderWithIndex(that.ftag.current_order_index, that.stat.current_scenario, true, insert, "yes");
+                        var stack_pm = that.kag.getStack("call"); //最新のコールスタックを取得
+                    
+                        //if(stack_pm==null){
+                        
+                            var _auto_next = "false";
+                            if(that.kag.stat.is_strong_stop == true){
+                                _auto_next = "stop";
+                            }else{
+                               //パラメータ初期値が入るようになる
+                               //_auto_next = "yes";
+                            }
+                           
+                            if($.getLargeScreenWidth()==true){
+                                that.variable.tf["_larger_width"] = 1;
+                            }else{
+                                that.variable.tf["_larger_width"] = 0;
+                            }
+                           
+                           that.kag.ftag.startTag("call", {
+                               storage: that.stat.resizecall["storage"],
+                               target: that.stat.resizecall["target"],
+                               auto_next: _auto_next,
+                               textclear: "false", //移動したときに現在のメッセージレイヤをクリアさせない。
+                           });
+                        
+                        /*
+                        }else{
+                            
+                            //スタックで残された
+                            that.kag.log("callスタックが残っている場合、resizecallボタンは反応しません");
+                            that.kag.log(stack_pm);
+    
+                            return false;
+                        }
+                        */
+                        
+                        
+                    }
+                    
+                }
+                
+                that.tmp.largerWidth = $.getLargeScreenWidth();
+                
+                ////リサイズコールここまで
+	            
+	            
                 if(Math.abs(window.orientation) === 90){
                     window.scrollTo(0,1);
                     that.tyrano.base.fitBaseSize(that.config.scWidth,that.config.scHeight);

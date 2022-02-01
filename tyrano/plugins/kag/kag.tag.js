@@ -128,13 +128,17 @@ tyrano.plugin.kag.ftag = {
                 this.kag.log(tag);
             }
             //前に改ページ指定が入っている場合はテキスト部分をクリアする
-            if((tag.name=="call" && tag.pm.storage=="make.ks") || this.kag.stat.current_scenario=="make.ks"){
-                //makeです
+            if(
+                (tag.name=="call" && tag.pm.storage=="make.ks") || 
+                this.kag.stat.current_scenario=="make.ks" || 
+                (tag.name=="call" && tag.pm.storage==this.kag.stat.resizecall["storage"]) || 
+                (this.kag.stat.current_scenario==this.kag.stat.resizecall["storage"])){
+                
+                //make or resize中 です
                 //make中は基本、メッセージクリアを行わない
                 if(this.kag.stat.flag_ref_page==true){
                     this.kag.tmp.loading_make_ref = true;
                     this.kag.stat.flag_ref_page = false;
-                    
                 }
                 
             }else{
@@ -5497,6 +5501,7 @@ storage=切り替えるための画像ファイルを指定します。ファイ
 time=時間をミリ秒で指定します。,
 wait=背景の切り替えが完了するまで処理を待ちます,
 cross=true or false を指定します。デフォルトはfalse。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い背景を残しながら上に重なる形で新しい背景を表示します。CG差分などで使用する場合はfalseが良いでしょう。,
+position:指定しない場合は画面サイズぴったりに引き伸ばされて背景が表示されます（比率は崩れる）。この値を指定すると背景画像と画面サイズの比率が異なる場合に、比率を崩さずに背景を配置することができます。配置位置を指定してください。left（左寄せ）center（中央寄せ）right（右寄せ）top（上寄せ）bottom（下寄せ）,
 method=切り替えのタイプを指定します。デフォルトは"fadeIn"です。指定できる演出は次の通りです。
 （V450以降）
 fadeIn/
@@ -5547,7 +5552,9 @@ tyrano.plugin.kag.tag.bg = {
         method : "crossfade",
         wait : "true",
         time : 3000,
-        cross:"false"
+        cross:"false",
+        position:"",
+        
     },
 
     start : function(pm) {
@@ -5577,6 +5584,11 @@ tyrano.plugin.kag.tag.bg = {
             
             j_new_bg.css("background-image","url("+storage_url+")");
             j_new_bg.css("display","none");
+            
+            if(pm.position!=""){
+                j_new_bg.css("background-size","cover");
+                j_new_bg.css("background-position",pm.position);
+            }
             
             j_old_bg.after(j_new_bg);
             

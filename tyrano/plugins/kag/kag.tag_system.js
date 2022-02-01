@@ -253,7 +253,10 @@ tyrano.plugin.kag.tag["trace"] = {
  bgimage=ゲーム画面外の背景に画像を設定することができます。bgimageフォルダに配置してください。,
  bgrepeat=背景に画像を指定した際の表示パターンを指定します。デフォルトは縦横に繰り返し表示されます。repeat-x:水平方向のみ繰り返し。repeat-y:垂直方向のみ繰り返し。round:比率を崩して覆うように全画面繰り返し。no-repeat:繰り返しなし,
  bgcolor=背景色を指定できます。0x000000形式で指定してください。なお、bgimageが設定されている場合は無視されます。,
- bgcover= true or false。デフォルトはfalse 。trueを指定すると１枚が全画面に引き伸ばして配置されます 
+ bgcover= true or false。デフォルトはfalse 。trueを指定すると１枚が全画面に引き伸ばして配置されます, 
+ scWidth=ゲーム画面のオリジナル横幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscWidthに対応します。,
+ scHeight=ゲーム画面のオリジナル縦幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscHeightに対応します。
+               
         
  #[end]
  */
@@ -268,6 +271,9 @@ tyrano.plugin.kag.tag["body"] = {
         bgrepeat: "",
         bgcolor : "",
         bgcover : "false",
+        scWidth:"",
+        scHeight:"",
+        
         
     },
 
@@ -308,6 +314,28 @@ tyrano.plugin.kag.tag["body"] = {
         
         if(pm.bgcover=="true"){
             $("body").css("background-size","cover");
+        }
+        
+        let flag_resize = false ;
+        
+        if(pm.scWidth!="" && parseInt(pm.scWidth) != parseInt(this.kag.config.scWidth)){
+            flag_resize = true;
+            this.kag.config.scWidth = parseInt(pm.scWidth);
+            $(".tyrano_base").css("width",parseInt(pm.scWidth));
+            $(".layer").css("width",parseInt(pm.scWidth));
+        }
+        
+        if(pm.scHeight!="" && parseInt(pm.scHeight) != parseInt(this.kag.config.scHeight)){
+            flag_resize = true;
+            this.kag.config.scHeight = parseInt(pm.scHeight);
+            $(".tyrano_base").css("height",parseInt(pm.scHeight));
+            $(".layer").css("height",parseInt(pm.scHeight));
+        }
+        
+        if(flag_resize){
+            
+            $(window).trigger("resize");
+            
         }
         
         this.kag.ftag.nextOrder();
@@ -922,8 +950,8 @@ tyrano.plugin.kag.tag["return"] = {
         
         //make.ksが終わるときの判定用
         if(pm.caller && pm.caller.storage){
-            if(pm.caller.storage=="make.ks"){
-               if(this.kag.tmp.loading_make_ref==true){
+            if(pm.caller.storage=="make.ks" || pm.caller.storage == this.kag.stat.resizecall["storage"]){
+               if(this.kag.tmp.loading_make_ref==true ){
                    this.kag.stat.flag_ref_page = true;
                    this.kag.tmp.loading_make_ref = false;
                }
@@ -2625,6 +2653,79 @@ tyrano.plugin.kag.tag.check_web_patch = {
         
     }
 };
+
+
+
+/*
+#[set_resizecall]
+:group
+システム操作
+:title
+レスポンシブデザイン対応
+:exp
+プレイ端末の画面比率が入れ替わったタイミングでシナリオを呼び出すことができます。
+例えば、縦持ち→横持ちになったタイミングで、横持ち用の座標へ変更するスクリプトを実行。
+逆に横持ち→縦持ちになったタイミングで、横持ち用の座標へ変更するスクリプトを実行。
+
+このように対応することで、様々なレイアウトに対応したゲームを作ることができます。
+
+なお、呼び出した先では必ず[return]を実行する必要があります。
+
+公式サイトの解説もご参考ください。
+レスポンシブ対応解説
+→https://tyrano.jp/usage/advance/responsive
+
+:sample
+
+[call storage="resize.ks"]
+
+;画面比率が変わったタイミングでresize.ksを呼び出す。
+[set_resizecall storage="resize.ks" ]
+
+:param
+storage=呼び出すシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます
+:demo
+
+#[end]
+*/
+
+//背景変更
+tyrano.plugin.kag.tag.set_resizecall = {
+
+    vital : ["storage"],
+
+    pm : {
+        storage:"", 
+        target :"", 
+    },
+
+    start : function(pm) {
+
+        var that = this;
+        
+        //ストレージとターゲット
+        this.kag.stat.resizecall["storage"] = pm.storage;
+        this.kag.stat.resizecall["target"]  = pm.target;
+        
+        //強制発火
+        this.kag.tmp.largerWidth = !this.kag.tmp.largerWidth;
+        
+        //$(window).trigger("resize");
+        
+        this.kag.ftag.nextOrder();
+        
+    }
+};
+
+
+
+
+
+
+
+
+
+
 
 
 
