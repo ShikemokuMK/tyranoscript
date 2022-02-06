@@ -103,28 +103,34 @@ tyrano.plugin.kag.key_mouse = {
         
         $(document).keydown(function(e) {
             
-            if(that.is_keydown==true){
-                return false;
-            }
+            if(that.kag.stat.enable_keyconfig==true){
             
-            //メニュー系が表示されている時。
-            
-            that.is_keydown = true;
-            
-            var keycode = e.keyCode;
-
-            //イベント登録済みなら
-            if (that.map_key[keycode]) {
-
-                if ( typeof that.map_key[keycode] == "function") {
-                    //関数の場合
-                    that.map_key[keycode]();
-                } else {
-                    if (that[that.map_key[keycode]]) {
-                        that[that.map_key[keycode]]();
+                if(that.is_keydown==true){
+                    return false;
+                }
+                
+                //メニュー系が表示されている時。
+                
+                that.is_keydown = true;
+                
+                var keycode = e.keyCode;
+    
+                //イベント登録済みなら
+                if (that.map_key[keycode]) {
+    
+                    if ( typeof that.map_key[keycode] == "function") {
+                        //関数の場合
+                        that.map_key[keycode]();
+                    } else {
+                        if (that[that.map_key[keycode]]) {
+                            that[that.map_key[keycode]]();
+                        }
                     }
                 }
+                
             }
+
+            
 
         });
         
