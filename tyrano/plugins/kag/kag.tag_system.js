@@ -2708,8 +2708,7 @@ tyrano.plugin.kag.tag.set_resizecall = {
         this.kag.stat.resizecall["target"]  = pm.target;
         
         //強制発火
-        this.kag.tmp.largerWidth = !this.kag.tmp.largerWidth;
-        
+        //this.kag.tmp.largerWidth = !this.kag.tmp.largerWidth;
         //$(window).trigger("resize");
         
         this.kag.ftag.nextOrder();
