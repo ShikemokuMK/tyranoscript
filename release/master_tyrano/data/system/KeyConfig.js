@@ -55,7 +55,11 @@ Ver4.50以降で有効
 */
 
 var __tyrano_key_config = {
-
+    
+    //ブラウザ固有の動作を許可するか否か
+    //例えば、trueにするとChromeのショートカットキーなどが有効になります。falseだとショートカットの発動を抑えます。
+    "system_key_event" : "false",
+    
     //キーボード操作 
     "key" : {
     

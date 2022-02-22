@@ -106,7 +106,13 @@ tyrano.plugin.kag.key_mouse = {
             if(that.kag.stat.enable_keyconfig==true){
             
                 if(that.is_keydown==true){
+                    
+                    if(__tyrano_key_config.system_key_event=="true"){
+                        return true;
+                    }
+                    
                     return false;
+                    
                 }
                 
                 //メニュー系が表示されている時。
