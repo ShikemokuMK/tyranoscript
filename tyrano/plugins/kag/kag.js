@@ -17,6 +17,9 @@ tyrano.plugin.kag ={
     
     cache_scenario : {},
     
+    //セーブ時に保存する属性ホワイトリスト
+    array_white_attr:["id","src","data-event-tag","data-event-pm","l_visible","data-parent-layer","data-video-name","data-video-pm","data-effect"],
+        
     
     config:{
       

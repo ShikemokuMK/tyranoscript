@@ -183,7 +183,7 @@ tyrano.plugin.kag ={};
                     console.log("ww  map_doc  wwwwwwww");
                     console.log(map_doc);
                     
-                    $("#studio_json").val(JSON.stringify(map_doc,undefined,4))
+                    $("#studio_json").val(JSON.stringify(map_doc,undefined,4));
                     
                 }
                 
