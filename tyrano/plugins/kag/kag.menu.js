@@ -804,9 +804,10 @@ tyrano.plugin.kag.menu = {
         }
         
         //読み込んだCSSがある場合
+        $('head').find("._tyrano_cssload_tag").remove();
         if(this.kag.stat.cssload){
 	    	for(file in this.kag.stat.cssload){
-		    	var style = '<link rel="stylesheet" href="'+file+ "?" + Math.floor(Math.random() * 10000000)+'">';
+		    	var style = '<link class="_tyrano_cssload_tag" rel="stylesheet" href="'+$.escapeHTML(file)+ "?" + Math.floor(Math.random() * 10000000)+'">';
 				$('head link:last').after(style);
     
 	    	}
