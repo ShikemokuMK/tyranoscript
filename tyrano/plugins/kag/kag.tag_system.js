@@ -2148,7 +2148,7 @@ tyrano.plugin.kag.tag.loadcss = {
         var file = pm.file;
 
         //ファイルの読み込み
-        var style = '<link rel="stylesheet" href="' + file + "?" + Math.floor(Math.random() * 10000000) + '">';
+        var style = '<link class="_tyrano_cssload_tag" rel="stylesheet" href="' + file + "?" + Math.floor(Math.random() * 10000000) + '">';
         $('head link:last').after(style);
         this.kag.stat.cssload[file] = true;
 
