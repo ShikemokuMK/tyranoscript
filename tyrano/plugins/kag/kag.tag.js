@@ -2409,8 +2409,17 @@ tyrano.plugin.kag.tag.image = {
             }
 
             var img_obj = $("<img />");
+            
+            
+            if($.getExt(pm.storage)=="svg" ||$.ext(pm.storage)=="SVG" ){
+                
+                img_obj = $("<object type='image/svg+xml' />");
+                img_obj.attr("data",strage_url);
+                
+            }
+            
             img_obj.attr("src", strage_url);
-
+            
             img_obj.css("position", "absolute");
             img_obj.css("top", pm.top + "px");
             img_obj.css("left", pm.left + "px");
@@ -5167,6 +5176,7 @@ tyrano.plugin.kag.tag.clickable = {
         j_button.css("background-color", $.convertColor(pm.color));
         j_button.css("border", $.replaceAll(pm.border, ":", " "));
 
+        
         //alert($.replaceAll(pm.border,":"," "));
 
         //x,y 座標が指定されている場合は、そっちを採用
