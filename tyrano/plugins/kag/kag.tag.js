@@ -2411,7 +2411,7 @@ tyrano.plugin.kag.tag.image = {
             var img_obj = $("<img />");
             
             
-            if($.getExt(pm.storage)=="svg" ||$.ext(pm.storage)=="SVG" ){
+            if($.getExt(pm.storage)=="svg" || $.getExt(pm.storage)=="SVG" ){
                 
                 img_obj = $("<object type='image/svg+xml' />");
                 img_obj.attr("data",strage_url);
