@@ -19,14 +19,14 @@
         return str.substring(0, i + 1);
 
     };
-    
-    $.getDirPath = function(str){
-        
+
+    $.getDirPath = function(str) {
+
         var i = str.lastIndexOf('/');
         return str.substring(0, i + 1);
-        
+
     };
-    
+
 
     $.isHTTP = function(str) {
         if (str.substring(0, 4) === "http") {
@@ -41,54 +41,54 @@
         audio_obj.play();
 
     };
-    
-    $.toBoolean = function(str){
-        
-        if(str=="true"){
+
+    $.toBoolean = function(str) {
+
+        if (str == "true") {
             return true;
-        }else{
-            return false;
-        }    
-        
-    };
-    
-    $.getAngle = function(){
-	  	
-        let angle = screen && screen.orientation && screen.orientation.angle;
-		if ( angle === undefined ) {
-		  angle = window.orientation;    // iOS用
-		}
-		
-		return angle; 
-	
-	};
-	
-	//横幅の方が大きければtrue;
-	$.getLargeScreenWidth = function(){
-        
-        let w = parseInt(window.innerWidth);
-        let h = parseInt(window.innerHeight);
-        
-        if(w>h){
-            return true;
-        }else{
+        } else {
             return false;
         }
-        
+
     };
 
-    $.localFilePath = function(){
-        
+    $.getAngle = function() {
+
+        let angle = screen && screen.orientation && screen.orientation.angle;
+        if (angle === undefined) {
+            angle = window.orientation;    // iOS用
+        }
+
+        return angle;
+
+    };
+
+    //横幅の方が大きければtrue;
+    $.getLargeScreenWidth = function() {
+
+        let w = parseInt(window.innerWidth);
+        let h = parseInt(window.innerHeight);
+
+        if (w > h) {
+            return true;
+        } else {
+            return false;
+        }
+
+    };
+
+    $.localFilePath = function() {
+
         var path = "";
         //Mac os Sierra 対応
-        if(process.execPath.indexOf("var/folders")!=-1){
-            path = process.env.HOME+"/_TyranoGameData";
-        }else{
+        if (process.execPath.indexOf("var/folders") != -1) {
+            path = process.env.HOME + "/_TyranoGameData";
+        } else {
             path = $.getExePath();
         }
-        
+
         return path;
-        
+
     };
 
     $.getViewPort = function() {
@@ -109,8 +109,8 @@
         }
 
         return {
-            width : width,
-            height : height
+            width: width,
+            height: height
         };
     };
 
@@ -162,61 +162,61 @@
         return h + "：" + m + "：" + s;
 
     };
-    
-    $.convertRem = function(px_val){
-        
+
+    $.convertRem = function(px_val) {
+
         function getRootElementFontSize() {
-          // Returns a number
-          return parseFloat(
-            // of the computed font-size, so in px
-            getComputedStyle(
-              // for the root <html> element
-              document.documentElement
-            ).fontSize
-          );
+            // Returns a number
+            return parseFloat(
+                // of the computed font-size, so in px
+                getComputedStyle(
+                    // for the root <html> element
+                    document.documentElement
+                ).fontSize
+            );
         }
-        
+
         return px_val * getRootElementFontSize();
-            
+
     };
-    
+
     //複数のスクリプトを一括して読み込み
-    $.getMultiScripts = function(arr,cb) {
-        
+    $.getMultiScripts = function(arr, cb) {
+
         var cnt_script = arr.length;
         var load_cnt = 0;
-        
-        if(cnt_script==0){
-	        cb();
-	    	return;
-	    }
-        
-        function getScript(src){
-            
-            $.getScript(arr[load_cnt],function(e){
-            
+
+        if (cnt_script == 0) {
+            cb();
+            return;
+        }
+
+        function getScript(src) {
+
+            $.getScript(arr[load_cnt], function(e) {
+
                 load_cnt++;
-                
-                if(cnt_script==load_cnt){
-                    
-                    if(typeof cb=="function"){
-                        cb();    
+
+                if (cnt_script == load_cnt) {
+
+                    if (typeof cb == "function") {
+                        cb();
                     }
-                    
-                }else{
+
+                } else {
                     getScript(arr[load_cnt]);
                 }
-                
+
             });
-            
-            
+
+
         }
-        
+
         getScript(arr[0]);
-        
-        
-    
-    }
+
+
+
+    };
 
     $.convertSecToString = function(val) {
         if (val == 0) {
@@ -283,19 +283,19 @@
 
     $.replaceAll = function(text, searchString, replacement) {
 
-        if ( typeof text != "string"){
+        if (typeof text != "string") {
             return text;
         }
-        
-        
+
+
         //置換のコード変えてみた
         var result = text.split(searchString).join(replacement);
-        
+
         return result;
-        
+
 
     };
-    
+
     //確証しを取得
     $.getExt = function(str) {
         return str.split(".").pop();
@@ -354,7 +354,7 @@
         return "";
 
     };
-    
+
     $.convertItalic = function(flag) {
 
         if (flag == "true") {
@@ -368,15 +368,15 @@
     $.send = function(url, obj, call_back) {
         //game.current_story_file = story_file;
         $.ajax({
-            type : "POST",
-            url : url,
-            data : obj,
-            dataType : 'json',
-            complete : function() {
+            type: "POST",
+            url: url,
+            data: obj,
+            dataType: 'json',
+            complete: function() {
                 //通信終了時の処理
                 $.hideLoading();
             },
-            success : function(data, status) {
+            success: function(data, status) {
                 $.hideLoading();
 
                 var data_obj = data;
@@ -388,10 +388,10 @@
     };
 
     $.loadText = function(file_path, callback) {
-        
+
         /*
         var httpObj = jQuery.get(file_path + "?" + Math.floor(Math.random() * 1000000), null, function(obj) {
-            
+
             var order_str = "";
 
             if (httpObj) {
@@ -411,23 +411,23 @@
             callback(order_str);
             // createOrder
         });
-        
+
         */
-        
+
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
-            success: function(text){
+            success: function(text) {
                 order_str = text;
                 callback(order_str);
             },
-            error:function(){
-                alert("file not found:"+file_path);
+            error: function() {
+                alert("file not found:" + file_path);
                 callback("");
             }
         });
-        
-        
+
+
 
     };
 
@@ -470,22 +470,22 @@
             return 'iphone';
         } else if (ua.indexOf('Android') > -1) {
             return 'android';
-        } else if(ua.indexOf('Chrome') > -1 && navigator.platform.indexOf('Linux') > -1) {
+        } else if (ua.indexOf('Chrome') > -1 && navigator.platform.indexOf('Linux') > -1) {
             return 'android';
-        }else {
+        } else {
             return "pc";
         }
 
     };
-    
-    $.isTyranoPlayer = function(){
-        if(typeof _tyrano_player != "undefined"){
+
+    $.isTyranoPlayer = function() {
+        if (typeof _tyrano_player != "undefined") {
             return true;
-        }else{
+        } else {
             return false;
         }
     };
-    
+
     $.lang = function(key) {
 
         if (tyrano_lang["word"][key]) {
@@ -510,12 +510,12 @@
     $.getBrowser = function() {
 
         var userAgent = window.navigator.userAgent.toLowerCase();
-        
+
         if (userAgent.indexOf('msie') >= 0 || userAgent.indexOf('trident') >= 0) {
             return "msie";
-        }else if (userAgent.indexOf("edge") > -1) {
-            return "edge"; 
-        }else if (userAgent.indexOf("firefox") > -1) {
+        } else if (userAgent.indexOf("edge") > -1) {
+            return "edge";
+        } else if (userAgent.indexOf("firefox") > -1) {
             return "firefox";
         } else if (userAgent.indexOf("opera") > -1) {
             return "opera";
@@ -523,37 +523,37 @@
             return "chrome";
         } else if (userAgent.indexOf("safari") > -1) {
             return "safari";
-        }else if (userAgent.indexOf("applewebkit") > -1) {
+        } else if (userAgent.indexOf("applewebkit") > -1) {
             return "safari";
-        }else {
+        } else {
             return "unknown";
         }
 
     };
-    
-    $.isNWJS = function(){
-        
+
+    $.isNWJS = function() {
+
         //Electronならfalse
-        if($.isElectron()){
+        if ($.isElectron()) {
             return false;
         }
-        
+
         // Node.js で動作しているか
         var isNode = (typeof process !== "undefined" && typeof require !== "undefined");
         // ブラウザ上(非Node.js)で動作しているか
-        var isBrowser = !isNode
+        var isBrowser = !isNode;
         // node-webkitで動作しているか
         var isNodeWebkit;
         try {
             isNodeWebkit = isNode ? (typeof require('nw.gui') !== "undefined") : false;
-        } catch(e) {
+        } catch (e) {
             isNodeWebkit = false;
         }
-        
+
         if (isNodeWebkit) {
             // node-webkitで動作
             return true;
-        } else if ( isNode) {
+        } else if (isNode) {
             // Node.js上で動作している
             return true;
         } else {
@@ -561,73 +561,73 @@
             return false;
         }
     },
-    
-    $.isNeedClickAudio = function (){
-        
-        //プレイヤーはクリックの必要なし
-        if($.isTyranoPlayer()){
-            return false;
-        }
-        
-        //ブラウザやスマホアプリは必要
-        if($.isElectron() || $.isNWJS()){
-            return false;
-        }
-        
-        return true;
-        
-        
-    }
-    
-    $.isElectron = function(){
-        if(navigator.userAgent.indexOf("TyranoErectron")!=-1){
-            return true;
-        }else{
-            return false
-        }
-        
-    },
-    
-    //オブジェクトを引き継ぐ。
-    $.extendParam = function(pm,target){
-        
-        var tmp = target;
-        
-        for(key in target){
-            
-            if(pm[key]){
-                if(pm[key]!=""){
-                    target[key] = pm[key];
-                }
-            }
-            
-        }
-        
-        return target;
-        
-    };
 
-    
-    $.insertRule = function(css_str){
-        
+        $.isNeedClickAudio = function() {
+
+            //プレイヤーはクリックの必要なし
+            if ($.isTyranoPlayer()) {
+                return false;
+            }
+
+            //ブラウザやスマホアプリは必要
+            if ($.isElectron() || $.isNWJS()) {
+                return false;
+            }
+
+            return true;
+
+
+        };
+
+    $.isElectron = function() {
+        if (navigator.userAgent.indexOf("TyranoErectron") != -1) {
+            return true;
+        } else {
+            return false;
+        }
+
+    },
+
+        //オブジェクトを引き継ぐ。
+        $.extendParam = function(pm, target) {
+
+            var tmp = target;
+
+            for (key in target) {
+
+                if (pm[key]) {
+                    if (pm[key] != "") {
+                        target[key] = pm[key];
+                    }
+                }
+
+            }
+
+            return target;
+
+        };
+
+
+    $.insertRule = function(css_str) {
+
         var sheet = (function() {
             var style = document.createElement("style");
             document.getElementsByTagName("head")[0].appendChild(style);
             return style.sheet;
         })();
-        sheet.insertRule(css_str,0);
-        
+        sheet.insertRule(css_str, 0);
+
     },
 
-    $.swfName = function(str) {
-        if (navigator.appName.indexOf("Microsoft") != -1) {
-            return window[str];
-        } else {
-            return document[str];
-        }
-    };
+        $.swfName = function(str) {
+            if (navigator.appName.indexOf("Microsoft") != -1) {
+                return window[str];
+            } else {
+                return document[str];
+            }
+        };
 
-//古いトランス。
+    //古いトランス。
     $.trans_old = function(method, j_obj, time, mode, callback) {
 
         if (method == "crossfade" || mode == "show") {
@@ -646,18 +646,18 @@
 
                 if (mode == "show") {
                     ta = {
-                        "opacity" : "show"
+                        "opacity": "show"
                     };
                 } else {
                     ta = {
-                        "opacity" : "hide"
+                        "opacity": "hide"
                     };
                 }
 
                 j_obj.animate(ta, {
-                    duration : time,
-                    easing : "linear",
-                    complete : function() {
+                    duration: time,
+                    easing: "linear",
+                    complete: function() {
                         if (callback) {
                             callback();
                         }
@@ -684,40 +684,40 @@
         }
 
     };
-    
+
     //コンバート v450rc5以前
     var _map_conv_method = {
-        "corssfade":"fadeIn",
-        "explode":"zoomIn",
-        "slide":"slideInLeft",
-        "blind":"bounceIn",
-        "bounce":"bounceIn",
-        "clip":"flipInX",
-        "drop":"slideInLeft",
-        "fold":"fadeIn",
-        "puff":"fadeIn",
-        "scale":"zoomIn",
-        "shake":"fadeIn",
-        "size":"zoomIn"
-    }
+        "corssfade": "fadeIn",
+        "explode": "zoomIn",
+        "slide": "slideInLeft",
+        "blind": "bounceIn",
+        "bounce": "bounceIn",
+        "clip": "flipInX",
+        "drop": "slideInLeft",
+        "fold": "fadeIn",
+        "puff": "fadeIn",
+        "scale": "zoomIn",
+        "shake": "fadeIn",
+        "size": "zoomIn"
+    };
 
     $.trans = function(method, j_obj, time, mode, callback) {
-        
-        if(method=="crossfade") {
+
+        if (method == "crossfade") {
             method = "fadeIn";
-        }else if(_map_conv_method[method]){
+        } else if (_map_conv_method[method]) {
             method = _map_conv_method[method];
         }
-        
-        j_obj.css("animation-duration",parseInt(time)+"ms");
-        
+
+        j_obj.css("animation-duration", parseInt(time) + "ms");
+
         if (mode == "hide") {
             j_obj.show();
-            method = $.replaceAll(method,"In","Out");
+            method = $.replaceAll(method, "In", "Out");
             var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
             j_obj.addClass('animated ' + method).one(animationEnd, function() {
                 j_obj.off(animationEnd);
-                j_obj.css("animation-duration","");
+                j_obj.css("animation-duration", "");
                 $(this).remove();
                 if (callback) {
                     //callback();
@@ -729,7 +729,7 @@
             var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
             j_obj.addClass('animated ' + method).one(animationEnd, function() {
                 j_obj.off(animationEnd);
-                j_obj.css("animation-duration","");
+                j_obj.css("animation-duration", "");
                 $(this).removeClass('animated ' + method);
                 if (callback) {
                     callback();
@@ -737,7 +737,7 @@
             });
         }
 
-        
+
 
     };
 
@@ -753,50 +753,50 @@
         return obj;
 
     };
-    
-    $.preloadImgCallback = function(j_menu,cb,that){
-    
+
+    $.preloadImgCallback = function(j_menu, cb, that) {
+
         var img_storage = [];
-        
+
         j_menu.find("img").each(function() {
             img_storage.push($(this).attr("src"));
         });
-        
+
         //ロードが全て完了したら、ふわっと出す
         var sum = 0;
         for (var i = 0; i < img_storage.length; i++) {
             that.kag.preload(img_storage[i], function() {
                 sum++;
                 if (img_storage.length == sum) {
-                    
+
                     cb();
-        
+
                 }
             });
         }
-        
-        if(img_storage.length==0){
+
+        if (img_storage.length == 0) {
             cb();
         }
-    
+
     };
-    
-    $.setStorage = function(key, val ,type) {
-        
-        if(type=="webstorage_compress"){
-            
-            $.setStorageCompress(key,val);
-            
-        }else if(type=="file"){
-            
-            $.setStorageFile(key,val);
-            
-        }else{
-            $.setStorageWeb(key,val);
+
+    $.setStorage = function(key, val, type) {
+
+        if (type == "webstorage_compress") {
+
+            $.setStorageCompress(key, val);
+
+        } else if (type == "file") {
+
+            $.setStorageFile(key, val);
+
+        } else {
+            $.setStorageWeb(key, val);
         }
-        
+
     };
-    
+
     //PC版のみ。実行フォルダを取得
     /*
     $.getProcessPath = function(){
@@ -804,73 +804,73 @@
         var tmp_index = path.indexOf(".app");
         var os = "mac";
         if(tmp_index == -1){
-            tmp_index = path.indexOf(".exe");
+            tmp_index = path.indexOf(".exe");
             os="win";
-        }
+        }
         var tmp_path =  path.substr(0,tmp_index);
-        var path_index =0;
+        var path_index =0;
         if(os=="mac"){
             path_index = tmp_path.lastIndexOf("/");
         }else{
             path_index = tmp_path.lastIndexOf("\\");
         }
-        
+
         var out_path = path.substr(0,path_index);
         return out_path;
-        
+
     };
     */
-    
-    $.getOS = function(){
-        
-        if($.isElectron()){
-            let os ="";
-            
-            if(process.platform == "darwin"){
-                os="mac";    
-            }else{
-                os="win";
+
+    $.getOS = function() {
+
+        if ($.isElectron()) {
+            let os = "";
+
+            if (process.platform == "darwin") {
+                os = "mac";
+            } else {
+                os = "win";
             }
             return os;
-            
-        }else{
+
+        } else {
             return "";
         }
     };
-    
-    $.makeSaveKey = function(){
-		
-		var S="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-		var N=16;
-		let key = Array.from(Array(N)).map(()=>S[Math.floor(Math.random()*S.length)]).join('');
-		return key;
-		
-	};
-    
-    $.getStorage = function(key,type) {
-        
+
+    $.makeSaveKey = function() {
+
+        var S = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var N = 16;
+        let key = Array.from(Array(N)).map(() => S[Math.floor(Math.random() * S.length)]).join('');
+        return key;
+
+    };
+
+    $.getStorage = function(key, type) {
+
         var gv = "null";
-        
-        if(type=="webstorage_compress"){
-            
+
+        if (type == "webstorage_compress") {
+
             gv = $.getStorageCompress(key);
-            
-        }else if(type=="file"){
+
+        } else if (type == "file") {
             gv = $.getStorageFile(key);
-        }else{
+        } else {
             gv = $.getStorageWeb(key);
         }
-        
+
         return gv;
-        
+
     };
 
     $.setStorageWeb = function(key, val) {
         val = JSON.stringify(val);
         //localStorage.setItem(key, LZString.compress(escape(val)));
-        try{
+        try {
             localStorage.setItem(key, escape(val));
-        }catch(e){
+        } catch (e) {
             console.error("セーブデータ。localstorageが利用できません。");
             return;
         }
@@ -890,10 +890,10 @@
             if (gv == "null")
                 return null;
 
-        } catch(e) {
+        } catch (e) {
             //alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             //$.confirmSaveClear();
-            
+
             console.error("セーブデータ。localstorageが利用できません。");
             return null;
         }
@@ -901,54 +901,54 @@
         return gv;
 
     };
-    
-    $.playerHtmlPath = function(html){
-     
+
+    $.playerHtmlPath = function(html) {
+
         if ("appJsInterface" in window) {
             //Android
         } else {
-            
-            if(typeof TyranoPlayer == "function"){
-            
+
+            if (typeof TyranoPlayer == "function") {
+
                 //playerの場合HTMLを修正する必要がある
-                var result_html ="";
-                while(1){
+                var result_html = "";
+                while (1) {
                     var index = html.indexOf("file:///");
-                    if(index==-1){
+                    if (index == -1) {
                         result_html += html;
                         break;
-                    }else{
-                        
-                        result_html += html.substring(0,index);
-                        html = html.substring(index,html.length);
-                        
+                    } else {
+
+                        result_html += html.substring(0, index);
+                        html = html.substring(index, html.length);
+
                         var replace_index = html.indexOf("/game/data");
-                        tmp_html = html.substring(replace_index + "/game/data".length,html.length);
-                        html = "./data"+tmp_html;
-                        
-                        
+                        tmp_html = html.substring(replace_index + "/game/data".length, html.length);
+                        html = "./data" + tmp_html;
+
+
                     }
-                    
+
                 }
-                
-                if(result_html !=""){
+
+                if (result_html != "") {
                     html = result_html;
                 }
-                
+
             }
-            
-            
+
+
         }
-        
+
         return html;
-        
+
     };
-    
-    
-    $.confirmSaveClear = function(){
-        if(confirm('セーブデータが壊れている可能性があります。セーブデータを初期化しますか？')){
-           alert("初期化");
-           localStorage.clear(); 
+
+
+    $.confirmSaveClear = function() {
+        if (confirm('セーブデータが壊れている可能性があります。セーブデータを初期化しますか？')) {
+            alert("初期化");
+            localStorage.clear();
         }
     };
 
@@ -975,8 +975,8 @@
             if (gv == "null")
                 return null;
 
-        } catch(e) {
-            console.log("==============")
+        } catch (e) {
+            console.log("==============");
             console.log(e);
             alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             $.confirmSaveClear();
@@ -985,109 +985,109 @@
         return gv;
 
     };
-    
-    $.getExtWithFile = function(str){
-        
+
+    $.getExtWithFile = function(str) {
+
         var filename = "";
-        if(str.indexOf("/") != -1){
+        if (str.indexOf("/") != -1) {
             filename = str.split("/").pop();
-        }else{
+        } else {
             filename = str;
         }
-        
-        var dir_name = $.replaceAll(str,filename,"");
-        
+
+        var dir_name = $.replaceAll(str, filename, "");
+
         var ext = "";
-        if(filename.indexOf(".") != -1){
+        if (filename.indexOf(".") != -1) {
             ext = str.split(".").pop();
-        }else{
+        } else {
             ext = "";
             //拡張子がない場合はディレクトリ名とする。
             dir_name = str;
         }
-        var name = $.replaceAll(filename,"."+ext,"");
-        
-        
-        return {filename:filename, ext:ext, name:name, dir_name:dir_name};
-        
-        
+        var name = $.replaceAll(filename, "." + ext, "");
+
+
+        return { filename: filename, ext: ext, name: name, dir_name: dir_name };
+
+
     };
-    
+
     //PC用の実行パスを取得
-    $.getExePath = function(){
-        
+    $.getExePath = function() {
+
         const _app = require('electron').remote.app;
-        
+
         //TyranoStudio.app/Contents/Resources/app
         let path = _app.getAppPath();
-        let platform ="";
+        let platform = "";
         //alert(process.platform);
         //console.log(process.platform)
         //console.log(path);
-        
-        if(process.platform == "darwin"){
-            
+
+        if (process.platform == "darwin") {
+
             platrofm = "mac";
             //TyranoStudio-darwin-x64.asar
-            if(path.indexOf(".asar")!=-1){
-                path = $.replaceAll(path,"/Contents/Resources/app.asar","");
-            }else{
-                path = $.replaceAll(path,"/Contents/Resources/app","");
+            if (path.indexOf(".asar") != -1) {
+                path = $.replaceAll(path, "/Contents/Resources/app.asar", "");
+            } else {
+                path = $.replaceAll(path, "/Contents/Resources/app", "");
             }
-            
-            path = $.getExtWithFile(path).dir_name;
-            
-            
-        }else if(process.platform == "win32"){
 
-            if(path.indexOf(".asar")!=-1){
-                path = $.replaceAll(path,"\\resources\\app.asar","");
-            }else{
-                path = $.replaceAll(path,"\\resources\\app","");
+            path = $.getExtWithFile(path).dir_name;
+
+
+        } else if (process.platform == "win32") {
+
+            if (path.indexOf(".asar") != -1) {
+                path = $.replaceAll(path, "\\resources\\app.asar", "");
+            } else {
+                path = $.replaceAll(path, "\\resources\\app", "");
             }
-            
+
         }
-        
-        return path ;
-            
+
+        return path;
+
     };
-    
+
     //展開先のパスを返す。
-    $.getUnzipPath = function(){
-        
+    $.getUnzipPath = function() {
+
         let path = __dirname;
-        
-        if(path.indexOf(".asar")!=-1){
+
+        if (path.indexOf(".asar") != -1) {
             return "asar";
         }
-        
+
         return path;
-        
+
     };
 
     $.setStorageFile = function(key, val) {
-	    
+
         val = JSON.stringify(val);
         var fs = require('fs');
-        
+
         var out_path = $.getExePath();
-                
+
         //mac os Sierra 対応
-        if(process.execPath.indexOf("var/folders")!=-1){
-            out_path = process.env.HOME+"/_TyranoGameData";
-            if(!fs.existsSync(out_path)){
+        if (process.execPath.indexOf("var/folders") != -1) {
+            out_path = process.env.HOME + "/_TyranoGameData";
+            if (!fs.existsSync(out_path)) {
                 fs.mkdirSync(out_path);
             }
-        }else{
+        } else {
             out_path = $.getExePath();
         }
-        
-        
+
+
         fs.writeFileSync(out_path + "/" + key + ".sav", escape(val));
 
     };
-    
-    
+
+
     $.getStorageFile = function(key) {
 
         try {
@@ -1095,31 +1095,31 @@
             var gv = "null";
             var fs = require('fs');
             var out_path = "";
-            
+
             var out_path = $.getExePath();
-            
-            if(process.execPath.indexOf("var/folders")!=-1){
-                out_path = process.env.HOME+"/_TyranoGameData";
-                if(!fs.existsSync(out_path)){
+
+            if (process.execPath.indexOf("var/folders") != -1) {
+                out_path = process.env.HOME + "/_TyranoGameData";
+                if (!fs.existsSync(out_path)) {
                     fs.mkdirSync(out_path);
                 }
-            }else{
+            } else {
                 out_path = $.getExePath();
             }
-            
-            if (fs.existsSync(out_path+"/" + key + ".sav")) {
-                var str = fs.readFileSync(out_path+"/" + key + ".sav");
+
+            if (fs.existsSync(out_path + "/" + key + ".sav")) {
+                var str = fs.readFileSync(out_path + "/" + key + ".sav");
                 gv = unescape(str);
             } else {
                 //Fileが存在しない場合にローカルストレージから読み取る使用は破棄。
                 //gv = unescape(localStorage.getItem(key));
             }
 
-            if (gv == "null"){
+            if (gv == "null") {
                 return null;
             }
 
-        } catch(e) {
+        } catch (e) {
             console.log(e);
             alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             $.confirmSaveClear();
@@ -1161,33 +1161,33 @@
     };
     */
 
-    $.alert = function(str,cb) {
-        
+    $.alert = function(str, cb) {
+
         $(".remodal_title").html(str);
-        
+
         $(".remodal").find(".remodal-cancel").hide();
         $(".remodal").find(".remodal-confirm").show();
-        
+
         var inst = $('[data-remodal-id=modal]').remodal();
         inst.open();
-        
-        $(document).off('closed', '.remodal');        
-        $(document).on('closed', '.remodal', function (e) {
-            
-            if(typeof cb == "function"){
+
+        $(document).off('closed', '.remodal');
+        $(document).on('closed', '.remodal', function(e) {
+
+            if (typeof cb == "function") {
                 cb();
             }
-            
+
         });
-        
-        
+
+
         /*
         if ($.userenv() != "pc") {
             alert(str);
             if(typeof cb == "function"){
                 cb();
             }
-            
+
         }else{
             alertify.alert(str,function(){;
                 if(typeof cb == "function"){
@@ -1196,61 +1196,61 @@
             });
         }
         */
-        
+
     };
-    
-    $.inform =function(str,type){
-        alertify.log(str,type);
+
+    $.inform = function(str, type) {
+        alertify.log(str, type);
     };
-    
-    $.confirm = function (str,cb_ok,cb_cancel){
-        
+
+    $.confirm = function(str, cb_ok, cb_cancel) {
+
         $(".remodal_title").html(str);
-        
+
         $(".remodal").find(".remodal-cancel").show();
         $(".remodal").find(".remodal-confirm").show();
-        
+
         var inst = $('[data-remodal-id=modal]').remodal();
         inst.open();
-        
+
         /////////OK /////////////
-        
-        $(document).off('closed', '.remodal');        
-        
-        $(document).off('confirmation', '.remodal');        
-        $(document).on('confirmation', '.remodal', function (e) {
-            
-            $(document).off('confirmation', '.remodal');        
-            $(document).off('cancellation', '.remodal');        
-            
-            if(typeof cb_ok == "function"){
+
+        $(document).off('closed', '.remodal');
+
+        $(document).off('confirmation', '.remodal');
+        $(document).on('confirmation', '.remodal', function(e) {
+
+            $(document).off('confirmation', '.remodal');
+            $(document).off('cancellation', '.remodal');
+
+            if (typeof cb_ok == "function") {
                 cb_ok();
             }
-            
+
         });
-        
+
         ///////キャンセル//////////////
-        $(document).off('cancellation', '.remodal');        
-        $(document).on('cancellation', '.remodal', function (e) {
-            
-            $(document).off('confirmation', '.remodal');        
-            $(document).off('cancellation', '.remodal');        
-            
-            if(typeof cb_cancel == "function"){
+        $(document).off('cancellation', '.remodal');
+        $(document).on('cancellation', '.remodal', function(e) {
+
+            $(document).off('confirmation', '.remodal');
+            $(document).off('cancellation', '.remodal');
+
+            if (typeof cb_cancel == "function") {
                 cb_cancel();
             }
-            
+
         });
-        
+
         /*
         if ($.userenv() != "pc") {
-            
+
             if(window.confirm(str)){
                 cb_ok();
-        	}else{
-        		cb_cancel();
-        	}
-            
+            }else{
+                cb_cancel();
+            }
+
         }else{
             alertify.confirm(str,function(e){
                 if (e) {
@@ -1261,37 +1261,37 @@
                     cb_cancel();
                 }
             });
-        }       
-        */     
-                
+        }
+        */
+
     };
 
     //オブジェクトの個数をもってきます。1
     $.countObj = function(obj) {
 
         var num = 0;
-        for (key in obj ) {
+        for (key in obj) {
             num++;
         }
         return num;
     };
-    
-    $.getUrlQuery = function(url){
-        
-        var hash  = url.slice(1).split('&');    
+
+    $.getUrlQuery = function(url) {
+
+        var hash = url.slice(1).split('&');
         var max = hash.length;
         var vars = {};
-        var array ="";
-        
+        var array = "";
+
         for (var i = 0; i < max; i++) {
-            array = hash[i].split('=');   
-            vars[array[0]] = array[1];    
+            array = hash[i].split('=');
+            vars[array[0]] = array[1];
         }
-        
+
         return vars;
 
-        
-    }
+
+    };
 
     //渡されたJqueryオブジェクトにクラスをセットします
     $.setName = function(jobj, str) {
@@ -1389,7 +1389,7 @@
     //クッキー設定
     $.setCookie = function(key, val) {
         document.cookie = key + "=" + escape(val) + ";expires=Fri, 31-Dec-2030 23:59:59;path=/;";
-    }
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function(s) {
@@ -1409,71 +1409,71 @@ jQuery.fn.outerHTML = function(s) {
 jQuery.easing['jswing'] = jQuery.easing['swing'];
 
 jQuery.extend(jQuery.easing, {
-    def : 'easeOutQuad',
-    swing : function(x, t, b, c, d) {
+    def: 'easeOutQuad',
+    swing: function(x, t, b, c, d) {
         //alert(jQuery.easing.default);
         return jQuery.easing[jQuery.easing.def](x, t, b, c, d);
     },
-    easeInQuad : function(x, t, b, c, d) {
+    easeInQuad: function(x, t, b, c, d) {
         return c * (t /= d) * t + b;
     },
-    easeOutQuad : function(x, t, b, c, d) {
+    easeOutQuad: function(x, t, b, c, d) {
         return -c * (t /= d) * (t - 2) + b;
     },
-    easeInOutQuad : function(x, t, b, c, d) {
+    easeInOutQuad: function(x, t, b, c, d) {
         if ((t /= d / 2) < 1)
             return c / 2 * t * t + b;
         return -c / 2 * ((--t) * (t - 2) - 1) + b;
     },
-    easeInCubic : function(x, t, b, c, d) {
+    easeInCubic: function(x, t, b, c, d) {
         return c * (t /= d) * t * t + b;
     },
-    easeOutCubic : function(x, t, b, c, d) {
-        return c * (( t = t / d - 1) * t * t + 1) + b;
+    easeOutCubic: function(x, t, b, c, d) {
+        return c * ((t = t / d - 1) * t * t + 1) + b;
     },
-    easeInOutCubic : function(x, t, b, c, d) {
+    easeInOutCubic: function(x, t, b, c, d) {
         if ((t /= d / 2) < 1)
             return c / 2 * t * t * t + b;
         return c / 2 * ((t -= 2) * t * t + 2) + b;
     },
-    easeInQuart : function(x, t, b, c, d) {
+    easeInQuart: function(x, t, b, c, d) {
         return c * (t /= d) * t * t * t + b;
     },
-    easeOutQuart : function(x, t, b, c, d) {
-        return -c * (( t = t / d - 1) * t * t * t - 1) + b;
+    easeOutQuart: function(x, t, b, c, d) {
+        return -c * ((t = t / d - 1) * t * t * t - 1) + b;
     },
-    easeInOutQuart : function(x, t, b, c, d) {
+    easeInOutQuart: function(x, t, b, c, d) {
         if ((t /= d / 2) < 1)
             return c / 2 * t * t * t * t + b;
         return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
     },
-    easeInQuint : function(x, t, b, c, d) {
+    easeInQuint: function(x, t, b, c, d) {
         return c * (t /= d) * t * t * t * t + b;
     },
-    easeOutQuint : function(x, t, b, c, d) {
-        return c * (( t = t / d - 1) * t * t * t * t + 1) + b;
+    easeOutQuint: function(x, t, b, c, d) {
+        return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
     },
-    easeInOutQuint : function(x, t, b, c, d) {
+    easeInOutQuint: function(x, t, b, c, d) {
         if ((t /= d / 2) < 1)
             return c / 2 * t * t * t * t * t + b;
         return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
     },
-    easeInSine : function(x, t, b, c, d) {
+    easeInSine: function(x, t, b, c, d) {
         return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
     },
-    easeOutSine : function(x, t, b, c, d) {
+    easeOutSine: function(x, t, b, c, d) {
         return c * Math.sin(t / d * (Math.PI / 2)) + b;
     },
-    easeInOutSine : function(x, t, b, c, d) {
+    easeInOutSine: function(x, t, b, c, d) {
         return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
     },
-    easeInExpo : function(x, t, b, c, d) {
+    easeInExpo: function(x, t, b, c, d) {
         return (t == 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
     },
-    easeOutExpo : function(x, t, b, c, d) {
+    easeOutExpo: function(x, t, b, c, d) {
         return (t == d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
     },
-    easeInOutExpo : function(x, t, b, c, d) {
+    easeInOutExpo: function(x, t, b, c, d) {
         if (t == 0)
             return b;
         if (t == d)
@@ -1482,18 +1482,18 @@ jQuery.extend(jQuery.easing, {
             return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
         return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
     },
-    easeInCirc : function(x, t, b, c, d) {
+    easeInCirc: function(x, t, b, c, d) {
         return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
     },
-    easeOutCirc : function(x, t, b, c, d) {
-        return c * Math.sqrt(1 - ( t = t / d - 1) * t) + b;
+    easeOutCirc: function(x, t, b, c, d) {
+        return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
     },
-    easeInOutCirc : function(x, t, b, c, d) {
+    easeInOutCirc: function(x, t, b, c, d) {
         if ((t /= d / 2) < 1)
             return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
         return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
     },
-    easeInElastic : function(x, t, b, c, d) {
+    easeInElastic: function(x, t, b, c, d) {
         var s = 1.70158;
         var p = 0;
         var a = c;
@@ -1510,7 +1510,7 @@ jQuery.extend(jQuery.easing, {
             var s = p / (2 * Math.PI) * Math.asin(c / a);
         return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
     },
-    easeOutElastic : function(x, t, b, c, d) {
+    easeOutElastic: function(x, t, b, c, d) {
         var s = 1.70158;
         var p = 0;
         var a = c;
@@ -1527,7 +1527,7 @@ jQuery.extend(jQuery.easing, {
             var s = p / (2 * Math.PI) * Math.asin(c / a);
         return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
     },
-    easeInOutElastic : function(x, t, b, c, d) {
+    easeInOutElastic: function(x, t, b, c, d) {
         var s = 1.70158;
         var p = 0;
         var a = c;
@@ -1546,27 +1546,27 @@ jQuery.extend(jQuery.easing, {
             return -.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
         return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
     },
-    easeInBack : function(x, t, b, c, d, s) {
+    easeInBack: function(x, t, b, c, d, s) {
         if (s == undefined)
             s = 1.70158;
         return c * (t /= d) * t * ((s + 1) * t - s) + b;
     },
-    easeOutBack : function(x, t, b, c, d, s) {
+    easeOutBack: function(x, t, b, c, d, s) {
         if (s == undefined)
             s = 1.70158;
-        return c * (( t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+        return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
     },
-    easeInOutBack : function(x, t, b, c, d, s) {
+    easeInOutBack: function(x, t, b, c, d, s) {
         if (s == undefined)
             s = 1.70158;
         if ((t /= d / 2) < 1)
             return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b;
         return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
     },
-    easeInBounce : function(x, t, b, c, d) {
+    easeInBounce: function(x, t, b, c, d) {
         return c - jQuery.easing.easeOutBounce(x, d - t, 0, c, d) + b;
     },
-    easeOutBounce : function(x, t, b, c, d) {
+    easeOutBounce: function(x, t, b, c, d) {
         if ((t /= d) < (1 / 2.75)) {
             return c * (7.5625 * t * t) + b;
         } else if (t < (2 / 2.75)) {
@@ -1577,10 +1577,9 @@ jQuery.extend(jQuery.easing, {
             return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
         }
     },
-    easeInOutBounce : function(x, t, b, c, d) {
+    easeInOutBounce: function(x, t, b, c, d) {
         if (t < d / 2)
             return jQuery.easing.easeInBounce(x, t * 2, 0, c, d) * .5 + b;
         return jQuery.easing.easeOutBounce(x, t * 2 - d, 0, c, d) * .5 + c * .5 + b;
     }
 });
-
