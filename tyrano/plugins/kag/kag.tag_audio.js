@@ -34,7 +34,6 @@ volume=再生する音量を指定できます。0〜100 の範囲で指定し�
 
 //音楽再生
 tyrano.plugin.kag.tag.playbgm = {
-
     vital: ["storage"],
 
     pm: {
@@ -51,12 +50,10 @@ tyrano.plugin.kag.tag.playbgm = {
         html5: "false",
 
         click: "false", //音楽再生にクリックが必要か否か
-        stop: "false" //trueの場合自動的に次の命令へ移動しない。ロード対策
-
+        stop: "false", //trueの場合自動的に次の命令へ移動しない。ロード対策
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         if (pm.target == "bgm" && that.kag.stat.play_bgm == false) {
@@ -71,62 +68,41 @@ tyrano.plugin.kag.tag.playbgm = {
 
         //スマホアプリの場合
         if ($.userenv() != "pc") {
-
             this.kag.layer.hideEventLayer();
 
             if (this.kag.stat.is_skip == true && pm.target == "se") {
-
                 if (pm.stop == "false") {
                     that.kag.layer.showEventLayer();
                     that.kag.ftag.nextOrder();
                 }
-
             } else {
-
                 //スマホからのアクセスで ready audio 出来ていない場合は、クリックを挟む
                 if (this.kag.tmp.ready_audio == false) {
-
-                    $(".tyrano_base").on("click.bgm", function() {
-
+                    $(".tyrano_base").on("click.bgm", function () {
                         that.kag.readyAudio();
                         that.kag.tmp.ready_audio = true;
                         that.play(pm);
                         $(".tyrano_base").off("click.bgm");
-
                     });
-
                 } else {
-
                     that.play(pm);
-
                 }
-
             }
-
         } else {
-
             if (this.kag.tmp.ready_audio == false) {
-
-                $(".tyrano_base").on("click.bgm", function() {
-
+                $(".tyrano_base").on("click.bgm", function () {
                     that.kag.readyAudio();
                     that.kag.tmp.ready_audio = true;
                     that.play(pm);
                     $(".tyrano_base").off("click.bgm");
-
                 });
-
             } else {
                 that.play(pm);
             }
-
-
         }
-
     },
 
-    play: function(pm) {
-
+    play: function (pm) {
         var that = this;
 
         var target = "bgm";
@@ -155,7 +131,6 @@ tyrano.plugin.kag.tag.playbgm = {
                     }
                 }
             }
-
         } else {
             this.kag.tmp.is_audio_stopping = false;
             this.kag.tmp.is_bgm_play = true;
@@ -171,32 +146,35 @@ tyrano.plugin.kag.tag.playbgm = {
 
         //デフォルトで指定される値を設定
         if (target === "bgm") {
-
             if (typeof this.kag.config.defaultBgmVolume == "undefined") {
                 ratio = 1;
             } else {
-                ratio = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
+                ratio = parseFloat(
+                    parseInt(this.kag.config.defaultBgmVolume) / 100,
+                );
             }
 
             //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
             if (typeof this.kag.stat.map_bgm_volume[pm.buf] != "undefined") {
-                ratio = parseFloat(parseInt(this.kag.stat.map_bgm_volume[pm.buf]) / 100);
+                ratio = parseFloat(
+                    parseInt(this.kag.stat.map_bgm_volume[pm.buf]) / 100,
+                );
             }
-
-
         } else {
-
             if (typeof this.kag.config.defaultSeVolume == "undefined") {
                 ratio = 1;
             } else {
-                ratio = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
+                ratio = parseFloat(
+                    parseInt(this.kag.config.defaultSeVolume) / 100,
+                );
             }
 
             //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
             if (typeof this.kag.stat.map_se_volume[pm.buf] != "undefined") {
-                ratio = parseFloat(parseInt(this.kag.stat.map_se_volume[pm.buf]) / 100);
+                ratio = parseFloat(
+                    parseInt(this.kag.stat.map_se_volume[pm.buf]) / 100,
+                );
             }
-
         }
 
         volume *= ratio;
@@ -228,13 +206,11 @@ tyrano.plugin.kag.tag.playbgm = {
         var audio_obj = null;
 
         var howl_opt = {
-
             src: storage_url,
-            volume: (volume),
+            volume: volume,
             onend: (e) => {
                 //this.j_btnPreviewBgm.parent().removeClass("soundOn");
-            }
-
+            },
         };
 
         //HTML5 audioを強制する
@@ -244,17 +220,15 @@ tyrano.plugin.kag.tag.playbgm = {
 
         //スプライトが指定されている場合
         if (pm.sprite_time != "") {
-
             let array_sprite = pm.sprite_time.split("-");
             let sprite_from = parseInt($.trim(array_sprite[0]));
             let sprite_to = parseInt($.trim(array_sprite[1]));
             let duration = sprite_to - sprite_from;
 
-            howl_opt["sprite"] = { "sprite_default": [sprite_from, duration, $.toBoolean(pm.loop)] };
-
+            howl_opt["sprite"] = {
+                sprite_default: [sprite_from, duration, $.toBoolean(pm.loop)],
+            };
         }
-
-
 
         audio_obj = new Howl(howl_opt);
 
@@ -265,7 +239,6 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         if (target === "bgm") {
-
             if (this.kag.tmp.map_bgm[pm.buf]) {
                 this.kag.tmp.map_bgm[pm.buf].unload();
             }
@@ -274,8 +247,6 @@ tyrano.plugin.kag.tag.playbgm = {
             that.kag.stat.current_bgm = storage;
             that.kag.stat.current_bgm_vol = pm.volume;
             that.kag.stat.current_bgm_html5 = pm.html5;
-
-
         } else {
             //効果音の時はバッファ指定
             //すでにバッファが存在するなら、それを消す。
@@ -286,11 +257,9 @@ tyrano.plugin.kag.tag.playbgm = {
             }
 
             this.kag.tmp.map_se[pm.buf] = audio_obj;
-
         }
 
-
-        audio_obj.once("play", function() {
+        audio_obj.once("play", function () {
             that.kag.layer.showEventLayer();
             if (pm.stop == "false") {
                 that.kag.ftag.nextOrder();
@@ -304,46 +273,35 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         if (pm.fadein == "true") {
-
             audio_obj.fade(0, volume, parseInt(pm.time));
-
         }
 
         //再生が完了した時
         if (pm.loop != "true") {
-
-            audio_obj.on("end", function(e) {
-
+            audio_obj.on("end", function (e) {
                 if (pm.target == "se") {
-
                     that.kag.tmp.is_se_play = false;
                     that.kag.tmp.is_vo_play = false;
 
                     if (that.kag.tmp.is_se_play_wait == true) {
                         that.kag.tmp.is_se_play_wait = false;
                         that.kag.ftag.nextOrder();
-
                     } else if (that.kag.tmp.is_vo_play_wait == true) {
                         that.kag.tmp.is_vo_play_wait = false;
-                        setTimeout(function() {
+                        setTimeout(function () {
                             that.kag.ftag.nextOrder();
                         }, 500);
                     }
-
                 } else if (pm.target == "bgm") {
-
                     that.kag.tmp.is_bgm_play = false;
 
                     if (that.kag.tmp.is_bgm_play_wait == true) {
                         that.kag.tmp.is_bgm_play_wait = false;
                         that.kag.ftag.nextOrder();
                     }
-
                 }
             });
         }
-
-
     },
 
     /*
@@ -424,7 +382,6 @@ tyrano.plugin.kag.tag.playbgm = {
     }
 
     */
-
 };
 
 /*
@@ -442,18 +399,15 @@ tyrano.plugin.kag.tag.playbgm = {
  */
 
 tyrano.plugin.kag.tag.stopbgm = {
-
     pm: {
         fadeout: "false",
         time: 2000,
         target: "bgm",
         buf: "0",
-        stop: "false" //trueの場合自動的に次の命令へ移動しない。ロード対策
-
+        stop: "false", //trueの場合自動的に次の命令へ移動しない。ロード対策
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         var target_map = null;
@@ -462,7 +416,6 @@ tyrano.plugin.kag.tag.stopbgm = {
             target_map = this.kag.tmp.map_bgm;
             that.kag.tmp.is_bgm_play = false;
             that.kag.tmp.is_bgm_play_wait = false;
-
         } else {
             target_map = this.kag.tmp.map_se;
 
@@ -475,7 +428,6 @@ tyrano.plugin.kag.tag.stopbgm = {
                 this.kag.stat.current_se = {};
             }
 
-
             if (pm.stop == "false") {
                 if (this.kag.stat.current_se[pm.buf]) {
                     delete this.kag.stat.current_se[pm.buf];
@@ -486,11 +438,8 @@ tyrano.plugin.kag.tag.stopbgm = {
         var browser = $.getBrowser();
 
         for (key in target_map) {
-
             if (key == pm.buf) {
-
-                (function() {
-
+                (function () {
                     var _key = key;
 
                     var _audio_obj = null;
@@ -503,32 +452,29 @@ tyrano.plugin.kag.tag.stopbgm = {
                             that.kag.stat.current_bgm = "";
                             that.kag.stat.current_bgm_vol = "";
                         }
-
                     } else {
                         _audio_obj = target_map[_key];
                     }
 
                     //フェードアウトしながら再生停止
                     if (pm.fadeout == "true") {
-
-                        _audio_obj.fade(_audio_obj.volume(), 0, parseInt(pm.time));
+                        _audio_obj.fade(
+                            _audio_obj.volume(),
+                            0,
+                            parseInt(pm.time),
+                        );
 
                         //fadeが完了した際にvolumeが0だったらstopを行う処理を追加
                         if (_audio_obj.playing()) {
-                            _audio_obj.once('fade', () => {
+                            _audio_obj.once("fade", () => {
                                 if (_audio_obj.volume() === 0) {
                                     _audio_obj.stop();
                                 }
                             });
                         }
-
-
                     } else {
-
                         _audio_obj.stop();
-
                     }
-
                 })();
             }
         }
@@ -536,7 +482,7 @@ tyrano.plugin.kag.tag.stopbgm = {
         if (pm.stop == "false") {
             this.kag.ftag.nextOrder();
         }
-    }
+    },
 };
 
 /*
@@ -562,7 +508,6 @@ tyrano.plugin.kag.tag.stopbgm = {
  */
 
 tyrano.plugin.kag.tag.fadeinbgm = {
-
     vital: ["storage", "time"],
 
     pm: {
@@ -571,16 +516,15 @@ tyrano.plugin.kag.tag.fadeinbgm = {
         fadein: "true",
         sprite_time: "", //200-544
         html5: "false",
-        time: 2000
+        time: 2000,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         if (parseInt(pm.time) <= 100) {
             pm.time = 100;
         }
         this.kag.ftag.startTag("playbgm", pm);
-    }
+    },
 };
 
 /*
@@ -599,19 +543,18 @@ tyrano.plugin.kag.tag.fadeinbgm = {
  #[end]
  */
 tyrano.plugin.kag.tag.fadeoutbgm = {
-
     //vital:["time"],
 
     pm: {
         loop: "true",
         storage: "",
         fadeout: "true",
-        time: 2000
+        time: 2000,
     },
 
-    start: function(pm) {
+    start: function (pm) {
         this.kag.ftag.startTag("stopbgm", pm);
-    }
+    },
 };
 
 /*
@@ -635,7 +578,6 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
  */
 
 tyrano.plugin.kag.tag.xchgbgm = {
-
     vital: ["storage", "time"],
 
     pm: {
@@ -643,15 +585,13 @@ tyrano.plugin.kag.tag.xchgbgm = {
         storage: "",
         fadein: "true",
         fadeout: "true",
-        time: 2000
+        time: 2000,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.startTag("stopbgm", pm);
         this.kag.ftag.startTag("playbgm", pm);
-
-    }
+    },
 };
 
 /*
@@ -690,7 +630,6 @@ tyrano.plugin.kag.tag.xchgbgm = {
  */
 
 tyrano.plugin.kag.tag.playse = {
-
     vital: ["storage"],
 
     pm: {
@@ -701,23 +640,21 @@ tyrano.plugin.kag.tag.playse = {
         buf: "0",
         sprite_time: "", //200-544
         html5: "false",
-        clear: "false" //他のSEがなっている場合、それをキャンセルして、新しく再生します
+        clear: "false", //他のSEがなっている場合、それをキャンセルして、新しく再生します
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.layer.hideEventLayer();
 
         if (pm.clear == "true") {
             this.kag.ftag.startTag("stopbgm", {
                 target: "se",
-                stop: "true"
+                stop: "true",
             });
         }
 
         this.kag.ftag.startTag("playbgm", pm);
-
-    }
+    },
 };
 
 /*
@@ -736,18 +673,17 @@ tyrano.plugin.kag.tag.playse = {
  */
 
 tyrano.plugin.kag.tag.stopse = {
-
     pm: {
         storage: "",
         fadeout: "false",
         time: 2000,
         buf: "0",
-        target: "se"
+        target: "se",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         this.kag.ftag.startTag("stopbgm", pm);
-    }
+    },
 };
 
 /*
@@ -772,7 +708,6 @@ tyrano.plugin.kag.tag.stopse = {
  */
 
 tyrano.plugin.kag.tag.fadeinse = {
-
     vital: ["storage", "time"],
 
     pm: {
@@ -784,19 +719,16 @@ tyrano.plugin.kag.tag.fadeinse = {
         buf: "0",
         sprite_time: "", //200-544
         html5: "false",
-        time: "2000"
-
+        time: "2000",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         if (parseInt(pm.time) <= 100) {
             pm.time = 100;
         }
 
         this.kag.ftag.startTag("playbgm", pm);
-
-    }
+    },
 };
 
 /*
@@ -816,20 +748,17 @@ tyrano.plugin.kag.tag.fadeinse = {
  */
 
 tyrano.plugin.kag.tag.fadeoutse = {
-
     pm: {
         storage: "",
         target: "se",
         loop: "false",
         buf: "0",
-        fadeout: "true"
+        fadeout: "true",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.startTag("stopbgm", pm);
-
-    }
+    },
 };
 
 /*
@@ -851,14 +780,13 @@ tyrano.plugin.kag.tag.fadeoutse = {
  */
 
 tyrano.plugin.kag.tag.bgmopt = {
-
     pm: {
         volume: "100",
         effect: "true",
-        buf: ""
+        buf: "",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         //再生中のBGMに変更を加える
         var map_bgm = this.kag.tmp.map_bgm;
 
@@ -872,7 +800,6 @@ tyrano.plugin.kag.tag.bgmopt = {
 
         //すぐに反映 スマホアプリの場合はすぐに変更はできない
         if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
-
             var new_volume = parseFloat(parseInt(pm.volume) / 100);
 
             if (pm.buf == "") {
@@ -886,17 +813,15 @@ tyrano.plugin.kag.tag.bgmopt = {
                     map_bgm[pm.buf].volume(new_volume);
                 }
             }
-
-
         }
 
         //this.kag.ftag.nextOrder();
 
         //この中でnextOrderしてる
-        this.kag.ftag.startTag("eval", { "exp": "sf._system_config_bgm_volume = " + pm.volume });
-
-
-    }
+        this.kag.ftag.startTag("eval", {
+            exp: "sf._system_config_bgm_volume = " + pm.volume,
+        });
+    },
 };
 
 /*
@@ -918,14 +843,13 @@ tyrano.plugin.kag.tag.bgmopt = {
  */
 
 tyrano.plugin.kag.tag.seopt = {
-
     pm: {
         volume: "100",
         effect: "true",
-        buf: ""
+        buf: "",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         //再生中のBGMに変更を加える
         var map_se = this.kag.tmp.map_se;
 
@@ -939,12 +863,10 @@ tyrano.plugin.kag.tag.seopt = {
 
         //すぐに反映
         if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
-
             var new_volume = parseFloat(parseInt(pm.volume) / 100);
 
             if (pm.buf == "") {
                 for (key in map_se) {
-
                     if (map_se[key]) {
                         map_se[key].volume(new_volume);
                     }
@@ -954,16 +876,15 @@ tyrano.plugin.kag.tag.seopt = {
                     map_se[pm.buf].volume(new_volume);
                 }
             }
-
         }
 
         //この中でnextOrderしてる
-        this.kag.ftag.startTag("eval", { "exp": "sf._system_config_se_volume = " + pm.volume });
-
+        this.kag.ftag.startTag("eval", {
+            exp: "sf._system_config_se_volume = " + pm.volume,
+        });
 
         //this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -983,11 +904,8 @@ BGMの再生完了を待ちます。playbgmでループ再生している場合�
 
 //BGMのフェード完了を待ちます
 tyrano.plugin.kag.tag.wbgm = {
-
-    pm: {
-    },
-    start: function() {
-
+    pm: {},
+    start: function () {
         //今、音楽再生中なら、
         if (this.kag.tmp.is_bgm_play == true) {
             //this.kag.layer.hideEventLayer();
@@ -995,8 +913,7 @@ tyrano.plugin.kag.tag.wbgm = {
         } else {
             this.kag.ftag.nextOrder();
         }
-
-    }
+    },
 };
 
 /*
@@ -1015,11 +932,8 @@ tyrano.plugin.kag.tag.wbgm = {
 */
 
 tyrano.plugin.kag.tag.wse = {
-
-    pm: {
-    },
-    start: function() {
-
+    pm: {},
+    start: function () {
         //今、音楽再生中なら、
 
         if (this.kag.tmp.is_se_play == true) {
@@ -1028,8 +942,7 @@ tyrano.plugin.kag.tag.wse = {
         } else {
             this.kag.ftag.nextOrder();
         }
-
-    }
+    },
 };
 
 /*
@@ -1077,30 +990,27 @@ number=デフォルトは０。vostorageで適応する数字をここで指定�
 */
 
 tyrano.plugin.kag.tag.voconfig = {
-
     pm: {
         sebuf: "0",
         name: "",
         vostorage: "",
-        number: ""
+        number: "",
     },
-    start: function(pm) {
-
+    start: function (pm) {
         var map_vo = this.kag.stat.map_vo;
 
         //ボイスバッファに指定する
         this.kag.stat.map_vo["vobuf"][pm.sebuf] = 1;
 
         if (pm.name != "") {
-
             var vochara = {};
             if (this.kag.stat.map_vo["vochara"][pm.name]) {
                 vochara = this.kag.stat.map_vo["vochara"][pm.name];
             } else {
                 vochara = {
-                    "vostorage": "",
-                    "buf": pm.sebuf,
-                    "number": 0
+                    vostorage: "",
+                    buf: pm.sebuf,
+                    number: 0,
                 };
             }
 
@@ -1113,16 +1023,11 @@ tyrano.plugin.kag.tag.voconfig = {
             }
 
             this.kag.stat.map_vo["vochara"][pm.name] = vochara;
-
         }
 
-
         this.kag.ftag.nextOrder();
-
-
-    }
+    },
 };
-
 
 /*
 #[vostart]
@@ -1143,15 +1048,11 @@ voconfigで指定したボイスの自動再生を開始します。
 */
 
 tyrano.plugin.kag.tag.vostart = {
-
-    pm: {
-    },
-    start: function() {
-
+    pm: {},
+    start: function () {
         this.kag.stat.vostart = true;
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -1169,18 +1070,12 @@ voconfigで指定したボイスの自動再生を停止します。
 */
 
 tyrano.plugin.kag.tag.vostop = {
-
-    pm: {
-    },
-    start: function() {
-
+    pm: {},
+    start: function () {
         this.kag.stat.vostart = false;
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
-
 
 /*
  #[speak_on]
@@ -1198,29 +1093,26 @@ tyrano.plugin.kag.tag.vostop = {
  */
 
 tyrano.plugin.kag.tag.speak_on = {
-
     vital: [],
 
     pm: {
-        volume: ""
+        volume: "",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
-        if ('speechSynthesis' in window) {
+        if ("speechSynthesis" in window) {
             that.kag.stat.play_speak = true;
         } else {
-            console.error("*error:この環境は[speak_on]の読み上げ機能に対応していません");
+            console.error(
+                "*error:この環境は[speak_on]の読み上げ機能に対応していません",
+            );
         }
 
         this.kag.ftag.nextOrder();
-
-
-    }
+    },
 };
-
 
 /*
  #[speak_off]
@@ -1239,20 +1131,16 @@ tyrano.plugin.kag.tag.speak_on = {
  */
 
 tyrano.plugin.kag.tag.speak_off = {
-
     vital: [],
 
     pm: {
-        volume: ""
+        volume: "",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         this.kag.stat.play_speak = false;
         this.kag.ftag.nextOrder();
-
-
-    }
+    },
 };

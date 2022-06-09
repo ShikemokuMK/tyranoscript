@@ -1,4 +1,3 @@
-
 /*
  #[camera]
  :group
@@ -58,13 +57,10 @@
  #[end]
  */
 
-
 tyrano.plugin.kag.tag.camera = {
-
     vital: [],
 
     pm: {
-
         time: 1000,
 
         from_x: "0",
@@ -79,12 +75,10 @@ tyrano.plugin.kag.tag.camera = {
         layer: "layer_camera",
 
         wait: "true",
-        ease_type: "ease"
-
-
+        ease_type: "ease",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         var that = this;
 
         /*
@@ -102,11 +96,15 @@ tyrano.plugin.kag.tag.camera = {
                 x: "0",
                 y: "0",
                 scale: "1",
-                rotate: "0"
+                rotate: "0",
             };
         }
 
-        var to_camera = $.extend(true, {}, this.kag.stat.current_camera[pm.layer]);
+        var to_camera = $.extend(
+            true,
+            {},
+            this.kag.stat.current_camera[pm.layer],
+        );
 
         //指定されて項目があるなら、上書きする
         if (pm.x != "") to_camera.x = parseInt(pm.x) * -1 + "px";
@@ -114,16 +112,18 @@ tyrano.plugin.kag.tag.camera = {
         if (pm.zoom != "") to_camera.scale = pm.zoom;
         if (pm.rotate != "") to_camera.rotate = pm.rotate + "deg";
 
-
-        if (pm.from_x != "0" || pm.from_y != "0" || pm.from_zoom != "1" || pm.from_rotate != "0") {
-
+        if (
+            pm.from_x != "0" ||
+            pm.from_y != "0" ||
+            pm.from_zoom != "1" ||
+            pm.from_rotate != "0"
+        ) {
             this.kag.stat.current_camera[pm.layer] = {
                 x: parseInt(pm.from_x) * -1 + "px",
                 y: parseInt(pm.from_y) * 1 + "px",
                 scale: pm.from_zoom,
-                rotate: pm.from_rotate + "deg"
+                rotate: pm.from_rotate + "deg",
             };
-
         }
 
         var flag_complete = false;
@@ -131,42 +131,38 @@ tyrano.plugin.kag.tag.camera = {
 
         var a3d_define = {
             frames: {
-
                 "0%": {
-                    trans: this.kag.stat.current_camera[pm.layer]
+                    trans: this.kag.stat.current_camera[pm.layer],
                 },
                 "100%": {
-                    trans: to_camera
-                }
+                    trans: to_camera,
+                },
             },
 
             config: {
                 duration: duration,
                 state: "running",
-                easing: pm.ease_type
+                easing: pm.ease_type,
             },
 
-            complete: function() {
+            complete: function () {
                 //アニメーションが完了しないと次へはいかない
                 if (pm.wait == "true" && flag_complete == false) {
                     flag_complete = true; //最初の一回だけwait有効
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         that.kag.ftag.nextOrder();
                     }, 300);
-
                 } else {
-
                     //カメラを待ってる状態なら
                     if (that.kag.stat.is_wait_camera == true) {
                         that.kag.stat.is_wait_camera = false;
                         that.kag.ftag.nextOrder();
                     }
-
                 }
 
                 that.kag.stat.is_move_camera = false;
-            }
+            },
         };
 
         this.kag.stat.current_camera[pm.layer] = to_camera;
@@ -181,16 +177,16 @@ tyrano.plugin.kag.tag.camera = {
             $(".layer_camera").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";
         } else {
-            $("." + pm.layer + "_fore").css("-webkit-transform-origin", "center center");
+            $("." + pm.layer + "_fore").css(
+                "-webkit-transform-origin",
+                "center center",
+            );
             $("." + pm.layer + "_fore").a3d(a3d_define);
             this.kag.stat.current_camera_layer = pm.layer;
         }
-
     },
 
-    play: function(obj, cb) {
-
-    }
+    play: function (obj, cb) {},
 };
 
 /*
@@ -216,22 +212,18 @@ tyrano.plugin.kag.tag.camera = {
  #[end]
  */
 
-
 tyrano.plugin.kag.tag.reset_camera = {
-
     vital: [],
 
     pm: {
-
         time: 1000,
 
         wait: "true",
         ease_type: "ease",
-        layer: "layer_camera"
-
+        layer: "layer_camera",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         var that = this;
         //duration を確認する
 
@@ -247,7 +239,7 @@ tyrano.plugin.kag.tag.reset_camera = {
             x: "0px",
             y: "0px",
             scale: "1",
-            rotate: "0deg"
+            rotate: "0deg",
         };
 
         var flag_complete = false;
@@ -256,23 +248,21 @@ tyrano.plugin.kag.tag.reset_camera = {
 
         var a3d_define = {
             frames: {
-
                 "0%": {
-                    trans: this.kag.stat.current_camera[pm.layer]
+                    trans: this.kag.stat.current_camera[pm.layer],
                 },
                 "100%": {
-                    trans: to_camera
-                }
+                    trans: to_camera,
+                },
             },
 
             config: {
                 duration: duration,
                 state: "running",
-                easing: pm.ease_type
+                easing: pm.ease_type,
             },
 
-            complete: function() {
-
+            complete: function () {
                 //リセットした時は、本当に消す
                 $("." + pm.layer).css({
                     "-animation-name": "",
@@ -283,7 +273,7 @@ tyrano.plugin.kag.tag.reset_camera = {
                     "-animation-direction": "",
                     "-animation-fill-mode": "",
                     "-animation-timing-function": "",
-                    "transform": ""
+                    "transform": "",
                 });
 
                 //アニメーションが完了しないと次へはいかない
@@ -291,19 +281,15 @@ tyrano.plugin.kag.tag.reset_camera = {
                     flag_complete = true; //最初の一回だけwait有効
                     that.kag.ftag.nextOrder();
                 } else {
-
                     //カメラを待ってる状態なら
                     if (that.kag.stat.is_wait_camera == true) {
                         that.kag.stat.is_wait_camera = false;
                         that.kag.ftag.nextOrder();
                     }
-
                 }
 
-
                 that.kag.stat.is_move_camera = false;
-
-            }
+            },
         };
 
         if (pm.layer != "layer_camera") {
@@ -323,20 +309,17 @@ tyrano.plugin.kag.tag.reset_camera = {
             $(".layer_camera").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";
         } else {
-            $("." + pm.layer + "_fore").css("-webkit-transform-origin", "center center");
+            $("." + pm.layer + "_fore").css(
+                "-webkit-transform-origin",
+                "center center",
+            );
             $("." + pm.layer + "_fore").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";
         }
-
-
     },
 
-    play: function(obj, cb) {
-
-    }
+    play: function (obj, cb) {},
 };
-
-
 
 /*
  #[wait_camera]
@@ -366,8 +349,7 @@ tyrano.plugin.kag.tag.reset_camera = {
  */
 
 tyrano.plugin.kag.tag.wait_camera = {
-    start: function(pm) {
-
+    start: function (pm) {
         //今、カメラ中なら待つ
         if (this.kag.stat.is_move_camera == true) {
             //this.kag.layer.hideEventLayer();
@@ -375,7 +357,7 @@ tyrano.plugin.kag.tag.wait_camera = {
         } else {
             this.kag.ftag.nextOrder();
         }
-    }
+    },
 };
 
 /*
@@ -439,23 +421,18 @@ folder=graphicで指定するフォルダをimage以外に変更したい場合�
  #[end]
  */
 
-
 tyrano.plugin.kag.tag.mask = {
-
     vital: [],
 
     pm: {
-
         time: 1000,
         effect: "fadeIn",
         color: "0x000000",
         graphic: "",
-        folder: ""
-
+        folder: "",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
         that.kag.layer.hideEventLayer();
 
@@ -463,7 +440,11 @@ tyrano.plugin.kag.tag.mask = {
             pm.time = "1";
         }
 
-        var j_div = $("<div class='layer layer_mask' data-effect='" + pm.effect + "' style='z-index:100000000;position:absolute;'>");
+        var j_div = $(
+            "<div class='layer layer_mask' data-effect='" +
+                pm.effect +
+                "' style='z-index:100000000;position:absolute;'>",
+        );
         j_div.css("animation-duration", parseInt(pm.time) + "ms");
 
         var sc_width = parseInt(that.kag.config.scWidth);
@@ -496,7 +477,6 @@ tyrano.plugin.kag.tag.mask = {
 
             //画像が設定されている場合
             behind = true;
-
         }
 
         //外に線が見える対応
@@ -506,8 +486,9 @@ tyrano.plugin.kag.tag.mask = {
 
         $(".tyrano_base").append(j_div);
 
-        var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-        j_div.addClass('animated ' + pm.effect).one(animationEnd, function() {
+        var animationEnd =
+            "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+        j_div.addClass("animated " + pm.effect).one(animationEnd, function () {
             //$(this).removeClass('animated ' + pm.effect);
 
             if (behind == false) {
@@ -516,8 +497,7 @@ tyrano.plugin.kag.tag.mask = {
 
             that.kag.ftag.nextOrder();
         });
-
-    }
+    },
 };
 
 /*
@@ -575,19 +555,15 @@ bounceOutUp
  #[end]
  */
 
-
 tyrano.plugin.kag.tag.mask_off = {
-
     vital: [],
 
     pm: {
-
         time: 1000,
-        effect: "fadeOut"
-
+        effect: "fadeOut",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         var that = this;
         var j_div = $(".layer_mask");
 
@@ -598,24 +574,22 @@ tyrano.plugin.kag.tag.mask_off = {
         $("#root_layer_game").css("opacity", 1);
 
         if (j_div.get(0)) {
-
             var _effect = j_div.attr("data-effect");
-            j_div.removeClass('animated ' + _effect);
+            j_div.removeClass("animated " + _effect);
             j_div.css("animation-duration", parseInt(pm.time) + "ms");
 
-            var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-            j_div.addClass('animated ' + pm.effect).one(animationEnd, function() {
-                j_div.remove();
-                that.kag.layer.showEventLayer();
-                that.kag.ftag.nextOrder();
-            });
-
+            var animationEnd =
+                "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            j_div
+                .addClass("animated " + pm.effect)
+                .one(animationEnd, function () {
+                    j_div.remove();
+                    that.kag.layer.showEventLayer();
+                    that.kag.ftag.nextOrder();
+                });
         } else {
             that.kag.layer.showEventLayer();
             that.kag.ftag.nextOrder();
         }
-
-    }
-
-
+    },
 };

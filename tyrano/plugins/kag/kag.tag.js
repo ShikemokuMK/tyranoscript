@@ -1,6 +1,5 @@
 //タグ総合管理　ゲーム全体の進捗も管理する
 tyrano.plugin.kag.ftag = {
-
     tyrano: null,
     kag: null,
 
@@ -8,21 +7,18 @@ tyrano.plugin.kag.ftag = {
     master_tag: {}, //使用可能なタグの種類
     current_order_index: -1, //現在の命令実行インデックス
 
-    init: function() {
-
+    init: function () {
         // タグの種類を確定させる
         for (var order_type in tyrano.plugin.kag.tag) {
-
-            this.master_tag[order_type] = object(tyrano.plugin.kag.tag[order_type]);
+            this.master_tag[order_type] = object(
+                tyrano.plugin.kag.tag[order_type],
+            );
             this.master_tag[order_type].kag = this.kag;
-
         }
-
     },
 
     //命令を元に、命令配列を作り出します
-    buildTag: function(array_tag, label_name) {
-
+    buildTag: function (array_tag, label_name) {
         this.array_tag = array_tag;
 
         //ラベル名が指定されている場合は
@@ -33,19 +29,22 @@ tyrano.plugin.kag.ftag = {
             this.nextOrderWithLabel("");
             //ここどうなんだろう
         }
-
     },
 
-    buildTagIndex: function(array_tag, index, auto_next) {
-
+    buildTagIndex: function (array_tag, index, auto_next) {
         this.array_tag = array_tag;
 
-        this.nextOrderWithIndex(index, undefined, undefined, undefined, auto_next);
-
+        this.nextOrderWithIndex(
+            index,
+            undefined,
+            undefined,
+            undefined,
+            auto_next,
+        );
     },
 
     //トランジション完了 だけにとどまらず、再生を強制的に再開させる
-    completeTrans: function() {
+    completeTrans: function () {
         //処理停止中なら
         this.kag.stat.is_trans = false;
         if (this.kag.stat.is_stop == true) {
@@ -55,30 +54,30 @@ tyrano.plugin.kag.ftag = {
     },
 
     //次へボタンを隠します
-    hideNextImg: function() {
-
+    hideNextImg: function () {
         $(".img_next").remove();
         $(".glyph_image").hide();
     },
 
-    showNextImg: function() {
-
+    showNextImg: function () {
         //グリフが指定されている場合はこちらを適用
         if (this.kag.stat.flag_glyph == "false") {
             $(".img_next").remove();
             var jtext = this.kag.getMessageInnerLayer();
-            jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/" + this.kag.stat.path_glyph + "' />");
-
+            jtext
+                .find("p")
+                .append(
+                    "<img class='img_next' src='./tyrano/images/system/" +
+                        this.kag.stat.path_glyph +
+                        "' />",
+                );
         } else {
             $(".glyph_image").show();
         }
-
-
     },
 
     //次の命令を実行する
-    nextOrder: function() {
-
+    nextOrder: function () {
         //基本非表示にする。
         this.kag.layer.layer_event.hide();
 
@@ -110,41 +109,39 @@ tyrano.plugin.kag.ftag = {
         this.kag.stat.current_line = tag.line;
 
         if (this.kag.is_rider) {
-
             tag.ks_file = this.kag.stat.current_scenario;
             this.kag.rider.pushConsoleLog(tag);
-
         } else if (this.kag.is_studio) {
-
             tag.ks_file = this.kag.stat.current_scenario;
             this.kag.studio.pushConsole(tag);
 
-            this.kag.log("**:" + this.current_order_index + "　line:" + tag.line);
+            this.kag.log(
+                "**:" + this.current_order_index + "　line:" + tag.line,
+            );
             this.kag.log(tag);
-
-
         } else {
-            this.kag.log("**:" + this.current_order_index + "　line:" + tag.line);
+            this.kag.log(
+                "**:" + this.current_order_index + "　line:" + tag.line,
+            );
             this.kag.log(tag);
         }
         //前に改ページ指定が入っている場合はテキスト部分をクリアする
         if (
             (tag.name == "call" && tag.pm.storage == "make.ks") ||
             this.kag.stat.current_scenario == "make.ks" ||
-            (tag.name == "call" && tag.pm.storage == this.kag.stat.resizecall["storage"]) ||
-            (this.kag.stat.current_scenario == this.kag.stat.resizecall["storage"])) {
-
+            (tag.name == "call" &&
+                tag.pm.storage == this.kag.stat.resizecall["storage"]) ||
+            this.kag.stat.current_scenario ==
+                this.kag.stat.resizecall["storage"]
+        ) {
             //make or resize中 です
             //make中は基本、メッセージクリアを行わない
             if (this.kag.stat.flag_ref_page == true) {
                 this.kag.tmp.loading_make_ref = true;
                 this.kag.stat.flag_ref_page = false;
             }
-
         } else {
-
             if (this.kag.stat.flag_ref_page == true) {
-
                 this.kag.stat.flag_ref_page = false;
 
                 //バックログ、画面クリア後は強制的に画面クリア
@@ -158,9 +155,7 @@ tyrano.plugin.kag.ftag = {
                 } else {
                     this.kag.getMessageInnerLayer().html("");
                 }
-
             }
-
         }
 
         //タグを無視する
@@ -170,15 +165,15 @@ tyrano.plugin.kag.ftag = {
         }
 
         //メッセージ非表示状態の場合は、表示して、テキスト表示
-        if (this.kag.stat.is_hide_message == true && that.kag.stat.fuki.active != true) {
-
+        if (
+            this.kag.stat.is_hide_message == true &&
+            that.kag.stat.fuki.active != true
+        ) {
             this.kag.layer.showMessageLayers();
             this.kag.stat.is_hide_message = false;
-
         }
 
         if (this.master_tag[tag.name]) {
-
             //この時点で、変数の中にエンティティがあれば、置き換える必要あり
             tag.pm = this.convertEntity(tag.pm);
 
@@ -187,17 +182,13 @@ tyrano.plugin.kag.ftag = {
 
             //バックログに入れるかどうか。
             if (this.master_tag[tag.name].log_join) {
-
                 this.kag.stat.log_join = "true";
-
             } else {
-
                 if (tag.name == "text") {
                     //何もしない
                 } else {
                     this.kag.stat.log_join = "false";
                 }
-
             }
 
             //クリック待ち解除フラグがたってるなら
@@ -209,13 +200,15 @@ tyrano.plugin.kag.ftag = {
                 this.kag.error(err_str);
             } else {
                 tag.pm["_tag"] = tag.name;
-                this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
+                this.master_tag[tag.name].start(
+                    $.extend(
+                        true,
+                        $.cloneObject(this.master_tag[tag.name].pm),
+                        tag.pm,
+                    ),
+                );
             }
-
-
-
         } else if (this.kag.stat.map_macro[tag.name]) {
-
             tag.pm = this.convertEntity(tag.pm);
 
             //マクロの場合、その位置へジャンプ
@@ -236,10 +229,11 @@ tyrano.plugin.kag.ftag = {
             this.kag.pushStack("macro", back_pm);
 
             this.kag.ftag.nextOrderWithIndex(map_obj.index, map_obj.storage);
-
         } else {
             //実装されていないタグの場合は、もう帰る
-            $.error_message($.lang("tag") + "：[" + tag.name + "]" + $.lang("not_exists"));
+            $.error_message(
+                $.lang("tag") + "：[" + tag.name + "]" + $.lang("not_exists"),
+            );
 
             this.nextOrder();
         }
@@ -252,33 +246,29 @@ tyrano.plugin.kag.ftag = {
         */
 
         //ラベルといった、先行してオンメモリにしておく必要が有る命令に関しては、ここで精査しておく
-
     },
 
-    checkCw: function(tag) {
-
+    checkCw: function (tag) {
         var master_tag = this.master_tag[tag.name];
 
         if (master_tag.cw) {
-
-            if (this.kag.stat.is_script != true && this.kag.stat.is_html != true && this.kag.stat.checking_macro != true) {
+            if (
+                this.kag.stat.is_script != true &&
+                this.kag.stat.is_html != true &&
+                this.kag.stat.checking_macro != true
+            ) {
                 return true;
-
             } else {
                 return false;
             }
-
         } else {
             return false;
         }
-
     },
 
     //次のタグを実行。ただし、指定のタグの場合のみ
-    nextOrderWithTag: function(target_tags) {
-
+    nextOrderWithTag: function (target_tags) {
         try {
-
             this.current_order_index++;
             var tag = this.array_tag[this.current_order_index];
 
@@ -289,41 +279,42 @@ tyrano.plugin.kag.ftag = {
             }
 
             if (target_tags[tag.name] == "") {
-
                 if (this.master_tag[tag.name]) {
-
                     switch (tag.name) {
                         case "elsif":
                         case "else":
                         case "endif":
                             var root = this.kag.getStack("if");
-                            if (!root || tag.pm.deep_if != root.deep) return false;
-                    };
+                            if (!root || tag.pm.deep_if != root.deep)
+                                return false;
+                    }
 
                     //この時点で、変数の中にエンティティがあれば、置き換える必要あり
                     tag.pm = this.convertEntity(tag.pm);
                     tag.pm["_tag"] = tag.name;
-                    this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
+                    this.master_tag[tag.name].start(
+                        $.extend(
+                            true,
+                            $.cloneObject(this.master_tag[tag.name].pm),
+                            tag.pm,
+                        ),
+                    );
                     return true;
                 } else {
                     return false;
                 }
-
             } else {
                 return false;
             }
-
         } catch (e) {
             //console.log(this.array_tag);
             console.log(e);
             return false;
         }
-
     },
 
     //要素にエンティティが含まれている場合は評価値を代入する
-    convertEntity: function(pm) {
-
+    convertEntity: function (pm) {
         var that = this;
 
         //もし、pmの中に、*が入ってたら、引き継いだ引数を全て、pmに統合させる。その上で実行
@@ -331,7 +322,6 @@ tyrano.plugin.kag.ftag = {
         if (pm["*"] == "") {
             //マクロ呼び出し元の変数から継承、引き継ぐ
             pm = $.extend(true, this.kag.stat.mp, $.cloneObject(pm));
-
         }
 
         //ストレージ要素が存在する場合、拡張子がついていなかったら、指定した拡張子を負荷する
@@ -343,7 +333,6 @@ tyrano.plugin.kag.ftag = {
          */
 
         for (key in pm) {
-
             var val = pm[key];
 
             var c = "";
@@ -352,11 +341,8 @@ tyrano.plugin.kag.ftag = {
                 c = val.substr(0, 1);
             }
             if (val.length > 0 && c === "&") {
-
                 pm[key] = this.kag.embScript(val.substr(1, val.length));
-
             } else if (val.length > 0 && c === "%") {
-
                 var map_obj = this.kag.getStack("macro");
                 //最新のコールスタックを取得
 
@@ -364,9 +350,7 @@ tyrano.plugin.kag.ftag = {
 
                 //もし、スタックが溜まっている状態なら、
                 if (map_obj) {
-
                     pm[key] = map_obj.pm[val.substr(1, val.length)];
-
                 }
 
                 //代替変数の代入処理
@@ -374,31 +358,30 @@ tyrano.plugin.kag.ftag = {
 
                 if (d.length == 2) {
                     //%〇〇の値が渡ってきているか調査
-                    if (map_obj.pm[$.trim(d[0]).substr(1, $.trim(d[0]).length)]) {
-                        pm[key] = map_obj.pm[$.trim(d[0]).substr(1, $.trim(d[0]).length)];
+                    if (
+                        map_obj.pm[$.trim(d[0]).substr(1, $.trim(d[0]).length)]
+                    ) {
+                        pm[key] =
+                            map_obj.pm[
+                                $.trim(d[0]).substr(1, $.trim(d[0]).length)
+                            ];
                     } else {
                         pm[key] = $.trim(d[1]);
-
                     }
-
                 }
             }
-
         }
 
         return pm;
-
     },
 
     //必須チェック
-    checkVital: function(tag) {
-
+    checkVital: function (tag) {
         var master_tag = this.master_tag[tag.name];
 
         var err_str = "";
 
         if (master_tag.vital) {
-
         } else {
             return "";
         }
@@ -407,24 +390,31 @@ tyrano.plugin.kag.ftag = {
 
         for (var i = 0; i < array_vital.length; i++) {
             if (tag.pm[array_vital[i]]) {
-
                 //値が入っていなかった場合
                 if (tag.pm[array_vital[i]] == "") {
-                    err_str += "タグ「" + tag.name + "」にパラメーター「" + array_vital[i] + "」は必須です　\n";
+                    err_str +=
+                        "タグ「" +
+                        tag.name +
+                        "」にパラメーター「" +
+                        array_vital[i] +
+                        "」は必須です　\n";
                 }
-
             } else {
-                err_str += "タグ「" + tag.name + "」にパラメーター「" + array_vital[i] + "」は必須です　\n";
+                err_str +=
+                    "タグ「" +
+                    tag.name +
+                    "」にパラメーター「" +
+                    array_vital[i] +
+                    "」は必須です　\n";
             }
         }
 
         return err_str;
-
     },
 
     //cond条件のチェック
     //条件が真の時だけ実行する
-    checkCond: function(tag) {
+    checkCond: function (tag) {
         var pm = tag.pm;
 
         //cond属性が存在して、なおかつ、条件
@@ -435,39 +425,38 @@ tyrano.plugin.kag.ftag = {
         } else {
             return true;
         }
-
     },
 
     //タグを指定して直接実行
-    startTag: function(name, pm) {
-
+    startTag: function (name, pm) {
         if (typeof pm == "undefined") {
             pm = {};
         }
 
         pm["_tag"] = name;
-        this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
-
+        this.master_tag[name].start(
+            $.extend(true, $.cloneObject(this.master_tag[name].pm), pm),
+        );
     },
 
     //indexを指定して、その命令を実行
     //シナリオファイルが異なる場合
-    nextOrderWithLabel: function(label_name, scenario_file) {
-
+    nextOrderWithLabel: function (label_name, scenario_file) {
         this.kag.stat.is_strong_stop = false;
 
         //Jump ラベル記録が必要な場合に記録しておく
         if (label_name) {
-
             if (label_name.indexOf("*") != -1) {
                 label_name = label_name.substr(1, label_name.length);
             }
-            this.kag.ftag.startTag("label", { "label_name": label_name, "nextorder": "false" });
+            this.kag.ftag.startTag("label", {
+                label_name: label_name,
+                nextorder: "false",
+            });
         }
 
         //セーブスナップが指定された場合
         if (label_name == "*savesnap") {
-
             var tmpsnap = this.kag.menu.snap;
 
             var co = tmpsnap.current_order_index;
@@ -477,7 +466,6 @@ tyrano.plugin.kag.ftag = {
             //snap は noかつ、スナップで上書きする
 
             return;
-
         }
 
         var that = this;
@@ -490,44 +478,47 @@ tyrano.plugin.kag.ftag = {
         label_name = label_name.replace("*", "");
 
         //シナリオファイルが変わる場合は、全く違う動きをする
-        if (scenario_file != this.kag.stat.current_scenario && original_scenario != null) {
-
+        if (
+            scenario_file != this.kag.stat.current_scenario &&
+            original_scenario != null
+        ) {
             this.kag.layer.hideEventLayer();
 
-            this.kag.loadScenario(scenario_file, function(array_tag) {
+            this.kag.loadScenario(scenario_file, function (array_tag) {
                 that.kag.layer.showEventLayer();
                 that.kag.ftag.buildTag(array_tag, label_name);
-
             });
-
         } else {
-
             //ラベル名が指定されてない場合は最初から
             if (label_name == "") {
-
                 this.current_order_index = -1;
                 this.nextOrder();
-
             } else if (this.kag.stat.map_label[label_name]) {
-
                 var label_obj = this.kag.stat.map_label[label_name];
                 this.current_order_index = label_obj.index;
                 this.nextOrder();
-
             } else {
-
-                $.error_message($.lang("label") + "：'" + label_name + "'" + $.lang("not_exists"));
+                $.error_message(
+                    $.lang("label") +
+                        "：'" +
+                        label_name +
+                        "'" +
+                        $.lang("not_exists"),
+                );
 
                 this.nextOrder();
-
             }
         }
-
     },
 
     //次の命令へ移動　index とストレージ名を指定する
-    nextOrderWithIndex: function(index, scenario_file, flag, insert, auto_next) {
-
+    nextOrderWithIndex: function (
+        index,
+        scenario_file,
+        flag,
+        insert,
+        auto_next,
+    ) {
         this.kag.stat.is_strong_stop = false;
         this.kag.layer.showEventLayer();
 
@@ -542,24 +533,18 @@ tyrano.plugin.kag.ftag = {
 
         //シナリオファイルが変わる場合は、全く違う動きをする
         if (scenario_file != this.kag.stat.current_scenario || flag == true) {
-
             this.kag.layer.hideEventLayer();
 
-            this.kag.loadScenario(scenario_file, function(tmp_array_tag) {
+            this.kag.loadScenario(scenario_file, function (tmp_array_tag) {
                 var array_tag = $.extend(true, [], tmp_array_tag);
                 if (typeof insert == "object") {
-
                     array_tag.splice(index + 1, 0, insert);
-
                 }
 
                 that.kag.layer.showEventLayer();
                 that.kag.ftag.buildTagIndex(array_tag, index, auto_next);
-
             });
-
         } else {
-
             //index更新
             this.current_order_index = index;
 
@@ -567,62 +552,53 @@ tyrano.plugin.kag.ftag = {
                 this.nextOrder();
             } else if (auto_next == "snap") {
                 //ストロングの場合、すすめないように
-                this.kag.stat.is_strong_stop = this.kag.menu.snap.stat.is_strong_stop;
+                this.kag.stat.is_strong_stop =
+                    this.kag.menu.snap.stat.is_strong_stop;
 
                 //スキップフラグが立っている場合は進めてくださいね。
-                if (this.kag.stat.is_skip == true && this.kag.stat.is_strong_stop == false) {
+                if (
+                    this.kag.stat.is_skip == true &&
+                    this.kag.stat.is_strong_stop == false
+                ) {
                     this.kag.ftag.nextOrder();
                 }
-
             } else if (auto_next == "stop") {
-
                 //[s]タグで終わった人が登場してきた時
                 //this.kag.stat.is_strong_stop = true;
                 //レイヤイベントレイヤ非表示。
                 //this.current_order_index--;
-                this.kag.ftag.startTag("s", { "val": {} });
-
+                this.kag.ftag.startTag("s", { val: {} });
             }
-
         }
-
-    }
+    },
 };
 
 //タグを記述していく
 tyrano.plugin.kag.tag.text = {
-
     //vital:["val"], //必須のタグ
 
     cw: true,
 
     //初期値
     pm: {
-
-        "val": "",
-        "backlog": "add" /*バックログ用の文字列。改行するかどうか。add join */
-
+        val: "",
+        backlog: "add" /*バックログ用の文字列。改行するかどうか。add join */,
     },
 
     //実行
-    start: function(pm) {
-
+    start: function (pm) {
         //スクリプト解析状態の場合は、その扱いをする
         if (this.kag.stat.is_script == true) {
-
             this.kag.stat.buff_script += pm.val + "\n";
             this.kag.ftag.nextOrder();
             return;
-
         }
 
         //HTML解析状態の場合
         if (this.kag.stat.is_html == true) {
-
             this.kag.stat.map_html.buff_html += pm.val;
             this.kag.ftag.nextOrder();
             return;
-
         }
 
         var j_inner_message = this.kag.getMessageInnerLayer();
@@ -630,8 +606,11 @@ tyrano.plugin.kag.tag.text = {
         //文字ステータスの設定
         j_inner_message.css({
             "letter-spacing": this.kag.config.defaultPitch + "px",
-            "line-height": parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px",
-            "font-family": this.kag.config.userFace
+            "line-height":
+                parseInt(this.kag.config.defaultFontSize) +
+                parseInt(this.kag.config.defaultLineSpacing) +
+                "px",
+            "font-family": this.kag.config.userFace,
         });
 
         //現在表示中のテキストを格納
@@ -639,63 +618,54 @@ tyrano.plugin.kag.tag.text = {
 
         //縦書き指定の場合
         if (this.kag.stat.vertical == "true") {
-
             //自動改ページ無効の場合
             if (this.kag.config.defaultAutoReturn != "false") {
-
                 //テキストエリアの横幅が、一定以上いっていたばあい、テキストをクリアします
                 var j_outer_message = this.kag.getMessageOuterLayer();
 
                 var limit_width = parseInt(j_outer_message.css("width")) * 0.8;
-                var current_width = parseInt(j_inner_message.find("p").css("width"));
+                var current_width = parseInt(
+                    j_inner_message.find("p").css("width"),
+                );
 
                 if (current_width > limit_width) {
-
                     if (this.kag.stat.vchat.is_active) {
                         this.kag.ftag.startTag("vchat_in", {});
                     } else {
                         this.kag.getMessageInnerLayer().html("");
                     }
-
                 }
-
             }
 
             this.showMessage(pm.val, pm, true);
-
         } else {
-
             if (this.kag.config.defaultAutoReturn != "false") {
-
                 //テキストエリアの高さが、一定以上いっていたばあい、テキストをクリアします
                 var j_outer_message = this.kag.getMessageOuterLayer();
 
-                var limit_height = parseInt(j_outer_message.css("height")) * 0.8;
-                var current_height = parseInt(j_inner_message.find("p").css("height"));
+                var limit_height =
+                    parseInt(j_outer_message.css("height")) * 0.8;
+                var current_height = parseInt(
+                    j_inner_message.find("p").css("height"),
+                );
 
                 if (current_height > limit_height) {
-
                     //画面クリア
                     if (this.kag.stat.vchat.is_active) {
                         this.kag.ftag.startTag("vchat_in", {});
                     } else {
                         this.kag.getMessageInnerLayer().html("");
                     }
-
                 }
-
             }
 
-
             this.showMessage(pm.val, pm, false);
-
         }
 
         //this.kag.ftag.nextOrder();
-
     },
 
-    showMessage: function(message_str, pm, isVertical) {
+    showMessage: function (message_str, pm, isVertical) {
         var that = this;
 
         //特定のタグが直前にあった場合、ログの作り方に気をつける
@@ -708,24 +678,39 @@ tyrano.plugin.kag.tag.text = {
             chara_name = $.isNull($("." + this.kag.stat.chara_ptext).html());
         }
 
-        if ((chara_name != "" && pm.backlog != "join") || (chara_name != "" && this.kag.stat.f_chara_ptext == "true")) {
-
-            this.kag.pushBackLog("<b class='backlog_chara_name " + chara_name + "'>" + chara_name + "</b>：<span class='backlog_text " + chara_name + "'>" + message_str + "</span>", "add");
+        if (
+            (chara_name != "" && pm.backlog != "join") ||
+            (chara_name != "" && this.kag.stat.f_chara_ptext == "true")
+        ) {
+            this.kag.pushBackLog(
+                "<b class='backlog_chara_name " +
+                    chara_name +
+                    "'>" +
+                    chara_name +
+                    "</b>：<span class='backlog_text " +
+                    chara_name +
+                    "'>" +
+                    message_str +
+                    "</span>",
+                "add",
+            );
 
             if (this.kag.stat.f_chara_ptext == "true") {
                 this.kag.stat.f_chara_ptext = "false";
                 this.kag.stat.log_join = "true";
             }
-
         } else {
-
-            var log_str = "<span class='backlog_text " + chara_name + "'>" + message_str + "</span>";
+            var log_str =
+                "<span class='backlog_text " +
+                chara_name +
+                "'>" +
+                message_str +
+                "</span>";
 
             if (pm.backlog == "join") {
                 this.kag.pushBackLog(log_str, "join");
             } else {
                 this.kag.pushBackLog(log_str, "add");
-
             }
         }
 
@@ -733,7 +718,6 @@ tyrano.plugin.kag.tag.text = {
         if (that.kag.stat.play_speak == true) {
             speechSynthesis.speak(new SpeechSynthesisUtterance(message_str));
         }
-
 
         //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
         that.kag.ftag.hideNextImg();
@@ -747,9 +731,7 @@ tyrano.plugin.kag.tag.text = {
             j_msg_inner.show();
         }
 
-
-        (function(jtext) {
-
+        (function (jtext) {
             if (jtext.html() == "") {
                 //タグ作成
                 if (isVertical) {
@@ -772,16 +754,14 @@ tyrano.plugin.kag.tag.text = {
             var current_str = "";
 
             if (jtext.find("p").find(".current_span").length != 0) {
-
                 //アニメーションは強制停止させる。
                 jtext.find("p").find(".current_span").find("span").css({
-                    "opacity": 1,
-                    "visibility": "visible",
-                    "animation": ""
+                    opacity: 1,
+                    visibility: "visible",
+                    animation: "",
                 });
 
                 current_str = jtext.find("p").find(".current_span").html();
-
             }
 
             that.kag.checkMessage(jtext);
@@ -790,36 +770,40 @@ tyrano.plugin.kag.tag.text = {
             var j_span = {};
 
             if (that.kag.stat.vchat.is_active) {
-
                 j_span = jtext.find(".current_span");
                 if (chara_name == "") {
                     $(".current_vchat").find(".vchat_chara_name").remove();
-                    $(".current_vchat").find(".vchat-text-inner").css("margin-top", "0.2em");
+                    $(".current_vchat")
+                        .find(".vchat-text-inner")
+                        .css("margin-top", "0.2em");
                 } else {
-                    $(".current_vchat").find(".vchat_chara_name").html(chara_name);
+                    $(".current_vchat")
+                        .find(".vchat_chara_name")
+                        .html(chara_name);
 
                     //キャラ名欄の色
-                    var vchat_name_color = $.convertColor(that.kag.stat.vchat.chara_name_color);
+                    var vchat_name_color = $.convertColor(
+                        that.kag.stat.vchat.chara_name_color,
+                    );
 
                     var cpm = that.kag.stat.vchat.charas[chara_name];
 
                     if (cpm) {
-
                         //色指定がある場合は、その色を指定する。
                         if (cpm.color != "") {
                             vchat_name_color = $.convertColor(cpm.color);
                         }
-
                     }
 
+                    $(".current_vchat")
+                        .find(".vchat_chara_name")
+                        .css("background-color", vchat_name_color);
 
-                    $(".current_vchat").find(".vchat_chara_name").css("background-color", vchat_name_color);
-
-                    $(".current_vchat").find(".vchat-text-inner").css("margin-top", "1.5em");
+                    $(".current_vchat")
+                        .find(".vchat-text-inner")
+                        .css("margin-top", "1.5em");
                 }
-
             } else {
-
                 j_span = that.kag.getMessageCurrentSpan();
 
                 j_span.css({
@@ -827,37 +811,50 @@ tyrano.plugin.kag.tag.text = {
                     "font-weight": that.kag.stat.font.bold,
                     "font-size": that.kag.stat.font.size + "px",
                     "font-family": that.kag.stat.font.face,
-                    "font-style": that.kag.stat.font.italic
+                    "font-style": that.kag.stat.font.italic,
                 });
 
                 if (that.kag.stat.font.edge != "") {
                     var edge_color = that.kag.stat.font.edge;
-                    j_span.css("text-shadow", "1px 1px 0 " + edge_color + ", -1px 1px 0 " + edge_color + ",1px -1px 0 " + edge_color + ",-1px -1px 0 " + edge_color + "");
-
+                    j_span.css(
+                        "text-shadow",
+                        "1px 1px 0 " +
+                            edge_color +
+                            ", -1px 1px 0 " +
+                            edge_color +
+                            ",1px -1px 0 " +
+                            edge_color +
+                            ",-1px -1px 0 " +
+                            edge_color +
+                            "",
+                    );
                 } else if (that.kag.stat.font.shadow != "") {
                     //j_span.css()
-                    j_span.css("text-shadow", "2px 2px 2px " + that.kag.stat.font.shadow);
+                    j_span.css(
+                        "text-shadow",
+                        "2px 2px 2px " + that.kag.stat.font.shadow,
+                    );
                 }
-
             }
-
 
             //既読管理中の場合、現在の場所が既読済みなら、色を変える
             if (that.kag.config.autoRecordLabel == "true") {
-
                 if (that.kag.stat.already_read == true) {
                     //テキストの色調整
                     if (that.kag.config.alreadyReadTextColor != "default") {
-                        j_span.css("color", $.convertColor(that.kag.config.alreadyReadTextColor));
+                        j_span.css(
+                            "color",
+                            $.convertColor(
+                                that.kag.config.alreadyReadTextColor,
+                            ),
+                        );
                     }
-
                 } else {
                     //未読スキップがfalseの場合は、スキップ停止
                     if (that.kag.config.unReadTextSkip == "false") {
                         that.kag.stat.is_skip = false;
                     }
                 }
-
             }
 
             var ch_speed = 30;
@@ -869,13 +866,19 @@ tyrano.plugin.kag.tag.text = {
             }
 
             //アニメーション設定。無効な場合がある
-            if (typeof that.kag.stat.font.effect == "undefined" || that.kag.stat.font.effect == "none") {
+            if (
+                typeof that.kag.stat.font.effect == "undefined" ||
+                that.kag.stat.font.effect == "none"
+            ) {
                 that.kag.stat.font.effect = "";
             }
 
             //禁則処理を有効にするための処置。エフェクトによっては有効にできないようにする
             var flag_in_block = true;
-            if (that.kag.stat.font.effect == "" || that.kag.stat.font.effect == "fadeIn") {
+            if (
+                that.kag.stat.font.effect == "" ||
+                that.kag.stat.font.effect == "fadeIn"
+            ) {
                 flag_in_block = false;
             }
 
@@ -884,43 +887,44 @@ tyrano.plugin.kag.tag.text = {
                 var c = message_str.charAt(i);
                 //ルビ指定がされている場合
                 if (that.kag.stat.ruby_str != "") {
-                    c = "<ruby><rb>" + c + "</rb><rt>" + that.kag.stat.ruby_str + "</rt></ruby>";
+                    c =
+                        "<ruby><rb>" +
+                        c +
+                        "</rb><rt>" +
+                        that.kag.stat.ruby_str +
+                        "</rt></ruby>";
                     that.kag.stat.ruby_str = "";
                 }
-
 
                 if (c == " ") {
                     append_str += "<span style='opacity:0'>" + c + "</span>";
                 } else {
-
                     if (that.kag.stat.mark == 1) {
-
                         var mark_style = that.kag.stat.style_mark;
                         c = "<mark style='" + mark_style + "'>" + c + "</mark>";
-
                     } else if (that.kag.stat.mark == 2) {
                         that.kag.stat.mark = 0;
                     }
 
                     if (flag_in_block) {
-                        append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
+                        append_str +=
+                            "<span style='display:inline-block;opacity:0'>" +
+                            c +
+                            "</span>";
                     } else {
-                        append_str += "<span style='opacity:0'>" + c + "</span>";
+                        append_str +=
+                            "<span style='opacity:0'>" + c + "</span>";
                     }
-
                 }
             }
 
             current_str += "<span>" + append_str + "</span>";
 
-
             // hidden状態で全部追加する
             that.kag.appendMessage(jtext, current_str);
 
-
             //吹き出しが有効な場合は位置を自動調整
             if (that.kag.stat.fuki.active) {
-
                 //メッセージレイヤの表示
                 that.kag.layer.showMessageLayers();
                 that.kag.stat.is_hide_message = false;
@@ -932,9 +936,7 @@ tyrano.plugin.kag.tag.text = {
 
                 if (chara_name == "") {
                     is_chara_show = false;
-
                 } else {
-
                     let original_name = chara_name;
 
                     if (that.kag.stat.jcharas[chara_name]) {
@@ -950,38 +952,50 @@ tyrano.plugin.kag.tag.text = {
                         chara_obj = undefined;
                     }
 
-                    if ((typeof chara_obj != "undefined" && chara_obj.get(0)) && that.kag.stat.charas[original_name]["fuki"]["enable"] == "true") {
-
+                    if (
+                        typeof chara_obj != "undefined" &&
+                        chara_obj.get(0) &&
+                        that.kag.stat.charas[original_name]["fuki"]["enable"] ==
+                            "true"
+                    ) {
                         is_chara_show = true;
 
                         //chara_p_textを排除
                         $(".tyrano_base").find(".chara_name_area").hide();
 
-                        chara_fuki = that.kag.stat.charas[original_name]["fuki"];
+                        chara_fuki =
+                            that.kag.stat.charas[original_name]["fuki"];
 
                         if (chara_fuki["fix_width"] != "") {
                             j_msg_inner.css("max-width", "");
-                            j_msg_inner.css("width", parseInt(chara_fuki["fix_width"]));
+                            j_msg_inner.css(
+                                "width",
+                                parseInt(chara_fuki["fix_width"]),
+                            );
                         } else {
                             j_msg_inner.css("width", "");
-                            j_msg_inner.css("max-width", parseInt(chara_fuki["max_width"]));
+                            j_msg_inner.css(
+                                "max-width",
+                                parseInt(chara_fuki["max_width"]),
+                            );
                         }
 
                         //縦書きの場合はheightだけ無視で。
                         if (that.kag.stat.vertical == "true") {
                             //safariでも表示させるための処置
-                            let w = j_msg_inner.find(".vertical_text").css("width");
+                            let w = j_msg_inner
+                                .find(".vertical_text")
+                                .css("width");
                             j_msg_inner.css("width", w);
                             j_msg_inner.css("height", "");
-                            j_msg_inner.css("max-height", parseInt(chara_fuki["max_width"]));
-
+                            j_msg_inner.css(
+                                "max-height",
+                                parseInt(chara_fuki["max_width"]),
+                            );
                         } else {
-
                             if (chara_fuki["fix_width"] == "") {
-
                                 j_msg_inner.css("width", "");
                                 j_msg_inner.css("height", "");
-
                             }
                         }
 
@@ -990,18 +1004,24 @@ tyrano.plugin.kag.tag.text = {
                         let height = j_msg_inner.css("height");
 
                         //20 はアイコンの文
-                        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
-                        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
+                        width =
+                            parseInt(width) +
+                            parseInt(j_msg_inner.css("padding-left")) +
+                            that.kag.stat.fuki.marginr +
+                            20;
+                        height =
+                            parseInt(height) +
+                            parseInt(j_msg_inner.css("padding-top")) +
+                            that.kag.stat.fuki.marginb +
+                            20;
 
                         var j_outer_message = that.kag.getMessageOuterLayer();
 
                         j_outer_message.css("width", width);
                         j_outer_message.css("height", height);
 
-
                         chara_left = parseInt(chara_obj.css("left"));
                         chara_top = parseInt(chara_obj.css("top"));
-
 
                         let fuki_left = chara_fuki["left"];
                         let fuki_top = chara_fuki["top"];
@@ -1009,11 +1029,19 @@ tyrano.plugin.kag.tag.text = {
                         let fuki_sippo_left = chara_fuki["sippo_left"];
                         let fuki_sippo_top = chara_fuki["sippo_top"];
 
-                        let chara_width = parseInt(chara_obj.find("img").css("width"));
-                        let chara_height = parseInt(chara_obj.find("img").css("height"));
+                        let chara_width = parseInt(
+                            chara_obj.find("img").css("width"),
+                        );
+                        let chara_height = parseInt(
+                            chara_obj.find("img").css("height"),
+                        );
 
-                        let origin_width = that.kag.stat.charas[original_name]["origin_width"];
-                        let origin_height = that.kag.stat.charas[original_name]["origin_height"];
+                        let origin_width =
+                            that.kag.stat.charas[original_name]["origin_width"];
+                        let origin_height =
+                            that.kag.stat.charas[original_name][
+                                "origin_height"
+                            ];
 
                         //相対位置はキャラのサイズによって座標を調整する
                         let per_width = chara_width / origin_width;
@@ -1025,15 +1053,20 @@ tyrano.plugin.kag.tag.text = {
                         fuki_left2 = chara_left + fuki_left;
                         fuki_top2 = chara_top + fuki_top;
 
-                        let outer_width = parseInt(j_outer_message.css("width"));
-                        let outer_height = parseInt(j_outer_message.css("height"));
+                        let outer_width = parseInt(
+                            j_outer_message.css("width"),
+                        );
+                        let outer_height = parseInt(
+                            j_outer_message.css("height"),
+                        );
 
                         //吹き出し位置によって位置を変更
                         let sippo = chara_fuki["sippo"];
                         if (sippo == "bottom") {
                             fuki_top2 = fuki_top2 - outer_height;
                         } else if (sippo == "left") {
-                            fuki_left2 = fuki_left2 + parseInt(chara_fuki["sippo_left"]);
+                            fuki_left2 =
+                                fuki_left2 + parseInt(chara_fuki["sippo_left"]);
                         } else if (sippo == "right") {
                             fuki_left2 = fuki_left2 - outer_width;
                         }
@@ -1051,31 +1084,26 @@ tyrano.plugin.kag.tag.text = {
                         //右端に飛び出ていたら
 
                         if (fuki_right >= sc_width) {
-
-                            fuki_left2 = fuki_left2 - (fuki_right - sc_width) - 10;
-                            sippo_left = (fuki_right - sc_width) + 10; //はみ出たぶんだけプラス
+                            fuki_left2 =
+                                fuki_left2 - (fuki_right - sc_width) - 10;
+                            sippo_left = fuki_right - sc_width + 10; //はみ出たぶんだけプラス
                         }
 
                         if (fuki_bottom >= sc_height) {
-                            fuki_top2 = fuki_top2 - (fuki_bottom - sc_height) - 10;
+                            fuki_top2 =
+                                fuki_top2 - (fuki_bottom - sc_height) - 10;
                             //sippo_left = (fuki_bottom - -50;
-
                         }
 
                         if (fuki_left2 <= 0) {
-
                             //しっぽの位置はマイナスさせる
-                            sippo_left = (fuki_left2) - 10;
+                            sippo_left = fuki_left2 - 10;
                             fuki_left2 = 10;
-
                         }
 
                         if (fuki_top2 <= 0) {
-
                             fuki_top2 = 10;
-
                         }
-
 
                         //alert(fuki_left);
                         j_outer_message.css("left", fuki_left2);
@@ -1083,8 +1111,8 @@ tyrano.plugin.kag.tag.text = {
 
                         //innerの情報
                         j_msg_inner.css({
-                            "left": parseInt(j_outer_message.css("left")) + 10,
-                            "top": parseInt(j_outer_message.css("top")) + 10
+                            left: parseInt(j_outer_message.css("left")) + 10,
+                            top: parseInt(j_outer_message.css("top")) + 10,
                         });
 
                         //調整値。はみ出し多分
@@ -1092,20 +1120,16 @@ tyrano.plugin.kag.tag.text = {
                         that.setFukiStyle(j_outer_message, chara_fuki);
 
                         //ふきだしの位置を調整//////////////
-                        that.kag.updateFuki(original_name, { "sippo_left": sippo_left });
-
-
+                        that.kag.updateFuki(original_name, {
+                            sippo_left: sippo_left,
+                        });
                     } else {
-
                         is_chara_show = false;
-
                     }
-
                 }
 
                 //othersのポジションに戻す。
                 if (is_chara_show == false) {
-
                     //chara_p_textを排除
                     $(".tyrano_base").find(".chara_name_area").hide();
 
@@ -1116,10 +1140,12 @@ tyrano.plugin.kag.tag.text = {
                     let nleft = others_style.left || def_style.left;
                     let ntop = others_style.top || def_style.top;
 
-
                     if (others_style["fix_width"] != "") {
                         j_msg_inner.css("max-width", "");
-                        j_msg_inner.css("width", parseInt(others_style["fix_width"]));
+                        j_msg_inner.css(
+                            "width",
+                            parseInt(others_style["fix_width"]),
+                        );
                     } else {
                         j_msg_inner.css("width", "");
                         j_msg_inner.css("max-width", parseInt(nwidth));
@@ -1129,10 +1155,17 @@ tyrano.plugin.kag.tag.text = {
                     width = j_msg_inner.css("width");
                     height = j_msg_inner.css("height");
 
-
                     //20 はアイコンの文
-                    width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
-                    height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
+                    width =
+                        parseInt(width) +
+                        parseInt(j_msg_inner.css("padding-left")) +
+                        that.kag.stat.fuki.marginr +
+                        20;
+                    height =
+                        parseInt(height) +
+                        parseInt(j_msg_inner.css("padding-top")) +
+                        that.kag.stat.fuki.marginb +
+                        20;
 
                     var j_outer_message = that.kag.getMessageOuterLayer();
 
@@ -1144,8 +1177,8 @@ tyrano.plugin.kag.tag.text = {
 
                     //通常のポジションに戻す
                     j_msg_inner.css({
-                        "left": parseInt(j_outer_message.css("left")) + 10,
-                        "top": parseInt(j_outer_message.css("top")) + 10
+                        left: parseInt(j_outer_message.css("left")) + 10,
+                        top: parseInt(j_outer_message.css("top")) + 10,
                     });
 
                     chara_fuki = that.kag.stat.fuki.others_style;
@@ -1153,163 +1186,188 @@ tyrano.plugin.kag.tag.text = {
                     that.setFukiStyle(j_outer_message, chara_fuki);
 
                     //ふきだしを消す
-                    that.kag.updateFuki("others", { "sippo": "none" });
-
+                    that.kag.updateFuki("others", { sippo: "none" });
                 }
-
-
             }
 
-
-            var append_span = j_span.children('span:last-child');
-            var makeVisible = function(index) {
-
+            var append_span = j_span.children("span:last-child");
+            var makeVisible = function (index) {
                 //append_span.children("span:eq(" + index + ")").addClass("fadeIn");
                 //append_span.children("span:eq(" + index + ")").css('animation','rollIn 0.2s ease 0s 1 normal forwards');
 
                 if (that.kag.stat.font.effect != "") {
-
-                    append_span.children("span:eq(" + index + ")").on("animationend", function(e) {
-
-                        $(e.target).css({
-                            "opacity": 1,
-                            "visibility": "visible",
-                            "animation": ""
+                    append_span
+                        .children("span:eq(" + index + ")")
+                        .on("animationend", function (e) {
+                            $(e.target).css({
+                                opacity: 1,
+                                visibility: "visible",
+                                animation: "",
+                            });
                         });
 
-                    });
-
-                    append_span.children("span:eq(" + index + ")").css('animation', "t" + that.kag.stat.font.effect + ' ' + that.kag.stat.font.effect_speed + ' ease 0s 1 normal forwards');
-
+                    append_span
+                        .children("span:eq(" + index + ")")
+                        .css(
+                            "animation",
+                            "t" +
+                                that.kag.stat.font.effect +
+                                " " +
+                                that.kag.stat.font.effect_speed +
+                                " ease 0s 1 normal forwards",
+                        );
                 } else {
-                    append_span.children("span:eq(" + index + ")").css({ 'visibility': 'visible', 'opacity': '1' });
+                    append_span
+                        .children("span:eq(" + index + ")")
+                        .css({ visibility: "visible", opacity: "1" });
                 }
-
             };
-            var makeVisibleAll = function() {
-                append_span.children("span").css({ 'visibility': 'visible', 'opacity': '1' });
+            var makeVisibleAll = function () {
+                append_span
+                    .children("span")
+                    .css({ visibility: "visible", opacity: "1" });
             };
 
-            var pchar = function(index) {
+            var pchar = function (index) {
                 // 一文字ずつ表示するか？
-                var isOneByOne = (
-                    that.kag.stat.is_skip != true
-                    && that.kag.stat.is_nowait != true
-                    && ch_speed >= 3
-                );
+                var isOneByOne =
+                    that.kag.stat.is_skip != true &&
+                    that.kag.stat.is_nowait != true &&
+                    ch_speed >= 3;
 
                 if (isOneByOne) {
                     makeVisible(index);
                 }
 
                 if (index <= message_str.length) {
-
                     that.kag.stat.is_adding_text = true;
 
                     //再生途中にクリックされて、残りを一瞬で表示する
-                    if (that.kag.stat.is_click_text == true || that.kag.stat.is_skip == true || that.kag.stat.is_nowait == true) {
+                    if (
+                        that.kag.stat.is_click_text == true ||
+                        that.kag.stat.is_skip == true ||
+                        that.kag.stat.is_nowait == true
+                    ) {
                         pchar(++index);
                     } else {
-                        setTimeout(function() {
+                        setTimeout(function () {
                             pchar(++index);
                         }, ch_speed);
                     }
                 } else {
-
                     that.kag.stat.is_adding_text = false;
                     that.kag.stat.is_click_text = false;
-
 
                     //すべて表示完了 ここまではイベント残ってたな
 
                     if (that.kag.stat.is_stop != "true") {
                         if (!isOneByOne) {
                             makeVisibleAll();
-                            setTimeout(function() {
-                                if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
+                            setTimeout(function () {
+                                if (!that.kag.stat.is_hide_message)
+                                    that.kag.ftag.nextOrder();
                             }, parseInt(that.kag.config.skipSpeed));
-
                         } else {
-                            if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
+                            if (!that.kag.stat.is_hide_message)
+                                that.kag.ftag.nextOrder();
                         }
                     }
                 }
             };
 
             pchar(0);
-
         })(j_msg_inner);
     },
 
-    nextOrder: function() {
+    nextOrder: function () {},
 
-    },
-
-    setFukiStyle: function(j_outer_message, chara_fuki) {
-
+    setFukiStyle: function (j_outer_message, chara_fuki) {
         //見た目の指定がある場合は設定する
         if (typeof chara_fuki["color"] != "undefined") {
-            j_outer_message.css("background-color", $.convertColor(chara_fuki["color"]));
+            j_outer_message.css(
+                "background-color",
+                $.convertColor(chara_fuki["color"]),
+            );
         }
 
         if (typeof chara_fuki["opacity"] != "undefined") {
-            j_outer_message.css("opacity", $.convertOpacity(chara_fuki["opacity"]));
+            j_outer_message.css(
+                "opacity",
+                $.convertOpacity(chara_fuki["opacity"]),
+            );
         }
 
         if (typeof chara_fuki["border_size"] != "undefined") {
-            j_outer_message.css("border-width", parseInt(chara_fuki["border_size"]));
+            j_outer_message.css(
+                "border-width",
+                parseInt(chara_fuki["border_size"]),
+            );
             j_outer_message.css("border-style", "solid");
         }
 
         if (typeof chara_fuki["border_color"] != "undefined") {
-            j_outer_message.css("border-color", $.convertColor(chara_fuki["border_color"]));
+            j_outer_message.css(
+                "border-color",
+                $.convertColor(chara_fuki["border_color"]),
+            );
         }
 
         if (typeof chara_fuki["radius"] != "undefined") {
-            j_outer_message.css("border-radius", parseInt(chara_fuki["radius"]));
+            j_outer_message.css(
+                "border-radius",
+                parseInt(chara_fuki["radius"]),
+            );
         }
 
         //内部設定
         if (typeof chara_fuki["font_color"] != "undefined") {
-            j_outer_message.parent().find(".message_inner").find(".current_span").css("color", $.convertColor(chara_fuki["font_color"]));
+            j_outer_message
+                .parent()
+                .find(".message_inner")
+                .find(".current_span")
+                .css("color", $.convertColor(chara_fuki["font_color"]));
         }
 
         if (typeof chara_fuki["font_size"] != "undefined") {
-            j_outer_message.parent().find(".message_inner").find(".current_span").css("font-size", parseInt(chara_fuki["font_size"]));
+            j_outer_message
+                .parent()
+                .find(".message_inner")
+                .find(".current_span")
+                .css("font-size", parseInt(chara_fuki["font_size"]));
         }
-
-    }
+    },
 };
 
 tyrano.plugin.kag.tag.label = {
-
     pm: {
-        nextorder: "true"
+        nextorder: "true",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         //ラベル通過したよ。
 
         //ラベル記録
         if (this.kag.config.autoRecordLabel == "true") {
-
-            var sf_tmp = "trail_" + this.kag.stat.current_scenario.replace(".ks", "").replace(/\u002f/g, "").replace(/:/g, "").replace(/\./g, "");
+            var sf_tmp =
+                "trail_" +
+                this.kag.stat.current_scenario
+                    .replace(".ks", "")
+                    .replace(/\u002f/g, "")
+                    .replace(/:/g, "")
+                    .replace(/\./g, "");
             var sf_buff = this.kag.stat.buff_label_name;
             var sf_label = sf_tmp + "_" + pm.label_name;
 
             if (this.kag.stat.buff_label_name != "") {
-
                 if (!this.kag.variable.sf.record) {
                     this.kag.variable.sf.record = {};
                 }
 
                 var sf_str = "sf.record." + sf_buff;
 
-                var scr_str = ""
-                    + sf_str + " = " + sf_str + "  || 0;"
-                    + sf_str + "++;";
+                var scr_str =
+                    "" + sf_str + " = " + sf_str + "  || 0;" + sf_str + "++;";
                 this.kag.evalScript(scr_str);
-
             }
 
             if (this.kag.variable.sf.record) {
@@ -1329,11 +1387,8 @@ tyrano.plugin.kag.tag.label = {
         if (pm.nextorder == "true") {
             this.kag.ftag.nextOrder();
         }
-
-    }
-
+    },
 };
-
 
 /*
 #[config_record_label]
@@ -1355,19 +1410,19 @@ skip=未読スキップをの有効(true)、無効(false)を指定します。�
 */
 
 tyrano.plugin.kag.tag.config_record_label = {
-
     pm: {
         color: "",
-        skip: ""
+        skip: "",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         if (pm.color != "") {
             this.kag.config.alreadyReadTextColor = pm.color;
-            this.kag.ftag.startTag("eval", { "exp": "sf._system_config_already_read_text_color = " + pm.color });
+            this.kag.ftag.startTag("eval", {
+                exp: "sf._system_config_already_read_text_color = " + pm.color,
+            });
         }
 
         if (pm.skip != "") {
@@ -1377,14 +1432,14 @@ tyrano.plugin.kag.tag.config_record_label = {
                 this.kag.config.unReadTextSkip = "false";
             }
 
-            this.kag.ftag.startTag("eval", { "exp": "sf._system_config_unread_text_skip = '" + pm.skip + "'" });
+            this.kag.ftag.startTag("eval", {
+                exp: "sf._system_config_unread_text_skip = '" + pm.skip + "'",
+            });
         }
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
 
 /*
 #[l]
@@ -1411,11 +1466,9 @@ tyrano.plugin.kag.tag.config_record_label = {
 
 //[l] クリック待ち
 tyrano.plugin.kag.tag.l = {
-
     cw: true,
 
-    start: function() {
-
+    start: function () {
         var that = this;
 
         this.kag.ftag.showNextImg();
@@ -1424,19 +1477,18 @@ tyrano.plugin.kag.tag.l = {
         if (this.kag.stat.is_skip == true) {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
-
         } else if (this.kag.stat.is_auto == true) {
-
             this.kag.stat.is_wait_auto = true;
 
             var auto_speed = that.kag.config.autoSpeed;
             if (that.kag.config.autoSpeedWithText != "0") {
                 var cnt_text = this.kag.stat.current_message_str.length;
-                auto_speed = parseInt(auto_speed) + (parseInt(that.kag.config.autoSpeedWithText) * cnt_text);
+                auto_speed =
+                    parseInt(auto_speed) +
+                    parseInt(that.kag.config.autoSpeedWithText) * cnt_text;
             }
 
-            setTimeout(function() {
-
+            setTimeout(function () {
                 if (that.kag.stat.is_wait_auto == true) {
                     //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
 
@@ -1446,12 +1498,9 @@ tyrano.plugin.kag.tag.l = {
                         that.kag.ftag.nextOrder();
                     }
                 }
-
             }, auto_speed);
-
         }
-
-    }
+    },
 };
 
 /*
@@ -1480,11 +1529,9 @@ tyrano.plugin.kag.tag.l = {
 
 //[p] 改ページクリック待ち
 tyrano.plugin.kag.tag.p = {
-
     cw: true,
 
-    start: function() {
-
+    start: function () {
         var that = this;
         //改ページ
         this.kag.stat.flag_ref_page = true;
@@ -1495,18 +1542,18 @@ tyrano.plugin.kag.tag.p = {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
         } else if (this.kag.stat.is_auto == true) {
-
             this.kag.stat.is_wait_auto = true;
 
             var auto_speed = that.kag.config.autoSpeed;
             if (that.kag.config.autoSpeedWithText != "0") {
                 var cnt_text = this.kag.stat.current_message_str.length;
-                auto_speed = parseInt(auto_speed) + (parseInt(that.kag.config.autoSpeedWithText) * cnt_text);
+                auto_speed =
+                    parseInt(auto_speed) +
+                    parseInt(that.kag.config.autoSpeedWithText) * cnt_text;
             }
 
-            setTimeout(function() {
+            setTimeout(function () {
                 if (that.kag.stat.is_wait_auto == true) {
-
                     //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
                     if (that.kag.tmp.is_vo_play == true) {
                         that.kag.tmp.is_vo_play_wait = true;
@@ -1515,9 +1562,8 @@ tyrano.plugin.kag.tag.p = {
                     }
                 }
             }, auto_speed);
-
         }
-    }
+    },
 };
 
 /*
@@ -1550,16 +1596,14 @@ tyrano.plugin.kag.tag.p = {
  */
 
 tyrano.plugin.kag.tag.graph = {
-
     vital: ["storage"],
 
     pm: {
-        storage: null
+        storage: null,
     },
 
     //開始
-    start: function(pm) {
-
+    start: function (pm) {
         var jtext = this.kag.getMessageInnerLayer();
 
         var current_str = "";
@@ -1577,11 +1621,13 @@ tyrano.plugin.kag.tag.graph = {
         }
 
         //テキストエリアに画像を追加して、次のメッセージへ晋
-        this.kag.appendMessage(jtext, current_str + "<img src='" + storage_url + "' >");
+        this.kag.appendMessage(
+            jtext,
+            current_str + "<img src='" + storage_url + "' >",
+        );
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -1611,22 +1657,19 @@ target=ジャンプ先のラベル名を指定します。省略すると先頭�
 
 //ジャンプ命令
 tyrano.plugin.kag.tag.jump = {
-
     pm: {
         storage: null,
         target: null, //ラベル名
-        countpage: true
+        countpage: true,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
         //ジャンプ直後のwt などでフラグがおかしくなる対策
-        setTimeout(function() {
+        setTimeout(function () {
             that.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
         }, 1);
-
-    }
+    },
 };
 
 /*
@@ -1652,22 +1695,21 @@ tyrano.plugin.kag.tag.jump = {
 
 //改行を挿入
 tyrano.plugin.kag.tag.r = {
-
     log_join: "true",
 
-    start: function() {
-
+    start: function () {
         var that = this;
         //クリックするまで、次へすすまないようにする
         var j_inner_message = this.kag.getMessageInnerLayer();
 
-        var txt = j_inner_message.find("p").find(".current_span").html() + "<br />";
+        var txt =
+            j_inner_message.find("p").find(".current_span").html() + "<br />";
         j_inner_message.find("p").find(".current_span").html(txt);
 
-        setTimeout(function() {
+        setTimeout(function () {
             that.kag.ftag.nextOrder();
         }, 5);
-    }
+    },
 };
 
 /*
@@ -1692,9 +1734,7 @@ tyrano.plugin.kag.tag.r = {
  */
 
 tyrano.plugin.kag.tag.er = {
-
-    start: function() {
-
+    start: function () {
         this.kag.ftag.hideNextImg();
         //フォントのリセット
         //カレントレイヤのみ削除
@@ -1703,8 +1743,7 @@ tyrano.plugin.kag.tag.er = {
         this.kag.ftag.startTag("resetfont");
 
         //this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -1734,9 +1773,7 @@ tyrano.plugin.kag.tag.er = {
 
 //画面クリア
 tyrano.plugin.kag.tag.cm = {
-
-    start: function() {
-
+    start: function () {
         this.kag.ftag.hideNextImg();
         //フォントのリセット
         //カレントレイヤだけじゃなくて、全てもメッセージレイヤを消去する必要がある
@@ -1753,8 +1790,7 @@ tyrano.plugin.kag.tag.cm = {
         this.kag.layer.getFreeLayer().html("").hide();
 
         this.kag.ftag.startTag("resetfont");
-
-    }
+    },
 };
 
 /*
@@ -1783,9 +1819,7 @@ tyrano.plugin.kag.tag.cm = {
  */
 
 tyrano.plugin.kag.tag.ct = {
-
-    start: function() {
-
+    start: function () {
         this.kag.ftag.hideNextImg();
 
         //フォントのリセット
@@ -1799,8 +1833,7 @@ tyrano.plugin.kag.tag.ct = {
         this.kag.stat.current_page = "fore";
 
         this.kag.ftag.startTag("resetfont");
-
-    }
+    },
 };
 
 /*
@@ -1830,14 +1863,12 @@ page=表画面を対象とするか、裏画面を対象とするかを指定し
 
 //メッセージレイヤの指定
 tyrano.plugin.kag.tag.current = {
-
     pm: {
         layer: "",
-        page: "fore"
+        page: "fore",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         //layer指定がない場合は、現在のレイヤを採用
         if (pm.layer == "") {
             pm.layer = this.kag.stat.current_layer;
@@ -1847,8 +1878,7 @@ tyrano.plugin.kag.tag.current = {
         this.kag.stat.current_page = pm.page;
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 //メッセージレイヤの属性を変更します
@@ -1892,9 +1922,7 @@ tyrano.plugin.kag.tag.current = {
  #[end]
  */
 tyrano.plugin.kag.tag.position = {
-
     pm: {
-
         layer: "message0",
         page: "fore",
         left: "",
@@ -1914,24 +1942,20 @@ tyrano.plugin.kag.tag.position = {
         marginb: "0", //下余白
 
         next: "true",
-
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         //指定のレイヤを取得
-        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_outer");
+        var target_layer = this.kag.layer
+            .getLayer(pm.layer, pm.page)
+            .find(".message_outer");
 
         var new_style = {};
 
-        if (pm.left != "")
-            new_style["left"] = pm.left + "px";
-        if (pm.top != "")
-            new_style["top"] = pm.top + "px";
-        if (pm.width != "")
-            new_style["width"] = pm.width + "px";
-        if (pm.height != "")
-            new_style["height"] = pm.height + "px";
+        if (pm.left != "") new_style["left"] = pm.left + "px";
+        if (pm.top != "") new_style["top"] = pm.top + "px";
+        if (pm.width != "") new_style["width"] = pm.width + "px";
+        if (pm.height != "") new_style["height"] = pm.height + "px";
         if (pm.color != "")
             new_style["background-color"] = $.convertColor(pm.color);
 
@@ -1940,7 +1964,6 @@ tyrano.plugin.kag.tag.position = {
         }
 
         if (pm.border_size != "") {
-
             new_style["border-width"] = parseInt(pm.border_size) + "px";
             target_layer.css("border-style", "solid");
         }
@@ -1952,13 +1975,16 @@ tyrano.plugin.kag.tag.position = {
         //背景フレーム画像の設定 透明度も自分で設定する
 
         if (pm.frame == "none") {
-
-            target_layer.css("opacity", $.convertOpacity(this.kag.config.frameOpacity));
+            target_layer.css(
+                "opacity",
+                $.convertOpacity(this.kag.config.frameOpacity),
+            );
             target_layer.css("background-image", "");
-            target_layer.css("background-color", $.convertColor(this.kag.config.frameColor));
-
+            target_layer.css(
+                "background-color",
+                $.convertColor(this.kag.config.frameColor),
+            );
         } else if (pm.frame != "") {
-
             var storage_url = "";
 
             if ($.isHTTP(pm.frame)) {
@@ -1971,7 +1997,6 @@ tyrano.plugin.kag.tag.position = {
             target_layer.css("background-repeat", "no-repeat");
             target_layer.css("opacity", 1);
             target_layer.css("background-color", "");
-
         }
 
         if (pm.opacity != "") {
@@ -1982,14 +2007,20 @@ tyrano.plugin.kag.tag.position = {
         this.kag.setStyles(target_layer, new_style);
 
         //outerレイヤを保存
-        this.kag.stat.fuki.def_style = $.extend(true, this.kag.stat.fuki.def_style, new_style);
+        this.kag.stat.fuki.def_style = $.extend(
+            true,
+            this.kag.stat.fuki.def_style,
+            new_style,
+        );
 
         //複数のレイヤに影響がでないように。
         this.kag.layer.refMessageLayer(pm.layer);
 
         //message_inner のスタイルを変更する必要もある
 
-        var layer_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
+        var layer_inner = this.kag.layer
+            .getLayer(pm.layer, pm.page)
+            .find(".message_inner");
 
         //縦書き指定
         if (pm.vertical != "") {
@@ -2002,7 +2033,6 @@ tyrano.plugin.kag.tag.position = {
             }
         }
 
-
         var new_style_inner = {};
 
         if (pm.marginl != "0")
@@ -2011,27 +2041,38 @@ tyrano.plugin.kag.tag.position = {
             new_style_inner["padding-top"] = parseInt(pm.margint) + "px";
 
         if (pm.marginr != "0") {
-            new_style_inner["width"] = (parseInt(layer_inner.css("width")) - parseInt(pm.marginr) - parseInt(pm.marginl)) + "px";
+            new_style_inner["width"] =
+                parseInt(layer_inner.css("width")) -
+                parseInt(pm.marginr) -
+                parseInt(pm.marginl) +
+                "px";
             this.kag.stat.fuki.marginr = parseInt(pm.marginr);
         }
 
         if (pm.marginb != "0") {
-            new_style_inner["height"] = (parseInt(layer_inner.css("height")) - parseInt(pm.marginb)) - parseInt(pm.margint) + "px";
+            new_style_inner["height"] =
+                parseInt(layer_inner.css("height")) -
+                parseInt(pm.marginb) -
+                parseInt(pm.margint) +
+                "px";
             this.kag.stat.fuki.marginb = parseInt(pm.marginb);
         }
 
         this.kag.setStyles(layer_inner, new_style_inner);
 
         //innerレイヤを保存
-        this.kag.stat.fuki.def_style_inner = $.extend(true, this.kag.stat.fuki.def_style_inner, new_style_inner);
-
+        this.kag.stat.fuki.def_style_inner = $.extend(
+            true,
+            this.kag.stat.fuki.def_style_inner,
+            new_style_inner,
+        );
 
         //レイヤーをリフレッシュする
 
         if (pm.next == "true") {
             this.kag.ftag.nextOrder();
         }
-    }
+    },
 };
 
 /*
@@ -2076,32 +2117,30 @@ othersで設定した位置にふきだしを表示[p]
  #[end]
  */
 tyrano.plugin.kag.tag.fuki_start = {
-
     pm: {
-
         layer: "message0",
         page: "fore",
-
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.stat.fuki.active = true;
 
         //どこに表示するか
         //指定のレイヤを取得
-        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_outer");
+        var target_layer = this.kag.layer
+            .getLayer(pm.layer, pm.page)
+            .find(".message_outer");
         target_layer.addClass("fuki_box");
 
-        var j_msg_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
+        var j_msg_inner = this.kag.layer
+            .getLayer(pm.layer, pm.page)
+            .find(".message_inner");
         j_msg_inner.css("width", "");
         j_msg_inner.css("height", "");
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
 
 /*
  #[fuki_stop]
@@ -2118,13 +2157,9 @@ tyrano.plugin.kag.tag.fuki_start = {
  #[end]
  */
 tyrano.plugin.kag.tag.fuki_stop = {
+    pm: {},
 
-    pm: {
-
-    },
-
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.stat.fuki.active = false;
 
         var j_outer_layer = this.kag.getMessageOuterLayer();
@@ -2151,8 +2186,7 @@ tyrano.plugin.kag.tag.fuki_stop = {
         $(".tyrano_base").find(".chara_name_area").show();
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -2197,11 +2231,9 @@ tyrano.plugin.kag.tag.fuki_stop = {
  */
 
 tyrano.plugin.kag.tag.fuki_chara = {
-
     vital: ["name"],
 
     pm: {
-
         name: "",
 
         //left:"",
@@ -2228,11 +2260,9 @@ tyrano.plugin.kag.tag.fuki_chara = {
         border_size: "",
         border_color: "",
         radius: "",
-
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var storage_url = "";
 
         //見た目は継承させない
@@ -2246,13 +2276,19 @@ tyrano.plugin.kag.tag.fuki_chara = {
         if (pm.font_color == "") delete pm.font_color;
 
         if (pm.name == "others") {
-            this.kag.stat.fuki.others_style = $.extend(this.kag.stat.fuki.others_style, pm);
+            this.kag.stat.fuki.others_style = $.extend(
+                this.kag.stat.fuki.others_style,
+                pm,
+            );
         } else {
-
             var cpm = this.kag.stat.charas[pm.name];
 
             if (cpm == null) {
-                this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+                this.kag.error(
+                    "指定されたキャラクター「" +
+                        pm.name +
+                        "」は定義されていません。[chara_new]で定義してください",
+                );
                 return;
             }
 
@@ -2260,15 +2296,11 @@ tyrano.plugin.kag.tag.fuki_chara = {
 
             //パラメータ更新
             this.kag.stat.charas[pm.name]["fuki"] = $.extend(_cpm, pm);
-
         }
 
         this.kag.ftag.nextOrder();
-
-
-    }
+    },
 };
-
 
 /*
 #[image]
@@ -2318,38 +2350,33 @@ pos=レイヤ位置を自動的に決定します。前景レイヤに対して�
 //タグを記述していく
 //[image layer=base page=fore storage=haikei.jpg visible=true]
 tyrano.plugin.kag.tag.image = {
-
     pm: {
-
-        "layer": "base",
-        "page": "fore",
-        "visible": "",
-        "top": "",
-        "left": "",
-        "x": "",
-        "y": "",
-        "width": "",
-        "height": "",
-        "pos": "",
-        "name": "",
-        "folder": "", //画像フォルダを明示できる
-        "time": "",
-        "wait": "true",
-        "depth": "front",
-        "reflect": "",
-        "zindex": "1"
+        layer: "base",
+        page: "fore",
+        visible: "",
+        top: "",
+        left: "",
+        x: "",
+        y: "",
+        width: "",
+        height: "",
+        pos: "",
+        name: "",
+        folder: "", //画像フォルダを明示できる
+        time: "",
+        wait: "true",
+        depth: "front",
+        reflect: "",
+        zindex: "1",
         //"visible":"true"
-
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var strage_url = "";
         var folder = "";
         var that = this;
 
         if (pm.layer != "base") {
-
             //visible true が指定されている場合は表示状態に持っていけ
             //これはレイヤのスタイル
             var layer_new_style = {};
@@ -2359,13 +2386,14 @@ tyrano.plugin.kag.tag.image = {
                 layer_new_style.display = "block";
             }
 
-            this.kag.setStyles(this.kag.layer.getLayer(pm.layer, pm.page), layer_new_style);
+            this.kag.setStyles(
+                this.kag.layer.getLayer(pm.layer, pm.page),
+                layer_new_style,
+            );
 
             //ポジションの指定
             if (pm.pos != "") {
-
                 switch (pm.pos) {
-
                     case "left":
                     case "l":
                         pm.left = this.kag.config["scPositionX.left"];
@@ -2390,9 +2418,7 @@ tyrano.plugin.kag.tag.image = {
                     case "r":
                         pm.left = this.kag.config["scPositionX.right"];
                         break;
-
                 }
-
             }
 
             if (pm.folder != "") {
@@ -2410,12 +2436,12 @@ tyrano.plugin.kag.tag.image = {
 
             var img_obj = $("<img />");
 
-
-            if ($.getExt(pm.storage) == "svg" || $.getExt(pm.storage) == "SVG") {
-
+            if (
+                $.getExt(pm.storage) == "svg" ||
+                $.getExt(pm.storage) == "SVG"
+            ) {
                 img_obj = $("<object type='image/svg+xml' />");
                 img_obj.attr("data", strage_url);
-
             }
 
             img_obj.attr("src", strage_url);
@@ -2455,7 +2481,6 @@ tyrano.plugin.kag.tag.image = {
 
             if (pm.time == 0 || pm.time == "0") pm.time = ""; // integer 0 and string "0" are equal to ""
             if (pm.time != "") {
-
                 img_obj.css("opacity", 0);
 
                 if (pm.depth == "back") {
@@ -2464,24 +2489,18 @@ tyrano.plugin.kag.tag.image = {
                     this.kag.layer.getLayer(pm.layer, pm.page).append(img_obj);
                 }
 
-
-                img_obj.stop(true, true).animate(
-                    { "opacity": 1 },
-                    parseInt(pm.time),
-                    function() {
+                img_obj
+                    .stop(true, true)
+                    .animate({ opacity: 1 }, parseInt(pm.time), function () {
                         if (pm.wait == "true") {
                             that.kag.ftag.nextOrder();
                         }
-                    }
-                );
+                    });
 
                 if (pm.wait != "true") {
                     that.kag.ftag.nextOrder();
                 }
-
-
             } else {
-
                 if (pm.depth == "back") {
                     this.kag.layer.getLayer(pm.layer, pm.page).prepend(img_obj);
                 } else {
@@ -2489,11 +2508,8 @@ tyrano.plugin.kag.tag.image = {
                 }
 
                 this.kag.ftag.nextOrder();
-
             }
-
         } else {
-
             //base レイヤの場合
 
             if (pm.folder != "") {
@@ -2513,19 +2529,20 @@ tyrano.plugin.kag.tag.image = {
 
             var new_style = {
                 "background-image": "url(" + strage_url + ")",
-                "display": "none"
+                "display": "none",
             };
 
             if (pm.page === "fore") {
                 new_style.display = "block";
             }
 
-            this.kag.setStyles(this.kag.layer.getLayer(pm.layer, pm.page), new_style);
+            this.kag.setStyles(
+                this.kag.layer.getLayer(pm.layer, pm.page),
+                new_style,
+            );
             this.kag.ftag.nextOrder();
-
         }
-
-    }
+    },
 };
 
 /*
@@ -2564,29 +2581,27 @@ wait=完了を待つかどうかを指定できます。trueを指定すると�
 
 //イメージ情報消去背景とか
 tyrano.plugin.kag.tag.freeimage = {
-
     vital: ["layer"],
 
     pm: {
         layer: "",
         page: "fore",
         time: "", //徐々に非表示にする
-        wait: "true"
+        wait: "true",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         if (pm.layer != "base") {
-
             //前景レイヤの場合、全部削除だよ
 
             //非表示にした後、削除する
             if (pm.time == 0) pm.time = ""; // integer 0 and string "0" are equal to ""
             if (pm.time != "") {
-
-                var j_obj = this.kag.layer.getLayer(pm.layer, pm.page).children();
+                var j_obj = this.kag.layer
+                    .getLayer(pm.layer, pm.page)
+                    .children();
 
                 //存在しない場合は即next
                 if (!j_obj.get(0)) {
@@ -2599,32 +2614,27 @@ tyrano.plugin.kag.tag.freeimage = {
                 var cnt = 0;
                 var s_cnt = j_obj.length;
 
-                j_obj.stop(true, true).animate(
-                    { "opacity": 0 },
-                    parseInt(pm.time),
-                    function() {
+                j_obj
+                    .stop(true, true)
+                    .animate({ opacity: 0 }, parseInt(pm.time), function () {
                         that.kag.layer.getLayer(pm.layer, pm.page).empty();
                         //次へ移動ですがな
                         cnt++;
                         if (s_cnt == cnt) {
-
                             if (pm.wait == "true") {
                                 that.kag.ftag.nextOrder();
                             }
-
                         }
-                    }
-                );
-
+                    });
             } else {
                 that.kag.layer.getLayer(pm.layer, pm.page).empty();
                 //次へ移動ですがな
                 that.kag.ftag.nextOrder();
             }
-
         } else {
-
-            this.kag.layer.getLayer(pm.layer, pm.page).css("background-image", "");
+            this.kag.layer
+                .getLayer(pm.layer, pm.page)
+                .css("background-image", "");
             //次へ移動ですがな
             this.kag.ftag.nextOrder();
         }
@@ -2632,15 +2642,11 @@ tyrano.plugin.kag.tag.freeimage = {
         if (pm.wait == "false") {
             this.kag.ftag.nextOrder();
         }
-
-
-    }
+    },
 };
-
 
 //freeimageという名前がわかりにくい。freelayerという名前でもつかえるようにした。
 tyrano.plugin.kag.tag.freelayer = tyrano.plugin.kag.tag.freeimage;
-
 
 /*
 #[free]
@@ -2672,11 +2678,8 @@ wait=削除の完了を待つかどうかを指定できます。trueを指定�
 #[end]
 */
 
-
-
 //イメージ情報消去背景とか
 tyrano.plugin.kag.tag.free = {
-
     vital: ["layer", "name"],
 
     pm: {
@@ -2684,24 +2687,20 @@ tyrano.plugin.kag.tag.free = {
         page: "fore",
         name: "",
         wait: "true",
-        time: "" //徐々に非表示にする
+        time: "", //徐々に非表示にする
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         if (pm.layer != "base") {
-
             //前景レイヤの場合、全部削除だよ
 
             //非表示にした後、削除する
             if (pm.time == 0) pm.time = ""; // integer 0 and string "0" are equal to ""
             if (pm.time != "") {
-
                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
                 j_obj = j_obj.find("." + pm.name);
-
 
                 //存在しない場合は即next
                 if (!j_obj.get(0)) {
@@ -2714,10 +2713,9 @@ tyrano.plugin.kag.tag.free = {
                 var cnt = 0;
                 var s_cnt = j_obj.length;
 
-                j_obj.stop(true, true).animate(
-                    { "opacity": 0 },
-                    parseInt(pm.time),
-                    function() {
+                j_obj
+                    .stop(true, true)
+                    .animate({ opacity: 0 }, parseInt(pm.time), function () {
                         j_obj.remove();
                         //次へ移動ですがな
                         cnt++;
@@ -2726,16 +2724,13 @@ tyrano.plugin.kag.tag.free = {
                                 that.kag.ftag.nextOrder();
                             }
                         }
-                    }
-                );
+                    });
 
                 //falseの時は即次へ
                 if (pm.wait == "false") {
                     that.kag.ftag.nextOrder();
                 }
-
             } else {
-
                 var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
                 j_obj = j_obj.find("." + pm.name);
                 j_obj.remove();
@@ -2743,9 +2738,7 @@ tyrano.plugin.kag.tag.free = {
                 //次へ移動ですがな
                 that.kag.ftag.nextOrder();
             }
-
         } else {
-
             var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
             j_obj = j_obj.find("." + pm.name);
             j_obj.remove();
@@ -2753,12 +2746,8 @@ tyrano.plugin.kag.tag.free = {
             //次へ移動ですがな
             this.kag.ftag.nextOrder();
         }
-
-
-    }
+    },
 };
-
-
 
 /*
 #[ptext]
@@ -2806,37 +2795,33 @@ overwrite=true か false を指定します。同時にnameを指定している
 
 //タグを記述していく
 tyrano.plugin.kag.tag.ptext = {
-
     vital: ["layer", "x", "y"],
 
     pm: {
-
-        "layer": "0",
-        "page": "fore",
-        "x": 0,
-        "y": 0,
-        "vertical": "false",
-        "text": "", //テキスト領域のデフォルト値を指定するためですが、、、
-        "size": "",
-        "face": "",
-        "color": "",
-        "italic": "",
-        "bold": "",
-        "align": "left",
-        "edge": "",
-        "shadow": "",
-        "name": "",
-        "time": "",
-        "width": "",
-        "zindex": "9999",
-        "overwrite": "false" //要素を上書きするかどうか
+        layer: "0",
+        page: "fore",
+        x: 0,
+        y: 0,
+        vertical: "false",
+        text: "", //テキスト領域のデフォルト値を指定するためですが、、、
+        size: "",
+        face: "",
+        color: "",
+        italic: "",
+        bold: "",
+        align: "left",
+        edge: "",
+        shadow: "",
+        name: "",
+        time: "",
+        width: "",
+        zindex: "9999",
+        overwrite: "false", //要素を上書きするかどうか
 
         //"visible":"true"
-
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         //visible true が指定されている場合は表示状態に持っていけ
@@ -2880,29 +2865,34 @@ tyrano.plugin.kag.tag.ptext = {
             pm.color = $.convertColor(pm.color);
         }
 
-
         var font_new_style = {
-
             "color": pm.color,
             "font-weight": pm.bold,
             "font-style": pm.fontstyle,
             "font-size": pm.size + "px",
             "font-family": pm.face,
             "z-index": "999",
-            "text": ""
-
+            "text": "",
         };
 
         if (pm.edge != "") {
             var edge_color = $.convertColor(pm.edge);
-            font_new_style["text-shadow"] = "1px 1px 0 " + edge_color + ", -1px 1px 0 " + edge_color + ",1px -1px 0 " + edge_color + ",-1px -1px 0 " + edge_color + "";
+            font_new_style["text-shadow"] =
+                "1px 1px 0 " +
+                edge_color +
+                ", -1px 1px 0 " +
+                edge_color +
+                ",1px -1px 0 " +
+                edge_color +
+                ",-1px -1px 0 " +
+                edge_color +
+                "";
         } else if (pm.shadow != "") {
-            font_new_style["text-shadow"] = "2px 2px 2px " + $.convertColor(pm.shadow);
+            font_new_style["text-shadow"] =
+                "2px 2px 2px " + $.convertColor(pm.shadow);
         }
 
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
-
-
 
         var tobj = $("<p></p>");
 
@@ -2912,7 +2902,6 @@ tyrano.plugin.kag.tag.ptext = {
         tobj.css("width", pm.width);
 
         tobj.css("text-align", pm.align);
-
 
         if (pm.vertical == "true") {
             tobj.addClass("vertical_text");
@@ -2934,22 +2923,18 @@ tyrano.plugin.kag.tag.ptext = {
             tobj.css("opacity", 0);
             target_layer.append(tobj);
             tobj.stop(true, true).animate(
-                { "opacity": 1 },
+                { opacity: 1 },
                 parseInt(pm.time),
-                function() {
+                function () {
                     that.kag.ftag.nextOrder();
-                }
+                },
             );
         } else {
             target_layer.append(tobj);
             this.kag.ftag.nextOrder();
-
         }
-
-
-    }
+    },
 };
-
 
 /*
 #[mtext]
@@ -3011,53 +2996,49 @@ out_reverse=trueを指定すると、文字が後ろから消えていきます�
 
 //タグを記述していく
 tyrano.plugin.kag.tag.mtext = {
-
     vital: ["x", "y"],
 
     pm: {
+        layer: "0",
+        page: "fore",
+        x: 0,
+        y: 0,
+        vertical: "false",
+        text: "", //テキスト領域のデフォルト値を指定するためですが、、、
+        size: "",
+        face: "",
+        color: "",
+        italic: "",
+        bold: "",
+        shadow: "",
+        edge: "",
+        name: "",
+        zindex: "9999",
+        width: "",
+        align: "left",
 
-        "layer": "0",
-        "page": "fore",
-        "x": 0,
-        "y": 0,
-        "vertical": "false",
-        "text": "", //テキスト領域のデフォルト値を指定するためですが、、、
-        "size": "",
-        "face": "",
-        "color": "",
-        "italic": "",
-        "bold": "",
-        "shadow": "",
-        "edge": "",
-        "name": "",
-        "zindex": "9999",
-        "width": "",
-        "align": "left",
+        fadeout: "true", //テキストを残すかどうか
+        time: "2000", //テキストを表示時間しておく時間
 
-        "fadeout": "true", //テキストを残すかどうか
-        "time": "2000", //テキストを表示時間しておく時間
+        in_effect: "fadeIn",
+        in_delay: "50",
+        in_delay_scale: "1.5",
+        in_sync: "false",
+        in_shuffle: "false",
+        in_reverse: "false",
 
-        "in_effect": "fadeIn",
-        "in_delay": "50",
-        "in_delay_scale": "1.5",
-        "in_sync": "false",
-        "in_shuffle": "false",
-        "in_reverse": "false",
+        wait: "true", //テキストの表示完了を待つ
 
-        "wait": "true",  //テキストの表示完了を待つ
-
-        "out_effect": "fadeOut",
-        "out_delay": "50", //次の１文字が消えるタイミングへ移動する時間をミリ秒で指定します
-        "out_scale_delay": "", //１文字が消えるのにかかる時間をミリ秒で指定します
-        "out_sync": "false",
-        "out_shuffle": "false",
-        "out_reverse": "false"
+        out_effect: "fadeOut",
+        out_delay: "50", //次の１文字が消えるタイミングへ移動する時間をミリ秒で指定します
+        out_scale_delay: "", //１文字が消えるのにかかる時間をミリ秒で指定します
+        out_sync: "false",
+        out_shuffle: "false",
+        out_reverse: "false",
         //"visible":"true"
-
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         //指定がない場合はデフォルトフォントを適応する
@@ -3073,22 +3054,30 @@ tyrano.plugin.kag.tag.mtext = {
         }
 
         var font_new_style = {
-
             "color": pm.color,
             "font-weight": pm.bold,
             "font-style": pm.fontstyle,
             "font-size": pm.size + "px",
             "font-family": pm.face,
             "z-index": "999",
-            "text": ""
-
+            "text": "",
         };
 
         if (pm.edge != "") {
             var edge_color = $.convertColor(pm.edge);
-            font_new_style["text-shadow"] = "1px 1px 0 " + edge_color + ", -1px 1px 0 " + edge_color + ",1px -1px 0 " + edge_color + ",-1px -1px 0 " + edge_color + "";
+            font_new_style["text-shadow"] =
+                "1px 1px 0 " +
+                edge_color +
+                ", -1px 1px 0 " +
+                edge_color +
+                ",1px -1px 0 " +
+                edge_color +
+                ",-1px -1px 0 " +
+                edge_color +
+                "";
         } else if (pm.shadow != "") {
-            font_new_style["text-shadow"] = "2px 2px 2px " + $.convertColor(pm.shadow);
+            font_new_style["text-shadow"] =
+                "2px 2px 2px " + $.convertColor(pm.shadow);
         }
 
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
@@ -3130,45 +3119,43 @@ tyrano.plugin.kag.tag.mtext = {
 
         //tobj をアニメーションさせる
         tobj.textillate({
+            loop: pm["fadeout"],
+            minDisplayTime: pm["time"],
 
-            "loop": pm["fadeout"],
-            "minDisplayTime": pm["time"],
-
-            "in": {
-                "effect": pm["in_effect"],
-                "delayScale": pm["in_delay_scale"],
-                "delay": pm["in_delay"],
-                "sync": pm["in_sync"],
-                "shuffle": pm["in_shuffle"],
-                "reverse": pm["in_reverse"],
-                "callback": function() {
+            in: {
+                effect: pm["in_effect"],
+                delayScale: pm["in_delay_scale"],
+                delay: pm["in_delay"],
+                sync: pm["in_sync"],
+                shuffle: pm["in_shuffle"],
+                reverse: pm["in_reverse"],
+                callback: function () {
                     if (pm.fadeout == false && pm.wait == true) {
                         that.kag.ftag.nextOrder();
                     }
-                }
+                },
             },
 
-            "out": {
-                "effect": pm["out_effect"],
-                "delayScale": pm["out_delay_scale"],
-                "delay": pm["out_delay"],
-                "sync": pm["out_sync"],
-                "shuffle": pm["out_shuffle"],
-                "reverse": pm["out_reverse"],
-                "callback": function() {
+            out: {
+                effect: pm["out_effect"],
+                delayScale: pm["out_delay_scale"],
+                delay: pm["out_delay"],
+                sync: pm["out_sync"],
+                shuffle: pm["out_shuffle"],
+                reverse: pm["out_reverse"],
+                callback: function () {
                     tobj.remove();
                     if (pm.wait == true) {
                         that.kag.ftag.nextOrder();
                     }
-                }
-            }
-
+                },
+            },
         });
 
         if (pm.wait != true) {
             this.kag.ftag.nextOrder();
         }
-    }
+    },
 };
 
 /*
@@ -3204,15 +3191,14 @@ message0 または message1 を指定するとメッセージレイヤにな り
 
 //前景レイヤを背景レイヤにコピー
 tyrano.plugin.kag.tag.backlay = {
-
     pm: {
-        layer: ""
+        layer: "",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         this.kag.layer.backlay(pm.layer);
         this.kag.ftag.nextOrder();
-    }
+    },
 };
 
 /*
@@ -3240,23 +3226,21 @@ tyrano.plugin.kag.tag.backlay = {
 
 //トランジション完了を待つ
 tyrano.plugin.kag.tag.wt = {
-    start: function(pm) {
-
+    start: function (pm) {
         if (this.kag.stat.is_trans == false) {
             this.kag.layer.showEventLayer();
             this.kag.ftag.nextOrder();
         } else {
             this.kag.layer.hideEventLayer();
         }
-
-    }
+    },
 };
 
 //音楽のフェードインを待つ
 tyrano.plugin.kag.tag.wb = {
-    start: function(pm) {
+    start: function (pm) {
         this.kag.layer.hideEventLayer();
-    }
+    },
 };
 
 //フェードインを待つ
@@ -3314,14 +3298,12 @@ target=ジャンプ先のラベルを指定します。省略すると、ファ�
 
 //リンクターゲット
 tyrano.plugin.kag.tag.link = {
-
     pm: {
         target: null,
-        storage: null
+        storage: null,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         //即時にスパンを設定しないとダメね
@@ -3331,35 +3313,30 @@ tyrano.plugin.kag.tag.link = {
 
         j_span.css("cursor", "pointer");
 
-        (function() {
-
+        (function () {
             var _target = pm.target;
             var _storage = pm.storage;
 
             //クラスとイベントを登録する
             that.kag.event.addEventElement({
-                "tag": "link",
-                "j_target": j_span, //イベント登録先の
-                "pm": pm
+                tag: "link",
+                j_target: j_span, //イベント登録先の
+                pm: pm,
             });
 
             //イベントを設定する
             that.setEvent(j_span, pm);
-
         })();
 
         this.kag.ftag.nextOrder();
-
     },
 
-    setEvent: function(j_span, pm) {
-
+    setEvent: function (j_span, pm) {
         var _target = pm.target;
         var _storage = pm.storage;
         var that = TYRANO;
 
-        j_span.bind('click touchstart', function(e) {
-
+        j_span.bind("click touchstart", function (e) {
             that.kag.stat.display_link = false;
 
             //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
@@ -3372,13 +3349,10 @@ tyrano.plugin.kag.tag.link = {
             } else {
                 that.kag.stat.is_skip = false;
             }
-
         });
 
         j_span.css("cursor", "pointer");
-
-    }
-
+    },
 };
 
 /*
@@ -3402,15 +3376,12 @@ tyrano.plugin.kag.tag.link = {
  */
 
 tyrano.plugin.kag.tag.endlink = {
-
-    start: function(pm) {
-
+    start: function (pm) {
         var j_span = this.kag.setMessageCurrentSpan();
 
         //新しいspanをつくるの
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -3431,31 +3402,25 @@ tyrano.plugin.kag.tag.endlink = {
  */
 
 tyrano.plugin.kag.tag.s = {
-
-    start: function() {
-
+    start: function () {
         this.kag.stat.is_strong_stop = true;
         this.kag.layer.hideEventLayer();
-
-    }
+    },
 };
 
 //使用禁止
 //処理停止、事前準備
 tyrano.plugin.kag.tag._s = {
-
     vital: [],
 
-    pm: {
+    pm: {},
 
-    },
-
-    start: function(pm) {
+    start: function (pm) {
         //現在のIndexを指定する。保存時に戻る場所だ
-        this.kag.stat.strong_stop_recover_index = this.kag.ftag.current_order_index;
+        this.kag.stat.strong_stop_recover_index =
+            this.kag.ftag.current_order_index;
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -3476,17 +3441,13 @@ time=ウェイトをミリ秒で指定します。
 
 //ウェイト
 tyrano.plugin.kag.tag.wait = {
-
     vital: ["time"],
 
     pm: {
-
-        time: 0
-
+        time: 0,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         //クリック無効
@@ -3494,19 +3455,14 @@ tyrano.plugin.kag.tag.wait = {
         this.kag.stat.is_wait = true;
         this.kag.layer.hideEventLayer();
 
-
-        that.kag.tmp.wait_id = setTimeout(function() {
+        that.kag.tmp.wait_id = setTimeout(function () {
             that.kag.stat.is_strong_stop = false;
             that.kag.stat.is_wait = false;
             that.kag.layer.showEventLayer();
             that.kag.ftag.nextOrder();
         }, pm.time);
-
-
-
-    }
+    },
 };
-
 
 /*
 #[wait_cancel]
@@ -3527,14 +3483,11 @@ tyrano.plugin.kag.tag.wait = {
 
 //ウェイト
 tyrano.plugin.kag.tag.wait_cancel = {
-
     vital: [],
 
-    pm: {
-    },
+    pm: {},
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         //[wait]キャンセル
@@ -3545,10 +3498,8 @@ tyrano.plugin.kag.tag.wait_cancel = {
         this.kag.layer.showEventLayer();
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
 
 /*
  #[hidemessage]
@@ -3565,9 +3516,7 @@ tyrano.plugin.kag.tag.wait_cancel = {
  */
 
 tyrano.plugin.kag.tag.hidemessage = {
-
-    start: function() {
-
+    start: function () {
         this.kag.stat.is_hide_message = true;
         //メッセージレイヤを全て削除する //テキスト表示時に復活
         this.kag.layer.hideMessageLayers();
@@ -3576,8 +3525,7 @@ tyrano.plugin.kag.tag.hidemessage = {
         this.kag.layer.layer_event.show();
 
         //this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -3606,7 +3554,6 @@ vmax=揺れの縦方向への最大振幅を指定します。省略すると 10
 
 //画面を揺らします
 tyrano.plugin.kag.tag.quake = {
-
     vital: ["time"],
 
     pm: {
@@ -3615,46 +3562,48 @@ tyrano.plugin.kag.tag.quake = {
         timemode: "",
         hmax: "0",
         vmax: "10",
-        wait: "true"
+        wait: "true",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         if (pm.hmax != "0") {
-
-            $("." + this.kag.define.BASE_DIV_NAME).effect('shake', {
-                times: parseInt(pm.count),
-                distance: parseInt(pm.hmax),
-                direction: "left"
-            }, parseInt(pm.time), function() {
-
-                if (pm.wait == "true") {
-                    that.kag.ftag.nextOrder();
-                }
-            });
-
+            $("." + this.kag.define.BASE_DIV_NAME).effect(
+                "shake",
+                {
+                    times: parseInt(pm.count),
+                    distance: parseInt(pm.hmax),
+                    direction: "left",
+                },
+                parseInt(pm.time),
+                function () {
+                    if (pm.wait == "true") {
+                        that.kag.ftag.nextOrder();
+                    }
+                },
+            );
         } else if (pm.vmax != "0") {
-
-            $("." + this.kag.define.BASE_DIV_NAME).effect('shake', {
-                times: parseInt(pm.count),
-                distance: parseInt(pm.vmax),
-                direction: "up"
-            }, parseInt(pm.time), function() {
-
-                if (pm.wait == "true") {
-                    that.kag.ftag.nextOrder();
-                }
-            });
-
+            $("." + this.kag.define.BASE_DIV_NAME).effect(
+                "shake",
+                {
+                    times: parseInt(pm.count),
+                    distance: parseInt(pm.vmax),
+                    direction: "up",
+                },
+                parseInt(pm.time),
+                function () {
+                    if (pm.wait == "true") {
+                        that.kag.ftag.nextOrder();
+                    }
+                },
+            );
         }
 
         if (pm.wait == "false") {
             that.kag.ftag.nextOrder();
         }
-
-    }
+    },
 };
 
 /*
@@ -3693,15 +3642,11 @@ fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn<br />/zoomIn/slideIn/
  */
 
 tyrano.plugin.kag.tag.font = {
-
-    pm: {
-
-    },
+    pm: {},
 
     log_join: "true",
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.setMessageCurrentSpan();
 
         var new_font = {};
@@ -3727,19 +3672,16 @@ tyrano.plugin.kag.tag.font = {
         }
 
         if (pm.effect) {
-
             if (pm.effect == "none") {
                 this.kag.stat.font["effect"] = "";
             } else {
                 this.kag.stat.font["effect"] = pm.effect;
             }
-
         }
 
         if (pm.effect_speed) {
             this.kag.stat.font["effect_speed"] = pm.effect_speed;
         }
-
 
         if (pm.edge) {
             if (pm.edge == "none" || pm.edge == "") {
@@ -3759,8 +3701,7 @@ tyrano.plugin.kag.tag.font = {
 
         this.kag.ftag.nextOrder();
         ///////////////////
-
-    }
+    },
 };
 
 /*
@@ -3794,13 +3735,9 @@ effect_speed=effectパラメータがnone以外の場合に、表示されるま
 
 //デフォルトフォント設定
 tyrano.plugin.kag.tag.deffont = {
+    pm: {},
 
-    pm: {
-
-    },
-
-    start: function(pm) {
-
+    start: function (pm) {
         var new_font = {};
 
         if (pm.size) {
@@ -3824,20 +3761,16 @@ tyrano.plugin.kag.tag.deffont = {
         }
 
         if (pm.effect) {
-
             if (pm.effect == "none") {
                 this.kag.stat.default_font["effect"] = "";
             } else {
                 this.kag.stat.default_font["effect"] = pm.effect;
             }
-
         }
 
         if (pm.effect_speed) {
             this.kag.stat.default_font["effect_speed"] = pm.effect_speed;
         }
-
-
 
         if (pm.edge) {
             if (pm.edge == "none" || pm.edge == "") {
@@ -3855,12 +3788,9 @@ tyrano.plugin.kag.tag.deffont = {
             }
         }
 
-
-
         this.kag.ftag.nextOrder();
         ///////////////////
-
-    }
+    },
 };
 
 /*
@@ -3884,21 +3814,19 @@ speed=文字の表示速度を指定します
 
 //文字の表示速度変更
 tyrano.plugin.kag.tag.delay = {
-
     pm: {
-        speed: ""
+        speed: "",
     },
 
     log_join: "true",
 
-    start: function(pm) {
+    start: function (pm) {
         if (pm.speed != "") {
             this.kag.stat.ch_speed = parseInt(pm.speed);
         }
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -3916,22 +3844,17 @@ tyrano.plugin.kag.tag.delay = {
 
 //文字の表示速度変更
 tyrano.plugin.kag.tag.resetdelay = {
-
     pm: {
-        speed: ""
+        speed: "",
     },
 
     log_join: "true",
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.stat.ch_speed = "";
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
-
 
 /*
 #[configdelay]
@@ -3951,21 +3874,21 @@ speed=文字の表示速度を指定します
 
 //文字の表示速度変更
 tyrano.plugin.kag.tag.configdelay = {
-
     pm: {
-        speed: ""
+        speed: "",
     },
 
-    start: function(pm) {
+    start: function (pm) {
         if (pm.speed != "") {
             this.kag.stat.ch_speed = "";
             this.kag.config.chSpeed = pm.speed;
-            this.kag.ftag.startTag("eval", { "exp": "sf._config_ch_speed = " + pm.speed });
+            this.kag.ftag.startTag("eval", {
+                exp: "sf._config_ch_speed = " + pm.speed,
+            });
         } else {
             this.kag.ftag.nextOrder();
         }
-
-    }
+    },
 };
 
 /*
@@ -3982,16 +3905,13 @@ tyrano.plugin.kag.tag.configdelay = {
  */
 
 tyrano.plugin.kag.tag.nowait = {
-
     pm: {},
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.stat.is_nowait = true;
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -4008,16 +3928,13 @@ tyrano.plugin.kag.tag.nowait = {
  */
 
 tyrano.plugin.kag.tag.endnowait = {
-
     pm: {},
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.stat.is_nowait = false;
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -4035,17 +3952,14 @@ tyrano.plugin.kag.tag.endnowait = {
  */
 
 tyrano.plugin.kag.tag.resetfont = {
-
     log_join: "true",
 
-    start: function() {
-
+    start: function () {
         var j_span = this.kag.setMessageCurrentSpan();
 
         this.kag.stat.font = $.extend(true, {}, this.kag.stat.default_font);
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -4082,7 +3996,6 @@ opacity=レイヤの不透明度を指定します。０～２５５の範囲で
 
 //レイヤーオプション変更
 tyrano.plugin.kag.tag.layopt = {
-
     vital: ["layer"],
 
     pm: {
@@ -4093,18 +4006,15 @@ tyrano.plugin.kag.tag.layopt = {
         top: "",
         opacity: "",
         autohide: false,
-        index: 10
+        index: 10,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         if (pm.layer == "message") {
-
             pm.layer = this.kag.stat.current_layer;
             pm.page = this.kag.stat.current_page;
-
         }
 
         var j_layer = this.kag.layer.getLayer(pm.layer, pm.page);
@@ -4115,23 +4025,17 @@ tyrano.plugin.kag.tag.layopt = {
 
         //表示部分の変更
         if (pm.visible != "") {
-
             if (pm.visible == "true") {
-
                 //バックの場合は、その場では表示してはダメ
                 if (pm.page == "fore") {
                     j_layer.css("display", "");
                 }
 
                 j_layer.attr("l_visible", "true");
-
             } else {
-
                 j_layer.css("display", "none");
                 j_layer.attr("l_visible", "false");
-
             }
-
         }
 
         //レイヤのポジション指定
@@ -4149,8 +4053,7 @@ tyrano.plugin.kag.tag.layopt = {
         }
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -4176,28 +4079,23 @@ text=ルビとして表示させる文字を指定します
 
 //ルビ指定
 tyrano.plugin.kag.tag["ruby"] = {
-
     vital: ["text"],
 
     pm: {
-        text: ""
+        text: "",
     },
 
     log_join: "true",
 
-    start: function(pm) {
-
+    start: function (pm) {
         var str = pm.text;
 
         //ここに文字が入っている場合、ルビを設定してから、テキスト表示する
         this.kag.stat.ruby_str = str;
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
-
 
 /*
 #[mark]
@@ -4225,7 +4123,6 @@ size=マーカーのサイズを指定できます。0〜100の間で指定し�
 
 //ルビ指定
 tyrano.plugin.kag.tag["mark"] = {
-
     vital: [],
 
     pm: {
@@ -4234,9 +4131,7 @@ tyrano.plugin.kag.tag["mark"] = {
         size: "",
     },
 
-
-    start: function(pm) {
-
+    start: function (pm) {
         var str = pm.text;
 
         this.kag.stat.mark = 1;
@@ -4248,11 +4143,15 @@ tyrano.plugin.kag.tag["mark"] = {
             style_mark += "color:" + $.convertColor(pm.font_color) + ";";
         } else {
             style_mark += "color:" + this.kag.stat.font.color + ";";
-
         }
 
         if (pm.size != "") {
-            style_mark += "background: linear-gradient(transparent " + (100 - parseInt(pm.size)) + "%, " + $.convertColor(pm.color) + " 0%);";
+            style_mark +=
+                "background: linear-gradient(transparent " +
+                (100 - parseInt(pm.size)) +
+                "%, " +
+                $.convertColor(pm.color) +
+                " 0%);";
         }
 
         style_mark += "padding-top:4px;padding-bottom:4px;";
@@ -4260,10 +4159,8 @@ tyrano.plugin.kag.tag["mark"] = {
         this.kag.stat.style_mark = style_mark;
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
 
 /*
 #[endmark]
@@ -4288,15 +4185,11 @@ tyrano.plugin.kag.tag["mark"] = {
 
 //ルビ指定
 tyrano.plugin.kag.tag["endmark"] = {
-
     vital: [],
 
-    pm: {
-    },
+    pm: {},
 
-
-    start: function(pm) {
-
+    start: function (pm) {
         var str = pm.text;
 
         //ここに文字が入っている場合、ルビを設定してから、テキスト表示する
@@ -4305,10 +4198,8 @@ tyrano.plugin.kag.tag["endmark"] = {
         }
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
 
 /*
  #[cancelskip]
@@ -4325,12 +4216,10 @@ tyrano.plugin.kag.tag["endmark"] = {
  */
 
 tyrano.plugin.kag.tag.cancelskip = {
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.stat.is_skip = false;
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -4357,14 +4246,12 @@ y=縦方向位置指定
 
 //グラフィックボタン表示位置調整、テキストはできない
 tyrano.plugin.kag.tag.locate = {
-
     pm: {
         x: null,
-        y: null
+        y: null,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         if (pm.x != null) {
             this.kag.stat.locate.x = pm.x;
         }
@@ -4374,8 +4261,7 @@ tyrano.plugin.kag.tag.locate = {
         }
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 /*
@@ -4432,7 +4318,6 @@ role=ボタンに特別な機能を割り当てることができます。この
 
 //指定した位置にグラフィックボタンを配置する
 tyrano.plugin.kag.tag.button = {
-
     pm: {
         graphic: "",
         storage: null,
@@ -4443,7 +4328,7 @@ tyrano.plugin.kag.tag.button = {
         y: "",
         width: "",
         height: "",
-        fix: "false", /*ここがtrueの場合、システムボタンになりますね*/
+        fix: "false" /*ここがtrueの場合、システムボタンになりますね*/,
         savesnap: "false",
         folder: "image",
         exp: "",
@@ -4458,14 +4343,12 @@ tyrano.plugin.kag.tag.button = {
 
         auto_next: "yes",
 
-        role: ""
-
+        role: "",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
     //cmで抹消しよう
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         var target_layer = null;
@@ -4530,8 +4413,8 @@ tyrano.plugin.kag.tag.button = {
         //ツールチップの設定
         if (pm.hint != "") {
             j_button.attr({
-                "title": pm.hint,
-                "alt": pm.hint
+                title: pm.hint,
+                alt: pm.hint,
             });
         }
 
@@ -4540,9 +4423,9 @@ tyrano.plugin.kag.tag.button = {
 
         //クラスとイベントを登録する
         that.kag.event.addEventElement({
-            "tag": "button",
-            "j_target": j_button, //イベント登録先の
-            "pm": pm
+            tag: "button",
+            j_target: j_button, //イベント登録先の
+            pm: pm,
         });
         that.setEvent(j_button, pm);
 
@@ -4553,15 +4436,12 @@ tyrano.plugin.kag.tag.button = {
         }
 
         this.kag.ftag.nextOrder();
-
     },
 
-    setEvent: function(j_button, pm) {
-
+    setEvent: function (j_button, pm) {
         var that = TYRANO;
 
-        (function() {
-
+        (function () {
             var _target = pm.target;
             var _storage = pm.storage;
             var _pm = pm;
@@ -4569,67 +4449,64 @@ tyrano.plugin.kag.tag.button = {
             var preexp = that.kag.embScript(pm.preexp);
             var button_clicked = false;
 
-            j_button.hover(function() {
-                //マウスが乗った時
-                if (_pm.enterse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        "storage": _pm.enterse,
-                        "stop": true
-                    });
-                }
-
-                if (_pm.enterimg != "") {
-                    var enter_img_url = "";
-                    if ($.isHTTP(_pm.enterimg)) {
-                        enter_img_url = _pm.enterimg;
-                    } else {
-                        enter_img_url = "./data/" + _pm.folder + "/" + _pm.enterimg;
+            j_button.hover(
+                function () {
+                    //マウスが乗った時
+                    if (_pm.enterse != "") {
+                        that.kag.ftag.startTag("playse", {
+                            storage: _pm.enterse,
+                            stop: true,
+                        });
                     }
 
-                    $(this).attr("src", enter_img_url);
+                    if (_pm.enterimg != "") {
+                        var enter_img_url = "";
+                        if ($.isHTTP(_pm.enterimg)) {
+                            enter_img_url = _pm.enterimg;
+                        } else {
+                            enter_img_url =
+                                "./data/" + _pm.folder + "/" + _pm.enterimg;
+                        }
 
-                }
-
-            }, function() {
-                //マウスが外れた時
-                if (_pm.leavese != "") {
-                    that.kag.ftag.startTag("playse", {
-                        "storage": _pm.leavese,
-                        "stop": true
-                    });
-                }
-
-                //元に戻す
-                if (_pm.enterimg != "") {
-
-                    var enter_img_url = "";
-                    if ($.isHTTP(_pm.graphic)) {
-                        enter_img_url = _pm.graphic;
-                    } else {
-                        enter_img_url = "./data/" + _pm.folder + "/" + _pm.graphic;
+                        $(this).attr("src", enter_img_url);
+                    }
+                },
+                function () {
+                    //マウスが外れた時
+                    if (_pm.leavese != "") {
+                        that.kag.ftag.startTag("playse", {
+                            storage: _pm.leavese,
+                            stop: true,
+                        });
                     }
 
-                    $(this).attr("src", enter_img_url);
+                    //元に戻す
+                    if (_pm.enterimg != "") {
+                        var enter_img_url = "";
+                        if ($.isHTTP(_pm.graphic)) {
+                            enter_img_url = _pm.graphic;
+                        } else {
+                            enter_img_url =
+                                "./data/" + _pm.folder + "/" + _pm.graphic;
+                        }
 
-                }
+                        $(this).attr("src", enter_img_url);
+                    }
+                },
+            );
 
-            });
-
-            j_button.click(function(event) {
-
+            j_button.click(function (event) {
                 if (_pm.clickimg != "") {
-
                     var click_img_url = "";
                     if ($.isHTTP(_pm.clickimg)) {
                         click_img_url = _pm.clickimg;
                     } else {
-                        click_img_url = "./data/" + _pm.folder + "/" + _pm.clickimg;
+                        click_img_url =
+                            "./data/" + _pm.folder + "/" + _pm.clickimg;
                     }
 
                     j_button.attr("src", click_img_url);
-
                 }
-
 
                 //fix指定のボタンは、繰り返し実行できるようにする
                 if (button_clicked == true && _pm.fix == "false") {
@@ -4637,7 +4514,10 @@ tyrano.plugin.kag.tag.button = {
                 }
 
                 //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
-                if (that.kag.stat.is_strong_stop != true && _pm.fix == "false") {
+                if (
+                    that.kag.stat.is_strong_stop != true &&
+                    _pm.fix == "false"
+                ) {
                     return false;
                 }
 
@@ -4649,7 +4529,6 @@ tyrano.plugin.kag.tag.button = {
                 }
 
                 if (_pm.savesnap == "true") {
-
                     //セーブスナップを取る場合、アニメーション中やトランジションはNG
                     if (that.kag.stat.is_stop == true) {
                         return false;
@@ -4657,20 +4536,19 @@ tyrano.plugin.kag.tag.button = {
 
                     //ここは、現在のセーブ用のメッセージを取得しよう
                     that.kag.menu.snapSave(that.kag.stat.current_save_str);
-
                 }
-
 
                 //画面効果中は実行できないようにする
-                if (that.kag.layer.layer_event.css("display") == "none" && that.kag.stat.is_strong_stop != true) {
+                if (
+                    that.kag.layer.layer_event.css("display") == "none" &&
+                    that.kag.stat.is_strong_stop != true
+                ) {
                     return false;
                 }
-
 
                 //roleが設定されている場合は対応する処理を実行
                 //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
                 if (_pm.role != "") {
-
                     //roleがクリックされたら、skip停止
                     that.kag.stat.is_skip = false;
 
@@ -4680,20 +4558,22 @@ tyrano.plugin.kag.tag.button = {
                     }
 
                     //文字が流れているときは、セーブ出来ないようにする。
-                    if (_pm.role == "save" ||
+                    if (
+                        _pm.role == "save" ||
                         _pm.role == "menu" ||
                         _pm.role == "quicksave" ||
-                        _pm.role == "sleepgame") {
-
+                        _pm.role == "sleepgame"
+                    ) {
                         //テキストが流れているときとwait中は実行しない
-                        if (that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true) {
+                        if (
+                            that.kag.stat.is_adding_text == true ||
+                            that.kag.stat.is_wait == true
+                        ) {
                             return false;
                         }
-
                     }
 
                     switch (_pm.role) {
-
                         case "save":
                             that.kag.menu.displaySave();
                             break;
@@ -4728,16 +4608,16 @@ tyrano.plugin.kag.tag.button = {
                             that.kag.menu.loadQuickSave();
                             break;
                         case "auto":
-
                             if (that.kag.stat.is_auto == true) {
-                                that.kag.ftag.startTag("autostop", { next: "false" });
+                                that.kag.ftag.startTag("autostop", {
+                                    next: "false",
+                                });
                             } else {
                                 that.kag.ftag.startTag("autostart", {});
                             }
                             break;
 
                         case "sleepgame":
-
                             //押されたオブジェクトのマウスオーバーをsleepgame前に解除
                             j_button.trigger("mouseout");
 
@@ -4752,14 +4632,13 @@ tyrano.plugin.kag.tag.button = {
 
                             that.kag.ftag.startTag("sleepgame", _pm);
                             break;
-
                     }
 
                     //クリックされた時に音が指定されていたら
                     if (_pm.clickse != "") {
                         that.kag.ftag.startTag("playse", {
-                            "storage": _pm.clickse,
-                            "stop": true
+                            storage: _pm.clickse,
+                            stop: true,
                         });
                     }
 
@@ -4773,8 +4652,8 @@ tyrano.plugin.kag.tag.button = {
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
                     that.kag.ftag.startTag("playse", {
-                        "storage": _pm.clickse,
-                        "stop": true
+                        storage: _pm.clickse,
+                        stop: true,
                     });
                 }
 
@@ -4782,7 +4661,6 @@ tyrano.plugin.kag.tag.button = {
 
                 //fixレイヤの場合はcallでスタックが積まれる
                 if (_pm.role == "" && _pm.fix == "true") {
-
                     //コールスタックが帰ってきてない場合は、実行しないようにする必要がある
                     //fixの場合はコールスタックに残る。
                     var stack_pm = that.kag.getStack("call"); //最新のコールスタックを取得
@@ -4804,24 +4682,20 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.ftag.startTag("call", {
                             storage: _storage,
                             target: _target,
-                            auto_next: _auto_next
+                            auto_next: _auto_next,
                         });
-
                     } else {
-
                         //スタックで残された
-                        that.kag.log("callスタックが残っている場合、fixボタンは反応しません");
+                        that.kag.log(
+                            "callスタックが残っている場合、fixボタンは反応しません",
+                        );
                         that.kag.log(stack_pm);
-
 
                         return false;
                     }
-
                 } else {
-
                     //jumpを実行する
                     that.kag.ftag.startTag("jump", _pm);
-
                 }
 
                 //選択肢の後、スキップを継続するか否か
@@ -4830,16 +4704,9 @@ tyrano.plugin.kag.tag.button = {
                 } else {
                     that.kag.stat.is_skip = false;
                 }
-
             });
-
         })();
-
-
-    }
-
-
-
+    },
 };
 
 /*
@@ -4899,7 +4766,6 @@ cm=デフォルトはtrue。glinkは通常、ボタンをクリック後、自�
 
 //グラフィカルな選択肢を表示する　CSSボタン
 tyrano.plugin.kag.tag.glink = {
-
     pm: {
         color: "black", //クラス名でいいよ
         font_color: "",
@@ -4918,13 +4784,12 @@ tyrano.plugin.kag.tag.glink = {
         clickse: "",
         enterse: "",
         leavese: "",
-        face: ""
+        face: "",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
     //cmで抹消しよう
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
         var target_layer = null;
         target_layer = this.kag.layer.getFreeLayer();
@@ -4950,7 +4815,6 @@ tyrano.plugin.kag.tag.glink = {
 
         //graphic 背景画像を指定できます。
         if (pm.graphic != "") {
-
             //画像の読み込み
 
             j_button.removeClass("glink_button").addClass("button_graphic");
@@ -4959,7 +4823,6 @@ tyrano.plugin.kag.tag.glink = {
             j_button.css("background-repeat", "no-repeat");
             j_button.css("background-position", "center center");
             j_button.css("background-size", "100% 100%");
-
         } else {
             j_button.addClass(pm.color);
         }
@@ -4976,7 +4839,6 @@ tyrano.plugin.kag.tag.glink = {
             var base = Math.floor(sc_width / 2);
             var first_left = base - center;
             j_button.css("left", first_left + "px");
-
         } else if (pm.x == "") {
             j_button.css("left", this.kag.stat.locate.x + "px");
         } else {
@@ -4993,37 +4855,33 @@ tyrano.plugin.kag.tag.glink = {
         $.setName(j_button, pm.name);
 
         that.kag.event.addEventElement({
-            "tag": "glink",
-            "j_target": j_button, //イベント登録先の
-            "pm": pm
+            tag: "glink",
+            j_target: j_button, //イベント登録先の
+            pm: pm,
         });
         this.setEvent(j_button, pm);
 
         target_layer.append(j_button);
         target_layer.show();
         this.kag.ftag.nextOrder();
-
     },
 
-    setEvent: function(j_button, pm) {
-
+    setEvent: function (j_button, pm) {
         var that = TYRANO;
 
-        (function() {
-
+        (function () {
             var _target = pm.target;
             var _storage = pm.storage;
             var _pm = pm;
             var preexp = that.kag.embScript(pm.preexp);
             var button_clicked = false;
 
-            j_button.click(function(e) {
-
+            j_button.click(function (e) {
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
                     that.kag.ftag.startTag("playse", {
-                        "storage": _pm.clickse,
-                        "stop": true
+                        storage: _pm.clickse,
+                        stop: true,
                     });
                 }
 
@@ -5054,46 +4912,45 @@ tyrano.plugin.kag.tag.glink = {
                 } else {
                     that.kag.stat.is_skip = false;
                 }
-
             });
 
-            j_button.hover(function() {
+            j_button.hover(
+                function () {
+                    if (_pm.enterimg != "") {
+                        var enterimg_url = "./data/image/" + _pm.enterimg;
+                        j_button.css(
+                            "background-image",
+                            "url(" + enterimg_url + ")",
+                        );
+                    }
 
-                if (_pm.enterimg != "") {
-                    var enterimg_url = "./data/image/" + _pm.enterimg;
-                    j_button.css("background-image", "url(" + enterimg_url + ")");
-                }
-
-                //マウスが乗った時
-                if (_pm.enterse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        "storage": _pm.enterse,
-                        "stop": true
-                    });
-                }
-
-            },
-                function() {
-
+                    //マウスが乗った時
+                    if (_pm.enterse != "") {
+                        that.kag.ftag.startTag("playse", {
+                            storage: _pm.enterse,
+                            stop: true,
+                        });
+                    }
+                },
+                function () {
                     if (_pm.enterimg != "") {
                         var img_url = "./data/image/" + _pm.graphic;
-                        j_button.css("background-image", "url(" + img_url + ")");
+                        j_button.css(
+                            "background-image",
+                            "url(" + img_url + ")",
+                        );
                     }
                     //マウスが乗った時
                     if (_pm.leavese != "") {
                         that.kag.ftag.startTag("playse", {
-                            "storage": _pm.leavese,
-                            "stop": true
+                            storage: _pm.leavese,
+                            stop: true,
                         });
                     }
-                });
-
-
-
+                },
+            );
         })();
-
-
-    }
+    },
 };
 
 /*
@@ -5137,7 +4994,6 @@ target=クリックされた際のジャンプ先のラベルを指定します�
 
 //指定した位置にグラフィックボタンを配置する
 tyrano.plugin.kag.tag.clickable = {
-
     vital: ["width", "height"],
 
     pm: {
@@ -5151,13 +5007,12 @@ tyrano.plugin.kag.tag.clickable = {
         opacity: "140",
         storage: null,
         target: null,
-        name: ""
+        name: "",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
     //cmで抹消しよう
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         //this.kag.stat.locate.x
@@ -5176,7 +5031,6 @@ tyrano.plugin.kag.tag.clickable = {
         j_button.css("background-color", $.convertColor(pm.color));
         j_button.css("border", $.replaceAll(pm.border, ":", " "));
 
-
         //alert($.replaceAll(pm.border,":"," "));
 
         //x,y 座標が指定されている場合は、そっちを採用
@@ -5190,9 +5044,9 @@ tyrano.plugin.kag.tag.clickable = {
 
         //クラスとイベントを登録する
         that.kag.event.addEventElement({
-            "tag": "clickable",
-            "j_target": j_button, //イベント登録先の
-            "pm": pm
+            tag: "clickable",
+            j_target: j_button, //イベント登録先の
+            pm: pm,
         });
 
         that.setEvent(j_button, pm);
@@ -5201,43 +5055,35 @@ tyrano.plugin.kag.tag.clickable = {
         layer_free.show();
 
         this.kag.ftag.nextOrder();
-
     },
 
-    setEvent: function(j_button, pm) {
-
+    setEvent: function (j_button, pm) {
         var that = TYRANO;
 
-        (function() {
-
+        (function () {
             var _target = pm.target;
             var _storage = pm.storage;
             var _pm = pm;
 
             if (_pm.mouseopacity != "") {
-
-                j_button.bind("mouseover", function() {
+                j_button.bind("mouseover", function () {
                     j_button.css("opacity", $.convertOpacity(_pm.mouseopacity));
-
                 });
 
-                j_button.bind("mouseout", function() {
+                j_button.bind("mouseout", function () {
                     j_button.css("opacity", $.convertOpacity(_pm.opacity));
                 });
-
             }
 
-            j_button.click(function() {
-
+            j_button.click(function () {
                 //Sタグに到達していないとクリッカブルが有効にならない
 
-                var is_s = (function(obj) {
+                var is_s = (function (obj) {
                     if (obj.kag.stat.is_strong_stop != true) {
                         return false;
                     }
 
                     return true;
-
                 })(that);
 
                 if (is_s == false) {
@@ -5248,15 +5094,9 @@ tyrano.plugin.kag.tag.clickable = {
                 //コールを実行する
                 that.kag.layer.showEventLayer();
                 that.kag.ftag.startTag("jump", _pm);
-
-
             });
-
         })();
-
-
-    }
-
+    },
 };
 
 /*
@@ -5285,25 +5125,22 @@ top=fix 属性を true にしたときに記号を表示する位置のうち、
 
 //指定した位置にグラフィックボタンを配置する
 tyrano.plugin.kag.tag.glyph = {
-
     pm: {
         line: "nextpage.gif",
         layer: "message0",
         fix: "false",
         left: 0,
-        top: 0
+        top: 0,
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
     //cmで抹消しよう
-    start: function(pm) {
-
+    start: function (pm) {
         var that = this;
 
         $(".glyph_image").remove();
 
         if (pm.fix == "true") {
-
             var j_layer = this.kag.layer.getLayer(pm.layer);
 
             var j_next = $("<img class='glyph_image' />");
@@ -5317,19 +5154,13 @@ tyrano.plugin.kag.tag.glyph = {
             j_layer.append(j_next);
 
             this.kag.stat.flag_glyph = "true";
-
         } else {
-
             this.kag.stat.flag_glyph = "false";
             this.kag.stat.path_glyph = pm.line;
-
-
-
         }
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
 
 //スタイル変更は未サポート
@@ -5411,18 +5242,16 @@ rollIn
 
 //トランジション
 tyrano.plugin.kag.tag.trans = {
-
     vital: ["time", "layer"],
 
     pm: {
         layer: "base",
         method: "fadeIn",
         children: false,
-        time: 1500
+        time: 1500,
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
         this.kag.stat.is_trans = true;
         var that = this;
@@ -5443,14 +5272,10 @@ tyrano.plugin.kag.tag.trans = {
         var map_layer_fore = $.cloneObject(this.kag.layer.map_layer_fore);
         var map_layer_back = $.cloneObject(this.kag.layer.map_layer_back);
 
-
         for (key in map_layer_fore) {
-
             //指定条件のレイヤのみ実施
             if (pm.children == true || key === pm.layer) {
-
-                (function() {
-
+                (function () {
                     var _key = key;
 
                     var layer_fore = map_layer_fore[_key];
@@ -5459,41 +5284,41 @@ tyrano.plugin.kag.tag.trans = {
                     //メッセージレイヤの場合、カレント以外はトランスしない。むしろ非表示
                     //if((_key.indexOf("message")!=-1 && _key !== that.kag.stat.current_layer) || (_key.indexOf("message")!=-1 && layer_back.attr("l_visible") == "false") ){
 
-                    if ((_key.indexOf("message") != -1 && layer_back.attr("l_visible") == "false")) {
-
+                    if (
+                        _key.indexOf("message") != -1 &&
+                        layer_back.attr("l_visible") == "false"
+                    ) {
                         comp_num++;
                         that.kag.layer.forelay(_key);
-
                     } else {
-
                         /*
                         $.trans_old(pm.method, layer_fore, parseInt(pm.time), "hide", function() {
                         });
                         layer_back.css("display", "none");
                         */
 
-                        $.trans(pm.method, layer_back, parseInt(pm.time), "show", function() {
-                            comp_num++;
-                            that.kag.layer.forelay(_key);
+                        $.trans(
+                            pm.method,
+                            layer_back,
+                            parseInt(pm.time),
+                            "show",
+                            function () {
+                                comp_num++;
+                                that.kag.layer.forelay(_key);
 
-                            that.kag.ftag.completeTrans();
+                                that.kag.ftag.completeTrans();
 
-                            that.kag.ftag.hideNextImg();
-
-                        });
-
+                                that.kag.ftag.hideNextImg();
+                            },
+                        );
                     }
-
                 })();
             }
         }
 
         this.kag.ftag.nextOrder();
-
-    }
+    },
 };
-
-
 
 /*
 #[bg]
@@ -5554,7 +5379,6 @@ puffIn
 
 //背景変更
 tyrano.plugin.kag.tag.bg = {
-
     vital: ["storage"],
 
     pm: {
@@ -5564,11 +5388,9 @@ tyrano.plugin.kag.tag.bg = {
         time: 3000,
         cross: "false",
         position: "",
-
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
 
         var that = this;
@@ -5587,8 +5409,7 @@ tyrano.plugin.kag.tag.bg = {
         }
 
         //jqyeru で一つを削除して、もう一方を復活させる
-        this.kag.preload(storage_url, function() {
-
+        this.kag.preload(storage_url, function () {
             var j_old_bg = that.kag.layer.getLayer("base", "fore");
             var j_new_bg = j_old_bg.clone(false);
 
@@ -5609,46 +5430,50 @@ tyrano.plugin.kag.tag.bg = {
                 that.kag.layer.hideEventLayer();
             }
 
-
             //スキップ中は時間を短くする
             pm.time = that.kag.cutTimeWithSkip(pm.time);
 
-            if (pm.cross == "true") {   //crossがfalseの場合は、古い背景はtransしない。
-                $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
-                    j_old_bg.remove();
-                });
+            if (pm.cross == "true") {
+                //crossがfalseの場合は、古い背景はtransしない。
+                $.trans(
+                    pm.method,
+                    j_old_bg,
+                    parseInt(pm.time),
+                    "hide",
+                    function () {
+                        j_old_bg.remove();
+                    },
+                );
             }
 
-            $.trans(pm.method, j_new_bg, parseInt(pm.time), "show", function() {
+            $.trans(
+                pm.method,
+                j_new_bg,
+                parseInt(pm.time),
+                "show",
+                function () {
+                    j_new_bg.css("opacity", 1);
 
-                j_new_bg.css("opacity", 1);
+                    //crossがfalseの場合は、古い背景画像を削除
+                    if (pm.cross == "false") {
+                        j_old_bg.remove();
+                    }
 
-                //crossがfalseの場合は、古い背景画像を削除
-                if (pm.cross == "false") {
-                    j_old_bg.remove();
-                }
-
-                if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
-                }
-
-            });
+                    if (pm.wait == "true") {
+                        that.kag.layer.showEventLayer();
+                        that.kag.ftag.nextOrder();
+                    }
+                },
+            );
 
             //レイヤの中で、画像を取得する
-
         });
 
         if (pm.wait == "false") {
             this.kag.ftag.nextOrder();
         }
-    }
+    },
 };
-
-
-
-
-
 
 /*
 #[bg2]
@@ -5708,7 +5533,6 @@ puffIn
 
 //背景変更
 tyrano.plugin.kag.tag.bg2 = {
-
     vital: ["storage"],
 
     pm: {
@@ -5723,11 +5547,10 @@ tyrano.plugin.kag.tag.bg2 = {
         left: "",
         top: "",
 
-        cross: "false"
+        cross: "false",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
 
         var that = this;
@@ -5745,8 +5568,7 @@ tyrano.plugin.kag.tag.bg2 = {
         }
 
         //jquery で一つを削除して、もう一方を復活させる
-        this.kag.preload(storage_url, function() {
-
+        this.kag.preload(storage_url, function () {
             var j_old_bg = that.kag.layer.getLayer("base", "fore");
             var j_new_bg = j_old_bg.clone(false);
 
@@ -5779,7 +5601,7 @@ tyrano.plugin.kag.tag.bg2 = {
                 width: scWidth,
                 height: scHeight,
                 left: left,
-                top: top
+                top: top,
             });
 
             j_bg_img.attr("src", storage_url);
@@ -5788,7 +5610,6 @@ tyrano.plugin.kag.tag.bg2 = {
 
             j_new_bg.find("img").remove();
             j_new_bg.append(j_bg_img);
-
 
             ////ここまで
             j_new_bg.css("display", "none");
@@ -5805,39 +5626,47 @@ tyrano.plugin.kag.tag.bg2 = {
             //スキップ中は時間を短くする
             pm.time = that.kag.cutTimeWithSkip(pm.time);
 
-            if (pm.cross == "true") {   //crossがfalseの場合は、古い背景はtransしない。
-                $.trans(pm.method, j_old_bg, parseInt(pm.time), "hide", function() {
-                    j_old_bg.remove();
-                });
+            if (pm.cross == "true") {
+                //crossがfalseの場合は、古い背景はtransしない。
+                $.trans(
+                    pm.method,
+                    j_old_bg,
+                    parseInt(pm.time),
+                    "hide",
+                    function () {
+                        j_old_bg.remove();
+                    },
+                );
             }
 
-            $.trans(pm.method, j_new_bg, parseInt(pm.time), "show", function() {
+            $.trans(
+                pm.method,
+                j_new_bg,
+                parseInt(pm.time),
+                "show",
+                function () {
+                    j_new_bg.css("opacity", 1);
 
-                j_new_bg.css("opacity", 1);
+                    //crossがfalseの場合は、古い背景画像を削除
+                    if (pm.cross == "false") {
+                        j_old_bg.remove();
+                    }
 
-                //crossがfalseの場合は、古い背景画像を削除
-                if (pm.cross == "false") {
-                    j_old_bg.remove();
-                }
-
-                if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
-                }
-
-            });
+                    if (pm.wait == "true") {
+                        that.kag.layer.showEventLayer();
+                        that.kag.ftag.nextOrder();
+                    }
+                },
+            );
 
             //レイヤの中で、画像を取得する
-
         });
 
         if (pm.wait == "false") {
             this.kag.ftag.nextOrder();
         }
-    }
+    },
 };
-
-
 
 /*
 #[layermode]
@@ -5869,7 +5698,6 @@ wait=合成の完了を待つか否かを指定できます。trueかfalseを指
 
 //背景変更
 tyrano.plugin.kag.tag.layermode = {
-
     vital: [],
 
     pm: {
@@ -5880,20 +5708,19 @@ tyrano.plugin.kag.tag.layermode = {
         folder: "",
         opacity: "", //opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全 に透明です。,
         time: "500", //時間,
-        wait: "true" //演出の終わりを待つかどうか
-
+        wait: "true", //演出の終わりを待つかどうか
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
 
         var that = this;
 
         var blend_layer = null;
 
-        blend_layer = $("<div class='layer_blend_mode blendlayer' style='display:none;position:absolute;width:100%;height:100%;z-index:99'></div>");
-
+        blend_layer = $(
+            "<div class='layer_blend_mode blendlayer' style='display:none;position:absolute;width:100%;height:100%;z-index:99'></div>",
+        );
 
         if (pm.name != "") {
             blend_layer.addClass("layer_blend_" + pm.name);
@@ -5906,7 +5733,6 @@ tyrano.plugin.kag.tag.layermode = {
         if (pm.opacity != "") {
             blend_layer.css("opacity", $.convertOpacity(pm.opacity));
         }
-
 
         if (pm.folder != "") {
             folder = pm.folder;
@@ -5923,48 +5749,36 @@ tyrano.plugin.kag.tag.layermode = {
 
         blend_layer.css("mix-blend-mode", pm.mode);
 
-
         $("#tyrano_base").append(blend_layer);
 
-
         //j_new_bg.css("background-image","url("+storage_url+")");
-
 
         //background: #0bd url(beach-footprint.jpg) no-repeat;
         //background-blend-mode: screen;
 
         if (pm.graphic != "") {
-
-            this.kag.preload(storage_url, function() {
-
-                blend_layer.stop(true, true).fadeIn(parseInt(pm.time), function() {
-
-                    if (pm.wait == "true") {
-                        that.kag.ftag.nextOrder();
-                    }
-
-                });
+            this.kag.preload(storage_url, function () {
+                blend_layer
+                    .stop(true, true)
+                    .fadeIn(parseInt(pm.time), function () {
+                        if (pm.wait == "true") {
+                            that.kag.ftag.nextOrder();
+                        }
+                    });
             });
-
         } else {
-
-            blend_layer.stop(true, true).fadeIn(parseInt(pm.time), function() {
-
+            blend_layer.stop(true, true).fadeIn(parseInt(pm.time), function () {
                 if (pm.wait == "true") {
                     that.kag.ftag.nextOrder();
                 }
-
             });
-
         }
 
         if (pm.wait == "false") {
             this.kag.ftag.nextOrder();
         }
-
-    }
+    },
 };
-
 
 /*
 #[layermode_movie]
@@ -6008,7 +5822,6 @@ wait=動作効果の再生完了を待つか否かをtrueかfalseで指定でき
 
 //背景変更
 tyrano.plugin.kag.tag.layermode_movie = {
-
     vital: ["video"],
 
     pm: {
@@ -6030,18 +5843,21 @@ tyrano.plugin.kag.tag.layermode_movie = {
         top: "",
         left: "",
 
-        stop: "false" //trueでnextorderを無効化。ロード復帰の時用
+        stop: "false", //trueでnextorderを無効化。ロード復帰の時用
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
 
         var that = this;
 
         var blend_layer = null;
 
-        blend_layer = $("<video class='layer_blend_mode blendlayer blendvideo' data-video-name='" + pm.name + "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>");
+        blend_layer = $(
+            "<video class='layer_blend_mode blendlayer blendvideo' data-video-name='" +
+                pm.name +
+                "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
+        );
         var video = blend_layer.get(0);
         var url = "./data/video/" + pm.video;
 
@@ -6091,14 +5907,12 @@ tyrano.plugin.kag.tag.layermode_movie = {
             video.style.top = pm.top + "px";
         }
 
-
         video.style.minHeight = "100%";
         video.style.minWidth = "100%";
         video.style.backgroundSize = "cover";
 
         video.autoplay = true;
         video.autobuffer = true;
-
 
         video.setAttribute("playsinline", "1");
 
@@ -6115,8 +5929,7 @@ tyrano.plugin.kag.tag.layermode_movie = {
         var j_video = $(video);
 
         //ビデオ再生完了時
-        video.addEventListener("ended", function(e) {
-
+        video.addEventListener("ended", function (e) {
             if (pm.loop == "false") {
                 j_video.remove();
             }
@@ -6135,7 +5948,6 @@ tyrano.plugin.kag.tag.layermode_movie = {
 
         blend_layer = j_video;
 
-
         if (pm.name != "") {
             blend_layer.addClass("layer_blend_" + pm.name);
         }
@@ -6146,17 +5958,14 @@ tyrano.plugin.kag.tag.layermode_movie = {
 
         blend_layer.css("mix-blend-mode", pm.mode);
 
-
         $("#tyrano_base").append(blend_layer);
 
-        blend_layer.stop(true, true).fadeIn(parseInt(pm.time), function() {
-
+        blend_layer.stop(true, true).fadeIn(parseInt(pm.time), function () {
             if (pm.wait == "true" && pm.loop == "true") {
                 if (pm.stop != "true") {
                     that.kag.ftag.nextOrder();
                 }
             }
-
         });
 
         if (pm.wait == "false") {
@@ -6164,12 +5973,8 @@ tyrano.plugin.kag.tag.layermode_movie = {
                 this.kag.ftag.nextOrder();
             }
         }
-
-    }
+    },
 };
-
-
-
 
 /*
 #[free_layermode]
@@ -6194,17 +5999,15 @@ wait=フェードアウトの完了を待つか否かをtrueかfalseで指定で
 
 //背景変更
 tyrano.plugin.kag.tag.free_layermode = {
-
     vital: [],
 
     pm: {
         name: "", //レイヤーモードに名前をつけることができます。
         time: "500", //時間,
-        wait: "true" //演出の完了を待つかどうか
+        wait: "true", //演出の完了を待つかどうか
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
 
         var that = this;
@@ -6226,9 +6029,9 @@ tyrano.plugin.kag.tag.free_layermode = {
             return;
         }
 
-        blend_layer.each(function() {
+        blend_layer.each(function () {
             var blend_obj = $(this);
-            blend_obj.stop(true, true).fadeOut(parseInt(pm.time), function() {
+            blend_obj.stop(true, true).fadeOut(parseInt(pm.time), function () {
                 blend_obj.remove();
                 n++;
                 if (pm.wait == "true") {
@@ -6237,13 +6040,10 @@ tyrano.plugin.kag.tag.free_layermode = {
                     }
                 }
             });
-
         });
-
 
         if (pm.wait == "false") {
             this.kag.ftag.nextOrder();
         }
-
-    }
+    },
 };
