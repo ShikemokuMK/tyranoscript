@@ -4304,7 +4304,8 @@ hint=マウスカーソルを静止させたときに表示されるツールチ
 clickse=ボタンをクリックした時に再生される効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
 enterse=ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください,
 leavese=ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルはsoundフォルダに配置してください。,
-clickimg=ボタンをクリックした時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください,
+activeimg=ボタンの上でマウスボタンを押している間に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。,
+clickimg=ボタンをクリックしたあとに切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。,
 enterimg=ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルはimageフォルダに配置してください。,
 visible=初期状態で表示か非表示を選択できます。trueで表示falseで非表示の初期状態となります,
 auto_next=true or false を指定します。falseを指定すると、fixの場合、[return]で戻った時に次のタグへ進ませません。,
@@ -4338,6 +4339,7 @@ tyrano.plugin.kag.tag.button = {
         clickse: "",
         enterse: "",
         leavese: "",
+        activeimg: "",
         clickimg: "",
         enterimg: "",
 
@@ -4449,63 +4451,66 @@ tyrano.plugin.kag.tag.button = {
             var preexp = that.kag.embScript(pm.preexp);
             var button_clicked = false;
 
+            var parse_img_url = function (src) {
+                if ($.isHTTP(src)) {
+                    return src;
+                } else {
+                    return "./data/" + _pm.folder + "/" + src;
+                }
+            };
+
             j_button.hover(
+                //マウスが乗った時
                 function () {
-                    //マウスが乗った時
+                    //音を鳴らす
                     if (_pm.enterse != "") {
                         that.kag.ftag.startTag("playse", {
                             storage: _pm.enterse,
                             stop: true,
                         });
                     }
-
+                    //画像を変更する
                     if (_pm.enterimg != "") {
-                        var enter_img_url = "";
-                        if ($.isHTTP(_pm.enterimg)) {
-                            enter_img_url = _pm.enterimg;
-                        } else {
-                            enter_img_url =
-                                "./data/" + _pm.folder + "/" + _pm.enterimg;
-                        }
-
+                        var enter_img_url = parse_img_url(_pm.enterimg);
                         $(this).attr("src", enter_img_url);
                     }
                 },
+                //マウスが外れた時
                 function () {
-                    //マウスが外れた時
+                    //音を鳴らす
                     if (_pm.leavese != "") {
                         that.kag.ftag.startTag("playse", {
                             storage: _pm.leavese,
                             stop: true,
                         });
                     }
-
-                    //元に戻す
+                    //画像を元に戻す
                     if (_pm.enterimg != "") {
-                        var enter_img_url = "";
-                        if ($.isHTTP(_pm.graphic)) {
-                            enter_img_url = _pm.graphic;
-                        } else {
-                            enter_img_url =
-                                "./data/" + _pm.folder + "/" + _pm.graphic;
-                        }
-
-                        $(this).attr("src", enter_img_url);
+                        var initial_img_url = parse_img_url(_pm.graphic);
+                        $(this).attr("src", initial_img_url);
                     }
                 },
             );
 
+            //マウスを押したとき
+            j_button.on("mousedown touchstart", function (event) {
+                if (_pm.activeimg != "") {
+                    var active_img_url = parse_img_url(_pm.activeimg);
+                    j_button.attr("src", active_img_url);
+                }
+            });
+
+            //クリックが確定したとき
             j_button.click(function (event) {
                 if (_pm.clickimg != "") {
-                    var click_img_url = "";
-                    if ($.isHTTP(_pm.clickimg)) {
-                        click_img_url = _pm.clickimg;
-                    } else {
-                        click_img_url =
-                            "./data/" + _pm.folder + "/" + _pm.clickimg;
-                    }
-
+                    //クリック画像が設定されているなら画像を変える
+                    var click_img_url = parse_img_url(_pm.clickimg);
                     j_button.attr("src", click_img_url);
+                } else if (_pm.activeimg != "") {
+                    //クリック画像は設定されていないが、アクティブ画像が設定されている場合
+                    //いままさにアクティブ画像になっているはずなので、もとに戻す
+                    var initial_img_url = parse_img_url(_pm.graphic);
+                    $(this).attr("src", initial_img_url);
                 }
 
                 //fix指定のボタンは、繰り返し実行できるようにする
