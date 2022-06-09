@@ -404,6 +404,7 @@ tyrano.plugin.kag.tag.stopbgm = {
         time: 2000,
         target: "bgm",
         buf: "0",
+        buf_all: "false",
         stop: "false", //trueの場合自動的に次の命令へ移動しない。ロード対策
     },
 
@@ -438,7 +439,9 @@ tyrano.plugin.kag.tag.stopbgm = {
         var browser = $.getBrowser();
 
         for (key in target_map) {
-            if (key == pm.buf) {
+            // pm.buf_allが"true"の場合はpm.bufを見ずにすべてのスロットの効果音を止める
+            // [playse ... clear="true"]の内部で[stopbgm]が呼び出されたときはpm.buf_allに"true"が入っている
+            if (pm.buf_all === "true" || key == pm.buf) {
                 (function () {
                     var _key = key;
 
@@ -650,6 +653,7 @@ tyrano.plugin.kag.tag.playse = {
             this.kag.ftag.startTag("stopbgm", {
                 target: "se",
                 stop: "true",
+                buf_all: "true",
             });
         }
 
