@@ -4701,7 +4701,6 @@ tyrano.plugin.kag.tag.button = {
 
             //クリックが確定したとき
             j_button.click(function (event) {
-                button_clicked = true;
 
                 if (_pm.clickimg != "") {
                     //クリック画像が設定されているなら画像を変える
@@ -4726,6 +4725,9 @@ tyrano.plugin.kag.tag.button = {
                 ) {
                     return false;
                 }
+                
+                button_clicked = true;
+
 
                 if (_pm.exp != "") {
                     //スクリプト実行
@@ -5086,6 +5088,7 @@ tyrano.plugin.kag.tag.glink = {
             var button_clicked = false;
 
             j_button.click(function (e) {
+                
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
                     that.kag.ftag.startTag("playse", {
