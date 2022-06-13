@@ -420,7 +420,7 @@ var PARAM_EXP = {
                     var param_name = $.trim(tmp_array[0]);
 
                     //解説
-                    var param_exp = $.trim(tmp_array.slice(1).join('='));
+                    var param_exp = $.trim(tmp_array.slice(1).join("="));
                     param_exp = replaceParamExpWithConstant(
                         param_exp,
                         param_name,
@@ -434,7 +434,9 @@ var PARAM_EXP = {
                         param_initial =
                             tyrano.plugin.kag.tag[tag_name].pm[param_name];
                     } catch (err) {}
-                    param_initial = param_initial ? `<span class="code">${param_initial}</span>` : "";
+                    param_initial = param_initial
+                        ? `<span class="code">${param_initial}</span>`
+                        : "";
 
                     //必須
                     var vital = "×";
