@@ -34,6 +34,25 @@ var GROUP_RANK = [
     "その他",
 ].reverse();
 
+var PARAM_EXP = {
+    "time/fadein":
+        "フェードイン時間をミリ秒単位で指定します。これを指定すると、画像が透明な状態から徐々に表示されていきます。省略すると、一瞬で消去されます。",
+    "wait/fadein":
+        "フェードインの完了を待つかどうか。`true`または`false`で指定します。",
+    "time/fadeout":
+        "フェードアウト時間をミリ秒単位で指定します。これを指定すると、画像が徐々に透明になっていきます。省略すると、一瞬で消去されます。",
+    "wait/fadeout":
+        "フェードアウトの完了を待つかどうか。`true`または`false`で指定します。",
+    "page": "レイヤの表ページと裏ページ、どちらを対象とするか。`fore`または`back`で指定します。省略すると、表ページとみなされます。",
+    "layer": "対象のレイヤを指定します。",
+    "layer/image": "対象とする前景レイヤを`0`以上の整数で指定します。",
+    "storage/jump":
+        "ジャンプ先のシナリオファイル名を指定します。省略すると、現在のシナリオファイルとみなされます。",
+    "target/jump":
+        "ジャンプ先のラベル名を指定します。省略すると、シナリオファイルの先頭にジャンプします。",
+    "name": "`[anim]`タグなどからこの名前でアニメーションさせられます。カンマで区切ることで複数指定できます。（高度な知識：`name`属性で指定した値はHTMLのクラス属性になります）",
+};
+
 (function ($) {
     $.generateHtml = function () {
         var html = "";
@@ -222,19 +241,20 @@ var GROUP_RANK = [
         var group_map = {};
 
         // TagDocをグループで整理
-        for (key in map_doc) {
-            var obj = map_doc[key];
+        for (var tag_name in map_doc) {
+            var obj = map_doc[tag_name];
             // 文字列をトリミングしておく
-            ["exp", "group", "sample", "demo"].forEach(function (key) {
+            ["exp", "group", "sample", "demo"].forEach((key) => {
                 if (typeof obj[key] === "string") {
                     obj[key] = obj[key].trim();
                 }
             });
             // 振り分け
-            if (group_map[obj.group] === undefined) {
-                group_map[obj.group] = {};
+            var group_name = obj.group;
+            if (group_map[group_name] === undefined) {
+                group_map[group_name] = {};
             }
-            group_map[obj.group][key] = obj;
+            group_map[group_name][tag_name] = obj;
         }
 
         //map_docに存在しているグループのリスト
@@ -304,14 +324,11 @@ var GROUP_RANK = [
 
         var j_root = $("<div></div>");
 
+        //スタイルの追加
         j_root.append(
             `<style>
                 .news-v3 p {
                     margin-bottom: 10px;
-                }
-                .news-v3 p > code {
-                    color: #555;
-                    background-color: #ececec;
                 }
                 .news-v3 h3 {
                     margin-bottom: 4px;
@@ -323,10 +340,20 @@ var GROUP_RANK = [
                 .news-v3 .code {
                     padding: 2px 3px;
                     margin: 0px 2px;
-                    font-size: 95%;
+                    font-size: 100%;
                     background-color: rgba(0, 0, 0, 0.07);
                     border-radius: 4px;
                     font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+                }
+                .news-v3 .tag {
+                    text-decoration: none;
+                }
+                .news-v3 .tag > .code {
+                    color: #c7254e;
+                    background-color: #f9f2f4;
+                }
+                .news-v3 .tag > .code:hover {
+                    background-color: #ffe9ef;
                 }
                 .news-v3 .table > thead > tr > th {
                     vertical-align: middle;
@@ -345,16 +372,16 @@ var GROUP_RANK = [
         console.log("===tag_names");
         console.log(tag_names);
 
-        for (var key of tag_names) {
-            var obj = map_doc[key];
+        for (var tag_name of tag_names) {
+            var obj = map_doc[tag_name];
 
             //説明文のパース
             exp = parseExp(obj.exp);
 
             var html =
                 `<div  class="news-v3 bg-color-white margin-bottom-20">` +
-                `<div class="news-v3-in"><a name="${key}"></a>` +
-                `<h3 style="color:#a10f2b">[${key}]　${obj.title}</h3>` +
+                `<div class="news-v3-in"><a name="${tag_name}"></a>` +
+                `<h3 style="color:#a10f2b">[${tag_name}]　${obj.title}</h3>` +
                 `<ul class="list-inline posted-info"><li><span class="group">${obj.group}</span></li></ul>${exp}`;
 
             //デモ用のURLがあるなら差し込む
@@ -374,7 +401,7 @@ var GROUP_RANK = [
             //パラメータのテーブルを作っていく
             html +=
                 '<table class="table table-bordered">' +
-                '<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>初期値</th><th>解説</th></tr></thead>' +
+                '<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>解説</th><th>初期値</th></tr></thead>' +
                 "<tbody>";
 
             var array_param = obj.param.split(",");
@@ -393,27 +420,32 @@ var GROUP_RANK = [
                     var param_name = $.trim(tmp_array[0]);
 
                     //解説
-                    var param_exp = $.trim(tmp_array[1]);
+                    var param_exp = $.trim(tmp_array.slice(1).join('='));
+                    param_exp = replaceParamExpWithConstant(
+                        param_exp,
+                        param_name,
+                        tag_name,
+                    );
                     param_exp = markup(param_exp);
 
                     //初期値
                     var param_initial = "";
                     try {
                         param_initial =
-                            tyrano.plugin.kag.tag[key].pm[param_name];
+                            tyrano.plugin.kag.tag[tag_name].pm[param_name];
                     } catch (err) {}
-                    param_initial = param_initial ?? "";
+                    param_initial = param_initial ? `<span class="code">${param_initial}</span>` : "";
 
                     //必須
                     var vital = "×";
                     if (
-                        master_tag[key] != null &&
-                        master_tag[key]["vital"] != null
+                        master_tag[tag_name] != null &&
+                        master_tag[tag_name]["vital"] != null
                     ) {
-                        var array_vital = master_tag[key]["vital"];
+                        var array_vital = master_tag[tag_name]["vital"];
 
                         for (var j = 0; j < array_vital.length; j++) {
-                            if (master_tag[key].vital[j] == param_name) {
+                            if (master_tag[tag_name].vital[j] == param_name) {
                                 vital = "◯";
                                 break;
                             }
@@ -422,7 +454,7 @@ var GROUP_RANK = [
 
                     html +=
                         `<tr><td>${param_name}</td><td>${vital}</td>` +
-                        `<td>${param_initial}</td><td>${param_exp}</td></tr>`;
+                        `<td>${param_exp}</td><td>${param_initial}</td></tr>`;
                 }
             } //end for loop
 
@@ -468,8 +500,8 @@ var GROUP_RANK = [
         $("#src_html").val("ボタンを押してください");
 
         var js_auto_complete = "";
-        for (key in master_tag) {
-            js_auto_complete += '"' + key + '",\n';
+        for (var tag_name in master_tag) {
+            js_auto_complete += '"' + tag_name + '",\n';
         }
         $("#auto_complete_tag").val(js_auto_complete);
     };
@@ -500,15 +532,42 @@ var GROUP_RANK = [
         p = p.trim();
         //段落内における改行は<br>に変換して見た目に反映
         p = p.replace(/\n/g, "<br>");
-        //インラインコードを変換
+        //インラインティラノタグ(`[hoge]`)を変換
+        p = p.replace(
+            /`\[([^`]+)\]`/g,
+            `<a class="tag" href="#$1"><span class="code">[$1]</span></a>`,
+        );
+        //インラインコード(`hoge`)を変換
         p = p.replace(/`([^`]+)`/g, `<span class="code">$1</span>`);
         //URLを検出してリンク化
         p = p.replace(
-            /https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+/g,
+            /(?<!href="|')https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+/g,
             function (url) {
                 return `<a href="${url}">${url}</a>`;
             },
         );
         return p;
+    }
+
+    //パラメータの説明を定数から取ってくる
+    function replaceParamExpWithConstant(str, param_name, tag_name) {
+        //トリミング
+        str = str.trim();
+        //"!!"から始まる場合は定数から取ってくる
+        if (str.match(/^\!\!/)) {
+            str = str.replace("!!", "");
+            const key = param_name + (str ? "/" : "") + str;
+            if (PARAM_EXP[key]) {
+                return PARAM_EXP[key];
+            } else {
+                console.error(
+                    `[${tag_name}]タグ: ${key} のパラメータ説明文が定義されていません。`,
+                );
+                return "";
+            }
+        } else {
+            //"!!"から始まらない場合はそのまま
+            return str;
+        }
     }
 })(jQuery);

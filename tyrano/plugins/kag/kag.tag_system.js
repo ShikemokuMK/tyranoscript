@@ -2626,7 +2626,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
                     parseFloat(obj.version) +
                     "「" +
                     obj.message +
-                    "」<br />アップデートを行いますか？",
+                    "」<br>アップデートを行いますか？",
                 function () {
                     alert(
                         "アップデートを行います。完了後、自動的にゲームは終了します。",
