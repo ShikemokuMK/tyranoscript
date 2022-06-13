@@ -22,7 +22,7 @@ exp には任意の TJS(JS) 式を指定できるので、TJS(JS) として有�
 ;↑ゲーム変数 test2 に ゲーム変数 test の 3 倍の数値を代入している
 
 :param
-exp=評価するTJS式を指定します。
+exp = 評価するTJS式を指定します。
 
 :demo
 1,kaisetsu/19_variable_1
@@ -63,7 +63,7 @@ tyrano.plugin.kag.tag.eval = {
 :sample
 
 :param
-exp=変数名を指定できます。変数名を指定した場合はその変数だけを消去します。例えば「f.name」「sf.flag」のように指定します。省略すると、すべての変数が消去されます。
+exp = 変数名を指定できます。変数名を指定した場合はその変数だけを消去します。例えば「f.name」「sf.flag」のように指定します。省略すると、すべての変数が消去されます。
 
 #[end]
 */
@@ -137,7 +137,7 @@ tyrano.plugin.kag.tag.clearsysvar = {
 :sample
 
 :param
-stack=`call`、`if`、`macro`のいずれかを指定できます。特定のスタックのみ削除できます。省略すると、全てのスタックを削除します。
+stack = `call`、`if`、`macro`のいずれかを指定できます。特定のスタックのみ削除できます。省略すると、全てのスタックを削除します。
 
 #[end]
 */
@@ -177,7 +177,7 @@ tyrano.plugin.kag.tag.clearstack = {
 :sample
 
 :param
-ask=終了の確認をするかどうか。`true`または`false`で指定します。デフォルトは`true`。
+ask = 終了の確認をするかどうか。`true`または`false`で指定します。デフォルトは`true`。
 
 #[end]
 */
@@ -246,7 +246,7 @@ tyrano.plugin.kag.tag["close"] = {
 [trace exp="f.test"]
 
 :param
-exp=評価するJS式を指定します。
+exp = 評価するJS式を指定します。
 
 #[end]
 */
@@ -285,12 +285,12 @@ tyrano.plugin.kag.tag["trace"] = {
 [body bgimage="back.png" bgcolor="black" ]
 
 :param
-bgimage=ゲーム画面外の背景に設定する画像を指定します。bgimageフォルダに配置してください。,
-bgrepeat=背景に画像を指定した際の表示パターンを指定します。デフォルトは縦横に繰り返し表示されます。repeat-x:水平方向のみ繰り返し。repeat-y:垂直方向のみ繰り返し。round:比率を崩して覆うように全画面繰り返し。no-repeat:繰り返しなし,
-bgcolor=背景色を0xRRGGBB形式で指定します。なお、bgimageが設定されている場合は無視されます。,
-bgcover= true or false。デフォルトはfalse 。trueを指定すると１枚が全画面に引き伸ばして配置されます,
-scWidth=ゲーム画面のオリジナル横幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscWidthに対応します。,
-scHeight=ゲーム画面のオリジナル縦幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscHeightに対応します。
+bgimage  = ゲーム画面外の背景に設定する画像を指定します。bgimageフォルダに配置してください。,
+bgrepeat = 背景に画像を指定した際の表示パターンを指定します。デフォルトは縦横に繰り返し表示されます。repeat-x:水平方向のみ繰り返し。repeat-y:垂直方向のみ繰り返し。round:比率を崩して覆うように全画面繰り返し。no-repeat:繰り返しなし,
+bgcolor  = 背景色を0xRRGGBB形式で指定します。なお、bgimageが設定されている場合は無視されます。,
+bgcover  =  true or false。デフォルトはfalse 。trueを指定すると１枚が全画面に引き伸ばして配置されます,
+scWidth  = ゲーム画面のオリジナル横幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscWidthに対応します。,
+scHeight = ゲーム画面のオリジナル縦幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscHeightに対応します。
 
 #[end]
 */
@@ -388,7 +388,7 @@ tyrano.plugin.kag.tag["body"] = {
 [title name="変更後のタイトル"]
 
 :param
-name=表示したいタイトルを指定します
+name = 表示したいタイトルを指定します
 
 #[end]
 */
@@ -466,7 +466,7 @@ JavaScriptの記述を終了します
 :sample
 
 :param
-stop=endscriptに到達した時、ここにtrueを指定すると次のタグに進ませない。scriptの中でjumpした時などに指定する。デフォルトはfalse
+stop = endscriptに到達した時、ここにtrueを指定すると次のタグに進ませない。scriptの中でjumpした時などに指定する。デフォルトはfalse
 
 #[end]
 */
@@ -525,9 +525,9 @@ cmタグなどで画面をクリアしない限り、クリックしてもゲー
 [endhtml]
 
 :param
-left=HTMLタグの左端位置を指定します。（ピクセル）,
-top=HTMLの上端位置を指定します。（ピクセル）,
-name=HTML領域に名前を指定できます。この名前を使って、HTML領域に対してアニメーションなども実行できます。
+left = HTMLタグの左端位置を指定します。（ピクセル）,
+top  = HTMLの上端位置を指定します。（ピクセル）,
+name = HTML領域に名前を指定できます。この名前を使って、HTML領域に対してアニメーションなども実行できます。
 
 :demo
 2,kaisetsu/11_html
@@ -630,7 +630,7 @@ exp で示された式を評価(実行)し、その結果を埋め込みます�
 と書くと、この emb タグが 変数の値だよ～ん という内容に置き換わります。
 
 :param
-exp=評価するTJS（JS）式を指定します。ここで評価された式がembタグと置き換わります
+exp = 評価するTJS（JS）式を指定します。ここで評価された式がembタグと置き換わります
 
 #[end]
 */
@@ -702,7 +702,7 @@ tyrano.plugin.kag.tag.emb = {
 [endif]
 
 :param
-exp=評価する TJS 式を指定します。この式の結果が false ( または 0 な らば、elsif・else・endif タグまでの文章やタグが無視されます。
+exp = 評価する TJS 式を指定します。この式の結果が false ( または 0 な らば、elsif・else・endif タグまでの文章やタグが無視されます。
 
 :demo
 1,kaisetsu/20_variable_2
@@ -773,7 +773,7 @@ if タグと endif タグの間で用いられます。 それまでの if タ�
 :sample
 
 :param
-exp=評価する JS 式を指定します。
+exp = 評価する JS 式を指定します。
 
 :demo
 1,kaisetsu/20_variable_2
@@ -895,7 +895,7 @@ if文を終了します。必ずif文の終わりに記述する必要があり�
 :sample
 
 :param
-exp=評価する TJS 式を指定します。
+exp = 評価する TJS 式を指定します。
 
 #[end]
 */
@@ -927,8 +927,8 @@ tyrano.plugin.kag.tag["endif"] = {
 :sample
 
 :param
-storage=呼び出したいサブルーチンのあるのシナリオファイルを 指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
-target=呼び出すサブルーチンのラベルを指定します。省略すると、ファイルの先頭から実行されます。
+storage = 呼び出したいサブルーチンのあるのシナリオファイルを 指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
+target  = 呼び出すサブルーチンのラベルを指定します。省略すると、ファイルの先頭から実行されます。
 
 :demo
 1,kaisetsu/21_macro
@@ -1049,7 +1049,7 @@ tyrano.plugin.kag.tag["return"] = {
 ;↑ % の属性の値では、 | のあとに続けて、その属性の省略値を指定できます
 
 :param
-name=マクロの名前を指定します。以後この名前で新しいタグが定義され呼び出せるようになります。
+name = マクロの名前を指定します。以後この名前で新しいタグが定義され呼び出せるようになります。
 
 :demo
  1,kaisetsu/21_macro
@@ -1168,7 +1168,7 @@ tyrano.plugin.kag.tag.endmacro = {
 :sample
 
 :param
-name=削除するマクロ名を記述してください
+name = 削除するマクロ名を記述してください
 
 #[end]
 */
@@ -1202,7 +1202,7 @@ tyrano.plugin.kag.tag.erasemacro = {
 :sample
 
 :param
-title=セーブデータのタイトルを指定します。
+title = セーブデータのタイトルを指定します。
 
 #[end]
 */
@@ -1264,7 +1264,7 @@ tyrano.plugin.kag.tag.savesnap = {
 [endif]
 
 :param
-title=セーブデータのタイトルを指定します。
+title = セーブデータのタイトルを指定します。
 
 #[end]
 */
@@ -1341,7 +1341,7 @@ tyrano.plugin.kag.tag.autoload = {
 :sample
 
 :param
-exp=評価する TJS 式を指定します。この式の結果が true ( または 0 以外 )ならば、endignore タグまでの文章やタグが無視されます。
+exp = 評価する TJS 式を指定します。この式の結果が true ( または 0 以外 )ならば、endignore タグまでの文章やタグが無視されます。
 
 #[end]
 */
@@ -1431,17 +1431,17 @@ tyrano.plugin.kag.tag.endignore = {
 「[emb exp=f.test]」と入力しましたね[l]
 
 :param
-name=格納する変数名を指定して下さい,
-length=横幅です,
-initial=初期値を設定できます,
-color=文字の色を指定して下さい　デフォルトは黒です,
-left=テキストボックスの横位置を指定します,
-top=テキストボックスの縦位置を指定します,
-autocomplete=入力の履歴を表示するか否か。trueで表示します。デフォルトはfalse,
-size=文字のサイズを指定します　デフォルト２０px,
-width=テキストボックスの幅サイズを指定します,
-height=テキストボックスの高さを指定します,
-maxchars=最大入力文字数
+name         = 格納する変数名を指定して下さい,
+length       = 横幅です,
+initial      = 初期値を設定できます,
+color        = 文字の色を指定して下さい　デフォルトは黒です,
+left         = テキストボックスの横位置を指定します,
+top          = テキストボックスの縦位置を指定します,
+autocomplete = 入力の履歴を表示するか否か。trueで表示します。デフォルトはfalse,
+size         = 文字のサイズを指定します　デフォルト２０px,
+width        = テキストボックスの幅サイズを指定します,
+height       = テキストボックスの高さを指定します,
+maxchars     = 最大入力文字数
 
 :demo
  1,kaisetsu/15_input_1
@@ -1565,8 +1565,8 @@ f.preload_images = ["data/fgimage/girl.jpg","data/fgimage/haruko.png","data/fgim
 [preload storage=&f.preload_images]
 
 :param
-storage=事前に読み込む画像ファイルをフルパスでしていしてください。配列を渡すことでまとめて指定することもできます。,
-wait=trueを指定すると、全ての読み込みが完了するまでゲームを停止します。NowLoadingの表示が必要でしょう。true or false デフォルトはfalse
+storage = 事前に読み込む画像ファイルをフルパスでしていしてください。配列を渡すことでまとめて指定することもできます。,
+wait    = trueを指定すると、全ての読み込みが完了するまでゲームを停止します。NowLoadingの表示が必要でしょう。true or false デフォルトはfalse
 
 #[end]
 */
@@ -1647,7 +1647,7 @@ name属性を指定することで、該当する要素のみを削除するこ�
 [clearfix name="sample"]
 
 :param
-name=fixレイヤーへ追加した時に名前を指定した場合、適応できます。
+name = fixレイヤーへ追加した時に名前を指定した場合、適応できます。
 
 #[end]
 */
@@ -1731,7 +1731,7 @@ storageに指定した画像ファイルがマウスカーソルに指定され�
 [cursor storage="my_cursor.gif"]
 
 :param
-storage=マウスカーソルに指定したい画像ファイルを指定します。画像はdata/imageフォルダに配置します。
+storage = マウスカーソルに指定したい画像ファイルを指定します。画像はdata/imageフォルダに配置します。
 
 #[end]
 */
@@ -1815,9 +1815,9 @@ sleepgameは複数実行することはできません。必ず[awakegame]を実
 [button name="button" role="sleepgame" fix="true" graphic="button/skip.gif" x=450 y=400 storage="scene3.ks" ]
 
 :param
-storage=ゲームを中断して処理を始めるシナリオ名を記述します。省略された場合は、現在のファイル名と解釈されます,
-target=ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます,
-next=true か　falseを指定。 falseを指定するとawakegameで戻ってくる時に次の命令へ移らなくなります。デフォルトはtrue
+storage = ゲームを中断して処理を始めるシナリオ名を記述します。省略された場合は、現在のファイル名と解釈されます,
+target  = ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます,
+next    = true か　falseを指定。 falseを指定するとawakegameで戻ってくる時に次の命令へ移らなくなります。デフォルトはtrue
 
 :demo
 2,kaisetsu/09_sleepgame
@@ -1871,8 +1871,8 @@ make.ksで変数fに対して、[awakegame]からの復帰かどうかの判定�
 :sample
 
 :param
-variable_over=trueかfalseを指定します。trueを指定するとsleepgame中のゲーム変数への変更を引き継ぎます。デフォルトはtrue,
-bgm_over=trueかfalseを指定します。trueを指定するとsleepgame中のBGMを再生し続けます。デフォルトはtrue。falseだとsleepgame時のBGMに切り替わります。
+variable_over = trueかfalseを指定します。trueを指定するとsleepgame中のゲーム変数への変更を引き継ぎます。デフォルトはtrue,
+bgm_over      = trueかfalseを指定します。trueを指定するとsleepgame中のBGMを再生し続けます。デフォルトはtrue。falseだとsleepgame時のBGMに切り替わります。
 
 :demo
 2,kaisetsu/09_sleepgame
@@ -1978,15 +1978,15 @@ inputはv470以降、廃止します。使用しないでください
 [dialog type="input" text="名前を教えて下さい" storage="scene2" target="ok_label" ]
 
 :param
-name=confirmを指定した時に格納する変数名を指定して下さい。,
-type=ダイアログの種類を指定します。alert confirm ,
-text=メッセージとして表示するてテキストを指定して下さい,
-storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
-target=指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
-storage_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先シナリオファイルを指定します。,
-target_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。,
-label_ok=OKボタンの名前を好きなものに指定できます。デフォルトはOKです　,
-label_cancel=キャンセルボタンの名前を好きなものに指定できます。デフォルトはCancelです　
+name           = confirmを指定した時に格納する変数名を指定して下さい。,
+type           = ダイアログの種類を指定します。alert confirm ,
+text           = メッセージとして表示するてテキストを指定して下さい,
+storage        = 指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
+target         = 指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
+storage_cancel = 指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先シナリオファイルを指定します。,
+target_cancel  = 指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。,
+label_ok       = OKボタンの名前を好きなものに指定できます。デフォルトはOKです　,
+label_cancel   = キャンセルボタンの名前を好きなものに指定できます。デフォルトはCancelです　
 #[end]
 */
 
@@ -2102,8 +2102,8 @@ mp.myname
 [plugin name="original1" font_color="black" arg2="aaaaaa" ]
 
 :param
-name=data/othres/plugin以下の配置したフォルダ名（プラグイン名）を指定する,
-storage=最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。
+name    = data/othres/plugin以下の配置したフォルダ名（プラグイン名）を指定する,
+storage = 最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。
 
 :demo
 2,kaisetsu/06_plugin
@@ -2151,8 +2151,8 @@ tyrano.plugin.kag.tag.plugin = {
 [sysview type="menu" storage="./data/others/plugin/mytheme/html/menu.html]
 
 :param
-type=save load backlog menu が指定可能 ,
-storage=HTMLファイルのパスを指定します。
+type    = save load backlog menu が指定可能 ,
+storage = HTMLファイルのパスを指定します。
 
 #[end]
 */
@@ -2198,7 +2198,7 @@ CSS反映
 [loadcss file="./data/others/css/mystyle.css" ]
 
 :param
-file=読み込みたいCSSファイルを指定します
+file = 読み込みたいCSSファイルを指定します
 
 :demo
 1,kaisetsu/22_font
@@ -2250,8 +2250,8 @@ storageに「default」と指定することで、従来の画面自動キャプ
 [save_img storage="my_capture.png" ]
 
 :param
-storage=設定したいセーブ用画像を設定します。bgimageフォルダに配置してください。「default」を指定するとオートキャプチャに戻ります。,
-folder=bgimageフォルダ以外から取得したい場合は、ここに指定します。例えば、othersやfgimage、imageなどです。
+storage = 設定したいセーブ用画像を設定します。bgimageフォルダに配置してください。「default」を指定するとオートキャプチャに戻ります。,
+folder  = bgimageフォルダ以外から取得したい場合は、ここに指定します。例えば、othersやfgimage、imageなどです。
 
 :demo
 2,kaisetsu/10_save_img
@@ -2401,8 +2401,8 @@ tyrano.plugin.kag.tag.endnolog = {
 [pushlog text="ここに好きなログ文字列を記述できます"]
 
 :param
-text=バックログに追加する文字列を追加できます,
-join=バックログを前の文字列に連結するか否かを指定できます。trueを指定すると前の文字列につなげます。デフォルトはfalse
+text = バックログに追加する文字列を追加できます,
+join = バックログを前の文字列に連結するか否かを指定できます。trueを指定すると前の文字列につなげます。デフォルトはfalse
 
 :demo
 2,kaisetsu/07_pushlog
@@ -2518,8 +2518,8 @@ dataフォルダ以外、tyrano本体をアップデートするときは
 [apply_local_patch file="test.tpatch" ]
 
 :param
-file=パッチファイルのパスを指定します。exeファイルの階層を起点として指定します,
-reload=true or false を指定。trueを指定すると反映後にゲームが再読込されます。デフォルトはfalse
+file   = パッチファイルのパスを指定します。exeファイルの階層を起点として指定します,
+reload = true or false を指定。trueを指定すると反映後にゲームが再読込されます。デフォルトはfalse
 
 #[end]
 */
@@ -2568,7 +2568,7 @@ V470以降で使用可
 [check_web_patch url="http://tyrano.jp/patch/mygame.json" ]
 
 :param
-url=サーバのjsonファイルのURLをhttp:// から指定します
+url = サーバのjsonファイルのURLをhttp:// から指定します
 
 #[end]
 */
@@ -2722,7 +2722,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
 [set_resizecall storage="resize.ks" ]
 
 :param
-storage=呼び出すシナリオファイル名を指定します。省略された場合は現在のシナリオファイルとみなされます
+storage = 呼び出すシナリオファイル名を指定します。省略された場合は現在のシナリオファイルとみなされます
 
 :demo
 

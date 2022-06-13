@@ -27,11 +27,11 @@ Confit.tjs の mediaFormatDefaultをmp3に変更して下さい。
 [playbgm storage="music.ogg"]
 
 :param
-storage=再生する音楽ファイルを指定します,
-loop=true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます。,
-sprite_time=再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-volume=再生する音量を指定できます。0〜100 の範囲で指定して下さい。（デフォルトは100）
+storage     = 再生する音楽ファイルを指定します,
+loop        = true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます。,
+sprite_time = 再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
+html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
+volume      = 再生する音量を指定できます。0〜100 の範囲で指定して下さい。（デフォルトは100）
 
 #[end]
 */
@@ -515,12 +515,12 @@ BGMを徐々に再生します。
 [fadeinbgm storage=sample.ogg loop=false time=3000]
 
 :param
-storage=再生する音楽ファイルを指定します,
-loop=true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます,
-sprite_time=再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-time=フェードインを行なっている時間をミリ秒で指定します。,
-volume=BGMの再生音量を変更できます（0〜100）
+storage     = 再生する音楽ファイルを指定します,
+loop        = true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます,
+sprite_time = 再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
+html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
+time        = フェードインを行なっている時間をミリ秒で指定します。,
+volume      = BGMの再生音量を変更できます（0〜100）
 
 #[end]
 */
@@ -562,7 +562,7 @@ BGMをフェードアウト停止
 [fadeoutbgm  time=3000]
 
 :param
-time=フェードアウトを行なっている時間をミリ秒で指定します。
+time = フェードアウトを行なっている時間をミリ秒で指定します。
 
 #[end]
 */
@@ -599,9 +599,9 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
 [xchgbgm storage=new.ogg loop=true time=3000]
 
 :param
-storage=次に再生するファイルを指定します,
-loop=true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます,
-time=クロスフェードを行なっている時間をミリ秒で指定します。
+storage = 次に再生するファイルを指定します,
+loop    = true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます,
+time    = クロスフェードを行なっている時間をミリ秒で指定します。
 
 #[end]
 */
@@ -652,13 +652,13 @@ Confit.tjsのmediaFormatDefaultをmp3に変更して下さい。
 [playse storage=sound.ogg loop=false ]
 
 :param
-storage=再生するファイルを指定します,
-buf=効果音を再生するスロットを指定できます。デフォルトは0,
-loop=trueまたはfalse （デフォルト）を指定できます。trueを指定すると繰り返し再生されます,
-sprite_time=再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-clear=trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
-html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-volume=効果音の再生音量を変更できます（0〜100）
+storage     = 再生するファイルを指定します,
+buf         = 効果音を再生するスロットを指定できます。デフォルトは0,
+loop        = trueまたはfalse （デフォルト）を指定できます。trueを指定すると繰り返し再生されます,
+sprite_time = 再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
+clear       = trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
+html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
+volume      = 効果音の再生音量を変更できます（0〜100）
 
 #[end]
 */
@@ -708,7 +708,7 @@ tyrano.plugin.kag.tag.playse = {
 [stopse ]
 
 :param
-buf=効果音を停止するスロットを指定できます。デフォルトは0。
+buf = 効果音を停止するスロットを指定できます。デフォルトは0。
 
 #[end]
 */
@@ -743,12 +743,12 @@ tyrano.plugin.kag.tag.stopse = {
 [fadeinse storage=sound.ogg loop=false time=2000 ]
 
 :param
-storage=次に再生するファイルを指定します。,
-loop=trueまたはfalseを指定します。trueを指定すると繰り返し再生されます。デフォルトはfalse。,
-sprite_time=再生の開始時間と終了時間をミリ秒で指定します。たとえば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-buf=効果音を停止するスロットを指定できます。デフォルトは0,
-html5=true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-time=フェードインの時間をミリ秒で指定します
+storage     = 次に再生するファイルを指定します。,
+loop        = trueまたはfalseを指定します。trueを指定すると繰り返し再生されます。デフォルトはfalse。,
+sprite_time = 再生の開始時間と終了時間をミリ秒で指定します。たとえば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
+buf         = 効果音を停止するスロットを指定できます。デフォルトは0,
+html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
+time        = フェードインの時間をミリ秒で指定します
 
 #[end]
 */
@@ -793,8 +793,8 @@ tyrano.plugin.kag.tag.fadeinse = {
 [fadeoutse time=2000 ]
 
 :param
-time=フェードアウトを行なっている時間をミリ秒で指定します。
-buf=効果音を停止するスロットを指定できます。デフォルトは0,
+time = フェードアウトを行なっている時間をミリ秒で指定します。
+buf  = 効果音を停止するスロットを指定できます。デフォルトは0,
 
 #[end]
 */
@@ -830,9 +830,9 @@ BGMの設定を変更できます
 [bgmopt volume=50 ]
 
 :param
-volume=BGMの再生音量を変更できます（0〜100）,
-effect=true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
-buf=設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
+volume = BGMの再生音量を変更できます（0〜100）,
+effect = true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
+buf    = 設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
 
 #[end]
 */
@@ -899,9 +899,9 @@ SEの設定を変更できます
 [seopt volume=50 ]
 
 :param
-volume=SEの再生音量を変更できます（0〜100）,
-effect=true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
-buf=設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
+volume = SEの再生音量を変更できます（0〜100）,
+effect = true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
+buf    = 設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
 
 #[end]
 */
@@ -1056,10 +1056,10 @@ tyrano.plugin.kag.tag.wse = {
 あかねの音声再生(akane_3.ogg)[p]
 
 :param
-sebuf=ボイスで使用するplayseのbufを指定します,
-name=ボイスを再生するキャラクター名を指定します。[chara_new ]タグのnameパラメータです,
-vostorage=音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます,
-number=デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます
+sebuf     = ボイスで使用するplayseのbufを指定します,
+name      = ボイスを再生するキャラクター名を指定します。[chara_new ]タグのnameパラメータです,
+vostorage = 音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます,
+number    = デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます
 
 :demo
 2,kaisetsu/19_voconfig
@@ -1182,7 +1182,7 @@ tyrano.plugin.kag.tag.vostop = {
 [speak_on ]
 
 :param
-volume=読み上げのボリュームを設定できます(まだ実装)。
+volume = 読み上げのボリュームを設定できます(まだ実装)。
 
 #[end]
 */
@@ -1226,7 +1226,7 @@ tyrano.plugin.kag.tag.speak_on = {
 [speak_off ]
 
 :param
-volume=読み上げのボリュームを設定できます。
+volume = 読み上げのボリュームを設定できます。
 
 #[end]
 */
