@@ -1395,18 +1395,20 @@ tyrano.plugin.kag.tag.label = {
 
 :group
 システム操作
+
 :title
 既読管理の設定
 
 :exp
-既読管理に関する設定を変更できます
+既読管理の設定を変更できます。
 
 :sample
-:param
-color=既読時のテキスト色を0x000000形式で指定してください,
-skip=未読スキップをの有効(true)、無効(false)を指定します。つまりfalseを指定すると、未読文章で止まります。
-#[end]
 
+:param
+color=既読テキスト色を`0xRRGGBB`形式で指定します。,
+skip=プレイヤーが未読テキストをスキップできるかどうか。`true`または`false`で指定します。`false`を指定すると、プレイヤーが未読テキストに到達したときにスキップが解除されます。
+
+#[end]
 */
 
 tyrano.plugin.kag.tag.config_record_label = {
@@ -1446,22 +1448,23 @@ tyrano.plugin.kag.tag.config_record_label = {
 
 :group
 メッセージ関連
+
 :title
 クリック待ち
 
 :exp
-このタグの位置でクリック待ちを行います。
+このタグの位置でプレイヤーのクリックを待ちます。
 
 :sample
 テキスト表示[l]
 テキスト表示[l][r]
+
 :param
 
 :demo
 1,kaisetsu/01_text
 
 #[end]
-
 */
 
 //[l] クリック待ち
@@ -1508,23 +1511,24 @@ tyrano.plugin.kag.tag.l = {
 
 :group
 メッセージ関連
+
 :title
-改ページクリック待ち
+クリック待ち＋改ページ
 
 :exp
-改ページをともなうクリック待ちで使用できます
+プレイヤーのクリックを待ちます。
+プレイヤーがクリックすると改ページされます。
 
 :sample
 テキスト表示[p]
 テキスト表示[p][r]
+
 :param
 
 :demo
 1,kaisetsu/01_text
 
-
 #[end]
-
 */
 
 //[p] 改ページクリック待ち
@@ -1567,33 +1571,36 @@ tyrano.plugin.kag.tag.p = {
 };
 
 /*
- #[graph]
- :group
- メッセージ関連
- :title
- インライン画像表示
- :exp
- 任意の画像をメッセージ中に表示します。
- 絵文字や特殊文字などに活用できます。
- 表示させる画像はimageフォルダに配置して下さい
+#[graph]
 
- また、よく使う記号については、マクロを組んでおくと楽です。
+:group
+メッセージ関連
 
- :sample
- ; heart にはハートマークの画像
- [macro name="heart"][graph storage="heart.png"][endmacro]
+:title
+インライン画像表示
 
- ; 以後、[heart] タグでハートマークを使用可能
- 大好き[heart]
- :param
- storage=表示する画像ファイル名を指定します
+:exp
+任意の画像をメッセージ中に表示します。絵文字や特殊文字などに活用できます。
+表示する画像はdata/imageフォルダに配置して下さい。
+よく使う記号についてはマクロを組んでおくと楽です。
 
- :demo
- 1,kaisetsu/02_decotext
+:sample
+;heart.png はハートマークの画像
+[macro name="heart"]
+[graph storage="heart.png"]
+[endmacro]
 
- #[end]
+;以後、[heart] タグでハートマークを使用可能
+大好き[heart][p]
 
- */
+:param
+storage=表示する画像ファイル名を指定します。
+
+:demo
+1,kaisetsu/02_decotext
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.graph = {
     vital: ["storage"],
@@ -1631,28 +1638,30 @@ tyrano.plugin.kag.tag.graph = {
 };
 
 /*
-
 #[jump]
+
 :group
 ラベル・ジャンプ操作
+
 :title
 シナリオのジャンプ
-:exp
-指定されたファイルの指定されたラベルに移動します
-callとの違いは、jumpはコールスタックに残りません。つまり、一方通行です。ラベルの指定は必須です。
-:sample
 
-; second.ks というシナリオファイルの　*start　ラベルへ移動する
+:exp
+指定シナリオファイルの指定ラベルに移動します。
+
+`[call]`タグとは異なり、`[jump]`タグの移動はコールスタックに残りません。つまり一方通行であり、`[return]`で戻ってくることはできません。
+
+:sample
+;second.ks というシナリオファイルの *start ラベルへ移動する
 [jump storage=second.ks target=*start]
 
 :param
-storage=移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます,
-target=ジャンプ先のラベル名を指定します。省略すると先頭から実行されます
+storage=ジャンプ先のシナリオファイル名を指定します。省略すると、現在のシナリオファイルとみなされます。,
+target=ジャンプ先のラベル名を指定します。省略すると、シナリオファイルの先頭にジャンプします。
 
 :demo
 
 #[end]
-
 */
 
 //ジャンプ命令
@@ -1674,21 +1683,25 @@ tyrano.plugin.kag.tag.jump = {
 
 /*
 #[r]
+
 :group
 メッセージ関連
+
 :title
-改行する
+改行
+
 :exp
-改行します
+改行します。
+
 :sample
 テキスト表示[l]
 改行します[l][r]
 改行します[l][r]
+
 :param
 
 :demo
  1,kaisetsu/01_text
-
 
 #[end]
 */
@@ -1713,25 +1726,30 @@ tyrano.plugin.kag.tag.r = {
 };
 
 /*
- #[er]
- :group
- メッセージ関連
- :title
- メッセージレイヤの文字の消去
- :exp
- 現在の操作対象メッセージレイヤ(current指定)の文字を消去します。
- :sample
- テキスト表示[l]
- メッセージをクリアします[l][er]
- 改行します[l][r]
- :param
+#[er]
 
- :demo
- 1,kaisetsu/01_text
+:group
+メッセージ関連
 
+:title
+メッセージレイヤの文字の消去
 
- #[end]
- */
+:exp
+現在の操作対象のメッセージレイヤの文字を消去します。
+
+操作対象のメッセージレイヤを切り替えるには`[current]`タグを使います。
+
+:sample
+クリックするとメッセージがクリアされます[l][er]
+クリアされました[l]
+
+:param
+
+:demo
+1,kaisetsu/01_text
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.er = {
     start: function () {
@@ -1748,25 +1766,29 @@ tyrano.plugin.kag.tag.er = {
 
 /*
 #[cm]
+
 :group
 メッセージ関連
+
 :title
-すべてのメッセージレイヤをクリア
+すべてのメッセージレイヤのクリア
+
 :exp
-すべてのメッセージレイヤをクリアします。
-また、フォントスタイルなどもデフォルトの設定に戻ります。
-ただし、positionやlayoptで指定した値は引き継がれます
-[ct]タグのように 操作対象のメッセージレイヤが表ページの message0 に指定されるようなことはありません。 このタグを実行後も操作対象のレイヤは同じです。
+すべてのメッセージレイヤの文字を消去します。`[button]`タグ、`[glink]`タグ、`[html]`タグなどで表示した要素も消去されます。
+
+フォントスタイルがデフォルトの設定に戻ります。
+
+`[ct]`タグとは異なり、操作対象のメッセージレイヤが`message0`に変更されるようなことはありません。このタグを実行したあとも操作対象のメッセージレイヤは同じままです。
 
 :sample
 テキスト表示[l]
 画面クリアする[l][cm]
 もう一度画面クリアする[l][cm]
+
 :param
 
 :demo
 1,kaisetsu/01_text
-
 
 #[end]
 */
@@ -1794,29 +1816,31 @@ tyrano.plugin.kag.tag.cm = {
 };
 
 /*
- #[ct]
- :group
- メッセージ関連
- :title
- すべてのメッセージレイヤをリセット
- :exp
+#[ct]
 
- メッセージレイヤをリセットします。
- すべてのメッセージレイヤの文字は消去され、操作対象のメッセージレイヤは 表ページの message0 に指定されます。
- font タグで指定した文字の属性、style タグ で指定したスタイルはすべて標準状態に戻ります。ただ し、position タグ や layopt タグで指定した属性は引き継が れます。
+:group
+メッセージ関連
 
- :sample
- テキスト表示[l]
- 画面クリアする[l][ct]
- もう一度画面クリアする[l][ct]
- :param
+:title
+メッセージレイヤにのリセット
 
- :demo
- 1,kaisetsu/01_text
+:exp
+すべてのメッセージレイヤの文字が消去されます。
 
+フォントスタイルがデフォルトの設定に戻り、操作対象のメッセージレイヤが`message0`の表ページに変更されます。
 
- #[end]
- */
+:sample
+テキスト表示[l]
+画面リセットする[l][ct]
+もう一度画面リセットする[l][ct]
+
+:param
+
+:demo
+1,kaisetsu/01_text
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.ct = {
     start: function () {
@@ -1838,25 +1862,30 @@ tyrano.plugin.kag.tag.ct = {
 
 /*
 #[current]
+
 :group
 メッセージ関連
+
 :title
 操作対象のメッセージレイヤの指定
+
 :exp
-操作対象とするメッセージレイヤを指定します。以後、文章や font タグでの文字属性の指定、l タグ等のクリック待ちなどは、このレイヤに対して行われます。
-message0はデフォルトで可視の状態で すが、message1 は layopt タグ 等で visible=true としないと表示されないので注意してください。
+操作対象とするメッセージレイヤを指定します。以後、文章や`[font]`タグでの文字属性の指定、`[l]`タグ等のクリック待ちなどは、このレイヤに対して行われます。
+
+`message0`はデフォルトで可視の状態ですが、`message1`は`[layopt]`タグを使用しないと表示されないので注意してください。
+
 :sample
 [current layer="message0"]
 message0レイヤに表示されています[l]
 [current layer="message1"]
 message1レイヤに表示されています[l]
+
 :param
-layer=操作対象のメッセージレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
-page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます
+layer=操作対象のメッセージレイヤを指定します。省略すると、現在のメッセージレイヤとみなされます。,
+page=表ページを対象とするか、裏ページを対象とするかを指定します。省略すると、表ページとみなされます。
 
 :demo
 1,kaisetsu/18_window_2
-
 
 #[end]
 */
@@ -1884,43 +1913,50 @@ tyrano.plugin.kag.tag.current = {
 //メッセージレイヤの属性を変更します
 
 /*
- #[position]
- :group
- レイヤ関連
- :title
- メッセージレイヤの属性変更
- :exp
- メッセージレイヤに対する様々な属性を指定します。<br />
- いずれの属性も、省略すれば設定は変更されません。
- :sample
- ;メッセージレイヤの位置とサイズを変更
- [position width=400 height=300 top=100 left=20]
- ;メッセージレイヤの色と透明度を変更
- [position color=blue opacity=100]
- :param
- layer=対象とするメッセージレイヤを指定します。<br/>省略するとcurrentタグで指定されたレイヤが選択されます,
- page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略するとcurrentタグで指定された、現在のページが選択されます。,
- left=メッセージレイヤの左端位置を指定します。（ピクセル）,
- top=メッセージレイヤの上端位置を指定します。（ピクセル）,
- width=メッセージレイヤの幅を指定します。（ピクセル）,
- height=メッセージレイヤの高さを指定します。（ピクセル）,
- frame=メッセージレイヤのフレーム画像として表示させる画像を指定します。<br>メッセージエリアをカスタマイズしたい場合に利用できます。<br />画像サイズはwidthとheight属性に準じて調整して下さい。<br />さらに、margin属性で実際にメッセージが表示される箇所の調整も行いましょう<br />また、"none"と指定することで標準枠に戻すこともできます。違う枠画像をしていすると切り替えることもできます,
- color=メッセージレイヤの表示色を 0xRRGGBB 形式で指定します。 ,
- border_color=外枠の線が有効な場合の色を 0xRRGGBB 形式で指定します。border_sizeの指定が同時に必要です,
- border_size=外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0です。,
- opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全に透明です。,
- marginl=メッセージレイヤの左余白を指定します。,
- margint=メッセージレイヤの上余白を指定します。,
- marginr=メッセージレイヤの右余白を指定します。,
- marginb=メッセージレイヤの下余白を指定します。,
- radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります,
- vertical=メッセージレイヤを縦書きにモードにするには "true" を指定します。 横書きにするには "false" を指定してください。,
- visible=true に設定すると、メッセージレイヤが可視(表示状態)になります。<br >false に設定すると、メッセージレイヤは不可視(非表示状態)になります。
+#[position]
+
+:group
+レイヤ関連
+
+:title
+メッセージレイヤの属性変更
+
+:exp
+メッセージレイヤに対する様々な属性を指定します。
+いずれの属性も、省略すれば設定は変更されません。
+
+:sample
+;メッセージレイヤの位置とサイズを変更
+[position width=400 height=300 top=100 left=20]
+;メッセージレイヤの色と透明度を変更
+[position color=blue opacity=100]
+
+:param
+layer=対象とするメッセージレイヤを指定します。
+page=対象とするページを指定します。"fore"か"back"を指定して下さい。,
+left=メッセージレイヤの左端位置を指定します。（ピクセル）,
+top=メッセージレイヤの上端位置を指定します。（ピクセル）,
+width=メッセージレイヤの幅を指定します。（ピクセル）,
+height=メッセージレイヤの高さを指定します。（ピクセル）,
+frame=メッセージレイヤのフレーム画像として表示させる画像を指定します。<br>メッセージエリアをカスタマイズしたい場合に利用できます。<br />画像サイズはwidthとheight属性に準じて調整して下さい。<br />さらに、margin属性で実際にメッセージが表示される箇所の調整も行いましょう<br />また、"none"と指定することで標準枠に戻すこともできます。違う枠画像をしていすると切り替えることもできます,
+color=メッセージレイヤの表示色を`0xRRGGBB`形式で指定します。 ,
+border_color=外枠の線が有効な場合の色を`0xRRGGBB`形式で指定します。`border_size`属性の指定が同時に必要です,
+border_size=外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0です。,
+opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全に透明です。,
+marginl=メッセージレイヤの左余白を指定します。,
+margint=メッセージレイヤの上余白を指定します。,
+marginr=メッセージレイヤの右余白を指定します。,
+marginb=メッセージレイヤの下余白を指定します。,
+radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります,
+vertical=メッセージレイヤを縦書きにモードにするには "true" を指定します。 横書きにするには "false" を指定します。,
+visible=true に設定すると、メッセージレイヤが可視(表示状態)になります。<br >false に設定すると、メッセージレイヤは不可視(非表示状態)になります。
+
 :demo
 1,kaisetsu/17_window_1
 
- #[end]
- */
+#[end]
+*/
+
 tyrano.plugin.kag.tag.position = {
     pm: {
         layer: "message0",
@@ -2076,16 +2112,22 @@ tyrano.plugin.kag.tag.position = {
 };
 
 /*
- #[fuki_start]
- :group
- メッセージ関連
- :title
- メッセージレイヤをふきだし化する
- :exp
- メッセージレイヤを漫画のふきだし風に表現できます。<br />
- このタグでふきだし表示を有効にする前に[fuki_chara]タグで個別に設定が必要です。
- ふきだしのデザインは[position]タグの設定が引き継がれますが、[fuki_chara]タグでデザインを個別に設定することも可能です。
- :sample
+#[fuki_start]
+
+:group
+メッセージ関連
+
+:title
+メッセージレイヤをふきだし化する
+
+:exp
+メッセージレイヤを漫画のふきだし風に表現できます。
+
+このタグでふきだし表示を有効にする前に`[fuki_chara]`タグで設定が必要です。
+
+ふきだしのデザインは`[position]`タグの設定が引き継がれますが、`[fuki_chara]`タグで個別に設定することも可能です。
+
+:sample
 
 ;通常のメッセージレイヤに対して、ふきだしに適応したいデザインを設定する
 [font color="black"]
@@ -2110,12 +2152,12 @@ tyrano.plugin.kag.tag.position = {
 #
 othersで設定した位置にふきだしを表示[p]
 
+:param
+layer=対象とするメッセージレイヤを指定します。デフォルトはmessage0
 
- :param
- layer=対象とするメッセージレイヤを指定します。デフォルトはmessage0
+#[end]
+*/
 
- #[end]
- */
 tyrano.plugin.kag.tag.fuki_start = {
     pm: {
         layer: "message0",
@@ -2143,19 +2185,25 @@ tyrano.plugin.kag.tag.fuki_start = {
 };
 
 /*
- #[fuki_stop]
- :group
- メッセージ関連
- :title
- メッセージレイヤのふきだし化を無効にする
- :exp
- ふきだし表示を停止します。
- メッセージレイヤのスタイルは[fuki_start]前の状態に戻ります。
- :sample
- :param
+#[fuki_stop]
 
- #[end]
- */
+:group
+メッセージ関連
+
+:title
+メッセージレイヤのふきだし化を無効にする
+
+:exp
+ふきだし表示を停止します。
+メッセージレイヤのスタイルは[fuki_start]前の状態に戻ります。
+
+:sample
+
+:param
+
+#[end]
+*/
+
 tyrano.plugin.kag.tag.fuki_stop = {
     pm: {},
 
@@ -2190,15 +2238,20 @@ tyrano.plugin.kag.tag.fuki_stop = {
 };
 
 /*
- #[fuki_chara ]
- :group
- メッセージ関連
- :title
- ふきだしのキャラクター登録
- :exp
- ふきだしを有効にしたとき、表示形式をキャラクター毎に設定できます。
- nameに「others」指定すると画面上にキャラクターが登場していない場合のスタイルを設定することができます。
- :sample
+#[fuki_chara]
+
+:group
+メッセージ関連
+
+:title
+ふきだしのキャラクター登録
+
+:exp
+ふきだしのデザインをキャラクターごとに設定できます。
+
+`name`属性に`others`を指定すると、画面上にキャラクターがいない場合のデザインを設定できます。
+
+:sample
 
 ;ふきだしの表示位置をキャラごとに設定する
 [fuki_chara name="akane" left=200 top=270 sippo_left=30 sippo_top=30 sippo="top" max_width=300 radius=15]
@@ -2207,28 +2260,27 @@ tyrano.plugin.kag.tag.fuki_stop = {
 ;キャラクターが画面上に存在しない場合に適応するふきだし設定 name=others
 [fuki_chara name="others" left=250 top=500 max_width=700 fix_width=700 radius=0 ]
 
- :param
- name=キャラクター名を指定。othersを指定するとキャラクターが見つからなかったときの位置を指定できる,
- left=ふきだし機能が有効な場合、どの位置にふきだしを表示するか指定します。画像ファイルの左端からの相対位置となります。,
- top=ふきだし機能が有効な場合、どの位置にふきだしを表示するか指定します。画像ファイルの上端からの相対位置となります。,
- sippo=しっぽをどの場所に表示するかを指定するtop（上） bottom（下） left（左） right（右） ,
- sippo_left=ふきだし機能が有効な場合かつ、ふきだしの位置がtopかbottomの場合、しっぽを表示する左端からの位置を指定できます。デフォルトは40,
- sippo_top=ふきだし機能が有効な場合かつ、ふきだしの位置がleftかrightの場合、しっぽを表示する上端からの位置を指定できます。デフォルトは40,
- sippo_width=しっぽの幅を指定できます。デフォルトは12,
- sippo_top=しっぽの高さを指定できます。デフォルトは20,
- max_width=ふきだしのサイズは自動的に調整されますが、横幅の上限サイズを指定することができます。デフォルトは300,
- fix_width=デフォルトのふきだし横幅は自動的に調整されますが、fix_widthパラメータを指定することで固定の幅を確保することができます。この値が指定されている場合はふきだしサイズの自動調整は行われません。,
- color=メッセージレイヤの表示色を 0xRRGGBB 形式で指定します。 ,
- border_color=外枠の線が有効な場合の色を 0xRRGGBB 形式で指定します。border_sizeの指定が同時に必要です,
- border_size=外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0です。,
- opacity=メッセージレイヤの不透明度を 0 ～ 255 の数値で指定しま す(文字の不透明度や、レイヤ自体の不透明度ではありません)。0 で完全に透明です。,
- radius=角の丸みを設定できます。数字で指定します。参考として 10（控えめな角丸）30（普通の角丸）100（巨大な角丸）くらいになります,
- font_color=フォントの色を指定できます。0xRRGGBB 形式で指定してください。 ,
- font_size=フォントサイズを指定できます。
+:param
+name         = キャラクター名を指定します。キャラクターがいないときデザインを設定するにはothersを指定します。,
+left         = どの位置にふきだしを表示するかを指定します。（キャラクター画像左端からの相対位置）,
+top          = どの位置にふきだしを表示するかを指定します。（キャラクター画像上端からの相対位置）,
+sippo        = しっぽをどの方向に表示するかを指定します。top（上）/ bottom（下）/ left（左）/ right（右）,
+sippo_left   = ふきだしの位置がtopかbottomの場合、しっぽを表示する左端からの位置を指定できます。デフォルトは40。,
+sippo_top    = ふきだしの位置がleftかrightの場合、しっぽを表示する上端からの位置を指定できます。デフォルトは40。,
+sippo_width  = しっぽの幅を指定できます。デフォルトは12。,
+sippo_top    = しっぽの高さを指定できます。デフォルトは20。,
+max_width    = ふきだしのサイズは自動的に調整されますが、横幅の上限サイズを指定できます。デフォルトは300。,
+fix_width    = ふきだし横幅は自動的に調整されますが、これを指定することで横幅を固定にできます。これが指定されている場合、ふきだしサイズの自動調整は行われません。,
+color        = メッセージレイヤの表示色を`0xRRGGBB`形式で指定します。 ,
+border_color = 外枠の線が有効な場合の色を`0xRRGGBB`形式で指定します。border_sizeの指定が同時に必要です。,
+border_size  = 外枠の線が有効な場合の太さを指定します。0を指定すると外枠は表示されません。デフォルトは0。,
+opacity      = ふきだしの不透明度を0～255の数値で指定します。0で完全に透明。（文字の不透明度や、レイヤ自体の不透明度ではありません）,
+radius       = ふきだしの角の丸みを数値で指定します。例：10（控えめな角丸）/ 30（普通の角丸）/ 100（巨大な角丸）,
+font_color   = フォントの色を0xRRGGBB形式で指定します。,
+font_size    = フォントサイズを指定します。
 
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag.fuki_chara = {
     vital: ["name"],
@@ -2304,42 +2356,50 @@ tyrano.plugin.kag.tag.fuki_chara = {
 
 /*
 #[image]
+
 :group
 レイヤ関連
+
 :title
 画像を表示
+
 :exp
-レイヤに画像を表示します。キャラクター表示や背景切り替えなどに使用できます。前景レイヤは初期状態では非表示なのでvisible=trueとすることで表示されます
+指定したレイヤに画像を追加します。キャラクター表示や背景切り替えなどに使用できます。
+
+初期状態ではレイヤ自体が非表示になっているため、そのままでは`[image]`タグで画像を追加しても画面に表示されません。その場合、`[layopt]`タグでレイヤ自体を表示状態にする必要があります。
+
 :sample
-;画像ファイルを表示
-[layopt layer=1 visible=true]
-[image layer="1" x="150" y="150" storage="myimage.png"]
+;レイヤ1を表示状態に
+[layopt layer="1" visible="true"]
+;レイヤ1にcat.pngを追加
+[image layer="1" x="150" y="150" storage="cat.png"]
+[l]
 
 ;画像を削除
 [freeimage layer="1"]
 
 :param
-storage=画像ファイル名を指定します。ファイルは背景レイヤならプロジェクトフォルダのbgimage、前景レイヤならfgimageに入れてください,
-layer=対象とするメレイヤを指定します。<br/>"base"を指定すると背景レイヤ。0以上の整数を指定すると対応する前景レイヤに画像を表示します,
-page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略すると"fore"であるとみなされます,
-visible=true or false を指定。imageは通常、非表示で始まるが、trueを指定すると最初から表示状態にできる。,
+storage=画像ファイル名を指定します。ファイルは背景レイヤならプロジェクトフォルダのbgimage、前景レイヤならfgimageに入れてください。,
+layer=画像を追加するレイヤを指定します。<br>`base`を指定すると背景レイヤ。0以上の整数を指定すると対応する前景レイヤに画像を表示します。,
+page=対象とするページを`fore`か`back`で指定します。デフォルトは`fore`。,
+visible=`true`または`false`を指定します。`true`を指定すると、画像を追加したレイヤ自体を表示状態にできます。つまり、`[layopt visible="true"]`を省略できます。,
 left=画像の左端位置を指定します。（ピクセル）,
 top=画像の上端位置を指定します。（ピクセル）,
-x=画像の左端位置を指定します。leftと同様。こちらが優先度高（ピクセル）,
-y=画像の上端位置を指定します。topと同様。こちらが優先度高（ピクセル）,
+x=画像の左端位置を指定します。leftと同様。こちらが優先度高。（ピクセル）,
+y=画像の上端位置を指定します。topと同様。こちらが優先度高。（ピクセル）,
 width=画像の横幅を指定します。（ピクセル）,
-height=画像の高さ位置を指定します。（ピクセル）,
-folder=好きな画像フォルダから、画像を選択できます。通常前景レイヤはfgimage　背景レイヤはbgimageと決まっていますが、ここで記述したフォルダ以下の画像ファイルを使用することができるようになります。,
-name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
-time=ミリ秒を指定することで、徐々にイメージを表示させることができます。,
-wait=falseを指定すると、画像が表示されるのを待たずに、処理を進め明日。デフォルトはtrue,
-zindex=画像同士の重なりを指定できます。数値が大きい方が前に表示されます,
-depth="zindexが同一な場合の重なりを指定できます。front（最前面）/back（最後面）で指定します。デフォルトはfront",
-reflect="trueを指定すると左右反転します",
-pos=レイヤ位置を自動的に決定します。前景レイヤに対して使います。横方向の位置は、この属性で指定した left ( 左端 ) 、left_center ( 左より )、center ( 中央 )、 right_center ( 右より )、right ( 右端 ) の位置に表示されます。各横方向の座標の中心 位置は Config.tjs で指定することができます。
+height=画像の高さを指定します。（ピクセル）,
+folder=画像が入っているフォルダを指定できます。デフォルトでは前景レイヤ用の画像は`fgimage`フォルダ、背景レイヤ用の画像は`bgimage`フォルダと決まっていますが、これを変更できます。,
+name=`[anim]`タグなどからこの名前でアニメーションさせられます。カンマで区切ることで複数指定できます。（高度な知識：`name`属性で指定した値はHTMLのクラス属性になります）,
+time=数値をミリ秒で指定できます。これを指定すると、その時間をかけて画像をフェードインさせられます。,
+wait=`time`属性を指定したとき、次のタグに進む前にフェードインの完了を待つかどうか。`true`または`false`で指定します。`false`を指定すると、画像が表示されきるのを待たずに次のタグに進みます。デフォルトは`true`,
+zindex=画像同士の重なりを指定できます。数値が大きい方が前に表示されます。,
+depth=zindexが同一な場合の重なりを指定できます。`front`(最前面)または`back`(最後面)で指定します。デフォルトはfront。,
+reflect=`true`を指定すると左右反転します。,
+pos=レイヤ位置を自動的に決定します。前景レイヤに対して使います。横方向の位置は、この属性で指定した`left`(左端)、`left_center`(左寄り)、`center`(中央)、`right_center`(右寄り)、`right`(右端)の位置に表示されます。各横方向の座標の中心位置は`Config.tjs`で指定できます。
 <br>left 、left_center、 center、 right_center、 right の代わりに、それぞれ l、 lc、 c、 rc、 r を 指定することもできます ( 動作は同じです )。
 <br>この属性を指定した場合は left 属性や top 属性は無視されます。
-<br>layerをbase と指定した場合にはこの属性は指定しないでください。各々の表示位置はConfig.tjsで事前に設定しておきましょう
+<br>layerをbase と指定した場合にはこの属性は指定しないでください。各々の表示位置はConfig.tjsで事前に設定しておきましょう。
 
 :demo
 1,kaisetsu/05_image
@@ -2547,31 +2607,34 @@ tyrano.plugin.kag.tag.image = {
 
 /*
 #[freeimage]
+
 :group
 レイヤ関連
+
 :title
-レイヤの解放
+レイヤのクリア
+
 :exp
+指定したレイヤに存在する画像などをすべて削除します。
 
-レイヤに追加された要素をすべて削除します　レイヤ指定は必須です。
 :sample
-;イメージの表示
-[image layer=0 page=fore visible=true top=100 left=300  storage=chara.png]
+;イメージを配置
+[image layer="0" page="fore" visible="true" top="100" left="300"  storage="chara.png"]
 
-;イメージをレイヤごと非表示にする
-[freeimage layer=0 ]
+;レイヤをクリア
+[freeimage layer="0"]
 
-;名前を指定して配置
-[image name="myimg" layer=0 visible=true top=100 left=300  storage=myimg.png]
+;名前を指定してイメージを配置
+[image name="myimg" layer="0" visible="true" top="100" left="300"  storage="myimg.png"]
 
 ;イメージの名前を指定して１つだけ消す
-[free name="myimg" layer=0 ]
+[free name="myimg" layer="0"]
 
 :param
-layer=操作対象のレイヤを指定します。指定がない場合、現在のメッセージレイヤとみなされます,
-page=表画面を対象とするか、裏画面を対象とするかを指定します。省略すると表ページとみなされます,
-time=ミリ秒を指定した場合、指定時間をかけてイメージが消えていきます,
-wait=完了を待つかどうかを指定できます。trueを指定すると完了を待ちます。デフォルトはtrue
+layer=操作対象のレイヤを指定します。省略すると、現在のメッセージレイヤとみなされます。,
+page=レイヤの裏表どちらのページを対象とするか。`fore`または`back`で指定します。省略すると、表ページとみなされます。,
+time=フェードアウト時間をミリ秒単位で指定します。省略すると、一瞬で消去されます。
+wait=フェードアウトの完了を待つかどうか。`true`または`false`で指定します。デフォルトは`true`。
 
 :demo
 1,kaisetsu/05_image
@@ -2650,12 +2713,16 @@ tyrano.plugin.kag.tag.freelayer = tyrano.plugin.kag.tag.freeimage;
 
 /*
 #[free]
+
 :group
 レイヤ関連
+
 :title
 オブジェクトの解放
+
 :exp
 レイヤに追加されたnameで指定された要素をすべて削除します　name指定は必須です。
+
 :sample
 [backlay]
 ;キャラクター表示
@@ -2751,15 +2818,19 @@ tyrano.plugin.kag.tag.free = {
 
 /*
 #[ptext]
+
 :group
 レイヤ関連
+
 :title
 レイヤにテキストを追加
+
 :exp
 レイヤにテキストを表示します。前景レイヤに対してのみ実行します<br />
 前景レイヤの属性を全て継承します。文字を消す時はfreeimageタグをレイヤに対して適応します
 また、前景レイヤはデフォルト非表示なので、トランジションで表示しない場合はレイヤを可視状態にしてから、追加します。
 [layopt layer=0 visible=true]が必要
+
 :sample
 [backlay]
 [ptext page=back text="テキストテキスト" size=30 x=200 y=300 color=red vertical=true]
@@ -2768,17 +2839,18 @@ tyrano.plugin.kag.tag.free = {
 [l]
 表示したテキストを消去します
 [freeimage layer = 0]
+
 :param
 layer=対象とするメレイヤを指定します。0以上の整数を指定すると対応する前景レイヤに画像を表示します,
 page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略すると"fore"であるとみなされます,
 text=表示するテキストの内容,
 x=テキストの左端位置を指定します。（ピクセル）,
 y=テキストの上端位置を指定します。（ピクセル）,
-vertical=true 、false のいずれかを指定してください。trueで縦書き表示されます。デフォルトは横書き,
-size=フォントサイズをピクセルで指定してください,
-face=フォントの種類を指定してください。非KAG互換ですが、ウェブフォントも使用できます,
+vertical=true 、false のいずれかを指定します。trueで縦書き表示されます。デフォルトは横書き,
+size=フォントサイズをピクセルで指定します,
+face=フォントの種類を指定します。非KAG互換ですが、ウェブフォントも使用できます,
 color=フォントの色を指定します,
-bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます,
+bold=太字指定 boldと指定します　HTML５互換ならfont-style指定に変換できます,
 edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。,
 shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。縁取りをしている場合は無効化されます。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
@@ -2938,35 +3010,40 @@ tyrano.plugin.kag.tag.ptext = {
 
 /*
 #[mtext]
+
 :group
 レイヤ関連
+
 :title
 演出テキスト
+
 :exp
 多彩な演出効果をもったテキストを画面上に表示します。
 指定できる演出アニメーションは http://tyrano.jp/mtext/ を参照
 
 [layopt layer=0 visible=true]が必要です。
+
 :sample
 ;デフォルトは前景レイヤは配置されますので表示状態にしておく
 [layopt layer=0 visible=true]
 [mtext text="演出テキスト" x=100 y=100 in_effect="fadeIn" out_effect="fadeOut"]
+
 :param
 layer=対象とするレイヤを指定します。0以上の整数を指定すると対応する前景レイヤに画像を表示します,
 page=対象とするページを指定します。"fore"か"back"を指定して下さい。<br>この属性を省略すると"fore"であるとみなされます,
 text=表示するテキストの内容,
 x=テキストの左端位置を指定します。（ピクセル）,
 y=テキストの上端位置を指定します。（ピクセル）,
-vertical=true 、false のいずれかを指定してください。trueで縦書き表示されます。デフォルトは横書き,
-size=フォントサイズをピクセルで指定してください,
-face=フォントの種類を指定してください。非KAG互換ですが、ウェブフォントも使用できます,
+vertical=true 、false のいずれかを指定します。trueで縦書き表示されます。デフォルトは横書き,
+size=フォントサイズをピクセルで指定します,
+face=フォントの種類を指定します。非KAG互換ですが、ウェブフォントも使用できます,
 color=フォントの色を指定します,
 
 width=テキスト表示部分の横幅をピクセルで指定します,
 align=文字の横方向に関する位置を指定できます。left（左寄せ）center（中央寄せ）right（右寄せ）デフォルトはleftです。widthパラメータで横幅を指定するのを忘れないようにしてください,
 
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
-bold=太字指定 boldと指定してください　HTML５互換ならfont-style指定に変換できます,
+bold=太字指定 boldと指定します　HTML５互換ならfont-style指定に変換できます,
 edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します,
 shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。縁取りをしている場合は無効化されます。,
 
@@ -3160,14 +3237,18 @@ tyrano.plugin.kag.tag.mtext = {
 
 /*
 #[backlay]
+
 :group
 レイヤ関連
+
 :title
 レイヤ情報の表ページから裏ページへのコピー
+
 :exp
 指定したレイヤ、あるいはすべてのレイヤの情報を、表ページから裏ページに コピーします。
 利用方法としてはtrans タグで表ページのレイヤの画像を裏ページの レイヤの画像に置き換えます。
 そのため、トランジション前にこの backlay タ グで画像を裏ページに転送し、裏ページでレイヤを操作してから、トランジションを 行うという方法に用います。
+
 :sample
 ;背景変更をトランジションで実施
 @layopt layer=message0 visible=false
@@ -3175,6 +3256,7 @@ tyrano.plugin.kag.tag.mtext = {
 [image layer=base page=back storage=rouka.jpg]
 [trans time=2000]
 [wt]
+
 :param
 layer=対象となるレイヤを指定します。<br>
 base を指定すると 背景レイヤ になります。<br>
@@ -3203,23 +3285,27 @@ tyrano.plugin.kag.tag.backlay = {
 
 /*
 #[wt]
+
 :group
 レイヤ関連
+
 :title
 トランジションの終了待ち
+
 :exp
 トランジションが終了するまで、待ちます。
+
 :sample
 [backlay]
 [image layer=base page=back storage=rouka.jpg]
 [trans time=2000]
 ;トランジションが終わるまで先へ進まない
 [wt]
+
 :param
 
 :demo
 1,kaisetsu/03_layer
-
 
 #[end]
 */
@@ -3256,14 +3342,18 @@ start:function(pm){
 
 /*
 #[link]
+
 :group
 ラベル・ジャンプ操作
+
 :title
 ハイパーリンク（選択肢）
+
 :exp
 
 link タグと endlink タグで囲まれた部分の文章を、 マウスやキーボードで選択可能にし、そこでクリックされたりキーを押されたときに、 ジャンプする先を指定できます。
 また、囲まれた文章はページをまたぐことは出来ません(行をまたぐことはできます)。
+
 :sample
 選択肢を表示します[l][r][r]
 
@@ -3286,8 +3376,9 @@ link タグと endlink タグで囲まれた部分の文章を、 マウスや�
 [cm]
 
 共通ルートです
+
 :param
-storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます,
+storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
 target=ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。
 
 :demo
@@ -3356,24 +3447,29 @@ tyrano.plugin.kag.tag.link = {
 };
 
 /*
- #[endlink]
- :group
- ラベル・ジャンプ操作
- :title
- ハイパーリンク（選択肢）の終了を示します
- :exp
- ハイパーリンク（選択肢）の終了を示します
- :sample
- [link target=*select1]【１】選択肢　その１[endlink][r]
- [link target=*select2]【２】選択肢　その２[endlink][r]
- :param
+#[endlink]
+
+:group
+ラベル・ジャンプ操作
+
+:title
+ハイパーリンク（選択肢）の終了を示します
+
+:exp
+ハイパーリンク（選択肢）の終了を示します
+
+:sample
+[link target=*select1]【１】選択肢　その１[endlink][r]
+[link target=*select2]【２】選択肢　その２[endlink][r]
+
+:param
 
 
 :demo
 1,kaisetsu/14_select
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag.endlink = {
     start: function (pm) {
@@ -3385,21 +3481,27 @@ tyrano.plugin.kag.tag.endlink = {
 };
 
 /*
- #[s]
- :group
- システム操作
- :title
- ゲームを停止する
- :exp
- シナリオファイルの実行を停止します。
- linkタグで選択肢表示した直後などに配置して利用する方法があります。
- :sample
- [link target=*select1]【１】選択肢　その１[endlink][r]
- [link target=*select2]【２】選択肢　その２[endlink][r]
- [s]
- :param
- #[end]
- */
+#[s]
+
+:group
+システム操作
+
+:title
+ゲームを停止する
+
+:exp
+シナリオファイルの実行を停止します。
+linkタグで選択肢表示した直後などに配置して利用する方法があります。
+
+:sample
+[link target=*select1]【１】選択肢　その１[endlink][r]
+[link target=*select2]【２】選択肢　その２[endlink][r]
+[s]
+
+:param
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.s = {
     start: function () {
@@ -3425,17 +3527,23 @@ tyrano.plugin.kag.tag._s = {
 
 /*
 #[wait]
+
 :group
 システム操作
+
 :title
 ウェイトを入れる
+
 :exp
 ウェイトを入れます。time属性で指定した時間、操作できなくなります。
+
 :sample
 ;2000ミリ秒（２秒）処理を停止します
 [wait time=2000]
+
 :param
 time=ウェイトをミリ秒で指定します。
+
 #[end]
 */
 
@@ -3466,13 +3574,17 @@ tyrano.plugin.kag.tag.wait = {
 
 /*
 #[wait_cancel]
+
 :group
 システム操作
+
 :title
 ウェイトをキャンセルする
+
 :exp
 [wait]タグで待ち状態のスタックが存在する場合、キャンセルできます。
 これは[wait]中にボタンクリックなどでジャンプした先でキャンセルするような使い方をします。
+
 :param
 
 :demo
@@ -3502,18 +3614,24 @@ tyrano.plugin.kag.tag.wait_cancel = {
 };
 
 /*
- #[hidemessage]
- :group
- レイヤ関連
- :title
- メッセージを消す
- :exp
- メッセージレイヤを一時的に隠します。メニューから「メッセージを消す」を選んだのと 同じ動作を行います。
- クリック待ちを行った後、メッセージレイヤは表示され、 実行は継続します。
- :sample
- :param
- #[end]
- */
+#[hidemessage]
+
+:group
+レイヤ関連
+
+:title
+メッセージを消す
+
+:exp
+メッセージレイヤを一時的に隠します。メニューから「メッセージを消す」を選んだのと 同じ動作を行います。
+クリック待ちを行った後、メッセージレイヤは表示され、 実行は継続します。
+
+:sample
+
+:param
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.hidemessage = {
     start: function () {
@@ -3530,21 +3648,26 @@ tyrano.plugin.kag.tag.hidemessage = {
 
 /*
 #[quake]
+
 :group
 システム操作
+
 :title
 画面を揺らす
+
 :exp
 指定したミリ秒だけ、画面を揺らします。（KAGの文字数指定は未対応）
 vmax 属性を 0 に設定すると横揺れになります。hmax 属性を 0 に設定すると縦揺れになります。
+
 :sample
 [quake count=5 time=300 hmax=20]
+
 :param
 count=指定した回数揺らします,
 wait  = trueかfalseを指定します。trueの場合は揺れが完了するまで、ゲームを停止します。デフォルトはtrue,
 time=１回揺れるのにかかる時間をミリ秒で指定します。デフォルトは300,
-hmax=揺れの横方向への最大振幅を指定します。省略すると 10(px) が指定されたと見なされます。,
-vmax=揺れの縦方向への最大振幅を指定します。省略すると 10(px) が指定されたと見なされます。
+hmax=揺れの横方向への最大振幅を指定します。省略すると 10(px) が指定されたとみなされます。,
+vmax=揺れの縦方向への最大振幅を指定します。省略すると 10(px) が指定されたとみなされます。
 
 :demo
 1,kaisetsu/12_anim
@@ -3607,39 +3730,44 @@ tyrano.plugin.kag.tag.quake = {
 };
 
 /*
- #[font]
- :group
- システム操作
- :title
- フォント属性設定
- :exp
- 文字の様々な属性を指定します。
- これらの属性は、メッセージレイヤごとに個別に設定できます。
- いずれの属性も、省略すると前の状態を引き継ぎます。また、default を指定すると Config.tjs 内で指定したデフォルトの値に戻ります。
- resetfont や　ct cm er タグが実行されると、、Config.tjs 内や deffont タグで指定し たデフォルトの値に戻ります。
- :sample
- [font size=40 bold=true]
- この文字は大きく、そして太字で表示されます。
- [resetfont]
- もとの大きさに戻りました。
- :param
- size=文字サイズを指定します,
- color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
- bold=太字指定。true 又は　false で指定,
- italic=trueを指定すると、イタリック体になります。デフォルトはfalseです,
- face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
- edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
- shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください,
- effect=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
+#[font]
+
+:group
+システム操作
+
+:title
+フォント属性設定
+
+:exp
+文字の様々な属性を指定します。
+これらの属性は、メッセージレイヤごとに個別に設定できます。
+いずれの属性も、省略すると前の状態を引き継ぎます。また、default を指定すると Config.tjs 内で指定したデフォルトの値に戻ります。
+resetfont や　ct cm er タグが実行されると、、Config.tjs 内や deffont タグで指定し たデフォルトの値に戻ります。
+
+:sample
+[font size=40 bold=true]
+この文字は大きく、そして太字で表示されます。
+[resetfont]
+もとの大きさに戻りました。
+
+:param
+size=文字サイズを指定します,
+color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
+bold=太字指定。true 又は　false で指定,
+italic=trueを指定すると、イタリック体になります。デフォルトはfalseです,
+face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
+edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定します,
+shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定します,
+effect=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
 fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn<br />/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
- effect_speed=effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。
+effect_speed=effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。
 
 
 :demo
 1,kaisetsu/02_decotext
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag.font = {
     pm: {},
@@ -3706,23 +3834,28 @@ tyrano.plugin.kag.tag.font = {
 
 /*
 #[deffont]
+
 :group
 システム操作
+
 :title
 デフォルトの文字属性設定
+
 :exp
 現在操作対象のメッセージレイヤに対する、デフォルトの文字属性を指定します。
 ここで指定した属性は、resetfont タグで実際に反映されます。
 つまり、このタグを実行しただけではすぐにはフォントの属性は反映されません。resetfont タグ を実行する必要があります。
+
 :sample
+
 :param
 size=文字サイズを指定します,
 color=文字色を文字色を 0xRRGGBB 形式で指定します。（吉里吉里対応）　HTML5に限るならその他指定でも大丈夫です,
 bold=太字指定。true 又は　false で指定,
 italic=trueを指定するとイタリック体で表示されます。デフォルトは
 face=フォントの種類を指定。非KAG互換でウェブフォントも利用可能。プロジェクトフォルダのothersフォルダに配置してください。そして、tyrano.cssの@font-faceを指定することで利用できます。,
-edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定してください,
-shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定してください
+edge=文字の縁取りを有効にできます。縁取りする文字色を 0xRRGGBB 形式で指定します。縁取りを解除する場合は「none」と指定します,
+shadow=文字に影をつけます。影の色を 0xRRGGBB 形式で指定します。影を解除する場合は「none」と指定します
 effect=フォントの表示演出にアニメーションを設定できます。noneを指定すると無効。デフォルトはnone。設定できる値は次のとおりです。/
 fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/<br />zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none,
 effect_speed=effectパラメータがnone以外の場合に、表示されるまでの時間を指定します。デフォルトは0.2s です。 sは秒を表します。
@@ -3795,14 +3928,19 @@ tyrano.plugin.kag.tag.deffont = {
 
 /*
 #[delay]
+
 :group
 システム操作
+
 :title
 文字の表示速度の設定
+
 :exp
 文字の表示速度を指定します。
 文字表示をノーウェイトにするには nowait タグをつかう こともできます。
+
 :sample
+
 :param
 speed=文字の表示速度を指定します
 
@@ -3831,14 +3969,20 @@ tyrano.plugin.kag.tag.delay = {
 
 /*
 #[resetdelay]
+
 :group
 システム操作
+
 :title
 文字の表示速度をデフォルトに戻す
+
 :exp
 文字の表示速度をデフォルト速度に戻します
+
 :sample
+
 :param
+
 #[end]
 */
 
@@ -3858,17 +4002,23 @@ tyrano.plugin.kag.tag.resetdelay = {
 
 /*
 #[configdelay]
+
 :group
 システム操作
+
 :title
 デフォルトの文字の表示速度の設定
+
 :exp
 デフォルトの文字の表示速度を指定します。
 つまり、resetdelay時にはこの速度が指定されます。
 コンフィグ画面などで文字速度を指定する場合はこのタグをつかって指定します。
+
 :sample
+
 :param
 speed=文字の表示速度を指定します
+
 #[end]
 */
 
@@ -3892,17 +4042,23 @@ tyrano.plugin.kag.tag.configdelay = {
 };
 
 /*
- #[nowait]
- :group
- システム操作
- :title
- 文字表示の瞬間表示
- :exp
- 待ち時間なしに、テキストを配置します。
- :sample
- :param
- #[end]
- */
+#[nowait]
+
+:group
+システム操作
+
+:title
+文字表示の瞬間表示
+
+:exp
+待ち時間なしに、テキストを配置します。
+
+:sample
+
+:param
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.nowait = {
     pm: {},
@@ -3915,17 +4071,23 @@ tyrano.plugin.kag.tag.nowait = {
 };
 
 /*
- #[endnowait]
- :group
- システム操作
- :title
- テキストの瞬間表示を取り消します。
- :exp
- テキストメッセージは前回nowaitタグを指定した時のスピードへ戻ります
- :sample
- :param
- #[end]
- */
+#[endnowait]
+
+:group
+システム操作
+
+:title
+テキストの瞬間表示を取り消します。
+
+:exp
+テキストメッセージは前回nowaitタグを指定した時のスピードへ戻ります
+
+:sample
+
+:param
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.endnowait = {
     pm: {},
@@ -3938,18 +4100,24 @@ tyrano.plugin.kag.tag.endnowait = {
 };
 
 /*
- #[resetfont]
- :group
- システム操作
- :title
- フォント属性を元に戻す
- :exp
- font タグで指定した文字の属性をデフォルトに戻します。
- 文字属性は、メッセージレイヤごとに個別に設定できます
- :sample
- :param
- #[end]
- */
+#[resetfont]
+
+:group
+システム操作
+
+:title
+フォント属性を元に戻す
+
+:exp
+font タグで指定した文字の属性をデフォルトに戻します。
+文字属性は、メッセージレイヤごとに個別に設定できます
+
+:sample
+
+:param
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.resetfont = {
     log_join: "true",
@@ -3964,12 +4132,16 @@ tyrano.plugin.kag.tag.resetfont = {
 
 /*
 #[layopt]
+
 :group
 レイヤ関連
+
 :title
 レイヤの属性設定
+
 :exp
 レイヤの属性を指定します。
+
 :sample
 ;メッセージレイヤを消去
 @layopt layer=message0 visible=false
@@ -3979,17 +4151,17 @@ tyrano.plugin.kag.tag.resetfont = {
 @wt
 ;そしてレイヤ表示
 @layopt layer=message0 visible=true
+
 :param
 layer=対象となる前景レイヤまたはメッセージレイヤを指定します。 　message とのみ指定した場合は、current タグで指定した、現在の操作対象のメッセージレイヤが対象となります。,
-page=表(fore)画面のレイヤを対象とするか、裏(back)画面のレイヤを対象と するかを指定します。省略すると表ページであると見なされます。ただしlayerをmessage とのみ指定した場合でこの属性を省略した場合は 現在操作対象のページのメッセージレイヤが選択されます。,
+page=表(fore)画面のレイヤを対象とするか、裏(back)画面のレイヤを対象と するかを指定します。省略すると表ページであるとみなされます。ただしlayerをmessage とのみ指定した場合でこの属性を省略した場合は 現在操作対象のページのメッセージレイヤが選択されます。,
 visible=layer 属性で指定したレイヤを表示するか、しないかを指定 します。visibleをtrue と 指定すれば、レイヤは表示状態になります。visible=false と指定すれば、 非表示状態になります。省略すると表示状態は変わりません。,
-left=layer 属性で指定したレイヤの左端位置を指定します。 省略すると位置は変更しません。　layer 属性に message0 や message1 を指定した場合は、position タグで位置等を指定してください。,
-top=layer 属性で指定したレイヤの上端位置を指定します。 省略すると位置は変更しません。　layer 属性に message0 や message1 を指定した場合は、むしろ position タグで位置等を指定してください。,
-opacity=レイヤの不透明度を指定します。０～２５５の範囲で指定してください（２５５で全くの不透明）
+left=layer 属性で指定したレイヤの左端位置を指定します。 省略すると位置は変更しません。（メッセージレイヤの位置を調整したい場合はこのタグの代わりに[position]タグを使用します）,
+top=layer 属性で指定したレイヤの上端位置を指定します。 省略すると位置は変更しません。（メッセージレイヤの位置を調整したい場合はこのタグの代わりに[position]タグを使用します）,
+opacity=レイヤの不透明度を0～255の範囲で指定します。（255で全くの不透明）
 
 :demo
 1,kaisetsu/18_window_2
-
 
 #[end]
 */
@@ -4058,16 +4230,21 @@ tyrano.plugin.kag.tag.layopt = {
 
 /*
 #[ruby]
+
 :group
 メッセージ関連
+
 :title
 ルビを振る
+
 :exp
 次の一文字に対するルビを指定します。
-ルビを表示させたい場合は毎回指定してください。
+ルビを表示させたい場合は毎回指定する必要があります。
 複数の文字にルビを振る場合は、一文字毎にルビを指定する必要があります。
+
 :sample
 [ruby text="かん"]漢[ruby text="じ"]字
+
 :param
 text=ルビとして表示させる文字を指定します
 
@@ -4099,22 +4276,26 @@ tyrano.plugin.kag.tag["ruby"] = {
 
 /*
 #[mark]
+
 :group
 メッセージ関連
+
 :title
 テキストマーカー
+
 :exp
 テキストに蛍光ペンでマーカーを引いたような効果をつけることができます。
 色やサイズも指定可能
+
 :sample
 ここはまだです。[mark]ここにマーカーがひかれています。[endmark]ここはひかれません。
 
 [mark color="0xff7f50" size=70 ]マーカーの色やサイズを指定することもできます。[endmark]
 
 :param
-color=マーカーの色を指定します。デフォルトは黄色です。0xRRGGBB 形式で指定してください。 ,
-font_color=マーカーを引いたときのフォントの色を指定できます。0xRRGGBB 形式で指定してください。指定しないときはゲーム中のフォント色を継承します。,
-size=マーカーのサイズを指定できます。0〜100の間で指定してください。例えば50だとテキストの半分までマーカーがひかれます。10だと下線になります。
+color=マーカーの色を指定します。デフォルトは黄色です。0xRRGGBB 形式で指定します。 ,
+font_color=マーカーを引いたときのフォントの色を指定できます。0xRRGGBB 形式で指定します。指定しないときはゲーム中のフォント色を継承します。,
+size=マーカーのサイズを指定できます。0〜100の間で指定します。例えば50だとテキストの半分までマーカーがひかれます。10だと下線になります。
 
 :demo
 
@@ -4164,10 +4345,13 @@ tyrano.plugin.kag.tag["mark"] = {
 
 /*
 #[endmark]
+
 :group
 メッセージ関連
+
 :title
 テキストマーカー終了
+
 :exp
 [mark]タグで開始したテキストマーカーを終了します。
 
@@ -4202,18 +4386,24 @@ tyrano.plugin.kag.tag["endmark"] = {
 };
 
 /*
- #[cancelskip]
- :group
- システム操作
- :title
- スキップ解除
- :exp
- スキップ状態の解除を行います。
- プレイヤーにスキップ状態の停止を強制させることができます
- :sample
- :param
- #[end]
- */
+#[cancelskip]
+
+:group
+システム操作
+
+:title
+スキップ解除
+
+:exp
+スキップ状態の解除を行います。
+プレイヤーにスキップ状態の停止を強制させることができます
+
+:sample
+
+:param
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.cancelskip = {
     start: function (pm) {
@@ -4224,13 +4414,17 @@ tyrano.plugin.kag.tag.cancelskip = {
 
 /*
 #[locate]
+
 :group
 システム操作
+
 :title
 表示位置の指定
+
 :exp
 グラフィックボタンの表示位置を指定します。
 テキストには対応しておりません。
+
 :sample
 [locate x=20 y=100]
 [button graphic="oda.png" target=*oda]
@@ -4241,6 +4435,7 @@ tyrano.plugin.kag.tag.cancelskip = {
 :param
 x=横方向位置指定,
 y=縦方向位置指定
+
 #[end]
 */
 
@@ -4266,10 +4461,13 @@ tyrano.plugin.kag.tag.locate = {
 
 /*
 #[button]
+
 :group
 ラベル・ジャンプ操作
+
 :title
 グラフィカルボタンの表示
+
 :exp
 グラフィカルボタンを表示します。
 linkタグの画像版となります。
@@ -4279,6 +4477,7 @@ linkタグの画像版となります。
 ここから、移動した場合はコールスタックに残りません。つまり、リターンできないのでご注意ください
 注意→fixにtrueを指定した場合はコールスタックに残ります。コール先からリターンするまで全てのボタンは有効にならないのでご注意ください
 ジャンプ後に必ず[cm]タグでボタンを非表示にする必要があります。
+
 :sample
 [locate x=20 y=100]
 [button graphic="oda.png" target=*oda]
@@ -4288,7 +4487,7 @@ linkタグの画像版となります。
 
 :param
 graphic=ボタンにする画像を指定します。ファイルはプロジェクトフォルダのimageフォルダに入れて下さい,
-storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
+storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
 target=ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 x=ボタンの横位置を指定します,
@@ -4502,6 +4701,8 @@ tyrano.plugin.kag.tag.button = {
 
             //クリックが確定したとき
             j_button.click(function (event) {
+                button_clicked = true;
+
                 if (_pm.clickimg != "") {
                     //クリック画像が設定されているなら画像を変える
                     var click_img_url = parse_img_url(_pm.clickimg);
@@ -4525,8 +4726,6 @@ tyrano.plugin.kag.tag.button = {
                 ) {
                     return false;
                 }
-
-                button_clicked = true;
 
                 if (_pm.exp != "") {
                     //スクリプト実行
@@ -4716,15 +4915,20 @@ tyrano.plugin.kag.tag.button = {
 
 /*
 #[glink]
+
 :group
 ラベル・ジャンプ操作
+
 :title
 グラフィカルリンク
+
 :exp
-グラフィカルなボタンを表示することができます。画像は必要ありません
-グラフィックリンク表示中は強制的にシナリオ進行が停止しますので、必ずジャンプ先を指定して下さい
-また、グラフィックボタンの表示位置は直前のlocateタグによる指定位置を参照します。
+グラフィカルリンク(テキストボタン)を表示できます。画像は必要ありません。
+グラフィックリンク表示中は強制的にシナリオ進行が停止しますので、必ずジャンプ先を指定して下さい。
+
+また、グラフィックリンクの表示位置は直前のlocateタグによる指定位置を参照します。
 ただし、x、y が指定されている場合は、そちらが優先されます。
+
 ここから、移動した場合はコールスタックに残りません。つまり、リターンできないのでご注意ください
 ジャンプ後は自動的に[cm]タグが実行され、ボタンは消失します
 
@@ -4742,8 +4946,8 @@ https://tyrano.jp/sample2/code/siryou/1
 
 :param
 color=ボタンの色を指定できます。デフォルトはblackです（black gray white orange red blue rosy green pink）V501c以降で200パターン以上のデザイン追加。詳しくは→ https://tyrano.jp/sample2/code/siryou/1 ,
-font_color=フォントの色を指定できます。0xRRGGBB 形式で指定してください。 ,
-storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
+font_color=フォントの色を0xRRGGBB形式で指定します。 ,
+storage=ジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
 target=ジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。,
 name=ティラノスクリプトのみ。animタグなどからこの名前でアニメーションさせることができます。でまた名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 text=ボタンの文字列です,
@@ -4960,16 +5164,20 @@ tyrano.plugin.kag.tag.glink = {
 
 /*
 #[clickable]
+
 :group
 ラベル・ジャンプ操作
+
 :title
 クリック可能な領域を設定
+
 :exp
-透明なクリック可能領域を設定することができます。
+透明なクリック可能領域を設定できます。
 クリッカブルエリアの表示中は強制的にシナリオ進行が停止しますので、必ずジャンプ先を指定して下さい
 また、グラフィックボタンの表示位置は直前のlocateタグによる指定位置を参照します
 ここから、移動した場合はコールスタックに残りません。つまり、リターンできないのでご注意ください
 ☆重要：[s]タグに到達していない間は、クリッカブルは有効になりません。かならず、[s]タグでゲームを停止してください。
+
 :sample
 [locate x=20 y=100]
 [clickable width=200 height=300 target=*oda]
@@ -4984,11 +5192,11 @@ width=領域の横幅を指定します,
 height=領域に高さを指定します,
 x=領域の左端位置のX座標を指定します,
 y=領域の左端位置のY座標を指定します。,
-borderstyle=領域に線を表示することができます。「線の太さ:線の種類（CSS準拠）:線の色」のフォーマットで記述して下さい。線の種類はsolid double groove dashed dotted などが指定できます,　
+borderstyle=領域に線を表示できます。「線の太さ:線の種類（CSS準拠）:線の色」のフォーマットで記述して下さい。線の種類はsolid double groove dashed dotted などが指定できます,　
 color=表示色を 0xRRGGBB 形式で指定 します。 ,
 opacity=領域の不透明度を 0 ～ 255 の数値で指定します0で完全 に透明です。,
-mouseopacity=領域にマウスが乗った時透明度を変更することができます。領域の不透明度を 0 ～ 255 の数値で指定します0で完全 に透明です,
-storage=クリックされた際のジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であると見なされます。,
+mouseopacity=領域にマウスが乗った時透明度を変更できます。領域の不透明度を 0 ～ 255 の数値で指定します0で完全 に透明です,
+storage=クリックされた際のジャンプ先のシナリオファイルを指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
 target=クリックされた際のジャンプ先のラベルを指定します。省略すると、ファイルの先頭から実行されます。
 
 :demo
@@ -5106,18 +5314,22 @@ tyrano.plugin.kag.tag.clickable = {
 
 /*
 #[glyph]
+
 :group
 システム操作
+
 :title
 クリック待ち記号の指定
+
 :exp
 クリック待ち記号を表示する位置を設定できます
 クリック記号はプロジェクトフォルダのtyrano/images/system/nextpage.gifを変更することで対応します
+
 :sample
 [glyph  fix=true left=200 top=100 ]
 
 :param
-line=クリック待ちの表示画像を指定することができます。tyrano/images/system/nextpage.gifと同一のフォルダに配置してください,
+line=クリック待ちの表示画像を指定できます。tyrano/images/system/nextpage.gifと同一のフォルダに配置してください,
 fix=trueを指定すると、left、及び、topを指定した位置に表示されます。,
 left=fix 属性を true にしたときに記号を表示する位置のうち、左端位置を 指定します,
 top=fix 属性を true にしたときに記号を表示する位置のうち、上端位置を 指定します
@@ -5184,20 +5396,25 @@ start:function(pm){
 
 /*
 #[trans]
+
 :group
 レイヤ関連
+
 :title
 レイヤのトランジション
+
 :exp
 指定したレイヤでトランジションを行います。
 トランジションは、常に裏ページの対象のレイヤが、表ページの対象のレイヤに 入れ替わる方向で行われます。
 トランジション後は、表ページの対象のレイヤの画像、位置、サイズ、可視・不可視 の状態は裏ページの対象のレイヤと同じになります。
 また、トランジション中はレイヤの属性変更などは行わないで下さい
+
 :sample
 [backlay]
 [image storage=fg0 layer=0 page=back]
 [trans time=1500 ]
 [wt]
+
 :param
 layer=対象となるレイヤを指定します。<br>
 base を指定すると 背景レイヤ になります。<br>
@@ -5327,21 +5544,26 @@ tyrano.plugin.kag.tag.trans = {
 
 /*
 #[bg]
+
 :group
 レイヤ関連
+
 :title
 背景の切り替え
+
 :exp
 背景の切り替えを簡易的に実行できます。
 常にforeのレイヤに対して切り替えが実行されます
+
 :sample
 [bg storage=fg0.png time=1500 wait=true]
+
 :param
 storage=切り替えるための画像ファイルを指定します。ファイルはbgimage以下に配置してください,
 time=時間をミリ秒で指定します。,
 wait=背景の切り替えが完了するまで処理を待ちます,
 cross=true or false を指定します。デフォルトはfalse。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い背景を残しながら上に重なる形で新しい背景を表示します。CG差分などで使用する場合はfalseが良いでしょう。,
-position:指定しない場合は画面サイズぴったりに引き伸ばされて背景が表示されます（比率は崩れる）。この値を指定すると背景画像と画面サイズの比率が異なる場合に、比率を崩さずに背景を配置することができます。配置位置を指定してください。left（左寄せ）center（中央寄せ）right（右寄せ）top（上寄せ）bottom（下寄せ）,
+position=省略すると、画面サイズぴったりに引き伸ばされて背景が表示されます（比率は崩れる）。この値を指定すると背景画像と画面サイズの比率が異なる場合に、比率を崩さずに背景を配置できます。配置位置を次のキーワードから選択してください。left（左寄せ）center（中央寄せ）right（右寄せ）top（上寄せ）bottom（下寄せ）,
 method=切り替えのタイプを指定します。デフォルトは"fadeIn"です。指定できる演出は次の通りです。
 （V450以降）
 fadeIn/
@@ -5377,7 +5599,6 @@ puffIn
 
 :demo
 1,kaisetsu/04_bg
-
 
 #[end]
 */
@@ -5482,22 +5703,27 @@ tyrano.plugin.kag.tag.bg = {
 
 /*
 #[bg2]
+
 :group
 レイヤ関連
+
 :title
 背景の切り替え
+
 :exp
 背景の切り替えを簡易的に実行できます。
 常にforeのレイヤに対して切り替えが実行されます
+
 :sample
 [bg storage=fg0.png time=1500 wait=true]
+
 :param
 name=animタグなどからこの名前でアニメーションさせることができます。また、名前を指定しておくとクラス属性としてJSから操作できます。カンマで区切ることで複数指定することもできます,
 storage=切り替えるための画像ファイルを指定します。ファイルはbgimage以下に配置してください,
 left=画像の左端位置を指定します。デフォルトは０です（ピクセル）,
 top=画像の上端位置を指定します。デフォルトは０です（ピクセル）,
-width=画像の横幅を指定します。（ピクセル）指定しない場合はゲーム画面に一致するサイズが設定されます,
-height=画像の高さ位置を指定します。（ピクセル）指定しない場合はゲーム画面に一致するサイズが設定されます,
+width=画像の横幅を指定します。（ピクセル）省略すると、ゲーム画面に一致するサイズが設定されます,
+height=画像の高さ位置を指定します。（ピクセル）省略すると、ゲーム画面に一致するサイズが設定されます,
 time=時間をミリ秒で指定します。,
 wait=背景の切り替えが完了するまで処理を待ちます,
 cross=true or false を指定します。デフォルトはfalse。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い背景を残しながら上に重なる形で新しい背景を表示します。CG差分などで使用する場合はfalseが良いでしょう。,
@@ -5533,6 +5759,7 @@ vanishIn/
 puffIn
 (V450以前)
 指定できる効果は「crossfade」「explode」「slide」「blind」「bounce」「clip」「drop」「fold」「puff」「scale」「shake」「size」
+
 #[end]
 */
 
@@ -5675,25 +5902,30 @@ tyrano.plugin.kag.tag.bg2 = {
 
 /*
 #[layermode]
+
 :group
 レイヤ関連
+
 :title
 レイヤーモード
+
 :exp
 レイヤの合成を行うことができます。
 PCゲーム環境での推奨機能です。
 一部ブラウザIE,Edge では動作しませんのでご注意ください
+
 :sample
 [layermode graphic=fg0.png time=1500 mode=overlay]
+
 :param
 name=レイヤ合成に名前をつけることができます。この名前はfree_layremovdeで特定の合成のみを消したい際に使用できます,
-graphic=合成する画像ファイルを指定してください。ファイルはimageフォルダに配置しします,
-color=合成に色を指定することができます0xFFFFFF形式で指定してください,
+graphic=合成する画像ファイルを指定します。ファイルはimageフォルダに配置します,
+color=合成する色を0xRRGGBB形式で指定します。,
 mode=合成方法を指定できます。デフォルトは「multiply」 次の効果が使えます→ multiply（乗算）screen（スクリーン）overlay（オーバーレイ）darken（暗く）lighten（明るく）color-dodge（覆い焼きカラー）color-burn（焼き込みカラー）hard-light（ハードライト）soft-light（ソフトライト）difference（差の絶対値）exclusion（除外）hue（色相）saturation（彩度）color（カラー）luminosity（輝度）,
-folder=graphicで指定する画像のフォルダを変更できます。例えばbgimageと指定することで、背景画像から取得することができます。,
+folder=graphicで指定する画像のフォルダを変更できます。例えばbgimageと指定することで、背景画像から取得できます。,
 opacity=不透明度を 0 ～ 255 の数値で指定します。0 で完全 に透明です。デフォルトは透明度指定なしです,
 time=合成はフェードインで行われます。合成が完了する時間をミリ秒(１秒=1000ミリ秒)で指定します。デフォルトは500ミリ秒です,
-wait=合成の完了を待つか否かを指定できます。trueかfalseを指定してください。デフォルトはtrueです
+wait=合成の完了を待つかどうかをtrueまたはfalseで指定します。デフォルトはtrueです。
 
 :demo
 2,kaisetsu/02_layermode
@@ -5787,10 +6019,13 @@ tyrano.plugin.kag.tag.layermode = {
 
 /*
 #[layermode_movie]
+
 :group
 レイヤ関連
+
 :title
 レイヤーモード動画
+
 :exp
 ゲーム画面に動画を合成を行うことができます。
 PCゲーム環境での推奨機能です。
@@ -5802,9 +6037,10 @@ PCゲーム形式の場合は webm形式を使ってください。 mp4 に対�
 
 :sample
 [layermode_movie video=test.webm time=1500 wait=true]
+
 :param
 name=レイヤ合成に名前をつけることができます。この名前はfree_layremovdeで特定の合成のみを消したい際に使用できます,
-video=合成する動画ファイルを指定してください。ファイルはvideoフォルダに配置しします,
+video=合成する動画ファイルを指定します。ファイルはvideoフォルダに配置しします,
 volume=合成する動画の音ボリュームを指定します。0〜100で指定します。デフォルトは０の消音です,
 mute=true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。,
 loop=動画をループするか否かをtrueかfalseで指定します。デフォルトはtrueです。ループ指定した場合、free_layermodeを行うまで演出が残ります。,
@@ -5812,8 +6048,8 @@ speed=動画の再生スピードを指定できます。デフォルトは１ �
 mode=合成方法を指定できます。デフォルトは「multiply」 次の効果が使えます→ multiply（乗算）screen（スクリーン）overlay（オーバーレイ）darken（暗く）lighten（明るく）color-dodge（覆い焼きカラー）color-burn（焼き込みカラー）hard-light（ハードライト）soft-light（ソフトライト）difference（差の絶対値）exclusion（除外）hue（色相）saturation（彩度）color（カラー）luminosity（輝度）,
 opacity=不透明度を 0 ～ 255 の数値で指定します。0 で完全 に透明です。デフォルトは透明度指定なしです,
 time=合成はフェードインで行われます。合成が完了する時間をミリ秒(１秒=1000ミリ秒)で指定します。デフォルトは500ミリ秒です,
-left=エフェクトをかける位置を指定することができます。（ピクセル）,
-top=エフェクトをかける位置を指定することができます。（ピクセル）,
+left=エフェクトをかける位置を指定できます。（ピクセル）,
+top=エフェクトをかける位置を指定できます。（ピクセル）,
 width=エフェクトの幅を指定します。（ピクセル）,
 height=エフェクトの高さを指定します。（ピクセル）,
 fit=true or false 演出を画面いっぱいに引き伸ばすことができます。デフォルトはtrue ,
@@ -5983,16 +6219,21 @@ tyrano.plugin.kag.tag.layermode_movie = {
 
 /*
 #[free_layermode]
+
 :group
 レイヤ関連
+
 :title
 レイヤーモードの開放
+
 :exp
 レイヤの合成を取り消します
+
 :sample
 [free_layermode name="test"]
+
 :param
-name=名前を指定して合成を行っている場合、ここで特定の合成のみを削除することも可能です。指定しない場合はすべての効果が消されます,
+name=名前を指定して合成を行っている場合、ここで特定の合成のみを削除することも可能です。省略すると、すべての効果が消されます,
 time=合成はフェードアウトで消えていきます。フェードアウトにかかる時間をミリ秒で指定できます。デフォルトは500ミリ秒です,
 wait=フェードアウトの完了を待つか否かをtrueかfalseで指定できます。デフォルトはtrueです。
 

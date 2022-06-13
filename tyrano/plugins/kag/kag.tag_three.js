@@ -76,34 +76,33 @@ $.getAngle = function(){
 */
 
 /*
- #[3d_init]
- :group
- 3D関連
+#[3d_init]
 
- :title
- 3D機能の初期化
+:group
+3D関連
 
- :exp
- 3D関連の機能を使用するために必要な宣言です。
- このタグを通過時、ゲーム内に3Dを表示するためのシーンが追加されます。
- また、タグを配置していないと3d_xxx で始まるタグを使用できません。
+:title
+3D機能の初期化
 
- 3D機能を使用する直前に宣言するようにしましょう。
- また3D機能の仕様が終わった段階で[3d_close]を行いましょう。
+:exp
+3D関連の機能を使用するために必要な宣言です。
+このタグを通過時、ゲーム内に3Dを表示するためのシーンが追加されます。
+また、タグを配置していないと3d_xxx で始まるタグを使用できません。
 
- :sample
- [3d_init layer=0 ]
+3D機能を使用する直前に宣言するようにしましょう。
+また3D機能の仕様が終わった段階で[3d_close]を行いましょう。
 
- :param
- layer=3Dモデルを配置するレイヤを指定できます。,
- camera=カメラのモードを指定できます。「Perspective」（遠近感あり）「Orthographic」（遠近感なしの平行投影）デフォルトはPerspective,
- near=カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１,
- far=カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000
+:sample
+[3d_init layer=0 ]
 
+:param
+layer=3Dモデルを配置するレイヤを指定できます。,
+camera=カメラのモードを指定できます。「Perspective」（遠近感あり）「Orthographic」（遠近感なしの平行投影）デフォルトはPerspective,
+near=カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１,
+far=カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000
 
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_init"] = {
     vital: [],
@@ -304,39 +303,37 @@ tyrano.plugin.kag.tag["3d_init"] = {
 };
 
 /*
- #[3d_model_new]
- :group
- 3D関連
+#[3d_model_new]
 
- :title
- 3Dモデルの作成
+:group
+3D関連
 
- :exp
- 外部ファイル形式の3Dモデルを読み込んで定義します。
- 実行時はゲーム画面には表示されません。表示するには[3d_show ]が必要です。
- 3Dモデルファイルは data/others/3d/modelフォルダに配置します。
+:title
+3Dモデルの作成
 
- :sample
- [3d_init layer=0]
+:exp
+外部ファイル形式の3Dモデルを読み込んで定義します。
+実行時はゲーム画面には表示されません。表示するには[3d_show ]が必要です。
+3Dモデルファイルは data/others/3d/modelフォルダに配置します。
 
- [3d_model_new name="mymodel" storage="mymodel/scene.gltf" ]
- [3d_show name="mymodel" pos="100,20,20" rot="1,1,1" scale=10 ]
+:sample
+[3d_init layer=0]
 
- :param
- name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
- storage=3Dファイルを指定します。gltf obj 形式に対応します。ファイルはothers/3d/modelフォルダに配置してください。,
- pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
- tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。,
- motion=ファイルにモーションが存在する場合、モーション名を指定することができます。指定がない場合は１つめのモーションファイルが自動的に適応されます。,
- folder=ファイルの配置フォルダを変更できます。
+[3d_model_new name="mymodel" storage="mymodel/scene.gltf" ]
+[3d_show name="mymodel" pos="100,20,20" rot="1,1,1" scale=10 ]
 
+:param
+name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+storage=3Dファイルを指定します。gltf obj 形式に対応します。ファイルはothers/3d/modelフォルダに配置してください。,
+pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定します。,
+motion=ファイルにモーションが存在する場合、モーション名を指定できます。指定がない場合は１つめのモーションファイルが自動的に適応されます。,
+folder=ファイルの配置フォルダを変更できます。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_model_new"] = {
     vital: ["name", "storage"],
@@ -488,40 +485,38 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 };
 
 /*
- #[3d_sphere_new]
- :group
- 3D関連
+#[3d_sphere_new]
 
- :title
- 3Dモデル(球体)
+:group
+3D関連
 
- :exp
- 球体の3Dモデルを定義します
+:title
+3Dモデル(球体)
 
- :sample
+:exp
+球体の3Dモデルを定義します
+
+:sample
 
 [3d_sphere_new name="tama" ]
 [3d_show name=tama pos="365,145,0" rot="0.92,-4.3,0" scale="0.77,0.77,0.77" time=2000]
 
- :param
- name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
- texture=球体にテクスチャを貼ることができます。画像は「others/3d/texture」以下に配置してください。サイズは256x256 や 512x512 といったサイズを推奨します。,
- color=色を指定できます。0xRRGGBB 形式で指定します。,
- pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+:param
+name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+texture=球体にテクスチャを貼ることができます。画像は「others/3d/texture」以下に配置してください。サイズは256x256 や 512x512 といったサイズを推奨します。,
+color=色を指定できます。0xRRGGBB 形式で指定します。,
+pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
 
- radius=球体の半径を指定します。デフォルトは300,
- width=球体の横幅を指定します。デフォルトは30,
- height=球体の高さを指定します。デフォルトは30,
+radius=球体の半径を指定します。デフォルトは300,
+width=球体の横幅を指定します。デフォルトは30,
+height=球体の高さを指定します。デフォルトは30,
 
- tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定してください。
+tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定します。
 
-
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_sphere_new"] = {
     vital: ["name"],
@@ -555,35 +550,34 @@ tyrano.plugin.kag.tag["3d_sphere_new"] = {
 };
 
 /*
- #[3d_sprite_new]
- :group
- 3D関連
+#[3d_sprite_new]
 
- :title
- 3Dモデル(スプライト)
+:group
+3D関連
 
- :exp
- スプライトの3Dモデルを定義します。
- イメージとの違いはスプライトの場合、オブジェクトが常にカメラの方を向きます。
+:title
+3Dモデル(スプライト)
 
- :sample
+:exp
+スプライトの3Dモデルを定義します。
+イメージとの違いはスプライトの場合、オブジェクトが常にカメラの方を向きます。
+
+:sample
 
 [3d_sprite_new name="yamato" storage="doki.png"]
 [3d_show name="yamato"]
 
- :param
- name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
- storage=表示する画像ファイルを指定します。ファイルは「othres/3d/sprite」フォルダ以下に配置してください。,
- pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
- tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。,
- folder=ファイルの配置フォルダを変更できます。
+:param
+name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+storage=表示する画像ファイルを指定します。ファイルは「othres/3d/sprite」フォルダ以下に配置してください。,
+pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定します。,
+folder=ファイルの配置フォルダを変更できます。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 //スプライトを配置する
 tyrano.plugin.kag.tag["3d_sprite_new"] = {
@@ -667,20 +661,21 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
 };
 
 /*
- #[3d_event]
- :group
- 3D関連
+#[3d_event]
 
- :title
- 3Dイベント定義
+:group
+3D関連
 
- :exp
- 3Dシーン上のオブジェクトがクリックされたときに、イベントを発火させることができます。
- イベントは[s]タグに到達していないと発火しません。
- また、一度イベントが発火すると自動的に全イベントが無効化されます（イベント定義自体は残っている）
- 再度イベントを発生させたい場合は[3d_event_start]を通過する必要があります。
+:title
+3Dイベント定義
 
- :sample
+:exp
+3Dシーン上のオブジェクトがクリックされたときに、イベントを発火させることができます。
+イベントは[s]タグに到達していないと発火しません。
+また、一度イベントが発火すると自動的に全イベントが無効化されます（イベント定義自体は残っている）
+再度イベントを発生させたい場合は[3d_event_start]を通過する必要があります。
+
+:sample
 
 ;3Dモデルの定義と表示
 [3d_model_new name="miruku" storage="miruku/scene.gltf" scale=300 pos="0,-300,500" ]
@@ -710,14 +705,12 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
 @3d_event_start
 
 :param
-name=3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトのnameを指定してください。,
-storage=移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルと見なされます,
+name=3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトのnameを指定します。,
+storage=移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルとみなされます。,
 target=ジャンプ先のラベル名を指定します。省略すると先頭から実行されます
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_event"] = {
     vital: ["name"],
@@ -739,17 +732,18 @@ tyrano.plugin.kag.tag["3d_event"] = {
 };
 
 /*
- #[3d_event_delete]
- :group
- 3D関連
+#[3d_event_delete]
 
- :title
- 3Dイベントの削除
+:group
+3D関連
 
- :exp
- 登録した3Dイベントを無効化します。
+:title
+3Dイベントの削除
 
- :sample
+:exp
+登録した3Dイベントを無効化します。
+
+:sample
 
 ;ボックスの表示
 [3d_box_new name="box" width=100 height=100 depth=100 scale=2 tone=false color="0xFFFFFF"]
@@ -762,12 +756,10 @@ tyrano.plugin.kag.tag["3d_event"] = {
 
 
 :param
-name=3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定してください。
+name=3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定します。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_event_delete"] = {
     vital: ["name"],
@@ -786,26 +778,25 @@ tyrano.plugin.kag.tag["3d_event_delete"] = {
 };
 
 /*
- #[3d_event_start]
- :group
- 3D関連
+#[3d_event_start]
 
- :title
- 3Dイベントの開始
+:group
+3D関連
 
- :exp
- 登録した3Dイベントを開始します。
- イベントが実行された後は必ず全イベントが無効化されるため、このタグで再度受付を開始する必要があります。
+:title
+3Dイベントの開始
 
- :sample
+:exp
+登録した3Dイベントを開始します。
+イベントが実行された後は必ず全イベントが無効化されるため、このタグで再度受付を開始する必要があります。
 
-
- :param
+:sample
 
 
+:param
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_event_start"] = {
     vital: [],
@@ -820,26 +811,25 @@ tyrano.plugin.kag.tag["3d_event_start"] = {
 };
 
 /*
- #[3d_event_stop]
- :group
- 3D関連
+#[3d_event_stop]
+
+:group
+3D関連
 
 :title
- 3Dイベントの停止
+3Dイベントの停止
 
 :exp
- 登録した3Dイベントを停止します。
- [3d_event_start]で再開できます。
- 登録したイベント自体は消えません。
+登録した3Dイベントを停止します。
+[3d_event_start]で再開できます。
+登録したイベント自体は消えません。
 
 :sample
 
 :param
 
-
-
- #[end]
- */
+#[end]
+*/
 
 //イベントを取得する。
 tyrano.plugin.kag.tag["3d_event_stop"] = {
@@ -855,17 +845,18 @@ tyrano.plugin.kag.tag["3d_event_stop"] = {
 };
 
 /*
- #[3d_box_new]
- :group
- 3D関連
+#[3d_box_new]
 
- :title
- 3Dモデル(ボックス)
+:group
+3D関連
 
- :exp
- 立方体の3Dモデルを定義します。
+:title
+3Dモデル(ボックス)
 
- :sample
+:exp
+立方体の3Dモデルを定義します。
+
+:sample
 
 ;ボックスの定義と表示
 [3d_box_new name="mybox1" ]
@@ -876,24 +867,22 @@ tyrano.plugin.kag.tag["3d_event_stop"] = {
 [3d_show name="mybox2" time=2000 ]
 
 
- :param
- name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
- texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます,
- color=色を指定できます。0xRRGGBB 形式で指定します。,
- width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
- height=3Dオブジェクトの高さを指定します。デフォルトは1です,
- depth=3Dオブジェクトの深さを指定します。デフォルトは1です,
+:param
+name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます,
+color=色を指定できます。0xRRGGBB 形式で指定します。,
+width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
+height=3Dオブジェクトの高さを指定します。デフォルトは1です,
+depth=3Dオブジェクトの深さを指定します。デフォルトは1です,
 
- pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
 
- tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。
+tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定します。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_box_new"] = {
     vital: ["name"],
@@ -927,39 +916,38 @@ tyrano.plugin.kag.tag["3d_box_new"] = {
 };
 
 /*
- #[3d_image_new]
- :group
- 3D関連
+#[3d_image_new]
 
- :title
- 3Dモデル(イメージ)
+:group
+3D関連
 
- :exp
- イメージの3Dモデルを定義します。
- 平面の板が3Dシーンに追加されるイメージです。
+:title
+3Dモデル(イメージ)
 
- :sample
+:exp
+イメージの3Dモデルを定義します。
+平面の板が3Dシーンに追加されるイメージです。
+
+:sample
 
 ;3Dイメージ
 [3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ]
 [3d_show name="myimg" ]
 
- :param
- name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
- texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。,
- width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
- height=3Dオブジェクトの高さを指定します。省略した場合は画像サイズの比率を保った形で表示できます。,
+:param
+name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。,
+width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
+height=3Dオブジェクトの高さを指定します。省略した場合は画像サイズの比率を保った形で表示できます。,
 
- pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
- doubleside=テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。,
- tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定してください。
+pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+doubleside=テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。,
+tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定します。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 //球体をつくる
 tyrano.plugin.kag.tag["3d_image_new"] = {
@@ -1129,34 +1117,33 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
 };
 
 /*
- #[3d_show]
- :group
- 3D関連
+#[3d_show]
 
- :title
- 3Dオブジェクト表示
+:group
+3D関連
 
- :exp
- 定義した3Dオブジェクトを実際にゲーム画面に登場させます。
+:title
+3Dオブジェクト表示
 
- :sample
+:exp
+定義した3Dオブジェクトを実際にゲーム画面に登場させます。
+
+:sample
 
 ;3Dイメージ
 [3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ]
 [3d_show name="myimg" ]
 
- :param
- name=3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定してください,
- time=表示させるまでの時間をミリ秒で指定します。デフォルトは500,
- wait=表示の完了を待つか否か。デフォルトはtrue。,
- pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。
+:param
+name=3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定します,
+time=表示させるまでの時間をミリ秒で指定します。デフォルトは500,
+wait=表示の完了を待つか否か。デフォルトはtrue。,
+pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_show"] = {
     vital: ["name"],
@@ -1214,19 +1201,20 @@ tyrano.plugin.kag.tag["3d_show"] = {
 };
 
 /*
- #[3d_hide]
- :group
- 3D関連
+#[3d_hide]
 
- :title
- 3Dオブジェクト非表示
+:group
+3D関連
 
- :exp
- 3Dオブジェクトをゲーム画面から退場させます。
- このタグを実行しても定義自体は削除されません。
- もう一度表示する場合は[3d_show]タグを使ってください。
+:title
+3Dオブジェクト非表示
 
- :sample
+:exp
+3Dオブジェクトをゲーム画面から退場させます。
+このタグを実行しても定義自体は削除されません。
+もう一度表示する場合は[3d_show]タグを使ってください。
+
+:sample
 
 ;3Dイメージ
 [3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ]
@@ -1235,14 +1223,13 @@ tyrano.plugin.kag.tag["3d_show"] = {
 非表示にします。[p]
 [3d_hide name="myimg"]
 
- :param
- name=3Dオブジェクトの名前です。退場させたいオブジェクトのnameを指定してください,
- time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
- wait=退場の完了を待つか否か。デフォルトはtrue。
+:param
+name=3Dオブジェクトの名前です。退場させたいオブジェクトのnameを指定します,
+time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
+wait=退場の完了を待つか否か。デフォルトはtrue。
 
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_hide"] = {
     vital: ["name"],
@@ -1283,27 +1270,27 @@ tyrano.plugin.kag.tag["3d_hide"] = {
 };
 
 /*
- #[3d_hide_all]
- :group
- 3D関連
+#[3d_hide_all]
 
- :title
- 3Dオブジェクト全非表示
+:group
+3D関連
 
- :exp
- すべての3Dオブジェクトをゲーム画面から退場させます。
- このタグを実行しても定義自体は削除されません。
- もう一度表示する場合は[3d_show]タグを使ってください。
+:title
+3Dオブジェクト全非表示
 
- :sample
+:exp
+すべての3Dオブジェクトをゲーム画面から退場させます。
+このタグを実行しても定義自体は削除されません。
+もう一度表示する場合は[3d_show]タグを使ってください。
 
- :param
- time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
- wait=退場の完了を待つか否か。デフォルトはtrue。
+:sample
 
+:param
+time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
+wait=退場の完了を待つか否か。デフォルトはtrue。
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_hide_all"] = {
     vital: [],
@@ -1357,19 +1344,20 @@ tyrano.plugin.kag.tag["3d_hide_all"] = {
 
 /*
  #[3d_delete]
- :group
- 3D関連
 
- :title
- 3Dオブジェクト削除
+:group
+3D関連
 
- :exp
- 3Dオブジェクトを削除します。
- このタグは定義からも削除されるので、再度使用する場合は
- もう一度 new タグで定義する必要があります。
- 使用しなくなった3Dオブジェクトはこまめに削除することで軽量な動作が期待できます。
+:title
+3Dオブジェクト削除
 
- :sample
+:exp
+3Dオブジェクトを削除します。
+このタグは定義からも削除されるので、再度使用する場合は
+もう一度 new タグで定義する必要があります。
+使用しなくなった3Dオブジェクトはこまめに削除することで軽量な動作が期待できます。
+
+:sample
 
 ;3Dイメージ
 [3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ]
@@ -1381,13 +1369,11 @@ tyrano.plugin.kag.tag["3d_hide_all"] = {
 定義からも削除[p]
 [3d_delete name="myimg"]
 
- :param
- name=3Dオブジェクトの名前です。削除していオブジェクトのnameを指定してください
+:param
+name=3Dオブジェクトの名前です。削除していオブジェクトのnameを指定します
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_delete"] = {
     vital: ["name"],
@@ -1412,25 +1398,24 @@ tyrano.plugin.kag.tag["3d_delete"] = {
 };
 
 /*
- #[3d_delete_all]
- :group
- 3D関連
+#[3d_delete_all]
 
- :title
- 3Dオブジェクト全削除
+:group
+3D関連
 
- :exp
- 3Dオブジェクトをすべて削除します。
- 3Dシーンをリセットするときに利用します。
+:title
+3Dオブジェクト全削除
 
- :sample
+:exp
+3Dオブジェクトをすべて削除します。
+3Dシーンをリセットするときに利用します。
 
- :param
+:sample
 
+:param
 
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_delete_all"] = {
     vital: [],
@@ -1456,26 +1441,25 @@ tyrano.plugin.kag.tag["3d_delete_all"] = {
 };
 
 /*
- #[3d_canvas_show]
- :group
- 3D関連
+#[3d_canvas_show]
 
- :title
- 3Dキャンバス表示
+:group
+3D関連
 
- :exp
- 3Dキャンバスを表示にします。
- 例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
+:title
+3Dキャンバス表示
 
- :sample
- time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
+:exp
+3Dキャンバスを表示にします。
+例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
 
- :param
+:sample
+time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
 
+:param
 
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_canvas_show"] = {
     vital: [],
@@ -1495,26 +1479,26 @@ tyrano.plugin.kag.tag["3d_canvas_show"] = {
 };
 
 /*
- #[3d_canvas_hide]
- :group
- 3D関連
+#[3d_canvas_hide]
 
- :title
- 3Dキャンバス非表示
+:group
+3D関連
 
- :exp
- 3Dキャンバスを非表示にします。
- 3Dシーン自体は維持されます。
- 例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
+:title
+3Dキャンバス非表示
 
- :sample
- time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
+:exp
+3Dキャンバスを非表示にします。
+3Dシーン自体は維持されます。
+例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
 
- :param
+:sample
+time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
 
+:param
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_canvas_hide"] = {
     vital: [],
@@ -1534,25 +1518,25 @@ tyrano.plugin.kag.tag["3d_canvas_hide"] = {
 };
 
 /*
- #[3d_close]
- :group
- 3D関連
+#[3d_close]
 
- :title
- 3Dシーン削除
+:group
+3D関連
 
- :exp
- 3Dシーンをすべて削除します。
- このタグを使用すると3D系の機能は全て使えなくなります。
- もう一度使用する場合は[3d_init]タグを通過させてください。
+:title
+3Dシーン削除
 
- :sample
+:exp
+3Dシーンをすべて削除します。
+このタグを使用すると3D系の機能は全て使えなくなります。
+もう一度使用する場合は[3d_init]タグを通過させてください。
 
- :param
+:sample
 
+:param
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_close"] = {
     vital: [],
@@ -1574,68 +1558,67 @@ tyrano.plugin.kag.tag["3d_close"] = {
 };
 
 /*
- #[3d_anim]
- :group
- 3D関連
+#[3d_anim]
 
- :title
- 3Dアニメーション
+:group
+3D関連
 
- :exp
- シーン上の3Dオブジェクトをアニメーションさせることができます。
+:title
+3Dアニメーション
 
- :sample
+:exp
+シーン上の3Dオブジェクトをアニメーションさせることができます。
 
- [3d_model_new name="mymodel" storage="mymodel/scene.gltf" ]
- [3d_anim name="miruku" pos="79,-458,727" scale="318.45,318.45,318.45" rot="0.13,-0.64,0" effect="easeInCubic" wait=true]
+:sample
 
-
- :param
- name=3Dオブジェクトの名前です。この名前の3Dオブジェクトをアニメーションさせます。カメラをアニメーションさせる場合は「camera」という名前を指定します。,
- pos=アニメーション後、3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=アニメーション後、3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- scale=アニメーション後、3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
- time=アニメーションにかける時間をミリ秒で指定します。デフォルトは1000です。,
- wait=アニメーションの完了を待つか否か。true or false デフォルトはtrueです。,
- lookat=ameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。,
- effect= 変化のエフェクトを指定します。指定できる文字列は以下の種類です<br />
- jswing
- ｜def
- ｜easeInQuad
- ｜easeOutQuad
- ｜easeInOutQuad
- ｜easeInCubic
- ｜easeOutCubic
- ｜easeInOutCubic
- ｜easeInQuart
- ｜easeOutQuart
- ｜easeInOutQuart
- ｜easeInQuint
- ｜easeOutQuint
- ｜easeInOutQuint
- ｜easeInSine
- ｜easeOutSine
- ｜easeInOutSine
- ｜easeInExpo
- ｜easeOutExpo
- ｜easeInOutExpo
- ｜easeInCirc
- ｜easeOutCirc
- ｜easeInOutCirc
- ｜easeInElastic
- ｜easeOutElastic
- ｜easeInOutElastic
- ｜easeInBack
- ｜easeOutBack
- ｜easeInOutBack
- ｜easeInBounce
- ｜easeOutBounce
- ｜easeInOutBounce
+[3d_model_new name="mymodel" storage="mymodel/scene.gltf" ]
+[3d_anim name="miruku" pos="79,-458,727" scale="318.45,318.45,318.45" rot="0.13,-0.64,0" effect="easeInCubic" wait=true]
 
 
+:param
+name=3Dオブジェクトの名前です。この名前の3Dオブジェクトをアニメーションさせます。カメラをアニメーションさせる場合は「camera」という名前を指定します。,
+pos=アニメーション後、3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=アニメーション後、3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+scale=アニメーション後、3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+time=アニメーションにかける時間をミリ秒で指定します。デフォルトは1000です。,
+wait=アニメーションの完了を待つか否か。true or false デフォルトはtrueです。,
+lookat=ameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。,
+effect= 変化のエフェクトを指定します。指定できる文字列は以下の種類です<br />
+jswing
+｜def
+｜easeInQuad
+｜easeOutQuad
+｜easeInOutQuad
+｜easeInCubic
+｜easeOutCubic
+｜easeInOutCubic
+｜easeInQuart
+｜easeOutQuart
+｜easeInOutQuart
+｜easeInQuint
+｜easeOutQuint
+｜easeInOutQuint
+｜easeInSine
+｜easeOutSine
+｜easeInOutSine
+｜easeInExpo
+｜easeOutExpo
+｜easeInOutExpo
+｜easeInCirc
+｜easeOutCirc
+｜easeInOutCirc
+｜easeInElastic
+｜easeOutElastic
+｜easeInOutElastic
+｜easeInBack
+｜easeOutBack
+｜easeInOutBack
+｜easeInBounce
+｜easeOutBounce
+｜easeInOutBounce
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_anim"] = {
     vital: ["name"],
@@ -1725,26 +1708,25 @@ tyrano.plugin.kag.tag["3d_anim"] = {
 };
 
 /*
- #[3d_anim_stop]
- :group
- 3D関連
+#[3d_anim_stop]
 
- :title
- 3Dアニメ停止
+:group
+3D関連
 
- :exp
- アニメーション中の3Dオブジェクトを停止することができます。
+:title
+3Dアニメ停止
 
- :sample
+:exp
+アニメーション中の3Dオブジェクトを停止できます。
 
- :param
- name=アニメーションを停止する3Dオブジェクトの名前を指定します。 ,
- finish=true or false を指定します。falseを指定するとアニメーション停止の位置でオブジェクトが停止します。trueだとアニメーションする予定の位置まで移動します。デフォルトはtrue。
+:sample
 
+:param
+name=アニメーションを停止する3Dオブジェクトの名前を指定します。 ,
+finish=true or false を指定します。falseを指定するとアニメーション停止の位置でオブジェクトが停止します。trueだとアニメーションする予定の位置まで移動します。デフォルトはtrue。
 
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_anim_stop"] = {
     vital: ["name"],
@@ -1768,31 +1750,29 @@ tyrano.plugin.kag.tag["3d_anim_stop"] = {
 };
 
 /*
- #[3d_scene]
- :group
- 3D関連
+#[3d_scene]
 
- :title
- 3Dシーン設定
+:group
+3D関連
 
- :exp
- 3Dのシーン全体に影響する設定を行うことができます。
+:title
+3Dシーン設定
 
- :sample
+:exp
+3Dのシーン全体に影響する設定を行うことができます。
 
- [3d_scene light_amb="2" tonemap=""]
+:sample
 
- :param
+[3d_scene light_amb="2" tonemap=""]
 
- tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
- tonemap_value=トーンマッピングの強さを設定します。デフォルトは0.8です。,
- light_amb=環境光の強さを指定します。デフォルトは1。例えば 0.5 だと暗め。2だとかなり明るくなります。
+:param
 
+tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
+tonemap_value=トーンマッピングの強さを設定します。デフォルトは0.8です。,
+light_amb=環境光の強さを指定します。デフォルトは1。例えば 0.5 だと暗め。2だとかなり明るくなります。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 //カメラの設定を変更
 tyrano.plugin.kag.tag["3d_scene"] = {
@@ -1864,30 +1844,30 @@ tyrano.plugin.kag.tag["3d_scene"] = {
 };
 
 /*
- #[3d_camera]
- :group
- 3D関連
+#[3d_camera]
 
- :title
- 3Dカメラ
+:group
+3D関連
 
- :exp
- 3Dシーンのカメラを設定できます。
- カメラの座標を確認したい場合は[camera_debug]をつかって、座標や傾きをテストするのがおすすめです。
+:title
+3Dカメラ
 
- :sample
+:exp
+3Dシーンのカメラを設定できます。
+カメラの座標を確認したい場合は[camera_debug]をつかって、座標や傾きをテストするのがおすすめです。
+
+:sample
 
 [3d_camera pos="10,20,30" ]
 
- :param
- pos=カメラを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
- rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
- tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
- lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。
+:param
+pos=カメラを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
+rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
+tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
+lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。
 
-
- #[end]
- */
+#[end]
+*/
 
 //カメラの設定を変更
 tyrano.plugin.kag.tag["3d_camera"] = {
@@ -1951,30 +1931,29 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 };
 
 /*
- #[3d_gyro]
- :group
- 3D関連
+#[3d_gyro]
 
- :title
- 3Dジャイロ
+:group
+3D関連
 
- :exp
- スマホの傾きでカメラを制御することができます。
- PCゲームの場合はマウスの位置でジャイロを再現することができます。
+:title
+3Dジャイロ
 
- :sample
+:exp
+スマホの傾きでカメラを制御できます。
+PCゲームの場合はマウスの位置でジャイロを再現できます。
+
+:sample
 
 [3d_gyro max_x="20" max_y="20" ]
 
- :param
- max_x=X軸方向の傾き上限を角度で指定します。デフォルトは30,
- max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30,
- mode=position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。
+:param
+max_x=X軸方向の傾き上限を角度で指定します。デフォルトは30,
+max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30,
+mode=position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 //カメラの設定を変更
 (tyrano.plugin.kag.tag["3d_gyro"] = {
@@ -2242,7 +2221,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
      :exp
      スマホ限定
      ジャイロの動きを停止します。
-     カメラの位置も戻したい場合はこのタグの直後に3d_cameraで指定してください。
+     カメラの位置も戻したい場合はこのタグの直後に3d_cameraで指定します。
      再度ジャイロを有効にしたい場合は [3d_gyro] タグです。
 
      :sample
@@ -2284,7 +2263,7 @@ tyrano.plugin.kag.tag["3d_camera"] = {
      3Dカメラデバッグ
 
      :exp
-     3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら、調整することができます。
+     3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら、調整できます。
      デバッグを終了する場合は画面左上のボタンを押します。
      マウス操作
      左クリック：カメラの向き(rot)
@@ -2574,17 +2553,18 @@ tyrano.plugin.kag.tag["3d_camera"] = {
     });
 
 /*
- #[3d_motion]
- :group
- 3D関連
+#[3d_motion]
 
- :title
- モーション変更
+:group
+3D関連
 
- :exp
- 3Dモデルのモーションを変更することができます。
+:title
+モーション変更
 
- :sample
+:exp
+3Dモデルのモーションを変更できます。
+
+:sample
 
 ;モデルの定義。最初はRunningというモーションで表示。
 [3d_model_new name="Robot" storage="Robot.glb" pos="0,0,0" scale="2" motion="Running" ]
@@ -2594,14 +2574,12 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 
 [3d_motion name="Robot" motion="Punch"]
 
- :param
- name=3Dオブジェクトの名前を指定します。 ,
- motion=モーション名を指定してください。
+:param
+name=3Dオブジェクトの名前を指定します。 ,
+motion=モーション名を指定します。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_motion"] = {
     vital: ["name", "motion"],
@@ -2625,23 +2603,24 @@ tyrano.plugin.kag.tag["3d_motion"] = {
 };
 
 /*
- #[3d_debug]
- :group
- 3D関連
+#[3d_debug]
 
- :title
- 3Dデバッグ
+:group
+3D関連
 
- :exp
- 3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整することができます。
- デバッグを終了する場合は画面左上のボタンを押します。
- マウス操作
- 左クリック：カメラの向き(rot)
- 右クリック：カメラの位置(pos)
- 中央クリック：ポジションのz軸
- スクロール：拡大縮小（scale）
+:title
+3Dデバッグ
 
- :sample
+:exp
+3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整できます。
+デバッグを終了する場合は画面左上のボタンを押します。
+マウス操作
+左クリック：カメラの向き(rot)
+右クリック：カメラの位置(pos)
+中央クリック：ポジションのz軸
+スクロール：拡大縮小（scale）
+
+:sample
 
 [3d_model_new name="Robot" storage="Robot.glb" ]
 [3d_show name="Robot" rot="0.28,0.67,0" pos="-129,-24,910" scale="9.68" ]
@@ -2650,17 +2629,15 @@ tyrano.plugin.kag.tag["3d_motion"] = {
 
 [3d_debug name="Robot" ]
 
- :param
- name=デバッグする3Dオブジェクトのnameを指定してください。,
- button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」,
- menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) ,
- overlap=true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase,
- reset=true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。
+:param
+name=デバッグする3Dオブジェクトのnameを指定します。,
+button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」,
+menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) ,
+overlap=true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase,
+reset=true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。
 
-
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag["3d_debug"] = {
     vital: ["name"],

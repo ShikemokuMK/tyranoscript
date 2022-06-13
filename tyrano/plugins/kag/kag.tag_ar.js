@@ -1,9 +1,12 @@
 /*
 #[bgcamera]
+
 :group
 AR関連
+
 :title
 ストリームカメラ背景
+
 :exp
 背景をデバイスのカメラ入力に切り替えることができます。
 キャラクターと記念撮影をするようなアプリが簡単につくれます。
@@ -52,15 +55,14 @@ name=animタグなどからこの名前でアニメーションさせること�
 wait=trueを指定するとカメラ入力の表示を待ちます。デフォルトはtrue,
 time=カメラ入力領域が表示されるフェードイン時間をミリ秒で指定します。デフォルトは1000,
 fit=比率を崩しても全画面に配置するならtrue。比率を保持して配置するならfalse。カメラの解像度によっては黒塗りの部分ができる可能性があります。デフォルトはtrue。,
-left=カメラを配置する位置を指定することができます。（ピクセル）,
-top=カメラを配置する位置を指定することができます。（ピクセル）,
+left=カメラを配置する位置を指定できます。（ピクセル）,
+top=カメラを配置する位置を指定できます。（ピクセル）,
 width=カメラを配置するエリアの幅を指定します。（ピクセル）,
 height=カメラを配置するエリアの高さを指定します。（ピクセル）,
 mode=「front」（前面カメラ）「back」（背面カメラ）を指定します。何も指定しないと標準のカメラが選択されます,
 qrcode=QRコードを読み込んだときの動作を設定できます。「jump」（ゲーム内移動のQRのみ反応）「web」（他サイトへのリンクだけ反応）「define」（qr_defineで定義したものだけに反応）「all」（すべてに反応）「off」（QRコードに反応しない）デフォルトは「off」,
 debug=QRコードが読み込まれたときにURLを表示するか否かを指定できます。デフォルトはfalse。trueでURLをアラート表示できます。 ,
 audio=音声入力も反映するか否か。trueを指定すると音声もゲームに反映されます。デフォルトはfalse
-
 
 #[end]
 */
@@ -337,22 +339,27 @@ tyrano.plugin.kag.tag.bgcamera = {
 };
 
 /*
- #[qr_config ]
- :group
- AR関連
- :title
- QRコードの動作設定
- :exp
- QRコードの各種動作設定が可能です。
- :sample
+#[qr_config]
 
- ;QRコードでティラノのジャップのみ有効にする
- [qr_config qrcode="jump"]
+:group
+AR関連
 
- :param
- qrcode=QRコードを読み込んだときの動作を設定できます。「jump」（ゲーム内移動のQRのみ反応）「web」（他サイトへのリンクだけ反応）「all」（jumpとweb両方に反応）「off」（QRコードに反応しない）デフォルトは「off」,
- #[end]
- */
+:title
+QRコードの動作設定
+
+:exp
+QRコードの各種動作設定が可能です。
+
+:sample
+
+;QRコードでティラノのジャップのみ有効にする
+[qr_config qrcode="jump"]
+
+:param
+qrcode=QRコードを読み込んだときの動作を設定できます。「jump」（ゲーム内移動のQRのみ反応）「web」（他サイトへのリンクだけ反応）「all」（jumpとweb両方に反応）「off」（QRコードに反応しない）デフォルトは「off」,
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.qr_config = {
     vital: [],
@@ -373,20 +380,26 @@ tyrano.plugin.kag.tag.qr_config = {
 };
 
 /*
- #[stop_bgcamera]
- :group
- AR関連
- :title
- カメラストリームの停止
- :exp
- [bgcamera]を非表示にします。
- :sample
- [stop_bgcamera time=1000 ]
- :param
- time=ミリ秒で指定。動画をフェードアウトして削除することが可能です。デフォルトは1000,
- wait=trueかfalse を指定します。動画のフェードアウトを待つかどうかを指定できます。デフォルトはtrue
- #[end]
- */
+#[stop_bgcamera]
+
+:group
+AR関連
+
+:title
+カメラストリームの停止
+
+:exp
+[bgcamera]を非表示にします。
+
+:sample
+[stop_bgcamera time=1000 ]
+
+:param
+time=ミリ秒で指定。動画をフェードアウトして削除することが可能です。デフォルトは1000,
+wait=trueかfalse を指定します。動画のフェードアウトを待つかどうかを指定できます。デフォルトはtrue
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.stop_bgcamera = {
     vital: [],
@@ -438,25 +451,29 @@ tyrano.plugin.kag.tag.stop_bgcamera = {
 };
 
 /*
- #[qr_define]
- :group
- AR関連
- :title
- QRコードの置き換え
- :exp
- QRコードのURLをjumpに置き換えることができます。
- 例えば、モニュメントや商品についているQRコードをゲーム内のイベントに置き換える事ができます。
+#[qr_define]
 
- :sample
- [qr_define url="https://tyrano.jp" storage="scene1.ks" target="test" ]
+:group
+AR関連
 
- :param
- url=カメラを写したときに反応させるURLを定義します,
- storage=URLが読み込まれたときに発動するjump先のシナリオファイルを指定します,
- target=ジャンプ先のラベルと指定する,
- clear=trueを指定すると定義を削除することができます。デフォルトはfalse
- #[end]
- */
+:title
+QRコードの置き換え
+
+:exp
+QRコードのURLをjumpに置き換えることができます。
+例えば、モニュメントや商品についているQRコードをゲーム内のイベントに置き換える事ができます。
+
+:sample
+[qr_define url="https://tyrano.jp" storage="scene1.ks" target="test" ]
+
+:param
+url=カメラを写したときに反応させるURLを定義します,
+storage=URLが読み込まれたときに発動するjump先のシナリオファイルを指定します,
+target=ジャンプ先のラベルと指定する,
+clear=trueを指定すると定義を削除できます。デフォルトはfalse
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.qr_define = {
     vital: ["url"],

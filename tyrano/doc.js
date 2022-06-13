@@ -17,6 +17,23 @@ var tyrano = {};
 tyrano.plugin = {};
 tyrano.plugin.kag = {};
 
+//グループの順番
+var GROUP_RANK = [
+    "メッセージ関連",
+    "ラベル・ジャンプ操作",
+    "キャラクター操作",
+    "レイヤ関連",
+    "システム操作",
+    "マクロ・変数・JS操作",
+    "カメラ操作",
+    "アニメーション関連",
+    "オーディオ関連",
+    "入力フォーム関連",
+    "3D関連",
+    "AR関連",
+    "その他",
+].reverse();
+
 (function ($) {
     $.generateHtml = function () {
         var html = "";
@@ -29,6 +46,7 @@ tyrano.plugin.kag = {};
             master_tag[order_type] = object(tyrano.plugin.kag.tag[order_type]);
         }
 
+        console.log("===master_tag");
         console.log(master_tag);
 
         //テキストを読み込み。スクリプトから、オブジェクト構造解析
@@ -179,7 +197,7 @@ tyrano.plugin.kag = {};
                             }
                         } //end for loop
 
-                        console.log("ww  map_doc  wwwwwwww");
+                        console.log("===map_doc");
                         console.log(map_doc);
 
                         $("#studio_json").val(
@@ -194,51 +212,83 @@ tyrano.plugin.kag = {};
     };
 
     $.putHtml = function (map_doc, master_tag) {
+        console.log("===map_doc");
+        console.log(map_doc);
+
+        //------------------------------
         //タグのグルーピングで左部分作成
+        //------------------------------
 
         var group_map = {};
 
-        var ghtml = "";
-
+        // TagDocをグループで整理
         for (key in map_doc) {
             var obj = map_doc[key];
-            if (group_map[obj.group]) {
-            } else {
+            // 文字列をトリミングしておく
+            ["exp", "group", "sample", "demo"].forEach(function (key) {
+                if (typeof obj[key] === "string") {
+                    obj[key] = obj[key].trim();
+                }
+            });
+            // 振り分け
+            if (group_map[obj.group] === undefined) {
                 group_map[obj.group] = {};
             }
             group_map[obj.group][key] = obj;
         }
 
-        var num_index = 0;
+        //map_docに存在しているグループのリスト
+        var group_names = Object.keys(group_map);
 
-        //グループをつくる
-        for (key in group_map) {
+        //GROUP_RANKに存在しないグループのセット
+        var unknown_groups = new Set();
+
+        //GROUP_RANK順になるように並び変える
+        //GROUP_RANKに載っていないグループは最後尾
+        //GROUP_RANKに載っていないグループ同士は文字コードを比較
+        group_names.sort(function (a, b) {
+            var i = GROUP_RANK.indexOf(a);
+            var j = GROUP_RANK.indexOf(b);
+            if (i < 0) unknown_groups.add(a);
+            if (j < 0) unknown_groups.add(b);
+            return i > j ? -1 : i < j ? 1 : a > b ? 1 : -1;
+        });
+
+        //未登録のタググループをアラート
+        if (unknown_groups.size > 0) {
+            alert(
+                "未登録のタググループを検出しました。\n\n" +
+                    [...unknown_groups].join("\n"),
+            );
+        }
+
+        //ソート済みのグループリストが完成
+        console.log("===group_names");
+        console.log(group_names);
+
+        //左側のHTMLを作る
+        var ghtml = "";
+        var num_index = 0;
+        for (var group_name of group_names) {
             ghtml += '<li class="list-group-item list-toggle">';
             ghtml +=
                 '<a data-toggle="collapse" data-parent="#sidebar-nav-1" href="#nav_' +
                 num_index +
                 '" class="collapsed" aria-expanded="false">' +
-                key +
+                group_name +
                 "</a>";
 
-            var tmp = group_map[key];
+            var tag_map = group_map[group_name];
 
             ghtml +=
                 '<ul id="nav_' +
                 num_index +
                 '" class="collapse" aria-expanded="false" style="height: 0px;">';
 
-            for (key2 in tmp) {
-                var obj = tmp[key2];
-                //ghtml +='<div style="padding:2px"><a  href="#'+key2+'">['+key2+']　<span style="font-style:italic;color:gray">('+obj.title+')</span></a></div>';
-                ghtml +=
-                    '<li><a href="#' +
-                    key2 +
-                    '"> [' +
-                    key2 +
-                    "]　" +
-                    obj.title +
-                    "</a></li>";
+            for (tag_name in tag_map) {
+                var obj = tag_map[tag_name];
+                //ghtml +='<div style="padding:2px"><a  href="#'+tag_name+'">['+tag_name+']　<span style="font-style:italic;color:gray">('+obj.title+')</span></a></div>';
+                ghtml += `<li><a href="#${tag_name}">[${tag_name}]　${obj.title}</a></li>`;
             }
 
             ghtml += "</ul>";
@@ -246,31 +296,66 @@ tyrano.plugin.kag = {};
 
             num_index++;
         }
-
         $(".area_group").html(ghtml);
+
+        //------------------------------
+        //ドキュメント本体を作っていく
+        //------------------------------
 
         var j_root = $("<div></div>");
 
-        for (key in map_doc) {
+        j_root.append(
+            `<style>
+                .news-v3 p {
+                    margin-bottom: 10px;
+                }
+                .news-v3 p > code {
+                    color: #555;
+                    background-color: #ececec;
+                }
+                .news-v3 h3 {
+                    margin-bottom: 4px;
+                }
+                .news-v3 .group {
+                    font-size: 90%;
+                    color: #a10f2b;
+                }
+                .news-v3 .code {
+                    padding: 2px 3px;
+                    margin: 0px 2px;
+                    font-size: 95%;
+                    background-color: rgba(0, 0, 0, 0.07);
+                    border-radius: 4px;
+                    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+                }
+                .news-v3 .table > thead > tr > th {
+                    vertical-align: middle;
+                }
+            </style>`
+                .replace(/\n/g, "")
+                .replace(/\s+/g, " "),
+        );
+
+        // タグ名のリストを作る（グループ順に準拠する）
+        var tag_names = [];
+        for (var group_name of group_names) {
+            var tag_map = group_map[group_name];
+            tag_names = tag_names.concat(Object.keys(tag_map));
+        }
+        console.log("===tag_names");
+        console.log(tag_names);
+
+        for (var key of tag_names) {
             var obj = map_doc[key];
 
+            //説明文のパース
+            exp = parseExp(obj.exp);
+
             var html =
-                "" +
-                '<div  class="news-v3 bg-color-white margin-bottom-20">' +
-                '<div class="news-v3-in"><a name="' +
-                key +
-                '"></a>' +
-                '<h3 style="color:#a10f2b">[' +
-                key +
-                "]　" +
-                obj.title +
-                "</h3>" +
-                '<ul class="list-inline posted-info"><li>' +
-                obj.group +
-                "</li></ul>" +
-                "<p>" +
-                $.br($.escapeHTML(obj.exp)) +
-                "</p>";
+                `<div  class="news-v3 bg-color-white margin-bottom-20">` +
+                `<div class="news-v3-in"><a name="${key}"></a>` +
+                `<h3 style="color:#a10f2b">[${key}]　${obj.title}</h3>` +
+                `<ul class="list-inline posted-info"><li><span class="group">${obj.group}</span></li></ul>${exp}`;
 
             //デモ用のURLがあるなら差し込む
             if (typeof obj.demo != "undefined") {
@@ -286,32 +371,41 @@ tyrano.plugin.kag = {};
                     '" target="_blank"">解説チュートリアル</a></p>';
             }
 
+            //パラメータのテーブルを作っていく
             html +=
                 '<table class="table table-bordered">' +
-                '<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>解説</th></tr></thead>' +
+                '<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>初期値</th><th>解説</th></tr></thead>' +
                 "<tbody>";
-
-            //繰り返し
-
-            var param_str = obj.param;
 
             var array_param = obj.param.split(",");
 
-            console.log("==== array_param  =====");
-            console.log(array_param);
+            //console.log("==== array_param  =====");
+            //console.log(array_param);
 
             for (var k = 0; k < array_param.length; k++) {
                 if (array_param[k] == "") {
                     html +=
-                        '<tr ><td colspan="3">指定できるパラメータはありません</td></tr>';
+                        '<tr ><td colspan="4">指定できるパラメータはありません。</td></tr>';
                 } else {
                     var tmp_array = array_param[k].split("=");
 
+                    //属性名
                     var param_name = $.trim(tmp_array[0]);
-                    var param_value = $.trim(tmp_array[1]);
 
+                    //解説
+                    var param_exp = $.trim(tmp_array[1]);
+                    param_exp = markup(param_exp);
+
+                    //初期値
+                    var param_initial = "";
+                    try {
+                        param_initial =
+                            tyrano.plugin.kag.tag[key].pm[param_name];
+                    } catch (err) {}
+                    param_initial = param_initial ?? "";
+
+                    //必須
                     var vital = "×";
-
                     if (
                         master_tag[key] != null &&
                         master_tag[key]["vital"] != null
@@ -327,30 +421,20 @@ tyrano.plugin.kag = {};
                     }
 
                     html +=
-                        "                 <tr>" +
-                        "                  <td>" +
-                        param_name +
-                        "</td>" +
-                        "                  <td>" +
-                        vital +
-                        "</td>" +
-                        "                  <td>" +
-                        param_value +
-                        "</td>" +
-                        "              </tr>";
+                        `<tr><td>${param_name}</td><td>${vital}</td>` +
+                        `<td>${param_initial}</td><td>${param_exp}</td></tr>`;
                 }
             } //end for loop
 
             html += "</tbody></table>";
 
+            //サンプルコード
             if (obj.sample != "") {
                 html +=
-                    "" +
-                    '<ul class="list-inline posted-info"><li>サンプルコード</li></ul>' +
-                    "<code><br />" +
-                    $.br($.escapeHTML(obj.sample)) +
-                    "<br /></code>" +
-                    "";
+                    `<ul class="list-inline posted-info"><li>サンプルコード</li></ul>` +
+                    `<pre class="language-tyranoscript"><code>${$.br(
+                        $.escapeHTML(obj.sample),
+                    )}</code></pre>`;
             }
 
             html += "</div></div>";
@@ -363,34 +447,68 @@ tyrano.plugin.kag = {};
 
         $(".area_ref").empty();
 
-        //基本説明部分ｎ
+        //基本説明部分
 
         var basic_exp =
-            "" +
-            ' <div class="alert alert-success fade in margin-bottom-20">' +
+            '<div class="alert alert-success fade in margin-bottom-20">' +
             "<h4>基本</h4>" +
             "<p>" +
-            "                       [ ] で囲まれた部分がタグになります。 <br/ >" +
-            "                        @で始まる行も、タグとして認識しますが、１行で記述しなければなりません<br/ >" +
-            "                        ;(セミコロン)で始まる行はコメントとして扱われます。<br/ >" +
-            "                        複数行にわたってコメントにする場合は、/* からはじめて */ で 閉じることでコメントになります。　<br/ >" +
-            "                        すべてのタグにcond属性があります。JS式を記述して、その結果が真の場合のみタグが実行されます<br/ >" +
-            "                        _（半角アンダーバー）で始まる行は、文章の前に空白を挿入することができます。<br />" +
-            "                        " +
-            "                    </p>     " +
-            "" +
+            "[ ] で囲まれた部分がタグになります。<br>" +
+            "@で始まる行もタグとして認識されますが、１行に複数のタグを書くことはできません。</p><p>" +
+            ";（セミコロン）で始まる行はコメントとして扱われます。<br>" +
+            "複数行をまとめてコメントにしたいときは、コメントにしたい行を /* と */ で囲みます。/* と */ はどちらも独立した行に記述する必要があります。</p><p>" +
+            "すべてのタグに共通して指定可能なパラメータにcond属性があります。cond属性は『そのタグが実行される条件』であり、JavaScriptの式で記述します。</p><p>" +
+            "基本的にスクリプトの行頭の空白はないものとして扱われます。テキストの前に空白を入れたいときは、行頭に_（半角アンダーバー）を書く必要があります。</p>" +
+            "</p>" +
             "</div>";
         $(".area_ref").append(basic_exp);
         $(".area_ref").append(j_root);
-        $("#src_html").val($(".area_main").html());
+
+        // htmlを全部<textarea>にぶち込む処理には時間がかかるのでここではまだぶち込まない
+        $("#src_html").val("ボタンを押してください");
 
         var js_auto_complete = "";
         for (key in master_tag) {
             js_auto_complete += '"' + key + '",\n';
         }
-
-        console.log(master_tag);
-
         $("#auto_complete_tag").val(js_auto_complete);
     };
+
+    $.setHtmlToTextarea = () => {
+        $("#src_html").val($(".area_main").html());
+    };
+
+    //タグ説明文のパース
+    function parseExp(exp) {
+        //HTML特殊文字のエスケープ
+        //exp = $.escapeHTML(exp);
+
+        //連続改行(空行)を検出して段落配列化
+        let paragraphs = exp.split(/\n\s*\n/);
+
+        //各段落に処理を行いjoinして返す
+        return paragraphs
+            .map((p) => {
+                return `<p>${markup(p)}</p>`;
+            })
+            .join("");
+    }
+
+    //マークアップ
+    function markup(p) {
+        //トリミング
+        p = p.trim();
+        //段落内における改行は<br>に変換して見た目に反映
+        p = p.replace(/\n/g, "<br>");
+        //インラインコードを変換
+        p = p.replace(/`([^`]+)`/g, `<span class="code">$1</span>`);
+        //URLを検出してリンク化
+        p = p.replace(
+            /https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+/g,
+            function (url) {
+                return `<a href="${url}">${url}</a>`;
+            },
+        );
+        return p;
+    }
 })(jQuery);

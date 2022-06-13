@@ -1,28 +1,31 @@
 /*
- #[camera]
- :group
- カメラ操作
- :title
- カメラを移動する
- :exp
- カメラをズームやパンさせる演出を追加できます。
- この機能を使うと、立ち絵のキャラクター表情にフォーカスをあてたり
- 一枚絵であっても多彩な演出が可能になります。
+#[camera]
 
- カメラ機能を使用するにはConfig.tjs の useCameraをtrueにする必要があります。
- また、カメラ機能を有効にした場合、画面の中央寄せ（ScreenCentering）が無効になります。
+:group
+カメラ操作
 
- カメラの座標は画面中央が(x:0,y:0)です。
- 例えば、画面右上は x:200 y:200 　画面左下は x:-200 y:-200 という座標指定になります。
+:title
+カメラを移動する
 
- カメラを元の位置に戻すためには[reset_camera]タグを使用します。
- カメラの演出完了を待ちたい場合は[wait_camera]タグを使用します。
+:exp
+カメラをズームやパンさせる演出を追加できます。
+この機能を使うと、立ち絵のキャラクター表情にフォーカスをあてたり
+一枚絵であっても多彩な演出が可能になります。
 
- 【重要】
- カメラ演出が終わったら、必ず[reset_camera]でカメラの位置を初期値に戻して下さい。
- カメラを戻さないと、背景の変更 [bg]タグ等は使用できません。
+カメラ機能を使用するにはConfig.tjs の useCameraをtrueにする必要があります。
+また、カメラ機能を有効にした場合、画面の中央寄せ（ScreenCentering）が無効になります。
 
- :sample
+カメラの座標は画面中央が(x:0,y:0)です。
+例えば、画面右上は x:200 y:200 　画面左下は x:-200 y:-200 という座標指定になります。
+
+カメラを元の位置に戻すためには[reset_camera]タグを使用します。
+カメラの演出完了を待ちたい場合は[wait_camera]タグを使用します。
+
+【重要】
+カメラ演出が終わったら、必ず[reset_camera]でカメラの位置を初期値に戻して下さい。
+カメラを戻さないと、背景の変更 [bg]タグ等は使用できません。
+
+:sample
 
 @camera zoom=2 x=180 y=100 time=1000
 @camera x=-180 y=100 time=2000
@@ -31,31 +34,31 @@
 ;カメラの位置を元に戻す
 @reset_camera
 
- :param
- time=カメラが座標へ移動する時間を指定できます。ミリ秒で指定して下さい。デフォルトは1000,
- x=カメラの移動するX座標を指定して下さい,
- y=カメラの移動するY座標を指定して下さい,
- zoom=カメラの拡大率を指定して下さい。例えば２と指定すると２倍ズームします,
- rotate=カメラの傾きを指定します。例えば20 だとカメラが20度傾きます。,
- from_x=カメラの移動開始時のX座標を指定できます,
- from_y=カメラの移動開始時のY座標を指定できます,
- from_zoom=カメラの移動開始時の倍率を指定できます,
- from_rotate=カメラの移動開始時の傾きを指定できます,
- wait=カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行することができます。デフォルトはtrue,
- layer=レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。,　
- ease_type=カメラの移動演出を指定できます。
- ease(開始時点と終了時点を滑らかに再生する)
- linear(一定の間隔で再生する)
- ease-in(開始時点をゆっくり再生する)
- ease-out(終了時点をゆっくり再生する)
- ease-in-out(開始時点と終了時点をゆっくり再生する)
- デフォルトはeaseです。
+:param
+time=カメラが座標へ移動する時間を指定できます。ミリ秒で指定して下さい。デフォルトは1000,
+x=カメラの移動するX座標を指定して下さい,
+y=カメラの移動するY座標を指定して下さい,
+zoom=カメラの拡大率を指定して下さい。例えば２と指定すると２倍ズームします,
+rotate=カメラの傾きを指定します。例えば20 だとカメラが20度傾きます。,
+from_x=カメラの移動開始時のX座標を指定できます,
+from_y=カメラの移動開始時のY座標を指定できます,
+from_zoom=カメラの移動開始時の倍率を指定できます,
+from_rotate=カメラの移動開始時の傾きを指定できます,
+wait=カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行できます。デフォルトはtrue,
+layer=レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。,　
+ease_type=カメラの移動演出を指定できます。
+ease(開始時点と終了時点を滑らかに再生する)
+linear(一定の間隔で再生する)
+ease-in(開始時点をゆっくり再生する)
+ease-out(終了時点をゆっくり再生する)
+ease-in-out(開始時点と終了時点をゆっくり再生する)
+デフォルトはeaseです。
 
- :demo
+:demo
 2,kaisetsu/01_camera
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag.camera = {
     vital: [],
@@ -190,27 +193,32 @@ tyrano.plugin.kag.tag.camera = {
 };
 
 /*
- #[reset_camera]
- :group
- カメラ操作
- :title
- カメラをリセットする
- :exp
- カメラの位置を初期値に戻します。
- [camera]タグを使った演出が終わった後は、必ず[reset_camera]で位置を元に戻して下さい。
- 位置を戻さない場合は背景変更などで不具合が生じる場合があります。
- :sample
- :param
- time=初期位置にカメラが移動する時間をミリ秒で指定します。デフォルトは1000です。,
- wait=カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行することができます。デフォルトはtrue,
- ease_type=カメラの戻り方を指定できます。デフォルトはease　詳細はcameraタグを確認。,
- layer=レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。
+#[reset_camera]
+
+:group
+カメラ操作
+
+:title
+カメラをリセットする
+
+:exp
+カメラの位置を初期値に戻します。
+[camera]タグを使った演出が終わった後は、必ず[reset_camera]で位置を元に戻して下さい。
+位置を戻さない場合は背景変更などで不具合が生じる場合があります。
+
+:sample
+
+:param
+time=初期位置にカメラが移動する時間をミリ秒で指定します。デフォルトは1000です。,
+wait=カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行できます。デフォルトはtrue,
+ease_type=カメラの戻り方を指定できます。デフォルトはease　詳細はcameraタグを確認。,
+layer=レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。
 
 :demo
 2,kaisetsu/01_camera
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag.reset_camera = {
     vital: [],
@@ -322,31 +330,33 @@ tyrano.plugin.kag.tag.reset_camera = {
 };
 
 /*
- #[wait_camera]
- :group
- カメラ操作
- :title
- カメラの演出を待つ
- :exp
- このタグはカメラの操作中である場合、完了を待つことができます。
- 例えば、cameraタグでwaitにfalseを指定して、ゲームを進行する場合、特定の位置で必ずカメラ演出の完了を待たせる事が出来ます
+#[wait_camera]
 
- :sample
+:group
+カメラ操作
 
- [camera zoom=2 x=180 y=100 time=5000]
- カメラ演出中[p]
- ここでもカメラ演出中[p]
- [wait_camera]
- カメラの演出が終わったので進行[p]
+:title
+カメラの演出を待つ
 
- :param
+:exp
+このタグはカメラの操作中である場合、完了を待つことができます。
+例えば、cameraタグでwaitにfalseを指定して、ゲームを進行する場合、特定の位置で必ずカメラ演出の完了を待たせる事が出来ます
 
- :demo
- 2,kaisetsu/01_camera
+:sample
 
+[camera zoom=2 x=180 y=100 time=5000]
+カメラ演出中[p]
+ここでもカメラ演出中[p]
+[wait_camera]
+カメラの演出が終わったので進行[p]
 
- #[end]
- */
+:param
+
+:demo
+2,kaisetsu/01_camera
+
+#[end]
+*/
 
 tyrano.plugin.kag.tag.wait_camera = {
     start: function (pm) {
@@ -361,15 +371,19 @@ tyrano.plugin.kag.tag.wait_camera = {
 };
 
 /*
- #[mask]
- :group
- レイヤ関連
- :title
- スクリーンマスク表示
- :exp
- ゲーム画面全体を豊富な効果とともに暗転させることができます。
- 暗転中にゲーム画面を再構築して[mask_off]タグでゲームを再開する使い方ができます。
- :sample
+#[mask]
+
+:group
+レイヤ関連
+
+:title
+スクリーンマスク表示
+
+:exp
+ゲーム画面全体を豊富な効果とともに暗転させることができます。
+暗転中にゲーム画面を再構築して[mask_off]タグでゲームを再開する使い方ができます。
+
+:sample
 ;暗転開始
 [mask effect="fadeInDownBig" time=2000]
 
@@ -379,9 +393,9 @@ tyrano.plugin.kag.tag.wait_camera = {
 ;暗転解除
 [mask_off]
 
- :param
- time=暗転が完了するまでの時間をミリ秒で指定できます ,
- effect=暗転の効果を指定できます。デフォルトは「fadeIn」指定できるのは次のとおりです
+:param
+time=暗転が完了するまでの時間をミリ秒で指定できます ,
+effect=暗転の効果を指定できます。デフォルトは「fadeIn」指定できるのは次のとおりです
 fadeIn/
 fadeInDownBig/
 fadeInLeftBig/
@@ -410,16 +424,15 @@ bounceInLeft/<br >
 bounceInRight/
 bounceInUp/
 rollIn,
-color=文字の色を指定して下さい。デフォルトは黒です。0xFFFFFF形式で指定します,
+color=文字の色を指定して下さい。デフォルトは黒です。0xRRGGBB形式で指定します,
 graphic=暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください,
 folder=graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです
 
- :demo
- 2,kaisetsu/05_mask
+:demo
+2,kaisetsu/05_mask
 
-
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag.mask = {
     vital: [],
@@ -501,14 +514,18 @@ tyrano.plugin.kag.tag.mask = {
 };
 
 /*
- #[mask_off]
- :group
- レイヤ関連
- :title
- スクリーンマスク消去
- :exp
- スクリーンマスクを消去してゲームを再開します。
- :sample
+#[mask_off]
+
+:group
+レイヤ関連
+
+:title
+スクリーンマスク消去
+
+:exp
+スクリーンマスクを消去してゲームを再開します。
+
+:sample
 ;暗転開始
 [mask effect="fadeInDownBig" time=2000]
 
@@ -518,9 +535,9 @@ tyrano.plugin.kag.tag.mask = {
 ;暗転解除
 [mask_off]
 
- :param
- time=暗転が完了するまでの時間をミリ秒で指定できます ,
- effect=暗転の効果を指定できます。デフォルトは「fadeOut」指定できるのは次のとおりです
+:param
+time=暗転が完了するまでの時間をミリ秒で指定できます ,
+effect=暗転の効果を指定できます。デフォルトは「fadeOut」指定できるのは次のとおりです
 fadeOut/
 fadeOutDownBig/
 fadeOutLeftBig/
@@ -550,10 +567,10 @@ bounceOutRight/
 bounceOutUp
 
 :demo
- 2,kaisetsu/05_mask
+2,kaisetsu/05_mask
 
- #[end]
- */
+#[end]
+*/
 
 tyrano.plugin.kag.tag.mask_off = {
     vital: [],
