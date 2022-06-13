@@ -432,7 +432,9 @@ var GROUP_RANK = [
             if (obj.sample != "") {
                 html +=
                     `<ul class="list-inline posted-info"><li>サンプルコード</li></ul>` +
-                    `<pre class="language-tyranoscript"><code>${$.escapeHTML(obj.sample)}</code></pre>`;
+                    `<pre class="language-tyranoscript"><code>${$.escapeHTML(
+                        obj.sample,
+                    )}</code></pre>`;
             }
 
             html += "</div></div>";
