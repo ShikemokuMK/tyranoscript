@@ -4700,8 +4700,6 @@ tyrano.plugin.kag.tag.button = {
 
             //クリックが確定したとき
             j_button.click(function (event) {
-                button_clicked = true;
-
                 if (_pm.clickimg != "") {
                     //クリック画像が設定されているなら画像を変える
                     var click_img_url = parse_img_url(_pm.clickimg);
@@ -4725,6 +4723,8 @@ tyrano.plugin.kag.tag.button = {
                 ) {
                     return false;
                 }
+
+                button_clicked = true;
 
                 if (_pm.exp != "") {
                     //スクリプト実行

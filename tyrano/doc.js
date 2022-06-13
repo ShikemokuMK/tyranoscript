@@ -466,8 +466,8 @@ var PARAM_EXP = {
             if (obj.sample != "") {
                 html +=
                     `<ul class="list-inline posted-info"><li>サンプルコード</li></ul>` +
-                    `<pre class="language-tyranoscript"><code>${$.br(
-                        $.escapeHTML(obj.sample),
+                    `<pre class="language-tyranoscript"><code>${$.escapeHTML(
+                        obj.sample,
                     )}</code></pre>`;
             }
 
