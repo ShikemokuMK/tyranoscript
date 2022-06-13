@@ -1,34 +1,25 @@
-(function($) {
-
+(function ($) {
     //jquery 拡張
 
     //アニメーション開始。未実装　キーフレアニメは投入したい
-    $.fn.a2d = function() {
-
-        return this.each(function(i) {
-
+    $.fn.a2d = function () {
+        return this.each(function (i) {
             $(this).css("-webkit-animation-play-state", str);
-
         });
     };
 
-    $.getBaseURL = function() {
-
+    $.getBaseURL = function () {
         var str = location.pathname;
-        var i = str.lastIndexOf('/');
+        var i = str.lastIndexOf("/");
         return str.substring(0, i + 1);
-
     };
 
-    $.getDirPath = function(str) {
-
-        var i = str.lastIndexOf('/');
+    $.getDirPath = function (str) {
+        var i = str.lastIndexOf("/");
         return str.substring(0, i + 1);
-
     };
 
-
-    $.isHTTP = function(str) {
+    $.isHTTP = function (str) {
         if (str.substring(0, 4) === "http") {
             return true;
         } else {
@@ -36,36 +27,29 @@
         }
     };
 
-    $.play_audio = function(audio_obj) {
-
+    $.play_audio = function (audio_obj) {
         audio_obj.play();
-
     };
 
-    $.toBoolean = function(str) {
-
+    $.toBoolean = function (str) {
         if (str == "true") {
             return true;
         } else {
             return false;
         }
-
     };
 
-    $.getAngle = function() {
-
+    $.getAngle = function () {
         let angle = screen && screen.orientation && screen.orientation.angle;
         if (angle === undefined) {
-            angle = window.orientation;    // iOS用
+            angle = window.orientation; // iOS用
         }
 
         return angle;
-
     };
 
     //横幅の方が大きければtrue;
-    $.getLargeScreenWidth = function() {
-
+    $.getLargeScreenWidth = function () {
         let w = parseInt(window.innerWidth);
         let h = parseInt(window.innerHeight);
 
@@ -74,11 +58,9 @@
         } else {
             return false;
         }
-
     };
 
-    $.localFilePath = function() {
-
+    $.localFilePath = function () {
         var path = "";
         //Mac os Sierra 対応
         if (process.execPath.indexOf("var/folders") != -1) {
@@ -88,17 +70,19 @@
         }
 
         return path;
-
     };
 
-    $.getViewPort = function() {
+    $.getViewPort = function () {
         var width, heiht;
 
         if (self.innerHeight) {
             // all except Explorer
             width = self.innerWidth;
             height = self.innerHeight;
-        } else if (document.documentElement && document.documentElement.clientHeight) {
+        } else if (
+            document.documentElement &&
+            document.documentElement.clientHeight
+        ) {
             // Explorer 6 Strict Mode
             width = document.documentElement.clientWidth;
             height = document.documentElement.clientHeight;
@@ -110,11 +94,11 @@
 
         return {
             width: width,
-            height: height
+            height: height,
         };
     };
 
-    $.escapeHTML = function(val, replace_str) {
+    $.escapeHTML = function (val, replace_str) {
         val = val || "";
         var t = $("<div />").text(val).html();
 
@@ -126,18 +110,15 @@
         return t;
     };
 
-    $.br = function(txtVal) {
-
+    $.br = function (txtVal) {
         txtVal = txtVal.replace(/\r\n/g, "<br />");
         txtVal = txtVal.replace(/(\n|\r)/g, "<br />");
         return txtVal;
-
     };
 
     //現在時刻を取得
     //現在の日
-    $.getNowDate = function() {
-
+    $.getNowDate = function () {
         var nowdate = new Date();
         var year = nowdate.getFullYear();
         // 年
@@ -147,12 +128,10 @@
         // 日
 
         return year + "/" + mon + "/" + date;
-
     };
 
     //現在の時刻
-    $.getNowTime = function() {
-
+    $.getNowTime = function () {
         var nowdate = new Date();
 
         var h = nowdate.getHours();
@@ -160,29 +139,25 @@
         var s = nowdate.getSeconds();
 
         return h + "：" + m + "：" + s;
-
     };
 
-    $.convertRem = function(px_val) {
-
+    $.convertRem = function (px_val) {
         function getRootElementFontSize() {
             // Returns a number
             return parseFloat(
                 // of the computed font-size, so in px
                 getComputedStyle(
                     // for the root <html> element
-                    document.documentElement
-                ).fontSize
+                    document.documentElement,
+                ).fontSize,
             );
         }
 
         return px_val * getRootElementFontSize();
-
     };
 
     //複数のスクリプトを一括して読み込み
-    $.getMultiScripts = function(arr, cb) {
-
+    $.getMultiScripts = function (arr, cb) {
         var cnt_script = arr.length;
         var load_cnt = 0;
 
@@ -192,40 +167,30 @@
         }
 
         function getScript(src) {
-
-            $.getScript(arr[load_cnt], function(e) {
-
+            $.getScript(arr[load_cnt], function (e) {
                 load_cnt++;
 
                 if (cnt_script == load_cnt) {
-
                     if (typeof cb == "function") {
                         cb();
                     }
-
                 } else {
                     getScript(arr[load_cnt]);
                 }
-
             });
-
-
         }
 
         getScript(arr[0]);
-
-
-
     };
 
-    $.convertSecToString = function(val) {
+    $.convertSecToString = function (val) {
         if (val == 0) {
-            return '-';
+            return "-";
         }
         var day = Math.floor(val / (24 * 60 * 60));
-        var hour = Math.floor((val % (24 * 60 * 60) / (60 * 60)));
-        var minute = Math.floor(val % (24 * 60 * 60) % (60 * 60) / 60);
-        var second = Math.floor(val % (24 * 60 * 60) % (60 * 60) % 60);
+        var hour = Math.floor((val % (24 * 60 * 60)) / (60 * 60));
+        var minute = Math.floor(((val % (24 * 60 * 60)) % (60 * 60)) / 60);
+        var second = Math.floor(((val % (24 * 60 * 60)) % (60 * 60)) % 60);
 
         var str = "";
         if (day !== 0) {
@@ -244,7 +209,7 @@
         return str;
     };
 
-    $.secToMinute = function(val) {
+    $.secToMinute = function (val) {
         if (val === 0) {
             return "-";
         }
@@ -261,9 +226,8 @@
         return str;
     };
 
-    $.trim = function(str) {
+    $.trim = function (str) {
         if (str) {
-
         } else {
             return "";
         }
@@ -271,124 +235,104 @@
         return str.replace(/^\s+|\s+$/g, "");
     };
 
-    $.rmspace = function(str) {
-
+    $.rmspace = function (str) {
         str = str.replace(/ /g, "");
         str = str.replace(/　/g, "");
         str = str.replace(/\r\n?/g, "");
 
         return str;
-
     };
 
-    $.replaceAll = function(text, searchString, replacement) {
-
+    $.replaceAll = function (text, searchString, replacement) {
         if (typeof text != "string") {
             return text;
         }
-
 
         //置換のコード変えてみた
         var result = text.split(searchString).join(replacement);
 
         return result;
-
-
     };
 
     //確証しを取得
-    $.getExt = function(str) {
+    $.getExt = function (str) {
         return str.split(".").pop();
     };
 
     //指定した拡張子を付ける。拡張子がなければ
-    $.setExt = function(name, ext_str) {
-
+    $.setExt = function (name, ext_str) {
         var tmp = name.split(".");
         if (tmp.length == 1) {
             name = name + "." + ext_str;
         }
 
         return name;
-
     };
 
     //要素をクローンします
-    $.cloneObject = function(source) {
-
+    $.cloneObject = function (source) {
         return $.extend(true, {}, source);
-
     };
 
     //透明度を適切な値に変更
-    $.convertOpacity = function(val) {
+    $.convertOpacity = function (val) {
         //255をマックスとして計算する
 
         var p = val / 255;
 
         return p;
-
     };
 
     //パスにfgimage bgimage image が含まれていた場合、それを適応する
-    $.convertStorage = function(path) {
+    $.convertStorage = function (path) {};
 
-    };
-
-    $.convertColor = function(val) {
-
+    $.convertColor = function (val) {
         if (val.indexOf("0x") != -1) {
             return val.replace("0x", "#");
         }
 
         return val;
-
     };
 
-    $.convertBold = function(flag) {
-
+    $.convertBold = function (flag) {
         if (flag == "true") {
             return "bold";
         }
 
         return "";
-
     };
 
-    $.convertItalic = function(flag) {
-
+    $.convertItalic = function (flag) {
         if (flag == "true") {
             return "italic";
         }
 
         return "";
-
     };
 
-    $.send = function(url, obj, call_back) {
+    $.send = function (url, obj, call_back) {
         //game.current_story_file = story_file;
         $.ajax({
             type: "POST",
             url: url,
             data: obj,
-            dataType: 'json',
-            complete: function() {
+            dataType: "json",
+            complete: function () {
                 //通信終了時の処理
                 $.hideLoading();
             },
-            success: function(data, status) {
+            success: function (data, status) {
                 $.hideLoading();
 
                 var data_obj = data;
                 if (call_back) {
                     call_back(data_obj);
                 }
-            }
+            },
         });
     };
 
-    $.loadText = function(file_path, callback) {
-
+    $.loadText = function (file_path, callback) {
         /*
         var httpObj = jQuery.get(file_path + "?" + Math.floor(Math.random() * 1000000), null, function(obj) {
 
@@ -417,22 +361,19 @@
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
-            success: function(text) {
+            success: function (text) {
                 order_str = text;
                 callback(order_str);
             },
-            error: function() {
+            error: function () {
                 alert("file not found:" + file_path);
                 callback("");
-            }
+            },
         });
-
-
-
     };
 
     //クッキーを取得
-    $.getCookie = function(key) {
+    $.getCookie = function (key) {
         var tmp = document.cookie + ";";
         var index1 = tmp.indexOf(key, 0);
         if (index1 != -1) {
@@ -444,41 +385,39 @@
         return null;
     };
 
-    $.isNull = function(str) {
+    $.isNull = function (str) {
         if (str == null) {
             return "";
         } else {
-
         }
 
         return str;
     };
 
-    $.dstop = function() {
-
+    $.dstop = function () {
         console.log("dstop");
-
     };
 
     //ユーザ環境を取得
-    $.userenv = function() {
-
+    $.userenv = function () {
         var ua = navigator.userAgent;
-        if (ua.indexOf('iPhone') > -1) {
-            return 'iphone';
-        } else if (ua.indexOf('iPad') > -1) {
-            return 'iphone';
-        } else if (ua.indexOf('Android') > -1) {
-            return 'android';
-        } else if (ua.indexOf('Chrome') > -1 && navigator.platform.indexOf('Linux') > -1) {
-            return 'android';
+        if (ua.indexOf("iPhone") > -1) {
+            return "iphone";
+        } else if (ua.indexOf("iPad") > -1) {
+            return "iphone";
+        } else if (ua.indexOf("Android") > -1) {
+            return "android";
+        } else if (
+            ua.indexOf("Chrome") > -1 &&
+            navigator.platform.indexOf("Linux") > -1
+        ) {
+            return "android";
         } else {
             return "pc";
         }
-
     };
 
-    $.isTyranoPlayer = function() {
+    $.isTyranoPlayer = function () {
         if (typeof _tyrano_player != "undefined") {
             return true;
         } else {
@@ -486,32 +425,30 @@
         }
     };
 
-    $.lang = function(key) {
-
+    $.lang = function (key) {
         if (tyrano_lang["word"][key]) {
             return tyrano_lang["word"][key];
         } else {
             return "NOT_DEFINED";
         }
-
     };
 
-    $.novel = function(key) {
-
+    $.novel = function (key) {
         if (tyrano_lang["novel"][key]) {
             return tyrano_lang["novel"][key];
         } else {
             return "NOT_DEFINED";
         }
-
     };
 
     //ユーザのブラウザ情報を取得
-    $.getBrowser = function() {
-
+    $.getBrowser = function () {
         var userAgent = window.navigator.userAgent.toLowerCase();
 
-        if (userAgent.indexOf('msie') >= 0 || userAgent.indexOf('trident') >= 0) {
+        if (
+            userAgent.indexOf("msie") >= 0 ||
+            userAgent.indexOf("trident") >= 0
+        ) {
             return "msie";
         } else if (userAgent.indexOf("edge") > -1) {
             return "edge";
@@ -528,24 +465,25 @@
         } else {
             return "unknown";
         }
-
     };
 
-    $.isNWJS = function() {
-
+    ($.isNWJS = function () {
         //Electronならfalse
         if ($.isElectron()) {
             return false;
         }
 
         // Node.js で動作しているか
-        var isNode = (typeof process !== "undefined" && typeof require !== "undefined");
+        var isNode =
+            typeof process !== "undefined" && typeof require !== "undefined";
         // ブラウザ上(非Node.js)で動作しているか
         var isBrowser = !isNode;
         // node-webkitで動作しているか
         var isNodeWebkit;
         try {
-            isNodeWebkit = isNode ? (typeof require('nw.gui') !== "undefined") : false;
+            isNodeWebkit = isNode
+                ? typeof require("nw.gui") !== "undefined"
+                : false;
         } catch (e) {
             isNodeWebkit = false;
         }
@@ -560,10 +498,8 @@
             //  通常のWebページとして動作している
             return false;
         }
-    },
-
-        $.isNeedClickAudio = function() {
-
+    }),
+        ($.isNeedClickAudio = function () {
             //プレイヤーはクリックの必要なし
             if ($.isTyranoPlayer()) {
                 return false;
@@ -575,63 +511,49 @@
             }
 
             return true;
+        });
 
-
-        };
-
-    $.isElectron = function() {
+    ($.isElectron = function () {
         if (navigator.userAgent.indexOf("TyranoErectron") != -1) {
             return true;
         } else {
             return false;
         }
-
-    },
-
+    }),
         //オブジェクトを引き継ぐ。
-        $.extendParam = function(pm, target) {
-
+        ($.extendParam = function (pm, target) {
             var tmp = target;
 
             for (key in target) {
-
                 if (pm[key]) {
                     if (pm[key] != "") {
                         target[key] = pm[key];
                     }
                 }
-
             }
 
             return target;
+        });
 
-        };
-
-
-    $.insertRule = function(css_str) {
-
-        var sheet = (function() {
+    ($.insertRule = function (css_str) {
+        var sheet = (function () {
             var style = document.createElement("style");
             document.getElementsByTagName("head")[0].appendChild(style);
             return style.sheet;
         })();
         sheet.insertRule(css_str, 0);
-
-    },
-
-        $.swfName = function(str) {
+    }),
+        ($.swfName = function (str) {
             if (navigator.appName.indexOf("Microsoft") != -1) {
                 return window[str];
             } else {
                 return document[str];
             }
-        };
+        });
 
     //古いトランス。
-    $.trans_old = function(method, j_obj, time, mode, callback) {
-
+    $.trans_old = function (method, j_obj, time, mode, callback) {
         if (method == "crossfade" || mode == "show") {
-
             if (time == 0) {
                 if (mode == "show") {
                     j_obj.show();
@@ -646,63 +568,56 @@
 
                 if (mode == "show") {
                     ta = {
-                        "opacity": "show"
+                        opacity: "show",
                     };
                 } else {
                     ta = {
-                        "opacity": "hide"
+                        opacity: "hide",
                     };
                 }
 
                 j_obj.animate(ta, {
                     duration: time,
                     easing: "linear",
-                    complete: function() {
+                    complete: function () {
                         if (callback) {
                             callback();
                         }
-                    }//end complerte
+                    }, //end complerte
                 });
             }
 
             return false;
-
         } else {
-
             if (mode == "hide") {
-                j_obj.hide(method, time, function() {
-                    if (callback)
-                        callback();
+                j_obj.hide(method, time, function () {
+                    if (callback) callback();
                 });
             } else if (mode == "show") {
-                j_obj.show(method, time, function() {
-                    if (callback)
-                        callback();
+                j_obj.show(method, time, function () {
+                    if (callback) callback();
                 });
             }
-
         }
-
     };
 
     //コンバート v450rc5以前
     var _map_conv_method = {
-        "corssfade": "fadeIn",
-        "explode": "zoomIn",
-        "slide": "slideInLeft",
-        "blind": "bounceIn",
-        "bounce": "bounceIn",
-        "clip": "flipInX",
-        "drop": "slideInLeft",
-        "fold": "fadeIn",
-        "puff": "fadeIn",
-        "scale": "zoomIn",
-        "shake": "fadeIn",
-        "size": "zoomIn"
+        corssfade: "fadeIn",
+        explode: "zoomIn",
+        slide: "slideInLeft",
+        blind: "bounceIn",
+        bounce: "bounceIn",
+        clip: "flipInX",
+        drop: "slideInLeft",
+        fold: "fadeIn",
+        puff: "fadeIn",
+        scale: "zoomIn",
+        shake: "fadeIn",
+        size: "zoomIn",
     };
 
-    $.trans = function(method, j_obj, time, mode, callback) {
-
+    $.trans = function (method, j_obj, time, mode, callback) {
         if (method == "crossfade") {
             method = "fadeIn";
         } else if (_map_conv_method[method]) {
@@ -714,8 +629,9 @@
         if (mode == "hide") {
             j_obj.show();
             method = $.replaceAll(method, "In", "Out");
-            var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-            j_obj.addClass('animated ' + method).one(animationEnd, function() {
+            var animationEnd =
+                "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
                 $(this).remove();
@@ -723,27 +639,23 @@
                     //callback();
                 }
             });
-
         } else if (mode == "show") {
             j_obj.show();
-            var animationEnd = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-            j_obj.addClass('animated ' + method).one(animationEnd, function() {
+            var animationEnd =
+                "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
-                $(this).removeClass('animated ' + method);
+                $(this).removeClass("animated " + method);
                 if (callback) {
                     callback();
                 }
             });
         }
-
-
-
     };
 
     //要素から空白のオブジェクトを削除して返却する
-    $.minifyObject = function(obj) {
-
+    $.minifyObject = function (obj) {
         for (key in obj) {
             if (obj[key] == null || obj[key] == "") {
                 delete obj[key];
@@ -751,26 +663,22 @@
         }
 
         return obj;
-
     };
 
-    $.preloadImgCallback = function(j_menu, cb, that) {
-
+    $.preloadImgCallback = function (j_menu, cb, that) {
         var img_storage = [];
 
-        j_menu.find("img").each(function() {
+        j_menu.find("img").each(function () {
             img_storage.push($(this).attr("src"));
         });
 
         //ロードが全て完了したら、ふわっと出す
         var sum = 0;
         for (var i = 0; i < img_storage.length; i++) {
-            that.kag.preload(img_storage[i], function() {
+            that.kag.preload(img_storage[i], function () {
                 sum++;
                 if (img_storage.length == sum) {
-
                     cb();
-
                 }
             });
         }
@@ -778,23 +686,16 @@
         if (img_storage.length == 0) {
             cb();
         }
-
     };
 
-    $.setStorage = function(key, val, type) {
-
+    $.setStorage = function (key, val, type) {
         if (type == "webstorage_compress") {
-
             $.setStorageCompress(key, val);
-
         } else if (type == "file") {
-
             $.setStorageFile(key, val);
-
         } else {
             $.setStorageWeb(key, val);
         }
-
     };
 
     //PC版のみ。実行フォルダを取得
@@ -821,8 +722,7 @@
     };
     */
 
-    $.getOS = function() {
-
+    $.getOS = function () {
         if ($.isElectron()) {
             let os = "";
 
@@ -832,29 +732,26 @@
                 os = "win";
             }
             return os;
-
         } else {
             return "";
         }
     };
 
-    $.makeSaveKey = function() {
-
-        var S = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    $.makeSaveKey = function () {
+        var S =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         var N = 16;
-        let key = Array.from(Array(N)).map(() => S[Math.floor(Math.random() * S.length)]).join('');
+        let key = Array.from(Array(N))
+            .map(() => S[Math.floor(Math.random() * S.length)])
+            .join("");
         return key;
-
     };
 
-    $.getStorage = function(key, type) {
-
+    $.getStorage = function (key, type) {
         var gv = "null";
 
         if (type == "webstorage_compress") {
-
             gv = $.getStorageCompress(key);
-
         } else if (type == "file") {
             gv = $.getStorageFile(key);
         } else {
@@ -862,10 +759,9 @@
         }
 
         return gv;
-
     };
 
-    $.setStorageWeb = function(key, val) {
+    $.setStorageWeb = function (key, val) {
         val = JSON.stringify(val);
         //localStorage.setItem(key, LZString.compress(escape(val)));
         try {
@@ -876,10 +772,8 @@
         }
     };
 
-    $.getStorageWeb = function(key) {
-
+    $.getStorageWeb = function (key) {
         try {
-
             var gv = "null";
 
             if (localStorage.getItem(key)) {
@@ -887,9 +781,7 @@
                 gv = unescape(localStorage.getItem(key));
             }
 
-            if (gv == "null")
-                return null;
-
+            if (gv == "null") return null;
         } catch (e) {
             //alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             //$.confirmSaveClear();
@@ -899,17 +791,13 @@
         }
 
         return gv;
-
     };
 
-    $.playerHtmlPath = function(html) {
-
+    $.playerHtmlPath = function (html) {
         if ("appJsInterface" in window) {
             //Android
         } else {
-
             if (typeof TyranoPlayer == "function") {
-
                 //playerの場合HTMLを修正する必要がある
                 var result_html = "";
                 while (1) {
@@ -918,50 +806,46 @@
                         result_html += html;
                         break;
                     } else {
-
                         result_html += html.substring(0, index);
                         html = html.substring(index, html.length);
 
                         var replace_index = html.indexOf("/game/data");
-                        tmp_html = html.substring(replace_index + "/game/data".length, html.length);
+                        tmp_html = html.substring(
+                            replace_index + "/game/data".length,
+                            html.length,
+                        );
                         html = "./data" + tmp_html;
-
-
                     }
-
                 }
 
                 if (result_html != "") {
                     html = result_html;
                 }
-
             }
-
-
         }
 
         return html;
-
     };
 
-
-    $.confirmSaveClear = function() {
-        if (confirm('セーブデータが壊れている可能性があります。セーブデータを初期化しますか？')) {
+    $.confirmSaveClear = function () {
+        if (
+            confirm(
+                "セーブデータが壊れている可能性があります。セーブデータを初期化しますか？",
+            )
+        ) {
             alert("初期化");
             localStorage.clear();
         }
     };
 
-    $.setStorageCompress = function(key, val) {
+    $.setStorageCompress = function (key, val) {
         val = JSON.stringify(val);
         localStorage.setItem(key, LZString.compress(escape(val)));
         //localStorage.setItem(key, escape(val));
     };
 
-    $.getStorageCompress = function(key) {
-
+    $.getStorageCompress = function (key) {
         try {
-
             var gv = "null";
 
             if (localStorage.getItem(key)) {
@@ -972,22 +856,20 @@
                 }
             }
 
-            if (gv == "null")
-                return null;
-
+            if (gv == "null") return null;
         } catch (e) {
             console.log("==============");
             console.log(e);
-            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
+            alert(
+                "この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します",
+            );
             $.confirmSaveClear();
         }
 
         return gv;
-
     };
 
-    $.getExtWithFile = function(str) {
-
+    $.getExtWithFile = function (str) {
         var filename = "";
         if (str.indexOf("/") != -1) {
             filename = str.split("/").pop();
@@ -1007,16 +889,12 @@
         }
         var name = $.replaceAll(filename, "." + ext, "");
 
-
         return { filename: filename, ext: ext, name: name, dir_name: dir_name };
-
-
     };
 
     //PC用の実行パスを取得
-    $.getExePath = function() {
-
-        const _app = require('electron').remote.app;
+    $.getExePath = function () {
+        const _app = require("electron").remote.app;
 
         //TyranoStudio.app/Contents/Resources/app
         let path = _app.getAppPath();
@@ -1026,7 +904,6 @@
         //console.log(path);
 
         if (process.platform == "darwin") {
-
             platrofm = "mac";
             //TyranoStudio-darwin-x64.asar
             if (path.indexOf(".asar") != -1) {
@@ -1036,25 +913,19 @@
             }
 
             path = $.getExtWithFile(path).dir_name;
-
-
         } else if (process.platform == "win32") {
-
             if (path.indexOf(".asar") != -1) {
                 path = $.replaceAll(path, "\\resources\\app.asar", "");
             } else {
                 path = $.replaceAll(path, "\\resources\\app", "");
             }
-
         }
 
         return path;
-
     };
 
     //展開先のパスを返す。
-    $.getUnzipPath = function() {
-
+    $.getUnzipPath = function () {
         let path = __dirname;
 
         if (path.indexOf(".asar") != -1) {
@@ -1062,13 +933,11 @@
         }
 
         return path;
-
     };
 
-    $.setStorageFile = function(key, val) {
-
+    $.setStorageFile = function (key, val) {
         val = JSON.stringify(val);
-        var fs = require('fs');
+        var fs = require("fs");
 
         var out_path = $.getExePath();
 
@@ -1082,18 +951,13 @@
             out_path = $.getExePath();
         }
 
-
         fs.writeFileSync(out_path + "/" + key + ".sav", escape(val));
-
     };
 
-
-    $.getStorageFile = function(key) {
-
+    $.getStorageFile = function (key) {
         try {
-
             var gv = "null";
-            var fs = require('fs');
+            var fs = require("fs");
             var out_path = "";
 
             var out_path = $.getExePath();
@@ -1118,15 +982,15 @@
             if (gv == "null") {
                 return null;
             }
-
         } catch (e) {
             console.log(e);
-            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
+            alert(
+                "この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します",
+            );
             $.confirmSaveClear();
         }
 
         return gv;
-
     };
 
     /*
@@ -1161,25 +1025,21 @@
     };
     */
 
-    $.alert = function(str, cb) {
-
+    $.alert = function (str, cb) {
         $(".remodal_title").html(str);
 
         $(".remodal").find(".remodal-cancel").hide();
         $(".remodal").find(".remodal-confirm").show();
 
-        var inst = $('[data-remodal-id=modal]').remodal();
+        var inst = $("[data-remodal-id=modal]").remodal();
         inst.open();
 
-        $(document).off('closed', '.remodal');
-        $(document).on('closed', '.remodal', function(e) {
-
+        $(document).off("closed", ".remodal");
+        $(document).on("closed", ".remodal", function (e) {
             if (typeof cb == "function") {
                 cb();
             }
-
         });
-
 
         /*
         if ($.userenv() != "pc") {
@@ -1196,50 +1056,44 @@
             });
         }
         */
-
     };
 
-    $.inform = function(str, type) {
+    $.inform = function (str, type) {
         alertify.log(str, type);
     };
 
-    $.confirm = function(str, cb_ok, cb_cancel) {
-
+    $.confirm = function (str, cb_ok, cb_cancel) {
         $(".remodal_title").html(str);
 
         $(".remodal").find(".remodal-cancel").show();
         $(".remodal").find(".remodal-confirm").show();
 
-        var inst = $('[data-remodal-id=modal]').remodal();
+        var inst = $("[data-remodal-id=modal]").remodal();
         inst.open();
 
         /////////OK /////////////
 
-        $(document).off('closed', '.remodal');
+        $(document).off("closed", ".remodal");
 
-        $(document).off('confirmation', '.remodal');
-        $(document).on('confirmation', '.remodal', function(e) {
-
-            $(document).off('confirmation', '.remodal');
-            $(document).off('cancellation', '.remodal');
+        $(document).off("confirmation", ".remodal");
+        $(document).on("confirmation", ".remodal", function (e) {
+            $(document).off("confirmation", ".remodal");
+            $(document).off("cancellation", ".remodal");
 
             if (typeof cb_ok == "function") {
                 cb_ok();
             }
-
         });
 
         ///////キャンセル//////////////
-        $(document).off('cancellation', '.remodal');
-        $(document).on('cancellation', '.remodal', function(e) {
-
-            $(document).off('confirmation', '.remodal');
-            $(document).off('cancellation', '.remodal');
+        $(document).off("cancellation", ".remodal");
+        $(document).on("cancellation", ".remodal", function (e) {
+            $(document).off("confirmation", ".remodal");
+            $(document).off("cancellation", ".remodal");
 
             if (typeof cb_cancel == "function") {
                 cb_cancel();
             }
-
         });
 
         /*
@@ -1263,12 +1117,10 @@
             });
         }
         */
-
     };
 
     //オブジェクトの個数をもってきます。1
-    $.countObj = function(obj) {
-
+    $.countObj = function (obj) {
         var num = 0;
         for (key in obj) {
             num++;
@@ -1276,46 +1128,39 @@
         return num;
     };
 
-    $.getUrlQuery = function(url) {
-
-        var hash = url.slice(1).split('&');
+    $.getUrlQuery = function (url) {
+        var hash = url.slice(1).split("&");
         var max = hash.length;
         var vars = {};
         var array = "";
 
         for (var i = 0; i < max; i++) {
-            array = hash[i].split('=');
+            array = hash[i].split("=");
             vars[array[0]] = array[1];
         }
 
         return vars;
-
-
     };
 
     //渡されたJqueryオブジェクトにクラスをセットします
-    $.setName = function(jobj, str) {
-
+    $.setName = function (jobj, str) {
         str = $.trim(str);
 
-        if (str == "")
-            return;
+        if (str == "") return;
 
         var array = str.split(",");
         for (var i = 0; i < array.length; i++) {
             jobj.addClass(array[i]);
-
         }
-
     };
 
     //フラッシュのインストール判定
-    $.isFlashInstalled = function() {
-        if (navigator.plugins['Shockwave Flash']) {
+    $.isFlashInstalled = function () {
+        if (navigator.plugins["Shockwave Flash"]) {
             return true;
         }
         try {
-            new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+            new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
             return true;
         } catch (e) {
             return false;
@@ -1325,12 +1170,13 @@
     /*スマホの場合は、タッチでクリックを置き換える*/
     /*タッチ系、一応出来たけど、動作確認よくしなければならなｋ，問題なければR9にも適応*/
     if ($.userenv() != "pc") {
-        $.event.tap = function(o) {
-
-            o.bind('touchstart', onTouchStart_);
+        $.event.tap = function (o) {
+            o.bind("touchstart", onTouchStart_);
             function onTouchStart_(e) {
                 e.preventDefault();
-                o.data('event.tap.moved', false).one('touchmove', onTouchMove_).one('touchend', onTouchEnd_);
+                o.data("event.tap.moved", false)
+                    .one("touchmove", onTouchMove_)
+                    .one("touchend", onTouchEnd_);
                 e.stopPropagation();
             }
 
@@ -1340,18 +1186,16 @@
             }
 
             function onTouchEnd_(e) {
-                if (!o.data('event.tap.moved')) {
-                    o.unbind('touchmove', onTouchMove_);
-                    o.trigger('click').click();
+                if (!o.data("event.tap.moved")) {
+                    o.unbind("touchmove", onTouchMove_);
+                    o.trigger("click").click();
                     e.stopPropagation();
                 }
             }
-
         };
 
-        if ('ontouchend' in document) {
-            $.fn.tap = function(data, fn) {
-
+        if ("ontouchend" in document) {
+            $.fn.tap = function (data, fn) {
                 //alert("tap!");
 
                 if (fn == null) {
@@ -1360,21 +1204,20 @@
                 }
 
                 if (arguments.length > 0) {
-                    this.bind('tap', data, fn);
+                    this.bind("tap", data, fn);
                     $.event.tap(this);
                 } else {
-                    this.trigger('tap');
+                    this.trigger("tap");
                 }
                 return this;
             };
 
             if ($.attrFn) {
-                $.attrFn['tap'] = true;
+                $.attrFn["tap"] = true;
             }
 
             //クリック上書き
             $.fn.click = $.fn.tap;
-
         } else {
             //$.fn.tap = $.fn.click;
         }
@@ -1382,17 +1225,21 @@
 
     //////////////////////////////
 
-    $.error_message = function(str) {
+    $.error_message = function (str) {
         alert(str);
     };
 
     //クッキー設定
-    $.setCookie = function(key, val) {
-        document.cookie = key + "=" + escape(val) + ";expires=Fri, 31-Dec-2030 23:59:59;path=/;";
+    $.setCookie = function (key, val) {
+        document.cookie =
+            key +
+            "=" +
+            escape(val) +
+            ";expires=Fri, 31-Dec-2030 23:59:59;path=/;";
     };
 })(jQuery);
 
-jQuery.fn.outerHTML = function(s) {
+jQuery.fn.outerHTML = function (s) {
     if (s) {
         this.before(s);
         this.remove();
@@ -1406,180 +1253,186 @@ jQuery.fn.outerHTML = function(s) {
 };
 
 // t: current time, b: begInnIng value, c: change In value, d: duration
-jQuery.easing['jswing'] = jQuery.easing['swing'];
+jQuery.easing["jswing"] = jQuery.easing["swing"];
 
 jQuery.extend(jQuery.easing, {
-    def: 'easeOutQuad',
-    swing: function(x, t, b, c, d) {
+    def: "easeOutQuad",
+    swing: function (x, t, b, c, d) {
         //alert(jQuery.easing.default);
         return jQuery.easing[jQuery.easing.def](x, t, b, c, d);
     },
-    easeInQuad: function(x, t, b, c, d) {
+    easeInQuad: function (x, t, b, c, d) {
         return c * (t /= d) * t + b;
     },
-    easeOutQuad: function(x, t, b, c, d) {
+    easeOutQuad: function (x, t, b, c, d) {
         return -c * (t /= d) * (t - 2) + b;
     },
-    easeInOutQuad: function(x, t, b, c, d) {
-        if ((t /= d / 2) < 1)
-            return c / 2 * t * t + b;
-        return -c / 2 * ((--t) * (t - 2) - 1) + b;
+    easeInOutQuad: function (x, t, b, c, d) {
+        if ((t /= d / 2) < 1) return (c / 2) * t * t + b;
+        return (-c / 2) * (--t * (t - 2) - 1) + b;
     },
-    easeInCubic: function(x, t, b, c, d) {
+    easeInCubic: function (x, t, b, c, d) {
         return c * (t /= d) * t * t + b;
     },
-    easeOutCubic: function(x, t, b, c, d) {
+    easeOutCubic: function (x, t, b, c, d) {
         return c * ((t = t / d - 1) * t * t + 1) + b;
     },
-    easeInOutCubic: function(x, t, b, c, d) {
-        if ((t /= d / 2) < 1)
-            return c / 2 * t * t * t + b;
-        return c / 2 * ((t -= 2) * t * t + 2) + b;
+    easeInOutCubic: function (x, t, b, c, d) {
+        if ((t /= d / 2) < 1) return (c / 2) * t * t * t + b;
+        return (c / 2) * ((t -= 2) * t * t + 2) + b;
     },
-    easeInQuart: function(x, t, b, c, d) {
+    easeInQuart: function (x, t, b, c, d) {
         return c * (t /= d) * t * t * t + b;
     },
-    easeOutQuart: function(x, t, b, c, d) {
+    easeOutQuart: function (x, t, b, c, d) {
         return -c * ((t = t / d - 1) * t * t * t - 1) + b;
     },
-    easeInOutQuart: function(x, t, b, c, d) {
-        if ((t /= d / 2) < 1)
-            return c / 2 * t * t * t * t + b;
-        return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+    easeInOutQuart: function (x, t, b, c, d) {
+        if ((t /= d / 2) < 1) return (c / 2) * t * t * t * t + b;
+        return (-c / 2) * ((t -= 2) * t * t * t - 2) + b;
     },
-    easeInQuint: function(x, t, b, c, d) {
+    easeInQuint: function (x, t, b, c, d) {
         return c * (t /= d) * t * t * t * t + b;
     },
-    easeOutQuint: function(x, t, b, c, d) {
+    easeOutQuint: function (x, t, b, c, d) {
         return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
     },
-    easeInOutQuint: function(x, t, b, c, d) {
-        if ((t /= d / 2) < 1)
-            return c / 2 * t * t * t * t * t + b;
-        return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+    easeInOutQuint: function (x, t, b, c, d) {
+        if ((t /= d / 2) < 1) return (c / 2) * t * t * t * t * t + b;
+        return (c / 2) * ((t -= 2) * t * t * t * t + 2) + b;
     },
-    easeInSine: function(x, t, b, c, d) {
-        return -c * Math.cos(t / d * (Math.PI / 2)) + c + b;
+    easeInSine: function (x, t, b, c, d) {
+        return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
     },
-    easeOutSine: function(x, t, b, c, d) {
-        return c * Math.sin(t / d * (Math.PI / 2)) + b;
+    easeOutSine: function (x, t, b, c, d) {
+        return c * Math.sin((t / d) * (Math.PI / 2)) + b;
     },
-    easeInOutSine: function(x, t, b, c, d) {
-        return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
+    easeInOutSine: function (x, t, b, c, d) {
+        return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
     },
-    easeInExpo: function(x, t, b, c, d) {
-        return (t == 0) ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
+    easeInExpo: function (x, t, b, c, d) {
+        return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
     },
-    easeOutExpo: function(x, t, b, c, d) {
-        return (t == d) ? b + c : c * (-Math.pow(2, -10 * t / d) + 1) + b;
+    easeOutExpo: function (x, t, b, c, d) {
+        return t == d ? b + c : c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
     },
-    easeInOutExpo: function(x, t, b, c, d) {
-        if (t == 0)
-            return b;
-        if (t == d)
-            return b + c;
-        if ((t /= d / 2) < 1)
-            return c / 2 * Math.pow(2, 10 * (t - 1)) + b;
-        return c / 2 * (-Math.pow(2, -10 * --t) + 2) + b;
+    easeInOutExpo: function (x, t, b, c, d) {
+        if (t == 0) return b;
+        if (t == d) return b + c;
+        if ((t /= d / 2) < 1) return (c / 2) * Math.pow(2, 10 * (t - 1)) + b;
+        return (c / 2) * (-Math.pow(2, -10 * --t) + 2) + b;
     },
-    easeInCirc: function(x, t, b, c, d) {
+    easeInCirc: function (x, t, b, c, d) {
         return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
     },
-    easeOutCirc: function(x, t, b, c, d) {
+    easeOutCirc: function (x, t, b, c, d) {
         return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
     },
-    easeInOutCirc: function(x, t, b, c, d) {
-        if ((t /= d / 2) < 1)
-            return -c / 2 * (Math.sqrt(1 - t * t) - 1) + b;
-        return c / 2 * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
+    easeInOutCirc: function (x, t, b, c, d) {
+        if ((t /= d / 2) < 1) return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
+        return (c / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
     },
-    easeInElastic: function(x, t, b, c, d) {
+    easeInElastic: function (x, t, b, c, d) {
         var s = 1.70158;
         var p = 0;
         var a = c;
-        if (t == 0)
-            return b;
-        if ((t /= d) == 1)
-            return b + c;
-        if (!p)
-            p = d * .3;
+        if (t == 0) return b;
+        if ((t /= d) == 1) return b + c;
+        if (!p) p = d * 0.3;
         if (a < Math.abs(c)) {
             a = c;
             var s = p / 4;
-        } else
-            var s = p / (2 * Math.PI) * Math.asin(c / a);
-        return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
+        } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+        return (
+            -(
+                a *
+                Math.pow(2, 10 * (t -= 1)) *
+                Math.sin(((t * d - s) * (2 * Math.PI)) / p)
+            ) + b
+        );
     },
-    easeOutElastic: function(x, t, b, c, d) {
+    easeOutElastic: function (x, t, b, c, d) {
         var s = 1.70158;
         var p = 0;
         var a = c;
-        if (t == 0)
-            return b;
-        if ((t /= d) == 1)
-            return b + c;
-        if (!p)
-            p = d * .3;
+        if (t == 0) return b;
+        if ((t /= d) == 1) return b + c;
+        if (!p) p = d * 0.3;
         if (a < Math.abs(c)) {
             a = c;
             var s = p / 4;
-        } else
-            var s = p / (2 * Math.PI) * Math.asin(c / a);
-        return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
+        } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+        return (
+            a *
+                Math.pow(2, -10 * t) *
+                Math.sin(((t * d - s) * (2 * Math.PI)) / p) +
+            c +
+            b
+        );
     },
-    easeInOutElastic: function(x, t, b, c, d) {
+    easeInOutElastic: function (x, t, b, c, d) {
         var s = 1.70158;
         var p = 0;
         var a = c;
-        if (t == 0)
-            return b;
-        if ((t /= d / 2) == 2)
-            return b + c;
-        if (!p)
-            p = d * (.3 * 1.5);
+        if (t == 0) return b;
+        if ((t /= d / 2) == 2) return b + c;
+        if (!p) p = d * (0.3 * 1.5);
         if (a < Math.abs(c)) {
             a = c;
             var s = p / 4;
-        } else
-            var s = p / (2 * Math.PI) * Math.asin(c / a);
+        } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
         if (t < 1)
-            return -.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
-        return a * Math.pow(2, -10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p) * .5 + c + b;
+            return (
+                -0.5 *
+                    (a *
+                        Math.pow(2, 10 * (t -= 1)) *
+                        Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
+                b
+            );
+        return (
+            a *
+                Math.pow(2, -10 * (t -= 1)) *
+                Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
+                0.5 +
+            c +
+            b
+        );
     },
-    easeInBack: function(x, t, b, c, d, s) {
-        if (s == undefined)
-            s = 1.70158;
+    easeInBack: function (x, t, b, c, d, s) {
+        if (s == undefined) s = 1.70158;
         return c * (t /= d) * t * ((s + 1) * t - s) + b;
     },
-    easeOutBack: function(x, t, b, c, d, s) {
-        if (s == undefined)
-            s = 1.70158;
+    easeOutBack: function (x, t, b, c, d, s) {
+        if (s == undefined) s = 1.70158;
         return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
     },
-    easeInOutBack: function(x, t, b, c, d, s) {
-        if (s == undefined)
-            s = 1.70158;
+    easeInOutBack: function (x, t, b, c, d, s) {
+        if (s == undefined) s = 1.70158;
         if ((t /= d / 2) < 1)
-            return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b;
-        return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
+            return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+        return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
     },
-    easeInBounce: function(x, t, b, c, d) {
+    easeInBounce: function (x, t, b, c, d) {
         return c - jQuery.easing.easeOutBounce(x, d - t, 0, c, d) + b;
     },
-    easeOutBounce: function(x, t, b, c, d) {
-        if ((t /= d) < (1 / 2.75)) {
+    easeOutBounce: function (x, t, b, c, d) {
+        if ((t /= d) < 1 / 2.75) {
             return c * (7.5625 * t * t) + b;
-        } else if (t < (2 / 2.75)) {
-            return c * (7.5625 * (t -= (1.5 / 2.75)) * t + .75) + b;
-        } else if (t < (2.5 / 2.75)) {
-            return c * (7.5625 * (t -= (2.25 / 2.75)) * t + .9375) + b;
+        } else if (t < 2 / 2.75) {
+            return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
+        } else if (t < 2.5 / 2.75) {
+            return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
         } else {
-            return c * (7.5625 * (t -= (2.625 / 2.75)) * t + .984375) + b;
+            return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
         }
     },
-    easeInOutBounce: function(x, t, b, c, d) {
+    easeInOutBounce: function (x, t, b, c, d) {
         if (t < d / 2)
-            return jQuery.easing.easeInBounce(x, t * 2, 0, c, d) * .5 + b;
-        return jQuery.easing.easeOutBounce(x, t * 2 - d, 0, c, d) * .5 + c * .5 + b;
-    }
+            return jQuery.easing.easeInBounce(x, t * 2, 0, c, d) * 0.5 + b;
+        return (
+            jQuery.easing.easeOutBounce(x, t * 2 - d, 0, c, d) * 0.5 +
+            c * 0.5 +
+            b
+        );
+    },
 });

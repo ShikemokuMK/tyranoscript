@@ -1,95 +1,104 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>タグリファレンス生成</title>
+	<title>タグリファレンス生成</title>
 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />  
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
-<script type="text/javascript" src="./tyrano/libs/jquery-3.4.1.min.js"></script>
+	<script type="text/javascript" src="./tyrano/libs/jquery-3.6.0.min.js"></script>
 
-<script>
-try{
-    window.jQuery = window.$ = require('./tyrano/libs/jquery-3.4.1.min.js');
-}catch(e){
-    
-}
-</script>
+	<script>
+		try {
+			window.jQuery = window.$ = require('./tyrano/libs/jquery-3.6.0.min.js');
+		} catch (e) {
 
-
-<script type="text/javascript" src="./tyrano/libs/jquery-ui-1.8.20.custom.min.js"></script>
-  
-<script type="text/javascript" src="./tyrano/libs.js" ></script>
-<script type="text/javascript" src="./tyrano/doc.js" ></script>
+		}
+	</script>
 
 
-<script type="text/javascript"  >
-    
-    tyrano.plugin.kag.tag ={};
-    
-</script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_audio.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_system.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ext.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_camera.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ar.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_three.js" ></script>
+	<script type="text/javascript" src="./tyrano/libs/jquery-ui/jquery-ui.min.js"></script>
 
-<link href="http://tyrano.jp/css/style.css" rel="stylesheet" type="text/css"/>
+	<script type="text/javascript" src="./tyrano/libs.js"></script>
+	<script type="text/javascript" src="./tyrano/doc.js"></script>
+
+
+	<script type="text/javascript">
+
+		tyrano.plugin.kag.tag = {};
+
+	</script>
+	<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag.js"></script>
+	<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_audio.js"></script>
+	<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_system.js"></script>
+	<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ext.js"></script>
+	<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_camera.js"></script>
+	<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ar.js"></script>
+	<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_three.js"></script>
+
+	<link href="https://tyrano.jp/assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css" />
+	<link href="https://tyrano.jp/assets/plugins/bootstrap/css/non-responsive.css" rel="stylesheet" type="text/css" />
+	<!-- CORSエラーが出るのでコメントアウト
+	<link href="https://tyrano.jp/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet"
+		type="text/css" />
+	-->
+	<link href="https://tyrano.jp/assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link href="https://tyrano.jp/assets/css/custom.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="https://tyrano.jp/assets/plugins/bootstrap/js/bootstrap.js"></script>
 
 </head>
 
 <body>
 
-<input id="button_gen" type="button" value="タグリファレンス生成" />
 
-<textarea id="src_html" style="height:300px">
-</textarea>
 
-オートコンプリート用のJS文字列
-<textarea id="auto_complete_tag" style="height:300px"></textarea>
-
-スタジオ用jsonファイル
-<textarea id="studio_json" style="height:300px"></textarea>
-
- 
-<div class="container content-md">
-	<div class="row area_main">
-		<div class="col-xs-4" style="background-color:white;border:0">
-			<ul class="area_group list-group sidebar-nav-v1" id="sidebar-nav-1">
-				<!-- ここにグループHTMLが格納される -->
-			</ul>
-
+	<div class="container">
+		<div class="row">
+			<div class="col-xs-3">
+				<button id="button_gen" style="margin-top:100px" class="btn btn-default">タグリファレンス生成</button>
+			</div>
+			<div class="col-xs-3">タグリファレンスHTML<br><textarea id="src_html" style="height:200px"></textarea></div>
+			<div class="col-xs-3">
+				オートコンプリート用のJS文字列<br>
+				<textarea id="auto_complete_tag" style="height:200px"></textarea>
+			</div>
+			<div class="col-xs-3">
+				スタジオ用jsonファイル<br>
+				<textarea id="studio_json" style="height:200px"></textarea>
+			</div>
 		</div>
-
-		<div class="area_ref col-xs-8">
-			<!-- ここにタグの解説がはいる -->
-		</div>
-
 	</div>
-</div>
+	<hr style="border-width:5px;">
+
+
+	<div class="container content-md">
+		<div class="row area_main">
+			<div class="col-xs-4"
+				style="background-color: white; border: 0;">
+				<ul class="area_group list-group sidebar-nav-v1" id="sidebar-nav-1">
+					<!-- ここにグループHTMLが格納される -->
+				</ul>
+			</div>
+			<div class="area_ref col-xs-8">
+				<!-- ここにタグの解説がはいる -->
+			</div>
+		</div>
+	</div>
 
 
 
-<script type="text/javascript">
-   
-   $(function(){
-    
-        //masterタグの作成
-        $("#button_gen").click(function(){
-        	$.generateHtml();
-        });
-        
-    
-   }); 
-   
-
-
-
-</script>
+	<script type="text/javascript">
+		$(function() {
+			$("#button_gen").click(function() {
+				$.setHtmlToTextarea();
+			});
+			$.generateHtml();
+		});
+	</script>
 
 
 
 </body>
+
 </html>

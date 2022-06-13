@@ -1,59 +1,46 @@
-
 tyrano.plugin.kag.parser = {
-
     tyrano: null,
     kag: null,
 
     flag_script: false, //スクリプト解析中なら
     deep_if: 0,
 
-    init: function() {
-
+    init: function () {
         //alert("kag.parser 初期化");
         //this.tyrano.test();
-
-
     },
 
-    loadConfig: function(call_back) {
-
+    loadConfig: function (call_back) {
         var that = this;
 
         //同じディレクトリにある、KAG関連のデータを読み込み
-        $.loadText("./data/system/Config.tjs", function(text_str) {
-
+        $.loadText("./data/system/Config.tjs", function (text_str) {
             var map_config = that.compileConfig(text_str);
 
             if (call_back) {
                 call_back(map_config);
             }
-
         });
-
     },
 
     //コンフィグファイルをデータ構造に格納
-    compileConfig: function(text_str) {
-
+    compileConfig: function (text_str) {
         var error_str = "";
         var map_config = {};
 
         var array_config = text_str.split("\n");
 
         for (var i = 0; i < array_config.length; i++) {
-
             try {
-
                 var line_str = $.trim(array_config[i]);
                 if (line_str != "" && line_str.substr(0, 1) === ";") {
-
                     var tmp_comment = line_str.split("//");
                     if (tmp_comment.length > 1) {
                         line_str = $.trim(tmp_comment[0]);
                     }
 
                     line_str = $.replaceAll(line_str, ";", "");
-                    line_str = $.replaceAll(line_str, "\"", "");
+                    line_str = $.replaceAll(line_str, '"', "");
 
                     var tmp = line_str.split("=");
 
@@ -61,13 +48,9 @@ tyrano.plugin.kag.parser = {
                     var val = $.trim(tmp[1]);
                     map_config[key] = val;
                 }
-
             } catch (e) {
-
                 error_str += "Error:Config.tjsに誤りがあります/行:" + i + "";
-
             }
-
         }
 
         if (error_str != "") {
@@ -75,12 +58,10 @@ tyrano.plugin.kag.parser = {
         }
 
         return map_config;
-
     },
 
     //シナリオをオブジェクト化する
-    parseScenario: function(text_str) {
-
+    parseScenario: function (text_str) {
         var array_s = [];
 
         var map_label = {}; //ラベル一覧
@@ -90,7 +71,6 @@ tyrano.plugin.kag.parser = {
         var flag_comment = false; //コメント中なら
 
         for (var i = 0; i < array_row.length; i++) {
-
             var line_str = $.trim(array_row[i]);
             var first_char = line_str.substr(0, 1);
 
@@ -104,9 +84,7 @@ tyrano.plugin.kag.parser = {
             } else if (line_str === "/*") {
                 flag_comment = true;
             } else if (flag_comment == true || first_char === ";") {
-
             } else if (first_char === "#") {
-
                 var tmp_line = $.trim(line_str.replace("#", ""));
                 var chara_name = "";
                 var chara_face = "";
@@ -121,13 +99,11 @@ tyrano.plugin.kag.parser = {
                 var text_obj = {
                     line: i,
                     name: "chara_ptext",
-                    pm: { "name": chara_name, "face": chara_face },
-                    val: text
+                    pm: { name: chara_name, face: chara_face },
+                    val: text,
                 };
 
                 array_s.push(text_obj);
-
-
             } else if (first_char === "*") {
                 //ラベル
 
@@ -145,12 +121,12 @@ tyrano.plugin.kag.parser = {
                 var label_obj = {
                     name: "label",
                     pm: {
-                        "line": i,
-                        "index": array_s.length,
-                        "label_name": label_key,
-                        "val": label_val
+                        line: i,
+                        index: array_s.length,
+                        label_name: label_key,
+                        val: label_val,
                     },
-                    val: label_val
+                    val: label_val,
                 };
 
                 //ラベル
@@ -158,19 +134,25 @@ tyrano.plugin.kag.parser = {
 
                 if (map_label[label_obj.pm.label_name]) {
                     //this.kag.warning("警告:"+i+"行目:"+"ラベル名「"+label_obj.pm.label_name+"」は同一シナリオファイル内に重複しています");
-                    this.kag.warning("Warning line:" + i + " " + $.lang("label") + "'" + label_obj.pm.label_name + "'" + $.lang("label_double"));
-
+                    this.kag.warning(
+                        "Warning line:" +
+                            i +
+                            " " +
+                            $.lang("label") +
+                            "'" +
+                            label_obj.pm.label_name +
+                            "'" +
+                            $.lang("label_double"),
+                    );
                 } else {
                     map_label[label_obj.pm.label_name] = label_obj.pm;
                 }
-
             } else if (first_char === "@") {
                 //コマンド行確定なので、その残りの部分を、ごそっと回す
                 var tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
                 var tmpobj = this.makeTag(tag_str, i);
                 array_s.push(tmpobj);
             } else {
-
                 //半角アンダーバーで始まっている場合は空白ではじめる
                 if (first_char === "_") {
                     line_str = line_str.substring(1, line_str.length);
@@ -178,7 +160,7 @@ tyrano.plugin.kag.parser = {
 
                 var array_char = line_str.split("");
 
-                var text = "";//命令じゃない部分はここに配置していく
+                var text = ""; //命令じゃない部分はここに配置していく
 
                 var tag_str = "";
 
@@ -191,43 +173,37 @@ tyrano.plugin.kag.parser = {
                     var c = array_char[j];
 
                     if (flag_tag === true) {
-
                         if (c === "]" && this.flag_script == false) {
-
                             num_kakko--;
 
                             if (num_kakko == 0) {
-
                                 flag_tag = false;
                                 array_s.push(this.makeTag(tag_str, i));
                                 //tag_str をビルドして、命令配列に格納
                                 tag_str = "";
-
                             } else {
                                 tag_str += c;
                             }
                         } else if (c === "[" && this.flag_script == false) {
-
                             num_kakko++;
                             tag_str += c;
-
                         } else {
                             tag_str += c;
                         }
-
-                    }
-                    else if (flag_tag === false && c === "[" && this.flag_script == false) {
-
+                    } else if (
+                        flag_tag === false &&
+                        c === "[" &&
+                        this.flag_script == false
+                    ) {
                         num_kakko++;
 
                         //テキストファイルを命令に格納
                         if (text != "") {
-
                             var text_obj = {
                                 line: i,
                                 name: "text",
-                                pm: { "val": text },
-                                val: text
+                                pm: { val: text },
+                                val: text,
                             };
 
                             array_s.push(text_obj);
@@ -236,59 +212,50 @@ tyrano.plugin.kag.parser = {
                         }
 
                         flag_tag = true;
-
                     } else {
-
                         text += c;
                     }
-
                 }
 
                 if (text != "") {
                     var text_obj = {
                         line: i,
                         name: "text",
-                        pm: { "val": text },
-                        val: text
+                        pm: { val: text },
+                        val: text,
                     };
 
                     array_s.push(text_obj);
                 }
 
                 //console.log(array_char);
-
             }
             //１行づつ解析解析していく
-
         }
 
         var result_obj = {
-
             array_s: array_s,
-            map_label: map_label
-
+            map_label: map_label,
         };
 
         if (this.deep_if != 0) {
-            alert("[if]と[endif]の数が一致しません。シナリオを見直してみませんか？");
+            alert(
+                "[if]と[endif]の数が一致しません。シナリオを見直してみませんか？",
+            );
             this.deep_if = 0;
         }
 
         return result_obj;
-
-
     },
 
     //タグ情報から、オブジェクトを作成して返却する
-    makeTag: function(str, line) {
-
+    makeTag: function (str, line) {
         var obj = {
             line: line,
             name: "",
             pm: {},
-            val: ""
+            val: "",
         };
-
 
         var array_c = str.split("");
 
@@ -299,20 +266,16 @@ tyrano.plugin.kag.parser = {
         var cnt_quot_c = 0;
 
         for (var j = 0; j < array_c.length; j++) {
-
             var c = array_c[j];
 
-            if (flag_quot_c == "" && (c === "\"" || c === "'")) {
+            if (flag_quot_c == "" && (c === '"' || c === "'")) {
                 flag_quot_c = c;
                 cnt_quot_c = 0;
             } else {
-
                 //特殊自体発生中
                 if (flag_quot_c != "") {
-
                     //特殊状態解除
                     if (c === flag_quot_c) {
-
                         flag_quot_c = "";
 
                         //""のように直後に"が出てきた場合undefinedを代入
@@ -321,9 +284,7 @@ tyrano.plugin.kag.parser = {
                         }
 
                         cnt_quot_c = 0;
-
                     } else {
-
                         if (c == "=") {
                             c = "#";
                         }
@@ -336,18 +297,11 @@ tyrano.plugin.kag.parser = {
 
                         tmp_str += c;
                         cnt_quot_c++;
-
                     }
-
-
-
                 } else {
                     tmp_str += c;
                 }
-
             }
-
-
         }
 
         str = tmp_str;
@@ -362,20 +316,15 @@ tyrano.plugin.kag.parser = {
 
         //=のみが出てきた場合は前後のをくっつけて、ひとつの変数にしてしまって良い
         for (var k = 1; k < array.length; k++) {
-
             if (array[k] == "") {
-
                 array.splice(k, 1);
                 k--;
-            }
-
-            else if (array[k] === "=") {
+            } else if (array[k] === "=") {
                 if (array[k - 1]) {
                     if (array[k + 1]) {
                         array[k - 1] = array[k - 1] + "=" + array[k + 1];
                         array.splice(k, 2);
                         k--;
-
                     }
                 }
             } else if (array[k].substr(0, 1) === "=") {
@@ -384,26 +333,22 @@ tyrano.plugin.kag.parser = {
                         array[k - 1] = array[k - 1] + array[k];
                         array.splice(k, 1);
                         //k--;
-
                     }
                 }
-            } else if (array[k].substr(array[k].length - 1, array[k].length) === "=") {
+            } else if (
+                array[k].substr(array[k].length - 1, array[k].length) === "="
+            ) {
                 if (array[k + 1]) {
                     if (array[k]) {
                         array[k] = array[k] + array[k + 1];
                         array.splice(k + 1, 1);
                         //k--;
-
                     }
                 }
             }
-
-
-
         }
 
         for (var i = 1; i < array.length; i++) {
-
             var tmp = $.trim(array[i]).split("=");
 
             var pm_key = $.trim(tmp[0]);
@@ -421,7 +366,6 @@ tyrano.plugin.kag.parser = {
             if (pm_val == "undefined") {
                 obj.pm[pm_key] = "";
             }
-
         }
 
         if (obj.name == "iscript") {
@@ -430,7 +374,6 @@ tyrano.plugin.kag.parser = {
         if (obj.name == "endscript") {
             this.flag_script = false;
         }
-
 
         switch (obj.name) {
             case "if":
@@ -443,13 +386,10 @@ tyrano.plugin.kag.parser = {
                 obj.pm.deep_if = this.deep_if;
                 this.deep_if--;
                 break;
-        };
+        }
 
         return obj;
-
     },
 
-    test: function() {
-
-    }
+    test: function () {},
 };

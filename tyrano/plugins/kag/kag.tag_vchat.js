@@ -1,6 +1,5 @@
 //スクリプトの評価
 
-
 /*
 TYRANO.kag.stat.tchat = {
             "current_top":0,
@@ -25,7 +24,6 @@ TYRANO.kag.stat.tchat = {
         };
 */
 
-
 /*
  vchat_in
  画面外にバルーンを配置する動作。一般的なタグとしては利用不可。
@@ -34,15 +32,11 @@ TYRANO.kag.stat.tchat = {
 var _vchat_log_count = 0;
 
 tyrano.plugin.kag.tag.vchat_in = {
-
     vital: [],
 
-    pm: {
+    pm: {},
 
-    },
-
-    start: function(pm) {
-
+    start: function (pm) {
         this.kag.layer.hideEventLayer();
 
         var that = this;
@@ -57,9 +51,13 @@ tyrano.plugin.kag.tag.vchat_in = {
 
         var j_area_chat = $("#vchat_base");
 
-        j_area_chat.find(".current_vchat").addClass("talked_vchat").removeClass("current_vchat");
+        j_area_chat
+            .find(".current_vchat")
+            .addClass("talked_vchat")
+            .removeClass("current_vchat");
 
-        var html = '\
+        var html =
+            '\
         <div style="right: 0px; margin-right: 5px;" class="vchat current_vchat ">\
             <div class="v_chat_text vchat-text" style="margin-top: 0px; margin-right: 5px; margin-left: 20px; background-color: rgb(255, 255, 255);">\
                 <h3 class="ribbon20 vchat_chara_name"></h3>\
@@ -99,7 +97,6 @@ tyrano.plugin.kag.tag.vchat_in = {
             /*  "font-family":that.kag.stat.font.face,*/
         });
 
-
         var j_area_chat = $("#vchat_base");
 
         j_area_chat.prepend(j_vchat);
@@ -110,55 +107,33 @@ tyrano.plugin.kag.tag.vchat_in = {
         _vchat_log_count++;
 
         if (_vchat_log_count > this.kag.stat.vchat.max_log_count) {
-
             //最後の１個消す
             $("#vchat_base").find(".vchat:eq(-1)").remove();
-
         }
 
         this.kag.layer.showEventLayer();
 
         return false;
-
-
     },
-
-
-
-
 };
 
-
 tyrano.plugin.kag.tag.vchat_config = {
-
     vital: [],
 
     pm: {
-        chara_name_color: ""
+        chara_name_color: "",
     },
 
-    start: function(pm) {
-
-
+    start: function (pm) {
         if (pm.chara_name_color != "") {
-
             this.kag.stat.vchat.chara_name_color = pm.chara_name_color;
-
         }
 
         this.kag.ftag.nextOrder();
-
-
     },
-
-
-
-
 };
 
-
 tyrano.plugin.kag.tag.vchat_chara = {
-
     vital: ["name"],
 
     pm: {
@@ -166,8 +141,7 @@ tyrano.plugin.kag.tag.vchat_chara = {
         color: "",
     },
 
-    start: function(pm) {
-
+    start: function (pm) {
         //vchatが有効じゃない場合は無視する
         if (!this.kag.stat.vchat.is_active) {
             this.kag.ftag.nextOrder();
@@ -178,7 +152,7 @@ tyrano.plugin.kag.tag.vchat_chara = {
 
         if (!charas[pm.name]) {
             charas[pm.name] = {
-                "color": "",
+                color: "",
             };
         }
 
@@ -187,10 +161,5 @@ tyrano.plugin.kag.tag.vchat_chara = {
         }
 
         this.kag.ftag.nextOrder();
-
     },
-
-
-
-
 };
