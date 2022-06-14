@@ -484,7 +484,9 @@ tyrano.plugin.kag.tag.endscript = {
         try {
             this.kag.evalScript(this.kag.stat.buff_script);
         } catch (err) {
-            that.kag.alert("[iscript]に記述されたJavaScript実行時にエラーが発生しました。");
+            that.kag.alert(
+                "[iscript]に記述されたJavaScript実行時にエラーが発生しました。",
+            );
             console.error(err);
         }
         this.kag.stat.buff_script = "";
@@ -1135,22 +1137,29 @@ tyrano.plugin.kag.tag.endmacro = {
             return;
         }
 
+        //最新のマクロスタックを取得
         var map_obj = this.kag.getStack("macro");
-        //最新のコールスタックを取得
 
-        //もし、スタックが溜まっている状態なら、
+        //マクロスタックが取得できたかどうか
         if (map_obj) {
-            //呼び出し元に戻る
+            //マクロスタックが取得できた場合（取得できない、ということは通常ではありえない）
+
+            //マクロスタックをpop
             this.kag.popStack("macro");
-            this.kag.stat.mp = this.kag.getStack("macro");
-            //参照用パラメータを設定
+
+            //さらにスタックを取得してみよう
+            var macro_stack = this.kag.getStack("macro") || { pm: {} };
+            //↑マクロの中で呼ばれたマクロの[endmacro]のケースではこれが取得できる！
+            //↑最も表層のマクロの[endmacro]のケースではundefinedとなってしまうので初期値を代入
+
+            //mpを復元
+            this.kag.stat.mp = macro_stack.pm;
 
             this.kag.ftag.nextOrderWithIndex(
                 map_obj.index,
                 map_obj.storage,
                 true,
             );
-            //スタックを奪い取る
         } else {
             //呼び出し元がない場合、普通に次の処理を行えば良い
             //endmacroの場合はだめじゃないでしょうか。。。
