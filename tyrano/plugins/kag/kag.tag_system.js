@@ -478,9 +478,15 @@ tyrano.plugin.kag.tag.endscript = {
     },
 
     start: function (pm) {
+        var that = this;
         this.kag.stat.is_script = false;
         //スクリプトを実行する
-        this.kag.evalScript(this.kag.stat.buff_script);
+        try {
+            this.kag.evalScript(this.kag.stat.buff_script);
+        } catch (err) {
+            that.kag.alert("[iscript]に記述されたJavaScript実行時にエラーが発生しました。");
+            console.error(err);
+        }
         this.kag.stat.buff_script = "";
 
         if (pm.stop == "false") {
