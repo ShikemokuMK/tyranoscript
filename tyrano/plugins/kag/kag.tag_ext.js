@@ -49,22 +49,49 @@ tyrano.plugin.kag.tag.loadjs = {
 その他
 
 :title
-ムービーの再生
+動画の再生
 
 :exp
-ogv webm mp4 などに対応します
-提供するゲームによって対応するフォーマットが異なります。
-PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
-ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
+ゲーム画面上で動画を再生します。動画ファイルは`data/video`フォルダに配置します。
+
+<b>`mp4`形式推奨</b>。`ogv``webm`形式にも対応します。
+
+ブラウザゲームとして出力する場合、ブラウザによってはサポートしない動画形式があるので注意してください。特に、<b>`webm`形式はSafariでは動作しません</b>。
+
+また、`mp4`形式はFireFoxやOperaでは動作しません。このとき、もし`mp4`ファイルと同じ場所に同名の`webm`ファイルがある場合は自動的にそちらを選択します。
 
 :sample
-[movie storage="" skip=false ]
+;動画を再生した回数をゲーム変数f.watch_countで数えてみる
+[eval exp="f.watch_count = 0"]
+
+*loop
+動画を再生するよ[p]
+
+;動画を再生したことがまだ1回もないなら、スキップできない
+;動画を再生したことが1回以上あるなら、スキップできる
+;という設定を一時変数tf.skipにをセット
+[iscript]
+if (f.watch_count === 0) {
+  tf.skip = "false";
+} else {
+  tf.skip = "true";
+}
+[endscript]
+
+;data/video/cat.mp4を再生するよ
+[movie storage="cat.mp4" skip=&tf.skip]
+
+動画を再生しおわったよ[p]
+
+;動画を再生した回数を増やす
+[eval exp="f.watch_count += 1"]
+[jump target="loop"]
 
 :param
-storage = 再生するogv webm mp4ファイルを指定します,
-skip    = 動画再生中に途中でスキップ可能かどうかをtrueまたはfalseで指定します。,
-mute    = true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。,
-volume  = ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100
+storage = 再生する動画ファイルを指定します。
+skip    = 動画を途中でスキップできるようにするかどうか。`true`または`false`で指定します。`true`を指定すると、プレイヤーが画面クリックで動画を飛ばせるようになります。,
+mute    = 動画の音をミュートするかどうか。`true`または`false`で指定します。ブラウザ上では動画を再生する前にユーザアクション（タップなど）が必要という制限がありますが、`true`を指定することでこの制限を無視できます。,
+volume  = 動画の音量を`0`〜`100`で指定します。
 
 #[end]
 */
@@ -1414,21 +1441,51 @@ tyrano.plugin.kag.tag.stop_kanim = {
 キャラクター操作
 
 :title
-キャラクターの発言名前欄表示と表情変更
+キャラクターの名前表示と表情変更
 
 :exp
-[chara_config ptext="hogehoge"]という形式で定義した発言者のメッセージボックスにnameで指定した名前を設定できます。
-さらに、faceパラメータを指定することで、同時に表情も変更できます。
-このタグには省略して書くことができます。
-#chara_name:face_name と　[ptext name="chara_name" face="face_name"] は同じ動作をします。
-[chara_new]時に登録した画像ファイルはface="default"で指定できます。
-[chara_new name="yuko" storage="yuko.png"  jname="ゆうこ"]
+キャラクターの名前を表示するためのタグです。いましゃべっているキャラクターの名前をメッセージウィンドウの上部に出すのが主な使い方になるでしょう。`face`属性を指定することで同時に表情を変更することもできます。
+
+あらかじめ`[ptext]`で作っておいたテキスト領域にキャラクターの名前を上書きする処理を行います。`[chara_ptext]`を使用する前に`[ptext]`および`[chara_config]`による事前準備が必要になります。実際の手順はサンプルコードを参照してください。
+
+<b>このタグは省略して書くことができます。</b>省略記法では、行の先頭に`#`を書き、続けて`name`属性に指定する値を書きます。表情を変更する場合は続けて`:`を書き、`face`属性に指定する値を書きます。
+
+つまり、`#akane:gekioko`と`[chara_ptext name=akane face=gekioko]`は同じ動作をします。
 
 :param
-name = [chara_new]で定義したnameを指定します。紐づいたjnameがptext欄に表示されます,
-face = [chara_face]で定義したface名を指定します
+name = `[chara_new]`タグで定義した`name`を指定します。それをひもついた`jname`がテキストエリアに表示されます。その`name`のキャラクター定義が存在しなかった場合、`name`に指定された内容がそのままテキストエリアに表示されます。,
+face = `[chara_face]`タグで定義した`face`を指定します。
 
 :sample
+;レイヤ0を表示
+[layopt layer="0" visible="true"]
+
+;テキスト領域をレイヤ0に作成
+[ptext layer="0" name="name_space" x="100" y="200" text="ここにキャラの名前が入る"]
+
+;↑で作ったテキスト領域(name_space)をキャラ名表示用であると宣言する
+[chara_config ptext="name_space"]
+
+;キャラ定義
+[chara_new name="akane" storage="chara/akane/normal.png" jname="あかね"]
+[chara_new name="yamato" storage="chara/yamato/normal.png" jname="やまと"]
+
+;キャラ名表示！
+[chara_ptext name="akane"]
+あかねです[p]
+
+;このような省略記法もあります（行頭に#を書いて、キャラのnameを続けて書く）
+;実際にはこの書き方を使うことがほとんどでしょう
+#yamato
+やまとです[p]
+
+;消去もできる
+#
+地の文です[p]
+
+;キャラ登録されていなくてもOK
+#？？？
+こんにちは[p]
 
 #[end]
 */
@@ -1866,19 +1923,19 @@ tyrano.plugin.kag.tag.chara_new = {
 
 :param
 name    = [chara_new]で定義したname属性を指定します。,
-time    = "ミリ秒で指定します。指定した時間をかけて登場します。デフォルトは1000ミリ秒です",
-layer   = "キャラクターを配置するレイヤーを指定できます。デフォルトは前景レイヤ layer=0 です",
-zindex  = "キャラクターの重なりを指定できます。ここで指定した値が大きいほうが前に表示できます。省略すると、後に登場するキャラクターが前に表示されます",
-depth   = "zindexが同一な場合の重なりを指定できます。front（最前面）/back（最後面）で指定します。デフォルトはfront",
-page    = "foreかbackを指定します。デフォルトはforeです",
-wait    = "trueを指定すると、キャラクターの登場完了を待ちます。デフォルトはtrue です。",
-face    = [chara_face]で定義したface属性を指定します。,
+time    = ミリ秒で指定します。指定した時間をかけて登場します。,
+layer   = キャラクターを配置するレイヤを`0`以上の整数で指定します。,
+zindex  = キャラクターの重なりを指定できます。ここで指定した値が大きいほうが前に表示できます。省略すると、後に登場するキャラクターが前に表示されます。",
+depth   = zindexが同一な場合の重なりを`front`(最前面)、`back`(最後面) で指定できます。,
+page    = foreかbackを指定します。,
+wait    = trueを指定すると、キャラクターの登場完了を待ちます。,
+face    = `[chara_face]`タグで定義したface属性を指定します。,
 storage = 変更する画像ファイルを指定します。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。,
-reflect = "trueを指定すると左右反転します",
-width   = "キャラクターの横幅を指定できます。",
-height  = "キャラクターの縦幅を指定できます。",
-left    = "キャラクターの横位置を指定できます。指定した場合、自動配置が有効であっても無効になります。",
-top     = "キャラクターの縦位置を指定できます。指定した場合、自動配置が有効であっても無効になります。"
+reflect = trueを指定すると左右反転します,
+width   = キャラクターの横幅を指定できます。,
+height  = キャラクターの縦幅を指定できます。,
+left    = キャラクターの横位置を指定できます。指定した場合、自動配置が有効であっても無効になります。,
+top     = キャラクターの縦位置を指定できます。指定した場合、自動配置が有効であっても無効になります。
 
 :demo
 1,kaisetsu/08_character

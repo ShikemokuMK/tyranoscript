@@ -36,7 +36,7 @@ var GROUP_RANK = [
 
 var PARAM_EXP = {
     "time/fadein":
-        "フェードイン時間をミリ秒単位で指定します。これを指定すると、画像が透明な状態から徐々に表示されていきます。省略すると、一瞬で消去されます。",
+        "フェードイン時間をミリ秒単位で指定します。これを指定すると、画像が透明な状態から徐々に表示されていきます。省略すると、一瞬で表示されます。",
     "wait/fadein":
         "フェードインの完了を待つかどうか。`true`または`false`で指定します。",
     "time/fadeout":
@@ -51,6 +51,17 @@ var PARAM_EXP = {
     "target/jump":
         "ジャンプ先のラベル名を指定します。省略すると、シナリオファイルの先頭にジャンプします。",
     "name": "`[anim]`タグなどからこの名前でアニメーションさせられます。カンマで区切ることで複数指定できます。（高度な知識：`name`属性で指定した値はHTMLのクラス属性になります）",
+    "opacity":
+        "不透明度を`0`～`255`の数値で指定します。`0`で完全に透明になります。",
+    "left": "画像左端の位置をピクセル単位で指定します。`0`でゲーム画面の上端に表示されます。",
+    "top": "画像上端の位置をピクセル単位で指定します。`0`でゲーム画面の上端に表示されます。",
+    "storage/audio": "再生する音楽ファイルを指定します",
+    "loop": "ループするかどうか。`true`または`false`で指定します。",
+    "sprite_time":
+        "再生する区間を指定できます。開始時刻と終了時刻をハイフン繋ぎでミリ秒単位で指定します。たとえば`6000-10000`と指定すると00:06～00:10の4秒間を再生します。`loop`属性が`true`の場合、この間をループ再生します。",
+    "volume": "再生する音量を指定できます。`0`〜`100`の範囲で指定して下さい。",
+    "html5":
+        "通常は指定しなくてOKです。HTML5 Audioを使う場合は`true`、Web Audio APIを使う場合は`false`(デフォルト)で指定します。",
 };
 
 (function ($) {
@@ -88,52 +99,59 @@ var PARAM_EXP = {
             $.loadText(
                 "./tyrano/plugins/kag/" + array_script[i],
                 function (text_str) {
-                    var flag_tag = ""; //タグ解析中の場合
+                    var flag_tag = ""; //タグ解析中の場合タグ名が入る
                     var flag_param = ""; //パラメータ名
 
                     var tmp_str = "";
 
+                    //改行で刻んで1行ずつ見ていく
                     var array_str = text_str.split("\n");
 
-                    for (var i = 0; i < array_str.length; i++) {
-                        var line_str = $.trim(array_str[i]);
+                    for (var origin_line_str of array_str) {
+                        //トリミング
+                        var line_str = $.trim(origin_line_str);
 
-                        //タグ解析中は改行もつかう
                         if (line_str != "" || flag_tag != "") {
+                            //空行ではない場合、または空行であってもタグ解析中の場合(タグ解析中は空行(改行)も使いたい意図)
                             if (line_str === "#[end]") {
+                                //タグ解析終了トークンに到達した場合
                                 //終了時点で登録すべきデータが残っていた場合は入れておく
                                 map_doc[flag_tag][flag_param] = tmp_str;
-
                                 flag_tag = "";
                                 flag_param = "";
                             } else if (flag_tag != "") {
+                                //タグ解析中の場合
                                 if (line_str.substr(0, 1) == ":") {
+                                    //:hogeという行の場合
+                                    //まずそれまで読んでいたひとつ前の属性データを格納する
                                     if (tmp_str != "") {
                                         if (flag_param != "") {
                                             map_doc[flag_tag][flag_param] =
                                                 tmp_str;
                                         }
                                     }
-
+                                    //新しい属性
                                     flag_param = "";
                                     flag_param = line_str.substr(
                                         1,
                                         line_str.length,
                                     );
-
-                                    //すでに登録済みのデータがあれば、それを格納する
+                                    //初期化
                                     map_doc[flag_tag][flag_param] = "";
-
                                     tmp_str = "";
                                 } else {
+                                    //サンプルコード中はインデントを使う(トリミング前に戻す)
+                                    if (flag_param === "sample") {
+                                        line_str = origin_line_str;
+                                    }
+                                    //:paramでも:titleでもないなら改行を足す
                                     if (
                                         flag_param != "param" &&
                                         flag_param != "title"
                                     ) {
-                                        tmp_str += line_str + "\n";
-                                    } else {
-                                        tmp_str += line_str;
+                                        line_str += "\n";
                                     }
+                                    tmp_str += line_str;
                                 }
 
                                 //タグ読み込み開始
@@ -159,8 +177,8 @@ var PARAM_EXP = {
                         $.putHtml(map_doc, master_tag);
 
                         ////////スタジオ用データ作成
-                        for (var key in map_doc) {
-                            var tag = map_doc[key];
+                        for (var tag_name in map_doc) {
+                            var tag = map_doc[tag_name];
                             tag.array_param = [];
 
                             var array_param = tag.param.split(",");
@@ -168,7 +186,15 @@ var PARAM_EXP = {
                             for (var k = 0; k < array_param.length; k++) {
                                 var tmp_array = array_param[k].split("=");
                                 var param_name = $.trim(tmp_array[0]);
-                                var param_value = $.trim(tmp_array[1]);
+                                var param_value = $.trim(
+                                    tmp_array.slice(1).join("="),
+                                );
+                                param_value = replaceParamExpWithConstant(
+                                    param_value,
+                                    param_name,
+                                    tag_name,
+                                );
+                                param_value = markup(param_value);
 
                                 if (param_name == "") {
                                     continue;
@@ -182,18 +208,19 @@ var PARAM_EXP = {
                                 };
 
                                 if (
-                                    master_tag[key].pm &&
-                                    master_tag[key].pm[param_name]
+                                    master_tag[tag_name].pm &&
+                                    master_tag[tag_name].pm[param_name]
                                 ) {
                                     pm_obj["default"] =
-                                        master_tag[key].pm[param_name];
+                                        master_tag[tag_name].pm[param_name];
                                 }
 
                                 if (
-                                    master_tag[key] != null &&
-                                    master_tag[key]["vital"] != null
+                                    master_tag[tag_name] != null &&
+                                    master_tag[tag_name]["vital"] != null
                                 ) {
-                                    var array_vital = master_tag[key]["vital"];
+                                    var array_vital =
+                                        master_tag[tag_name]["vital"];
 
                                     for (
                                         var j = 0;
@@ -201,7 +228,7 @@ var PARAM_EXP = {
                                         j++
                                     ) {
                                         if (
-                                            master_tag[key].vital[j] ==
+                                            master_tag[tag_name].vital[j] ==
                                             param_name
                                         ) {
                                             pm_obj["vital"] = "◯";
@@ -338,12 +365,15 @@ var PARAM_EXP = {
                     color: #a10f2b;
                 }
                 .news-v3 .code {
-                    padding: 2px 3px;
-                    margin: 0px 2px;
+                    padding: 1px 3px;
+                    margin: 0px 2px 1px;
                     font-size: 100%;
-                    background-color: rgba(0, 0, 0, 0.07);
+                    background-color: rgba(0, 30, 150, 0.07);
                     border-radius: 4px;
                     font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+                    line-height: 140%;
+                    display: inline-block;
+                    word-break: keep-all;
                 }
                 .news-v3 .tag {
                     text-decoration: none;
@@ -357,6 +387,15 @@ var PARAM_EXP = {
                 }
                 .news-v3 .table > thead > tr > th {
                     vertical-align: middle;
+                }
+                .news-v3 .table > tbody > tr > td:nth-child(3) {
+                    word-break: break-word;
+                }
+                .news-v3 .table > tbody > tr > td:nth-child(2) {
+                    text-align: center;
+                }
+                .news-v3 .table > tbody > tr > td > p:last-child {
+                    margin-bottom: 0;
                 }
             </style>`
                 .replace(/\n/g, "")
@@ -376,7 +415,7 @@ var PARAM_EXP = {
             var obj = map_doc[tag_name];
 
             //説明文のパース
-            exp = parseExp(obj.exp);
+            var exp = parseExp(obj.exp);
 
             var html =
                 `<div  class="news-v3 bg-color-white margin-bottom-20">` +
@@ -506,6 +545,8 @@ var PARAM_EXP = {
             js_auto_complete += '"' + tag_name + '",\n';
         }
         $("#auto_complete_tag").val(js_auto_complete);
+
+        window.Prism.highlightAll();
     };
 
     $.setHtmlToTextarea = () => {
@@ -536,7 +577,7 @@ var PARAM_EXP = {
         p = p.replace(/\n/g, "<br>");
         //インラインティラノタグ(`[hoge]`)を変換
         p = p.replace(
-            /`\[([^`]+)\]`/g,
+            /`\[([^`\s]+)\]`/g,
             `<a class="tag" href="#$1"><span class="code">[$1]</span></a>`,
         );
         //インラインコード(`hoge`)を変換

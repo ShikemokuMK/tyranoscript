@@ -8,30 +8,21 @@
 BGMの再生
 
 :exp
-BGMを再生します。
-再生するファイルはbgmフォルダに格納してください。
+BGMを再生します。再生する音声ファイルは`data/bgm`フォルダに配置します。
 
-ogg形式、HTML5標準をサポートします。
-動作させる環境によって対応フォーマットが異なります。
+<b>`mp3`形式推奨</b>。`ogg``m4a``wav`形式にも対応します。
 
-基本的にogg形式を指定しておけば問題ありません。
-ただし、複数のブラウザ形式の場合、IEとSafariにも対応させるためには
-bgmフォルダに同名でaac形式(m4a)ファイルも配置して下さい。
-そうした場合、自動的に適切なファイルを選択して再生します。
-
-デフォルト設定ではmp3は再生できません。
-Confit.tjs の mediaFormatDefaultをmp3に変更して下さい。
-ただしこの場合 PCアプリとしては動作しません
+ただし、<b>`ogg`形式は一部のブラウザにおいて動作しません</b>（IE、Safari）。`ogg`形式を使う場合、IEとSafariにも対応させるためには、同じフォルダに同名の`m4a`ファイルを用意してください。そうした場合、IEやSafariでは自動で`m4a`形式のファイルが選択されるようになります。（ブラウザゲームとして公開しない場合は不要）
 
 :sample
-[playbgm storage="music.ogg"]
+[playbgm storage=music.mp3]
 
 :param
-storage     = 再生する音楽ファイルを指定します,
-loop        = true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます。,
-sprite_time = 再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-volume      = 再生する音量を指定できます。0〜100 の範囲で指定して下さい。（デフォルトは100）
+storage     = !!audio,
+loop        = !!,
+sprite_time = !!,
+volume      = !!,
+html5       = !!
 
 #[end]
 */
@@ -398,10 +389,10 @@ tyrano.plugin.kag.tag.playbgm = {
 BGMの停止
 
 :exp
-再生しているBGMの再生を停止します
+再生しているBGMの再生を停止します。
 
 :sample
-[stopbgm ]
+[stopbgm]
 
 :param
 
@@ -509,18 +500,19 @@ BGMをフェードイン再生
 
 :exp
 BGMを徐々に再生します。
-一部環境（Firefox、Sarafi等）においては対応していません。その場合、playbgmの動作となります。
+
+一部環境（Firefox、Sarafi等）においては対応していません。その場合、`[playbgm]`の動作となります。
 
 :sample
-[fadeinbgm storage=sample.ogg loop=false time=3000]
+[fadeinbgm storage=sample.mp3 loop=false time=3000]
 
 :param
-storage     = 再生する音楽ファイルを指定します,
-loop        = true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます,
-sprite_time = 再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-time        = フェードインを行なっている時間をミリ秒で指定します。,
-volume      = BGMの再生音量を変更できます（0〜100）
+storage     = !!audio,
+loop        = !!,
+sprite_time = !!,
+time        = フェードイン時間をミリ秒で指定します。,
+volume      = !!,
+html5       = !!
 
 #[end]
 */
@@ -556,13 +548,14 @@ BGMをフェードアウト停止
 
 :exp
 再生中のBGMをフェードアウトしながら停止します。
-一部環境（Firefox、Sarafi等）においては対応していません。その場合、stopbgmの動作となります。
+
+一部環境（Firefox、Sarafi等）においては対応していません。その場合、`[stopbgm]`の動作となります。
 
 :sample
-[fadeoutbgm  time=3000]
+[fadeoutbgm time=3000]
 
 :param
-time = フェードアウトを行なっている時間をミリ秒で指定します。
+time = フェードアウト時間をミリ秒で指定します。
 
 #[end]
 */
@@ -591,16 +584,16 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
 【非推奨】BGMのクロスフェード（入れ替え）
 
 :exp
-【非推奨】BGMを入れ替えます。
-音楽が交差して切り替わる演出に使用できます。
-一部環境（Firefox、Safari等）において対応していません。その場合、playbgmの動作となります。
+【非推奨】BGMを入れ替えます。音楽が交差して切り替わる演出に使用できます。
+
+一部環境（Firefox、Safari等）において対応していません。その場合、`[playbgm]`の動作となります。
 
 :sample
-[xchgbgm storage=new.ogg loop=true time=3000]
+[xchgbgm storage=new.mp3 loop=true time=3000]
 
 :param
 storage = 次に再生するファイルを指定します,
-loop    = true（デフォルト）またはfalse を指定します。trueを指定すると繰り返し再生されます,
+loop    = !!,
 time    = クロスフェードを行なっている時間をミリ秒で指定します。
 
 #[end]
@@ -633,32 +626,23 @@ tyrano.plugin.kag.tag.xchgbgm = {
 効果音の再生
 
 :exp
-効果音を再生します。
-効果音ファイルはdata/soundフォルダに入れてください。
+BGMを再生します。再生する音声ファイルは`data/bgm`フォルダに配置します。
 
-ogg形式、HTML5標準をサポートします。
-動作させる環境によって対応フォーマットが異なります。
+<b>`mp3`形式推奨</b>。`ogg``m4a``wav`形式にも対応します。
 
-基本的にogg形式を指定しておけば問題ありません。
-ただし、複数のブラウザ形式の場合、IEとSafariにも対応させるためには
-同じ場所に同名のAAC形式（m4a）ファイルを配置して下さい。
-そうした場合、自動的に適切なファイルが選択されます。
-
-デフォルト設定ではmp3は再生できません。
-Confit.tjsのmediaFormatDefaultをmp3に変更して下さい。
-ただしそうした場合、PCアプリとしては動作しません。
+ただし、<b>`ogg`形式は一部のブラウザにおいて動作しません</b>（IE、Safari）。`ogg`形式を使う場合、IEとSafariにも対応させるためには、同じフォルダに同名の`m4a`ファイルを用意してください。そうした場合、IEやSafariでは自動で`m4a`形式のファイルが選択されるようになります。（ブラウザゲームとして公開しない場合は不要）
 
 :sample
-[playse storage=sound.ogg loop=false ]
+[playse storage=sound.mp3 loop=false ]
 
 :param
-storage     = 再生するファイルを指定します,
-buf         = 効果音を再生するスロットを指定できます。デフォルトは0,
-loop        = trueまたはfalse （デフォルト）を指定できます。trueを指定すると繰り返し再生されます,
-sprite_time = 再生の開始時間と終了時間を指定できます。ミリ秒で指定します。例えば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-clear       = trueまたはfalse(デフォルト) 他のSEが鳴っている場合、trueだと他のSEを停止した後、再生します。音声などはtrueが便利でしょう,
-html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-volume      = 効果音の再生音量を変更できます（0〜100）
+storage     = !!audio,
+buf         = 効果音を再生するスロットを指定できます。すでに指定スロットで再生中の効果音がある場合、その効果音は停止されます。,
+loop        = !!,
+sprite_time = !!,
+clear       = `true`または`false`。`true`を指定すると、他のスロットで再生中の効果音がある場合、そちらもすべて停止します。音声などは`trueが`便利でしょう。,
+volume      = !!,
+html5       = !!
 
 #[end]
 */
@@ -705,10 +689,10 @@ tyrano.plugin.kag.tag.playse = {
 効果音を再生を停止します。
 
 :sample
-[stopse ]
+[stopse]
 
 :param
-buf = 効果音を停止するスロットを指定できます。デフォルトは0。
+buf = 効果音を停止するスロットを指定できます。
 
 #[end]
 */
@@ -740,15 +724,15 @@ tyrano.plugin.kag.tag.stopse = {
 効果音をフェードインしながら再生します。
 
 :sample
-[fadeinse storage=sound.ogg loop=false time=2000 ]
+[fadeinse storage=sound.mp3 loop=false time=2000]
 
 :param
-storage     = 次に再生するファイルを指定します。,
-loop        = trueまたはfalseを指定します。trueを指定すると繰り返し再生されます。デフォルトはfalse。,
-sprite_time = 再生の開始時間と終了時間をミリ秒で指定します。たとえば 6000-10000 と指定すると 6:00〜10:00　の間のみ再生できます。loopがtrueの場合はこの間のみループ再生します。,
-buf         = 効果音を停止するスロットを指定できます。デフォルトは0,
-html5       = true or falseを指定。デフォルトはfalse。trueを指定するとHTML5 Audioで再生します。通常はWeb Audio API での再生です。特に指示がない場合はそのままでOKです。,
-time        = フェードインの時間をミリ秒で指定します
+storage     = !!audio,
+loop        = !!,
+sprite_time = !!,
+buf         = 効果音を停止するスロットを指定できます。,
+time        = フェードイン時間をミリ秒で指定します。,
+html5       = !!
 
 #[end]
 */
@@ -784,17 +768,17 @@ tyrano.plugin.kag.tag.fadeinse = {
 オーディオ関連
 
 :title
-効果音の停止
+効果音のフェードアウト
 
 :exp
-効果音をフェードアウトします
+効果音をフェードアウトします。
 
 :sample
-[fadeoutse time=2000 ]
+[fadeoutse time=2000]
 
 :param
-time = フェードアウトを行なっている時間をミリ秒で指定します。
-buf  = 効果音を停止するスロットを指定できます。デフォルトは0,
+time = フェードアウト時間をミリ秒で指定します。,
+buf  = 効果音を停止するスロットを指定できます。
 
 #[end]
 */
@@ -823,16 +807,17 @@ tyrano.plugin.kag.tag.fadeoutse = {
 BGM設定
 
 :exp
-BGMの設定を変更できます
-音量設定については スマートフォンブラウザからの閲覧の場合、端末の制限により変更できません。
+BGMの設定を変更できます。
+
+プレイヤーがスマホブラウザから閲覧している場合は端末の制限により音量が変更できませんので注意してください。
 
 :sample
 [bgmopt volume=50 ]
 
 :param
-volume = BGMの再生音量を変更できます（0〜100）,
-effect = true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
-buf    = 設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
+volume = BGMの音量を`0`〜`100`で指定できます。,
+effect = 現在再生中のBGMに即反映するかどうか。`true`または`false`で指定します。,
+buf    = 設定を変更するスロットを指定できます。省略すると、すべてのスロットが対象になります。
 
 #[end]
 */
@@ -893,15 +878,16 @@ SE設定
 
 :exp
 SEの設定を変更できます
-音量設定については スマートフォンブラウザからの閲覧の場合、端末の制限により変更できません。
+
+プレイヤーがスマホブラウザから閲覧している場合は端末の制限により音量が変更できませんので注意してください。
 
 :sample
 [seopt volume=50 ]
 
 :param
-volume = SEの再生音量を変更できます（0〜100）,
-effect = true false を指定して下さい（デフォルトはtrue） trueだと再生中のBGMに即反映します,
-buf    = 設定を変更するスロットを指定できます。指定がない場合はすべてのスロットが対象になります
+volume = 効果音の音量を`0`〜`100`で指定できます。,
+effect = 現在再生中の効果音に即反映するかどうか。`true`または`false`で指定します。,
+buf    = 設定を変更するスロットを指定できます。省略すると、すべてのスロットが対象になります。
 
 #[end]
 */
@@ -961,9 +947,12 @@ tyrano.plugin.kag.tag.seopt = {
 BGMの再生完了を待つ
 
 :exp
-BGMの再生完了を待ちます。playbgmでループ再生している場合は永遠に止まりますのでご注意下さい。
-このタグはPCゲーム、ブラウザゲームで利用できます。
-スマホアプリでは利用できませんのでご注意ください。
+BGMの再生完了を待ちます。
+
+PCアプリ、ブラウザゲームで利用できます。
+スマホアプリでは利用できませんので注意してください。
+
+`[playbgm]`でループ再生している場合は永遠に止まります。こちらも要注意。
 
 :sample
 
@@ -997,8 +986,9 @@ tyrano.plugin.kag.tag.wbgm = {
 
 :exp
 効果音の再生完了を待ちます。
-このタグはPCゲーム、ブラウザゲームで利用できます。
-スマホアプリでは利用できませんのでご注意ください。
+
+PCアプリ、ブラウザゲームで利用できます。
+スマホアプリでは利用できませんので注意してください。
 
 :sample
 
@@ -1032,9 +1022,10 @@ tyrano.plugin.kag.tag.wse = {
 
 :exp
 ボイスを効率的に再生するための設定ができます。
-キャラクター名と音声ファイル名を関連させておくことで
-キャラ名表示のタイミングで音声ファイルを順番に再生させることができます。
-このタグで設定をした後、[vostart]タグで自動再生を開始しないと有効になりません。
+
+キャラクター名と音声ファイル名を関連させておくことで、キャラ名表示のタイミングで音声ファイルを順番に再生させることができます。
+
+このタグで設定をした後、`[vostart]`タグで自動再生を開始しないと有効になりません。
 
 :sample
 [voconfig sebuf=2 name="akane" vostorage="akane_{number}.ogg" number=1 ]

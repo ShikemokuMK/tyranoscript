@@ -394,39 +394,11 @@ tyrano.plugin.kag.tag.wait_camera = {
 [mask_off]
 
 :param
-time    = 暗転が完了するまでの時間をミリ秒で指定できます ,
-effect  = 暗転の効果を指定できます。デフォルトは「fadeIn」指定できるのは次のとおりです
-fadeIn/
-fadeInDownBig/
-fadeInLeftBig/
-fadeInRightBig/<br >
-fadeInUpBig/
-flipInX/
-flipInY/
-lightSpeedIn/<br >
-rotateIn/
-rotateInDownLeft/
-rotateInDownRight/
-rotateInUpLeft/<br >
-rotateInUpRight/
-zoomIn/
-zoomInDown/
-zoomInLeft/<br >
-zoomInRight/
-zoomInUp/
-slideInDown/
-slideInLeft/<br >
-slideInRight/
-slideInUp/
-bounceIn /
-bounceInDown/
-bounceInLeft/<br >
-bounceInRight/
-bounceInUp/
-rollIn,
-color   = 文字の色を指定して下さい。デフォルトは黒です。0xRRGGBB形式で指定します,
-graphic = 暗転部分に独自画像を指定できます。画像はimageフォルダに配置してください,
-folder  = graphicで指定するフォルダをimage以外に変更したい場合はこちらに記述します。例えばbgimage fgimageなどです
+time    = 暗転が完了するまでの時間をミリ秒で指定できます。,
+effect  = <p>暗転の効果を指定できます。指定できるキーワードは以下。</p><p>`fadeIn``fadeInDownBig``fadeInLeftBig``fadeInRightBig``fadeInUpBig``flipInX``flipInY``lightSpeedIn``rotateIn``rotateInDownLeft``rotateInDownRight``rotateInUpLeft``rotateInUpRight``zoomIn``zoomInDown``zoomInLeft``zoomInRight``zoomInUp``slideInDown``slideInLeft``slideInRight``slideInUp``bounceIn ``bounceInDown``bounceInLeft``bounceInRight``bounceInUp``rollIn`</p>,
+color   = 暗転の色を`0xRRGGBB`形式で指定します。デフォルトは黒。,
+graphic = 指定すると、暗転部分に画像を使用できます。画像は`data/image`フォルダに配置します。,
+folder  = `graphic`で指定するフォルダを`image`以外に変更したい場合はこちらに記述します。`bgimage``fgimage`などを指定します。
 
 :demo
 2,kaisetsu/05_mask
@@ -537,34 +509,7 @@ tyrano.plugin.kag.tag.mask = {
 
 :param
 time   = 暗転が完了するまでの時間をミリ秒で指定できます ,
-effect = 暗転の効果を指定できます。デフォルトは「fadeOut」指定できるのは次のとおりです
-fadeOut/
-fadeOutDownBig/
-fadeOutLeftBig/
-fadeOutRightBig/
-fadeOutUpBig/
-flipOutX/<br >
-flipOutY/
-lightSpeedOut/
-rotateOut/
-rotateOutDownLeft/
-rotateOutDownRight/<br >
-rotateOutUpLeft/
-rotateOutUpRight/
-zoomOut/
-zoomOutDown/<br >
-zoomOutLeft/
-zoomOutRight/
-zoomOutUp/
-slideOutDown/<br >
-slideOutLeft/
-slideOutRight/
-slideOutUp/<br >
-bounceOut /
-bounceOutDown/
-bounceOutLeft/<br >
-bounceOutRight/
-bounceOutUp
+effect = <p>暗転の効果を指定できます。指定できるキーワードは以下。</p><p>`fadeOut``fadeOutDownBig/``fadeOutLeftBig/``fadeOutRightBig/``fadeOutUpBig/``flipOutX/``flipOutY/``lightSpeedOut/``rotateOut/``rotateOutDownLeft/``rotateOutDownRight/``rotateOutUpLeft/``rotateOutUpRight/``zoomOut/``zoomOutDown/``zoomOutLeft/``zoomOutRight/``zoomOutUp/``slideOutDown/``slideOutLeft/``slideOutRight/``slideOutUp/``bounceOut /``bounceOutDown/``bounceOutLeft/``bounceOutRight/``bounceOutUp/`</p>
 
 :demo
 2,kaisetsu/05_mask
