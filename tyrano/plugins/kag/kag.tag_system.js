@@ -1153,7 +1153,7 @@ tyrano.plugin.kag.tag.endmacro = {
             //↑最も表層のマクロの[endmacro]のケースではundefinedとなってしまうので初期値を代入
 
             //mpを復元
-            this.kag.stat.mp = macro_stack.pm;
+            this.kag.stat.mp = $.extend({}, macro_stack.pm);
 
             this.kag.ftag.nextOrderWithIndex(
                 map_obj.index,

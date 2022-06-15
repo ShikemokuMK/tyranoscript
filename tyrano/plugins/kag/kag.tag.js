@@ -226,7 +226,7 @@ tyrano.plugin.kag.ftag = {
             var back_pm = {};
             back_pm.index = this.kag.ftag.current_order_index;
             back_pm.storage = this.kag.stat.current_scenario;
-            back_pm.pm = pms;
+            back_pm.pm = $.extend({}, pms);
 
             this.kag.stat.mp = pms;
             //参照用パラメータを設定
