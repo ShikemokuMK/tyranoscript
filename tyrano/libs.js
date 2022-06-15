@@ -1129,6 +1129,7 @@
     };
 
     $.getUrlQuery = function (url) {
+        
         var hash = url.slice(1).split("&");
         var max = hash.length;
         var vars = {};
@@ -1138,6 +1139,8 @@
             array = hash[i].split("=");
             vars[array[0]] = array[1];
         }
+        
+        return vars;
 
     }
     
