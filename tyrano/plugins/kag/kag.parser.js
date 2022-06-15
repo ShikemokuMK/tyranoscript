@@ -297,6 +297,7 @@ tyrano.plugin.kag.parser = {
 
     //タグ情報から、オブジェクトを作成して返却する
     makeTag: function (str, line) {
+        var that = this;
         var obj = {
             line: line,
             name: "",
@@ -311,7 +312,7 @@ tyrano.plugin.kag.parser = {
         var SCANNING_EQUAL = 3;
         var SCANNING_START_QUOT = 4;
         var SCANNING_PARAM_VALUE = 5;
-        var scanning_state = SCANNING_TAG_NAME; // 最初はタグ名読み取りモード
+        var scanning_state = SCANNING_TAG_NAME; // 最初はタグ名検出モード
         var tag_name = ""; // タグ名記憶用
         var param_name = ""; // パラメータキー記憶用
         var param_value = ""; // パラメータバリュー記憶用
@@ -324,12 +325,12 @@ tyrano.plugin.kag.parser = {
                 case SCANNING_TAG_NAME:
                     // タグ名検出モード
                     if (c === " ") {
-                        // 空白を検出！
+                        // 空白に遭遇！
                         if (tag_name === "") {
-                            // まだタグ名になにも入っていないならタグ名読み取りを継続
+                            // まだタグ名になにも入っていないならタグ名検出モードを継続
                             // 例) [ bg storage=room.jpg] のように先頭に空白が入っているケースに対応する
                         } else {
-                            // タグ名になにか入っている場合のみパラメータ名読み取りに遷移
+                            // タグ名になにか入っている状態で空白に遭遇したならパラメータキー検出モードに遷移
                             scanning_state = SCANNING_PARAM_NAME;
                         }
                     } else {
@@ -342,14 +343,14 @@ tyrano.plugin.kag.parser = {
                     if (c === " ") {
                         // 空白に遭遇！
                         if (param_name === "") {
-                            // パラメータ名になにも入っていないならパラメータ名読み取りを継続
+                            // パラメータキーになにも入っていないならパラメータキー検出モードを継続
                         } else {
-                            // パラメータ名になにか入っている場合はイコール読み取りに遷移
+                            // パラメータキーになにか入っている場合はイコール検出モードに遷移
                             scanning_state = SCANNING_EQUAL;
                         }
                     } else if (c === "=") {
                         // イコールに遭遇！
-                        // 開始クォートを検出
+                        // 開始クォート検出モードに遷移
                         scanning_state = SCANNING_START_QUOT;
                     } else {
                         // パラメータ名に足す
@@ -358,8 +359,8 @@ tyrano.plugin.kag.parser = {
                     break;
                 case SCANNING_EQUAL:
                     // イコール検出モード
-                    // ふつうはここに来ることなくタグ名検出モードから直接クォート検出モードに移行するはずだが
-                    // パラメータ名のあとにすぐイコールが記述されなかったケースにも対応する
+                    // ふつうはここに来ることなくタグ名検出モードからクォート検出モードに直で遷移するはずだが
+                    // パラメータキーのあとにイコールではなく空白が挟まっているケースではこのモードとなる
                     // 例1) [bg storage   =room.jpg] → storage=room.jpg と解釈したい
                     // 例2) [bg * time=1000] → マクロ内のパラメータ全渡しの * にも対応
                     if (c === "=") {
@@ -371,26 +372,29 @@ tyrano.plugin.kag.parser = {
                         // イコールに遭遇する前に空白以外の文字が来た
                         // たとえば [bg time storage=room.jpg] というケースでは
                         // time のあとの空白を読み取ったあとイコール検出モードに入るが
-                        // なんと s が来ているので time 要らない説が出てくる
-                        // (パラメータ全渡しの * エンティティもここで対応)
+                        // 文字を読み進めていくと、なんとイコールに遭遇する前に s に遭遇してしまう！
+                        // このケースでは time パラメータには空文字列を入れて
+                        // s から始まるパラメータキーを検出するモードに遷移する
+                        // (パラメータ全渡しの * エンティティもこれで対応できる)
                         obj.pm[param_name] = "";
                         param_name = c;
-                        // パラメータ読み取りに戻る
                         scanning_state = SCANNING_PARAM_NAME;
                     }
                     break;
                 case SCANNING_START_QUOT:
                     // パラメータバリューの開始クォート検出モード
                     if (c === '"' || c === "'" || c === "`") {
-                        // クォート3種の神器
+                        // クォート3種のいずれかの遭遇！
                         // ここで読み取ったクォートを終了クォートとする
+                        // パラメータバリュー検出モードに遷移
                         end_char_of_param_value = c;
                         scanning_state = SCANNING_PARAM_VALUE;
                     } else if (c === " ") {
                         // 空白に遭遇してもめげない
                     } else {
-                        // クォートなしで即バリューを書き出すケースにも対応
+                        // クォートなしで即バリューを書き出しているようだ！
                         // この場合はクォートではなく空白によってバリューの終わりを検出
+                        // パラメータバリュー検出モードに遷移
                         end_char_of_param_value = " ";
                         param_value = c;
                         scanning_state = SCANNING_PARAM_VALUE;
@@ -399,13 +403,14 @@ tyrano.plugin.kag.parser = {
                 case SCANNING_PARAM_VALUE:
                     // パラメータバリュー検出モード
                     if (c === end_char_of_param_value) {
-                        //終了文字に遭遇したらパラメータバリュー解析は終わり！
+                        // 終了文字に遭遇！
+                        // パラメータバリュー検出を終わりたい
                         if (flag_escape) {
-                            //でもエスケープはできるようにしよう
+                            // でもエスケープはできるようにしよう
                             flag_escape = false;
                             param_value += c;
                         } else {
-                            //パラメータ完成！
+                            // パラメータ完成！
                             obj.pm[param_name] = param_value;
                             param_name = "";
                             param_value = "";
@@ -413,11 +418,15 @@ tyrano.plugin.kag.parser = {
                             scanning_state = SCANNING_PARAM_NAME;
                         }
                     } else {
+                        // 終了文字には遭遇しなかった
                         // バリューを足していく
-                        // 開始クォートの種類がバッククォートじゃない場合バリュー内の空白は削除
-                        // (従来のティラノの仕様に合わせるため)
+
+                        // 従来のパーサーの仕様（バリュー内の空白全削除）を再現するための処理
+                        // 開始クォートの種類がバッククォートじゃない、かつ、オプションが有効な場合
                         if (end_char_of_param_value !== "`" && c === " ") {
-                            c = "";
+                            if (that.kag.config.KeepSpaceInValue === "false") {
+                                c = "";
+                            }
                         }
                         if (flag_escape) {
                             param_value += c;
