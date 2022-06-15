@@ -277,6 +277,147 @@ tyrano.plugin.kag.parser = {
             val: "",
         };
 
+        var array_c = str.split(""); // 1文字ずつバラす
+        var flag_escape = false; // エスケープ中？
+        var SCANNING_TAG_NAME = 1;
+        var SCANNING_PARAM_NAME = 2;
+        var SCANNING_EQUAL = 3;
+        var SCANNING_START_QUOT = 4;
+        var SCANNING_PARAM_VALUE = 5;
+        var scanning_state = SCANNING_TAG_NAME; // 最初はタグ名読み取りモード
+        var tag_name = ""; // タグ名記憶用
+        var param_name = ""; // パラメータキー記憶用
+        var param_value = ""; // パラメータバリュー記憶用
+        var end_char_of_param_value = ""; // パラメータバリューの記述終了を検出する文字(クォート3種か空白)
+
+        // 1文字ずつ見ていくぞ
+        for (var j = 0; j < array_c.length; j++) {
+            var c = array_c[j];
+            switch (scanning_state) {
+                case SCANNING_TAG_NAME:
+                    // タグ名検出モード
+                    if (c === " ") {
+                        // 空白を検出！
+                        if (tag_name === "") {
+                            // まだタグ名になにも入っていないならタグ名読み取りを継続
+                            // 例) [ bg storage=room.jpg] のように先頭に空白が入っているケースに対応する
+                        } else {
+                            // タグ名になにか入っている場合のみパラメータ名読み取りに遷移
+                            scanning_state = SCANNING_PARAM_NAME;
+                        }
+                    } else {
+                        // 空白じゃないならタグ名に足していく
+                        tag_name += c;
+                    }
+                    break;
+                case SCANNING_PARAM_NAME:
+                    // パラメータキー検出モード
+                    if (c === " ") {
+                        // 空白に遭遇！
+                        if (param_name === "") {
+                            // パラメータ名になにも入っていないならパラメータ名読み取りを継続
+                        } else {
+                            // パラメータ名になにか入っている場合はイコール読み取りに遷移
+                            scanning_state = SCANNING_EQUAL;
+                        }
+                    } else if (c === "=") {
+                        // イコールに遭遇！
+                        // 開始クォートを検出
+                        scanning_state = SCANNING_START_QUOT;
+                    } else {
+                        // パラメータ名に足す
+                        param_name += c;
+                    }
+                    break;
+                case SCANNING_EQUAL:
+                    // イコール検出モード
+                    // ふつうはここに来ることなくタグ名検出モードから直接クォート検出モードに移行するはずだが
+                    // パラメータ名のあとにすぐイコールが記述されなかったケースにも対応する
+                    // 例1) [bg storage   =room.jpg] → storage=room.jpg と解釈したい
+                    // 例2) [bg * time=1000] → マクロ内のパラメータ全渡しの * にも対応
+                    if (c === "=") {
+                        // イコールを検出したら次は開始クォートを検出
+                        scanning_state = SCANNING_START_QUOT;
+                    } else if (c === " ") {
+                        // 空白に遭遇してもめげない
+                    } else {
+                        // イコールに遭遇する前に空白以外の文字が来た
+                        // たとえば [bg time storage=room.jpg] というケースでは
+                        // time のあとの空白を読み取ったあとイコール検出モードに入るが
+                        // なんと s が来ているので time 要らない説が出てくる
+                        // (パラメータ全渡しの * エンティティもここで対応)
+                        obj.pm[param_name] = "";
+                        param_name = c;
+                        // パラメータ読み取りに戻る
+                        scanning_state = SCANNING_PARAM_NAME;
+                    }
+                    break;
+                case SCANNING_START_QUOT:
+                    // パラメータバリューの開始クォート検出モード
+                    if (c === '"' || c === "'" || c === "`") {
+                        // クォート3種の神器
+                        // ここで読み取ったクォートを終了クォートとする
+                        end_char_of_param_value = c;
+                        scanning_state = SCANNING_PARAM_VALUE;
+                    } else if (c === " ") {
+                        // 空白に遭遇してもめげない
+                    } else {
+                        // クォートなしで即バリューを書き出すケースにも対応
+                        // この場合はクォートではなく空白によってバリューの終わりを検出
+                        end_char_of_param_value = " ";
+                        param_value = c;
+                        scanning_state = SCANNING_PARAM_VALUE;
+                    }
+                    break;
+                case SCANNING_PARAM_VALUE:
+                    // パラメータバリュー検出モード
+                    if (c === end_char_of_param_value) {
+                        //終了文字に遭遇したらパラメータバリュー解析は終わり！
+                        if (flag_escape) {
+                            //でもエスケープはできるようにしよう
+                            flag_escape = false;
+                            param_value += c;
+                        } else {
+                            //パラメータ完成！
+                            obj.pm[param_name] = param_value;
+                            param_name = "";
+                            param_value = "";
+                            end_char_of_param_value = "";
+                            scanning_state = SCANNING_PARAM_NAME;
+                        }
+                    } else {
+                        // バリューを足していく
+                        // 開始クォートの種類がバッククォートじゃない場合バリュー内の空白は削除
+                        // (従来のティラノの仕様に合わせるため)
+                        if (end_char_of_param_value !== "`" && c === " ") {
+                            c = "";
+                        }
+                        if (flag_escape) {
+                            param_value += c;
+                        } else if (c === "\\") {
+                            flag_escape = true;
+                        } else {
+                            param_value += c;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        // 全文字見終わった
+        // この時点で未登録のパラメータがあるなら登録
+        if (param_name !== "") {
+            obj.pm[param_name] = param_value;
+        }
+
+        // 原文と解釈結果をコンソールで確認
+        // var style =
+        //     "padding: 2px 4px; border-radius: 4px; background: blue; color: white;";
+        // console.log("%c" + str, "background: #ddd; padding: 4px 0;");
+        // console.log("%c" + tag_name + "%o", style, obj.pm);
+
+        obj.name = tag_name;
+
         if (obj.name == "iscript") {
             this.flag_script = true;
         }
