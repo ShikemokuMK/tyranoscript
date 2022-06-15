@@ -198,7 +198,7 @@ abbr,acronym{
 	padding: 0;
 	background-color: rgba(255 ,255 ,255 ,.3);
 	background-image: url('images/system/saveslot.png');
-	background-repeat: y-repeat;
+	background-repeat: repeat-y;
 	background-position: left top;
 	box-sizing: border-box;
 }
@@ -222,7 +222,7 @@ abbr,acronym{
 	border-radius: 0;
 	background-color: rgba(255 ,255 ,255 ,.3);
 	background-image: url('images/system/saveslot.png');
-	background-repeat: y-repeat;
+	background-repeat: repeat-y;
 	background-position: right top;
 	text-align: left;
 	vertical-align: top;

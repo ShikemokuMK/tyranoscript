@@ -19,112 +19,99 @@
  *
  */
 tyrano.plugin.kag.key_mouse = {
-    kag : null,
+    kag: null,
 
     //キーコンフィグ。デフォルトは用意しておく
-    keyconfig : {
-        key : {}
+    keyconfig: {
+        key: {},
     },
 
-    map_key : {},
-    map_mouse:{},
-    map_ges:{},
-    
+    map_key: {},
+    map_mouse: {},
+    map_ges: {},
+
     //状況に応じて変化する
     is_swipe: false,
-    timeoutId:0,
-    
-    is_keydown:false, //キーの連続押し込み反応を防ぐ
-    
+    timeoutId: 0,
+
+    is_keydown: false, //キーの連続押し込み反応を防ぐ
+
     //指が動いた状態を管理するための値
-    start_point:{x:0,y:0},
-    end_point:{x:0,y:0},
-    
+    start_point: { x: 0, y: 0 },
+    end_point: { x: 0, y: 0 },
 
-    init : function() {
+    init: function () {
         var that = this;
-        
-        //定義されてない場合デフォルトを設定 
-        if(typeof __tyrano_key_config=="undefined"){
-            
-            __tyrano_key_config = {
 
-                //キーボード操作 
-                "key" : {
-                
-                    "32" : "hidemessage", //Space
-                    "13" : "next", // Enter
-                    "91" : "skip", //Command(Mac)  
-                    "17" : "skip", //Ctrl (Windows)
-                    "67":function(){ // c ボタン
-                    }
-                    
+        //定義されてない場合デフォルトを設定
+        if (typeof __tyrano_key_config == "undefined") {
+            __tyrano_key_config = {
+                //キーボード操作
+                key: {
+                    32: "hidemessage", //Space
+                    13: "next", // Enter
+                    91: "skip", //Command(Mac)
+                    17: "skip", //Ctrl (Windows)
+                    67: function () {
+                        // c ボタン
+                    },
                 },
-            
+
                 //マウス操作
-                "mouse" : {
-                    "right" : "hidemessage", //右クリックの動作
-                    "center": "menu", //センターボタンをクリック
-                    "wheel_up" : "backlog", // ホイールをアップした時の動作
-                    "wheel_down" : "next" //ホイールをダウンした時の動作
+                mouse: {
+                    right: "hidemessage", //右クリックの動作
+                    center: "menu", //センターボタンをクリック
+                    wheel_up: "backlog", // ホイールをアップした時の動作
+                    wheel_down: "next", //ホイールをダウンした時の動作
                 },
-                
+
                 //ジェスチャー
-                "gesture" : {
-                    "swipe_up_1" : {
-                        "action" : "backlog"
+                gesture: {
+                    swipe_up_1: {
+                        action: "backlog",
                     },
-                    "swipe_left_1" : {
-                        "action" : "auto"
+                    swipe_left_1: {
+                        action: "auto",
                     },
-                    "swipe_right_1" : {
-                        "action" : "menu"
+                    swipe_right_1: {
+                        action: "menu",
                     },
-                    "swipe_down_1" : {
-                        "action" : "load"
+                    swipe_down_1: {
+                        action: "load",
                     },
-                    
-                    "hold" : {
-                        "action" : "skip",
-                    }
-                }
-            
-            }; 
-        
+
+                    hold: {
+                        action: "skip",
+                    },
+                },
+            };
         }
-        
-        
+
         this.keyconfig = __tyrano_key_config;
-        
 
         this.map_key = this.keyconfig["key"];
         this.map_mouse = this.keyconfig["mouse"];
         this.map_ges = this.keyconfig["gesture"];
-        
-        $(document).keydown(function(e) {
-            
-            if(that.kag.stat.enable_keyconfig==true){
-            
-                if(that.is_keydown==true){
-                    
-                    if(__tyrano_key_config.system_key_event=="true"){
+
+        $(document).keydown(function (e) {
+            if (that.kag.stat.enable_keyconfig == true) {
+                if (that.is_keydown == true) {
+                    if (__tyrano_key_config.system_key_event == "true") {
                         return true;
                     }
-                    
+
                     return false;
-                    
                 }
-                
+
                 //メニュー系が表示されている時。
-                
+
                 that.is_keydown = true;
-                
+
                 var keycode = e.keyCode;
-    
+
                 //イベント登録済みなら
                 if (that.map_key[keycode]) {
-    
-                    if ( typeof that.map_key[keycode] == "function") {
+                    if (typeof that.map_key[keycode] == "function") {
                         //関数の場合
                         that.map_key[keycode]();
                     } else {
@@ -133,229 +120,218 @@ tyrano.plugin.kag.key_mouse = {
                         }
                     }
                 }
-                
             }
-
-            
-
         });
-        
+
         //keyup はコントローラーのときや押しっぱなし対応
-        $(document).keyup(function(e) {
-            
+        $(document).keyup(function (e) {
             that.is_keydown = false;
-            
+
             var keycode = e.keyCode;
 
             //スキップ用ホールド解除 mac と windowsでコードが違うctrl 決め打ち
-            if (keycode==91 || keycode ==17) {
+            if (keycode == 91 || keycode == 17) {
                 that.kag.stat.is_skip = false;
             }
-
         });
 
+        $(document).on("mousedown", function (e) {
+            that.clearSkip();
 
-        $(document).on("mousedown", function(e) {
-            
-            that.clearSkip();          
-            
             var target = null;
-            
+
             //中央クリック
             if (e.which == 2) {
-                
                 target = that.map_mouse["center"];
-                
-            }else if(e.which == 3){
+            } else if (e.which == 3) {
                 //右クリック
                 target = that.map_mouse["right"];
-            
             }
-            
-            if(typeof target=="function"){
+
+            if (typeof target == "function") {
                 target();
-            }else{
-                if(that[target]){
+            } else {
+                if (that[target]) {
                     that[target]();
                 }
             }
-            
         });
-        
-        var mousewheelevent = 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll';
-        $(document).on(mousewheelevent,function(e){
-            
-            //メニュー表示中は進めない。
-            if(!that.canShowMenu()){
-                return ;
-            }
-            
-            //キーコンフィグが有効化否か
-            if(that.kag.stat.enable_keyconfig==false){
-                return ;
-            }
-            
 
-            
-            //メニュー表示中は無効にする
-            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
-                return ;
+        var mousewheelevent =
+            "onwheel" in document
+                ? "wheel"
+                : "onmousewheel" in document
+                ? "mousewheel"
+                : "DOMMouseScroll";
+        $(document).on(mousewheelevent, function (e) {
+            //メニュー表示中は進めない。
+            if (!that.canShowMenu()) {
+                return;
             }
-            
-            var delta = e.originalEvent.deltaY ? -(e.originalEvent.deltaY) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : -(e.originalEvent.detail);
-            
+
+            //キーコンフィグが有効化否か
+            if (that.kag.stat.enable_keyconfig == false) {
+                return;
+            }
+
+            //メニュー表示中は無効にする
+            if (
+                $(".menu_close").length > 0 &&
+                $(".layer_menu").css("display") != "none"
+            ) {
+                return;
+            }
+
+            var delta = e.originalEvent.deltaY
+                ? -e.originalEvent.deltaY
+                : e.originalEvent.wheelDelta
+                ? e.originalEvent.wheelDelta
+                : -e.originalEvent.detail;
+
             var target = null;
-            
-            if (delta < 0){
+
+            if (delta < 0) {
                 // マウスホイールを下にスクロールしたときの処理を記載
                 target = that.map_mouse["wheel_down"];
-                
             } else {
                 // マウスホイールを上にスクロールしたときの処理を記載
                 target = that.map_mouse["wheel_up"];
             }
-            
-            if(typeof target=="function"){
+
+            if (typeof target == "function") {
                 target();
-            }else{
-                if(that[target]){
+            } else {
+                if (that[target]) {
                     that[target]();
                 }
             }
-            
         });
-        
-        
+
         var layer_obj_click = $(".layer_event_click");
-        
+
         //スマートフォンイベント
-        if($.userenv() != "pc"){
-            layer_obj_click.swipe(
-                {
-                    swipe:function(event, direction, distance, duration, fingerCount, fingerData){
-                        that.is_swipe = true;
-                        //console.log("wwwwwwwwwwwwwww");
-                        //console.log(direction+":"+distance+":"+duration+":"+fingerCount+":"+fingerData);
-                        //$(this).text("You swiped " + direction );
-                        
-                        var swipe_str = "swipe_"+direction+"_"+fingerCount;
-                        
-                        
-                        if(that.map_ges[swipe_str]){
-                            if(that[that.map_ges[swipe_str]["action"]]){
-                                that[that.map_ges[swipe_str]["action"]](); 
-                            }                            
+        if ($.userenv() != "pc") {
+            layer_obj_click.swipe({
+                swipe: function (
+                    event,
+                    direction,
+                    distance,
+                    duration,
+                    fingerCount,
+                    fingerData,
+                ) {
+                    that.is_swipe = true;
+                    //console.log("wwwwwwwwwwwwwww");
+                    //console.log(direction+":"+distance+":"+duration+":"+fingerCount+":"+fingerData);
+                    //$(this).text("You swiped " + direction );
+
+                    var swipe_str = "swipe_" + direction + "_" + fingerCount;
+
+                    if (that.map_ges[swipe_str]) {
+                        if (that[that.map_ges[swipe_str]["action"]]) {
+                            that[that.map_ges[swipe_str]["action"]]();
                         }
-                        
-                        event.stopPropagation();  
-                        event.preventDefault();
-                        return false;
-                    },
-                    
-                    fingers:"all"
-                }
-            );
-            
-            
-            layer_obj_click.on("touchstart", function() {
-                                
-                //スキップ中にクリックされたら元に戻す
-                that.clearSkip();
-                
-                
-                that.timeoutId = setTimeout(function(){
-                    if(that[that.map_ges["hold"]["action"]]){
-                        that.is_swipe = true;
-                        that[that.map_ges["hold"]["action"]](); 
                     }
-                    
-                }, 2000);
-            }).on('touchend', function() {
-                clearTimeout(that.timeoutId);
-                that.timeoutId = null;
+
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                },
+
+                fingers: "all",
             });
-            
+
+            layer_obj_click
+                .on("touchstart", function () {
+                    //スキップ中にクリックされたら元に戻す
+                    that.clearSkip();
+
+                    that.timeoutId = setTimeout(function () {
+                        if (that[that.map_ges["hold"]["action"]]) {
+                            that.is_swipe = true;
+                            that[that.map_ges["hold"]["action"]]();
+                        }
+                    }, 2000);
+                })
+                .on("touchend", function () {
+                    clearTimeout(that.timeoutId);
+                    that.timeoutId = null;
+                });
+
             //スマホでのダブルタップ抑制
             var t = 0;
-            $(".tyrano_base").on('touchend', function (e) {
+            $(".tyrano_base").on("touchend", function (e) {
                 var now = new Date().getTime();
-                if ((now - t) < 350){
+                if (now - t < 350) {
                     e.preventDefault();
                 }
                 t = now;
-            });  
-            
-            
+            });
         }
-        
-        layer_obj_click.click(function(e){
-	        
-            if(that.kag.tmp.ready_audio==false){
-                
-                if($.isNeedClickAudio()){
-                
+
+        layer_obj_click.click(function (e) {
+            if (that.kag.tmp.ready_audio == false) {
+                if ($.isNeedClickAudio()) {
                     that.kag.readyAudio();
                     that.kag.tmp.ready_audio = true;
-                    
-                    if(that.kag.stat.is_adding_text == true){
+
+                    if (that.kag.stat.is_adding_text == true) {
                         that.kag.stat.is_click_text = true;
                         return false;
                     }
                     that.kag.ftag.nextOrder();
                     return false;
-                        
                 }
-            }             
+            }
 
-
-            if(that.is_swipe){
+            if (that.is_swipe) {
                 that.is_swipe = false;
                 return false;
             }
-            
-            if(that.kag.stat.is_hide_message == true){
+
+            if (that.kag.stat.is_hide_message == true) {
                 that.kag.layer.showMessageLayers();
                 return false;
             }
-            
+
             //テキスト再生中にクリックされた場合、文字列を進めて終了にする
-            if(that.kag.stat.is_adding_text == true){
+            if (that.kag.stat.is_adding_text == true) {
                 that.kag.stat.is_click_text = true;
-                return false;;
-            }
-            
-            //テキストマッハ表示時もリターン。
-            if(that.kag.stat.is_click_text == true){
-                return false;
-            }
-            
-            if(that.kag.stat.is_stop == true){
                 return false;
             }
 
-			//フキダシ表示の場合は一回非表示にする。
-			if(that.kag.stat.fuki.active==true){
-				that.kag.layer.hideMessageLayers();
+            //テキストマッハ表示時もリターン。
+            if (that.kag.stat.is_click_text == true) {
+                return false;
+            }
+
+            if (that.kag.stat.is_stop == true) {
+                return false;
+            }
+
+            //フキダシ表示の場合は一回非表示にする。
+            if (that.kag.stat.fuki.active == true) {
+                that.kag.layer.hideMessageLayers();
             }
 
             that.kag.ftag.nextOrder();
-            
         });
-        
-        
     },
 
-    next : function() {
+    next: function () {
         //指定された動作を発火させる
         if (this.kag.key_mouse.canClick()) {
-	        this.clearSkip();          
+            this.clearSkip();
             $(".layer_event_click").trigger("click");
-	    }
+        }
     },
 
-    showmenu : function() {
+    showmenu: function () {
         if (this.canShowMenu()) {
-            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
+            if (
+                $(".menu_close").length > 0 &&
+                $(".layer_menu").css("display") != "none"
+            ) {
                 $(".menu_close").click();
             } else {
                 $(".button_menu").click();
@@ -363,9 +339,12 @@ tyrano.plugin.kag.key_mouse = {
         }
     },
 
-    hidemessage : function() {
+    hidemessage: function () {
         if (this.canShowMenu()) {
-            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
+            if (
+                $(".menu_close").length > 0 &&
+                $(".layer_menu").css("display") != "none"
+            ) {
                 $(".menu_close").click();
             } else {
                 if (!this.kag.stat.is_strong_stop) {
@@ -378,90 +357,97 @@ tyrano.plugin.kag.key_mouse = {
             }
         }
     },
-    
-    save:function(){
+
+    save: function () {
         this._role("save");
     },
-    load:function(){
-        this._role("load");  
+    load: function () {
+        this._role("load");
     },
-    menu:function(){
+    menu: function () {
         this._role("menu");
     },
-    title:function(){
+    title: function () {
         this._role("title");
     },
-    skip:function(){
-        if(this.canClick()){
+    skip: function () {
+        if (this.canClick()) {
             this._role("skip");
         }
     },
-    backlog:function(){
+    backlog: function () {
         this._role("backlog");
     },
-    fullscreen:function(){
+    fullscreen: function () {
         this._role("fullscreen");
     },
-    qsave:function(){
+    qsave: function () {
         this._role("quicksave");
     },
-    qload:function(){
+    qload: function () {
         this._role("quickload");
     },
-    auto:function(){
+    auto: function () {
         this._role("auto");
     },
-    
-    //役割系のロジック
-    _role : function(role) {
 
+    //役割系のロジック
+    _role: function (role) {
         var that = this;
-        
+
         //roleがクリックされたら、skip停止。スキップ繰り返しでやったりやめたり
-        if(that.kag.stat.is_skip==true && role=="skip"){
+        if (that.kag.stat.is_skip == true && role == "skip") {
             that.kag.stat.is_skip = false;
             return false;
         }
-        
+
         //画面効果中は実行できないようにする
-        if(that.kag.layer.layer_event.css("display") =="none" && that.kag.stat.is_strong_stop != true){
+        if (
+            that.kag.layer.layer_event.css("display") == "none" &&
+            that.kag.stat.is_strong_stop != true
+        ) {
             return false;
         }
-        
+
         //キーコンフィグが有効化否か
-        if(that.kag.stat.enable_keyconfig==false){
+        if (that.kag.stat.enable_keyconfig == false) {
             return false;
         }
-        
+
         that.kag.stat.is_skip = false;
-        
+
         //オートは停止
         if (role != "auto") {
-            that.kag.ftag.startTag("autostop", {next:"false"});
+            that.kag.ftag.startTag("autostop", { next: "false" });
         }
 
         //文字が流れているときは、セーブ出来ないようにする。
-        if (role == "save" || role == "menu" || role == "quicksave" || role == "sleepgame") {
-
+        if (
+            role == "save" ||
+            role == "menu" ||
+            role == "quicksave" ||
+            role == "sleepgame"
+        ) {
             //テキストが流れているときとwait中は実行しない
-            if (that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true) {
+            if (
+                that.kag.stat.is_adding_text == true ||
+                that.kag.stat.is_wait == true
+            ) {
                 return false;
             }
-
         }
 
-        switch(role) {
-
+        switch (role) {
             case "save":
                 //すでにメニュー画面が見えてる場合は無効にする
-                if($(".layer_menu").css("display")=="none"){
+                if ($(".layer_menu").css("display") == "none") {
                     that.kag.menu.displaySave();
                 }
-                
+
                 break;
 
             case "load":
-                if($(".layer_menu").css("display")=="none"){
+                if ($(".layer_menu").css("display") == "none") {
                     that.kag.menu.displayLoad();
                 }
                 break;
@@ -470,14 +456,17 @@ tyrano.plugin.kag.key_mouse = {
                 that.kag.layer.hideMessageLayers();
                 break;
             case "title":
-
-                $.confirm($.lang("go_title"), function() {
-                    location.reload();
-                }, function() {
-                    return false;
-                });
+                $.confirm(
+                    $.lang("go_title"),
+                    function () {
+                        location.reload();
+                    },
+                    function () {
+                        return false;
+                    },
+                );
                 break;
-                
+
             case "menu":
                 that.kag.menu.showMenu();
                 break;
@@ -498,14 +487,13 @@ tyrano.plugin.kag.key_mouse = {
                 break;
             case "auto":
                 if (that.kag.stat.is_auto == true) {
-                    that.kag.ftag.startTag("autostop", {next:"false"});
+                    that.kag.ftag.startTag("autostop", { next: "false" });
                 } else {
                     that.kag.ftag.startTag("autostart", {});
                 }
                 break;
 
             case "sleepgame":
-
                 if (that.kag.tmp.sleep_game != null) {
                     return false;
                 }
@@ -515,69 +503,69 @@ tyrano.plugin.kag.key_mouse = {
 
                 that.kag.ftag.startTag("sleepgame", _pm);
                 break;
-
         }
-
-
     },
 
-    canClick : function() {
-        
-        if ($(".layer_event_click").css("display") != "none" && $(".layer_menu").css("display") == "none") {
+    canClick: function () {
+        if (
+            $(".layer_event_click").css("display") != "none" &&
+            $(".layer_menu").css("display") == "none"
+        ) {
             return true;
         }
-        
-        
+
         return false;
     },
-    
+
     //スキップやオートをクリアする
-    clearSkip:function(){
-        
+    clearSkip: function () {
         var that = this;
-        
+
         //スキップ中にクリックされたら元に戻す
-        if(that.kag.stat.is_skip == true && that.kag.stat.is_strong_stop == false){
-            that.kag.stat.is_skip = false; 
+        if (
+            that.kag.stat.is_skip == true &&
+            that.kag.stat.is_strong_stop == false
+        ) {
+            that.kag.stat.is_skip = false;
             return false;
         }
-        
+
         //オート中でクリックされた場合。オート停止
-        if(that.kag.stat.is_auto == true){
-            if(that.kag.config.autoClickStop == "true"){
-                that.kag.ftag.startTag("autostop", {next:"false"});
+        if (that.kag.stat.is_auto == true) {
+            if (that.kag.config.autoClickStop == "true") {
+                that.kag.ftag.startTag("autostop", { next: "false" });
             }
         }
-        
+
         //オート待ち状態なら、、解除する
-        if(that.kag.stat.is_wait_auto == true){
+        if (that.kag.stat.is_wait_auto == true) {
             that.kag.stat.is_wait_auto = false;
         }
-        
     },
 
-    canShowMenu : function() {
-        
-        
-        if (this.kag.layer.layer_event.css("display") == "none" && this.kag.stat.is_strong_stop != true) {
+    canShowMenu: function () {
+        if (
+            this.kag.layer.layer_event.css("display") == "none" &&
+            this.kag.stat.is_strong_stop != true
+        ) {
             return false;
         }
-        
+
         //wait中の時
-        if(this.kag.stat.is_wait == true){
+        if (this.kag.stat.is_wait == true) {
             return false;
         }
-        
+
         return true;
-        
+
         /*
         if ($(".layer_free").css("display") == "none") {
             return true;
         }
         return false;
-        
+
         */
-    }
+    },
 };
 
 /*
@@ -626,4 +614,3 @@ tyrano.plugin.kag.key_mouse = {
  });
 
  * */
-

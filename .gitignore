@@ -1,4 +1,11 @@
+# Windows
 Thumbs.db
+
+# Mac
 .DS_Store
 
+# リリース用
 release/
+
+# テスト用
+test/
