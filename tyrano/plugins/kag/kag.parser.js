@@ -176,52 +176,75 @@ tyrano.plugin.kag.parser = {
 
                 //１文字ずつバラして解析していく
                 var array_char = line_str.split("");
-
-                var text = ""; //命令じゃない部分はここに配置していく
-
-                var tag_str = "";
-
-                var flag_tag = false; //タグ解析中
-
-                var num_kakko = 0; //"["の深さ
+                var text = ""; // テキスト文字（[iscript][html]内のテキストを含む）
+                var tag_str = ""; // タグ文字 例）ptext x=0 y=0 text="hogehoge[][]'''"
+                var scanning_tag = false; // タグ解析中かどうか
+                var deep_kakko = 0; // [ の深さ
                 //↑exp属性の中で配列[]を使用した場合などに、配列の"]"を閉じタグの"]"として解釈しないようにするために必要
+                var start_quot = ""; // クォートが始まってから終わるまで
+                var flag_escape = false; // エスケープフラグ バックスラッシュでフラグが立つ
 
                 for (var j = 0; j < array_char.length; j++) {
                     var c = array_char[j];
 
-                    if (flag_tag === true) {
-                        //タグ解析中！
-                        if (c === "]" && this.flag_script == false) {
-                            //[iscript]解析中以外で"]"に遭遇したらカッコの深さを減らす
-                            num_kakko--;
-
-                            if (num_kakko == 0) {
-                                //一番表層に戻ってきたときにタグ文字列が完成する！makeTagに投げる
-                                flag_tag = false;
-                                array_s.push(this.makeTag(tag_str, i));
-                                tag_str = "";
-                            } else {
-                                //ネストされた"]"なら閉じタグではない
+                    if (this.flag_script) {
+                        // [iscript]解析中は単に足す
+                        text += c;
+                    } else if (scanning_tag) {
+                        // タグ解析中の場合
+                        if (c === "]") {
+                            // タグ解析中 → 閉じタグ ] に遭遇した！
+                            if (start_quot !== "") {
+                                // クォート内部ならどうでもよい
+                                // 例) [ptext text="[[あああ]]"] ← こういうのに対応
                                 tag_str += c;
+                            } else {
+                                // 1段表層に浮かび上がる
+                                deep_kakko--;
+                                if (deep_kakko === 0) {
+                                    // 最表層に戻ってきたときにタグ文字列が完成する！makeTagに投げる
+                                    scanning_tag = false;
+                                    array_s.push(this.makeTag(tag_str, i));
+                                    tag_str = "";
+                                    start_quot = "";
+                                } else {
+                                    // まだ最表層ではないなら単に足す
+                                    // 例) [ptext text=[[あああ]] ] ← こういうのに対応
+                                    tag_str += c;
+                                }
                             }
-                        } else if (c === "[" && this.flag_script == false) {
-                            //[iscript]解析中以外で"["に遭遇したらカッコの深さを増やす
-                            num_kakko++;
+                        } else if (c === "[") {
+                            // タグ解析中 → 開始タグ [ に遭遇した！
+                            if (start_quot === "") {
+                                // クォート外部であるときだけ1段深層に沈む
+                                deep_kakko++;
+                            }
+                            // 足すの忘れない
+                            tag_str += c;
+                        } else if (c === '"' || c === "'" || c === "`") {
+                            // タグ解析中 → クォート " ' ` に遭遇した！
+                            if (start_quot === c) {
+                                // このクォートなんか見たことあるぞ…となったらクォートを脱出
+                                start_quot = "";
+                            } else if (start_quot === "") {
+                                // まだクォートに侵入していないならこれから侵入する
+                                start_quot = c;
+                            }
+                            // 足すの忘れない
                             tag_str += c;
                         } else {
-                            //"["でも"]"でもない
-                            //あるいは[iscript]解析中であるなら単に足す
+                            // タグ解析中 → [ ] " ' ` のいずれでもない
                             tag_str += c;
                         }
-                    } else if (
-                        flag_tag === false &&
-                        c === "[" &&
-                        this.flag_script == false
-                    ) {
-                        //[iscript]解析中以外で"["に遭遇したらタグ解析モード！
-                        flag_tag = true;
-                        num_kakko++;
-
+                    } else if (flag_escape) {
+                        // タグ解析中ではなくエスケープフラグが立っている場合
+                        text += c;
+                        flag_escape = false;
+                    } else if (c === "[") {
+                        // タグ解析中ではなくエスケープフラグも立っていないときに [ に遭遇した場合
+                        // タグ解析開始！
+                        scanning_tag = true;
+                        deep_kakko++;
                         //この時点で格納されているテキストがあれば配列に追加
                         if (text != "") {
                             var text_obj = {
@@ -234,8 +257,12 @@ tyrano.plugin.kag.parser = {
                             text = "";
                         }
                     } else {
-                        //[iscript]解析中か"["以外の文字なら単に足す
-                        text += c;
+                        //"["以外の文字の場合
+                        if (c === "\\") {
+                            flag_escape = true;
+                        } else {
+                            text += c;
+                        }
                     }
                 }
                 //1文字ずつ解析していくのが完了した
