@@ -177,7 +177,8 @@ tyrano.plugin.kag.ftag = {
             //この時点で、変数の中にエンティティがあれば、置き換える必要あり
             //tag.pm = this.convertEntity(tag.pm);
             //iscript-endscript内ではエンティティは置き換えない
-            if (!this.kag.stat.is_script) {
+            //通常のテキスト(＝内部的には[text]タグ)でもエンティティは停止
+            if (!this.kag.stat.is_script && tag.name !== "text") {
                 tag.pm = this.convertEntity(tag.pm);
             }
 
