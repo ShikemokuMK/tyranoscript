@@ -80,11 +80,20 @@ tyrano.plugin.kag.parser = {
 
             //コメントの場合は無視する
             if (flag_comment === true && line_str === "*/") {
+                //ブロックコメント解除
+                //"*/"単独ではない場合、たとえば"hoge */"とか"*/ hoge"のような行ではブロックコメントは解除されない
                 flag_comment = false;
             } else if (line_str === "/*") {
+                //ブロックコメント開始
+                //やはり"/*"単独の行でないと認識されない
                 flag_comment = true;
             } else if (flag_comment == true || first_char === ";") {
+                //コメントは無視
             } else if (first_char === "#") {
+                //キャラ名
+                //#akane:happy
+                //↑を↓に変換する
+                //[chara_ptext name=akane face=happy]
                 var tmp_line = $.trim(line_str.replace("#", ""));
                 var chara_name = "";
                 var chara_face = "";
@@ -106,7 +115,9 @@ tyrano.plugin.kag.parser = {
                 array_s.push(text_obj);
             } else if (first_char === "*") {
                 //ラベル
-
+                //*opening|オープニング
+                //↑を↓に変換する
+                //[label label_name=opening val=オープニング]
                 var label_tmp = line_str.substr(1, line_str.length).split("|");
 
                 var label_key = "";
@@ -133,6 +144,7 @@ tyrano.plugin.kag.parser = {
                 array_s.push(label_obj);
 
                 if (map_label[label_obj.pm.label_name]) {
+                    //ラベルの重複はエラー
                     //this.kag.warning("警告:"+i+"行目:"+"ラベル名「"+label_obj.pm.label_name+"」は同一シナリオファイル内に重複しています");
                     this.kag.warning(
                         "Warning line:" +
@@ -148,46 +160,57 @@ tyrano.plugin.kag.parser = {
                     map_label[label_obj.pm.label_name] = label_obj.pm;
                 }
             } else if (first_char === "@") {
-                //コマンド行確定なので、その残りの部分を、ごそっと回す
+                //タグ
+                //残りの部分をごそっと回す
                 var tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
                 var tmpobj = this.makeTag(tag_str, i);
                 array_s.push(tmpobj);
             } else {
-                //半角アンダーバーで始まっている場合は空白ではじめる
+                //テキストか[]記法のタグ
+                //テキストは[iscript]内のJavaScriptや[html]内のHTMLである可能性がある
+
+                //先頭の半角アンダーバーは空白を除去しないという特殊記号なので排除
                 if (first_char === "_") {
                     line_str = line_str.substring(1, line_str.length);
                 }
 
+                //１文字ずつバラして解析していく
                 var array_char = line_str.split("");
 
                 var text = ""; //命令じゃない部分はここに配置していく
 
                 var tag_str = "";
 
-                //１文字づつ解析していく
                 var flag_tag = false; //タグ解析中
 
-                var num_kakko = 0; //embタグの中の配列[]扱うために
+                var num_kakko = 0; //"["の深さ
+                //↑exp属性の中で配列[]を使用した場合などに、配列の"]"を閉じタグの"]"として解釈しないようにするために必要
 
                 for (var j = 0; j < array_char.length; j++) {
                     var c = array_char[j];
 
                     if (flag_tag === true) {
+                        //タグ解析中！
                         if (c === "]" && this.flag_script == false) {
+                            //[iscript]解析中以外で"]"に遭遇したらカッコの深さを減らす
                             num_kakko--;
 
                             if (num_kakko == 0) {
+                                //一番表層に戻ってきたときにタグ文字列が完成する！makeTagに投げる
                                 flag_tag = false;
                                 array_s.push(this.makeTag(tag_str, i));
-                                //tag_str をビルドして、命令配列に格納
                                 tag_str = "";
                             } else {
+                                //ネストされた"]"なら閉じタグではない
                                 tag_str += c;
                             }
                         } else if (c === "[" && this.flag_script == false) {
+                            //[iscript]解析中以外で"["に遭遇したらカッコの深さを増やす
                             num_kakko++;
                             tag_str += c;
                         } else {
+                            //"["でも"]"でもない
+                            //あるいは[iscript]解析中であるなら単に足す
                             tag_str += c;
                         }
                     } else if (
@@ -195,9 +218,11 @@ tyrano.plugin.kag.parser = {
                         c === "[" &&
                         this.flag_script == false
                     ) {
+                        //[iscript]解析中以外で"["に遭遇したらタグ解析モード！
+                        flag_tag = true;
                         num_kakko++;
 
-                        //テキストファイルを命令に格納
+                        //この時点で格納されているテキストがあれば配列に追加
                         if (text != "") {
                             var text_obj = {
                                 line: i,
@@ -205,18 +230,16 @@ tyrano.plugin.kag.parser = {
                                 pm: { val: text },
                                 val: text,
                             };
-
                             array_s.push(text_obj);
-
                             text = "";
                         }
-
-                        flag_tag = true;
                     } else {
+                        //[iscript]解析中か"["以外の文字なら単に足す
                         text += c;
                     }
                 }
-
+                //1文字ずつ解析していくのが完了した
+                //この時点でテキストがあれば配列に追加
                 if (text != "") {
                     var text_obj = {
                         line: i,
@@ -224,7 +247,6 @@ tyrano.plugin.kag.parser = {
                         pm: { val: text },
                         val: text,
                     };
-
                     array_s.push(text_obj);
                 }
 
@@ -239,9 +261,7 @@ tyrano.plugin.kag.parser = {
         };
 
         if (this.deep_if != 0) {
-            alert(
-                "[if]と[endif]の数が一致しません。シナリオを見直してみませんか？",
-            );
+            this.kag.warning("[if]と[endif]の数が一致しません。");
             this.deep_if = 0;
         }
 
