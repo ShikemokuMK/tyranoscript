@@ -484,7 +484,7 @@ tyrano.plugin.kag.tag.endscript = {
         try {
             this.kag.evalScript(this.kag.stat.buff_script);
         } catch (err) {
-            that.kag.alert(
+            that.kag.error(
                 "[iscript]に記述されたJavaScript実行時にエラーが発生しました。",
             );
             console.error(err);
