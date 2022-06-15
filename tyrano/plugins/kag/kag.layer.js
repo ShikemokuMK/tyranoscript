@@ -289,6 +289,7 @@ tyrano.plugin.kag.layer = {
         }
     },
     
+    
     getLayeyHtml:function(){
         
         var that = this;
@@ -349,8 +350,8 @@ tyrano.plugin.kag.layer = {
             map_layer_back:{},
             layer_free:{},
             layer_fix:{},
-            layer_blend:{},
-        
+            layer_blend:{}
+            
         };
 
         for (key in this.map_layer_fore) {
@@ -474,8 +475,6 @@ tyrano.plugin.kag.layer = {
             }
             
          }
-         
-         
          
          this.layer_free.remove();
          delete this.layer_free ;

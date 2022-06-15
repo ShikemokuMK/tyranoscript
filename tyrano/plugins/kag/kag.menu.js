@@ -440,13 +440,8 @@ tyrano.plugin.kag.menu = {
             setTimeout(function () {
                 var completeImage = function (img_code) {
                     var data = {};
-<<<<<<< HEAD
     
                     data.title = $(title).text();
-=======
-
-                    data.title = title;
->>>>>>> release
                     data.stat = _stat;
                     data.three = three_save;
 
@@ -1080,7 +1075,6 @@ tyrano.plugin.kag.menu = {
             this.kag.config.configSave,
         );
 
-<<<<<<< HEAD
         var save_obj = $.getStorage(this.kag.config.projectID + "_tyrano_data",this.kag.config.configSave);
         
         if (save_obj) {
@@ -1135,25 +1129,14 @@ tyrano.plugin.kag.menu = {
             return save_obj;
 
 
-=======
-        if (tmp_array) {
-            // データがある場合は一覧として表示します
-            //return eval("(" + tmp_array + ")");
-            return JSON.parse(tmp_array);
->>>>>>> release
         } else {
             
             tmp_array = new Array();
 
             var root = {
-<<<<<<< HEAD
                 kind : "save",
                 version:"2",
                 hash : this.kag.save_key_val
-=======
-                kind: "save",
-                hash: this.kag.save_key_val,
->>>>>>> release
             };
 
             //セーブ数の上限を変更する。
