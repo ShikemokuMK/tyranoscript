@@ -288,15 +288,70 @@ tyrano.plugin.kag.layer = {
             }
         }
     },
-
-    //レイヤに関連するHTMLファイルを文字列でぶっこ抜きます
-    getLayeyHtml: function () {
-        var layer_info = {
-            map_layer_fore: {},
-            map_layer_back: {},
-            layer_free: {},
-            layer_fix: {},
-            layer_blend: {},
+    
+    
+    getLayeyHtml:function(){
+        
+        var that = this;
+        
+        var layer_info ={
+            
+            map_layer_fore:{},
+            map_layer_back:{},
+            layer_free:{},
+            layer_fix:{},
+            layer_blend:{}
+            
+        };
+        
+        for( key in this.map_layer_fore ){
+            layer_info["map_layer_fore"][key] = $.makeSaveJSON(this.map_layer_fore[key].get(0),this.kag.array_white_attr);
+        }
+        for( key in this.map_layer_back ){
+            layer_info["map_layer_back"][key] = $.makeSaveJSON(this.map_layer_back[key].get(0),this.kag.array_white_attr);
+        }
+        
+        /*
+        for( key in this.map_layer_fix ){
+            layer_info["map_layer_fix"][key] = this.map_layer_fix[key].outerHTML();
+        }
+        */
+        
+        layer_info["layer_free"] = $.makeSaveJSON(this.layer_free.get(0),this.kag.array_white_attr);
+        
+        var n = 0;
+        $(".fixlayer").each(function(){
+        
+            layer_info["layer_fix"][n]  = $.makeSaveJSON($(this).get(0),that.kag.array_white_attr);
+            n++;
+            
+        });
+        
+        var m = 0;
+        $(".blendlayer").each(function(){
+            layer_info["layer_blend"][m]  =  $.makeSaveJSON($(this).get(0),that.kag.array_white_attr);
+            m++;
+            
+        });
+        
+        return layer_info;
+        
+        
+    },
+    
+    
+    
+    //レイヤに関連するHTMLファイルを文字列でぶっこ抜きます。旧メソッド
+    _getLayeyHtml:function(){
+        
+        var layer_info ={
+            
+            map_layer_fore:{},
+            map_layer_back:{},
+            layer_free:{},
+            layer_fix:{},
+            layer_blend:{}
+            
         };
 
         for (key in this.map_layer_fore) {
@@ -361,25 +416,25 @@ tyrano.plugin.kag.layer = {
         for (key in layer.map_layer_fore) {
             this["map_layer_fore"][key].remove();
             delete this["map_layer_fore"][key];
-            this["map_layer_fore"][key] = $(layer["map_layer_fore"][key]);
-
-            var parent_layer =
-                this["map_layer_fore"][key].attr("data-parent-layer");
-            this.appendLayer(this["map_layer_fore"][key], parent_layer);
-        }
-
-        for (key in layer.map_layer_back) {
+            this["map_layer_fore"][key] = $.makeElementFromSave(layer["map_layer_fore"][key],this.kag.array_white_attr);
+            
+            var parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
+            this.appendLayer(this["map_layer_fore"][key],parent_layer);
+            
+         }
+        
+        for(key in layer.map_layer_back){
             this["map_layer_back"][key].remove();
             delete this["map_layer_back"][key];
-            this["map_layer_back"][key] = $(layer["map_layer_back"][key]);
+            this["map_layer_back"][key] = $.makeElementFromSave(layer["map_layer_back"][key],this.kag.array_white_attr);
+            
+            var parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
+            this.appendLayer(this["map_layer_back"][key],parent_layer);
+            
+         }
 
-            var parent_layer =
-                this["map_layer_fore"][key].attr("data-parent-layer");
-            this.appendLayer(this["map_layer_back"][key], parent_layer);
-        }
-
-        //fixlayerの削除
-        $(".fixlayer").each(function () {
+//fixlayerの削除
+        $(".fixlayer").each(function(){
             $(this).remove();
         });
 
@@ -387,18 +442,20 @@ tyrano.plugin.kag.layer = {
         $(".three_canvas").each(function () {
             $(this).remove();
         });
-
-        //fixlayer は復元しない
-
-        for (key in layer.layer_fix) {
-            $("#tyrano_base").append($(layer.layer_fix[key]));
-        }
-
+        
+           
+//fixlayer は復元しない 
+        
+        for(key in layer.layer_fix){
+            $("#tyrano_base").append($.makeElementFromSave(layer.layer_fix[key],this.kag.array_white_attr));
+         }
+         
         //ブレンド演出の復元
-        $(".blendlayer").remove();
-        for (key in layer.layer_blend) {
-            var obj = $(layer.layer_blend[key]);
-            if (obj.hasClass("blendvideo")) {
+         $(".blendlayer").remove();
+         for(key in layer.layer_blend){
+             
+            var obj = $.makeElementFromSave(layer.layer_blend[key],this.kag.array_white_attr);
+            if(obj.hasClass("blendvideo")){
                 //ビデオの再現
                 //console.log(obj.attr("data-video-pm"));
                 var video_pm = JSON.parse(obj.attr("data-video-pm"));
@@ -416,12 +473,15 @@ tyrano.plugin.kag.layer = {
                 //画像のブレンド
                 $("#tyrano_base").append(obj);
             }
-        }
-
-        this.layer_free.remove();
-        delete this.layer_free;
-        this.layer_free = $(layer.layer_free);
-        this.appendLayer(this.layer_free, "root_layer_system");
+            
+         }
+         
+         this.layer_free.remove();
+         delete this.layer_free ;
+         this.layer_free = $.makeElementFromSave(layer.layer_free,this.kag.array_white_attr);
+         this.appendLayer(this.layer_free,"root_layer_system");
+         
+        
     },
 
     //すべてのメッセージインナーレイヤ削除

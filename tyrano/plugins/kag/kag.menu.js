@@ -145,7 +145,13 @@ tyrano.plugin.kag.menu = {
         var layer_menu = that.kag.layer.getMenuLayer();
 
         for (var i = 0; i < array.length; i++) {
+            
             array[i].num = i;
+            
+            //旧セーブデータ互換
+            //array[i]["title"]=array[i]["title"].replace("<span class='backlog_text '>","").replace('</span>','');
+            
+            
         }
 
         this.kag.html(
@@ -411,7 +417,7 @@ tyrano.plugin.kag.menu = {
             var img_code = "";
             var data = {};
 
-            data.title = title;
+            data.title = $(title).text();
             data.stat = _stat;
             data.three = three_save;
             data.current_order_index = _current_order_index;
@@ -434,8 +440,8 @@ tyrano.plugin.kag.menu = {
             setTimeout(function () {
                 var completeImage = function (img_code) {
                     var data = {};
-
-                    data.title = title;
+    
+                    data.title = $(title).text();
                     data.stat = _stat;
                     data.three = three_save;
 
@@ -1069,16 +1075,68 @@ tyrano.plugin.kag.menu = {
             this.kag.config.configSave,
         );
 
-        if (tmp_array) {
-            // データがある場合は一覧として表示します
-            //return eval("(" + tmp_array + ")");
-            return JSON.parse(tmp_array);
+        var save_obj = $.getStorage(this.kag.config.projectID + "_tyrano_data",this.kag.config.configSave);
+        
+        if (save_obj) {
+
+            var save_obj = JSON.parse(save_obj)
+            
+            //旧版のセーブデータの場合、バックアップをとった上で変換する
+            if(typeof save_obj.version=="undefined"){
+                
+                $.setStorage(this.kag.config.projectID + "_tyrano_data.bk", save_obj, this.kag.config.configSave);
+                
+                var array_data = save_obj.data;
+                
+                for(var i=0;i<array_data.length;i++){
+                    
+                    array_data[i]["title"] = $(array_data[i]["title"]).text();
+                    
+                    if(typeof array_data[i]["layer"]=="undefined") continue;
+                     
+                    var layer = array_data[i]["layer"]; 
+                    
+                    for(key in layer.map_layer_fore){
+                        layer["map_layer_fore"][key] = $.makeSaveJSON($(layer["map_layer_fore"][key]).get(0),this.kag.array_white_attr);
+                    }
+                    
+                    for(key in layer.map_layer_back){
+                        layer["map_layer_back"][key] = $.makeSaveJSON($(layer["map_layer_back"][key]).get(0),this.kag.array_white_attr);
+                    }
+            
+                    for(key in layer.layer_fix){
+                        layer["map_layer_back"][key] = $.makeSaveJSON($(layer.layer_fix[key]).get(0),this.kag.array_white_attr);
+                    }
+                     
+                    for(key in layer.layer_blend){
+                        layer["layer_blend"][key] = $.makeSaveJSON($(layer.layer_blend[key]).get(0),this.kag.array_white_attr);
+                    }
+                     
+                    layer.layer_free = $.makeSaveJSON($(layer.layer_free).get(0),this.kag.array_white_attr);
+                    
+                    array_data[i]["layer"] = layer;
+                
+                }
+                
+                save_obj.data = array_data;
+                save_obj.version="2";
+                
+                //セーブ上書き
+                $.setStorage(this.kag.config.projectID + "_tyrano_data", save_obj, this.kag.config.configSave);
+                
+            }
+            
+            return save_obj;
+
+
         } else {
+            
             tmp_array = new Array();
 
             var root = {
-                kind: "save",
-                hash: this.kag.save_key_val,
+                kind : "save",
+                version:"2",
+                hash : this.kag.save_key_val
             };
 
             //セーブ数の上限を変更する。

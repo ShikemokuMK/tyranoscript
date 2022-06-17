@@ -1,30 +1,35 @@
 tyrano.plugin.kag = {
     version: 500,
-
-    tyrano: null,
-    kag: null,
-    sound_swf: null,
-
-    is_rider: false, //ティラノライダーからの起動かどうか
-    is_studio: false, //ティラノスタジオからの起動かどうか
-
-    save_key_id: "",
-    save_key_val: "", //セーブデータ用のキー
-
-    cache_html: {},
-
-    cache_scenario: {},
-
-    config: {
-        defaultStorageExtension: "jpg",
-        projectID: "tyranoproject",
-        game_version: "0.0",
-        preload: "on",
-        skipSpeed: "30",
-        patch_apply_auto: "true",
-        mediaFormatDefault: "ogg",
-        configSave: "webstorage",
-        configSaveOverwrite: "false",
+    tyrano:null,
+    kag:null,
+    sound_swf:null,
+    
+    is_rider:false, //ティラノライダーからの起動かどうか
+    is_studio:false, //ティラノスタジオからの起動かどうか
+    
+    save_key_id:"",
+    save_key_val:"", //セーブデータ用のキー
+    
+    cache_html:{},
+    
+    cache_scenario : {},
+    
+    //セーブ時に保存する属性ホワイトリスト
+    array_white_attr:["id","src","data-event-tag","data-event-pm","l_visible","data-parent-layer","data-video-name","data-video-pm","data-effect"],
+        
+    
+    config:{
+      
+      defaultStorageExtension:"jpg",
+      projectID : "tyranoproject",
+      game_version:"0.0",
+      preload:"on",
+      skipSpeed:"30",
+      patch_apply_auto:"true",
+      mediaFormatDefault:"ogg",
+      configSave:"webstorage",
+      configSaveOverwrite:"false",
+        
     }, //読み込んできた値 Config.tjs の値
 
     //変更されることが無い静的な値
