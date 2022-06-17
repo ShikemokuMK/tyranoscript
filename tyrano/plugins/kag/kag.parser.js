@@ -422,9 +422,9 @@ tyrano.plugin.kag.parser = {
                         // バリューを足していく
 
                         // 従来のパーサーの仕様（バリュー内の空白全削除）を再現するための処理
-                        // 開始クォートの種類がバッククォートじゃない、かつ、オプションが有効な場合
+                        // 開始クォートの種類がバッククォートじゃない、かつ、空白保持オプションが"false"の場合
                         if (end_char_of_param_value !== "`" && c === " ") {
-                            if (that.kag.config.KeepSpaceInValue === "false") {
+                            if (that.kag.config.KeepSpaceInParameterValue === "false") {
                                 c = "";
                             }
                         }
