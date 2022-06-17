@@ -1,5 +1,5 @@
-<div>
-	
+<div id="menu_load_wrapper">
+
 	<div class="menu_item" style="float:right; margin: 20px 10px 0 0;">
 	<img class="menu_close" src="tyrano/images/system/menu_button_close.png" />
 	</div>
@@ -38,14 +38,14 @@
 
 <script class="menu_close">
 	var tmp_src = "";
-	
-	$(".menu_item").hover(function(){
+
+	$("#menu_load_wrapper .menu_item").hover(function(){
 		tmp_src = $(this).find("img").attr("src");
 		var img_src = tmp_src.replace(".png","2.png");
 		$(this).find("img").attr("src",img_src);
 	},
 	function(){
-		
+
 		//もとにもどす
 		$(this).find("img").attr("src",tmp_src);
 	});
