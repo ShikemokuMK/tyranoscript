@@ -1129,7 +1129,6 @@
     };
 
     $.getUrlQuery = function (url) {
-        
         var hash = url.slice(1).split("&");
         var max = hash.length;
         var vars = {};
@@ -1139,142 +1138,144 @@
             array = hash[i].split("=");
             vars[array[0]] = array[1];
         }
-        
-        return vars;
 
-    }
-    
+        return vars;
+    };
+
     //アトリビュートの中で保存するリストを取得する
-    $.makeSaveJSON = function(el,array_white_attr){
-        
+    $.makeSaveJSON = function (el, array_white_attr) {
         var j_el = $($.playerHtmlPath($(el).outerHTML()));
-        
+
         var root = {
-            "tag":el.tagName,
-            "style":j_el.attr("style"),
-            "class":j_el.attr("class"),
-            "text":"",
-            "attr":{},
-            "children":[],
+            tag: el.tagName,
+            style: j_el.attr("style"),
+            class: j_el.attr("class"),
+            text: "",
+            attr: {},
+            children: [],
         };
-        
+
         //属性を設置
-        for(var k=0;k<array_white_attr.length;k++){
-            if(j_el.attr(array_white_attr[k])){
-                root["attr"][array_white_attr[k]] = j_el.attr(array_white_attr[k]);
+        for (var k = 0; k < array_white_attr.length; k++) {
+            if (j_el.attr(array_white_attr[k])) {
+                root["attr"][array_white_attr[k]] = j_el.attr(
+                    array_white_attr[k],
+                );
             }
         }
-        
-        loop(el,root);
-        
-        function loop(node,_root){
+
+        loop(el, root);
+
+        function loop(node, _root) {
             var nodes = node.childNodes;
-            for (var i = 0; i <nodes.length; i++){
-                
+            for (var i = 0; i < nodes.length; i++) {
                 //console.log(nodes[i]);
                 var j_node = $(nodes[i]);
-                
+
                 var obj = {
-                    "tag":nodes[i].tagName,
-                    "style":j_node.attr("style"),
-                    "class":j_node.attr("class"),
-                    "text":j_node.text(),
-                    "attr":{},
-                    "children":[],
-                }
-                
+                    tag: nodes[i].tagName,
+                    style: j_node.attr("style"),
+                    class: j_node.attr("class"),
+                    text: j_node.text(),
+                    attr: {},
+                    children: [],
+                };
+
                 //属性を設置
-                for(var k=0;k<array_white_attr.length;k++){
-                    if(j_node.attr(array_white_attr[k])){
-                        obj["attr"][array_white_attr[k]] = j_node.attr(array_white_attr[k]);
+                for (var k = 0; k < array_white_attr.length; k++) {
+                    if (j_node.attr(array_white_attr[k])) {
+                        obj["attr"][array_white_attr[k]] = j_node.attr(
+                            array_white_attr[k],
+                        );
                     }
                 }
-                
-                if(!nodes[i]){
+
+                if (!nodes[i]) {
                     console.error("セーブデータ作成エラー");
                     console.error(nodes[i]);
                     continue;
                 }
-        
-                if(nodes[i].childNodes.length > 0){
-                    loop(nodes[i],obj);
+
+                if (nodes[i].childNodes.length > 0) {
+                    loop(nodes[i], obj);
                 }
-                
+
                 _root.children.push(obj);
-                
             }
         }
-        
+
         return root;
-        
     };
-    
+
     //レイヤーをhtmlエレメントとして復元する
-    $.makeElementFromSave = function(root,array_white_attr){
-        
-        if(root.tag.toLowerCase()=="script") return false;
-        
+    $.makeElementFromSave = function (root, array_white_attr) {
+        if (root.tag.toLowerCase() == "script") return false;
+
         var j_root = $(document.createElement(root.tag));
-        
-        j_root.attr("style",root["style"]);
-        j_root.attr("class",root["class"]);
-        
-        for(var i=0;i<array_white_attr.length;i++){
-            if(typeof root["attr"][array_white_attr[i]] !="undefined"){
-                j_root.attr(array_white_attr[i],root["attr"][array_white_attr[i]]);
+
+        j_root.attr("style", root["style"]);
+        j_root.attr("class", root["class"]);
+
+        for (var i = 0; i < array_white_attr.length; i++) {
+            if (typeof root["attr"][array_white_attr[i]] != "undefined") {
+                j_root.attr(
+                    array_white_attr[i],
+                    root["attr"][array_white_attr[i]],
+                );
             }
         }
-        
-        loop(root,j_root);
-        
-        function loop(_root,_j_obj){
-        
+
+        loop(root, j_root);
+
+        function loop(_root, _j_obj) {
             var nodes = _root.children;
-            for (var i = 0; i < nodes.length; i++){
-                
-                if(typeof nodes[i].tag !="undefined" && nodes[i].tag.toLowerCase()=="script"){
+            for (var i = 0; i < nodes.length; i++) {
+                if (
+                    typeof nodes[i].tag != "undefined" &&
+                    nodes[i].tag.toLowerCase() == "script"
+                ) {
                     break;
                     return false;
                 }
-                
-                if(typeof nodes[i].tag =="undefined"){
+
+                if (typeof nodes[i].tag == "undefined") {
                     _j_obj.append(nodes[i].text);
                     continue;
                 }
-                
-                    
+
                 var j_node = $(document.createElement(nodes[i].tag));
-                
-                j_node.attr("style",nodes[i]["style"]);
-                j_node.attr("class",nodes[i]["class"]);
-                
-                for(var k=0;k<array_white_attr.length;k++){
-                    if(typeof nodes[i]["attr"][array_white_attr[k]] !="undefined"){
-                        j_node.attr(array_white_attr[k],nodes[i]["attr"][array_white_attr[k]]);
+
+                j_node.attr("style", nodes[i]["style"]);
+                j_node.attr("class", nodes[i]["class"]);
+
+                for (var k = 0; k < array_white_attr.length; k++) {
+                    if (
+                        typeof nodes[i]["attr"][array_white_attr[k]] !=
+                        "undefined"
+                    ) {
+                        j_node.attr(
+                            array_white_attr[k],
+                            nodes[i]["attr"][array_white_attr[k]],
+                        );
                     }
                 }
-                
-                
-                if(!nodes[i]){
+
+                if (!nodes[i]) {
                     console.error("セーブデータ作成エラー");
                     console.error(nodes[i]);
                     continue;
                 }
-        
-                if(nodes[i].children.length > 0){
-                    loop(nodes[i],j_node);
+
+                if (nodes[i].children.length > 0) {
+                    loop(nodes[i], j_node);
                 }
-                
+
                 _j_obj.append(j_node);
-                
             }
         }
-        
+
         return j_root;
-        
-    }
-    
-    
+    };
 
     //渡されたJqueryオブジェクトにクラスをセットします
     $.setName = function (jobj, str) {
