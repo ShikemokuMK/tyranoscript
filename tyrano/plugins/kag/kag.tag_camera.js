@@ -8,51 +8,47 @@
 カメラを移動する
 
 :exp
-カメラをズームやパンさせる演出を追加できます。
-この機能を使うと、立ち絵のキャラクター表情にフォーカスをあてたり
-一枚絵であっても多彩な演出が可能になります。
+カメラのズームやパンのような演出ができます。
+カメラ機能を使うことで、キャラクターの立ち絵の表情にフォーカスをあてたり、一枚絵のいろんな個所をズームしてみたりと多彩な演出ができます。
 
-カメラ機能を使用するにはConfig.tjs の useCameraをtrueにする必要があります。
-また、カメラ機能を有効にした場合、画面の中央寄せ（ScreenCentering）が無効になります。
+カメラ機能を使用するには`Config.tjs`の`useCamera`を`true`にする必要があります。
+また、カメラ機能を有効にした場合、画面の中央寄せ（`ScreenCentering`）が無効になります。
 
-カメラの座標は画面中央が(x:0,y:0)です。
-例えば、画面右上は x:200 y:200 　画面左下は x:-200 y:-200 という座標指定になります。
+カメラの座標は画面中央が（`x=0 y=0`）です。たとえば画面右上は`x=200 y=200`、画面左下は`x=-200 y=-200`という座標指定になります。
 
-カメラを元の位置に戻すためには[reset_camera]タグを使用します。
-カメラの演出完了を待ちたい場合は[wait_camera]タグを使用します。
+カメラを元の位置に戻すためには`[reset_camera]`タグを使用します。
+カメラの演出完了を待つためには`[wait_camera]`タグを使用します。
 
-【重要】
-カメラ演出が終わったら、必ず[reset_camera]でカメラの位置を初期値に戻して下さい。
-カメラを戻さないと、背景の変更 [bg]タグ等は使用できません。
+<b>★重要</b>
+カメラ演出が終わったら、必ず`[reset_camera]`でカメラの位置を初期値に戻してください。カメラを戻さないと、背景の変更 [bg]タグ等は使用できません。
 
 :sample
 
-@camera zoom=2 x=180 y=100 time=1000
-@camera x=-180 y=100 time=2000
-@camera zoom=2 from_zoom=3 x=180 y=100 time=1000
+[camera zoom=2 x=180 y=100 time=1000]
+[camera x=-180 y=100 time=2000]
+[camera zoom=2 from_zoom=3 x=180 y=100 time=1000]
 
 ;カメラの位置を元に戻す
-@reset_camera
+[reset_camera]
 
 :param
-time        = カメラが座標へ移動する時間を指定できます。ミリ秒で指定して下さい。デフォルトは1000,
-x           = カメラの移動するX座標を指定して下さい,
-y           = カメラの移動するY座標を指定して下さい,
-zoom        = カメラの拡大率を指定して下さい。例えば２と指定すると２倍ズームします,
-rotate      = カメラの傾きを指定します。例えば20 だとカメラが20度傾きます。,
-from_x      = カメラの移動開始時のX座標を指定できます,
-from_y      = カメラの移動開始時のY座標を指定できます,
-from_zoom   = カメラの移動開始時の倍率を指定できます,
-from_rotate = カメラの移動開始時の傾きを指定できます,
-wait        = カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行できます。デフォルトはtrue,
-layer       = レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。,　
-ease_type   = カメラの移動演出を指定できます。
-ease(開始時点と終了時点を滑らかに再生する)
-linear(一定の間隔で再生する)
-ease-in(開始時点をゆっくり再生する)
-ease-out(終了時点をゆっくり再生する)
-ease-in-out(開始時点と終了時点をゆっくり再生する)
-デフォルトはeaseです。
+time        = カメラが座標へ移動する時間をミリ秒で指定します。,
+x           = カメラの移動するX座標を指定します。,
+y           = カメラの移動するY座標を指定します,
+zoom        = カメラの拡大率を指定します。`２`と指定すると2倍ズームとなります。,
+rotate      = カメラの傾きを指定します。`20`と指定するとカメラが20度傾きます。,
+from_x      = カメラの移動開始時のX座標を指定できます。,
+from_y      = カメラの移動開始時のY座標を指定できます。,
+from_zoom   = カメラの移動開始時の倍率を指定できます。,
+from_rotate = カメラの移動開始時の傾きを指定できます。,
+wait        = カメラ移動の完了を待つかどうかを`true`または`false`で指定します。`false`を指定するとカメラ移動中もゲームを進行できます。,
+layer       = カメラの効果を与えるレイヤを指定します。背景なら`base`、前景レイヤなら`0`以上の数字。これを指定すると、カメラの影響を特定レイヤに限定できます。通常はすべてのレイヤに対して影響を及ぼします。,
+ease_type   = カメラの移動演出を指定できます。<br>
+`ease`(開始時点と終了時点を滑らかに再生する)<br>
+`linear`(一定の速度で再生する)<br>
+`ease-in`(開始時点をゆっくり再生する)<br>
+`ease-out`(終了時点をゆっくり再生する)<br>
+`ease-in-out`(開始時点と終了時点をゆっくり再生する)
 
 :demo
 2,kaisetsu/01_camera
@@ -203,16 +199,24 @@ tyrano.plugin.kag.tag.camera = {
 
 :exp
 カメラの位置を初期値に戻します。
-[camera]タグを使った演出が終わった後は、必ず[reset_camera]で位置を元に戻して下さい。
-位置を戻さない場合は背景変更などで不具合が生じる場合があります。
+
+<b>★重要</b>
+`[camera]`タグによるカメラ演出が終わったあとは、必ずこのタグでカメラの位置をもとに戻してください。
+そうしない場合、背景の変更などで不具合が生じる場合があります。
 
 :sample
 
 :param
-time      = 初期位置にカメラが移動する時間をミリ秒で指定します。デフォルトは1000です。,
-wait      = カメラ移動の完了を待つかどうかを指定します。falseを指定するとカメラ移動中もゲームを進行できます。デフォルトはtrue,
-ease_type = カメラの戻り方を指定できます。デフォルトはease　詳細はcameraタグを確認。,
-layer     = レイヤを指定します。背景ならbase 前景レイヤならう 0以上の数字。カメラの効果を特定レイヤだけに適応できます。
+time      = カメラの移動時間をミリ秒で指定します。,
+wait        = カメラ移動の完了を待つかどうかを`true`または`false`で指定します。`false`を指定するとカメラ移動中もゲームを進行できます。,
+layer       = カメラの効果を与えるレイヤを指定します。背景なら`base`、前景レイヤなら`0`以上の数字。これを指定すると、カメラの影響を特定レイヤに限定できます。通常はすべてのレイヤに対して影響を及ぼします。,
+ease_type   = カメラの移動演出を指定できます。<br>
+`ease`(開始時点と終了時点を滑らかに再生する)<br>
+`linear`(一定の速度で再生する)<br>
+`ease-in`(開始時点をゆっくり再生する)<br>
+`ease-out`(終了時点をゆっくり再生する)<br>
+`ease-in-out`(開始時点と終了時点をゆっくり再生する)
+
 
 :demo
 2,kaisetsu/01_camera
@@ -339,15 +343,15 @@ tyrano.plugin.kag.tag.reset_camera = {
 カメラの演出を待つ
 
 :exp
-このタグはカメラの操作中である場合、完了を待つことができます。
-例えば、cameraタグでwaitにfalseを指定して、ゲームを進行する場合、特定の位置で必ずカメラ演出の完了を待たせる事が出来ます
+カメラが演出中である場合、その完了を待つことができます。`wait=false`を指定した`[camera]`タグと組み合わせて使います。
+
+たとえば「背景でカメラを動かしつつ、テキストを読ませる。ただし、メッセージ送りのタイミングでカメラが動き終わるのを待つ」という演出に活用できます。
 
 :sample
-
-[camera zoom=2 x=180 y=100 time=5000]
+[camera zoom=2 x=180 y=100 time=10000 wait=false]
 カメラ演出中[p]
 ここでもカメラ演出中[p]
-[wait_camera]
+カメラの演出を待ちます[wait_camera]
 カメラの演出が終わったので進行[p]
 
 :param
@@ -381,7 +385,7 @@ tyrano.plugin.kag.tag.wait_camera = {
 
 :exp
 ゲーム画面全体を豊富な効果とともに暗転させることができます。
-暗転中にゲーム画面を再構築して[mask_off]タグでゲームを再開する使い方ができます。
+暗転中にゲーム画面を再構築して`[mask_off]`タグでゲームを再開する使い方ができます。
 
 :sample
 ;暗転開始
@@ -395,7 +399,7 @@ tyrano.plugin.kag.tag.wait_camera = {
 
 :param
 time    = 暗転が完了するまでの時間をミリ秒で指定できます。,
-effect  = <p>暗転の効果を指定できます。指定できるキーワードは以下。</p><p>`fadeIn``fadeInDownBig``fadeInLeftBig``fadeInRightBig``fadeInUpBig``flipInX``flipInY``lightSpeedIn``rotateIn``rotateInDownLeft``rotateInDownRight``rotateInUpLeft``rotateInUpRight``zoomIn``zoomInDown``zoomInLeft``zoomInRight``zoomInUp``slideInDown``slideInLeft``slideInRight``slideInUp``bounceIn ``bounceInDown``bounceInLeft``bounceInRight``bounceInUp``rollIn`</p>,
+effect  = <p>暗転の効果を指定できます。以下のキーワードが指定できます。</p><p>`fadeIn``fadeInDownBig``fadeInLeftBig``fadeInRightBig``fadeInUpBig``flipInX``flipInY``lightSpeedIn``rotateIn``rotateInDownLeft``rotateInDownRight``rotateInUpLeft``rotateInUpRight``zoomIn``zoomInDown``zoomInLeft``zoomInRight``zoomInUp``slideInDown``slideInLeft``slideInRight``slideInUp``bounceIn ``bounceInDown``bounceInLeft``bounceInRight``bounceInUp``rollIn`</p>,
 color   = 暗転の色を`0xRRGGBB`形式で指定します。デフォルトは黒。,
 graphic = 指定すると、暗転部分に画像を使用できます。画像は`data/image`フォルダに配置します。,
 folder  = `graphic`で指定するフォルダを`image`以外に変更したい場合はこちらに記述します。`bgimage``fgimage`などを指定します。
@@ -508,8 +512,8 @@ tyrano.plugin.kag.tag.mask = {
 [mask_off]
 
 :param
-time   = 暗転が完了するまでの時間をミリ秒で指定できます ,
-effect = <p>暗転の効果を指定できます。指定できるキーワードは以下。</p><p>`fadeOut``fadeOutDownBig/``fadeOutLeftBig/``fadeOutRightBig/``fadeOutUpBig/``flipOutX/``flipOutY/``lightSpeedOut/``rotateOut/``rotateOutDownLeft/``rotateOutDownRight/``rotateOutUpLeft/``rotateOutUpRight/``zoomOut/``zoomOutDown/``zoomOutLeft/``zoomOutRight/``zoomOutUp/``slideOutDown/``slideOutLeft/``slideOutRight/``slideOutUp/``bounceOut /``bounceOutDown/``bounceOutLeft/``bounceOutRight/``bounceOutUp/`</p>
+time   = 暗転が完了するまでの時間をミリ秒で指定できます。,
+effect = <p>暗転の効果を指定できます。以下のキーワードが指定できます。</p><p>`fadeOut``fadeOutDownBig/``fadeOutLeftBig/``fadeOutRightBig/``fadeOutUpBig/``flipOutX/``flipOutY/``lightSpeedOut/``rotateOut/``rotateOutDownLeft/``rotateOutDownRight/``rotateOutUpLeft/``rotateOutUpRight/``zoomOut/``zoomOutDown/``zoomOutLeft/``zoomOutRight/``zoomOutUp/``slideOutDown/``slideOutLeft/``slideOutRight/``slideOutUp/``bounceOut /``bounceOutDown/``bounceOutLeft/``bounceOutRight/``bounceOutUp/`</p>
 
 :demo
 2,kaisetsu/05_mask

@@ -592,7 +592,7 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
 [xchgbgm storage=new.mp3 loop=true time=3000]
 
 :param
-storage = 次に再生するファイルを指定します,
+storage = 次に再生するファイルを指定します。,
 loop    = !!,
 time    = クロスフェードを行なっている時間をミリ秒で指定します。
 
@@ -877,7 +877,7 @@ tyrano.plugin.kag.tag.bgmopt = {
 SE設定
 
 :exp
-SEの設定を変更できます
+SEの設定を変更できます。
 
 プレイヤーがスマホブラウザから閲覧している場合は端末の制限により音量が変更できませんので注意してください。
 
@@ -1047,10 +1047,10 @@ tyrano.plugin.kag.tag.wse = {
 あかねの音声再生(akane_3.ogg)[p]
 
 :param
-sebuf     = ボイスで使用するplayseのbufを指定します,
-name      = ボイスを再生するキャラクター名を指定します。[chara_new ]タグのnameパラメータです,
-vostorage = 音声ファイルとして使用するファイル名のテンプレートを指定します。{number}の部分に再生されることに+1された数字が入っていきます,
-number    = デフォルトは０。vostorageで適応する数字をここで指定した値にリセットできます
+sebuf     = ボイスで使用する`[playse]`の`buf`を指定します。,
+name      = ボイスを再生するキャラクター名を指定します。`[chara_new]`タグの`name`。,
+vostorage = 音声ファイルとして使用するファイル名のテンプレートを指定します。`{number}`の部分には、再生されることに+1された数値が入っていきます。,
+number    = `vostorage`の`{number}`に当てはめる数値の初期値。
 
 :demo
 2,kaisetsu/19_voconfig
@@ -1108,8 +1108,8 @@ tyrano.plugin.kag.tag.voconfig = {
 ボイス自動再生開始
 
 :exp
-voconfigで指定したボイスの自動再生を開始します。
-コレ以降、#で名前を指定した場合、紐付いたボイスが再生されていきます。
+`[voconfig]`で指定したボイスの自動再生を開始します。
+これ以降、`#`で名前を指定したときに紐付いたボイスが再生されていきます。
 
 :sample
 
@@ -1139,8 +1139,8 @@ tyrano.plugin.kag.tag.vostart = {
 ボイス自動再生停止
 
 :exp
-voconfigで指定したボイスの自動再生を停止します。
-コレ以降、#で名前を指定しても、ボイスが紐付いて再生されることを防ぎます。
+`[voconfig]`で指定したボイスの自動再生を停止します。
+これ以降、`#`で名前を指定してもボイスは再生されません。
 
 :sample
 
@@ -1169,11 +1169,13 @@ tyrano.plugin.kag.tag.vostop = {
 :exp
 ストーリーのシナリオを音声で読み上げることができます。
 
+<b>★注意</b>
+ブラウザゲームのみ動作。PCアプリとして出力した場合には動作しません。
+
 :sample
-[speak_on ]
+[speak_on]
 
 :param
-volume = 読み上げのボリュームを設定できます(まだ実装)。
 
 #[end]
 */
@@ -1211,13 +1213,11 @@ tyrano.plugin.kag.tag.speak_on = {
 
 :exp
 シナリオの読み上げをオフにします。
-＊ブラウザのみ動作。PC版パッケージ版では動作しません。
 
 :sample
-[speak_off ]
+[speak_off]
 
 :param
-volume = 読み上げのボリュームを設定できます。
 
 #[end]
 */
