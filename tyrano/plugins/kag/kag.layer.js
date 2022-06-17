@@ -411,47 +411,85 @@ tyrano.plugin.kag.layer = {
         return layer_info;
     },
 
+    sortGameLayerKeys(keys) {
+        var that = this;
+        keys.sort(function (a, b) {
+            var a_index = that.getGameLayerIndex(a);
+            var b_index = that.getGameLayerIndex(b);
+            return a_index > b_index ? 1 : -1;
+        });
+    },
+
+    getGameLayerIndex(key) {
+        if (key === "base") {
+            return -1;
+        }
+        if (key.indexOf("message") > -1) {
+            return 1000 + (parseInt(key.replace("message", "")) || 0);
+        }
+        return parseInt(key) || 0;
+    },
+
     setLayerHtml: function (layer) {
         var that = this;
 
-        for (key in layer.map_layer_fore) {
+        // foreレイヤのキー配列
+        // 例) ["0", "1", "2", "base", "message0", "message1"]
+        var fore_keys = Object.keys(layer.map_layer_fore);
+        // 実際の合成順に並べ替え
+        // 例) ["base", "0", "1", "2", "message0", "message1"]
+        this.sortGameLayerKeys(fore_keys);
+
+        // 各foreレイヤについて
+        for (var key of fore_keys) {
+            // 既存のレイヤーのDOMを削除
             this["map_layer_fore"][key].remove();
             delete this["map_layer_fore"][key];
+
+            // セーブデータから復元
             this["map_layer_fore"][key] = $.makeElementFromSave(
                 layer["map_layer_fore"][key],
                 this.kag.array_white_attr,
             );
 
+            // data-parent-layer属性を分析してそこにDOMを追加
+            // 例) "root_layer_game", "root_layer_system"
             var parent_layer =
                 this["map_layer_fore"][key].attr("data-parent-layer");
             this.appendLayer(this["map_layer_fore"][key], parent_layer);
         }
 
-        for (key in layer.map_layer_back) {
+        // backレイヤについても同様
+        var back_keys = Object.keys(layer.map_layer_back);
+        this.sortGameLayerKeys(back_keys);
+        for (var key of back_keys) {
             this["map_layer_back"][key].remove();
             delete this["map_layer_back"][key];
             this["map_layer_back"][key] = $.makeElementFromSave(
                 layer["map_layer_back"][key],
                 this.kag.array_white_attr,
             );
-
             var parent_layer =
                 this["map_layer_fore"][key].attr("data-parent-layer");
             this.appendLayer(this["map_layer_back"][key], parent_layer);
+
+            // ただしここでbackレイヤは対応するforeレイヤの直後に配置したい！
+            if (this["map_layer_fore"][key]) {
+                this["map_layer_fore"][key].after(this["map_layer_back"][key]);
+            }
         }
 
-        //fixlayerの削除
+        // fixレイヤの削除
         $(".fixlayer").each(function () {
             $(this).remove();
         });
 
-        //canvasは削除 → 3Dレイヤのcanvasは削除
+        // Three.jsのcanvasを削除
         $(".three_canvas").each(function () {
             $(this).remove();
         });
 
-        //fixlayer は復元しない
-
+        // fixレイヤの復元
         for (key in layer.layer_fix) {
             $("#tyrano_base").append(
                 $.makeElementFromSave(
@@ -461,7 +499,7 @@ tyrano.plugin.kag.layer = {
             );
         }
 
-        //ブレンド演出の復元
+        //ブレンド演出の削除と復元
         $(".blendlayer").remove();
         for (key in layer.layer_blend) {
             var obj = $.makeElementFromSave(
@@ -488,6 +526,7 @@ tyrano.plugin.kag.layer = {
             }
         }
 
+        // フリーレイヤの削除と復元
         this.layer_free.remove();
         delete this.layer_free;
         this.layer_free = $.makeElementFromSave(
@@ -495,6 +534,8 @@ tyrano.plugin.kag.layer = {
             this.kag.array_white_attr,
         );
         this.appendLayer(this.layer_free, "root_layer_system");
+        // フリーレイヤはメニューレイヤの後！
+        this.layer_menu.after(this.layer_free);
     },
 
     //すべてのメッセージインナーレイヤ削除
