@@ -1,5 +1,5 @@
 tyrano.plugin.kag = {
-    version: 500,
+    version: 515,
     tyrano: null,
     kag: null,
     sound_swf: null,
@@ -41,7 +41,7 @@ tyrano.plugin.kag = {
 
     //変更されることが無い静的な値
     define: {
-        TYRANO_ENGINE_VERSION: 400,
+        TYRANO_ENGINE_VERSION: 515,
         BASE_DIV_NAME: "tyrano_base",
         FLAG_APRI: false,
     },
