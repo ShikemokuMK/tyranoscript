@@ -1372,6 +1372,18 @@
             escape(val) +
             ";expires=Fri, 31-Dec-2030 23:59:59;path=/;";
     };
+
+    // window.setTimeoutのラッパー関数
+    // timeoutが0より大きい数値ならwindow.setTimeoutに投げて非同期実行（戻り値はtimerId:正の整数）
+    // そうでないならcallbackを同期実行（戻り値は0）
+    // ※window.setTimeout(callback, 0)は非同期実行になってしまう
+    $.setTimeout = function (callback, timeout) {
+        if (typeof timeout === "number" && timeout > 0) {
+            return setTimeout(callback, timeout);
+        }
+        callback();
+        return 0;
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {
@@ -1570,4 +1582,10 @@ jQuery.extend(jQuery.easing, {
             b
         );
     },
+});
+
+// windowのloadイベントが発火済みかどうかを管理
+window.isLoaded = false;
+window.addEventListener("load", function () {
+    window.isLoaded = true;
 });
