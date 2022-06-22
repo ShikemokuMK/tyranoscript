@@ -535,7 +535,7 @@ tyrano.plugin.kag.layer = {
         );
         this.appendLayer(this.layer_free, "root_layer_system");
         // フリーレイヤはメニューレイヤの後！
-        this.layer_menu.after(this.layer_free);
+        this.layer_free.insertAfter(this.layer_menu);
     },
 
     //すべてのメッセージインナーレイヤ削除
