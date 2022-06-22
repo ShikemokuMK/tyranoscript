@@ -1,4 +1,4 @@
-TyranoScript｜ティラノスクリプト　Ver5.00（C）ShikemokuMK
+TyranoScript｜ティラノスクリプト　Ver5.15（C）ShikemokuMK
 https://tyrano.jp
 
 

@@ -86,20 +86,19 @@ $.getAngle = function(){
 
 :exp
 3D関連の機能を使用するために必要な宣言です。
-このタグを通過時、ゲーム内に3Dを表示するためのシーンが追加されます。
-また、タグを配置していないと3d_xxx で始まるタグを使用できません。
+このタグを通過するとき、ゲーム内に3Dを表示するための初期化が行われます。
+このタグを通過するまで`[3d_...]`で始まるタグは使えません。
 
-3D機能を使用する直前に宣言するようにしましょう。
-また3D機能の仕様が終わった段階で[3d_close]を行いましょう。
+3D機能を使用する直前に宣言し、3D機能の仕様が終わった段階で`[3d_close]`を行いましょう。
 
 :sample
-[3d_init layer=0 ]
+[3d_init layer=0]
 
 :param
-layer=3Dモデルを配置するレイヤを指定できます。,
-camera=カメラのモードを指定できます。「Perspective」（遠近感あり）「Orthographic」（遠近感なしの平行投影）デフォルトはPerspective,
-near=カメラに近いオブジェクトをどの距離まで描画するかを設定できます。デフォルトは１,
-far=カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。デフォルトは5000
+layer  = 3Dモデルを配置するレイヤを指定できます。,
+camera = カメラのモードを指定できます。`Perspective`(遠近感あり)、`Orthographic`(遠近感なしの平行投影),
+near   = カメラに近いオブジェクトをどの距離まで描画するかを設定できます。,
+far    = カメラから遠いオブジェクトを表示する距離を設定できます。大きすぎると不必要に遠くまで描画するため処理が重くなります。可能な限り小さい値に調整しましょう。
 
 #[end]
 */
@@ -312,9 +311,9 @@ tyrano.plugin.kag.tag["3d_init"] = {
 3Dモデルの作成
 
 :exp
-外部ファイル形式の3Dモデルを読み込んで定義します。
-実行時はゲーム画面には表示されません。表示するには[3d_show ]が必要です。
-3Dモデルファイルは data/others/3d/modelフォルダに配置します。
+外部ファイルの3Dモデルを読み込んで定義します。
+このタグを実行しただけでは、3Dモデルはまだゲーム画面に表示されません。表示するには`[3d_show]`が必要です。
+3Dモデルファイルは`data/others/3d/model`フォルダに配置します。
 
 :sample
 [3d_init layer=0]
@@ -323,14 +322,14 @@ tyrano.plugin.kag.tag["3d_init"] = {
 [3d_show name="mymodel" pos="100,20,20" rot="1,1,1" scale=10 ]
 
 :param
-name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
-storage=3Dファイルを指定します。gltf obj 形式に対応します。ファイルはothers/3d/modelフォルダに配置してください。,
-pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
-tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定します。,
-motion=ファイルにモーションが存在する場合、モーション名を指定できます。指定がない場合は１つめのモーションファイルが自動的に適応されます。,
-folder=ファイルの配置フォルダを変更できます。
+name    = 3Dオブジェクトの名前です。この名前をつかって表示・非表示などを制御します。,
+storage = 3Dモデルのファイルを指定します。対応している形式は`gltf`、`obj`です。ファイルは`dataothers/3d/model`フォルダに配置します。,
+pos     = 3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。,
+rot     = 3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。,
+scale   = 3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。,
+tonemap = トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトは`true`。無効にする場合は`false`を指定します。,
+motion  = 3Dモデルにモーションが存在する場合、モーション名を指定できます。指定がない場合はひとつめのモーションファイルが自動的に適応されます。,
+folder  = ファイルの配置フォルダを変更できます。たとえば`fgimage`と指定すると、`data/fgimage`フォルダにある3Dモデルファイルを探します。
 
 #[end]
 */
@@ -494,26 +493,26 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 3Dモデル(球体)
 
 :exp
-球体の3Dモデルを定義します
+球体の3Dモデルを定義します。
 
 :sample
 
-[3d_sphere_new name="tama" ]
+[3d_sphere_new name="tama"]
 [3d_show name=tama pos="365,145,0" rot="0.92,-4.3,0" scale="0.77,0.77,0.77" time=2000]
 
 :param
-name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
-texture=球体にテクスチャを貼ることができます。画像は「others/3d/texture」以下に配置してください。サイズは256x256 や 512x512 といったサイズを推奨します。,
-color=色を指定できます。0xRRGGBB 形式で指定します。,
-pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
+name    = 3Dオブジェクトの名前です。この名前をつかって表示・非表示などを制御します。,
+texture = 球体にテクスチャを貼ることができます。画像は`data/others/3d/texture`以下に配置します。画像サイズは`256x256`や`512x512`が推奨されます。,
+color   = 球体の色を`0xRRGGBB`形式で指定します。,
+pos     = 3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。,
+rot     = 3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。,
+scale   = 3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。,
 
-radius=球体の半径を指定します。デフォルトは300,
-width=球体の横幅を指定します。デフォルトは30,
-height=球体の高さを指定します。デフォルトは30,
+radius  = 球体の半径を指定します。,
+width   = 球体の横幅を指定します。,
+height  = 球体の高さを指定します。,
 
-tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはtrue。無効にする場合はfalseを指定します。
+tonemap = トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトは`true`。無効にする場合は`false`を指定します。
 
 #[end]
 */
@@ -568,13 +567,13 @@ tyrano.plugin.kag.tag["3d_sphere_new"] = {
 [3d_show name="yamato"]
 
 :param
-name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
-storage=表示する画像ファイルを指定します。ファイルは「othres/3d/sprite」フォルダ以下に配置してください。,
-pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
-tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定します。,
-folder=ファイルの配置フォルダを変更できます。
+name    = 3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+storage = 表示する画像ファイルを指定します。ファイルは「others/3d/sprite」フォルダ以下に配置してください。,
+pos     = 3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。,
+rot     = 3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。,
+scale   = 3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。,
+tonemap = トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトは`true`。無効にする場合は`false`を指定します。,
+folder  = ファイルの配置フォルダを変更できます。たとえば`fgimage`と指定すると、`data/fgimage`フォルダにある3Dモデルファイルを探します。
 
 #[end]
 */
@@ -670,10 +669,9 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
 3Dイベント定義
 
 :exp
-3Dシーン上のオブジェクトがクリックされたときに、イベントを発火させることができます。
-イベントは[s]タグに到達していないと発火しません。
-また、一度イベントが発火すると自動的に全イベントが無効化されます（イベント定義自体は残っている）
-再度イベントを発生させたい場合は[3d_event_start]を通過する必要があります。
+3Dオブジェクトがクリックされたときにイベントを発火（シナリオをジャンプ）させることができます。イベントは[s]タグに到達していないと発火しません。
+
+一度イベントが発火すると、次に`[3d_event_start]`タグを通過するまでイベントが発火しなくなります。イベントを何度も発火させる必要がある場合、ジャンプ先に`[3d_event_start]`を配置してください。
 
 :sample
 
@@ -705,9 +703,9 @@ tyrano.plugin.kag.tag["3d_sprite_new"] = {
 @3d_event_start
 
 :param
-name=3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトのnameを指定します。,
-storage=移動するシナリオファイル名を指定します。省略された場合は現在のシナリオファイルとみなされます。,
-target=ジャンプ先のラベル名を指定します。省略すると先頭から実行されます
+name    = 3Dオブジェクトの名前です。イベントを発生させる3Dオブジェクトの`name`を指定します。,
+storage = !!jump,
+target  = !!jump
 
 #[end]
 */
@@ -744,7 +742,6 @@ tyrano.plugin.kag.tag["3d_event"] = {
 登録した3Dイベントを無効化します。
 
 :sample
-
 ;ボックスの表示
 [3d_box_new name="box" width=100 height=100 depth=100 scale=2 tone=false color="0xFFFFFF"]
 [3d_show name="box" time=2000 ]
@@ -754,9 +751,8 @@ tyrano.plugin.kag.tag["3d_event"] = {
 
 [s]
 
-
 :param
-name=3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトのnameを指定します。
+name = 3Dオブジェクトの名前です。イベントを削除する3Dオブジェクトの`name`を指定します。
 
 #[end]
 */
@@ -788,7 +784,7 @@ tyrano.plugin.kag.tag["3d_event_delete"] = {
 
 :exp
 登録した3Dイベントを開始します。
-イベントが実行された後は必ず全イベントが無効化されるため、このタグで再度受付を開始する必要があります。
+イベントが一度実行された後は全イベントが無効化されるため、受付を再開したい場合はこのタグを配置する必要があります。
 
 :sample
 
@@ -820,9 +816,9 @@ tyrano.plugin.kag.tag["3d_event_start"] = {
 3Dイベントの停止
 
 :exp
-登録した3Dイベントを停止します。
-[3d_event_start]で再開できます。
-登録したイベント自体は消えません。
+登録した3Dイベントを一時的に停止します。
+
+登録したイベント自体は消えません。`[3d_event_start]`タグでいつでも再開できます。
 
 :sample
 
@@ -868,18 +864,16 @@ tyrano.plugin.kag.tag["3d_event_stop"] = {
 
 
 :param
-name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
-texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます,
-color=色を指定できます。0xRRGGBB 形式で指定します。,
-width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
-height=3Dオブジェクトの高さを指定します。デフォルトは1です,
-depth=3Dオブジェクトの深さを指定します。デフォルトは1です,
-
-pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
-
-tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定します。
+name    = 3Dオブジェクトの名前です。この名前をつかって表示・非表示を制御します。,
+texture = 表示する画像ファイルを指定します。ファイルは`data/others/3d/texture`フォルダ以下に配置してください。１つのテクスチャの場合はすべての面が同じ画像になりますが、半角カンマで区切って６つ指定するとすべての面に異なるテクスチャを適応することもできます,
+color   = 色を指定できます。0xRRGGBB 形式で指定します。,
+width   = 3Dオブジェクトの横幅を指定します。デフォルトは1です,
+height  = 3Dオブジェクトの高さを指定します。デフォルトは1です,
+depth   = 3Dオブジェクトの深さを指定します。デフォルトは1です,
+pos     = 3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。,
+rot     = 3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。,
+scale   = 3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。,
+tonemap = トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトは`true`。無効にする場合は`false`を指定します。
 
 #[end]
 */
@@ -935,16 +929,15 @@ tyrano.plugin.kag.tag["3d_box_new"] = {
 [3d_show name="myimg" ]
 
 :param
-name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
-texture=表示する画像ファイルを指定します。ファイルは「othres/3d/texture」フォルダ以下に配置してください。,
-width=3Dオブジェクトの横幅を指定します。デフォルトは1です,
-height=3Dオブジェクトの高さを指定します。省略した場合は画像サイズの比率を保った形で表示できます。,
-
-pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
-doubleside=テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。,
-tonemap=トーンマッピングが有効な場合、このオブジェクトが影響を受けるか否かを設定できます。デフォルトはfalse。有効にする場合はtrueを指定します。
+name       = 3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
+texture    = 表示する画像ファイルを指定します。ファイルは「others/3d/texture」フォルダ以下に配置してください。,
+width      = 3Dオブジェクトの横幅を指定します。デフォルトは1です,
+height     = 3Dオブジェクトの高さを指定します。省略した場合は画像サイズの比率を保った形で表示できます。,
+pos        = 3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。,
+rot        = 3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。,
+scale      = 3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。,
+tonemap    = トーンマッピングが有効な場合、このオブジェクトが影響を受けるかどうか。デフォルトは`true`。無効にする場合は`false`を指定します。,
+doubleside = テクスチャを両面に表示させるかを指定します。デフォルトはfalse。trueを指定すると裏面にもテクスチャが表示されます。
 
 #[end]
 */
@@ -1135,12 +1128,12 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
 [3d_show name="myimg" ]
 
 :param
-name=3Dオブジェクトの名前です。表示させたいオブジェクトのnameを指定します,
-time=表示させるまでの時間をミリ秒で指定します。デフォルトは500,
-wait=表示の完了を待つか否か。デフォルトはtrue。,
-pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。
+name  = 3Dオブジェクトの名前です。表示させたいオブジェクトの`name`を指定します,
+time  = 表示させるまでの時間をミリ秒で指定します。,
+wait  = 表示の完了を待つか否か。,
+pos   = 3Dオブジェクトを配置する座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。,
+rot   = 3Dオブジェクトの回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。,
+scale = 3Dオブジェクトの拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。
 
 #[end]
 */
@@ -1212,21 +1205,21 @@ tyrano.plugin.kag.tag["3d_show"] = {
 :exp
 3Dオブジェクトをゲーム画面から退場させます。
 このタグを実行しても定義自体は削除されません。
-もう一度表示する場合は[3d_show]タグを使ってください。
+もう一度表示させるには`[3d_show]`タグを使います。
 
 :sample
 
 ;3Dイメージ
-[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ]
-[3d_show name="myimg" ]
+[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true]
+[3d_show name="myimg"]
 
 非表示にします。[p]
 [3d_hide name="myimg"]
 
 :param
-name=3Dオブジェクトの名前です。退場させたいオブジェクトのnameを指定します,
-time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
-wait=退場の完了を待つか否か。デフォルトはtrue。
+name = 退場させるオブジェクトの`name`を指定します。,
+time = 退場させるまでの時間をミリ秒で指定します。,
+wait = 退場の完了を待つかどうか。`true`または`false`で指定します。
 
 #[end]
 */
@@ -1281,13 +1274,13 @@ tyrano.plugin.kag.tag["3d_hide"] = {
 :exp
 すべての3Dオブジェクトをゲーム画面から退場させます。
 このタグを実行しても定義自体は削除されません。
-もう一度表示する場合は[3d_show]タグを使ってください。
+もう一度表示する場合は`[3d_show]`タグを使ってください。
 
 :sample
 
 :param
-time=退場させるまでの時間をミリ秒で指定します。デフォルトは500,
-wait=退場の完了を待つか否か。デフォルトはtrue。
+time = 退場させるまでの時間をミリ秒で指定します。,
+wait = 退場の完了を待つかどうか。`true`または`false`で指定します
 
 #[end]
 */
@@ -1349,19 +1342,18 @@ tyrano.plugin.kag.tag["3d_hide_all"] = {
 3D関連
 
 :title
-3Dオブジェクト削除
+3Dオブジェクトの定義の削除
 
 :exp
-3Dオブジェクトを削除します。
-このタグは定義からも削除されるので、再度使用する場合は
-もう一度 new タグで定義する必要があります。
-使用しなくなった3Dオブジェクトはこまめに削除することで軽量な動作が期待できます。
+3Dオブジェクトの定義を削除します。
+このタグは[3d_hide]とは異なり3Dモデルの定義自体を削除するので、モデルを再度使用するには`[3d_model_new]`タグを使う必要があります。
+使用しなくなった3Dオブジェクトの定義をこまめに削除しておくことで軽量な動作が期待できます。
 
 :sample
 
 ;3Dイメージ
-[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true ]
-[3d_show name="myimg" ]
+[3d_image_new name="myimg" texture="room.jpg" width=200 doubleside=true]
+[3d_show name="myimg"]
 
 非表示にします。[p]
 [3d_hide name="myimg"]
@@ -1370,7 +1362,7 @@ tyrano.plugin.kag.tag["3d_hide_all"] = {
 [3d_delete name="myimg"]
 
 :param
-name=3Dオブジェクトの名前です。削除していオブジェクトのnameを指定します
+name = 削除したい3Dオブジェクトの`name`を指定します。
 
 #[end]
 */
@@ -1450,13 +1442,14 @@ tyrano.plugin.kag.tag["3d_delete_all"] = {
 3Dキャンバス表示
 
 :exp
-3Dキャンバスを表示にします。
-例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
+3Dキャンバスを表示状態にします。
+対になる`[3d_canvas_hide]`タグと組み合わせて使います。
+3Dシーンとノベルパートを頻繁に行き来する場合に活用できます。
 
 :sample
-time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
 
 :param
+time = 表示にかける時間をミリ秒で指定できます。
 
 #[end]
 */
@@ -1490,7 +1483,7 @@ tyrano.plugin.kag.tag["3d_canvas_show"] = {
 :exp
 3Dキャンバスを非表示にします。
 3Dシーン自体は維持されます。
-例えば、3Dシーンからノベルパートへの移動を頻繁にする場合などは便利です。
+3Dシーンとノベルパートを頻繁に行き来する場合に活用できます。
 
 :sample
 time=表示にかける時間をミリ秒で指定できます。デフォルトは1000です。
@@ -1529,7 +1522,7 @@ tyrano.plugin.kag.tag["3d_canvas_hide"] = {
 :exp
 3Dシーンをすべて削除します。
 このタグを使用すると3D系の機能は全て使えなくなります。
-もう一度使用する場合は[3d_init]タグを通過させてください。
+もう一度3D系の機能を使用するには`[3d_init]`タグを使用してください。
 
 :sample
 
@@ -1567,7 +1560,7 @@ tyrano.plugin.kag.tag["3d_close"] = {
 3Dアニメーション
 
 :exp
-シーン上の3Dオブジェクトをアニメーションさせることができます。
+シーン上の3Dオブジェクトをアニメーションさせます。
 
 :sample
 
@@ -1576,46 +1569,15 @@ tyrano.plugin.kag.tag["3d_close"] = {
 
 
 :param
-name=3Dオブジェクトの名前です。この名前の3Dオブジェクトをアニメーションさせます。カメラをアニメーションさせる場合は「camera」という名前を指定します。,
-pos=アニメーション後、3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=アニメーション後、3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-scale=アニメーション後、3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
-time=アニメーションにかける時間をミリ秒で指定します。デフォルトは1000です。,
-wait=アニメーションの完了を待つか否か。true or false デフォルトはtrueです。,
-lookat=ameraのときだけ有効。オブジェクトのnameかpos座標を指定することでカメラを特定の方向に向けることができます。,
-effect= 変化のエフェクトを指定します。指定できる文字列は以下の種類です<br />
-jswing
-｜def
-｜easeInQuad
-｜easeOutQuad
-｜easeInOutQuad
-｜easeInCubic
-｜easeOutCubic
-｜easeInOutCubic
-｜easeInQuart
-｜easeOutQuart
-｜easeInOutQuart
-｜easeInQuint
-｜easeOutQuint
-｜easeInOutQuint
-｜easeInSine
-｜easeOutSine
-｜easeInOutSine
-｜easeInExpo
-｜easeOutExpo
-｜easeInOutExpo
-｜easeInCirc
-｜easeOutCirc
-｜easeInOutCirc
-｜easeInElastic
-｜easeOutElastic
-｜easeInOutElastic
-｜easeInBack
-｜easeOutBack
-｜easeInOutBack
-｜easeInBounce
-｜easeOutBounce
-｜easeInOutBounce
+name   = アニメーション対象の3Dオブジェクトの`name`を指定します。ただし`camera`を指定した場合はカメラをアニメーションさせる動作となります。,
+pos    = アニメーション後の座標を指定します。xyz座標をそれぞれ半角カンマ区切りでまとめて指定します。,
+rot    = アニメーション後の回転を指定します。xyz軸の回転をそれぞれ半角カンマ区切りでまとめて指定します。,
+scale  = アニメーション後の拡大率を指定します。xyz軸の拡大率をそれぞれ半角カンマで区切ってまとめて指定します。,
+time   = アニメーションにかける時間をミリ秒で指定します。,
+wait   = アニメーションの完了を待つかどうかを`true`または`false`で指定します。,
+lookat = `name`が`camera`のときだけ有効。オブジェクトの`name`か`pos`座標を指定することで、カメラを特定の方向に向けられます。,
+effect = 変化のエフェクトを指定します。以下のキーワードが指定できます。<br>
+`jswing``def``easeInQuad``easeOutQuad``easeInOutQuad``easeInCubic``easeOutCubic``easeInOutCubic``easeInQuart``easeOutQuart``easeInOutQuart``easeInQuint``easeOutQuint``easeInOutQuint``easeInSine``easeOutSine``easeInOutSine``easeInExpo``easeOutExpo``easeInOutExpo``easeInCirc``easeOutCirc``easeInOutCirc``easeInElastic``easeOutElastic``easeInOutElastic``easeInBack``easeOutBack``easeInOutBack``easeInBounce``easeOutBounce``easeInOutBounce`
 
 #[end]
 */
@@ -1717,13 +1679,13 @@ tyrano.plugin.kag.tag["3d_anim"] = {
 3Dアニメ停止
 
 :exp
-アニメーション中の3Dオブジェクトを停止できます。
+3Dオブジェクトのアニメーションを停止できます。
 
 :sample
 
 :param
-name=アニメーションを停止する3Dオブジェクトの名前を指定します。 ,
-finish=true or false を指定します。falseを指定するとアニメーション停止の位置でオブジェクトが停止します。trueだとアニメーションする予定の位置まで移動します。デフォルトはtrue。
+name   = アニメーションを停止する3Dオブジェクトの`name`を指定します。,
+finish = `true`または`false`を指定します。`true`を指定すると3Dオブジェクトが最終的にアニメーションする予定だった場所まで移動します。`false`を指定するとその場で停止します。
 
 #[end]
 */
@@ -1759,7 +1721,7 @@ tyrano.plugin.kag.tag["3d_anim_stop"] = {
 3Dシーン設定
 
 :exp
-3Dのシーン全体に影響する設定を行うことができます。
+3Dシーン全体に影響する設定を行うことができます。
 
 :sample
 
@@ -1767,9 +1729,9 @@ tyrano.plugin.kag.tag["3d_anim_stop"] = {
 
 :param
 
-tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
-tonemap_value=トーンマッピングの強さを設定します。デフォルトは0.8です。,
-light_amb=環境光の強さを指定します。デフォルトは1。例えば 0.5 だと暗め。2だとかなり明るくなります。
+tonemap       = トーンマッピングをシーンに設定できます。以下のキーワードが指定できます。`No``Linear``Reinhard``Uncharted2``Cineon``ACESFilmic`<br>デフォルトは`No`(トーンマッピングなし),
+tonemap_value = トーンマッピングの強さを設定します。,
+light_amb     = 環境光の強さを指定します。デフォルトは`1`。`0.5`だと暗めに、`2`だとかなり明るくなります。
 
 #[end]
 */
@@ -1854,17 +1816,16 @@ tyrano.plugin.kag.tag["3d_scene"] = {
 
 :exp
 3Dシーンのカメラを設定できます。
-カメラの座標を確認したい場合は[camera_debug]をつかって、座標や傾きをテストするのがおすすめです。
+カメラの座標を確認したい場合は`[camera_debug]`をつかって、座標や傾きをテストするのがおすすめです。
 
 :sample
 
-[3d_camera pos="10,20,30" ]
+[3d_camera pos="10,20,30"]
 
 :param
-pos=カメラを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
-rot=カメラの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
-tonemap=トーンマッピングをシーンに設定できます。指定できる種類はNo/Linear/Reinhard/Uncharted2/Cineon/ACESFilmic。デフォルトはNo（トーンマッピングなし）。,
-lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブジェクトの方にカメラを向けることができます。 もしくはposを直接指定することで、その座標にカメラを向けることもできます。
+pos     = カメラの座標を指定します。xyz座標をそれぞれ半角カンマで区切って指定します。,
+rot     = カメラの回転を指定します。xyz軸の回転をそれぞれ半角カンマで区切って指定します。,
+lookat  = シーン上の3Dオブジェクトの`name`を指定することで、そのオブジェクトの方にカメラを向けることができます。もしくはxyz座標を直接指定することで、その座標にカメラを向けることもできます。
 
 #[end]
 */
@@ -1940,23 +1901,22 @@ tyrano.plugin.kag.tag["3d_camera"] = {
 3Dジャイロ
 
 :exp
-スマホの傾きでカメラを制御できます。
+ジャイロ（スマホの傾き）でカメラを制御できます。
 PCゲームの場合はマウスの位置でジャイロを再現できます。
 
 :sample
-
 [3d_gyro max_x="20" max_y="20" ]
 
 :param
-max_x=X軸方向の傾き上限を角度で指定します。デフォルトは30,
-max_y=Y軸方向の傾き上限を角度で指定します。デフォルトは30,
-mode=position か rotation を指定します。傾きに対してカメラに回転の影響を与えるのか、座標移動を与えるのかの違いがあります。デフォルトはrotation（回転）です。
+max_x = X軸方向の傾き上限を角度で指定します。,
+max_y = Y軸方向の傾き上限を角度で指定します。,
+mode  = `position`または`rotation`。カメラの「座標」と「回転」のうちどちらをジャイロで制御するのかを指定できます。回転をジャイロで制御できるようするには`rotation`を、座標をジャイロで制御できるようにするには`position`を指定します。
 
 #[end]
 */
 
 //カメラの設定を変更
-(tyrano.plugin.kag.tag["3d_gyro"] = {
+tyrano.plugin.kag.tag["3d_gyro"] = {
     vital: [],
 
     pm: {
@@ -2209,348 +2169,331 @@ mode=position か rotation を指定します。傾きに対してカメラに�
             this.kag.ftag.nextOrder();
         }
     },
-}),
-    /*
-     #[3d_gyro_stop]
-     :group
-     3D関連
+};
 
-     :title
-     3Dジャイロ停止
+/*
+#[3d_gyro_stop]
+:group
+3D関連
 
-     :exp
-     スマホ限定
-     ジャイロの動きを停止します。
-     カメラの位置も戻したい場合はこのタグの直後に3d_cameraで指定します。
-     再度ジャイロを有効にしたい場合は [3d_gyro] タグです。
+:title
+3Dジャイロ停止
 
-     :sample
+:exp
+ジャイロの動きを停止します。
+カメラの位置や回転をもとに戻したい場合、このタグの直後に`[3d_camera]`で指定する必要があります。
+ジャイロを有効にするには再び`[3d_gyro]`タグを使用します。
 
-     :param
+:sample
 
+:param
 
+#[end]
+*/
 
-     #[end]
-     */
+//カメラの設定を変更
+tyrano.plugin.kag.tag["3d_gyro_stop"] = {
+    vital: [],
 
-    //カメラの設定を変更
-    (tyrano.plugin.kag.tag["3d_gyro_stop"] = {
-        vital: [],
+    pm: {
+        max_x: "30",
+        max_y: "30",
+        frame: "1",
+        next: "true",
+    },
 
-        pm: {
-            max_x: "30",
-            max_y: "30",
-            frame: "1",
-            next: "true",
-        },
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var camera = three.camera;
+        var renderer = three.renderer;
 
-        start: function (pm) {
-            var three = this.kag.tmp.three;
-            var camera = three.camera;
-            var renderer = three.renderer;
+        three.stat.gyro.mode = 0;
 
-            three.stat.gyro.mode = 0;
+        this.kag.ftag.nextOrder();
+    },
+};
 
-            this.kag.ftag.nextOrder();
-        },
-    }),
-    /*
-     #[3d_debug_camera]
-     :group
-     3D関連
+/*
+#[3d_debug_camera]
 
-     :title
-     3Dカメラデバッグ
+:group
+3D関連
 
-     :exp
-     3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら、調整できます。
-     デバッグを終了する場合は画面左上のボタンを押します。
-     マウス操作
-     左クリック：カメラの向き(rot)
-     右クリック：カメラの位置(pos)
-     中央クリック：ポジションのz軸
+:title
+3Dカメラデバッグ
 
+:exp
+3Dシーンのカメラ座標をマウスでドラッグアンドドロップしながら調整できます。
+デバッグを終了する場合は画面左上のボタンを押します。
 
-     :sample
+<b>★マウス操作</b>
+左クリック：カメラの回転`rot`
+右クリック：カメラの位置`pos`
+中央クリック：ポジションの`z`軸
 
-    [3d_debug_camera ]
+:sample
+[3d_debug_camera]
 
-     :param
-     button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「カメラインスペクタを閉じる」 ,
-     menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示)
+:param
+button_text = デバッグ終了ボタンのテキストを自由に設定できます。,
+menu        = デバッグのメニューを表示するかどうか。`false`を指定すると終了ボタンのみになります。
 
+#[end]
+*/
 
+tyrano.plugin.kag.tag["3d_debug_camera"] = {
+    vital: [],
 
-     #[end]
-     */
+    pm: {
+        name: "camera",
+        button_text: "カメラインスペクタを閉じる",
+        menu: "true",
+    },
 
-    (tyrano.plugin.kag.tag["3d_debug_camera"] = {
-        vital: [],
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-        pm: {
-            name: "camera",
-            button_text: "カメラインスペクタを閉じる",
-            menu: "true",
-        },
+        //一番前にもってきて、うごかせるようにする。
+        var j_canvas = three.j_canvas;
+        var target_layer = three.target_layer;
 
-        start: function (pm) {
-            var three = this.kag.tmp.three;
+        var old_target_layer_zindex = target_layer.css("z-index");
+        var old_canvas_zindex = j_canvas.css("z-index");
 
-            //一番前にもってきて、うごかせるようにする。
-            var j_canvas = three.j_canvas;
-            var target_layer = three.target_layer;
+        j_canvas.css("z-index", 9999999);
+        target_layer.css("z-index", 9999999);
 
-            var old_target_layer_zindex = target_layer.css("z-index");
-            var old_canvas_zindex = j_canvas.css("z-index");
+        var model_obj = this.kag.tmp.three.models[pm.name];
+        var model = model_obj.model;
 
-            j_canvas.css("z-index", 9999999);
-            target_layer.css("z-index", 9999999);
+        var renderer = three.renderer;
+        var camera = three.camera;
 
-            var model_obj = this.kag.tmp.three.models[pm.name];
-            var model = model_obj.model;
+        var sc_width = parseInt(this.kag.config.scWidth);
+        var sc_height = parseInt(this.kag.config.scHeight);
 
-            var renderer = three.renderer;
-            var camera = three.camera;
+        // オブジェクトの回転
+        var prevPosition = {};
+        var mousedown = false;
+        var button = 0;
 
-            var sc_width = parseInt(this.kag.config.scWidth);
-            var sc_height = parseInt(this.kag.config.scHeight);
+        //オブジェクトの移動
+        var vec = new THREE.Vector3(); // create once and reuse
+        var pos = new THREE.Vector3(); // create once and reuse
 
-            // オブジェクトの回転
-            var prevPosition = {};
-            var mousedown = false;
-            var button = 0;
+        var original_pos = new THREE.Vector3(); // create once and reuse
 
-            //オブジェクトの移動
-            var vec = new THREE.Vector3(); // create once and reuse
-            var pos = new THREE.Vector3(); // create once and reuse
+        var hen_pos = {
+            x: 0,
+            y: 0,
+            z: 0,
+        };
 
-            var original_pos = new THREE.Vector3(); // create once and reuse
+        var original_v = $.setVector(model);
 
-            var hen_pos = {
-                x: 0,
-                y: 0,
-                z: 0,
-            };
+        var first_client_x = 0;
+        var first_client_y = 0;
 
-            var original_v = $.setVector(model);
+        var first_model_x = 0;
+        var first_model_y = 0;
+        var first_model_z = 0;
 
-            var first_client_x = 0;
-            var first_client_y = 0;
+        function evt_mousewheel(e) {
+            var delta = e.wheelDelta;
 
-            var first_model_x = 0;
-            var first_model_y = 0;
-            var first_model_z = 0;
-
-            function evt_mousewheel(e) {
-                var delta = e.wheelDelta;
-
-                if (delta < 0) {
-                    model.position.z += 5;
-                } else {
-                    model.position.z -= 5;
-                }
-
-                evt_mouseup();
-                e.preventDefault();
+            if (delta < 0) {
+                model.position.z += 5;
+            } else {
+                model.position.z -= 5;
             }
 
-            function evt_mousedown(e) {
-                if (e.button == 0) {
-                    button = 0;
+            evt_mouseup();
+            e.preventDefault();
+        }
 
-                    first_client_x = e.clientX;
-                    first_client_y = e.clientY;
+        function evt_mousedown(e) {
+            if (e.button == 0) {
+                button = 0;
 
-                    first_model_x = model.rotation.x;
-                    first_model_y = model.rotation.y;
-                } else if (e.button == 1) {
-                    //target.innerHTML = "中ボタンが押されました。";
-                    button = 1;
-                    first_client_y = e.clientY;
-                    first_model_z = model.position.z;
-                } else if (e.button == 2) {
-                    button = 2;
+                first_client_x = e.clientX;
+                first_client_y = e.clientY;
 
-                    first_client_x = e.clientX;
-                    first_client_y = e.clientY;
+                first_model_x = model.rotation.x;
+                first_model_y = model.rotation.y;
+            } else if (e.button == 1) {
+                //target.innerHTML = "中ボタンが押されました。";
+                button = 1;
+                first_client_y = e.clientY;
+                first_model_z = model.position.z;
+            } else if (e.button == 2) {
+                button = 2;
 
-                    first_model_x = model.position.x;
-                    first_model_y = model.position.y;
-                }
+                first_client_x = e.clientX;
+                first_client_y = e.clientY;
 
-                mousedown = true;
+                first_model_x = model.position.x;
+                first_model_y = model.position.y;
             }
 
-            function evt_mousemove(e) {
-                if (!mousedown) return;
+            mousedown = true;
+        }
 
-                if (button == 0) {
-                    var hen_x = first_client_x - e.clientX;
-                    model.rotation.y = first_model_y + hen_x * 0.005;
+        function evt_mousemove(e) {
+            if (!mousedown) return;
 
-                    var hen_y = first_client_y - e.clientY;
-                    model.rotation.x = first_model_x + hen_y * 0.005;
-                } else if (button == 1) {
-                    var hen_y = first_client_y - e.clientY;
-                    model.position.z = first_model_z + hen_y;
-                } else if (button == 2) {
-                    var hen_x = first_client_x - e.clientX;
-                    model.position.x = first_model_x + hen_x * 1;
+            if (button == 0) {
+                var hen_x = first_client_x - e.clientX;
+                model.rotation.y = first_model_y + hen_x * 0.005;
 
-                    var hen_y = first_client_y - e.clientY;
-                    model.position.y = first_model_y + hen_y * -1;
+                var hen_y = first_client_y - e.clientY;
+                model.rotation.x = first_model_x + hen_y * 0.005;
+            } else if (button == 1) {
+                var hen_y = first_client_y - e.clientY;
+                model.position.z = first_model_z + hen_y;
+            } else if (button == 2) {
+                var hen_x = first_client_x - e.clientX;
+                model.position.x = first_model_x + hen_x * 1;
 
-                    model.position.x = $.orgFloor(model.position.x, 1);
-                    model.position.y = $.orgFloor(model.position.y, 1);
-                }
+                var hen_y = first_client_y - e.clientY;
+                model.position.y = first_model_y + hen_y * -1;
+
+                model.position.x = $.orgFloor(model.position.x, 1);
+                model.position.y = $.orgFloor(model.position.y, 1);
             }
+        }
 
-            function evt_mouseup(e) {
-                first_client_x = 0;
-                first_client_y = 0;
+        function evt_mouseup(e) {
+            first_client_x = 0;
+            first_client_y = 0;
 
-                if (button == 0) {
-                    var str =
-                        $.orgFloor(model.rotation.x, 100) +
-                        "," +
-                        $.orgFloor(model.rotation.y, 100) +
-                        "," +
-                        model.rotation.z;
-                } else if (button == 2 || button == 1) {
-                }
-
-                var msg_pos =
-                    model.position.x +
-                    "," +
-                    model.position.y +
-                    "," +
-                    model.position.z;
-                var msg_rot =
+            if (button == 0) {
+                var str =
                     $.orgFloor(model.rotation.x, 100) +
                     "," +
                     $.orgFloor(model.rotation.y, 100) +
                     "," +
-                    $.orgFloor(model.rotation.z, 100);
-                var msg_scale =
-                    $.orgFloor(model.scale.x, 100) +
-                    "," +
-                    $.orgFloor(model.scale.y, 100) +
-                    "," +
-                    $.orgFloor(model.scale.z, 100);
-
-                var msg =
-                    'pos="' +
-                    msg_pos +
-                    '" rot="' +
-                    msg_rot +
-                    '" scale="' +
-                    msg_scale +
-                    '" ';
-                j_debug_msg.find("input").val(msg);
-
-                mousedown = false;
+                    model.rotation.z;
+            } else if (button == 2 || button == 1) {
             }
 
-            ///マウスホイール
-            renderer.domElement.addEventListener(
+            var msg_pos =
+                model.position.x +
+                "," +
+                model.position.y +
+                "," +
+                model.position.z;
+            var msg_rot =
+                $.orgFloor(model.rotation.x, 100) +
+                "," +
+                $.orgFloor(model.rotation.y, 100) +
+                "," +
+                $.orgFloor(model.rotation.z, 100);
+            var msg_scale =
+                $.orgFloor(model.scale.x, 100) +
+                "," +
+                $.orgFloor(model.scale.y, 100) +
+                "," +
+                $.orgFloor(model.scale.z, 100);
+
+            var msg =
+                'pos="' +
+                msg_pos +
+                '" rot="' +
+                msg_rot +
+                '" scale="' +
+                msg_scale +
+                '" ';
+            j_debug_msg.find("input").val(msg);
+
+            mousedown = false;
+        }
+
+        ///マウスホイール
+        renderer.domElement.addEventListener(
+            "mousewheel",
+            evt_mousewheel,
+            false,
+        );
+        renderer.domElement.addEventListener("mousedown", evt_mousedown, false);
+        renderer.domElement.addEventListener("mouseup", evt_mouseup, false);
+        renderer.domElement.addEventListener("mousemove", evt_mousemove, false);
+
+        //デバッグ終了ボタンを押すと、nextOrderする。
+        //リロードボタンの配置
+        //メッセージエリア非表示。
+
+        var j_close_button = $(
+            "<div class='area_three_debug' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
+                pm.button_text +
+                "</span></button></div>",
+        );
+        j_close_button.draggable({
+            scroll: false,
+            //containment:".tyrano_base",
+            stop: (e, ui) => {},
+        });
+
+        var j_debug_msg = $(
+            "<div style='padding:5px'><input type='text' style='width:320px' /></div>",
+        );
+        var j_copy_button = $("<input type='button' value='コピー' />");
+
+        j_copy_button.on("click", (e) => {
+            evt_mouseup();
+
+            j_debug_msg.find("input").select();
+            // コピー
+            document.execCommand("copy");
+        });
+
+        var j_reset_button = $("<input type='button' value='リセット' />");
+        j_reset_button.on("click", (e) => {
+            //モデルを最初の位置に戻す
+            //document.execCommand("copy");
+            model.position.set(
+                original_v.pos.x,
+                original_v.pos.y,
+                original_v.pos.z,
+            );
+            model.rotation.set(
+                original_v.rot.x,
+                original_v.rot.y,
+                original_v.rot.z,
+            );
+            model.scale.set(
+                original_v.scale.x,
+                original_v.scale.y,
+                original_v.scale.z,
+            );
+        });
+
+        j_close_button.find("button").on("click", (e) => {
+            j_close_button.remove();
+
+            j_canvas.css("z-index", old_canvas_zindex);
+            target_layer.css("z-index", old_target_layer_zindex);
+
+            renderer.domElement.removeEventListener("mousedown", evt_mousedown);
+            renderer.domElement.removeEventListener("mouseup", evt_mouseup);
+            renderer.domElement.removeEventListener("mousemove", evt_mousemove);
+            renderer.domElement.removeEventListener(
                 "mousewheel",
                 evt_mousewheel,
-                false,
-            );
-            renderer.domElement.addEventListener(
-                "mousedown",
-                evt_mousedown,
-                false,
-            );
-            renderer.domElement.addEventListener("mouseup", evt_mouseup, false);
-            renderer.domElement.addEventListener(
-                "mousemove",
-                evt_mousemove,
-                false,
             );
 
-            //デバッグ終了ボタンを押すと、nextOrderする。
-            //リロードボタンの配置
-            //メッセージエリア非表示。
+            this.kag.ftag.nextOrder();
+        });
 
-            var j_close_button = $(
-                "<div class='area_three_debug' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
-                    pm.button_text +
-                    "</span></button></div>",
-            );
-            j_close_button.draggable({
-                scroll: false,
-                //containment:".tyrano_base",
-                stop: (e, ui) => {},
-            });
+        if (pm.menu == "true") {
+            j_close_button.append("<span style='font-size:10px'>｜</span>");
+            j_close_button.append(j_copy_button);
+            j_close_button.append(j_reset_button);
+            j_close_button.append(j_debug_msg);
+        }
 
-            var j_debug_msg = $(
-                "<div style='padding:5px'><input type='text' style='width:320px' /></div>",
-            );
-            var j_copy_button = $("<input type='button' value='コピー' />");
-
-            j_copy_button.on("click", (e) => {
-                evt_mouseup();
-
-                j_debug_msg.find("input").select();
-                // コピー
-                document.execCommand("copy");
-            });
-
-            var j_reset_button = $("<input type='button' value='リセット' />");
-            j_reset_button.on("click", (e) => {
-                //モデルを最初の位置に戻す
-                //document.execCommand("copy");
-                model.position.set(
-                    original_v.pos.x,
-                    original_v.pos.y,
-                    original_v.pos.z,
-                );
-                model.rotation.set(
-                    original_v.rot.x,
-                    original_v.rot.y,
-                    original_v.rot.z,
-                );
-                model.scale.set(
-                    original_v.scale.x,
-                    original_v.scale.y,
-                    original_v.scale.z,
-                );
-            });
-
-            j_close_button.find("button").on("click", (e) => {
-                j_close_button.remove();
-
-                j_canvas.css("z-index", old_canvas_zindex);
-                target_layer.css("z-index", old_target_layer_zindex);
-
-                renderer.domElement.removeEventListener(
-                    "mousedown",
-                    evt_mousedown,
-                );
-                renderer.domElement.removeEventListener("mouseup", evt_mouseup);
-                renderer.domElement.removeEventListener(
-                    "mousemove",
-                    evt_mousemove,
-                );
-                renderer.domElement.removeEventListener(
-                    "mousewheel",
-                    evt_mousewheel,
-                );
-
-                this.kag.ftag.nextOrder();
-            });
-
-            if (pm.menu == "true") {
-                j_close_button.append("<span style='font-size:10px'>｜</span>");
-                j_close_button.append(j_copy_button);
-                j_close_button.append(j_reset_button);
-                j_close_button.append(j_debug_msg);
-            }
-
-            $("body").append(j_close_button);
-        },
-    });
+        $("body").append(j_close_button);
+    },
+};
 
 /*
 #[3d_motion]
@@ -2575,8 +2518,8 @@ mode=position か rotation を指定します。傾きに対してカメラに�
 [3d_motion name="Robot" motion="Punch"]
 
 :param
-name=3Dオブジェクトの名前を指定します。 ,
-motion=モーション名を指定します。
+name   = 3Dオブジェクトの`name`を指定します。,
+motion = モーション名を指定します。
 
 #[end]
 */
@@ -2614,14 +2557,14 @@ tyrano.plugin.kag.tag["3d_motion"] = {
 :exp
 3Dシーンのオブジェクトをマウスでドラッグアンドドロップしながら、調整できます。
 デバッグを終了する場合は画面左上のボタンを押します。
-マウス操作
-左クリック：カメラの向き(rot)
-右クリック：カメラの位置(pos)
-中央クリック：ポジションのz軸
-スクロール：拡大縮小（scale）
+
+<b>★マウス操作</b>
+左クリック：カメラの回転`rot`
+右クリック：カメラの位置`pos`
+中央クリック：ポジションの`z`軸
+スクロール：拡大縮小`scale`
 
 :sample
-
 [3d_model_new name="Robot" storage="Robot.glb" ]
 [3d_show name="Robot" rot="0.28,0.67,0" pos="-129,-24,910" scale="9.68" ]
 
@@ -2630,11 +2573,11 @@ tyrano.plugin.kag.tag["3d_motion"] = {
 [3d_debug name="Robot" ]
 
 :param
-name=デバッグする3Dオブジェクトのnameを指定します。,
-button_text=デバッグを終了するボタンのテキストを自由に設定できます。デフォルトは「3Dインスペクタを閉じる」,
-menu=デバッグのメニューを表示するか否か。falseを指定すると終了させるボタンのみになります。デフォルトはtrue(表示) ,
-overlap=true or false。trueを指定すると最前面にモデルが表示されます。メニューに隠れたくない場合はここをtrueにしてください。デフォルトはflase,
-reset=true or false。trueを指定するとデバッグが終わった後、モデルがデバッグ前の位置に戻ります。デフォルトはfalse。
+name        = デバッグする3Dオブジェクトのnameを指定します。,
+button_text = デバッグ終了ボタンのテキストを自由に設定できます。,
+menu        = デバッグのメニューを表示するかどうか。`false`を指定すると終了ボタンのみになります。,
+overlap     = `true`または`false`。`true`を指定すると、モデルが最前面に表示されます。モデルがメニューに隠れてしまう場合はここを`true`にしてください。,
+reset       = `true`または`false`。`true`を指定すると、デバッグ終了後にモデルの状態がデバッグ前に戻ります。
 
 #[end]
 */

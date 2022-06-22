@@ -8,21 +8,28 @@
 式の評価
 
 :exp
-expで示された式を評価します。変数への値の代入などに使用されます。
-exp には任意の TJS(JS) 式を指定できるので、TJS(JS) として有効な式であれば 何でも評価できます。
+`exp`に指定されたJavaScriptの文を実行します。主に変数に値をセットする際に活用できます。
+
+`exp`に指定する文は必ずダブルクォート（"）で囲みましょう。意図しない動作を防ぐことができます。
+
+`exp`には任意のJavaScript文を指定できるので、関数の実行なども可能です。（高度）
 
 :sample
-[eval exp="f.test=500"]
-;↑ゲーム変数 test に数値を代入している
-[eval exp="f.test2='文字列'"]
-;↑ゲーム変数 test2 に文字列を代入している
-[eval exp="sf.test=400"]
-;↑システム変数 test に数値を代入している
-[eval exp="f.test2=f.test*3"]
-;↑ゲーム変数 test2 に ゲーム変数 test の 3 倍の数値を代入している
+[eval exp="f.akane_like=50"]
+;↑ゲーム変数 akane_like に 50 という数値をセット
+;あかねの好感度は50のようだ
+
+[eval exp="f.akane_nickname=''"]
+;↑ゲーム変数 akane_nickname に あーちゃん という文字列をセット
+;あかねのあだ名はあーちゃんのようだ
+;※文字列はシングルクォーテーション（'）で囲みます
+
+[eval exp="f.yamato_like = f.akane_like * 2"]
+;↑ゲーム変数 yamato_like に ゲーム変数 akane_like の 2倍の数値をセット
+;やまとの好感度はあかねの好感度の2倍のようだ
 
 :param
-exp=評価するTJS式を指定します。
+exp = 実行するJavaScript文を指定します。
 
 :demo
 1,kaisetsu/19_variable_1
@@ -58,12 +65,12 @@ tyrano.plugin.kag.tag.eval = {
 変数の消去
 
 :exp
-ゲーム変数を消去します。
+変数を消去します。特定の変数だけを消去することもできます。
 
 :sample
 
 :param
-exp=変数名を指定できます。変数名を指定した場合はその変数だけを消去します。例えば「f.name」「sf.flag」のように指定します。省略すると、すべての変数が消去されます。
+exp = 消去する変数名を指定します。`f.name`や`sf.flag`のように指定します。`name``flag`では動作しません。<br>省略すると、すべての変数が消去されます。
 
 #[end]
 */
@@ -96,7 +103,7 @@ tyrano.plugin.kag.tag.clearvar = {
 システム変数の全消去
 
 :exp
-システム変数を全消去します
+システム変数を全消去します。
 
 :sample
 
@@ -124,20 +131,18 @@ tyrano.plugin.kag.tag.clearsysvar = {
 スタックの消去
 
 :exp
-システムが管理するスタックを消去します。
+システムが管理するスタックを消去します。<b>帰るべきスタックがない場面（タイトルや章の始まりなど、きりの良い場面）でこのタグを配置しておくことをオススメします</b>。
 
-帰るべきスタックがない場面（タイトルや章の始まりなど、きりの良い場面）でこのタグを配置しておくことをオススメします。
+スタックとは、ゲームを進める中で`[call]`、`[if]`、マクロを通過するときに呼び出し元に帰ってくるために記憶しておくメモリ領域です。（森を探検するときに目印として落としておくパンくずのようなものとお考えください）
 
-スタックとは、ゲームを進める中で`[call]`、`[if]`、マクロを通過したさいに呼び出し元に帰ってくるために記憶しておくメモリ領域です。
+通常であれば、スタックは`[return]``[endif]``[endmacro]`を踏んだときに回収されます。しかし`[call]`先で`[return]`することなく別のシナリオにジャンプしたり、`[if]`やマクロの中でジャンプしたりすることを繰り返した場合、回収されないスタックが溜まっていきます。
 
-`[call]`先で`[return]`することなくジャンプしたり、`[if]`やマクロの中でジャンプしたりすることを繰り返した場合、回収されないスタックが溜まっていきます。
-
-スタックが溜まりすぎると、セーブデータの肥大化やマシンのパフォーマンスの低下を引き起こす恐れがあります。
+スタックが溜まりすぎると、ゲームの動作が重くなったりセーブデータが肥大化したりする恐れがあります。
 
 :sample
 
 :param
-stack=`call`、`if`、`macro`のいずれかを指定できます。特定のスタックのみ削除できます。省略すると、全てのスタックを削除します。
+stack = `call`、`if`、`macro`のいずれかを指定できます。特定のスタックのみ削除できます。省略すると、全てのスタックを削除します。
 
 #[end]
 */
@@ -171,13 +176,13 @@ tyrano.plugin.kag.tag.clearstack = {
 ウィンドウを閉じる
 
 :exp
-アプリ版の場合、ウィンドウを閉じます。
-ブラウザ版の場合、タブを閉じます。
+PCアプリの場合、ウィンドウを閉じます。
+ブラウザゲームの場合、タブを閉じます。
 
 :sample
 
 :param
-ask=終了の確認をするかどうか。`true`または`false`で指定します。デフォルトは`true`。
+ask = 終了の確認をするかどうか。`true`または`false`で指定します。デフォルトは`true`。
 
 #[end]
 */
@@ -246,7 +251,7 @@ tyrano.plugin.kag.tag["close"] = {
 [trace exp="f.test"]
 
 :param
-exp=評価するJS式を指定します。
+exp = 評価するJS式を指定します。
 
 #[end]
 */
@@ -277,20 +282,21 @@ tyrano.plugin.kag.tag["trace"] = {
 ゲーム画面外の設定
 
 :exp
-ゲーム描画領域の外側をカスタマイズできます。
-例えば、背景画像を設定するなど。
-重要な点として必ずfirst.ksなど、ゲーム起動時に通過する場所で設定してください。このタグはロード時は復元されません。
+ゲーム画面サイズやゲーム画面外側の黒帯部分をカスタマイズできます。黒帯部分の色を変更したり、黒帯部分に画像を設定したり、ゲーム画面サイズをゲーム中に変更したりできます。
+
+<b>★注意</b>
+このタグで変更した内容はセーブデータのロード時に復元されません。
 
 :sample
 [body bgimage="back.png" bgcolor="black" ]
 
 :param
-bgimage=ゲーム画面外の背景に設定する画像を指定します。bgimageフォルダに配置してください。,
-bgrepeat=背景に画像を指定した際の表示パターンを指定します。デフォルトは縦横に繰り返し表示されます。repeat-x:水平方向のみ繰り返し。repeat-y:垂直方向のみ繰り返し。round:比率を崩して覆うように全画面繰り返し。no-repeat:繰り返しなし,
-bgcolor=背景色を0xRRGGBB形式で指定します。なお、bgimageが設定されている場合は無視されます。,
-bgcover= true or false。デフォルトはfalse 。trueを指定すると１枚が全画面に引き伸ばして配置されます,
-scWidth=ゲーム画面のオリジナル横幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscWidthに対応します。,
-scHeight=ゲーム画面のオリジナル縦幅サイズをゲーム中に変更できます。レスポンシブ対応を想定したタグです。Config.tjsのscHeightに対応します。
+bgimage  = ゲーム画面外の背景に設定する画像を指定します。`bgimage`フォルダに配置してください。,
+bgrepeat = 背景に画像を指定した際の表示パターンを指定します。デフォルトは縦横に繰り返し表示されます。<br>`repeat-x`(水平方向のみ繰り返し)<br>`repeat-y`(垂直方向のみ繰り返し)<br>`round`(比率を崩して覆うように全画面繰り返し)<br>`no-repeat`(繰り返しなし),
+bgcolor  = 背景色を`0xRRGGBB`形式で指定します。`bgimage`が設定されている場合は無視されます。,
+bgcover  = 背景画像を画面全体に引き伸ばすかどうか。`true`または`false`で指定します。,
+scWidth  = ゲーム画面のオリジナルの横幅をゲーム中に変更できます。レスポンシブ対応を想定したタグです。`Config.tjs`の`scWidth`に相当します。<br>※「オリジナルの」は「ウィンドウサイズにフィットさせるためにゲーム画面の拡縮を行う前の」という意味で用いられています。,
+scHeight = ゲーム画面のオリジナルの高さをゲーム中に変更できます。レスポンシブ対応を想定したタグです。`Config.tjs`の`scHeight`に相当します。
 
 #[end]
 */
@@ -379,16 +385,19 @@ tyrano.plugin.kag.tag["body"] = {
 タイトル指定
 
 :exp
-ゲームタイトルを指定します。
-例えば、章ごとにタイトルを変えるとプレイヤーからわかりやすくなります。
-吉里吉里の場合、アプリのウィンドウタイトル。
-ティラノスクリプトの場合、ブラウザタイトルが変わります
+ゲームタイトルを指定します。たとえば、章ごとにタイトルを変えるとプレイヤーがわかりやすくなります。
+
+PCアプリではウィンドウタイトル、ブラウザゲームではタブタイトルが変わります。
+
+このタグを通過するまでのタイトルは次のようになっています。
+ゲーム起動直後 … `Loading TyranoScript`
+読み込み後 … `Config.tjs`の`System.title`で設定されたテキスト
 
 :sample
 [title name="変更後のタイトル"]
 
 :param
-name=表示したいタイトルを指定します
+name = 表示したいタイトルを指定します
 
 #[end]
 */
@@ -420,17 +429,21 @@ tyrano.plugin.kag.tag["title"] = {
 JavaScriptの記述
 
 :exp
-[iscript]と[endscript]に囲まれた箇所にJavaScriptを記述できます。
-TJSの式にも適応できますが、ティラノスクリプトとの動作互換はありません
+`[iscript]`と`[endscript]`に囲まれた箇所にJavaScriptの文を記述できます。
 
 :sample
 [iscript]
 
 var test = 22;
 f.name = test;
-alert("javascriptの関数にもアクセス可能");
-//jqueryも利用可能 コメントもJS方式利用可能
+//JavaScriptの関数にアクセス可能
+alert("JavaScript");
+//jQueryも利用可能
 $("body").html();
+
+//JS方式の行コメントも書けますが
+;ティラノスクリプトの行コメントも有効のままなので注意が必要です
+;alert("!!")
 
 [endscript]
 
@@ -461,12 +474,12 @@ tyrano.plugin.kag.tag.iscript = {
 JavaScriptの終了
 
 :exp
-JavaScriptの記述を終了します
+JavaScriptの記述を終了します。
 
 :sample
 
 :param
-stop=endscriptに到達した時、ここにtrueを指定すると次のタグに進ませない。scriptの中でjumpした時などに指定する。デフォルトはfalse
+stop = 【高度】`true`を指定すると、`[endscript]`に到達したときに次のタグに進まなくなります。JavaScriptの記述によってシナリオをジャンプさせたい場合に`true`を指定します。
 
 #[end]
 */
@@ -478,9 +491,17 @@ tyrano.plugin.kag.tag.endscript = {
     },
 
     start: function (pm) {
+        var that = this;
         this.kag.stat.is_script = false;
         //スクリプトを実行する
-        this.kag.evalScript(this.kag.stat.buff_script);
+        try {
+            this.kag.evalScript(this.kag.stat.buff_script);
+        } catch (err) {
+            that.kag.error(
+                "[iscript]に記述されたJavaScript実行時にエラーが発生しました。",
+            );
+            console.error(err);
+        }
         this.kag.stat.buff_script = "";
 
         if (pm.stop == "false") {
@@ -499,17 +520,16 @@ tyrano.plugin.kag.tag.endscript = {
 HTMLをレイヤ追加
 
 :exp
-[html]と[endhtml]の間に記述したHTMLを表示できます。
-この機能は非常に強力です。もちろんJavaScriptタグ。Canvasなど次世代Web表現を全てサポートします。
-例えば、Youtubeのビデオプレイヤーを挿入したり、無数に公開されているWebAPIとの連携なども可能です。
-このタグで挿入した場合は最前面にHTML要素が挿入されます
-cmタグなどで画面をクリアしない限り、クリックしてもゲームが進みません。
-必ずグラフィックボタンなども配置して、ジャンプでゲームを進める状態にしておくことが必要です。
-タグの中に、ティラノスクリプトの変数を挿入することもできます。
-従来通りHTMLの中で[emb]タグを使用してください
+`[html]`と`[endhtml]`の間に記述したHTMLを表示できます。このHTMLは最前面に表示されます。
+
+この機能は非常に強力です。JavaScript、Canvas、YouTubeのプレイヤーなどを埋め込むことができ、次世代Web表現を全てサポートします。
+
+HTMLの記述内にティラノスクリプトの変数を使うことができます。通常のテキスト通り`[emb]`タグを使用してください。
+
+<b>★注意</b>
+HTML表示中は画面をクリックしてもゲームが進みません。必ずグラフィックボタンなどを配置して、ジャンプでゲームを進める状態にしてください。
 
 :sample
-
 ;youtubeのプレイヤーを指定した位置に挿入します
 ;yoububeから埋め込み用タグを取得してきています
 [html top=100 left=300]
@@ -525,9 +545,9 @@ cmタグなどで画面をクリアしない限り、クリックしてもゲー
 [endhtml]
 
 :param
-left=HTMLタグの左端位置を指定します。（ピクセル）,
-top=HTMLの上端位置を指定します。（ピクセル）,
-name=HTML領域に名前を指定できます。この名前を使って、HTML領域に対してアニメーションなども実行できます。
+left = HTMLの左端位置を指定します。（ピクセル）,
+top  = HTMLの上端位置を指定します。（ピクセル）,
+name = HTML領域に名前を指定できます。この名前を使って、HTML領域に対してアニメーションを実行することができます。
 
 :demo
 2,kaisetsu/11_html
@@ -562,7 +582,7 @@ tyrano.plugin.kag.tag.html = {
 HTMLの終了
 
 :exp
-HTMLの記述を終了します
+HTMLの記述を終了します。
 
 :sample
 
@@ -620,17 +640,31 @@ tyrano.plugin.kag.tag.endhtml = {
 式評価結果の埋め込み
 
 :exp
-exp で示された式を評価(実行)し、その結果を埋め込みます。
-変数をシナリオ中に表示させたい場合に使います。
+`exp`で指定されたJavaScriptの文を評価し、その結果をテキストとして表示します。
+
+変数の中身をシナリオに埋め込みたい場合に使います。
 
 :sample
-[eval exp="f.value1='変数の値だよ～ん'"]
-とどこかで書いておいて、
-[emb exp="f.value1"]
-と書くと、この emb タグが 変数の値だよ～ん という内容に置き換わります。
+;ゲーム変数 name に ポチ という文字列をセット
+[eval exp="f.name='ポチ'"]
+;↑長くなるためここでは扱いませんが
+; [edit]タグでプレイヤーに入力させてみても面白いですね
+
+;テキスト中に変数の中身を埋め込む
+今日からこの子の名前は[emb exp="f.name"]だ。[l][r]
+
+;キャラの名前のようなケースでは
+;仮名でマクロ化しておくとシナリオファイルが読みやすくなるでしょう
+[macro name="シロ"]
+  [emb exp="f.name"]
+[endmacro]
+
+;仮名マクロで記述する
+おーい、[シロ]。[シロ]！元気？[s]
+;※サンプルでは f.name に ポチ が入っているのでポチと表示される
 
 :param
-exp=評価するTJS（JS）式を指定します。ここで評価された式がembタグと置き換わります
+exp = 評価するJavaScriptの式を指定します。基本的には変数の名前を指定すればよいでしょう。`f.name``sf.text`など。
 
 #[end]
 */
@@ -664,45 +698,55 @@ tyrano.plugin.kag.tag.emb = {
 条件分岐
 
 :exp
-式を評価し、その結果が true ( または 0 以外 ) ならば、 elsif・else・endif のいずれかまでにある文章やタグを実行し、 そうでない場合は無視します。
+条件分岐を行います。
+
+`exp`に指定されたJavaScriptの式を評価します。その結果が`true`(真)ならば、`[elsif]``[else]``[endif]`のいずれかまでにある文章やタグを実行します。`false`(偽)ならば、次の`[elsif]``[else]``[endif]`のいずれかに移動します。
+
+JavaScriptの比較式の例を以下に示します。例中の`A`や`B`には、変数、数値、文字列、式などを当てはめることができます。
+
+`A === B` AとBは等しい
+`A !== B` AとBは等しくない
+`A > B` AはBよりも大きい
+`A >= B` AはB以上である
+`A < B` AはBよりも小さい
+`A <= B` AはB以下である
+
+<b>★高度</b>
+`exp`には比較式以外も記述できます。`true`や`false`などのキーワードを直接指定したり、変数を指定したり、関数を実行したりできます。JavaScriptにはいくつか特殊な`trueとして扱われる値`が存在しますので、注意が必要です。
 
 :sample
-;例1
-[if exp="false"]
-ここは表示されない
-[else]
-ここは表示される
+;ゲーム変数 like に 50 という数値をセット
+;自由に変えてみてください
+[iscript]
+f.like = 50
+[endscript]
+
+例1[p]
+
+[if exp="f.like < 30"]
+  好感度が低いです[p]
 [endif]
 
-;例2
-[if exp="false"]
-ここは表示されない
-[elsif exp="false"]
-ここは表示されない
+例2[p]
+
+[if exp="f.like < 3c0"]
+  好感度が低いです[p]
 [else]
-ここは表示される
+  好感度が低くはないようです[p]
 [endif]
 
-;例3
-[if exp="false"]
-ここは表示されない
-[elsif exp="true"]
-ここは表示される
-[else]
-ここは表示されない
-[endif]
+例3[p]
 
-;例4
-[if exp="true"]
-ここは表示される
-[elsif exp="true"]
-ここは表示されない
+[if exp="f.like >= 80"]
+  最高の好感度です[p]
+[elsif exp="f.like >= 40"]
+  かなり高い好感度です[p]
 [else]
-ここは表示されない
+  好感度は高くありません[p]
 [endif]
 
 :param
-exp=評価する TJS 式を指定します。この式の結果が false ( または 0 な らば、elsif・else・endif タグまでの文章やタグが無視されます。
+exp = 評価するJavaScriptの式を指定します。
 
 :demo
 1,kaisetsu/20_variable_2
@@ -764,16 +808,19 @@ tyrano.plugin.kag.tag["if"] = {
 マクロ・変数・JS操作
 
 :title
-それまでの if の中身が実行されていなかったときに、条件付きで実行
+条件分岐（複数の条件）
 
 :exp
-if タグと endif タグの間で用いられます。 それまでの if タグまたは elsif タグの中身がひとつも実行されていないときに 式を評価し、その結果が真ならば elsif から次の elsif・else・endif までの間を実行します。
-使い方の例については、if タグの項目を参照してください。
+`[if]`タグと`[endif]`タグの間で使います。分岐の条件を増やして、複雑な分岐を行なうことができます。
+
+このタグまでに記述された`[if]``[elsif]`タグの条件をまだ満たしていない場合に`exp`を評価します。その結果が`true`(真)ならば、次の`[elsif]``[else]``[endif]`のいずれかまでにある文章やタグを実行します。`false`(偽)ならば、次の`[elsif]``[else]``[endif]`のいずれかに移動します。
+
+使い方の例については`[if]`タグの項目を参照してください。
 
 :sample
 
 :param
-exp=評価する JS 式を指定します。
+exp = 評価する JS 式を指定します。
 
 :demo
 1,kaisetsu/20_variable_2
@@ -829,11 +876,13 @@ tyrano.plugin.kag.tag["elsif"] = {
 マクロ・変数・JS操作
 
 :title
-if の中身が実行されなかったときに実行
+条件分岐（条件を満たさなかったとき）
 
 :exp
-if タグもしくは elsif タグ と endif タグの間で用いられます。 if または elsif ブロックの中身がひとつも実行されていないとき、 else から endif までの間を実行します。
-使い方の例については、if タグの項目を参照してください。
+`[if]`もしくは`[elsif]`タグと`[endif]`タグの間で用いられます。 このタグまでに記述された`[if]``[elsif]`タグの条件をまだ満たしていない場合に、このタグから`[endif]`までの記述が実行されます。
+
+使い方の例については`[if]`タグの項目を参照してください。
+
 
 :sample
 
@@ -887,15 +936,14 @@ tyrano.plugin.kag.tag["else"] = {
 マクロ・変数・JS操作
 
 :title
-if文を終了します
+条件分岐の終了
 
 :exp
-if文を終了します。必ずif文の終わりに記述する必要があります
+`[if]`文を終了します。`[if]`文の終わりに必ず記述する必要があります。
 
 :sample
 
 :param
-exp=評価する TJS 式を指定します。
 
 #[end]
 */
@@ -921,14 +969,33 @@ tyrano.plugin.kag.tag["endif"] = {
 サブルーチンの呼び出し
 
 :exp
-指定されたシナリオファイルの指定されたラベルで示される サブルーチンを呼び出します。
-呼び出されたサブルーチンは、 return タグで 呼び出し元や任意の場所に戻ることができます。
+指定したシナリオファイル・ラベルにジャンプします。
+
+ジャンプ先で`[return]`タグに到達すると、`[call]`タグの場所にまた戻ってきます。<b>`[return]`タグで戻ってこれる</b>という点が`[jump]`タグとの違いです。
+
+`[call]`タグのジャンプ先のことを<b>サブルーチン</b>と呼びます。たとえば、何度も使うことになる同じ処理をサブルーチンとして記述して`[call]`で呼び出すようにする、という使い方があります。
+
+`[call]`タグが実行されるとスタックがひとつ溜まります。スタックは`[return]`で回収されます。スタックについては`[clearstack]`の項目もご確認ください。
 
 :sample
+頭をなでた。[p]
+[call target=sub]
+しっぽをなでた。[p]
+[call target=sub]
+おなかをなでた。[p]
+[call target=sub]
+おわり[s]
+
+*sub
+[font color=green]
+好感度が上がったぞ！
+[resetfont][p]
+[return]
+
 
 :param
-storage=呼び出したいサブルーチンのあるのシナリオファイルを 指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
-target=呼び出すサブルーチンのラベルを指定します。省略すると、ファイルの先頭から実行されます。
+storage = 呼び出したいサブルーチンのあるのシナリオファイルを 指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
+target  = 呼び出すサブルーチンのラベルを指定します。省略すると、ファイルの先頭から実行されます。
 
 :demo
 1,kaisetsu/21_macro
@@ -973,9 +1040,7 @@ tyrano.plugin.kag.tag["call"] = {
 サブルーチンから戻る
 
 :exp
-サブルーチンから呼び出し元に戻ります。
-KAG３の任意の場所へのリターンは廃止しました。
-（必要な場合はCallで代用してください）
+サブルーチンから呼び出し元に戻ります。詳細は`[call]`の項目を参照してください。
 
 :sample
 
@@ -1029,27 +1094,52 @@ tyrano.plugin.kag.tag["return"] = {
 マクロ・変数・JS操作
 
 :title
-マクロの記述
+マクロ定義の開始
 
 :exp
-マクロ記述を開始します。新しいタグを定義することが出来ます。
-このタグから、endmacro タグまでにある文章やタグは、 name 属性で指定されたタグとして登録され、以後使用できるようになります。
-マクロ中に書かれたタグには、特別に % を頭につけた属性の値を指定できます。 % 以降にはマクロに渡された属性名を指定します。すると、マクロに渡された属性の値をその属性の値とできます。このとき、| を使って属性の省略値を指定することもできます ( 下の例参照 )。 属性名には小文字を用いてください。
-また、属性の代わりに * を書くと、マクロに渡されたすべての属性をそのタグに渡すこと ができます。
+マクロ記述を開始します。<b>自分で新しいタグを定義することが出来ます</b>。
+
+`[macro]`から`[endmacro]`タグまでにある文章やタグは、`name`属性で指定されたタグとして登録されます。登録されたあとは自由に使用できるようになります。
+
+マクロの中に書かれたタグには、特殊なパラメータの指定の記述方法が存在します。
+
+パラメータの値の先頭に`%`を付けると、マクロに渡されたパラメータの値を流用できます。このとき、`|`を使って属性の省略値を指定することもできます。サンプルコードを見れば理解しやすいでしょう。
+
+またタグのなかに`*`を書くと、マクロに渡されたすべてのパラメータをそのタグに流用できます。
 
 :sample
-[macro name="newtag"][font color=0xff0000]新しいタグです[resetfont][endmacro]
-[newtag]
-[macro name="colortag"][font color=%iro]iro 属性付きのタグ[resetfont][endmacro]
-[colortag iro=0x332211]
-;↑ colotag に渡された iro 属性の値が font タグの color 属性に渡される
-[macro name="transwait"][trans *][wt][endmacro]
-;↑ この transwait に渡されたすべての属性が trans タグに渡される
-[macro name="colortag"][font color=%iro|0xff0000]iro 属性付きで省略値をしていしたタグ[resetfont][endmacro]
-;↑ % の属性の値では、 | のあとに続けて、その属性の省略値を指定できます
+;自分で[my_color_1]というタグを作れる！！
+[macro name="my_color_1"]
+  [font color="0xff0000"]
+  新しいタグです[p]
+  [resetfont]
+[endmacro]
+
+;さっそく使ってみる
+[my_color_1]
+
+;iroパラメータを指定できる、もし指定がなかったら0xff0000
+[macro name="my_color_2"]
+  [font color=%iro|0xff0000]
+  iroパラメータを指定できるタグです[p]
+  [resetfont]
+[endmacro]
+
+;さっそく使ってみる
+[my_color_2 iro=0x00ff00]
+[my_color_2]
+
+;すべてのパラメータを流用するマクロ
+[macro name="my_color_3"]
+  [font *]
+  すべてのパラメータを渡せるタグです[p]
+  [resetfont]
+[endmacro]
+
+[my_color_3 color=0x0000ff bold=true size=80]
 
 :param
-name=マクロの名前を指定します。以後この名前で新しいタグが定義され呼び出せるようになります。
+name = <p>マクロの名前を指定します。以後、この名前をタグのように記述することで、マクロを呼び出せるようになります。</p><p><b>★重要</b><br>ティラノスクリプトにすでに使用されているタグ名は使わないでください。また`text`や`label`も使えません。</p>
 
 :demo
  1,kaisetsu/21_macro
@@ -1105,10 +1195,10 @@ tyrano.plugin.kag.tag.macro = {
 マクロ・変数・JS操作
 
 :title
-マクロを終了します
+マクロ定義の終了
 
 :exp
-マクロの終了タグです
+マクロの記述を終了します。
 
 :sample
 
@@ -1129,22 +1219,29 @@ tyrano.plugin.kag.tag.endmacro = {
             return;
         }
 
+        //最新のマクロスタックを取得
         var map_obj = this.kag.getStack("macro");
-        //最新のコールスタックを取得
 
-        //もし、スタックが溜まっている状態なら、
+        //マクロスタックが取得できたかどうか
         if (map_obj) {
-            //呼び出し元に戻る
+            //マクロスタックが取得できた場合（取得できない、ということは通常ではありえない）
+
+            //マクロスタックをpop
             this.kag.popStack("macro");
-            this.kag.stat.mp = this.kag.getStack("macro");
-            //参照用パラメータを設定
+
+            //さらにスタックを取得してみよう
+            var macro_stack = this.kag.getStack("macro") || { pm: {} };
+            //↑マクロの中で呼ばれたマクロの[endmacro]のケースではこれが取得できる！
+            //↑最も表層のマクロの[endmacro]のケースではundefinedとなってしまうので初期値を代入
+
+            //mpを復元
+            this.kag.stat.mp = $.extend({}, macro_stack.pm);
 
             this.kag.ftag.nextOrderWithIndex(
                 map_obj.index,
                 map_obj.storage,
                 true,
             );
-            //スタックを奪い取る
         } else {
             //呼び出し元がない場合、普通に次の処理を行えば良い
             //endmacroの場合はだめじゃないでしょうか。。。
@@ -1163,12 +1260,12 @@ tyrano.plugin.kag.tag.endmacro = {
 マクロの削除
 
 :exp
-登録したマクロを削除します
+登録したマクロを削除します。
 
 :sample
 
 :param
-name=削除するマクロ名を記述してください
+name = 削除するマクロ名を指定します。
 
 #[end]
 */
@@ -1197,12 +1294,12 @@ tyrano.plugin.kag.tag.erasemacro = {
 セーブスナップの作成
 
 :exp
-現在のプレイ状況を一時保存します。その後、tyrano.ks　拡張の[setsave]を行うことで、ここで記録したセーブデータが保存されます。
+現在のプレイ状況を一時保存します。その後、`tyrano.ks`拡張の`[setsave]`を行うことで、ここで記録したセーブデータが保存されます。
 
 :sample
 
 :param
-title=セーブデータのタイトルを指定します。
+title = セーブデータのタイトルを指定します。
 
 #[end]
 */
@@ -1233,38 +1330,41 @@ tyrano.plugin.kag.tag.savesnap = {
 オートセーブ機能
 
 :exp
-このタグに到達した際、自動的にプレイ状況を保存します。自動セーブ機能に活用ください。
-[autosave]されたデータが存在する場合、sf.system.autosaveにtrueが格納されます。
-タイトル画面より前に、サンプルのような判定ロジックを用意しておくことで、
-スマートフォンなどで、復帰後に事前にプレイしていた状態からゲームを開始することができるようになります。
+このタグに到達した際、自動的にプレイ状況を保存します。
+
+`[autosave]`されたデータが存在する場合、`sf.system.autosave`に`true`が格納されます。
+
+サンプルコードのような判定ロジックをタイトル画面より前に用意しておくことで、前回のプレイ状況からゲームを再開するような仕組みが作れます。
 
 :sample
+オートセーブデータの判定を行います[l][r]
 
-[autosave]
+[if exp="sf.system.autosave === true"]
 
-;autosaveされたデータが存在する場合、sf.system.autosave に trueが入ります
-[if exp="sf.system.autosave ==true"]
-自動的に保存されたデータが存在します。ロードしますか？[l][r]
+  自動的に保存されたデータが存在します。ロードしますか？[r]
+  [link target=select1]【１】はい[endlink][r]
+  [link target=select2]【２】いいえ[endlink][r]
+  [s]
 
-[link target=*select1]【１】はい[endlink][r]
-[link target=*select2]【２】いいえ[endlink][r]
+  *select1
+  ロードを実行します[l]
+  [autoload]
 
-[s]
+  *select2
+  [cm]
+  ロードを実行しません[l][r]
 
-*select1
-;ロードを実行します
-[autoload]
-
-*select2
-[cm]
-ロードをやめました[l]
-@jump target=*noload
 [else]
-自動的に保存されたデータはありません。[l][r]
+
+  自動的に保存されたデータはありません[l][r]
+
 [endif]
 
+オートセーブを実行しました[autosave][l][r]
+ゲームを再起動してみてください[s]
+
 :param
-title=セーブデータのタイトルを指定します。
+title = セーブデータのタイトルを指定します。
 
 #[end]
 */
@@ -1301,7 +1401,7 @@ tyrano.plugin.kag.tag.autosave = {
 オートロード機能
 
 :exp
-[autosave]タグで保存されたデータを読み込みます
+`[autosave]`タグで保存されたデータを読み込みます。
 
 :sample
 
@@ -1336,12 +1436,13 @@ tyrano.plugin.kag.tag.autoload = {
 条件によりシナリオを無視
 
 :exp
-式を評価し、その結果が true ( または 0 以外 ) ならば、endignore タグまでにある文章 やタグが無視されます。
+
+`exp`に指定されたJavaScriptの式を評価します。その結果が`true`(真)ならば、`[ignore]`と`[endignore]`で囲まれた文章やタグが無視されます。
 
 :sample
 
 :param
-exp=評価する TJS 式を指定します。この式の結果が true ( または 0 以外 )ならば、endignore タグまでの文章やタグが無視されます。
+exp = 評価するJavaScriptの式を指定します。
 
 #[end]
 */
@@ -1381,10 +1482,10 @@ tyrano.plugin.kag.tag.ignore = {
 マクロ・変数・JS操作
 
 :title
-ignoreの終了
+[ignore]の終了
 
 :exp
-ignoreを終了します
+`[ignore]`の記述を終了します。
 
 :sample
 
@@ -1409,39 +1510,39 @@ tyrano.plugin.kag.tag.endignore = {
 テキストボックス
 
 :exp
-テキストボックスを表示します。
-入力された値はcommitタグのタイミングで指定した変数名に格納されます
-フォーム表示中はシナリオは停止します。（クリックしてもストーリーが進まない）
-必ず、グラフィックボタンなどを配置してラベルへジャンプしてください。
-こまかい表示方法の変更はtyrano.css内を編集することで可能です。
+プレイヤーが入力可能なテキストボックスを表示します。
+
+テキストボックス表示中はシナリオの進行が止まります。必ずグラフィックボタンなどを配置してジャンプできるようにしてください。
+
+入力されたテキストは`[commit]`タグが実行されるタイミングで指定された変数に格納されます。`[commit]`タグが実行される時点でテキストボックスがまだ表示されている必要があります。`[glink]`と組み合わせる場合、`[glink]`タグに`cm=false`を指定してください。
+
+<b>★高度</b>
+テキストボックスのデザインは`tyrano/tyrano.css`を編集することで調整可能です。
 
 :sample
-[edit name="f.test"]
+この子の名前を決めなければ…[l]
 
-[locate x=200 y=300 ]
-[button graphic="start.png" target=*commit]
-
+[edit name="f.dog_name" left=50 top=100]
+[glink text="決定" target=next x=250 y=100 cm=false]
 [s]
 
-*commit
-[commit name="f.test"]
+*next
+[commit name="f.dog_name"]
 [cm]
-;入力されたテキストの内容を表示する
-値が確定しました[l]
-「[emb exp=f.test]」と入力しましたね[l]
+この子の名前は「[emb exp=f.dog_name]」だ！[r]
+やあ[emb exp=f.dog_name]！一緒に遊ぼう！[s]
 
 :param
-name=格納する変数名を指定して下さい,
-length=横幅です,
-initial=初期値を設定できます,
-color=文字の色を指定して下さい　デフォルトは黒です,
-left=テキストボックスの横位置を指定します,
-top=テキストボックスの縦位置を指定します,
-autocomplete=入力の履歴を表示するか否か。trueで表示します。デフォルトはfalse,
-size=文字のサイズを指定します　デフォルト２０px,
-width=テキストボックスの幅サイズを指定します,
-height=テキストボックスの高さを指定します,
-maxchars=最大入力文字数
+name         = プレイヤーの入力テキストを保存する変数名を指定してください。,
+initial      = テキストボックスの初期値を設定できます。,
+color        = 文字の色を指定します。,
+left         = テキストボックスの横位置を指定します。,
+top          = テキストボックスの縦位置を指定します。,
+autocomplete = 入力の履歴を表示するかどうか。`true`または`false`で指定します。,
+size         = 文字のサイズを指定します。,
+width        = テキストボックスの横幅を指定します。,
+height       = テキストボックスの高さを指定します。,
+maxchars     = 最大入力文字数を指定します。
 
 :demo
  1,kaisetsu/15_input_1
@@ -1549,7 +1650,7 @@ tyrano.plugin.kag.tag.edit = {
 画像ファイルの事前読み込み
 
 :exp
-preloadタグを使用することで、素材ファイル（画像や音楽）を事前に読み込んでおくことができます。
+`[preload]`タグを使用することで、素材ファイル（画像や音楽）を事前に読み込むことができます。
 実際に素材を使用する際に表示がスムーズになります。
 
 :sample
@@ -1559,14 +1660,19 @@ preloadタグを使用することで、素材ファイル（画像や音楽）�
 
 ;配列を渡すと、まとめてロードすることもできます。
 [iscript]
-f.preload_images = ["data/fgimage/girl.jpg","data/fgimage/haruko.png","data/fgimage/miku1.png","data/fgimage/miku2.png"];
+f.preload_images = [
+  'data/fgimage/girl.jpg',
+  'data/fgimage/haruko.png',
+  'data/fgimage/miku1.png',
+  'data/fgimage/miku2.png'
+];
 [endscript]
 
 [preload storage=&f.preload_images]
 
 :param
-storage=事前に読み込む画像ファイルをフルパスでしていしてください。配列を渡すことでまとめて指定することもできます。,
-wait=trueを指定すると、全ての読み込みが完了するまでゲームを停止します。NowLoadingの表示が必要でしょう。true or false デフォルトはfalse
+storage = プリロードするファイルをフルパスで指定します。JavaScriptの配列を指定することもできます。,
+wait    = `true`を指定すると、すべての読み込みが完了するまでゲームを停止します。`true`にする場合は画面に「Now Loading」などと表示しておき、素材のロード中であることをプレイヤーに知らせるべきでしょう。
 
 #[end]
 */
@@ -1633,10 +1739,12 @@ tyrano.plugin.kag.tag.preload = {
 レイヤ関連
 
 :title
-Fixレイヤーをクリアします。
+fixレイヤーのクリア
 
 :exp
-name属性を指定することで、該当する要素のみを削除することもできます。
+fixレイヤーの要素を消去します。`name`属性を指定することで特定の要素のみを消去することもできます。
+
+fixレイヤーはゲームの最前面にある特殊なレイヤーであり、主にセーブやロードなどの固定ボタンを配置する場所です。
 
 :sample
 
@@ -1647,7 +1755,7 @@ name属性を指定することで、該当する要素のみを削除するこ�
 [clearfix name="sample"]
 
 :param
-name=fixレイヤーへ追加した時に名前を指定した場合、適応できます。
+name = これを指定すると、該当する要素だけを消去することができます。
 
 #[end]
 */
@@ -1678,8 +1786,10 @@ tyrano.plugin.kag.tag.clearfix = {
 フォームの確定
 
 :exp
-テキストボックスの値を確定して指定したname属性で指定した変数に値を格納します。
-注意点としてcommitが実行された段階で、テキストボックスなどのフォームが表示されている必要があります。
+`[edit]`で表示したテキストボックスの入力内容を確定し、`name`属性で指定した変数に値をセットします。
+
+<b>★注意</b>
+`[commit]`が実行されるタイミングで、まだテキストボックスが表示されている必要があります。
 
 :sample
 
@@ -1723,15 +1833,17 @@ tyrano.plugin.kag.tag.commit = {
 マウスカーソルに画像を設定
 
 :exp
-storageに指定した画像ファイルがマウスカーソルに指定されます。data/imageフォルダ以下に配置してください。ファイルは形式は gif png jpg です。
-ゲーム中に何度でも変更することが可能です。ゲームでの標準カーソルを指定したい場合は、system/Config.tjsのcursorDefaultを変更します。
-システムの標準カーソルに戻す場合はdefaultを指定します
+マウスカーソルに画像を設定することができます。画像は`data/image`フォルダに配置してください。使用可能な画像形式は`gif``png``jpg`です。
+
+ゲーム中に何度でも変更することが可能です。ゲームでの標準カーソルを指定したい場合は`data/system/Config.tjs`の`cursorDefault`を変更します。
+
+システムの標準カーソルに戻す場合は`default`を指定します。
 
 :sample
 [cursor storage="my_cursor.gif"]
 
 :param
-storage=マウスカーソルに指定したい画像ファイルを指定します。画像はdata/imageフォルダに配置します。
+storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。
 
 #[end]
 */
@@ -1760,8 +1872,9 @@ tyrano.plugin.kag.tag.cursor = {
 フルスクリーン
 
 :exp
-ゲーム画面をフルスクリーンにします。PCゲームのみ動作します
-ウィンドウに戻す場合は再度呼び出すことでウィンドウに戻ります
+ゲーム画面をフルスクリーンにします。再度呼び出すことでフルスクリーンからウィンドウに戻ります。
+
+PCゲームでのみ動作します。
 
 :sample
 [screen_full]
@@ -1794,18 +1907,15 @@ tyrano.plugin.kag.tag.screen_full = {
 
 :exp
 
-このタグに到達した時点でゲームの状態を保存した上で、他のシナリオへ移動できます。
-そして遷移先で[awakegame]が実行されたらゲームに復帰できます。
+このタグに到達した時点でゲームの状態を保存した上で、他のシナリオにジャンプできます。ジャンプ先で`[awakegame]`に到達するとゲームの状態が`[sleepgame]`時点に復帰します。
 
-このタグはゲームから一時的に画面を遷移したい場合に非常に強力に機能します。
+このタグはゲームから一時的に画面を遷移したい場合に非常に強力に機能します。たとえばゲームの途中でコンフィグの設定を行いたい場合には、`[sleepgame]`で進行状態を保持したうえでコンフィグ用のシナリオファイルに移動したあと、`[awakegame]`タグでゲームに復帰するような挙動が可能です。
 
-例えば、ゲームの途中でコンフィグの設定を行いたい場合などは
-sleepgameで進行状態を保持した上で、コンフィグ画面に移動します。[awakegame]タグでゲームに復帰します
+`[sleepgame]`は複数実行することはできません。つまり、`[sleepgame]`で休止中の状態で`[sleepgame]`するようなことはできません。ジャンプ先には必ず`[awakegame]`を配置してください。
 
-sleepgameは複数実行することはできません。必ず[awakegame]を実行して下さい。
-[awakegame]を実行しない場合は[breakgame]で休止中の状態を破棄します。
+休止中に`[breakgame]`タグを踏むと戻ってくることなく休止中の状態を破棄します。
 
-[button]で呼びたす場合、roleにsleepgameを指定すると、押された時にsleepgameを適応できます。
+`[sleepgame]`の動作を`[button]`に登録することもできます。`[button]`タグに`role=sleepgame`を指定することで`[sleepgame]`の挙動になります。
 
 :sample
 
@@ -1815,9 +1925,9 @@ sleepgameは複数実行することはできません。必ず[awakegame]を実
 [button name="button" role="sleepgame" fix="true" graphic="button/skip.gif" x=450 y=400 storage="scene3.ks" ]
 
 :param
-storage=ゲームを中断して処理を始めるシナリオ名を記述します。省略された場合は、現在のファイル名と解釈されます,
-target=ジャンプする先のラベル名を指定できます。省略されている場合は先頭位置からと解釈されます,
-next=true か　falseを指定。 falseを指定するとawakegameで戻ってくる時に次の命令へ移らなくなります。デフォルトはtrue
+storage = !!jump,
+target  = !!jump,
+next    = `true`または`false`を指定します。`false`を指定すると`[awakegame]`で戻ってきたときに次のタグに進まなくなります。
 
 :demo
 2,kaisetsu/09_sleepgame
@@ -1863,16 +1973,17 @@ tyrano.plugin.kag.tag.sleepgame = {
 ゲームの一時停止からの復帰
 
 :exp
-[gamesleep]タグで一時停止していたゲームを再開します。
-ジャンプ先での変数操作 （f）については、ゲーム復旧後も反映されます。
-ゲームに戻る前にmake.ksを通過します。ジャンプ先での操作に対して戻る前に設定を行いたい場合は
-make.ksで変数fに対して、[awakegame]からの復帰かどうかの判定をいれるとよいでしょう。
+`[sleepgame]`タグで保存されたゲームの状態に復帰します。
+
+ジャンプ先でゲーム変数を操作した場合、その内容は復帰後に反映されます。
+
+セーブデータをロードするときと同様に、ゲームの復帰時には`make.ks`を通過します。休止中の操作に対してなんらかの特別な処理を実行したい場合、`make.ks`でゲーム変数などを使って`[awakegame]`からの復帰かどうかの判定をいれるとよいでしょう。
 
 :sample
 
 :param
-variable_over=trueかfalseを指定します。trueを指定するとsleepgame中のゲーム変数への変更を引き継ぎます。デフォルトはtrue,
-bgm_over=trueかfalseを指定します。trueを指定するとsleepgame中のBGMを再生し続けます。デフォルトはtrue。falseだとsleepgame時のBGMに切り替わります。
+variable_over = `true`または`false`を指定します。`true`を指定すると、`[sleepgame]`中のゲーム変数の変更を復帰後に引き継ぎます。,
+bgm_over      = `true`または`false`を指定します。`true`を指定すると、`[sleepgame]`中のBGMを復帰後に引き継ぎます。
 
 :demo
 2,kaisetsu/09_sleepgame
@@ -1928,8 +2039,9 @@ tyrano.plugin.kag.tag.awakegame = {
 ゲームの停止データの削除
 
 :exp
-[gamesleep]タグで一時停止していたゲームを削除します。
-[gameawake]しない場合、このタグで削除してください。
+`[sleepgame]`タグで保存した休止状態を破棄します。
+
+休止状態に復帰する必要がなくなった段階で`[breakgame]`を配置するとよいでしょう。
 
 :sample
 
@@ -1962,31 +2074,45 @@ tyrano.plugin.kag.tag.breakgame = {
 
 :exp
 確認用のダイアログを表示します。
+
 ダイアログは以下のタイプがあります。
-alert confirm input
-inputはv470以降、廃止します。使用しないでください
+`alert``confirm``input`
+
+※`input`は廃止予定です。使用は推奨されません。
 
 :sample
-;警告ウィンドウのメッセージ表示
-[dialog type="alert" text="メッセージ内容" ]
+;警告
+[dialog type="alert" text="ここから先は危険地帯です"]
 
-;確認ダイアログの表示
-[dialog type="confirm" text="メッセージ内容" storage="scene2" target="ok_label" storage_cancel="" target_cancel="" ]
+;確認してOKならシナリオジャンプ
+[dialog type="confirm" text="本当に進みますか？" target="ok" target_cancel="cancel"]
 
-;V470から廃止です。使用しないでください
-;テキスト入力ダイアログの表示
-[dialog type="input" text="名前を教えて下さい" storage="scene2" target="ok_label" ]
+*ok
+進みます[p]
+[jump target=input]
+
+*cancel
+進みませんでした[p]
+[jump target=input]
+
+*input
+;inputは廃止予定！！
+;入力
+[dialog type="input" name="f.name" text="名前を教えてください" target="next"]
+
+*next
+あなたの名前は[emb exp="f.name"]ですね[s]
 
 :param
-name=confirmを指定した時に格納する変数名を指定して下さい。,
-type=ダイアログの種類を指定します。alert confirm ,
-text=メッセージとして表示するてテキストを指定して下さい,
-storage=指定されている場合はダイアログのボタンを押した後のジャンプ先シナリオファイルを指定します。省略すると、現在 のシナリオファイル内であるとみなされます。,
-target=指定されている場合はダイアログのボタンを押した後のジャンプ先ラベルを指定します。,
-storage_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先シナリオファイルを指定します。,
-target_cancel=指定されている場合はダイアログのキャンセルボタンを押した後のジャンプ先ラベルを指定します。,
-label_ok=OKボタンの名前を好きなものに指定できます。デフォルトはOKです　,
-label_cancel=キャンセルボタンの名前を好きなものに指定できます。デフォルトはCancelです　
+type           = ダイアログの種類を以下のキーワードのいずれかで指定します。<br>`alert`(警告)<br>`confirm`(確認)<br>`input`(入力),
+name           = 入力ダイアログの場合に、入力内容を保存する変数名を指定します。`f.name`など。,
+text           = ダイアログに表示するメッセージを記述します。,
+storage        = OKボタンが押されたときのジャンプ先のシナリオファイルを指定します。省略すると、現在のシナリオファイルとみなされます。,
+target         = OKボタンが押されたときのジャンプ先のラベルを指定します。省略すると、シナリオファイルの先頭とみなされます。<br><br><b>なお、`storage`と`target`が両方省略されている場合、単に次のタグに進みます。</b>,
+storage_cancel = キャンセルボタンが押されたときのジャンプ先のシナリオファイルを指定します。省略すると、現在のシナリオファイルとみなされます。,
+target_cancel  = キャンセルボタンが押されたときのジャンプ先のラベルを指定します。省略すると、シナリオファイルの先頭とみなされます。,
+label_ok       = OKボタンのテキストを変更できます。,
+label_cancel   = キャンセルボタンのテキストを変更できます。　
 #[end]
 */
 
@@ -2080,30 +2206,34 @@ tyrano.plugin.kag.tag.dialog = {
 
 :exp
 外部プラグインを読み込むことができます。
-プラグインはdata/others/plugin/　フォルダに配置します。
+プラグインは`data/others/plugin`フォルダに配置します。
 
-また、pluginタグは引数を自由に渡すことができます。
-例えば
-[plugin name="original1" font_color="black" myname="シケモク" ]
+`[plugin]`タグには自由にパラメータを指定することができます。たとえば、
 
-のようにすると、プラグイン先のinit.ks 内で
-mp.font_color
-mp.myname
+`[plugin name="my_plugin" color="black" name="シケモク"]`
+
+と指定すると、プラグインの`init.ks`のなかで
+
+`mp.font_color`
+`mp.myname`
+
 のような形で引数を利用できます。
 
-これを &mp.font_color のように使うことで、カスタマイズ可能なプラグインが作れます。
-ただ、マクロで使用可能だった%font_color のような形の使用はできませんので注意。
+これを`&mp.font_color`のように使うことで、カスタマイズ可能なプラグインが作れます。
+
+ただし、マクロで使用可能だった`%font_color`のような形での使用はできません。
 
 :sample
-;テーマ変更
-[plugin name="original1" ]
+;プラグイン my_plugin を読み込み
+[plugin name="my_plugin" ]
+;↑ data/others/plugin/my_plugin/init.ks にジャンプしているよ
 
 ;自由に引数を渡すことも可能
-[plugin name="original1" font_color="black" arg2="aaaaaa" ]
+[plugin name="my_plugin" font_color="black" arg2="aaaaaa" ]
 
 :param
-name=data/othres/plugin以下の配置したフォルダ名（プラグイン名）を指定する,
-storage=最初に読み込むシナリオファイルを変更できます。デフォルトはinit.ks です。
+name    = 読み込むプラグインの名前を指定します。プラグインは`data/others/plugin`フォルダに配置します。,
+storage = 最初に読み込むシナリオファイルを変更できます。
 
 :demo
 2,kaisetsu/06_plugin
@@ -2151,8 +2281,8 @@ tyrano.plugin.kag.tag.plugin = {
 [sysview type="menu" storage="./data/others/plugin/mytheme/html/menu.html]
 
 :param
-type=save load backlog menu が指定可能 ,
-storage=HTMLファイルのパスを指定します。
+type    = `save``load``backlog``menu`が指定可能です。,
+storage = HTMLファイルのパスを指定します。
 
 #[end]
 */
@@ -2198,7 +2328,7 @@ CSS反映
 [loadcss file="./data/others/css/mystyle.css" ]
 
 :param
-file=読み込みたいCSSファイルを指定します
+file = 読み込むCSSファイルのパスを指定します。パスは`data/`から記述します。
 
 :demo
 1,kaisetsu/22_font
@@ -2237,21 +2367,24 @@ tyrano.plugin.kag.tag.loadcss = {
 システム操作
 
 :title
-セーブ時のキャプチャイメージ変更
+セーブデータのサムネイル変更
 
 :exp
-セーブデータのサムネイルをキャプチャを変更できます。
-このタグで設定したイメージがセーブ時の画像として適応されます。
-セーブ画像は「bgimage」フォルダから指定します。
-storageに「default」と指定することで、従来の画面自動キャプチャに戻せます。
+セーブデータのサムネイルに好きな画像を指定できます。
+
+通常、セーブデータのサムネイルにはセーブした瞬間のゲーム画面のキャプチャが使用されます。しかし`[save_img]`タグを使用することで、特定の画像をサムネイルにすることができます。
+
+画像ファイルは`data/bgimage`フォルダに配置します。
+
+`storage`に`default`を指定すると、通常のサムネイル（ゲーム画面のキャプチャ）に戻すことができます。
 
 :sample
 ;サムネイル画像の変更
 [save_img storage="my_capture.png" ]
 
 :param
-storage=設定したいセーブ用画像を設定します。bgimageフォルダに配置してください。「default」を指定するとオートキャプチャに戻ります。,
-folder=bgimageフォルダ以外から取得したい場合は、ここに指定します。例えば、othersやfgimage、imageなどです。
+storage = サムネイルに設定したい画像ファイルを設定します。`bgimage`フォルダに配置してください。`default`を指定すると画面キャプチャに戻ります。,
+folder  = 画像を`bgimage`フォルダ以外から取得したい場合は、ここに指定します。たとえば`others``fgimage``image`など。
 
 :demo
 2,kaisetsu/10_save_img
@@ -2307,11 +2440,12 @@ tyrano.plugin.kag.tag.save_img = {
 システム操作
 
 :title
-バックログ記録停止
+バックログ記録の一時停止
 
 :exp
-このタグに到達すると、バックログへ一切追加されなくなります。
-[endnolog]タグに到達すると、バックログへの記録が再開されます。
+このタグに到達すると、テキストがバックログに記録されなくなります。
+
+`[endnolog]`タグに到達すると、バックログへの記録が再開されます。
 
 :sample
 ここはログに記録される[p]
@@ -2348,11 +2482,10 @@ tyrano.plugin.kag.tag.nolog = {
 システム操作
 
 :title
-バックログ記録を再開する
+バックログ記録の再開
 
 :exp
-[nolog]タグでログ記録を停止している場合
-この[endnolog]タグで記録を再開する必要があります。
+`[nolog]`タグで一時停止したバックログへの記録を再開します。
 
 :sample
 ここはログに記録される[p]
@@ -2389,20 +2522,19 @@ tyrano.plugin.kag.tag.endnolog = {
 システム操作
 
 :title
-バックログに文字列記録
+バックログにテキスト追加
 
 :exp
-バックログに任意の文字列を追加できます。
-例えば [mtext]などは通常バックログに記録されませんが
-このタグを内包したマクロなどにしておくと、バックログに追加した
-演出テキストなどが可能です。
+バックログに任意のテキストを追加できます。
+
+たとえば`[mtext]`で表示したアニメーションテキストは、そのままではバックログに記録されません。しかし、`[mtext]`に併せて`[pushlog]`を使うことで、バックログにアニメーションテキストの内容を記録することができます。
 
 :sample
 [pushlog text="ここに好きなログ文字列を記述できます"]
 
 :param
-text=バックログに追加する文字列を追加できます,
-join=バックログを前の文字列に連結するか否かを指定できます。trueを指定すると前の文字列につなげます。デフォルトはfalse
+text = バックログに追加するテキストを指定します。,
+join = バックログを前のテキストに連結するかどうか。`true`または`false`で指定します。
 
 :demo
 2,kaisetsu/07_pushlog
@@ -2439,7 +2571,7 @@ tyrano.plugin.kag.tag.pushlog = {
 キーコンフィグ操作の有効化
 
 :exp
-キーコンフィグが無効の場合、再開できます。
+`[stop_keyconfig]`で無効化したキーコンフィグを有効化できます。
 
 :sample
 [start_keyconfig]
@@ -2468,20 +2600,20 @@ tyrano.plugin.kag.tag.start_keyconfig = {
 キーコンフィグ操作の無効化
 
 :exp
-キーコンフィグを一時的に無効にできます。
-再開させる場合は[start_keyconfig]タグを使用してください。
+キーコンフィグを一時的に無効化します。`[start_keyconfig]`で再び有効化できます。
 
-無効になるのは
+無効になるのは次の操作です。
 ・マウス操作
 ・キーボード操作
 ・マウスのスワイプ操作
 
 :sample
+キーコンフィグが有効[p]
 [stop_keyconfig]
-ここは無効。
-ここも無効。
+ここは無効[p]
+ここも無効[p]
 [start_keyconfig]
-ここから、キーコンフィグ設定が有効。
+ここからまた有効[p]
 
 :param
 
@@ -2504,22 +2636,23 @@ tyrano.plugin.kag.tag.stop_keyconfig = {
 システム操作
 
 :title
-パッチファイルを手動で反映します
+パッチファイルの適用
 
 :exp
-V470以降で使用可
-パッケージングして配布している場合のみ有効。
-このタグに到達した時点で、パッチファイルをゲームに反映することが可能。
-dataフォルダ以外、tyrano本体をアップデートするときは
-このタグではなく、起動時のアップデートで対応してください。
-パッチファイルの容量が大きい場合は一時的にゲームが停止します。ロード中といった表記を表示すると親切です。
+V470以降で使用可。<b>PCアプリとして配布している場合のみ有効です</b>。
+
+このタグに到達した時点で、パッチファイルをゲームに反映します。
+
+`data`フォルダ以外（`tyrano`本体）をアップデートするときは、このタグではなく、起動時のアップデートで対応してください。
+
+パッチファイルの容量が大きい場合は一時的にゲームが停止します。ロード中などのテキストを表示するとプレイヤーに親切でしょう。
 
 :sample
 [apply_local_patch file="test.tpatch" ]
 
 :param
-file=パッチファイルのパスを指定します。exeファイルの階層を起点として指定します,
-reload=true or false を指定。trueを指定すると反映後にゲームが再読込されます。デフォルトはfalse
+file   = パッチファイルのパスを指定します。exeファイルの階層を起点として指定します,
+reload = `true`または`false`を指定します。`true`を指定すると、パッチ反映後にゲームが自動的に再起動されます。
 
 #[end]
 */
@@ -2555,20 +2688,20 @@ tyrano.plugin.kag.tag.apply_local_patch = {
 システム操作
 
 :title
-サーバーからアップデートをチェックして反映させることができます。
+アップデートのチェック
 
 :exp
-V470以降で使用可
-サーバーにアップデートパッチを配置して更新がある場合
-自動的にメッセージを表示して、パッチの適応を促すことができます。
-サーバーをレンタルして json ファイルと tpatch ファイルを配置します。
-また、反映するためには、一度ゲームを再起動する必要があります。
+V470以降で使用可。<b>PCアプリとして配布している場合のみ有効です</b>。
+
+サーバーに配置してあるアップデートパッチに更新がある場合、自動的にメッセージを表示して、パッチの適応を促すことができます。（パッチの反映にはゲームの再起動が必要です）
+
+サーバーをレンタルして`json`ファイルと`tpatch`ファイルを配置する必要があります。
 
 :sample
 [check_web_patch url="http://tyrano.jp/patch/mygame.json" ]
 
 :param
-url=サーバのjsonファイルのURLをhttp:// から指定します
+url = パッチの`json`ファイルのURLを指定します。
 
 #[end]
 */
@@ -2626,7 +2759,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
                     parseFloat(obj.version) +
                     "「" +
                     obj.message +
-                    "」<br />アップデートを行いますか？",
+                    "」<br>アップデートを行いますか？",
                 function () {
                     alert(
                         "アップデートを行います。完了後、自動的にゲームは終了します。",
@@ -2703,26 +2836,27 @@ tyrano.plugin.kag.tag.check_web_patch = {
 
 :exp
 プレイ端末の画面比率が入れ替わったタイミングでシナリオを呼び出すことができます。
-例えば、縦持ち→横持ちになったタイミングで、横持ち用の座標へ変更するスクリプトを実行。
-逆に横持ち→縦持ちになったタイミングで、横持ち用の座標へ変更するスクリプトを実行。
 
-このように対応することで、様々なレイアウトに対応したゲームを作ることができます。
+たとえば、タテ持ち→ヨコ持ちになったタイミングで、ヨコ持ち用の座標へ変更するスクリプトを実行。
 
-なお、呼び出した先では必ず[return]を実行する必要があります。
+逆に、ヨコ持ち→タテ持ちになったタイミングで、タテ持ち用の座標へ変更するスクリプトを実行。
 
-公式サイトの解説もご参考ください。
-レスポンシブ対応解説
-→https://tyrano.jp/usage/advance/responsive
+このように実装することで、様々なレイアウトに対応したゲームを作ることができます。
+
+なお、呼び出した先では必ず`[return]`を実行する必要があります。
+
+公式の実践テクニック解説もご覧ください。
+https://tyrano.jp/usage/advance/responsive
 
 :sample
-
 [call storage="resize.ks"]
 
-;画面比率が変わったタイミングでresize.ksを呼び出す。
+;画面比率が変わったタイミングでresize.ksを呼び出す、という宣言
 [set_resizecall storage="resize.ks" ]
 
 :param
-storage=呼び出すシナリオファイル名を指定します。省略された場合は現在のシナリオファイルとみなされます
+storage = !!jump,
+target  = !!jump
 
 :demo
 

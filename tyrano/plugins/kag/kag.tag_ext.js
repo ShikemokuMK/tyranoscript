@@ -10,15 +10,15 @@
 外部JavaScriptファイル読み込み
 
 :exp
-外部JavaScriptファイルをロードします
-無制限な機能拡張が可能です
-JSファイルは/data/others フォルダ以下に格納してください
+外部JavaScriptファイルをロードします。無制限な機能拡張が可能です。
+JavaScriptファイルは`data/others`フォルダに配置してください。
 
 :sample
-[loadjs storage="sample.js"  ]
+;data/others/sample.jsを読み込み
+[loadjs storage="sample.js"]
 
 :param
-storage=ロードするJSファイルを指定します
+storage = ロードするJavaScriptファイルを指定します。
 
 :demo
 2,kaisetsu/21_othello
@@ -49,22 +49,49 @@ tyrano.plugin.kag.tag.loadjs = {
 その他
 
 :title
-ムービーの再生
+動画の再生
 
 :exp
-ogv webm mp4 などに対応します
-提供するゲームによって対応するフォーマットが異なります。
-PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
-ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
+ゲーム画面上で動画を再生します。動画ファイルは`data/video`フォルダに配置します。
+
+<b>`mp4`形式推奨</b>。`ogv``webm`形式にも対応します。
+
+ブラウザゲームとして出力する場合、ブラウザによってはサポートしない動画形式があるので注意してください。特に、<b>`webm`形式はSafariでは動作しません</b>。
+
+また、`mp4`形式はFireFoxやOperaでは動作しません。このとき、もし`mp4`ファイルと同じ場所に同名の`webm`ファイルがある場合は自動的にそちらを選択します。
 
 :sample
-[movie storage="" skip=false ]
+;動画を再生した回数をゲーム変数f.watch_countで数えてみる
+[eval exp="f.watch_count = 0"]
+
+*loop
+動画を再生するよ[p]
+
+;動画を再生したことがまだ1回もないなら、スキップできない
+;動画を再生したことが1回以上あるなら、スキップできる
+;という設定を一時変数tf.skipにをセット
+[iscript]
+if (f.watch_count === 0) {
+  tf.skip = "false";
+} else {
+  tf.skip = "true";
+}
+[endscript]
+
+;data/video/cat.mp4を再生するよ
+[movie storage="cat.mp4" skip=&tf.skip]
+
+動画を再生しおわったよ[p]
+
+;動画を再生した回数を増やす
+[eval exp="f.watch_count += 1"]
+[jump target="loop"]
 
 :param
-storage=再生するogv webm mp4ファイルを指定します,
-skip=動画再生中に途中でスキップ可能かどうかをtrueまたはfalseで指定します。,
-mute=true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。,
-volume=ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100
+storage = 再生する動画ファイルを指定します。
+skip    = 動画を途中でスキップできるようにするかどうか。`true`または`false`で指定します。`true`を指定すると、プレイヤーが画面クリックで動画を飛ばせるようになります。,
+mute    = 動画の音をミュートするかどうか。`true`または`false`で指定します。ブラウザ上では動画を再生する前にユーザアクション（タップなど）が必要という制限がありますが、`true`を指定することでこの制限を無視できます。,
+volume  = 動画の音量を`0`〜`100`で指定します。
 
 #[end]
 */
@@ -306,25 +333,30 @@ tyrano.plugin.kag.tag.movie = {
 背景ムービーの再生
 
 :exp
-ogv webm mp4 などに対応します
-提供するゲームによって対応するフォーマットが異なります。
-PCゲーム形式の場合は webm形式を使ってください。 mp4 に対応しません。
-ブラウザゲームの場合はmp4ファイルを使用します。ただし、FireFox Opera を含む全てのブラウザに対応させる場合は同名のwebmファイルも配置して下さい
-stop_bgmovie タグを指定すると再生が終わります。
 
-bgmovieをループ中に別のbgmovieを重ねることで、ループが完了してから次の動画を再生させる事ができます。
+ゲーム画面の背景に動画を使用できます。動画ファイルは`data/video`フォルダに配置します。
 
-（注意）このタグはPC限定です。スマホでは利用できません。
+`[stop_bgmovie]`タグを指定すると再生が終わります。
+`[bgmovie]`をループ中に別の`[bgmovie]`を重ねることで、ループが完了してから次の動画を再生させる事ができます。
+
+<b>`mp4`形式推奨</b>。`ogv``webm`形式にも対応します。
+
+ブラウザゲームとして出力する場合、ブラウザによってはサポートしない動画形式があるので注意してください。特に、<b>`webm`形式はSafariでは動作しません</b>。
+
+また、`mp4`形式はFireFoxやOperaでは動作しません。このとき、もし`mp4`ファイルと同じ場所に同名の`webm`ファイルがある場合は自動的にそちらを選択します。
+
+<b>★注意</b>
+このタグはPC限定です。スマホでは利用できません。
 
 :sample
-[bgmovie storage="test.webm" ]
+[bgmovie storage=cat.mp4]
 
 :param
-storage=再生するogv webm mp4ファイルを指定します,
-time=背景動画を表示するときにフェードアウト効果を与える時間を指定します。デフォルトは1000(ミリ秒),
-mute=true/falseを指定します。デフォルトはfalse。動画の音をミュートにできます。スマホブラウザの場合、動作が再生前のユーザアクションが必要ですが、trueを指定することでこの制限を無視できます。,
-volume=ビデオの音量を指定できます 0〜100の間で指定して下さい。デフォルトは100 ,
-loop=背景動画をループさせるかどうかを指定します。falseを指定すると動画の最後の状態で停止します。
+storage = 再生する動画ファイルを指定します。
+time    = フェードイン時間をミリ秒で指定します。,
+mute    = 動画の音をミュートするかどうか。`true`または`false`で指定します。ブラウザ上では動画を再生する前にユーザアクション（タップなど）が必要という制限がありますが、`true`を指定することでこの制限を無視できます。,
+volume  = 動画の音量を`0`〜`100`で指定します。,
+loop    = 背景動画をループさせるかどうか。`true`または`false`で指定します。`false`を指定すると動画の最後の状態で停止します。
 
 #[end]
 */
@@ -420,11 +452,15 @@ tyrano.plugin.kag.tag.wait_bgmovie = {
 bgmovieで再生した背景動画を停止します。
 
 :sample
-[stop_bgmovie storage="" skip=false ]
+[bgmovie storage=cat.mp4]
+動画を停止します[p]
+
+[stop_bgmovie]
+動画を停止しました[p]
 
 :param
-time=ミリ秒で指定すると、動画をフェードアウトして削除することが可能です。デフォルトは1000,
-wait=trueかfalse を指定します。動画のフェードアウトを待つかどうかを指定できます。デフォルトはtrue
+time = フェードアウト時間をミリ秒で指定します。,
+wait = フェードアウト完了を待つかどうかを`true`または`false`で指定できます。
 
 #[end]
 */
@@ -479,10 +515,10 @@ tyrano.plugin.kag.tag.stop_bgmovie = {
 システム操作
 
 :title
-セーブ画面を表示します
+セーブ画面の表示
 
 :exp
-セーブ画面を表示します
+セーブ画面を表示します。
 
 :sample
 [showsave]
@@ -513,10 +549,10 @@ tyrano.plugin.kag.tag.showsave = {
 システム操作
 
 :title
-ロード画面を表示します
+ロード画面の表示
 
 :exp
-ロード画面を表示します
+ロード画面を表示します。
 
 :sample
 [showload]
@@ -544,10 +580,10 @@ tyrano.plugin.kag.tag.showload = {
 システム操作
 
 :title
-メニュー画面を表示します
+メニュー画面の表示
 
 :exp
-メニュ＾画面を表示します
+メニュー画面を表示します。
 
 :sample
 [showmenu]
@@ -573,10 +609,10 @@ tyrano.plugin.kag.tag.showmenu = {
 システム操作
 
 :title
-メニューボタンを表示
+メニューボタンの表示
 
 :exp
-メニューボタンを表示します
+メニューボタンを表示します。
 
 :sample
 [showmenubutton]
@@ -604,10 +640,10 @@ tyrano.plugin.kag.tag.showmenubutton = {
 システム操作
 
 :title
-メニューボタンを非表示
+メニューボタンの非表示
 
 :exp
-メニューボタンを非表示します
+メニューボタンを非表示にします。
 
 :sample
 [hidemenubutton]
@@ -635,10 +671,10 @@ tyrano.plugin.kag.tag.hidemenubutton = {
 システム操作
 
 :title
-スキップ開始
+スキップモード開始
 
 :exp
-文字表示をスキップモードにします。
+スキップモードを開始します。テキストが一瞬で表示されるようになります。
 
 :sample
 
@@ -670,10 +706,10 @@ tyrano.plugin.kag.tag.skipstart = {
 システム操作
 
 :title
-スキップ停止
+スキップモード停止
 
 :exp
-スキップモードを停止します。
+スキップモードを停止します。`[cancelskip]`と同じ動作。
 
 :sample
 
@@ -698,11 +734,12 @@ tyrano.plugin.kag.tag.skipstop = {
 システム操作
 
 :title
-オート開始
+オートモード開始
 
 :exp
-文字表示を一定間隔で自動的に進めます。
-進行速度はconfig.tjsのautoSpeedを確認して下さい
+オートモードを開始します。テキストの文字数に応じた時間経過によってクリック待ちを自動的で通過するようになります。
+
+オートモード時の進行速度は`Config.tjs`の`autoSpeed`、もしくは`[autoconfig]`タグを確認してください。
 
 :sample
 
@@ -734,7 +771,7 @@ tyrano.plugin.kag.tag.autostart = {
 システム操作
 
 :title
-オート停止（）
+オートモード停止
 
 :exp
 オートモードを停止します。
@@ -773,13 +810,13 @@ tyrano.plugin.kag.tag.autostop = {
 オート設定
 
 :exp
-オートモードに関する設定
+オートモードに関する設定を行います。
 
 :sample
 
 :param
-speed=オート時のスピードをミリ秒で指定して下さい,
-clickstop=画面クリック時にオートを停止するかどうかを指定します true(停止する デフォルト) false（停止しない）
+speed     = オートモード時のスピードをミリ秒で指定してください,
+clickstop = 画面クリック時にオートモードを停止するかどうか。`true`または`false`で指定します。`false`を指定すると、画面をクリックしてもオートモードが止まらないようになります。
 
 #[end]
 */
@@ -821,12 +858,15 @@ tyrano.plugin.kag.tag.autoconfig = {
 アニメーション
 
 :exp
-画像やボタン、レイヤなどの中身をアニメーションさせることができます
-アニメーションさせる要素は[image][ptext][button]タグ作成時にname属性で指定した名前を利用できます。
-レイヤを指定するとレイヤの中にある要素全てを同時にアニメーションできます
-このタグはアニメーションの終了を待ちません。[wa]タグを使用すると実行中のすべてのアニメーションの完了を待つことができます。
-位置のアニメーションは指定する値に+=100 -=100　と指定することで相対位置指定できます（今表示されているところから、右へ１００PX移動といった指定ができます）
-透明度を指定すれば、アニメーションしながら非表示にすることもできます。
+画像やボタン、レイヤなどの中身をアニメーションさせることができます。
+
+アニメーションさせる要素の指定には、`[image]``[ptext]``[button]`タグなどに指定した`name`を利用します。あるいはレイヤを指定することで、レイヤの中にあるすべての要素をアニメーション対象にすることもできます。
+
+このタグはアニメーションの終了を待ちません。アニメーションの完了を待つには`[wa]`タグを使用してください。
+
+アニメーションの座標指定については、`+=100``-=100`のように指定することで<b>相対位置</b>で指定できます。（いま表示されているところから右に100px移動、といった表現が可能）
+
+透明度を指定することでフェードインやフェードアウトも可能です。
 
 :sample
 [ptext layer=1 page=fore text="文字列" size=30 x=0 y=0 color=red vertical=true]
@@ -846,49 +886,17 @@ tyrano.plugin.kag.tag.autoconfig = {
 アニメーション終了
 
 :param
-name=ここで指定した値が設定されている要素に対してアニメーションを開始します。name属性で指定した値です。,
-layer=name属性が指定されている場合は無視されます。前景レイヤを指定します。必ずforeページに対して実施されます。,
-left=指定した横位置にアニメーションで移動します。,
-top=指定した縦位置にアニメーションで移動します。,
-width=幅を指定します,
-height=高さを指定します,
-opacity=0～255の値を指定します。指定した透明度へアニメーションします,
-color=色指定,
-time=アニメーションにかける時間をミリ秒で指定して下さい。デフォルトは2000ミリ秒です,
-effect=変化のエフェクトを指定します。指定できる文字列は以下の種類です<br />
-
-jswing
-｜def
-｜easeInQuad
-｜easeOutQuad
-｜easeInOutQuad
-｜easeInCubic
-｜easeOutCubic
-｜easeInOutCubic
-｜easeInQuart
-｜easeOutQuart
-｜easeInOutQuart
-｜easeInQuint
-｜easeOutQuint
-｜easeInOutQuint
-｜easeInSine
-｜easeOutSine
-｜easeInOutSine
-｜easeInExpo
-｜easeOutExpo
-｜easeInOutExpo
-｜easeInCirc
-｜easeOutCirc
-｜easeInOutCirc
-｜easeInElastic
-｜easeOutElastic
-｜easeInOutElastic
-｜easeInBack
-｜easeOutBack
-｜easeInOutBack
-｜easeInBounce
-｜easeOutBounce
-｜easeInOutBounce
+name    = ここで指定した値が設定されている要素に対してアニメーションを開始します。name属性で指定した値です。,
+layer   = name属性が指定されている場合は無視されます。前景レイヤを指定します。必ずforeページに対して実施されます。,
+left    = 指定した横位置にアニメーションで移動します。,
+top     = 指定した縦位置にアニメーションで移動します。,
+width   = 幅を指定します,
+height  = 高さを指定します,
+opacity = 0～255の値を指定します。指定した透明度へアニメーションします,
+color   = 色指定,
+time    = アニメーションにかける時間をミリ秒で指定してください。デフォルトは2000ミリ秒です,
+effect  = 変化のエフェクトを指定します。以下のキーワードが指定できます。
+`jswing``def``easeInQuad``easeOutQuad``easeInOutQuad``easeInCubic``easeOutCubic``easeInOutCubic``easeInQuart``easeOutQuart``easeInOutQuart``easeInQuint``easeOutQuint``easeInOutQuint``easeInSine``easeOutSine``easeInOutSine``easeInExpo``easeOutExpo``easeInOutExpo``easeInCirc``easeOutCirc``easeInOutCirc``easeInElastic``easeOutElastic``easeInOutElastic``easeInBack``easeOutBack``easeInOutBack``easeInBounce``easeOutBounce``easeInOutBounce`
 
 :demo
 1,kaisetsu/12_anim
@@ -995,7 +1003,7 @@ tyrano.plugin.kag.tag.anim = {
 アニメーション終了待ち
 
 :exp
-実行中のアニメーションすべて終了するまで処理を待ちます
+実行中のアニメーションすべて終了するまで処理を待ちます。
 
 :sample
 
@@ -1032,7 +1040,7 @@ tyrano.plugin.kag.tag.wa = {
 :sample
 
 :param
-name=ここで指定した値が設定されている要素に対してアニメーションを停止します
+name = アニメーションを強制停止する要素の`name`を指定します。
 
 #[end]
 */
@@ -1061,10 +1069,12 @@ tyrano.plugin.kag.tag.stopanim = {
 アニメーション関連
 
 :title
-キーフレームアニメーション定義
+キーフレームアニメーション定義の開始
 
 :exp
-キーフレームアニメーションを定義します。定義したアニメーションは[kanim]タグで指定することで使用できます
+キーフレームアニメーションの定義を開始します。
+
+定義したキーフレームアニメーションは`[kanim]`タグで使用できます。
 
 :sample
 
@@ -1079,7 +1089,7 @@ tyrano.plugin.kag.tag.stopanim = {
 ;-----定義したアニメーションを実行
 
 :param
-name=キーブレームの名前を指定します。後に[kanim]タグを使用する際に指定する名前になります
+name = キーブレームアニメーションの名前を指定します。`[kanim]`タグで使用します。
 
 :demo
 2,kaisetsu/15_kanim
@@ -1108,10 +1118,10 @@ tyrano.plugin.kag.tag.keyframe = {
 アニメーション関連
 
 :title
-キーフレームアニメーション定義を終了します
+キーフレームアニメーション定義の終了
 
 :exp
-キーフレームアニメーション定義を終了します
+キーフレームアニメーション定義を終了します。
 
 :sample
 
@@ -1139,29 +1149,29 @@ tyrano.plugin.kag.tag.endkeyframe = {
 キーフレームアニメーション定義
 
 :exp
-キーフレームアニメーションを定義します。定義したアニメーションは[kanim]タグで指定することで使用できます
+キーフレームをひとつ定義します。`[keyframe]`と`[endkeyframe]`の間に記述します。
 
 :sample
 
 :param
-p=パーセンテージを0〜100%の間で指定します。例えば５秒かかるアニメーションに対して20%の位置という指定になります。0%を省略することで前回のアニメーション状態を継承して新しいアニメーションを開始できます。,
-x=X軸方向へのアニメーション量をpxで指定して下さい。　また、*(アスタリスク)で始めることで、絶対位置として指定できます。（例） x＝"100"（前へ100px移動する） x="*100" 画面左端から100pxの位置へ移動する,
-y=Y軸方向へのアニメーション量をpxで指定して下さい。　また、*(アスタリスク)で始めることで、絶対位置として指定できます。（例） y＝"100"（前へ100px移動する） y="*100" 画面上端から100pxの位置へ移動する,
-z=Z軸方向へのアニメーション量をpxで指定して下さい。　また、*(アスタリスク)で始めることで、絶対位置として指定できます。（例） z＝"100"（前へ100px移動する） z="*100" こちらのタグを使用すると三次元を表現できますが、現状一部ブラウザ（safari iphone系）で動作します,
-rotate=対象を回転させることができます。例　rotate＝"360deg"のような形で指定して下さい（３６０度回転）,
-rotateX=対象をX軸を軸として回転させることができます。例　rotateX＝"360deg"のような形で指定して下さい（３６０度回転）,
-rotateY=対象をY軸を軸として回転させることができます。例　rotateY＝"360deg"のような形で指定して下さい（３６０度回転）,
-rotateZ=対象をZ軸を軸として回転させることができます。例　rotateZ＝"360deg"のような形で指定して下さい（３６０度回転）,
-scale=対象を拡大、縮小できます。例　scale＝"2" (２倍に拡大します) scale＝"0.5" 半分に縮小します,
-scaleX=X方向に拡大、縮小できます,
-scaleY=Y方向に拡大、縮小できます,
-scaleZ=Z方向に拡大、縮小できます,
-skew=傾斜,
-skewX=X傾斜,
-skewY=Y傾斜,
-perspective=遠近効果を付与できます。一部ブラウザのみ,
-opacity=0～1を指定することで、各要素の透明度を指定できます、非表示にしたりできます。0で完全に透明になります。
-その他=CSSのスタイルを各種指定できます。
+p           = キーフレームの位置をパーセンテージ（`0%`〜`100%`）で指定します。たとえば`50%`と指定すれば、全体の長さが4秒のアニメーションのなかの2秒目、となります。`0%`のキーフレームを省略することで前回のアニメーション状態を継承できます。,
+x           = X軸方向へのアニメーション量をピクセル単位で指定してください。`*`(アスタリスク)で始めることで、絶対位置として指定できます。<br>例） `x＝"100"`(前へ100px移動する)、`x="*100"`(画面左端から100pxの位置へ移動する),
+y           = Y軸方向へのアニメーション量をピクセル単位で指定してください。`*`(アスタリスク)で始めることで、絶対位置として指定できます。,
+z           = Z軸方向へのアニメーション量をピクセル単位で指定してください。`*`(アスタリスク)で始めることで、絶対位置として指定できます。<br><br>このパラメータを使用することで三次元的な表現が可能ですが、対応しているのは一部のブラウザのみとなります。,
+rotate      = 対象を回転させることができます。たとえば180度回転させたい場合、`180deg`のように指定します。,
+rotateX     = 対象をX軸を軸として回転させることができます。,
+rotateY     = 対象をY軸を軸として回転させることができます。,
+rotateZ     = 対象をZ軸を軸として回転させることができます。,
+scale       = 対象を拡大または縮小できます。2倍に拡大するには`2`を、半分に縮小するには`0.5`を指定します。,
+scaleX      = X方向に拡大または縮小できます。,
+scaleY      = Y方向に拡大または縮小できます。,
+scaleZ      = Z方向に拡大または縮小できます。,
+skew        = 傾斜を指定できます。,
+skewX       = X傾斜を指定できます。,
+skewY       = Y傾斜を指定できます。,
+perspective = 遠近効果を付与できます。一部ブラウザのみ対応。,
+opacity     = !!,
+その他        = CSSのスタイルを各種指定できます。
 
 :demo
 2,kaisetsu/15_kanim
@@ -1252,28 +1262,27 @@ tyrano.plugin.kag.tag.frame = {
 キーフレームアニメーションの実行
 
 :exp
-キーフレームアニメーションを実行します。[keyframe]タグで定義した名前とアニメーションさせる画像やテキストを指定することで
-複雑なアニメーションを実現できます。
+キーフレームアニメーションを実行します。事前に`[keyframe]`タグでキーフレームアニメーションを定義しておく必要があります。
 
 :sample
 
 :param
-name=アニメーションさせる画像やテキストのnameを指定します,
-layer=nameを指定せずに、layerを指定することでそのlayerに属するエレメント全てにアニメーションを適用させることができます,
-keyframe=実行するキーフレームアニメーション名を指定します。,
-time=アニメーションを実行する時間をミリ秒で指定します。,
-easing=アニメーションの変化パターンを指定できます。
-指定できる値として
-ease(開始時点と終了時点を滑らかに再生する)　linear(一定の間隔で再生する)
-ease-in(開始時点をゆっくり再生する)
-ease-out(終了時点をゆっくり再生する)
-ease-in-out(開始時点と終了時点をゆっくり再生する)
-この他に、cubic-bezier関数を使って、イージングを独自に設定することも可能です
+name       = アニメーションさせる画像やテキストの`name`を指定します。,
+layer      = `name`を指定せずに`layer`を指定することで、そのレイヤに存在するすべての要素をアニメーションさせることができます。,
+keyframe   = 適用するキーフレームアニメーションの`name`を指定します。,
+time       = アニメーション時間をミリ秒で指定します。,
+easing     = アニメーションの変化パターンを指定できます。以下のキーワードが指定できます。<br>
+`ease`(開始時点と終了時点を滑らかに再生する)<br>
+`linear`(一定の間隔で再生する)<br>
+`ease-in`(開始時点をゆっくり再生する)<br>
+`ease-out`(終了時点をゆっくり再生する)<br>
+`ease-in-out`(開始時点と終了時点をゆっくり再生する)<br>
+この他に`cubic-bezier`関数を使って独自のイージングを指定することも可能です。
 ,
-count = 再生回数を指定できます。初期値は１。"infinite"を指定することで無限にアニメーションさせることもできます。,
-delay = 開始までの時間を指定できます。初期値は遅延なし(0)です。,
-direction = 偶数回のアニメーションを逆再生するか指定できます。 初期値は"normal" 偶数回逆再生させる場合は、"alternate"を指定します,
-mode = 再生前後の状態を指定できます。初期値は"forwards"で再生後の状態を維持します。 "none"を指定すると、再生後の状態を維持しません
+count      =  再生回数を指定できます。`infinite`を指定することで無限ループさせることもできます。,
+delay      =  開始までの時間を指定できます。初期値は`0`、つまり遅延なしです。,
+direction  =  アニメーションを複数回ループさせる場合に、偶数回目のアニメーションを逆再生にするかを設定できます。偶数回目を逆再生にする場合は`alternate`を指定します。,
+mode       =  アニメーションの最後のフレームの状態（位置、回転など）をアニメーション終了後も維持するかを設定できます。`forwards`(デフォルト)で維持。`none`を指定すると、アニメーション再生前の状態に戻ります。
 
 :demo
 2,kaisetsu/15_kanim
@@ -1360,8 +1369,8 @@ tyrano.plugin.kag.tag.kanim = {
 :sample
 
 :param
-name=アニメーションさせる停止する画像やテキストのnameを指定します,
-layer=nameを指定せずに、layerを指定することでそのlayerに属するエレメント全てにアニメーション停止を適用させることができます
+name  = アニメーションを停止する画像やテキストの`name`を指定します。,
+layer = `name`を指定せずに`layer`を指定することで、そのレイヤに存在するすべての要素のアニメーションを停止できます。
 
 #[end]
 */
@@ -1414,21 +1423,51 @@ tyrano.plugin.kag.tag.stop_kanim = {
 キャラクター操作
 
 :title
-キャラクターの発言名前欄表示と表情変更
+キャラクターの名前表示と表情変更
 
 :exp
-[chara_config ptext="hogehoge"]という形式で定義した発言者のメッセージボックスにnameで指定した名前を設定できます。
-さらに、faceパラメータを指定することで、同時に表情も変更できます。
-このタグには省略して書くことができます。
-#chara_name:face_name と　[ptext name="chara_name" face="face_name"] は同じ動作をします。
-[chara_new]時に登録した画像ファイルはface="default"で指定できます。
-[chara_new name="yuko" storage="yuko.png"  jname="ゆうこ"]
+キャラクターの名前を表示するためのタグです。いましゃべっているキャラクターの名前をメッセージウィンドウの上部に出すのが主な使い方になるでしょう。`face`属性を指定することで、名前を出すと同時にそのキャラクターの表情を変更することもできます。
+
+あらかじめ`[ptext]`で作っておいたテキスト領域にキャラクターの名前を上書きする処理を行います。`[chara_ptext]`を使用する前に`[ptext]`および`[chara_config]`による事前準備が必要になります。実際の手順はサンプルコードを参照してください。
+
+<b>このタグは省略して書くことができます。</b>省略記法では、行の先頭に`#`を書き、続けて`name`属性に指定する値を書きます。表情を変更する場合は続けて`:`を書き、`face`属性に指定する値を書きます。
+
+つまり、`#akane:gekioko`と`[chara_ptext name=akane face=gekioko]`は同じ動作をします。
 
 :param
-name=[chara_new]で定義したnameを指定します。紐づいたjnameがptext欄に表示されます,
-face=[chara_face]で定義したface名を指定します
+name = `[chara_new]`タグで定義した`name`を指定します。それをひもついた`jname`がテキストエリアに表示されます。その`name`のキャラクター定義が存在しなかった場合、`name`に指定された内容がそのままテキストエリアに表示されます。,
+face = `[chara_face]`タグで定義した`face`を指定します。
 
 :sample
+;レイヤ0を表示
+[layopt layer="0" visible="true"]
+
+;テキスト領域をレイヤ0に作成
+[ptext layer="0" name="name_space" x="100" y="200" text="ここにキャラの名前が入る"]
+
+;↑で作ったテキスト領域(name_space)をキャラ名表示用であると宣言する
+[chara_config ptext="name_space"]
+
+;キャラ定義
+[chara_new name="akane" storage="chara/akane/normal.png" jname="あかね"]
+[chara_new name="yamato" storage="chara/yamato/normal.png" jname="やまと"]
+
+;キャラ名表示！
+[chara_ptext name="akane"]
+あかねです[p]
+
+;このような省略記法もあります（行頭に#を書いて、キャラのnameを続けて書く）
+;実際にはこの書き方を使うことがほとんどでしょう
+#yamato
+やまとです[p]
+
+;消去もできる
+#
+地の文です[p]
+
+;キャラ登録されていなくてもOK
+#？？？
+こんにちは[p]
 
 #[end]
 */
@@ -1643,51 +1682,20 @@ tyrano.plugin.kag.tag.chara_ptext = {
 :sample
 
 :param
-pos_mode=true か false　を指定します。デフォルトはtrueです。trueの場合は、[chara_show]タグなどで追加した時の立ち位置を自動的に計算し、配置します。,
-ptext=発言者の名前領域のptextを指定できます。例えば[ptext name=name_space] のように定義されていた場合、その後 #yuko のように指定するだけで、ptext領域キャラクターの名前を表示できます。,
-time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
-memory=true か false を指定します。デフォルトはfalseです。キャラクターを非表示にして再度表示した時に、表情を維持するかどうかをしていできます。falseをしていすると、[chara_new]で指定してデフォルトの表情で表示されます,
-anim=キャラクターを自動配置する場合、キャラクターの立ち位置が変わるときにアニメーションを行うか否かを指定できます。デフォルトは true です。falseを指定するとじんわりと入れ替わる効果に切り替わります。,
-pos_change_time=キャラクターの位置を変更する際のスピードを調整できます。ミリ秒で指定して下さい。デフォルトは600,
-talk_focus=現在話しているキャラクターの立ち絵に対して、目立たせる演出が可能になります。指定できるのは brightness（明度） blur（ぼかし） none （無効）です。デフォルトはnone　どのキャラクターが話しているかの指定は #yuko のように指定すると、chara_new時の名前とひも付きます。 ,
-brightness_value=brightnessの値を指定できます。話しているキャラクター以外の明度を指定します。0〜100 で指定して下さい。デフォルトは60,
-blur_value=blurの値を指定できます。話しているキャラクター以外のぼかし方を指定します。0〜100 で指定して下さい。デフォルトは2 値がおおきいほどぼかしが強くなります,
-talk_anim=現在話しているキャラクターの立ち絵に対して、ピョンと跳ねるような効果を与えることができます。指定できるのは up（上に跳ねる） down（下に沈む） none （無効）です。デフォルトはnone　どのキャラクターが話しているかの指定は #yuko のように指定すると、chara_new時の名前とひも付きます。,
-talk_anim_time=talk_animが有効な場合のアニメーション速度を指定できます。デフォルトは230ミリ秒。,
-talk_anim_value=talk_animが有効な場合のアニメーション量を指定できます。デフォルトは30。数値で指定します。,
-effect=キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。
-jswing
-｜def
-｜easeInQuad
-｜easeOutQuad
-｜easeInOutQuad
-｜easeInCubic
-｜easeOutCubic
-｜easeInOutCubic
-｜easeInQuart
-｜easeOutQuart
-｜easeInOutQuart
-｜easeInQuint
-｜easeOutQuint
-｜easeInOutQuint
-｜easeInSine
-｜easeOutSine
-｜easeInOutSine
-｜easeInExpo
-｜easeOutExpo
-｜easeInOutExpo
-｜easeInCirc
-｜easeOutCirc
-｜easeInOutCirc
-｜easeInElastic
-｜easeOutElastic
-｜easeInOutElastic
-｜easeInBack
-｜easeOutBack
-｜easeInOutBack
-｜easeInBounce
-｜easeOutBounce
-｜easeInOutBounce
+pos_mode         = `true`または`false`を指定します。デフォルトは`true`です。`true`の場合、`[chara_show]`タグでキャラクターを表示したときの立ち位置を自動的に計算して配置します。,
+ptext            = `[ptext]`で作っておいた、キャラクターの名前を表示するためのテキスト領域の`name`を指定します。詳しくは`[chara_ptext]`の項目を参照してください。,
+time             = `[chara_mod]`タグで表情を変える際のクロスフェード時間をミリ秒で指定します。`0`を指定すると瞬間的に切り替わります。,
+memory           = キャラクターを退場させたときの表情を記憶しておくかどうか。`true`または`false`を指定します。`true`を指定すると、キャラクターを再登場させたときに、前回退場時の表情のまま表示されます。,
+anim             = `pos_mode=true`によってキャラクターの自動配置が有効になっている場合に、キャラクターの立ち位置変化のアニメーションを行うかどうか。`true`または`false`で指定します。,
+pos_change_time  = キャラクターの位置を自動で調整する際のアニメーション時間をミリ秒で指定します。,
+talk_focus       = 現在話しているキャラクターの立ち絵を目立たせる演出を有効にするための設定です。以下のキーワードが指定できます。`brightness`(明度)、`blur`(ぼかし)、`none`(無効)<br>現在誰が話しているかの指定は`[chara_ptext]`タグもしくはその省略表記である`#akane`のような記述で行います。,
+brightness_value = `talk_focus=brightness`の場合の、話していないキャラクターの明度を`0`〜`100`で指定します。デフォルトは`60`。つまり、話していないキャラクターをちょっと暗くします。,
+blur_value       = `talk_focus=blur`の場合の、話していないキャラクターのぼかし度合を数値で指定します。デフォルトは`2`。数値が大きくなるほど強くぼけるようになります。,
+talk_anim        = キャラクターが話し始めるときに、キャラクターの立ち絵にピョンと跳ねるようなアニメーション演出を自動で加えることができる設定です。以下のキーワードが指定できます。`up`（上に跳ねる）、`down`(下に沈む)、`none`(無効),
+talk_anim_time   = `talk_anim`が有効な場合の、アニメーション時間をミリ秒で指定できます。,
+talk_anim_value  = `talk_anim`が有効な場合の、キャラクターの移動量を指定できます。（ピクセル）,
+effect           = キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。指定できるキーワードは次のとおりです。
+`jswing``def``easeInQuad``easeOutQuad``easeInOutQuad``easeInCubic``easeOutCubic``easeInOutCubic``easeInQuart``easeOutQuart``easeInOutQuart``easeInQuint``easeOutQuint``easeInOutQuint``easeInSine``easeOutSine``easeInOutSine``easeInExpo``easeOutExpo``easeInOutExpo``easeInCirc``easeOutCirc``easeInOutCirc``easeInElastic``easeOutElastic``easeInOutElastic``easeInBack``easeOutBack``easeInOutBack``easeInBounce``easeOutBounce``easeInOutBounce`
 
 :demo
 1,kaisetsu/08_character
@@ -1769,21 +1777,23 @@ tyrano.plugin.kag.tag.chara_config = {
 キャラクターの定義
 
 :exp
-登場するキャラクターの情報を定義します。その後[chara_show ]で指定した名称で表示したり、画像を変更したりできます。
-また、ここで定義したname属性は[anim]タグなどからも指定可能です。
-つまり、キャラクターを追加したあとアニメーションすることも自由にできます。
+登場するキャラクターの情報を定義します。
+
+このタグでキャラクターを定義しておくことで、`[chara_show]`タグでそのキャラクターを表示したり、`[chara_mod]`タグでキャラクターの表情を変更したりできます。
+
+このタグに指定した`name`パラメータは`[chara_show]`を始めとするキャラクター操作系のタグに使われます。他にも`[anim]`タグや`[kanim]`タグにキャラクターの`name`を指定することもできます。つまり、キャラクターを自由にアニメーションさせられます。
 
 :sample
-[chara_new name="yuko" storage="yuko.png"  jname="ゆうこ"]
+[chara_new name=yuko storage=yuko.png jname=ゆうこ]
 
 :param
-name=キャラクターを以後操作するための名前を半角英数で指定します。このnameは他のタグを含めて必ずユニークでなければなりません,
-storage=キャラクター画像を指定します。画像ファイルはプロジェクトフォルダのfgimageフォルダに配置してください,
-width=画像の横幅を指定できます,
-height=画像の高さを指定できます。,
-reflect=画像を反転します,
-color=キャラクターの名前を表示するときの色を指定できます。0xRRGGBB 形式で指定します。,
-jname=このキャラクターをネームスペースに表示する場合、適用する名称を指定できます。例えば、#yuko と指定すると　メッセージエリアに　ゆうこ　と表示できます
+name    = キャラクターを管理するための名前を半角英数で指定します。この`name`は必ず<b>ユニーク</b>（一意、固有）である必要があります。すなわち、他のキャラクターと`name`が重複してはいけません。また`[ptext][image]`などのタグに指定する`name`とも重複してはいけません。,
+storage = キャラクター画像を指定します。画像ファイルは`data/fgimage`フォルダに配置します。,
+width   = 画像の横幅を指定できます。,
+height  = 画像の高さを指定できます。,
+reflect = 画像を左右反転するかどうか。`true`または`false`で指定します。`true`を指定すると、画像を左右反転して表示します。,
+color   = キャラクターの名前を表示するときの色を指定できます。`0xRRGGBB`形式で指定します。,
+jname   = このキャラクターをネームスペースに表示する場合、適用する名称を指定できます。例えば、#yuko と指定すると　メッセージエリアに　ゆうこ　と表示できます
 
 :demo
 1,kaisetsu/08_character
@@ -1859,26 +1869,26 @@ tyrano.plugin.kag.tag.chara_new = {
 キャラクターの登場
 
 :exp
-定義しておいたキャラクターを画面に表示します
+定義しておいたキャラクターを画面に表示します。
 
 :sample
 [chara_show name="yuko" ]
 
 :param
-name=[chara_new]で定義したname属性を指定します。,
-time="ミリ秒で指定します。指定した時間をかけて登場します。デフォルトは1000ミリ秒です",
-layer="キャラクターを配置するレイヤーを指定できます。デフォルトは前景レイヤ layer=0 です",
-zindex="キャラクターの重なりを指定できます。ここで指定した値が大きいほうが前に表示できます。省略すると、後に登場するキャラクターが前に表示されます",
-depth="zindexが同一な場合の重なりを指定できます。front（最前面）/back（最後面）で指定します。デフォルトはfront",
-page="foreかbackを指定します。デフォルトはforeです",
-wait="trueを指定すると、キャラクターの登場完了を待ちます。デフォルトはtrue です。",
-face=[chara_face]で定義したface属性を指定します。,
-storage=変更する画像ファイルを指定します。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。,
-reflect="trueを指定すると左右反転します",
-width="キャラクターの横幅を指定できます。",
-height="キャラクターの縦幅を指定できます。",
-left="キャラクターの横位置を指定できます。指定した場合、自動配置が有効であっても無効になります。",
-top="キャラクターの縦位置を指定できます。指定した場合、自動配置が有効であっても無効になります。"
+name    = [chara_new]で定義したname属性を指定します。,
+time    = ミリ秒で指定します。指定した時間をかけて登場します。,
+layer   = キャラクターを配置するレイヤを`0`以上の整数で指定します。,
+zindex  = キャラクターの重なりを指定できます。ここで指定した値が大きいほうが前に表示できます。省略すると、後に登場するキャラクターが前に表示されます。",
+depth   = zindexが同一な場合の重なりを`front`(最前面)、`back`(最後面) で指定できます。,
+page    = foreかbackを指定します。,
+wait    = trueを指定すると、キャラクターの登場完了を待ちます。,
+face    = `[chara_face]`タグで定義したface属性を指定します。,
+storage = 変更する画像ファイルを指定します。画像ファイルは`data/fgimage`フォルダに配置します。,
+reflect = 画像を左右反転するかどうか。`true`または`false`で指定します。`true`を指定すると、画像を左右反転して表示します。,
+width   = キャラクターの横幅を指定できます。,
+height  = キャラクターの縦幅を指定できます。,
+left    = キャラクターの横位置を指定できます。指定した場合、自動配置が有効であっても無効になります。,
+top     = キャラクターの縦位置を指定できます。指定した場合、自動配置が有効であっても無効になります。
 
 :demo
 1,kaisetsu/08_character
@@ -1964,6 +1974,10 @@ tyrano.plugin.kag.tag.chara_show = {
                 return;
             }
             storage_url = "./data/fgimage/" + cpm["map_face"][pm.face];
+            //表情画像がhttpで指定されている場合はそれをそのまま格納する
+            if ($.isHTTP(cpm["map_face"][pm.face])) {
+                storage_url = cpm["map_face"][pm.face];
+            }
         } else if (pm.storage != "") {
             if ($.isHTTP(pm.storage)) {
                 folder = "";
@@ -2275,14 +2289,14 @@ tyrano.plugin.kag.tag.chara_show = {
 [chara_show]タグで表示したキャラクターを退場させます。
 
 :sample
-[chara_hide name="yuko" ]
+[chara_hide name="yuko"]
 
 :param
-name=[chara_new]で定義したname属性を指定します。,
-wait=trueを指定すると、キャラクターの退場を待ちます。デフォルトはtrueです。,
-time=ミリ秒で指定します。指定した時間をかけて退場します。デフォルトは1000ミリ秒です,
-layer=削除対象のレイヤ。chara_showの時にレイヤ指定した場合は、指定します。デフォルトは０,
-pos_mode=キャラクターの立ち位置自動調整が有効な場合にこの値にfalseを指定すると退場後に立ち位置の調整を行いません。デフォルトはtrueです,
+name     = `[chara_new]`で定義した`name`属性を指定します。,
+time     = フェードアウト時間をミリ秒で指定します。,
+wait     = フェードアウトの完了を待つかどうか。`true`または`false`で指定します。,
+layer    = 削除対象のレイヤ。`[chara_show]`でにレイヤ指定した場合はここでも指定します。,
+pos_mode = キャラクターの立ち位置自動調整が有効な場合に、このパラメータに`false`を指定すると退場後に立ち位置の調整を行いません。
 
 :demo
 1,kaisetsu/08_character
@@ -2481,15 +2495,15 @@ tyrano.plugin.kag.tag.chara_hide = {
 キャラクターを全員退場
 
 :exp
-[chara_show]タグで表示したキャラクターを全員退場させます。
+`[chara_show]`タグで表示したキャラクターを全員退場させます。
 
 :sample
 [chara_hide_all time=1000 wait=true]
 
 :param
-wait=trueを指定すると、キャラクターの退場を待ちます。デフォルトはtrueです。,
-time=ミリ秒で指定します。指定した時間をかけて退場します。デフォルトは1000ミリ秒です,
-layer=削除対象のレイヤ。chara_showの時にレイヤ指定した場合は、指定します。デフォルトは０
+time  = フェードアウト時間をミリ秒で指定します。,
+wait  = フェードアウトの完了を待つかどうか。`true`または`false`で指定します。,
+layer = 削除対象のレイヤ。`[chara_show]`でにレイヤ指定した場合はここでも指定します。
 
 #[end]
 */
@@ -2576,13 +2590,15 @@ tyrano.plugin.kag.tag.chara_hide_all = {
 キャラクター情報の削除
 
 :exp
-定義しておいたキャラクター情報を削除します。（画面から消す場合は[chara_hide]を使用してください）
+キャラクターの定義情報を削除します。
+
+キャラクターの立ち絵を画面から退場させたい場合はこのタグではなく`[chara_hide]`を使用してください。
 
 :sample
 [chara_delete="yuko" ]
 
 :param
-name=[chara_new]で定義したname属性を指定します。
+name = [chara_new]で定義したname属性を指定します。
 
 #[end]
 */
@@ -2611,19 +2627,19 @@ tyrano.plugin.kag.tag.chara_delete = {
 キャラクター画像変更
 
 :exp
-画面のキャラクター画像を変更します。表情を変更する場合などに便利でしょう
+キャラクター画像を変更します。表情変更に活用できます。
 
 :sample
 [chara_mod name="yuko" storage="newface.png"]
 
 :param
-name=[chara_new]で定義したname属性を指定します。,
-face=[chara_face]で定義したface属性を指定します,
-time=0以上の数値をミリ秒で指定することで、[chara_mod]タグで表情を変える際に、クロスフェードの効果を与えることができます。指定時間かけて切り替わります。デフォルトは600ミリ秒です。0を指定すると即時に切り替わります,
-reflect=trueを指定すると左右反転します,
-storage=変更する画像ファイルを指定します。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。,
-wait=表情の変更完了を待つか否かを指定します。true or falseで指定。デフォルトは true,
-cross=true or false を指定します。デフォルトはtrue。trueを指定すると２つの画像が同じタイミングで透明になりながら入れ替わります。falseを指定すると、古い表情を残しながら上に重なる形で新しい表情を表示します。
+name    = `[chara_new]`で定義した`name`を指定します。,
+face    = `[chara_face]`で定義した`face`を指定します。,
+time    = `[chara_mod]`タグで表情を変える際のクロスフェード時間をミリ秒で指定します。`0`を指定すると瞬間的に切り替わります。,
+storage = 変更する画像ファイルを指定します。画像ファイルは`data/fgimage`フォルダに配置します。,
+reflect = 画像を左右反転するかどうか。`true`または`false`で指定します。`true`を指定すると、画像を左右反転して表示します。,
+wait    = 表情変更のクロスフェードが終わるのを待つかどうか。`true`または`false`で指定します。,
+cross   = <p>クロスフェードの方式を`true`または`false`を指定します。`true`を指定すると、旧画像がフェードアウトさせるのと同時に新画像をフェードインさせます。`false`を指定すると、旧画像を残したままその上に新画像をフェードインさせます。</p><p>`true`の場合、クロスフェードの瞬間にキャラクターが若干透けて背景が見えてしまうことがあります。そのような場合は`false`を指定することでキャラクターを透けさせずに表情変更ができます。ただし透けなくはなりますが、シルエットが変わるような表情変更の場合は違和感が出ることがあります。</p>
 
 :demo
 1,kaisetsu/08_character
@@ -2663,6 +2679,10 @@ tyrano.plugin.kag.tag.chara_mod = {
                 return;
             }
             storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
+            //表情画像がhttpで指定されている場合はこの後で付け加えられるfolderを空にしておく
+            if ($.isHTTP(storage_url)) {
+                folder = "";
+            }
         } else {
             if ($.isHTTP(pm.storage)) {
                 folder = "";
@@ -2822,54 +2842,22 @@ tyrano.plugin.kag.tag.chara_mod = {
 キャラクターの位置変更
 
 :exp
-画面のキャラクター立ち位置を変更します。
+キャラクターの立ち位置や大きさを変更します。指定時間をかけてアニメ―ションさせることもできます。
 
 :sample
 [chara_move name="yuko" time=100 left=20 top=100 ]
 
 :param
-name=[chara_new]で定義したname属性を指定します。,
-time=0以上の数値をミリ秒で指定することで、指定時間かけて位置を移動します切り替わります。600ミリ秒です。,
-anim=trueかfalseを指定します。デフォルトはfalse。trueを指定すると、位置を変える時にアニメーションさせることができます。アニメーション効果は[chara_config]のeffectパラメータを参照します,
-left=移動先のヨコ位置を指定できます。「left="+=200"」「left="-=200"」のように指定すると今いる位置を基準にできます（相対指定）,
-top=移動先のタテ位置を指定できます。「top="+=100"」「top="-=100"」のように指定すると今いる位置を基準にできます（相対指定）,
-width=変更後の横幅を指定できます,
-height=変更後の高さを指定できます,
-wait=位置変更を待つか否かを指定します。true or falseで指定。デフォルトは true,
-effect=変化のエフェクトを指定します。指定できる文字列は以下の種類です<br />
-
-jswing
-｜def
-｜easeInQuad
-｜easeOutQuad
-｜easeInOutQuad
-｜easeInCubic
-｜easeOutCubic
-｜easeInOutCubic
-｜easeInQuart
-｜easeOutQuart
-｜easeInOutQuart
-｜easeInQuint
-｜easeOutQuint
-｜easeInOutQuint
-｜easeInSine
-｜easeOutSine
-｜easeInOutSine
-｜easeInExpo
-｜easeOutExpo
-｜easeInOutExpo
-｜easeInCirc
-｜easeOutCirc
-｜easeInOutCirc
-｜easeInElastic
-｜easeOutElastic
-｜easeInOutElastic
-｜easeInBack
-｜easeOutBack
-｜easeInOutBack
-｜easeInBounce
-｜easeOutBounce
-｜easeInOutBounce
+name   = `[chara_new]`で定義した`name`を指定します。,
+left   = 変更後の横位置を指定できます。`left="+=200"``left="-=200"`のように指定すると、「いまの場所からどれだけ動くか」という相対指定ができます。,
+top    = 変更後の縦位置を指定できます。`top="+=100"``top="-=100"`のように指定すると、「いまの場所からどれだけ動くか」という相対指定ができます。,
+width  = 変更後の横幅を指定できます。,
+height = 変更後の高さを指定できます。,
+anim   = アニメーションさせるかどうか。`true`か`false`で指定します。`true`を指定すると、位置を変更するときにアニメーションさせることができます。この場合、アニメーション効果は`[chara_config]`の`effect`パラメータを参照します。,
+time   = アニメーション時間をミリ秒で指定します。,
+wait   = アニメーションの完了を待つかどうか。`true`か`false`で指定します。,
+effect = 変化のエフェクトを指定します。以下のキーワードが指定できます。
+`jswing``def``easeInQuad``easeOutQuad``easeInOutQuad``easeInCubic``easeOutCubic``easeInOutCubic``easeInQuart``easeOutQuart``easeInOutQuart``easeInQuint``easeOutQuint``easeInOutQuint``easeInSine``easeOutSine``easeInOutSine``easeInExpo``easeOutExpo``easeInOutExpo``easeInCirc``easeOutCirc``easeInOutCirc``easeInElastic``easeOutElastic``easeInOutElastic``easeInBack``easeOutBack``easeInOutBack``easeInBounce``easeOutBounce``easeInOutBounce`
 
 #[end]
 */
@@ -2990,25 +2978,29 @@ tyrano.plugin.kag.tag.chara_move = {
 キャラクター表情登録
 
 :exp
-キャラクターの表情画像を名称と共に登録できます
+キャラクターの表情画像を登録できます。
 
 :sample
 
 ;表情の登録
 [chara_face name="yuko" face="angry" storage="newface.png"]
-;表情の適応
+
+;表情の適用
 [chara_mod name="yuko" face="angry"]
+
 ;発言者の名前も同時にかえたい場合
 [chara_ptext name="yuko" face="angry"]
+
 ;短縮して書けます。以下も同じ意味
 #yuko:angry
+
 ;chara_new で登録した画像はdefaultという名前で指定可能
 #yuko:default
 
 :param
-name=[chara_new]で定義したname属性を指定します。,
-face=登録する表情の名前を指定します,
-storage=変更する画像ファイルを指定します。ファイルはプロジェクトフォルダのfgimageフォルダに配置します。
+name    = 表情を登録するキャラクターの名前。`[chara_new]`で定義した`name`属性を指定します。,
+face    = 登録する表情の名前を指定します。`happy``angry`など、自分がわかりやすいものを自由につけましょう。,
+storage = 画像ファイルを指定します。画像ファイルは`data/fgimage`フォルダに配置します。
 
 #[end]
 */
@@ -3053,11 +3045,11 @@ tyrano.plugin.kag.tag.chara_face = {
 [chara_layer name="yuko" part=mouse id=egao storage="image/egao.png" ]
 
 :param
-name=[chara_new]で定義したname属性を指定します。,
-part=パーツとして登録する名を指定します。例えば「目」というpartを登録しておいて、このpartの中で他の差分をいくつも登録できます。,
-id=パーツの中で差分にidを登録できます。例えば「目」というpartの中で「笑顔の目」「泣いてる目」のようにidを分けてstorageを登録してください,
-storage=差分として登録する画像を指定します。画像はfgimageフォルダの中に配置します。noneを指定するとデフォルトそのパーツがない状態を表現できます,
-zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。一度登録しておけば該当するpartに適応されます。
+name    = パーツを登録するキャラクターの名前。`[chara_new]`で定義した`name`属性を指定します。,
+part    = パーツとして登録する名前を指定します。例えば`目`というパーツを`part`を登録しておき、この`part`の中で他の差分をいくつでも登録できます。,
+id      = パーツの中の差分を識別するための名前を指定します。例えば`目`という`part`の中で`笑顔の目``泣いてる目`のように`id`を分けて登録できます。,
+storage = 差分として登録する画像を指定します。画像は`data/fgimage`フォルダの中に配置します。`none`を指定すると、デフォルトでそのパーツがない状態を表現できます。,
+zindex  = このパーツが他のパーツと重なった時にどちらが前面に表示されるかを決定するための優先度を数字で指定します。数字が大きいほど前面に表示されます。一度登録しておけば、同パーツの他の差分にも適用されます。
 
 #[end]
 */
@@ -3151,9 +3143,9 @@ chara_layerで定義した設定を変更できます。
 [chara_layer_mod name="yuko" part=mouse zindex=20 ]
 
 :param
-name=[chara_new]で定義したname属性を指定します。,
-part=変更したいパーツとして登録した名を指定します。,
-zindex=数値を指定します。このpartが他のパーツ重なった時にどの位置に表示されるかを指定します。数値が大きい程、前面に表示されます。この設定は即時反映されず、次回表示時、反映されます。
+name   = パーツ定義の変更対象となるキャラクターの名前。`[chara_new]`で定義した`name`属性を指定します。,
+part   = 変更したいパーツ名を指定します。,
+zindex = このパーツが他のパーツと重なった時にどちらが前面に表示されるかを決定するための優先度を数字で指定します。数字が大きいほど前面に表示されます。この設定は即時反映されません。次回表示時に反映されます。
 
 #[end]
 */
@@ -3209,22 +3201,25 @@ tyrano.plugin.kag.tag.chara_layer_mod = {
 キャラクターの差分パーツ変更
 
 :exp
-[chara_layer]で指定した差分を実際に表示切り替えする
-このタグは特殊なパラメータ指定で[chara_layer]で定義したpart と id の組み合わせをパラメータとして自由に指定できます。
-（例）eye=sample1
-同時に複数のpartを変更することも可能です。
-また、id登録していない、画像を直接指定することもできます。この場合パラメータのallow_storageにtrueに指定してください。
-特定部位のzindexを変更して出力したい場合はpart名+_zindex という名前のパラメータに数値を代入できます。
-（例）eye_zindex=10
+`[chara_layer]`タグで定義したパーツ差分の実際の表示を切り替えます。
+
+このタグのパラメータの指定の方法は特殊です。`[chara_layer]`タグで定義した`part`と`id`の組み合わせをパラメータとして自由に指定できます。
+
+`[chara_layer name=yuko eye=happy]`
+
+同時に複数の`part`を変更することも可能です。
+`id`登録をせずに差分画像ファイルを直接指定することもできます。この場合、`allow_storage=true`を指定してください。
+特定部位の`zindex`を変更して出力するために、`part名+_zindex`という名前のパラメータに数値を指定できます。
+`[chara_layer name=yuko eye=happy eye_zindex=10]`
 
 :sample
-[chara_part name="yuko" mouse=aaa eye=bbb ]
+[chara_part name=yuko mouse=happy eye=happy]
 
 :param
-name=[chara_new]で指定したキャラクター名を指定します。,
-time=パーツが表示されるまでの時間を指定できます。ミリ秒で指定します。指定するとフェードインしながら表示できます。デフォルトは指定なしです。,
-wait=true or false を指定します。trueを指定するとtimeで指定したフェードインの完了を待ちます。デフォルトはtrueです。,
-allow_storage=true or false 。partの指定にidではなく直接画像ファイルを指定できます。画像はfgimageフォルダに配置してください。デフォルトはfalseです。
+name          = `[chara_new]`で指定したキャラクター名を指定します。,
+time          = パーツが表示されるまでのフェードイン時間を指定できます。ミリ秒で指定します。,
+wait          = フェードインの完了を待つかどうか。`true`または`false`で指定します。,
+allow_storage = `true`または`false`。`true`を指定すると、`part`の指定に`id`ではなく直接画像ファイルを指定できます。画像は`fgimage`フォルダに配置してください。
 
 #[end]
 */
@@ -3402,15 +3397,15 @@ tyrano.plugin.kag.tag.chara_part = {
 キャラクターの差分パーツをデフォルトに戻す
 
 :exp
-[chara_part]で差分を変更した際、デフォルトの表情に戻すことができます。
+`[chara_part]`で差分を変更した際、デフォルトの表情に戻すことができます。
 キャラクターが表示されている場合は即時デフォルトに戻ります。
 
 :sample
-[chara_part_reset name="yuko" ]
+[chara_part_reset name=yuko]
 
 :param
-name=[chara_new]で指定したキャラクター名を指定します。,
-part=特定のpartに絞ってリセットすることが可能です。デフォルトはすべてをデフォルトに戻します。ここに記述することで指定したpartのみリセットされます。カンマで区切ると複数指定することが可能です
+name = `[chara_new]`で指定したキャラクター名を指定します。,
+part = 特定の`part`に絞ってリセットすることが可能です。カンマ区切りで複数指定が可能です。省略すると、すべてのパーツをデフォルトに戻します。
 
 #[end]
 */
@@ -3480,10 +3475,10 @@ tyrano.plugin.kag.tag.chara_part_reset = {
 システム操作
 
 :title
-バックログを表示します
+バックログの表示
 
 :exp
-バックログを表示します
+バックログを表示します。
 
 :sample
 [showlog]
@@ -3515,24 +3510,24 @@ tyrano.plugin.kag.tag.showlog = {
 レイヤやオブジェクトを指定して、様々なフィルター効果を追加できます。
 
 :sample
-;特定のオブジェクトを指定して、フィルター効果。
-[filter layer="0" name="chara_a" grayscale=50 ]
+;特定のオブジェクトを指定して、フィルター効果
+[filter layer=0 name=chara_a grayscale=50 ]
 
 ;レイヤを指定してフィルター効果
-[filter layer="0" grayscale=50 ]
+[filter layer=0 brightness=50 ]
 
 :param
-layer=効果を追加するレイヤを指定します。省略すると、もしくは「all」と指定するとゲーム画面全てに効果がかかります,
-name=削除する要素のnameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。,
-grayscale=0(デフォルト)-100 を指定することで、画像の表示をグレースケールに変換できます,
-sepia=0(デフォルト)-100を指定することで、画像の表示をセピア調に変換できます,
-saturate=0-100(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます,
-hue=0(デフォルト)-360を指定することで、画像の表示の色相を変更できます,
-invert=0(デフォルト)-100を指定することで、画像の表示の階調を反転させることができます,
-opacity=0-100(デフォルト)を指定することで、画像の表示の透過度を変更できます,
-brightness=0-100(デフォルト)を指定することで、画像の表示の明るさを変更できます。元画像より暗くしたい場合に使えます,
-contrast=0-100(デフォルト)を指定することで、画像の表示のコントラストを変更できます,
-blur=0(デフォルト)-任意の値[px] を指定することで、画像の表示をぼかすことができます
+layer      = フィルタをかけるレイヤを指定します。省略すると、もしくは`all`と指定するとゲーム画面全てに効果がかかります。,
+name       = 特定の要素にフィルタをかけたい場合に、その要素の`name`を指定します。,
+grayscale  = `0`(デフォルト)～`100`を指定することで、画像の表示をグレースケールに変換できます。,
+sepia      = `0`(デフォルト)～`100`を指定することで、画像の表示をセピア調に変換できます。,
+saturate   = `0`～`100`(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。,
+hue        = `0`(デフォルト)～`360`を指定することで、画像の表示の色相を変更できます。,
+invert     = `0`(デフォルト)～`100`を指定することで、画像の表示の階調を反転させることができます。,
+opacity    = `0`～`100`(デフォルト)を指定することで、画像の表示の透過度を変更できます。,
+brightness = `100`(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。`0`で真っ暗に、`100`以上の数値でより明るくなります。,
+contrast   = `0`～`100`(デフォルト)を指定することで、画像の表示のコントラストを変更できます。,
+blur       = `0`(デフォルト)～`任意の値`を指定することで、画像の表示をぼかすことができます。
 
 :demo
 2,kaisetsu/04_filter
@@ -3642,22 +3637,21 @@ tyrano.plugin.kag.tag.filter = {
 レイヤ関連
 
 :title
-フィルター効果削除
+フィルター効果消去
 
 :exp
-レイヤやオブジェクトを指定して、filter効果を無効にします。
-指定されない場合はすべてのフィルター効果が無効化されます。
+レイヤやオブジェクトを指定して、`[filter]`効果を無効にします。
 
 :sample
-;特定のオブジェクトを指定して、フィルターを打ち消す。
-[free_filter layer="0" name="chara_a"]
+;特定のオブジェクトを指定して、フィルターを打ち消す
+[free_filter layer=0 name=chara_a]
 
 ;全部のフィルターを打ち消す
-[free_filter  ]
+[free_filter]
 
 :param
-layer=フィルターを打ち消すレイヤを指定します。指定がない場合、すべての効果が消されます,
-name=フィルターを打ち消したい、nameを指定します。レイヤの中のあらゆるオブジェクトに適応できます。
+layer = フィルターを消去するレイヤを指定します。指定がない場合、すべてのフィルターが消去されます。,
+name  = 特定の要素のフィルターを消去したい場合に、その要素の`name`を指定します。
 
 :demo
 2,kaisetsu/04_filter
@@ -3713,8 +3707,10 @@ Webサイトを開く
 
 :exp
 指定したWebサイトをブラウザで開くことができます。
-ただし、このタグを配置する直前にクリック待ちを配置する必要があります。
-多くの環境で、ユーザーアクションなしにブラウザが開くことを禁止しています。
+
+<b>★重要</b>
+ただし、このタグの直前にクリック待ちを配置する必要があります。
+スマホブラウザを始めとする多くの環境において、ユーザーアクションなしに（たとえばテキスト表示中にいきなり勝手に）別ページに飛ぶような挙動が禁止されているためです。
 
 :sample
 ;クリック待ちを挟む
@@ -3725,7 +3721,7 @@ Webサイトを開く
 [web url="./data/bgimage/room.jpg"]
 
 :param
-url=開きたいWebサイトのURLを入れてください。
+url = 開きたいWebサイトのURLを指定します。ゲーム内の画像ファイルなどを開きたい場合、ファイルの場所を`data`から初めて記述します。
 
 :demo
 2,kaisetsu/11_html

@@ -1,10 +1,9 @@
 // Config.tjs - ティラノスクリプト 設定
-// Copyright (C) 2012-2017 ShikemokuMK  
+// Copyright (C) 2012-2021 ShikemokuMK
 
 ;global.config_version = "5.00"; // この行を消さないでください
 
 // ティラノスクリプトの基本設定になります。
-// 吉里吉里で動かす場合は同一フォルダ内のKirikiri_Config.tjs を使用して下さい
 
 // このファイル内で設定できる項目は、すべて
 // ;設定名 = 値;
@@ -50,6 +49,17 @@
 // trueで有効　false で無効です。
 ;useCamera = true;
 
+// 3D機能を利用できるようにする
+// trueで有効　false で無効です。
+// 有効にすると起動時間が長くなりますので、必要ない場合はfalseが推奨です。
+;use3D = false;
+
+// ◆ タグのパラメータの値に含まれる空白を保持するか
+// もし既存のゲームプロジェクトのティラノスクリプト本体（V514以前）をそれ以降のバージョンで上書きしたときに
+// それまで正常に動作していたゲームの挙動が変わった場合は、ここの true　を false に変更してみてください。
+// false にすると、たとえば [bg storage="my room.jpg"] という記述の storage パラメータの値が
+// my room.jpg ではなく myroom.jpg と解釈されるようになります。
+;KeepSpaceInParameterValue = true;
 
 //-------------------------------------------- ウィンドウや動作の設定 -----
 
@@ -67,14 +77,25 @@
 // チャットノベルで便利なセーブやロードなどを備えたメニューを表示するか否か。
 ;vchatMenuVisible = false;
 
-// ◆ 文字表示スピード 
-// delay で指定した場合はその値が優先されます。resetdelayで元に戻ります 
-;chSpeed = 30; 
+// ◆ 文字表示スピード
+// delay で指定した場合はその値が優先されます。resetdelayで元に戻ります
+;chSpeed = 30;
 
 // ◆ 文字表示スピード (ミリ秒/文字)（未実装）
 ;chSpeeds.fast = 10; // 「高速」文字表示スピード
 ;chSpeeds.normal = 30; // 「普通」文字表示スピード
 ;chSpeeds.slow = 50; // 「遅い」文字表示スピード
+
+// ◆ 文字表示の演出
+// テキストの表示演出を指定できます。noneを指定すると演出が無効になります。
+// 指定できる名前
+// fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none
+;defaultChEffect = none;
+
+// ◆ 文字表示の演出スピード
+// defaultChAnimの演出が有効な場合、演出にかける時間を指定します。sは秒を表します。
+;defaultChEffectSpeed = 0.2s;
+
 
 // ◆ スキップスピード (ミリ秒/文字)
 //スキップ時にどれくらいの早さで進むかを設定できる
@@ -85,14 +106,14 @@
 ;skipEffectIgnore = true;
 
 
-// ◆ オートスピード 
+// ◆ オートスピード
 //autoSpeedはオート時にどれくらいの早さで進むかをミリ秒設定できる
 //autoClickStop は 画面クリックでオートが停止するかどうかを設定。trueを指定すると、クリックでオートが停止
 ;autoSpeed = 1300;
 ;autoClickStop = true;
 
 //オート時の待ち時間を文字数に応じて調整できます。１文字あたり指定したミリ秒分がautoSpeedの時間に追加された時間待ちます
-//例えば10文字のテキストだった場合、60*10 = 600ms + autoSpeedの値 
+//例えば10文字のテキストだった場合、60*10 = 600ms + autoSpeedの値
 ;autoSpeedWithText = 60;
 
 
@@ -102,17 +123,12 @@
 // 独自の画像カーソルを使用したい場合はimageフォルダに配置した上で、ファイル名を指定してください
 // [cursor]タグを使って、ゲーム中に変更することもできます。
 
-;cursorDefault = default; // 通常のマウスカーソル 
+;cursorDefault = default; // 通常のマウスカーソル
 
 // ◆ デフォルトのサウンド・動画フォーマットを指定
-// デフォルトはogg形式です
-// すべてのブラウザに対応させるためには、ogg と aac の両ファイルを用意指定してください。
-// 近年、mp3・mp4ファイルはライセンス上の関係から避けられる傾向があります
-// 特に商用利用の場合はライセンスフリーのogg・webm等の利用をお願い致します。
-// Windows・Mac のアプリ形式で動かす場合は ogg を指定する必要があります。mp3は鳴らせません
-// "ogg" もしくは "mp3" を指定します。
+// V5以降は未使用。特に変更する必要はありません。
 
-;mediaFormatDefault = ogg; 
+;mediaFormatDefault = ogg;
 
 // ◆ BGMの音量 0 〜 100 で指定します。
 ;defaultBgmVolume = 100;
@@ -162,13 +178,23 @@
 // スロット数はゲーム開始後は変更できません。その場合、セーブデータをすべて消した上で再度開始する必要があります。
 ;configSaveSlotNum = 5;
 
+
+// ◆ セーブデータ移動の可否を設定します。（PCゲーム限定）
+// 他人のセーブデータ取得し配置することで、ゲームを改造するチート行為は危険です。
+// ティラノスクリプトではセーブデータの改変を検知するとゲームの起動を停止する機能が備わっています。
+// ただし、頻繁にアップデートを行うケース等において、この機能が誤検知してしまうケースがまれに発生します。
+// その場合、ゲーム本体のインストール場所（フォルダ名）を変更することで回避できます。
+// trueを指定すると、セーブデータの移動と上書きが可能になりますが、信頼できない場所からセーブデータを取得し配置しないような注意喚起も合わせてお願い致します。
+;configSaveOverwrite = false
+
+
 // ◆ バックログ機能
 // バックログ機能用にテキストの最大保持数を保存できます。
 // 保存されたデータはtf.system.backlog に配列として格納されます。
 // 0の場合、保存を行いません。
 ;maxBackLogNum = 50;
 
-// ◆ ラベル記録  
+// ◆ ラベル記録
 // 重要：既読管理を有効にしたい場合は必ずtrueを指定して下さい
 // 自動的に「読んだ」ラベルを記録するかどうかを指定します。
 // この設定が false でなく true になっていると、ラベルを読むごとにシステム
@@ -192,7 +218,7 @@
 ;unReadTextSkip = false 　
 
 //既読のテキストの色(0x000000形式)を変更できます。default を指定すると既読テキストでも色は変わりません。
-;alreadyReadTextColor = default 
+;alreadyReadTextColor = 0x87cefa
 
 // ◆ 初期状態の前景レイヤの数
 // 必要なければ 0 を指定してかまいません。
@@ -284,7 +310,7 @@
 // true を設定すると、行末での自動改行、ページ末での自動改ページが行われま
 // す。false を設定するとこれらが行われない他、禁則処理等もされなくなりま
 // す。
-;defaultAutoReturn = true; 
+;defaultAutoReturn = true;
 
 
 // ◆ 右文字マージン （未実装）
@@ -316,7 +342,7 @@
 // userFace の設定を変更し、適用したい場合はシステム変数ファイル
 // カンマで区切って複数のフォントを指定することができます。その場合は、最初
 // の方に書いたフォントが存在すれば、優先されます。
-;userFace = Quicksand, 游ゴシック体, "Yu Gothic", YuGothic, "ヒラギノ角ゴシック Pro", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif, Arial; 
+;userFace = Quicksand, 游ゴシック体, "Yu Gothic", YuGothic, "ヒラギノ角ゴシック Pro", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif, Arial;
 
 
 // ◆ 文字の色
@@ -350,7 +376,7 @@
 // 注意：文字の縁取りと同時に使用することはできません。その場合、影は無効になります。
 ;defaultShadow = false;  // deffont タグの shadow 属性に相当
 
-// ◆ 影の色 
+// ◆ 影の色
 // 影の色を 0xRRGGBB 形式で指定します。
 ;defaultShadowColor = 0x000000;  // deffont タグの shadowcolor に属性に相当
 

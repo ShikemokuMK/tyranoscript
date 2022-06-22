@@ -1,4 +1,4 @@
-<div>
+<div id="menu_menu_wrapper">
 
 	<div class="display_menu block_menu" align="center">
 
@@ -41,17 +41,17 @@
 
 	var tmp_src = "";
 
-		$(".menu_item").hover(function(){
+		$("#menu_menu_wrapper .menu_item").hover(function(){
 			tmp_src = $(this).find("img").attr("src");
 			var img_src = tmp_src.replace(".png","2.png");
 			$(this).find("img").attr("src",img_src);
 		},
 		function(){
-		
+
 			//もとにもどす
 			$(this).find("img").attr("src",tmp_src);
 		});
-		
+
 	</script>
 
 </div>

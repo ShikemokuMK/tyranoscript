@@ -80,11 +80,20 @@ tyrano.plugin.kag.parser = {
 
             //コメントの場合は無視する
             if (flag_comment === true && line_str === "*/") {
+                //ブロックコメント解除
+                //"*/"単独ではない場合、たとえば"hoge */"とか"*/ hoge"のような行ではブロックコメントは解除されない
                 flag_comment = false;
             } else if (line_str === "/*") {
+                //ブロックコメント開始
+                //やはり"/*"単独の行でないと認識されない
                 flag_comment = true;
             } else if (flag_comment == true || first_char === ";") {
+                //コメントは無視
             } else if (first_char === "#") {
+                //キャラ名
+                //#akane:happy
+                //↑を↓に変換する
+                //[chara_ptext name=akane face=happy]
                 var tmp_line = $.trim(line_str.replace("#", ""));
                 var chara_name = "";
                 var chara_face = "";
@@ -106,7 +115,9 @@ tyrano.plugin.kag.parser = {
                 array_s.push(text_obj);
             } else if (first_char === "*") {
                 //ラベル
-
+                //*opening|オープニング
+                //↑を↓に変換する
+                //[label label_name=opening val=オープニング]
                 var label_tmp = line_str.substr(1, line_str.length).split("|");
 
                 var label_key = "";
@@ -133,6 +144,7 @@ tyrano.plugin.kag.parser = {
                 array_s.push(label_obj);
 
                 if (map_label[label_obj.pm.label_name]) {
+                    //ラベルの重複はエラー
                     //this.kag.warning("警告:"+i+"行目:"+"ラベル名「"+label_obj.pm.label_name+"」は同一シナリオファイル内に重複しています");
                     this.kag.warning(
                         "Warning line:" +
@@ -148,56 +160,92 @@ tyrano.plugin.kag.parser = {
                     map_label[label_obj.pm.label_name] = label_obj.pm;
                 }
             } else if (first_char === "@") {
-                //コマンド行確定なので、その残りの部分を、ごそっと回す
+                //タグ
+                //残りの部分をごそっと回す
                 var tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
                 var tmpobj = this.makeTag(tag_str, i);
                 array_s.push(tmpobj);
             } else {
-                //半角アンダーバーで始まっている場合は空白ではじめる
+                //テキストか[]記法のタグ
+                //テキストは[iscript]内のJavaScriptや[html]内のHTMLである可能性がある
+
+                //先頭の半角アンダーバーは空白を除去しないという特殊記号なので排除
                 if (first_char === "_") {
                     line_str = line_str.substring(1, line_str.length);
                 }
 
+                //１文字ずつバラして解析していく
                 var array_char = line_str.split("");
-
-                var text = ""; //命令じゃない部分はここに配置していく
-
-                var tag_str = "";
-
-                //１文字づつ解析していく
-                var flag_tag = false; //タグ解析中
-
-                var num_kakko = 0; //embタグの中の配列[]扱うために
+                var text = ""; // テキスト文字（[iscript][html]内のテキストを含む）
+                var tag_str = ""; // タグ文字 例）ptext x=0 y=0 text="hogehoge[][]'''"
+                var scanning_tag = false; // タグ解析中かどうか
+                var deep_kakko = 0; // [ の深さ
+                //↑exp属性の中で配列[]を使用した場合などに、配列の"]"を閉じタグの"]"として解釈しないようにするために必要
+                var start_quot = ""; // クォートが始まってから終わるまで
+                var flag_escape = false; // エスケープフラグ バックスラッシュでフラグが立つ
 
                 for (var j = 0; j < array_char.length; j++) {
                     var c = array_char[j];
 
-                    if (flag_tag === true) {
-                        if (c === "]" && this.flag_script == false) {
-                            num_kakko--;
-
-                            if (num_kakko == 0) {
-                                flag_tag = false;
-                                array_s.push(this.makeTag(tag_str, i));
-                                //tag_str をビルドして、命令配列に格納
-                                tag_str = "";
-                            } else {
+                    if (this.flag_script) {
+                        // [iscript]解析中は単に足す
+                        text += c;
+                    } else if (scanning_tag) {
+                        // タグ解析中の場合
+                        if (c === "]") {
+                            // タグ解析中 → 閉じタグ ] に遭遇した！
+                            if (start_quot !== "") {
+                                // クォート内部ならどうでもよい
+                                // 例) [ptext text="[[あああ]]"] ← こういうのに対応
                                 tag_str += c;
+                            } else {
+                                // 1段表層に浮かび上がる
+                                deep_kakko--;
+                                if (deep_kakko === 0) {
+                                    // 最表層に戻ってきたときにタグ文字列が完成する！makeTagに投げる
+                                    scanning_tag = false;
+                                    array_s.push(this.makeTag(tag_str, i));
+                                    tag_str = "";
+                                    start_quot = "";
+                                } else {
+                                    // まだ最表層ではないなら単に足す
+                                    // 例) [ptext text=[[あああ]] ] ← こういうのに対応
+                                    tag_str += c;
+                                }
                             }
-                        } else if (c === "[" && this.flag_script == false) {
-                            num_kakko++;
+                        } else if (c === "[") {
+                            // タグ解析中 → 開始タグ [ に遭遇した！
+                            if (start_quot === "") {
+                                // クォート外部であるときだけ1段深層に沈む
+                                deep_kakko++;
+                            }
+                            // 足すの忘れない
+                            tag_str += c;
+                        } else if (c === '"' || c === "'" || c === "`") {
+                            // タグ解析中 → クォート " ' ` に遭遇した！
+                            if (start_quot === c) {
+                                // このクォートなんか見たことあるぞ…となったらクォートを脱出
+                                start_quot = "";
+                            } else if (start_quot === "") {
+                                // まだクォートに侵入していないならこれから侵入する
+                                start_quot = c;
+                            }
+                            // 足すの忘れない
                             tag_str += c;
                         } else {
+                            // タグ解析中 → [ ] " ' ` のいずれでもない
                             tag_str += c;
                         }
-                    } else if (
-                        flag_tag === false &&
-                        c === "[" &&
-                        this.flag_script == false
-                    ) {
-                        num_kakko++;
-
-                        //テキストファイルを命令に格納
+                    } else if (flag_escape) {
+                        // タグ解析中ではなくエスケープフラグが立っている場合
+                        text += c;
+                        flag_escape = false;
+                    } else if (c === "[") {
+                        // タグ解析中ではなくエスケープフラグも立っていないときに [ に遭遇した場合
+                        // タグ解析開始！
+                        scanning_tag = true;
+                        deep_kakko++;
+                        //この時点で格納されているテキストがあれば配列に追加
                         if (text != "") {
                             var text_obj = {
                                 line: i,
@@ -205,18 +253,20 @@ tyrano.plugin.kag.parser = {
                                 pm: { val: text },
                                 val: text,
                             };
-
                             array_s.push(text_obj);
-
                             text = "";
                         }
-
-                        flag_tag = true;
                     } else {
-                        text += c;
+                        //"["以外の文字の場合
+                        if (c === "\\") {
+                            flag_escape = true;
+                        } else {
+                            text += c;
+                        }
                     }
                 }
-
+                //1文字ずつ解析していくのが完了した
+                //この時点でテキストがあれば配列に追加
                 if (text != "") {
                     var text_obj = {
                         line: i,
@@ -224,7 +274,6 @@ tyrano.plugin.kag.parser = {
                         pm: { val: text },
                         val: text,
                     };
-
                     array_s.push(text_obj);
                 }
 
@@ -239,9 +288,7 @@ tyrano.plugin.kag.parser = {
         };
 
         if (this.deep_if != 0) {
-            alert(
-                "[if]と[endif]の数が一致しません。シナリオを見直してみませんか？",
-            );
+            this.kag.warning("[if]と[endif]の数が一致しません。");
             this.deep_if = 0;
         }
 
@@ -250,6 +297,7 @@ tyrano.plugin.kag.parser = {
 
     //タグ情報から、オブジェクトを作成して返却する
     makeTag: function (str, line) {
+        var that = this;
         var obj = {
             line: line,
             name: "",
@@ -257,116 +305,161 @@ tyrano.plugin.kag.parser = {
             val: "",
         };
 
-        var array_c = str.split("");
+        var array_c = str.split(""); // 1文字ずつバラす
+        var flag_escape = false; // エスケープ中？
+        var SCANNING_TAG_NAME = 1;
+        var SCANNING_PARAM_NAME = 2;
+        var SCANNING_EQUAL = 3;
+        var SCANNING_START_QUOT = 4;
+        var SCANNING_PARAM_VALUE = 5;
+        var scanning_state = SCANNING_TAG_NAME; // 最初はタグ名検出モード
+        var tag_name = ""; // タグ名記憶用
+        var param_name = ""; // パラメータキー記憶用
+        var param_value = ""; // パラメータバリュー記憶用
+        var end_char_of_param_value = ""; // パラメータバリューの記述終了を検出する文字(クォート3種か空白)
 
-        var flag_quot_c = "";
-
-        var tmp_str = "";
-
-        var cnt_quot_c = 0;
-
+        // 1文字ずつ見ていくぞ
         for (var j = 0; j < array_c.length; j++) {
             var c = array_c[j];
-
-            if (flag_quot_c == "" && (c === '"' || c === "'")) {
-                flag_quot_c = c;
-                cnt_quot_c = 0;
-            } else {
-                //特殊自体発生中
-                if (flag_quot_c != "") {
-                    //特殊状態解除
-                    if (c === flag_quot_c) {
-                        flag_quot_c = "";
-
-                        //""のように直後に"が出てきた場合undefinedを代入
-                        if (cnt_quot_c == 0) {
-                            tmp_str += "undefined";
+            switch (scanning_state) {
+                case SCANNING_TAG_NAME:
+                    // タグ名検出モード
+                    if (c === " ") {
+                        // 空白に遭遇！
+                        if (tag_name === "") {
+                            // まだタグ名になにも入っていないならタグ名検出モードを継続
+                            // 例) [ bg storage=room.jpg] のように先頭に空白が入っているケースに対応する
+                        } else {
+                            // タグ名になにか入っている状態で空白に遭遇したならパラメータキー検出モードに遷移
+                            scanning_state = SCANNING_PARAM_NAME;
                         }
-
-                        cnt_quot_c = 0;
                     } else {
-                        if (c == "=") {
-                            c = "#";
+                        // 空白じゃないならタグ名に足していく
+                        tag_name += c;
+                    }
+                    break;
+                case SCANNING_PARAM_NAME:
+                    // パラメータキー検出モード
+                    if (c === " ") {
+                        // 空白に遭遇！
+                        if (param_name === "") {
+                            // パラメータキーになにも入っていないならパラメータキー検出モードを継続
+                        } else {
+                            // パラメータキーになにか入っている場合はイコール検出モードに遷移
+                            scanning_state = SCANNING_EQUAL;
                         }
-
-                        //空白削除。カンマの中の場合
-                        if (c == " ") {
-                            //個々消さないとダメ
-                            c = "";
+                    } else if (c === "=") {
+                        // イコールに遭遇！
+                        // 開始クォート検出モードに遷移
+                        scanning_state = SCANNING_START_QUOT;
+                    } else {
+                        // パラメータ名に足す
+                        param_name += c;
+                    }
+                    break;
+                case SCANNING_EQUAL:
+                    // イコール検出モード
+                    // ふつうはここに来ることなくタグ名検出モードからクォート検出モードに直で遷移するはずだが
+                    // パラメータキーのあとにイコールではなく空白が挟まっているケースではこのモードとなる
+                    // 例1) [bg storage   =room.jpg] → storage=room.jpg と解釈したい
+                    // 例2) [bg * time=1000] → マクロ内のパラメータ全渡しの * にも対応
+                    if (c === "=") {
+                        // イコールを検出したら次は開始クォートを検出
+                        scanning_state = SCANNING_START_QUOT;
+                    } else if (c === " ") {
+                        // 空白に遭遇してもめげない
+                    } else {
+                        // イコールに遭遇する前に空白以外の文字が来た
+                        // たとえば [bg time storage=room.jpg] というケースでは
+                        // time のあとの空白を読み取ったあとイコール検出モードに入るが
+                        // 文字を読み進めていくと、なんとイコールに遭遇する前に s に遭遇してしまう！
+                        // このケースでは time パラメータには空文字列を入れて
+                        // s から始まるパラメータキーを検出するモードに遷移する
+                        // (パラメータ全渡しの * エンティティもこれで対応できる)
+                        obj.pm[param_name] = "";
+                        param_name = c;
+                        scanning_state = SCANNING_PARAM_NAME;
+                    }
+                    break;
+                case SCANNING_START_QUOT:
+                    // パラメータバリューの開始クォート検出モード
+                    if (c === '"' || c === "'" || c === "`") {
+                        // クォート3種のいずれかに遭遇！
+                        // ここで読み取ったクォートを終了クォートとする
+                        // パラメータバリュー検出モードに遷移
+                        end_char_of_param_value = c;
+                        scanning_state = SCANNING_PARAM_VALUE;
+                    } else if (c === " ") {
+                        // 空白に遭遇してもめげない
+                    } else {
+                        // クォートなしで即バリューを書き出しているようだ！
+                        // この場合はクォートではなく空白によってバリューの終わりを検出
+                        // パラメータバリュー検出モードに遷移
+                        end_char_of_param_value = " ";
+                        param_value = c;
+                        scanning_state = SCANNING_PARAM_VALUE;
+                    }
+                    break;
+                case SCANNING_PARAM_VALUE:
+                    // パラメータバリュー検出モード
+                    if (c === end_char_of_param_value) {
+                        // 終了文字に遭遇！
+                        // パラメータバリュー検出を終わりたい
+                        if (flag_escape) {
+                            // でもエスケープはできるようにしよう
+                            flag_escape = false;
+                            param_value += c;
+                        } else {
+                            // パラメータ完成！
+                            obj.pm[param_name] = param_value;
+                            // トリミングして"undefined"となるようなら""に変換
+                            if ($.trim(param_value) === "undefined") {
+                                obj.pm[param_name] = "";
+                            }
+                            param_name = "";
+                            param_value = "";
+                            end_char_of_param_value = "";
+                            scanning_state = SCANNING_PARAM_NAME;
                         }
+                    } else {
+                        // 終了文字には遭遇しなかった
+                        // バリューを足していく
 
-                        tmp_str += c;
-                        cnt_quot_c++;
+                        // 従来のパーサーの仕様（バリュー内の空白全削除）を再現するための処理
+                        // 開始クォートの種類がバッククォートじゃない、かつ、空白保持オプションが"false"の場合
+                        if (end_char_of_param_value !== "`" && c === " ") {
+                            if (
+                                that.kag.config.KeepSpaceInParameterValue ===
+                                "false"
+                            ) {
+                                c = "";
+                            }
+                        }
+                        if (flag_escape) {
+                            param_value += c;
+                        } else if (c === "\\") {
+                            flag_escape = true;
+                        } else {
+                            param_value += c;
+                        }
                     }
-                } else {
-                    tmp_str += c;
-                }
+                    break;
             }
         }
 
-        str = tmp_str;
-
-        //str = $.replaceAll(str,'"','');
-        //str = $.replaceAll(str,"'",'');
-
-        var array = str.split(" ");
-
-        //タグの名前 [xxx
-        obj.name = $.trim(array[0]);
-
-        //=のみが出てきた場合は前後のをくっつけて、ひとつの変数にしてしまって良い
-        for (var k = 1; k < array.length; k++) {
-            if (array[k] == "") {
-                array.splice(k, 1);
-                k--;
-            } else if (array[k] === "=") {
-                if (array[k - 1]) {
-                    if (array[k + 1]) {
-                        array[k - 1] = array[k - 1] + "=" + array[k + 1];
-                        array.splice(k, 2);
-                        k--;
-                    }
-                }
-            } else if (array[k].substr(0, 1) === "=") {
-                if (array[k - 1]) {
-                    if (array[k]) {
-                        array[k - 1] = array[k - 1] + array[k];
-                        array.splice(k, 1);
-                        //k--;
-                    }
-                }
-            } else if (
-                array[k].substr(array[k].length - 1, array[k].length) === "="
-            ) {
-                if (array[k + 1]) {
-                    if (array[k]) {
-                        array[k] = array[k] + array[k + 1];
-                        array.splice(k + 1, 1);
-                        //k--;
-                    }
-                }
-            }
+        // 全文字見終わった
+        // この時点で未登録のパラメータがあるなら登録
+        if (param_name !== "") {
+            obj.pm[param_name] = param_value;
         }
 
-        for (var i = 1; i < array.length; i++) {
-            var tmp = $.trim(array[i]).split("=");
+        // 原文と解釈結果をコンソールで確認
+        // var style =
+        //     "padding: 2px 4px; border-radius: 4px; background: blue; color: white;";
+        // console.log("%c" + str, "background: #ddd; padding: 4px 0;");
+        // console.log("%c" + tag_name + "%o", style, obj.pm);
 
-            var pm_key = $.trim(tmp[0]);
-            var pm_val = $.trim(tmp[1]);
-
-            //全引き継ぎ対応
-            if (pm_key == "*") {
-                obj.pm["*"] = "";
-            }
-            //特殊変換された値はそのまま代入できない
-            if (pm_val != "") {
-                obj.pm[pm_key] = $.replaceAll(pm_val, "#", "=");
-            }
-
-            if (pm_val == "undefined") {
-                obj.pm[pm_key] = "";
-            }
-        }
+        obj.name = tag_name;
 
         if (obj.name == "iscript") {
             this.flag_script = true;
