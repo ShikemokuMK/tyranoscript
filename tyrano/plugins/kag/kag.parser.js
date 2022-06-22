@@ -384,7 +384,7 @@ tyrano.plugin.kag.parser = {
                 case SCANNING_START_QUOT:
                     // パラメータバリューの開始クォート検出モード
                     if (c === '"' || c === "'" || c === "`") {
-                        // クォート3種のいずれかの遭遇！
+                        // クォート3種のいずれかに遭遇！
                         // ここで読み取ったクォートを終了クォートとする
                         // パラメータバリュー検出モードに遷移
                         end_char_of_param_value = c;
@@ -412,6 +412,10 @@ tyrano.plugin.kag.parser = {
                         } else {
                             // パラメータ完成！
                             obj.pm[param_name] = param_value;
+                            // トリミングして"undefined"となるようなら""に変換
+                            if ($.trim(param_value) === "undefined") {
+                                obj.pm[param_name] = "";
+                            }
                             param_name = "";
                             param_value = "";
                             end_char_of_param_value = "";
