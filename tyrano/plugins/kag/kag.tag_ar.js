@@ -220,10 +220,7 @@ tyrano.plugin.kag.tag.bgcamera = {
             return;
         }
 
-        if (
-            this.kag.stat.qr.mode == "off" ||
-            this.kag.stat.is_strong_stop != true
-        ) {
+        if (this.kag.stat.qr.mode == "off" || this.kag.stat.is_strong_stop != true) {
             setTimeout(() => {
                 this.checkPicture(video, pm);
             }, 1000);

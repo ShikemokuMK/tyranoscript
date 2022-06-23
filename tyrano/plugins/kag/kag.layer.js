@@ -24,22 +24,13 @@ tyrano.plugin.kag.layer = {
         //同じディレクトリにある、KAG関連のデータを読み込み
 
         //分割用のレイヤ
-        $("#tyrano_base").append(
-            '<div id="root_layer_game" class="root_layer_game"></div>',
-        );
-        $("#tyrano_base").append(
-            '<div id="root_layer_system" class="root_layer_system"></div>',
-        );
+        $("#tyrano_base").append('<div id="root_layer_game" class="root_layer_game"></div>');
+        $("#tyrano_base").append('<div id="root_layer_system" class="root_layer_system"></div>');
 
         //隠しレイヤの登録
         //画面クリックのレイヤ
-        var layer_obj_click = $(
-            "<div class='layer layer_event_click' style='z-index:9999;display:none'></div>",
-        );
-        layer_obj_click
-            .css("width", this.kag.config.scWidth)
-            .css("height", this.kag.config.scHeight)
-            .css("position", "absolute");
+        var layer_obj_click = $("<div class='layer layer_event_click' style='z-index:9999;display:none'></div>");
+        layer_obj_click.css("width", this.kag.config.scWidth).css("height", this.kag.config.scHeight).css("position", "absolute");
 
         //スキップやオートキャンセルの停止、画面がクリックされた時。
         /*
@@ -70,24 +61,14 @@ tyrano.plugin.kag.layer = {
         this.appendLayer(this.layer_event, "root_layer_system");
 
         //メニュー画面用のレイヤ
-        var layer_menu = $(
-            "<div class='layer layer_menu' style='z-index:1000000000;display:none'  align='center'></div>",
-        );
-        layer_menu
-            .css("width", this.kag.config.scWidth)
-            .css("height", this.kag.config.scHeight)
-            .css("position", "absolute");
+        var layer_menu = $("<div class='layer layer_menu' style='z-index:1000000000;display:none'  align='center'></div>");
+        layer_menu.css("width", this.kag.config.scWidth).css("height", this.kag.config.scHeight).css("position", "absolute");
         this.layer_menu = layer_menu;
         this.appendLayer(this.layer_menu, "root_layer_system");
 
         //フリーレイヤ
-        var layer_free = $(
-            "<div class='layer layer_free' style='z-index:9998;display:none' ></div>",
-        );
-        layer_free
-            .css("width", this.kag.config.scWidth)
-            .css("height", this.kag.config.scHeight)
-            .css("position", "absolute");
+        var layer_free = $("<div class='layer layer_free' style='z-index:9998;display:none' ></div>");
+        layer_free.css("width", this.kag.config.scWidth).css("height", this.kag.config.scHeight).css("position", "absolute");
         this.layer_free = layer_free;
         this.appendLayer(this.layer_free, "root_layer_system");
     },
@@ -105,14 +86,8 @@ tyrano.plugin.kag.layer = {
     addLayer: function (layer_name) {
         var system_layer = "";
 
-        var layer_obj_fore = $(
-            "<div class='layer " + layer_name + "_fore layer_fore'></div>",
-        );
-        var layer_obj_back = $(
-            "<div class='layer " +
-                layer_name +
-                "_back layer_back' style='display:none'></div>",
-        );
+        var layer_obj_fore = $("<div class='layer " + layer_name + "_fore layer_fore'></div>");
+        var layer_obj_back = $("<div class='layer " + layer_name + "_back layer_back' style='display:none'></div>");
 
         if (layer_name.indexOf("message") == -1) {
             layer_obj_fore.addClass("layer_camera");
@@ -121,14 +96,8 @@ tyrano.plugin.kag.layer = {
             system_layer = "root_layer_system";
         }
 
-        layer_obj_fore
-            .css("width", this.kag.config.scWidth)
-            .css("height", this.kag.config.scHeight)
-            .css("position", "absolute");
-        layer_obj_back
-            .css("width", this.kag.config.scWidth)
-            .css("height", this.kag.config.scHeight)
-            .css("position", "absolute");
+        layer_obj_fore.css("width", this.kag.config.scWidth).css("height", this.kag.config.scHeight).css("position", "absolute");
+        layer_obj_back.css("width", this.kag.config.scWidth).css("height", this.kag.config.scHeight).css("position", "absolute");
 
         this.map_layer_fore[layer_name] = layer_obj_fore;
         this.map_layer_back[layer_name] = layer_obj_back;
@@ -244,26 +213,14 @@ tyrano.plugin.kag.layer = {
         if (!target_layer) {
             while (true) {
                 if (this.map_layer_fore["message" + num]) {
-                    var j_message_outer =
-                        this.map_layer_fore["message" + num].find(
-                            ".message_outer",
-                        );
-                    var j_message_inner =
-                        this.map_layer_fore["message" + num].find(
-                            ".message_inner",
-                        );
+                    var j_message_outer = this.map_layer_fore["message" + num].find(".message_outer");
+                    var j_message_inner = this.map_layer_fore["message" + num].find(".message_inner");
 
                     j_message_inner
                         .css("left", parseInt(j_message_outer.css("left")) + 10)
                         .css("top", parseInt(j_message_outer.css("top")) + 10)
-                        .css(
-                            "width",
-                            parseInt(j_message_outer.css("width")) - 10,
-                        )
-                        .css(
-                            "height",
-                            parseInt(j_message_outer.css("height")) - 10,
-                        );
+                        .css("width", parseInt(j_message_outer.css("width")) - 10)
+                        .css("height", parseInt(j_message_outer.css("height")) - 10);
                 } else {
                     break;
                 }
@@ -272,19 +229,14 @@ tyrano.plugin.kag.layer = {
             }
         } else {
             if (this.map_layer_fore[target_layer]) {
-                var j_message_outer =
-                    this.map_layer_fore[target_layer].find(".message_outer");
-                var j_message_inner =
-                    this.map_layer_fore[target_layer].find(".message_inner");
+                var j_message_outer = this.map_layer_fore[target_layer].find(".message_outer");
+                var j_message_inner = this.map_layer_fore[target_layer].find(".message_inner");
 
                 j_message_inner
                     .css("left", parseInt(j_message_outer.css("left")) + 10)
                     .css("top", parseInt(j_message_outer.css("top")) + 10)
                     .css("width", parseInt(j_message_outer.css("width")) - 10)
-                    .css(
-                        "height",
-                        parseInt(j_message_outer.css("height")) - 10,
-                    );
+                    .css("height", parseInt(j_message_outer.css("height")) - 10);
             }
         }
     },
@@ -301,16 +253,10 @@ tyrano.plugin.kag.layer = {
         };
 
         for (key in this.map_layer_fore) {
-            layer_info["map_layer_fore"][key] = $.makeSaveJSON(
-                this.map_layer_fore[key].get(0),
-                this.kag.array_white_attr,
-            );
+            layer_info["map_layer_fore"][key] = $.makeSaveJSON(this.map_layer_fore[key].get(0), this.kag.array_white_attr);
         }
         for (key in this.map_layer_back) {
-            layer_info["map_layer_back"][key] = $.makeSaveJSON(
-                this.map_layer_back[key].get(0),
-                this.kag.array_white_attr,
-            );
+            layer_info["map_layer_back"][key] = $.makeSaveJSON(this.map_layer_back[key].get(0), this.kag.array_white_attr);
         }
 
         /*
@@ -319,26 +265,17 @@ tyrano.plugin.kag.layer = {
         }
         */
 
-        layer_info["layer_free"] = $.makeSaveJSON(
-            this.layer_free.get(0),
-            this.kag.array_white_attr,
-        );
+        layer_info["layer_free"] = $.makeSaveJSON(this.layer_free.get(0), this.kag.array_white_attr);
 
         var n = 0;
         $(".fixlayer").each(function () {
-            layer_info["layer_fix"][n] = $.makeSaveJSON(
-                $(this).get(0),
-                that.kag.array_white_attr,
-            );
+            layer_info["layer_fix"][n] = $.makeSaveJSON($(this).get(0), that.kag.array_white_attr);
             n++;
         });
 
         var m = 0;
         $(".blendlayer").each(function () {
-            layer_info["layer_blend"][m] = $.makeSaveJSON(
-                $(this).get(0),
-                that.kag.array_white_attr,
-            );
+            layer_info["layer_blend"][m] = $.makeSaveJSON($(this).get(0), that.kag.array_white_attr);
             m++;
         });
 
@@ -356,14 +293,10 @@ tyrano.plugin.kag.layer = {
         };
 
         for (key in this.map_layer_fore) {
-            layer_info["map_layer_fore"][key] = $.playerHtmlPath(
-                this.map_layer_fore[key].outerHTML(),
-            );
+            layer_info["map_layer_fore"][key] = $.playerHtmlPath(this.map_layer_fore[key].outerHTML());
         }
         for (key in this.map_layer_back) {
-            layer_info["map_layer_back"][key] = $.playerHtmlPath(
-                this.map_layer_back[key].outerHTML(),
-            );
+            layer_info["map_layer_back"][key] = $.playerHtmlPath(this.map_layer_back[key].outerHTML());
         }
 
         /*
@@ -372,9 +305,7 @@ tyrano.plugin.kag.layer = {
         }
         */
 
-        layer_info["layer_free"] = $.playerHtmlPath(
-            this.layer_free.outerHTML(),
-        );
+        layer_info["layer_free"] = $.playerHtmlPath(this.layer_free.outerHTML());
 
         var n = 0;
         $(".fixlayer").each(function () {
@@ -384,9 +315,7 @@ tyrano.plugin.kag.layer = {
 
         var m = 0;
         $(".blendlayer").each(function () {
-            layer_info["layer_blend"][m] = $.playerHtmlPath(
-                $(this).outerHTML(),
-            );
+            layer_info["layer_blend"][m] = $.playerHtmlPath($(this).outerHTML());
             m++;
         });
 
@@ -447,15 +376,11 @@ tyrano.plugin.kag.layer = {
             delete this["map_layer_fore"][key];
 
             // セーブデータから復元
-            this["map_layer_fore"][key] = $.makeElementFromSave(
-                layer["map_layer_fore"][key],
-                this.kag.array_white_attr,
-            );
+            this["map_layer_fore"][key] = $.makeElementFromSave(layer["map_layer_fore"][key], this.kag.array_white_attr);
 
             // data-parent-layer属性を分析してそこにDOMを追加
             // 例) "root_layer_game", "root_layer_system"
-            var parent_layer =
-                this["map_layer_fore"][key].attr("data-parent-layer");
+            var parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
             this.appendLayer(this["map_layer_fore"][key], parent_layer);
         }
 
@@ -465,12 +390,8 @@ tyrano.plugin.kag.layer = {
         for (var key of back_keys) {
             this["map_layer_back"][key].remove();
             delete this["map_layer_back"][key];
-            this["map_layer_back"][key] = $.makeElementFromSave(
-                layer["map_layer_back"][key],
-                this.kag.array_white_attr,
-            );
-            var parent_layer =
-                this["map_layer_fore"][key].attr("data-parent-layer");
+            this["map_layer_back"][key] = $.makeElementFromSave(layer["map_layer_back"][key], this.kag.array_white_attr);
+            var parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
             this.appendLayer(this["map_layer_back"][key], parent_layer);
 
             // ただしここでbackレイヤは対応するforeレイヤの直後に配置したい！
@@ -491,21 +412,13 @@ tyrano.plugin.kag.layer = {
 
         // fixレイヤの復元
         for (key in layer.layer_fix) {
-            $("#tyrano_base").append(
-                $.makeElementFromSave(
-                    layer.layer_fix[key],
-                    this.kag.array_white_attr,
-                ),
-            );
+            $("#tyrano_base").append($.makeElementFromSave(layer.layer_fix[key], this.kag.array_white_attr));
         }
 
         //ブレンド演出の削除と復元
         $(".blendlayer").remove();
         for (key in layer.layer_blend) {
-            var obj = $.makeElementFromSave(
-                layer.layer_blend[key],
-                this.kag.array_white_attr,
-            );
+            var obj = $.makeElementFromSave(layer.layer_blend[key], this.kag.array_white_attr);
             if (obj.hasClass("blendvideo")) {
                 //ビデオの再現
                 //console.log(obj.attr("data-video-pm"));
@@ -529,10 +442,7 @@ tyrano.plugin.kag.layer = {
         // フリーレイヤの削除と復元
         this.layer_free.remove();
         delete this.layer_free;
-        this.layer_free = $.makeElementFromSave(
-            layer.layer_free,
-            this.kag.array_white_attr,
-        );
+        this.layer_free = $.makeElementFromSave(layer.layer_free, this.kag.array_white_attr);
         this.appendLayer(this.layer_free, "root_layer_system");
         // フリーレイヤはメニューレイヤの後！
         this.layer_free.insertAfter(this.layer_menu);

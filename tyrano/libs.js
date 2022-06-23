@@ -79,10 +79,7 @@
             // all except Explorer
             width = self.innerWidth;
             height = self.innerHeight;
-        } else if (
-            document.documentElement &&
-            document.documentElement.clientHeight
-        ) {
+        } else if (document.documentElement && document.documentElement.clientHeight) {
             // Explorer 6 Strict Mode
             width = document.documentElement.clientWidth;
             height = document.documentElement.clientHeight;
@@ -407,10 +404,7 @@
             return "iphone";
         } else if (ua.indexOf("Android") > -1) {
             return "android";
-        } else if (
-            ua.indexOf("Chrome") > -1 &&
-            navigator.platform.indexOf("Linux") > -1
-        ) {
+        } else if (ua.indexOf("Chrome") > -1 && navigator.platform.indexOf("Linux") > -1) {
             return "android";
         } else {
             return "pc";
@@ -445,10 +439,7 @@
     $.getBrowser = function () {
         var userAgent = window.navigator.userAgent.toLowerCase();
 
-        if (
-            userAgent.indexOf("msie") >= 0 ||
-            userAgent.indexOf("trident") >= 0
-        ) {
+        if (userAgent.indexOf("msie") >= 0 || userAgent.indexOf("trident") >= 0) {
             return "msie";
         } else if (userAgent.indexOf("edge") > -1) {
             return "edge";
@@ -474,16 +465,13 @@
         }
 
         // Node.js で動作しているか
-        var isNode =
-            typeof process !== "undefined" && typeof require !== "undefined";
+        var isNode = typeof process !== "undefined" && typeof require !== "undefined";
         // ブラウザ上(非Node.js)で動作しているか
         var isBrowser = !isNode;
         // node-webkitで動作しているか
         var isNodeWebkit;
         try {
-            isNodeWebkit = isNode
-                ? typeof require("nw.gui") !== "undefined"
-                : false;
+            isNodeWebkit = isNode ? typeof require("nw.gui") !== "undefined" : false;
         } catch (e) {
             isNodeWebkit = false;
         }
@@ -629,8 +617,7 @@
         if (mode == "hide") {
             j_obj.show();
             method = $.replaceAll(method, "In", "Out");
-            var animationEnd =
-                "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
             j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
@@ -641,8 +628,7 @@
             });
         } else if (mode == "show") {
             j_obj.show();
-            var animationEnd =
-                "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
             j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
@@ -738,8 +724,7 @@
     };
 
     $.makeSaveKey = function () {
-        var S =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var S = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         var N = 16;
         let key = Array.from(Array(N))
             .map(() => S[Math.floor(Math.random() * S.length)])
@@ -810,10 +795,7 @@
                         html = html.substring(index, html.length);
 
                         var replace_index = html.indexOf("/game/data");
-                        tmp_html = html.substring(
-                            replace_index + "/game/data".length,
-                            html.length,
-                        );
+                        tmp_html = html.substring(replace_index + "/game/data".length, html.length);
                         html = "./data" + tmp_html;
                     }
                 }
@@ -828,11 +810,7 @@
     };
 
     $.confirmSaveClear = function () {
-        if (
-            confirm(
-                "セーブデータが壊れている可能性があります。セーブデータを初期化しますか？",
-            )
-        ) {
+        if (confirm("セーブデータが壊れている可能性があります。セーブデータを初期化しますか？")) {
             alert("初期化");
             localStorage.clear();
         }
@@ -860,9 +838,7 @@
         } catch (e) {
             console.log("==============");
             console.log(e);
-            alert(
-                "この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します",
-            );
+            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             $.confirmSaveClear();
         }
 
@@ -984,9 +960,7 @@
             }
         } catch (e) {
             console.log(e);
-            alert(
-                "この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します",
-            );
+            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
             $.confirmSaveClear();
         }
 
@@ -1158,9 +1132,7 @@
         //属性を設置
         for (var k = 0; k < array_white_attr.length; k++) {
             if (j_el.attr(array_white_attr[k])) {
-                root["attr"][array_white_attr[k]] = j_el.attr(
-                    array_white_attr[k],
-                );
+                root["attr"][array_white_attr[k]] = j_el.attr(array_white_attr[k]);
             }
         }
 
@@ -1184,9 +1156,7 @@
                 //属性を設置
                 for (var k = 0; k < array_white_attr.length; k++) {
                     if (j_node.attr(array_white_attr[k])) {
-                        obj["attr"][array_white_attr[k]] = j_node.attr(
-                            array_white_attr[k],
-                        );
+                        obj["attr"][array_white_attr[k]] = j_node.attr(array_white_attr[k]);
                     }
                 }
 
@@ -1218,10 +1188,7 @@
 
         for (var i = 0; i < array_white_attr.length; i++) {
             if (typeof root["attr"][array_white_attr[i]] != "undefined") {
-                j_root.attr(
-                    array_white_attr[i],
-                    root["attr"][array_white_attr[i]],
-                );
+                j_root.attr(array_white_attr[i], root["attr"][array_white_attr[i]]);
             }
         }
 
@@ -1230,10 +1197,7 @@
         function loop(_root, _j_obj) {
             var nodes = _root.children;
             for (var i = 0; i < nodes.length; i++) {
-                if (
-                    typeof nodes[i].tag != "undefined" &&
-                    nodes[i].tag.toLowerCase() == "script"
-                ) {
+                if (typeof nodes[i].tag != "undefined" && nodes[i].tag.toLowerCase() == "script") {
                     break;
                     return false;
                 }
@@ -1249,14 +1213,8 @@
                 j_node.attr("class", nodes[i]["class"]);
 
                 for (var k = 0; k < array_white_attr.length; k++) {
-                    if (
-                        typeof nodes[i]["attr"][array_white_attr[k]] !=
-                        "undefined"
-                    ) {
-                        j_node.attr(
-                            array_white_attr[k],
-                            nodes[i]["attr"][array_white_attr[k]],
-                        );
+                    if (typeof nodes[i]["attr"][array_white_attr[k]] != "undefined") {
+                        j_node.attr(array_white_attr[k], nodes[i]["attr"][array_white_attr[k]]);
                     }
                 }
 
@@ -1309,9 +1267,7 @@
             o.bind("touchstart", onTouchStart_);
             function onTouchStart_(e) {
                 e.preventDefault();
-                o.data("event.tap.moved", false)
-                    .one("touchmove", onTouchMove_)
-                    .one("touchend", onTouchEnd_);
+                o.data("event.tap.moved", false).one("touchmove", onTouchMove_).one("touchend", onTouchEnd_);
                 e.stopPropagation();
             }
 
@@ -1366,11 +1322,7 @@
 
     //クッキー設定
     $.setCookie = function (key, val) {
-        document.cookie =
-            key +
-            "=" +
-            escape(val) +
-            ";expires=Fri, 31-Dec-2030 23:59:59;path=/;";
+        document.cookie = key + "=" + escape(val) + ";expires=Fri, 31-Dec-2030 23:59:59;path=/;";
     };
 
     // window.setTimeoutのラッパー関数
@@ -1490,13 +1442,7 @@ jQuery.extend(jQuery.easing, {
             a = c;
             var s = p / 4;
         } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-        return (
-            -(
-                a *
-                Math.pow(2, 10 * (t -= 1)) *
-                Math.sin(((t * d - s) * (2 * Math.PI)) / p)
-            ) + b
-        );
+        return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
     },
     easeOutElastic: function (x, t, b, c, d) {
         var s = 1.70158;
@@ -1509,13 +1455,7 @@ jQuery.extend(jQuery.easing, {
             a = c;
             var s = p / 4;
         } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-        return (
-            a *
-                Math.pow(2, -10 * t) *
-                Math.sin(((t * d - s) * (2 * Math.PI)) / p) +
-            c +
-            b
-        );
+        return a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) + c + b;
     },
     easeInOutElastic: function (x, t, b, c, d) {
         var s = 1.70158;
@@ -1528,22 +1468,8 @@ jQuery.extend(jQuery.easing, {
             a = c;
             var s = p / 4;
         } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-        if (t < 1)
-            return (
-                -0.5 *
-                    (a *
-                        Math.pow(2, 10 * (t -= 1)) *
-                        Math.sin(((t * d - s) * (2 * Math.PI)) / p)) +
-                b
-            );
-        return (
-            a *
-                Math.pow(2, -10 * (t -= 1)) *
-                Math.sin(((t * d - s) * (2 * Math.PI)) / p) *
-                0.5 +
-            c +
-            b
-        );
+        if (t < 1) return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
+        return a * Math.pow(2, -10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) * 0.5 + c + b;
     },
     easeInBack: function (x, t, b, c, d, s) {
         if (s == undefined) s = 1.70158;
@@ -1555,8 +1481,7 @@ jQuery.extend(jQuery.easing, {
     },
     easeInOutBack: function (x, t, b, c, d, s) {
         if (s == undefined) s = 1.70158;
-        if ((t /= d / 2) < 1)
-            return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+        if ((t /= d / 2) < 1) return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
         return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
     },
     easeInBounce: function (x, t, b, c, d) {
@@ -1574,13 +1499,8 @@ jQuery.extend(jQuery.easing, {
         }
     },
     easeInOutBounce: function (x, t, b, c, d) {
-        if (t < d / 2)
-            return jQuery.easing.easeInBounce(x, t * 2, 0, c, d) * 0.5 + b;
-        return (
-            jQuery.easing.easeOutBounce(x, t * 2 - d, 0, c, d) * 0.5 +
-            c * 0.5 +
-            b
-        );
+        if (t < d / 2) return jQuery.easing.easeInBounce(x, t * 2, 0, c, d) * 0.5 + b;
+        return jQuery.easing.easeOutBounce(x, t * 2 - d, 0, c, d) * 0.5 + c * 0.5 + b;
     },
 });
 

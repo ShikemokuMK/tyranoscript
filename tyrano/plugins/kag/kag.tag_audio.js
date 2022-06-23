@@ -144,31 +144,23 @@ tyrano.plugin.kag.tag.playbgm = {
             if (typeof this.kag.config.defaultBgmVolume == "undefined") {
                 ratio = 1;
             } else {
-                ratio = parseFloat(
-                    parseInt(this.kag.config.defaultBgmVolume) / 100,
-                );
+                ratio = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
             }
 
             //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
             if (typeof this.kag.stat.map_bgm_volume[pm.buf] != "undefined") {
-                ratio = parseFloat(
-                    parseInt(this.kag.stat.map_bgm_volume[pm.buf]) / 100,
-                );
+                ratio = parseFloat(parseInt(this.kag.stat.map_bgm_volume[pm.buf]) / 100);
             }
         } else {
             if (typeof this.kag.config.defaultSeVolume == "undefined") {
                 ratio = 1;
             } else {
-                ratio = parseFloat(
-                    parseInt(this.kag.config.defaultSeVolume) / 100,
-                );
+                ratio = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
             }
 
             //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
             if (typeof this.kag.stat.map_se_volume[pm.buf] != "undefined") {
-                ratio = parseFloat(
-                    parseInt(this.kag.stat.map_se_volume[pm.buf]) / 100,
-                );
+                ratio = parseFloat(parseInt(this.kag.stat.map_se_volume[pm.buf]) / 100);
             }
         }
 
@@ -462,11 +454,7 @@ tyrano.plugin.kag.tag.stopbgm = {
 
                     //フェードアウトしながら再生停止
                     if (pm.fadeout == "true") {
-                        _audio_obj.fade(
-                            _audio_obj.volume(),
-                            0,
-                            parseInt(pm.time),
-                        );
+                        _audio_obj.fade(_audio_obj.volume(), 0, parseInt(pm.time));
 
                         //fadeが完了した際にvolumeが0だったらstopを行う処理を追加
                         if (_audio_obj.playing()) {
@@ -1193,9 +1181,7 @@ tyrano.plugin.kag.tag.speak_on = {
         if ("speechSynthesis" in window) {
             that.kag.stat.play_speak = true;
         } else {
-            console.error(
-                "*error:この環境は[speak_on]の読み上げ機能に対応していません",
-            );
+            console.error("*error:この環境は[speak_on]の読み上げ機能に対応していません");
         }
 
         this.kag.ftag.nextOrder();

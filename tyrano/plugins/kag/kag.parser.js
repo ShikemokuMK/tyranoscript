@@ -147,14 +147,7 @@ tyrano.plugin.kag.parser = {
                     //ラベルの重複はエラー
                     //this.kag.warning("警告:"+i+"行目:"+"ラベル名「"+label_obj.pm.label_name+"」は同一シナリオファイル内に重複しています");
                     this.kag.warning(
-                        "Warning line:" +
-                            i +
-                            " " +
-                            $.lang("label") +
-                            "'" +
-                            label_obj.pm.label_name +
-                            "'" +
-                            $.lang("label_double"),
+                        "Warning line:" + i + " " + $.lang("label") + "'" + label_obj.pm.label_name + "'" + $.lang("label_double"),
                     );
                 } else {
                     map_label[label_obj.pm.label_name] = label_obj.pm;
@@ -317,6 +310,7 @@ tyrano.plugin.kag.parser = {
         var param_name = ""; // パラメータキー記憶用
         var param_value = ""; // パラメータバリュー記憶用
         var end_char_of_param_value = ""; // パラメータバリューの記述終了を検出する文字(クォート3種か空白)
+        var keepSpaceConfig = that.kag.config.KeepSpaceInParameterValue;
 
         // 1文字ずつ見ていくぞ
         for (var j = 0; j < array_c.length; j++) {
@@ -412,9 +406,16 @@ tyrano.plugin.kag.parser = {
                         } else {
                             // パラメータ完成！
                             obj.pm[param_name] = param_value;
+                            // パラメータの値をトリミング（両端の空白を削除）
+                            var param_value_trim = $.trim(param_value);
                             // トリミングして"undefined"となるようなら""に変換
-                            if ($.trim(param_value) === "undefined") {
+                            if (param_value_trim === "undefined") {
                                 obj.pm[param_name] = "";
+                            }
+                            // 空白保持レベルが3でない場合はトリミングした値で上書き
+                            // 未定義(V514以前)の場合も含まれる
+                            if (keepSpaceConfig !== "3") {
+                                obj.pm[param_name] = param_value_trim;
                             }
                             param_name = "";
                             param_value = "";
@@ -426,12 +427,9 @@ tyrano.plugin.kag.parser = {
                         // バリューを足していく
 
                         // 従来のパーサーの仕様（バリュー内の空白全削除）を再現するための処理
-                        // 開始クォートの種類がバッククォートじゃない、かつ、空白保持オプションが"false"の場合
+                        // 開始クォートの種類がバッククォートじゃない、かつ、空白保持レベルが1の場合は半角スペースを除去
                         if (end_char_of_param_value !== "`" && c === " ") {
-                            if (
-                                that.kag.config.KeepSpaceInParameterValue ===
-                                "false"
-                            ) {
+                            if (keepSpaceConfig === "1") {
                                 c = "";
                             }
                         }

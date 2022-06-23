@@ -6,8 +6,7 @@ function object(o) {
         prop;
     f.prototype = o;
     n = new f();
-    for (i = 1, len = arguments.length; i < len; ++i)
-        for (prop in arguments[i]) n[prop] = arguments[i][prop];
+    for (i = 1, len = arguments.length; i < len; ++i) for (prop in arguments[i]) n[prop] = arguments[i][prop];
     return n;
 }
 
@@ -37,22 +36,17 @@ var GROUP_RANK = [
 var PARAM_EXP = {
     "time/fadein":
         "フェードイン時間をミリ秒単位で指定します。これを指定すると、画像が透明な状態から徐々に表示されていきます。省略すると、一瞬で表示されます。",
-    "wait/fadein":
-        "フェードインの完了を待つかどうか。`true`または`false`で指定します。",
+    "wait/fadein": "フェードインの完了を待つかどうか。`true`または`false`で指定します。",
     "time/fadeout":
         "フェードアウト時間をミリ秒単位で指定します。これを指定すると、画像が徐々に透明になっていきます。省略すると、一瞬で消去されます。",
-    "wait/fadeout":
-        "フェードアウトの完了を待つかどうか。`true`または`false`で指定します。",
+    "wait/fadeout": "フェードアウトの完了を待つかどうか。`true`または`false`で指定します。",
     "page": "レイヤの表ページと裏ページ、どちらを対象とするか。`fore`または`back`で指定します。省略すると、表ページとみなされます。",
     "layer": "対象のレイヤを指定します。",
     "layer/image": "対象とする前景レイヤを`0`以上の整数で指定します。",
-    "storage/jump":
-        "ジャンプ先のシナリオファイル名を指定します。省略すると、現在のシナリオファイルとみなされます。",
-    "target/jump":
-        "ジャンプ先のラベル名を指定します。省略すると、シナリオファイルの先頭にジャンプします。",
+    "storage/jump": "ジャンプ先のシナリオファイル名を指定します。省略すると、現在のシナリオファイルとみなされます。",
+    "target/jump": "ジャンプ先のラベル名を指定します。省略すると、シナリオファイルの先頭にジャンプします。",
     "name": "`[anim]`タグなどからこの名前でアニメーションさせられます。カンマで区切ることで複数指定できます。（高度な知識：`name`属性で指定した値はHTMLのクラス属性になります）",
-    "opacity":
-        "不透明度を`0`～`255`の数値で指定します。`0`で完全に透明になります。",
+    "opacity": "不透明度を`0`～`255`の数値で指定します。`0`で完全に透明になります。",
     "left": "画像左端の位置をピクセル単位で指定します。`0`でゲーム画面の上端に表示されます。",
     "top": "画像上端の位置をピクセル単位で指定します。`0`でゲーム画面の上端に表示されます。",
     "storage/audio": "再生する音楽ファイルを指定します。",
@@ -60,8 +54,7 @@ var PARAM_EXP = {
     "sprite_time":
         "再生する区間を指定できます。開始時刻と終了時刻をハイフン繋ぎでミリ秒単位で指定します。たとえば`6000-10000`と指定すると00:06～00:10の4秒間を再生します。`loop`属性が`true`の場合、この間をループ再生します。",
     "volume": "再生する音量を指定できます。`0`〜`100`の範囲で指定して下さい。",
-    "html5":
-        "通常は指定しなくてOKです。HTML5 Audioを使う場合は`true`、Web Audio APIを使う場合は`false`(デフォルト)で指定します。",
+    "html5": "通常は指定しなくてOKです。HTML5 Audioを使う場合は`true`、Web Audio APIを使う場合は`false`(デフォルト)で指定します。",
 };
 
 (function ($) {
@@ -96,162 +89,129 @@ var PARAM_EXP = {
         var loading_num = 0;
 
         for (var i = 0; i < array_script.length; i++) {
-            $.loadText(
-                "./tyrano/plugins/kag/" + array_script[i],
-                function (text_str) {
-                    var flag_tag = ""; //タグ解析中の場合タグ名が入る
-                    var flag_param = ""; //パラメータ名
+            $.loadText("./tyrano/plugins/kag/" + array_script[i], function (text_str) {
+                var flag_tag = ""; //タグ解析中の場合タグ名が入る
+                var flag_param = ""; //パラメータ名
 
-                    var tmp_str = "";
+                var tmp_str = "";
 
-                    //改行で刻んで1行ずつ見ていく
-                    var array_str = text_str.split("\n");
+                //改行で刻んで1行ずつ見ていく
+                var array_str = text_str.split("\n");
 
-                    for (var origin_line_str of array_str) {
-                        //トリミング
-                        var line_str = $.trim(origin_line_str);
+                for (var origin_line_str of array_str) {
+                    //トリミング
+                    var line_str = $.trim(origin_line_str);
 
-                        if (line_str != "" || flag_tag != "") {
-                            //空行ではない場合、または空行であってもタグ解析中の場合(タグ解析中は空行(改行)も使いたい意図)
-                            if (line_str === "#[end]") {
-                                //タグ解析終了トークンに到達した場合
-                                //終了時点で登録すべきデータが残っていた場合は入れておく
-                                map_doc[flag_tag][flag_param] = tmp_str;
-                                flag_tag = "";
-                                flag_param = "";
-                            } else if (flag_tag != "") {
-                                //タグ解析中の場合
-                                if (line_str.substr(0, 1) == ":") {
-                                    //:hogeという行の場合
-                                    //まずそれまで読んでいたひとつ前の属性データを格納する
-                                    if (tmp_str != "") {
-                                        if (flag_param != "") {
-                                            map_doc[flag_tag][flag_param] =
-                                                tmp_str;
-                                        }
+                    if (line_str != "" || flag_tag != "") {
+                        //空行ではない場合、または空行であってもタグ解析中の場合(タグ解析中は空行(改行)も使いたい意図)
+                        if (line_str === "#[end]") {
+                            //タグ解析終了トークンに到達した場合
+                            //終了時点で登録すべきデータが残っていた場合は入れておく
+                            map_doc[flag_tag][flag_param] = tmp_str;
+                            flag_tag = "";
+                            flag_param = "";
+                        } else if (flag_tag != "") {
+                            //タグ解析中の場合
+                            if (line_str.substr(0, 1) == ":") {
+                                //:hogeという行の場合
+                                //まずそれまで読んでいたひとつ前の属性データを格納する
+                                if (tmp_str != "") {
+                                    if (flag_param != "") {
+                                        map_doc[flag_tag][flag_param] = tmp_str;
                                     }
-                                    //新しい属性
-                                    flag_param = "";
-                                    flag_param = line_str.substr(
-                                        1,
-                                        line_str.length,
-                                    );
-                                    //初期化
-                                    map_doc[flag_tag][flag_param] = "";
-                                    tmp_str = "";
-                                } else {
-                                    //サンプルコード中はインデントを使う(トリミング前に戻す)
-                                    if (flag_param === "sample") {
-                                        line_str = origin_line_str;
-                                    }
-                                    //:paramでも:titleでもないなら改行を足す
-                                    if (
-                                        flag_param != "param" &&
-                                        flag_param != "title"
-                                    ) {
-                                        line_str += "\n";
-                                    }
-                                    tmp_str += line_str;
                                 }
-
-                                //タグ読み込み開始
-                            } else if (line_str.substr(0, 2) === "#[") {
-                                var tag_name = line_str.replace("#[", "");
-                                tag_name = tag_name.replace("]", "");
-                                tag_name = $.trim(tag_name);
-
-                                flag_tag = tag_name;
+                                //新しい属性
                                 flag_param = "";
-
-                                map_doc[flag_tag] = {};
+                                flag_param = line_str.substr(1, line_str.length);
+                                //初期化
+                                map_doc[flag_tag][flag_param] = "";
+                                tmp_str = "";
+                            } else {
+                                //サンプルコード中はインデントを使う(トリミング前に戻す)
+                                if (flag_param === "sample") {
+                                    line_str = origin_line_str;
+                                }
+                                //:paramでも:titleでもないなら改行を足す
+                                if (flag_param != "param" && flag_param != "title") {
+                                    line_str += "\n";
+                                }
+                                tmp_str += line_str;
                             }
+
+                            //タグ読み込み開始
+                        } else if (line_str.substr(0, 2) === "#[") {
+                            var tag_name = line_str.replace("#[", "");
+                            tag_name = tag_name.replace("]", "");
+                            tag_name = $.trim(tag_name);
+
+                            flag_tag = tag_name;
+                            flag_param = "";
+
+                            map_doc[flag_tag] = {};
                         }
                     }
+                }
 
-                    //macdoc を　解析して、HTMLを作成
+                //macdoc を　解析して、HTMLを作成
 
-                    loading_num++;
+                loading_num++;
 
-                    if (loading_num == script_num) {
-                        //HTML作成
-                        $.putHtml(map_doc, master_tag);
+                if (loading_num == script_num) {
+                    //HTML作成
+                    $.putHtml(map_doc, master_tag);
 
-                        ////////スタジオ用データ作成
-                        for (var tag_name in map_doc) {
-                            var tag = map_doc[tag_name];
-                            tag.array_param = [];
+                    ////////スタジオ用データ作成
+                    for (var tag_name in map_doc) {
+                        var tag = map_doc[tag_name];
+                        tag.array_param = [];
 
-                            var array_param = tag.param.split(",");
+                        var array_param = tag.param.split(",");
 
-                            for (var k = 0; k < array_param.length; k++) {
-                                var tmp_array = array_param[k].split("=");
-                                var param_name = $.trim(tmp_array[0]);
-                                var param_value = $.trim(
-                                    tmp_array.slice(1).join("="),
-                                );
-                                param_value = replaceParamExpWithConstant(
-                                    param_value,
-                                    param_name,
-                                    tag_name,
-                                );
-                                param_value = markup(param_value);
+                        for (var k = 0; k < array_param.length; k++) {
+                            var tmp_array = array_param[k].split("=");
+                            var param_name = $.trim(tmp_array[0]);
+                            var param_value = $.trim(tmp_array.slice(1).join("="));
+                            param_value = replaceParamExpWithConstant(param_value, param_name, tag_name);
+                            param_value = markup(param_value);
 
-                                if (param_name == "") {
-                                    continue;
-                                }
+                            if (param_name == "") {
+                                continue;
+                            }
 
-                                var pm_obj = {
-                                    name: param_name,
-                                    value: param_value,
-                                    vital: "×",
-                                    default: "",
-                                };
+                            var pm_obj = {
+                                name: param_name,
+                                value: param_value,
+                                vital: "×",
+                                default: "",
+                            };
 
-                                if (
-                                    master_tag[tag_name].pm &&
-                                    master_tag[tag_name].pm[param_name]
-                                ) {
-                                    pm_obj["default"] =
-                                        master_tag[tag_name].pm[param_name];
-                                }
+                            if (master_tag[tag_name].pm && master_tag[tag_name].pm[param_name]) {
+                                pm_obj["default"] = master_tag[tag_name].pm[param_name];
+                            }
 
-                                if (
-                                    master_tag[tag_name] != null &&
-                                    master_tag[tag_name]["vital"] != null
-                                ) {
-                                    var array_vital =
-                                        master_tag[tag_name]["vital"];
+                            if (master_tag[tag_name] != null && master_tag[tag_name]["vital"] != null) {
+                                var array_vital = master_tag[tag_name]["vital"];
 
-                                    for (
-                                        var j = 0;
-                                        j < array_vital.length;
-                                        j++
-                                    ) {
-                                        if (
-                                            master_tag[tag_name].vital[j] ==
-                                            param_name
-                                        ) {
-                                            pm_obj["vital"] = "◯";
-                                            break;
-                                        }
+                                for (var j = 0; j < array_vital.length; j++) {
+                                    if (master_tag[tag_name].vital[j] == param_name) {
+                                        pm_obj["vital"] = "◯";
+                                        break;
                                     }
                                 }
-
-                                tag.array_param.push(pm_obj);
-
-                                delete tag["param"];
                             }
-                        } //end for loop
 
-                        console.log("===map_doc");
-                        console.log(map_doc);
+                            tag.array_param.push(pm_obj);
 
-                        $("#studio_json").val(
-                            JSON.stringify(map_doc, undefined, 4),
-                        );
-                    }
-                },
-            ); //　ローディング
+                            delete tag["param"];
+                        }
+                    } //end for loop
+
+                    console.log("===map_doc");
+                    console.log(map_doc);
+
+                    $("#studio_json").val(JSON.stringify(map_doc, undefined, 4));
+                }
+            }); //　ローディング
         }
 
         return html;
@@ -303,10 +263,7 @@ var PARAM_EXP = {
 
         //未登録のタググループをアラート
         if (unknown_groups.size > 0) {
-            alert(
-                "未登録のタググループを検出しました。\n\n" +
-                    [...unknown_groups].join("\n"),
-            );
+            alert("未登録のタググループを検出しました。\n\n" + [...unknown_groups].join("\n"));
         }
 
         //ソート済みのグループリストが完成
@@ -327,10 +284,7 @@ var PARAM_EXP = {
 
             var tag_map = group_map[group_name];
 
-            ghtml +=
-                '<ul id="nav_' +
-                num_index +
-                '" class="collapse" aria-expanded="false" style="height: 0px;">';
+            ghtml += '<ul id="nav_' + num_index + '" class="collapse" aria-expanded="false" style="height: 0px;">';
 
             for (tag_name in tag_map) {
                 var obj = tag_map[tag_name];
@@ -426,15 +380,8 @@ var PARAM_EXP = {
             //デモ用のURLがあるなら差し込む
             if (typeof obj.demo != "undefined") {
                 var array_demo = obj.demo.split(",");
-                var demo_url =
-                    "/demogame/tech_samples_" +
-                    $.trim(array_demo[0]) +
-                    "_v5/index.html?storage=" +
-                    $.trim(array_demo[1]);
-                html +=
-                    '<p><a href="' +
-                    demo_url +
-                    '" target="_blank"">解説チュートリアル</a></p>';
+                var demo_url = "/demogame/tech_samples_" + $.trim(array_demo[0]) + "_v5/index.html?storage=" + $.trim(array_demo[1]);
+                html += '<p><a href="' + demo_url + '" target="_blank"">解説チュートリアル</a></p>';
             }
 
             //パラメータのテーブルを作っていく
@@ -450,8 +397,7 @@ var PARAM_EXP = {
 
             for (var k = 0; k < array_param.length; k++) {
                 if (array_param[k] == "") {
-                    html +=
-                        '<tr ><td colspan="4">指定できるパラメータはありません。</td></tr>';
+                    html += '<tr ><td colspan="4">指定できるパラメータはありません。</td></tr>';
                 } else {
                     var tmp_array = array_param[k].split("=");
 
@@ -460,29 +406,19 @@ var PARAM_EXP = {
 
                     //解説
                     var param_exp = $.trim(tmp_array.slice(1).join("="));
-                    param_exp = replaceParamExpWithConstant(
-                        param_exp,
-                        param_name,
-                        tag_name,
-                    );
+                    param_exp = replaceParamExpWithConstant(param_exp, param_name, tag_name);
                     param_exp = markup(param_exp);
 
                     //初期値
                     var param_initial = "";
                     try {
-                        param_initial =
-                            tyrano.plugin.kag.tag[tag_name].pm[param_name];
+                        param_initial = tyrano.plugin.kag.tag[tag_name].pm[param_name];
                     } catch (err) {}
-                    param_initial = param_initial
-                        ? `<span class="code">${param_initial}</span>`
-                        : "";
+                    param_initial = param_initial ? `<span class="code">${param_initial}</span>` : "";
 
                     //必須
                     var vital = "×";
-                    if (
-                        master_tag[tag_name] != null &&
-                        master_tag[tag_name]["vital"] != null
-                    ) {
+                    if (master_tag[tag_name] != null && master_tag[tag_name]["vital"] != null) {
                         var array_vital = master_tag[tag_name]["vital"];
 
                         for (var j = 0; j < array_vital.length; j++) {
@@ -493,9 +429,7 @@ var PARAM_EXP = {
                         }
                     }
 
-                    html +=
-                        `<tr><td>${param_name}</td><td>${vital}</td>` +
-                        `<td>${param_exp}</td><td>${param_initial}</td></tr>`;
+                    html += `<tr><td>${param_name}</td><td>${vital}</td>` + `<td>${param_exp}</td><td>${param_initial}</td></tr>`;
                 }
             } //end for loop
 
@@ -505,9 +439,7 @@ var PARAM_EXP = {
             if (obj.sample != "") {
                 html +=
                     `<ul class="list-inline posted-info"><li>サンプルコード</li></ul>` +
-                    `<pre class="language-tyranoscript"><code>${$.escapeHTML(
-                        obj.sample,
-                    )}</code></pre>`;
+                    `<pre class="language-tyranoscript"><code>${$.escapeHTML(obj.sample)}</code></pre>`;
             }
 
             html += "</div></div>";
@@ -576,19 +508,13 @@ var PARAM_EXP = {
         //段落内における改行は<br>に変換して見た目に反映
         p = p.replace(/\n/g, "<br>");
         //インラインティラノタグ(`[hoge]`)を変換
-        p = p.replace(
-            /`\[([^`\s]+)\]`/g,
-            `<a class="tag" href="#$1"><span class="code">[$1]</span></a>`,
-        );
+        p = p.replace(/`\[([^`\s]+)\]`/g, `<a class="tag" href="#$1"><span class="code">[$1]</span></a>`);
         //インラインコード(`hoge`)を変換
         p = p.replace(/`([^`]+)`/g, `<span class="code">$1</span>`);
         //URLを検出してリンク化
-        p = p.replace(
-            /(?<!href="|')https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+/g,
-            function (url) {
-                return `<a href="${url}">${url}</a>`;
-            },
-        );
+        p = p.replace(/(?<!href="|')https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+/g, function (url) {
+            return `<a href="${url}">${url}</a>`;
+        });
         return p;
     }
 
@@ -603,9 +529,7 @@ var PARAM_EXP = {
             if (PARAM_EXP[key]) {
                 return PARAM_EXP[key];
             } else {
-                console.error(
-                    `[${tag_name}]タグ: ${key} のパラメータ説明文が定義されていません。`,
-                );
+                console.error(`[${tag_name}]タグ: ${key} のパラメータ説明文が定義されていません。`);
                 return "";
             }
         } else {

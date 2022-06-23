@@ -7,10 +7,7 @@ tyrano.plugin.kag.menu = {
     init: function () {},
 
     showMenu: function (call_back) {
-        if (
-            this.kag.layer.layer_event.css("display") == "none" &&
-            this.kag.stat.is_strong_stop != true
-        ) {
+        if (this.kag.layer.layer_event.css("display") == "none" && this.kag.stat.is_strong_stop != true) {
             return false;
         }
 
@@ -161,9 +158,7 @@ tyrano.plugin.kag.menu = {
                 var j_save = $(html_str);
 
                 //フォントをゲームで指定されているフォントにする。
-                j_save
-                    .find(".save_list")
-                    .css("font-family", that.kag.config.userFace);
+                j_save.find(".save_list").css("font-family", that.kag.config.userFace);
 
                 j_save.find(".save_display_area").each(function () {
                     $(this).click(function (e) {
@@ -181,41 +176,20 @@ tyrano.plugin.kag.menu = {
                     */
 
                         that.doSave(num, function (save_data) {
-                            var j_slot = layer_menu.find(
-                                "[data-num='" + num + "']",
-                            );
+                            var j_slot = layer_menu.find("[data-num='" + num + "']");
 
                             if (save_data["img_data"] != "") {
-                                if (
-                                    j_slot
-                                        .find(".save_list_item_thumb")
-                                        .find("img")
-                                        .get(0)
-                                ) {
-                                    j_slot
-                                        .find(".save_list_item_thumb")
-                                        .find("img")
-                                        .attr("src", save_data["img_data"]);
+                                if (j_slot.find(".save_list_item_thumb").find("img").get(0)) {
+                                    j_slot.find(".save_list_item_thumb").find("img").attr("src", save_data["img_data"]);
                                 } else {
-                                    j_slot
-                                        .find(".save_list_item_thumb")
-                                        .css("background-image", "");
-                                    j_slot
-                                        .find(".save_list_item_thumb")
-                                        .append("<img>");
-                                    j_slot
-                                        .find(".save_list_item_thumb")
-                                        .find("img")
-                                        .attr("src", save_data["img_data"]);
+                                    j_slot.find(".save_list_item_thumb").css("background-image", "");
+                                    j_slot.find(".save_list_item_thumb").append("<img>");
+                                    j_slot.find(".save_list_item_thumb").find("img").attr("src", save_data["img_data"]);
                                 }
                             }
 
-                            j_slot
-                                .find(".save_list_item_date")
-                                .html(save_data["save_date"]);
-                            j_slot
-                                .find(".save_list_item_text")
-                                .html(save_data["title"]);
+                            j_slot.find(".save_list_item_date").html(save_data["save_date"]);
+                            j_slot.find(".save_list_item_text").html(save_data["title"]);
 
                             if (typeof cb == "function") {
                                 cb();
@@ -231,17 +205,13 @@ tyrano.plugin.kag.menu = {
                     j_save.find(".button_arrow_up").click(function () {
                         var now = j_save.find(".area_save_list").scrollTop();
                         var pos = now - 160;
-                        layer_menu
-                            .find(".area_save_list")
-                            .animate({ scrollTop: pos }, { queue: false });
+                        layer_menu.find(".area_save_list").animate({ scrollTop: pos }, { queue: false });
                     });
 
                     j_save.find(".button_arrow_down").click(function () {
                         var now = j_save.find(".area_save_list").scrollTop();
                         var pos = now + 160;
-                        j_save
-                            .find(".area_save_list")
-                            .animate({ scrollTop: pos }, { queue: false });
+                        j_save.find(".area_save_list").animate({ scrollTop: pos }, { queue: false });
                     });
                 }
 
@@ -282,11 +252,7 @@ tyrano.plugin.kag.menu = {
                 data = that.snap;
                 data.save_date = $.getNowDate() + "　" + $.getNowTime();
                 array_save.data[num] = data;
-                $.setStorage(
-                    that.kag.config.projectID + "_tyrano_data",
-                    array_save,
-                    that.kag.config.configSave,
-                );
+                $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
                 if (typeof cb == "function") {
                     //終わったタイミングでコールバックを返す
@@ -297,11 +263,7 @@ tyrano.plugin.kag.menu = {
             data = that.snap;
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
             array_save.data[num] = data;
-            $.setStorage(
-                that.kag.config.projectID + "_tyrano_data",
-                array_save,
-                that.kag.config.configSave,
-            );
+            $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
             if (typeof cb == "function") {
                 //終わったタイミングでコールバックを返す
@@ -318,11 +280,7 @@ tyrano.plugin.kag.menu = {
         that.kag.menu.snapSave(saveTitle, function () {
             var data = that.snap;
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
-            $.setStorage(
-                that.kag.config.projectID + "_tyrano_quick_save",
-                data,
-                that.kag.config.configSave,
-            );
+            $.setStorage(that.kag.config.projectID + "_tyrano_quick_save", data, that.kag.config.configSave);
 
             var layer_menu = that.kag.layer.getMenuLayer();
             layer_menu.hide();
@@ -330,10 +288,7 @@ tyrano.plugin.kag.menu = {
     },
 
     loadQuickSave: function () {
-        var data = $.getStorage(
-            this.kag.config.projectID + "_tyrano_quick_save",
-            this.kag.config.configSave,
-        );
+        var data = $.getStorage(this.kag.config.projectID + "_tyrano_quick_save", this.kag.config.configSave);
 
         if (data) {
             data = JSON.parse(data);
@@ -348,11 +303,7 @@ tyrano.plugin.kag.menu = {
     doSetAutoSave: function () {
         var data = this.snap;
         data.save_date = $.getNowDate() + "　" + $.getNowTime();
-        $.setStorage(
-            this.kag.config.projectID + "_tyrano_auto_save",
-            data,
-            this.kag.config.configSave,
-        );
+        $.setStorage(this.kag.config.projectID + "_tyrano_auto_save", data, this.kag.config.configSave);
 
         var layer_menu = this.kag.layer.getMenuLayer();
         layer_menu.hide();
@@ -360,10 +311,7 @@ tyrano.plugin.kag.menu = {
 
     //自動保存のデータを読み込む
     loadAutoSave: function () {
-        var data = $.getStorage(
-            this.kag.config.projectID + "_tyrano_auto_save",
-            this.kag.config.configSave,
-        );
+        var data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save", this.kag.config.configSave);
 
         if (data) {
             data = JSON.parse(data);
@@ -546,12 +494,8 @@ tyrano.plugin.kag.menu = {
                     };
 
                     html2canvas(tmp_base.get(0), opt).then(function (canvas) {
-                        $("#tyrano_base")
-                            .find(".layer_blend_mode")
-                            .css("display", "");
-                        $("#tyrano_base")
-                            .find(".tmp_video_canvas")
-                            .css("backgroundImage", "");
+                        $("#tyrano_base").find(".layer_blend_mode").css("display", "");
+                        $("#tyrano_base").find(".tmp_video_canvas").css("backgroundImage", "");
 
                         // canvas is the final rendered <canvas> element
                         //console.log(canvas);
@@ -626,9 +570,7 @@ tyrano.plugin.kag.menu = {
             function (html_str) {
                 var j_save = $(html_str);
 
-                j_save
-                    .find(".save_list")
-                    .css("font-family", that.kag.config.userFace);
+                j_save.find(".save_list").css("font-family", that.kag.config.userFace);
 
                 j_save.find(".save_display_area").each(function () {
                     $(this).click(function (e) {
@@ -658,17 +600,13 @@ tyrano.plugin.kag.menu = {
                     j_save.find(".button_arrow_up").click(function () {
                         var now = j_save.find(".area_save_list").scrollTop();
                         var pos = now - 160;
-                        layer_menu
-                            .find(".area_save_list")
-                            .animate({ scrollTop: pos }, { queue: false });
+                        layer_menu.find(".area_save_list").animate({ scrollTop: pos }, { queue: false });
                     });
 
                     j_save.find(".button_arrow_down").click(function () {
                         var now = j_save.find(".area_save_list").scrollTop();
                         var pos = now + 160;
-                        j_save
-                            .find(".area_save_list")
-                            .animate({ scrollTop: pos }, { queue: false });
+                        j_save.find(".area_save_list").animate({ scrollTop: pos }, { queue: false });
                     });
                 }
 
@@ -861,18 +799,12 @@ tyrano.plugin.kag.menu = {
 
                 //アニメーションの実行
                 if (key == "layer_camera") {
-                    $(".layer_camera").css(
-                        "-webkit-transform-origin",
-                        "center center",
-                    );
+                    $(".layer_camera").css("-webkit-transform-origin", "center center");
                     setTimeout(function () {
                         $(".layer_camera").a3d(a3d_define);
                     }, 1);
                 } else {
-                    $("." + key + "_fore").css(
-                        "-webkit-transform-origin",
-                        "center center",
-                    );
+                    $("." + key + "_fore").css("-webkit-transform-origin", "center center");
                     setTimeout(function () {
                         $("." + key + "_fore").a3d(a3d_define);
                     }, 1);
@@ -1019,13 +951,7 @@ tyrano.plugin.kag.menu = {
         //添付変数は消す。
         this.kag.clearTmpVariable();
 
-        this.kag.ftag.nextOrderWithIndex(
-            data.current_order_index,
-            data.stat.current_scenario,
-            true,
-            insert,
-            "yes",
-        );
+        this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
     },
 
     //メニュー画面に指定のJクエリオブジェクト追加
@@ -1068,26 +994,16 @@ tyrano.plugin.kag.menu = {
 
     //セーブデータを取得します
     getSaveData: function () {
-        var tmp_array = $.getStorage(
-            this.kag.config.projectID + "_tyrano_data",
-            this.kag.config.configSave,
-        );
+        var tmp_array = $.getStorage(this.kag.config.projectID + "_tyrano_data", this.kag.config.configSave);
 
-        var save_obj = $.getStorage(
-            this.kag.config.projectID + "_tyrano_data",
-            this.kag.config.configSave,
-        );
+        var save_obj = $.getStorage(this.kag.config.projectID + "_tyrano_data", this.kag.config.configSave);
 
         if (save_obj) {
             var save_obj = JSON.parse(save_obj);
 
             //旧版のセーブデータの場合、バックアップをとった上で変換する
             if (typeof save_obj.version == "undefined") {
-                $.setStorage(
-                    this.kag.config.projectID + "_tyrano_data.bk",
-                    save_obj,
-                    this.kag.config.configSave,
-                );
+                $.setStorage(this.kag.config.projectID + "_tyrano_data.bk", save_obj, this.kag.config.configSave);
 
                 var array_data = save_obj.data;
 
@@ -1099,37 +1015,22 @@ tyrano.plugin.kag.menu = {
                     var layer = array_data[i]["layer"];
 
                     for (key in layer.map_layer_fore) {
-                        layer["map_layer_fore"][key] = $.makeSaveJSON(
-                            $(layer["map_layer_fore"][key]).get(0),
-                            this.kag.array_white_attr,
-                        );
+                        layer["map_layer_fore"][key] = $.makeSaveJSON($(layer["map_layer_fore"][key]).get(0), this.kag.array_white_attr);
                     }
 
                     for (key in layer.map_layer_back) {
-                        layer["map_layer_back"][key] = $.makeSaveJSON(
-                            $(layer["map_layer_back"][key]).get(0),
-                            this.kag.array_white_attr,
-                        );
+                        layer["map_layer_back"][key] = $.makeSaveJSON($(layer["map_layer_back"][key]).get(0), this.kag.array_white_attr);
                     }
 
                     for (key in layer.layer_fix) {
-                        layer["map_layer_back"][key] = $.makeSaveJSON(
-                            $(layer.layer_fix[key]).get(0),
-                            this.kag.array_white_attr,
-                        );
+                        layer["map_layer_back"][key] = $.makeSaveJSON($(layer.layer_fix[key]).get(0), this.kag.array_white_attr);
                     }
 
                     for (key in layer.layer_blend) {
-                        layer["layer_blend"][key] = $.makeSaveJSON(
-                            $(layer.layer_blend[key]).get(0),
-                            this.kag.array_white_attr,
-                        );
+                        layer["layer_blend"][key] = $.makeSaveJSON($(layer.layer_blend[key]).get(0), this.kag.array_white_attr);
                     }
 
-                    layer.layer_free = $.makeSaveJSON(
-                        $(layer.layer_free).get(0),
-                        this.kag.array_white_attr,
-                    );
+                    layer.layer_free = $.makeSaveJSON($(layer.layer_free).get(0), this.kag.array_white_attr);
 
                     array_data[i]["layer"] = layer;
                 }
@@ -1138,11 +1039,7 @@ tyrano.plugin.kag.menu = {
                 save_obj.version = "2";
 
                 //セーブ上書き
-                $.setStorage(
-                    this.kag.config.projectID + "_tyrano_data",
-                    save_obj,
-                    this.kag.config.configSave,
-                );
+                $.setStorage(this.kag.config.projectID + "_tyrano_data", save_obj, this.kag.config.configSave);
             }
 
             return save_obj;
@@ -1211,17 +1108,13 @@ tyrano.plugin.kag.menu = {
                     layer_menu.find(".button_arrow_up").click(function () {
                         var now = layer_menu.find(".log_body").scrollTop();
                         var pos = now - 60;
-                        layer_menu
-                            .find(".log_body")
-                            .animate({ scrollTop: pos }, { queue: false });
+                        layer_menu.find(".log_body").animate({ scrollTop: pos }, { queue: false });
                     });
 
                     layer_menu.find(".button_arrow_down").click(function () {
                         var now = layer_menu.find(".log_body").scrollTop();
                         var pos = now + 60;
-                        layer_menu
-                            .find(".log_body")
-                            .animate({ scrollTop: pos }, { queue: false });
+                        layer_menu.find(".log_body").animate({ scrollTop: pos }, { queue: false });
                     });
                 }
 
@@ -1235,9 +1128,7 @@ tyrano.plugin.kag.menu = {
 
                 layer_menu.find(".log_body").html(log_str);
 
-                layer_menu
-                    .find(".log_body")
-                    .css("font-family", that.kag.config.userFace);
+                layer_menu.find(".log_body").css("font-family", that.kag.config.userFace);
 
                 $.preloadImgCallback(
                     layer_menu,
