@@ -306,25 +306,29 @@ tyrano.plugin.kag.ftag = {
             if (val.length > 0 && c === "&") {
                 pm[key] = this.kag.embScript(val.substr(1, val.length));
             } else if (val.length > 0 && c === "%") {
+                // 最新のマクロスタックを取得
                 var map_obj = this.kag.getStack("macro");
-                //最新のコールスタックを取得
-
-                // | で分けられていた場合、その値を投入
-
-                //もし、スタックが溜まっている状態なら、
+                // マクロスタックが取得できた場合はエンティティ置換
                 if (map_obj) {
-                    pm[key] = map_obj.pm[val.substr(1, val.length)];
-                }
+                    // 文字列を加工して扱いやすくする
+                    // もとのvalの例) "%color|0xffffff"
+                    var val_sub = val.substring(1); // "color|0xffffff"
+                    var vertical_bar_hash = val_sub.split("|"); // ["color", "0xffffff"]
+                    var map_key = vertical_bar_hash[0]; // "color"
+                    var default_value = vertical_bar_hash[1] || ""; // "0xffffff"
 
-                //代替変数の代入処理
-                var d = val.split("|");
+                    // トリミング
+                    if (that.kag.config.KeepSpaceInParameterValue !== "3") {
+                        map_key = $.trim(map_key);
+                        default_value = $.trim(default_value);
+                    }
 
-                if (d.length == 2) {
-                    //%〇〇の値が渡ってきているか調査
-                    if (map_obj.pm[$.trim(d[0]).substr(1, $.trim(d[0]).length)]) {
-                        pm[key] = map_obj.pm[$.trim(d[0]).substr(1, $.trim(d[0]).length)];
+                    if (map_key in map_obj.pm) {
+                        // マクロスタックのパラメータにそのキーが存在する場合、それを取り出して代入
+                        pm[key] = map_obj.pm[map_key];
                     } else {
-                        pm[key] = $.trim(d[1]);
+                        // 存在しない場合はデフォルト値を代入
+                        pm[key] = default_value;
                     }
                 }
             }
