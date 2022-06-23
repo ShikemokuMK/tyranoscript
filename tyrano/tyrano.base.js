@@ -24,7 +24,10 @@ tyrano.base = {
     },
 
     //画面サイズをぴったりさせます
-    _fitBaseSize: function (width, height) {
+    _fitBaseSize: function (width, height, timeout) {
+        if (typeof timeout !== "number") {
+            timeout = 100;
+        }
         var that = this;
         var view_width = $.getViewPort().width;
         var view_height = $.getViewPort().height;
@@ -48,7 +51,7 @@ tyrano.base = {
 
             this.tyrano.kag.tmp.base_scale = scale_f;
 
-            setTimeout(function () {
+            $.setTimeout(function () {
                 var margin_top =
                     document.documentElement.clientHeight - window.innerHeight;
 
@@ -109,16 +112,16 @@ tyrano.base = {
                         "height": vchat_height,
                     });
                 }
-            }, 100);
+            }, timeout);
         } else if (screen_ratio == "fit") {
             //スクリーンサイズに合わせて自動的に調整される
-            setTimeout(function () {
+            $.setTimeout(function () {
                 $(".tyrano_base").css(
                     "transform",
                     "scaleX(" + width_f + ") scaleY(" + height_f + ")",
                 );
                 window.scrollTo(width, height);
-            }, 100);
+            }, timeout);
         } else {
             //スクリーンサイズ固定
         }

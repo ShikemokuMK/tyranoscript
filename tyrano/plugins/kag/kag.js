@@ -889,7 +889,12 @@ tyrano.plugin.kag = {
 
         //スマホの場合は、実施。 PCの場合でも画面を一致させる処理→すべての画面フィットさせる仕様に変更
         //       if($.userenv() !="pc"){
-        this.tyrano.base.fitBaseSize(that.config.scWidth, that.config.scHeight);
+        // ゲーム画面フィットを即実行する
+        this.tyrano.base._fitBaseSize(
+            that.config.scWidth,
+            that.config.scHeight,
+            0,
+        );
         //スマホの場合、傾いた時に再計算させる
 
         //繰り返し実行用の関数
@@ -985,6 +990,12 @@ tyrano.plugin.kag = {
             }
         });
         //        }
+
+        // この時点ですでにloadが発火済みの場合がありえる！（Electronの場合は基本的に発火済み）
+        // その場合は手動でloadをトリガーすることで上記イベントハンドラを実行する
+        if (window.isLoaded === true) {
+            $(window).trigger("load");
+        }
 
         this.layer.addLayer("base");
 
