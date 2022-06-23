@@ -847,7 +847,19 @@ tyrano.plugin.kag = {
         //繰り返し実行用の関数
         var timerId = null;
 
-        $(window).bind("load orientationchange resize", function () {
+        var flag_resized = false;
+
+        $(window).bind("load resize orientationchange", function () {
+            if (flag_resized === true) {
+                return;
+            } else {
+                setTimeout(function () {
+                    flag_resized = false;
+                }, 100);
+            }
+
+            flag_resized = true;
+
             that.tmp.angle = $.getAngle();
 
             //リサイズコールの仕組み
