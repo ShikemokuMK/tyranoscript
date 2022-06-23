@@ -26,4 +26,7 @@ module.exports = {
 
     // 改行記号：CRLF
     endOfLine: "crlf",
+
+    // 1行あたりの文字数：140
+    printWidth: 140,
 };

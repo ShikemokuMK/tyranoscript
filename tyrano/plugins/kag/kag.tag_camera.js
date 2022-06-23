@@ -99,11 +99,7 @@ tyrano.plugin.kag.tag.camera = {
             };
         }
 
-        var to_camera = $.extend(
-            true,
-            {},
-            this.kag.stat.current_camera[pm.layer],
-        );
+        var to_camera = $.extend(true, {}, this.kag.stat.current_camera[pm.layer]);
 
         //指定されて項目があるなら、上書きする
         if (pm.x != "") to_camera.x = parseInt(pm.x) * -1 + "px";
@@ -111,12 +107,7 @@ tyrano.plugin.kag.tag.camera = {
         if (pm.zoom != "") to_camera.scale = pm.zoom;
         if (pm.rotate != "") to_camera.rotate = pm.rotate + "deg";
 
-        if (
-            pm.from_x != "0" ||
-            pm.from_y != "0" ||
-            pm.from_zoom != "1" ||
-            pm.from_rotate != "0"
-        ) {
+        if (pm.from_x != "0" || pm.from_y != "0" || pm.from_zoom != "1" || pm.from_rotate != "0") {
             this.kag.stat.current_camera[pm.layer] = {
                 x: parseInt(pm.from_x) * -1 + "px",
                 y: parseInt(pm.from_y) * 1 + "px",
@@ -176,10 +167,7 @@ tyrano.plugin.kag.tag.camera = {
             $(".layer_camera").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";
         } else {
-            $("." + pm.layer + "_fore").css(
-                "-webkit-transform-origin",
-                "center center",
-            );
+            $("." + pm.layer + "_fore").css("-webkit-transform-origin", "center center");
             $("." + pm.layer + "_fore").a3d(a3d_define);
             this.kag.stat.current_camera_layer = pm.layer;
         }
@@ -321,10 +309,7 @@ tyrano.plugin.kag.tag.reset_camera = {
             $(".layer_camera").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";
         } else {
-            $("." + pm.layer + "_fore").css(
-                "-webkit-transform-origin",
-                "center center",
-            );
+            $("." + pm.layer + "_fore").css("-webkit-transform-origin", "center center");
             $("." + pm.layer + "_fore").a3d(a3d_define);
             this.kag.stat.current_camera_layer = "";
         }
@@ -429,11 +414,7 @@ tyrano.plugin.kag.tag.mask = {
             pm.time = "1";
         }
 
-        var j_div = $(
-            "<div class='layer layer_mask' data-effect='" +
-                pm.effect +
-                "' style='z-index:100000000;position:absolute;'>",
-        );
+        var j_div = $("<div class='layer layer_mask' data-effect='" + pm.effect + "' style='z-index:100000000;position:absolute;'>");
         j_div.css("animation-duration", parseInt(pm.time) + "ms");
 
         var sc_width = parseInt(that.kag.config.scWidth);
@@ -475,8 +456,7 @@ tyrano.plugin.kag.tag.mask = {
 
         $(".tyrano_base").append(j_div);
 
-        var animationEnd =
-            "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+        var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
         j_div.addClass("animated " + pm.effect).one(animationEnd, function () {
             //$(this).removeClass('animated ' + pm.effect);
 
@@ -544,15 +524,12 @@ tyrano.plugin.kag.tag.mask_off = {
             j_div.removeClass("animated " + _effect);
             j_div.css("animation-duration", parseInt(pm.time) + "ms");
 
-            var animationEnd =
-                "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
-            j_div
-                .addClass("animated " + pm.effect)
-                .one(animationEnd, function () {
-                    j_div.remove();
-                    that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
-                });
+            var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            j_div.addClass("animated " + pm.effect).one(animationEnd, function () {
+                j_div.remove();
+                that.kag.layer.showEventLayer();
+                that.kag.ftag.nextOrder();
+            });
         } else {
             that.kag.layer.showEventLayer();
             that.kag.ftag.nextOrder();

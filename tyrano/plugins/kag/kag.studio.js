@@ -77,17 +77,14 @@ tyrano.plugin.kag.studio = {
                 this.cutTyranoScript(tag_text);
             });
 
-            this.ipc.ipcRenderer.on(
-                "material-preview-position",
-                (event, arg) => {
-                    let data = JSON.parse(arg);
+            this.ipc.ipcRenderer.on("material-preview-position", (event, arg) => {
+                let data = JSON.parse(arg);
 
-                    let file = data["file"];
-                    let category = data["category"];
+                let file = data["file"];
+                let category = data["category"];
 
-                    this.insertElement(category, file);
-                },
-            );
+                this.insertElement(category, file);
+            });
 
             this.ipc.ipcRenderer.on("variable-add-all", (event, arg) => {
                 //すべての変数を読み込んでスタジオに通知する
@@ -164,9 +161,7 @@ tyrano.plugin.kag.studio = {
                         let left = Math.floor(ui.position.left);
                         let top = Math.floor(ui.position.top);
 
-                        _j_img
-                            .find(".area_pos")
-                            .html("x:" + left + " y:" + top);
+                        _j_img.find(".area_pos").html("x:" + left + " y:" + top);
 
                         let obj = {
                             left: left,

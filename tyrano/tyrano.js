@@ -6,8 +6,7 @@ function object(o) {
         prop;
     f.prototype = o;
     n = new f();
-    for (i = 1, len = arguments.length; i < len; ++i)
-        for (prop in arguments[i]) n[prop] = arguments[i][prop];
+    for (i = 1, len = arguments.length; i < len; ++i) for (prop in arguments[i]) n[prop] = arguments[i][prop];
     return n;
 }
 
@@ -49,18 +48,15 @@ tyrano.core = {
         var count_src = 0;
 
         for (var i = 0; i < array_src.length; i++) {
-            $.getScript(
-                "./tyrano/plugins/" + array_src[i] + "/" + array_src[i] + ".js",
-                function () {
-                    count_src++;
+            $.getScript("./tyrano/plugins/" + array_src[i] + "/" + array_src[i] + ".js", function () {
+                count_src++;
 
-                    if (count_src == array_src.length) {
-                        if (call_back) {
-                            call_back(array_src);
-                        }
+                if (count_src == array_src.length) {
+                    if (call_back) {
+                        call_back(array_src);
                     }
-                },
-            );
+                }
+            });
         }
     },
 

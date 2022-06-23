@@ -51,10 +51,7 @@ tyrano.plugin.kag.tag.vchat_in = {
 
         var j_area_chat = $("#vchat_base");
 
-        j_area_chat
-            .find(".current_vchat")
-            .addClass("talked_vchat")
-            .removeClass("current_vchat");
+        j_area_chat.find(".current_vchat").addClass("talked_vchat").removeClass("current_vchat");
 
         var html =
             '\

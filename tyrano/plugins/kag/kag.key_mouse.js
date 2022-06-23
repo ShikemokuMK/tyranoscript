@@ -157,12 +157,7 @@ tyrano.plugin.kag.key_mouse = {
             }
         });
 
-        var mousewheelevent =
-            "onwheel" in document
-                ? "wheel"
-                : "onmousewheel" in document
-                ? "mousewheel"
-                : "DOMMouseScroll";
+        var mousewheelevent = "onwheel" in document ? "wheel" : "onmousewheel" in document ? "mousewheel" : "DOMMouseScroll";
         $(document).on(mousewheelevent, function (e) {
             //メニュー表示中は進めない。
             if (!that.canShowMenu()) {
@@ -175,10 +170,7 @@ tyrano.plugin.kag.key_mouse = {
             }
 
             //メニュー表示中は無効にする
-            if (
-                $(".menu_close").length > 0 &&
-                $(".layer_menu").css("display") != "none"
-            ) {
+            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 return;
             }
 
@@ -212,14 +204,7 @@ tyrano.plugin.kag.key_mouse = {
         //スマートフォンイベント
         if ($.userenv() != "pc") {
             layer_obj_click.swipe({
-                swipe: function (
-                    event,
-                    direction,
-                    distance,
-                    duration,
-                    fingerCount,
-                    fingerData,
-                ) {
+                swipe: function (event, direction, distance, duration, fingerCount, fingerData) {
                     that.is_swipe = true;
                     //console.log("wwwwwwwwwwwwwww");
                     //console.log(direction+":"+distance+":"+duration+":"+fingerCount+":"+fingerData);
@@ -328,10 +313,7 @@ tyrano.plugin.kag.key_mouse = {
 
     showmenu: function () {
         if (this.canShowMenu()) {
-            if (
-                $(".menu_close").length > 0 &&
-                $(".layer_menu").css("display") != "none"
-            ) {
+            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
                 $(".button_menu").click();
@@ -341,10 +323,7 @@ tyrano.plugin.kag.key_mouse = {
 
     hidemessage: function () {
         if (this.canShowMenu()) {
-            if (
-                $(".menu_close").length > 0 &&
-                $(".layer_menu").css("display") != "none"
-            ) {
+            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
                 if (!this.kag.stat.is_strong_stop) {
@@ -402,10 +381,7 @@ tyrano.plugin.kag.key_mouse = {
         }
 
         //画面効果中は実行できないようにする
-        if (
-            that.kag.layer.layer_event.css("display") == "none" &&
-            that.kag.stat.is_strong_stop != true
-        ) {
+        if (that.kag.layer.layer_event.css("display") == "none" && that.kag.stat.is_strong_stop != true) {
             return false;
         }
 
@@ -422,17 +398,9 @@ tyrano.plugin.kag.key_mouse = {
         }
 
         //文字が流れているときは、セーブ出来ないようにする。
-        if (
-            role == "save" ||
-            role == "menu" ||
-            role == "quicksave" ||
-            role == "sleepgame"
-        ) {
+        if (role == "save" || role == "menu" || role == "quicksave" || role == "sleepgame") {
             //テキストが流れているときとwait中は実行しない
-            if (
-                that.kag.stat.is_adding_text == true ||
-                that.kag.stat.is_wait == true
-            ) {
+            if (that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true) {
                 return false;
             }
         }
@@ -507,10 +475,7 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     canClick: function () {
-        if (
-            $(".layer_event_click").css("display") != "none" &&
-            $(".layer_menu").css("display") == "none"
-        ) {
+        if ($(".layer_event_click").css("display") != "none" && $(".layer_menu").css("display") == "none") {
             return true;
         }
 
@@ -522,10 +487,7 @@ tyrano.plugin.kag.key_mouse = {
         var that = this;
 
         //スキップ中にクリックされたら元に戻す
-        if (
-            that.kag.stat.is_skip == true &&
-            that.kag.stat.is_strong_stop == false
-        ) {
+        if (that.kag.stat.is_skip == true && that.kag.stat.is_strong_stop == false) {
             that.kag.stat.is_skip = false;
             return false;
         }
@@ -544,10 +506,7 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     canShowMenu: function () {
-        if (
-            this.kag.layer.layer_event.css("display") == "none" &&
-            this.kag.stat.is_strong_stop != true
-        ) {
+        if (this.kag.layer.layer_event.css("display") == "none" && this.kag.stat.is_strong_stop != true) {
             return false;
         }
 

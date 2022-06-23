@@ -215,10 +215,7 @@ tyrano.plugin.kag.tag["close"] = {
         if (typeof navigator.app != "undefined") {
             navigator.app.exitApp();
         }
-        if (
-            typeof require != "undefined" &&
-            typeof require("nw.gui") != "undefined"
-        ) {
+        if (typeof require != "undefined" && typeof require("nw.gui") != "undefined") {
             require("nw.gui").Window.get().close();
         }
 
@@ -347,20 +344,14 @@ tyrano.plugin.kag.tag["body"] = {
 
         let flag_resize = false;
 
-        if (
-            pm.scWidth != "" &&
-            parseInt(pm.scWidth) != parseInt(this.kag.config.scWidth)
-        ) {
+        if (pm.scWidth != "" && parseInt(pm.scWidth) != parseInt(this.kag.config.scWidth)) {
             flag_resize = true;
             this.kag.config.scWidth = parseInt(pm.scWidth);
             $(".tyrano_base").css("width", parseInt(pm.scWidth));
             $(".layer").css("width", parseInt(pm.scWidth));
         }
 
-        if (
-            pm.scHeight != "" &&
-            parseInt(pm.scHeight) != parseInt(this.kag.config.scHeight)
-        ) {
+        if (pm.scHeight != "" && parseInt(pm.scHeight) != parseInt(this.kag.config.scHeight)) {
             flag_resize = true;
             this.kag.config.scHeight = parseInt(pm.scHeight);
             $(".tyrano_base").css("height", parseInt(pm.scHeight));
@@ -497,9 +488,7 @@ tyrano.plugin.kag.tag.endscript = {
         try {
             this.kag.evalScript(this.kag.stat.buff_script);
         } catch (err) {
-            that.kag.error(
-                "[iscript]に記述されたJavaScript実行時にエラーが発生しました。",
-            );
+            that.kag.error("[iscript]に記述されたJavaScript実行時にエラーが発生しました。");
             console.error(err);
         }
         this.kag.stat.buff_script = "";
@@ -839,10 +828,7 @@ tyrano.plugin.kag.tag["elsif"] = {
 
     start: function (pm) {
         //条件合格
-        if (
-            this.kag.getStack("if").bool == false &&
-            this.kag.embScript(pm.exp)
-        ) {
+        if (this.kag.getStack("if").bool == false && this.kag.embScript(pm.exp)) {
             this.kag.setStack("if", { bool: true, deep: pm.deep_if });
 
             this.kag.ftag.nextOrder();
@@ -1062,10 +1048,7 @@ tyrano.plugin.kag.tag["return"] = {
 
         //make.ksが終わるときの判定用
         if (pm.caller && pm.caller.storage) {
-            if (
-                pm.caller.storage == "make.ks" ||
-                pm.caller.storage == this.kag.stat.resizecall["storage"]
-            ) {
+            if (pm.caller.storage == "make.ks" || pm.caller.storage == this.kag.stat.resizecall["storage"]) {
                 if (this.kag.tmp.loading_make_ref == true) {
                     this.kag.stat.flag_ref_page = true;
                     this.kag.tmp.loading_make_ref = false;
@@ -1076,13 +1059,7 @@ tyrano.plugin.kag.tag["return"] = {
         var auto_next = pm.auto_next;
         this.kag.popStack("call");
 
-        this.kag.ftag.nextOrderWithIndex(
-            pm.index,
-            pm.storage,
-            undefined,
-            undefined,
-            auto_next,
-        );
+        this.kag.ftag.nextOrderWithIndex(pm.index, pm.storage, undefined, undefined, auto_next);
         //スタックを奪い取る
     },
 };
@@ -1237,11 +1214,7 @@ tyrano.plugin.kag.tag.endmacro = {
             //mpを復元
             this.kag.stat.mp = $.extend({}, macro_stack.pm);
 
-            this.kag.ftag.nextOrderWithIndex(
-                map_obj.index,
-                map_obj.storage,
-                true,
-            );
+            this.kag.ftag.nextOrderWithIndex(map_obj.index, map_obj.storage, true);
         } else {
             //呼び出し元がない場合、普通に次の処理を行えば良い
             //endmacroの場合はだめじゃないでしょうか。。。
@@ -1418,10 +1391,7 @@ tyrano.plugin.kag.tag.autoload = {
     },
 
     start: function (pm) {
-        var game_data = $.getStorage(
-            this.kag.config.projectID + "_tyrano_auto_save",
-            this.kag.config.configSave,
-        );
+        var game_data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save", this.kag.config.configSave);
         this.kag.menu.loadAutoSave();
     },
 };
@@ -1571,11 +1541,7 @@ tyrano.plugin.kag.tag.edit = {
     },
 
     start: function (pm) {
-        var j_text = $(
-            "<input class='text_box form' name='" +
-                pm.name +
-                "' type='text' value='' />",
-        );
+        var j_text = $("<input class='text_box form' name='" + pm.name + "' type='text' value='' />");
 
         //指定がない場合はデフォルトフォントを適応する
         if (pm.face == "") {
@@ -2347,12 +2313,7 @@ tyrano.plugin.kag.tag.loadcss = {
         var file = pm.file;
 
         //ファイルの読み込み
-        var style =
-            '<link class="_tyrano_cssload_tag" rel="stylesheet" href="' +
-            file +
-            "?" +
-            Math.floor(Math.random() * 10000000) +
-            '">';
+        var style = '<link class="_tyrano_cssload_tag" rel="stylesheet" href="' + file + "?" + Math.floor(Math.random() * 10000000) + '">';
         $("head link:last").after(style);
         this.kag.stat.cssload[file] = true;
 
@@ -2745,15 +2706,10 @@ tyrano.plugin.kag.tag.check_web_patch = {
 
         //バージョンの確認
         if (typeof this.kag.variable.sf._patch_version == "undefined") {
-            this.kag.evalScript(
-                "sf._patch_version=" + this.kag.config["game_version"],
-            );
+            this.kag.evalScript("sf._patch_version=" + this.kag.config["game_version"]);
         }
 
-        if (
-            parseFloat(this.kag.variable.sf._patch_version) <
-            parseFloat(obj.version)
-        ) {
+        if (parseFloat(this.kag.variable.sf._patch_version) < parseFloat(obj.version)) {
             $.confirm(
                 "新しいアップデートが見つかりました。Ver:" +
                     parseFloat(obj.version) +
@@ -2761,9 +2717,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
                     obj.message +
                     "」<br>アップデートを行いますか？",
                 function () {
-                    alert(
-                        "アップデートを行います。完了後、自動的にゲームは終了します。",
-                    );
+                    alert("アップデートを行います。完了後、自動的にゲームは終了します。");
 
                     var http = require("http");
                     var fs = require("fs");
@@ -2792,9 +2746,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
                         res.on("end", function () {
                             outFile.close();
                             //アップデートを実行
-                            that.kag.evalScript(
-                                "sf._patch_version=" + obj.version,
-                            );
+                            that.kag.evalScript("sf._patch_version=" + obj.version);
 
                             window.close();
 

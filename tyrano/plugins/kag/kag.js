@@ -356,10 +356,7 @@ tyrano.plugin.kag = {
         //アプリか否かの設定
         $("script").each(function () {
             if ($(this).attr("src")) {
-                if (
-                    $(this).attr("src").indexOf("cordova") != -1 ||
-                    $(this).attr("src").indexOf("phonegap") != -1
-                ) {
+                if ($(this).attr("src").indexOf("cordova") != -1 || $(this).attr("src").indexOf("phonegap") != -1) {
                     that.define.FLAG_APRI = true;
                 }
             }
@@ -451,9 +448,7 @@ tyrano.plugin.kag = {
             let out_path = $.localFilePath();
 
             if (process.platform == "darwin") {
-                alert(
-                    "パッチを適応するゲーム実行ファイル（.app）の場所を選択してください。",
-                );
+                alert("パッチを適応するゲーム実行ファイル（.app）の場所を選択してください。");
 
                 //実行パスを選択させる
                 let dialog = require("electron").remote.dialog;
@@ -479,10 +474,7 @@ tyrano.plugin.kag = {
             fse.mkdirSync(_path.resolve(out_path + "/update_tmp"));
 
             (async () => {
-                await asar.extractAll(
-                    _path.resolve(path),
-                    _path.resolve(out_path + "/update_tmp/"),
-                );
+                await asar.extractAll(_path.resolve(path), _path.resolve(out_path + "/update_tmp/"));
             })();
 
             //ファイル全部コピーする
@@ -501,18 +493,15 @@ tyrano.plugin.kag = {
             (async () => {
                 await asar.createPackage(src, dest);
 
-                $.alert(
-                    "パッチを適応しました。再度、起動してください。",
-                    function () {
-                        //パッチの削除。
-                        fse.removeSync(_path.resolve(patch_path));
+                $.alert("パッチを適応しました。再度、起動してください。", function () {
+                    //パッチの削除。
+                    fse.removeSync(_path.resolve(patch_path));
 
-                        //作業ディレクトリ削除
-                        fse.removeSync(_path.resolve(out_path + "update_tmp"));
+                    //作業ディレクトリ削除
+                    fse.removeSync(_path.resolve(out_path + "update_tmp"));
 
-                        window.close();
-                    },
-                );
+                    window.close();
+                });
             })();
 
             return;
@@ -589,11 +578,7 @@ tyrano.plugin.kag = {
 
     //システム変数を保存する
     saveSystemVariable: function () {
-        $.setStorage(
-            this.kag.config.projectID + "_sf",
-            this.variable.sf,
-            this.kag.config.configSave,
-        );
+        $.setStorage(this.kag.config.projectID + "_sf", this.variable.sf, this.kag.config.configSave);
     },
 
     //すべての変数クリア
@@ -695,8 +680,7 @@ tyrano.plugin.kag = {
             if (process.execPath.indexOf("var/folders") != -1) {
                 that.save_key_id = that.kag.config.projectID + "_save_key";
             } else {
-                that.save_key_id =
-                    $.getExePath() + "_" + that.kag.config.projectID;
+                that.save_key_id = $.getExePath() + "_" + that.kag.config.projectID;
             }
 
             if (localStorage.getItem(that.save_key_id)) {
@@ -710,11 +694,7 @@ tyrano.plugin.kag = {
                 var tmp_array = that.menu.getSaveData();
                 //ハッシュを上書き
                 tmp_array["hash"] = that.save_key_val;
-                $.setStorage(
-                    that.kag.config.projectID + "_tyrano_data",
-                    tmp_array,
-                    that.kag.config.configSave,
-                );
+                $.setStorage(that.kag.config.projectID + "_tyrano_data", tmp_array, that.kag.config.configSave);
             }
 
             //ハッシュに差分があったら、警告を表示して上書きするか確認。
@@ -726,11 +706,7 @@ tyrano.plugin.kag = {
                 if (that.kag.config.configSaveOverwrite == "true") {
                     if (confirm($.lang("save_file_violation_2"))) {
                         tmp_array["hash"] = that.save_key_val;
-                        $.setStorage(
-                            that.kag.config.projectID + "_tyrano_data",
-                            tmp_array,
-                            that.kag.config.configSave,
-                        );
+                        $.setStorage(that.kag.config.projectID + "_tyrano_data", tmp_array, that.kag.config.configSave);
                     } else {
                         alert($.lang("save_file_violation_3"));
                         return false;
@@ -743,10 +719,7 @@ tyrano.plugin.kag = {
         }
 
         //システム変数の初期化
-        var tmpsf = $.getStorage(
-            this.kag.config.projectID + "_sf",
-            that.config.configSave,
-        );
+        var tmpsf = $.getStorage(this.kag.config.projectID + "_sf", that.config.configSave);
 
         if (tmpsf == null) {
             this.variable.sf = {};
@@ -759,39 +732,23 @@ tyrano.plugin.kag = {
 
         //システムが永続させたい変数はすぐにコンフィグに反映
         if (typeof that.variable.sf._system_config_bgm_volume !== "undefined")
-            that.config["defaultBgmVolume"] = String(
-                that.variable.sf._system_config_bgm_volume,
-            );
+            that.config["defaultBgmVolume"] = String(that.variable.sf._system_config_bgm_volume);
         if (typeof that.variable.sf._system_config_se_volume !== "undefined")
-            that.config["defaultSeVolume"] = String(
-                that.variable.sf._system_config_se_volume,
-            );
+            that.config["defaultSeVolume"] = String(that.variable.sf._system_config_se_volume);
         //if(that.variable.sf._system_config_bgm_volume) that.config["defaultBgmVolume"] = that.variable.sf._system_config_bgm_volume;
         //if(that.variable.sf._system_config_se_volume) that.config["defaultSeVolume"] = that.variable.sf._system_config_se_volume;
-        if (that.variable.sf._config_ch_speed)
-            that.config["chSpeed"] = that.variable.sf._config_ch_speed;
+        if (that.variable.sf._config_ch_speed) that.config["chSpeed"] = that.variable.sf._config_ch_speed;
         if (typeof that.variable.sf._system_config_auto_speed !== "undefined")
-            that.config["autoSpeed"] =
-                that.variable.sf._system_config_auto_speed;
-        if (that.variable.sf._system_config_auto_click)
-            that.config["autoClickStop"] =
-                that.variable.sf._system_config_auto_click_stop;
+            that.config["autoSpeed"] = that.variable.sf._system_config_auto_speed;
+        if (that.variable.sf._system_config_auto_click) that.config["autoClickStop"] = that.variable.sf._system_config_auto_click_stop;
         if (that.variable.sf._system_config_already_read_text_color)
-            that.config["alreadyReadTextColor"] =
-                that.variable.sf._system_config_already_read_text_color;
-        if (
-            typeof that.variable.sf._system_config_unread_text_skip !=
-            "undefined"
-        ) {
-            that.config["unReadTextSkip"] =
-                that.variable.sf._system_config_unread_text_skip;
+            that.config["alreadyReadTextColor"] = that.variable.sf._system_config_already_read_text_color;
+        if (typeof that.variable.sf._system_config_unread_text_skip != "undefined") {
+            that.config["unReadTextSkip"] = that.variable.sf._system_config_unread_text_skip;
         }
 
         //自動セーブのデータがあるかどうか
-        var auto_save_data = $.getStorage(
-            this.kag.config.projectID + "_tyrano_auto_save",
-            this.kag.config.configSave,
-        );
+        var auto_save_data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save", this.kag.config.configSave);
 
         this.variable.sf["system"] = {};
 
@@ -814,10 +771,7 @@ tyrano.plugin.kag = {
 
         //コンフィグボタンの位置を指定する
 
-        if (
-            this.kag.config.configLeft != "-1" &&
-            this.kag.config.configTop != "-1"
-        ) {
+        if (this.kag.config.configLeft != "-1" && this.kag.config.configTop != "-1") {
             button_menu_obj.css("left", parseInt(this.kag.config.configLeft));
             button_menu_obj.css("top", parseInt(this.kag.config.configTop));
         } else {
@@ -840,10 +794,7 @@ tyrano.plugin.kag = {
         $("." + this.kag.define.BASE_DIV_NAME).append(button_menu_obj);
 
         //センタリングの調整
-        if (
-            this.kag.config["ScreenCentering"] &&
-            this.kag.config["ScreenCentering"] == "false"
-        ) {
+        if (this.kag.config["ScreenCentering"] && this.kag.config["ScreenCentering"] == "false") {
             //センタリングをキャンセルする
             $(".tyrano_base").css("transform-origin", "0 0");
             $(".tyrano_base").css({
@@ -890,11 +841,7 @@ tyrano.plugin.kag = {
         //スマホの場合は、実施。 PCの場合でも画面を一致させる処理→すべての画面フィットさせる仕様に変更
         //       if($.userenv() !="pc"){
         // ゲーム画面フィットを即実行する
-        this.tyrano.base._fitBaseSize(
-            that.config.scWidth,
-            that.config.scHeight,
-            0,
-        );
+        this.tyrano.base._fitBaseSize(that.config.scWidth, that.config.scHeight, 0);
         //スマホの場合、傾いた時に再計算させる
 
         //繰り返し実行用の関数
@@ -909,10 +856,7 @@ tyrano.plugin.kag = {
                 if (that.stat.resizecall["storage"] != "") {
                     //画面変化中にリサイズするとすぐに反映されない仕組みを実装。
                     //クリックできない状態のときは実行しない
-                    if (
-                        that.kag.layer.layer_event.css("display") == "none" &&
-                        that.kag.stat.is_strong_stop != true
-                    ) {
+                    if (that.kag.layer.layer_event.css("display") == "none" && that.kag.stat.is_strong_stop != true) {
                         timerId = setTimeout(function () {
                             $(window).trigger("resize");
                         }, 1000);
@@ -920,10 +864,7 @@ tyrano.plugin.kag = {
                     }
 
                     //テキストが流れているときとwait中は実行しない
-                    if (
-                        that.kag.stat.is_adding_text == true ||
-                        that.kag.stat.is_wait == true
-                    ) {
+                    if (that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true) {
                         timerId = setTimeout(function () {
                             $(window).trigger("resize");
                         }, 1000);
@@ -975,18 +916,12 @@ tyrano.plugin.kag = {
 
             if (Math.abs(window.orientation) === 90) {
                 window.scrollTo(0, 1);
-                that.tyrano.base.fitBaseSize(
-                    that.config.scWidth,
-                    that.config.scHeight,
-                );
+                that.tyrano.base.fitBaseSize(that.config.scWidth, that.config.scHeight);
             } else {
                 if (window.pageYOffset === 0) {
                     window.scrollTo(0, 1);
                 }
-                that.tyrano.base.fitBaseSize(
-                    that.config.scWidth,
-                    that.config.scHeight,
-                );
+                that.tyrano.base.fitBaseSize(that.config.scWidth, that.config.scHeight);
             }
         });
         //        }
@@ -1018,9 +953,7 @@ tyrano.plugin.kag = {
         this.layer.appendObj("message0", "fore", j_message);
 
         //メッセージ表示領域
-        var j_message_inner = $(
-            "<div class='message_inner' style='z-index:1001'></div>",
-        );
+        var j_message_inner = $("<div class='message_inner' style='z-index:1001'></div>");
 
         //禁則処理
         if (this.config.WordBreak == "false") {
@@ -1028,11 +961,7 @@ tyrano.plugin.kag = {
         }
 
         //１行目の上に余裕を持たせる。rubyカクつき対策
-        $.insertRule(
-            ".message_inner p{ padding-top:" +
-                this.kag.config.defaultLineSpacing +
-                "px;}",
-        );
+        $.insertRule(".message_inner p{ padding-top:" + this.kag.config.defaultLineSpacing + "px;}");
 
         this.layer.appendObj("message0", "fore", j_message_inner);
 
@@ -1075,18 +1004,13 @@ tyrano.plugin.kag = {
         }
 
         //デフォルトフォントの設定
-        this.stat.default_font.color = $.convertColor(
-            this.kag.config.defaultChColor,
-        );
-        this.stat.default_font.bold = $.convertBold(
-            this.kag.config.defaultBold,
-        );
+        this.stat.default_font.color = $.convertColor(this.kag.config.defaultChColor);
+        this.stat.default_font.bold = $.convertBold(this.kag.config.defaultBold);
         this.stat.default_font.size = this.kag.config.defaultFontSize;
         this.stat.default_font.face = this.kag.config.userFace;
 
         this.stat.default_font.effect = this.kag.config.defaultChEffect;
-        this.stat.default_font.effect_speed =
-            this.kag.config.defaultChEffectSpeed;
+        this.stat.default_font.effect_speed = this.kag.config.defaultChEffectSpeed;
 
         //文字のアンチエイリアス効果
         var smooth = this.kag.config.defaultAntialiased; //アンチエイリアス効果
@@ -1096,34 +1020,23 @@ tyrano.plugin.kag = {
         } else if (smooth == "0") {
             $(".tyrano_base").css("-webkit-font-smoothing", "none");
         } else {
-            $(".tyrano_base").css(
-                "-webkit-font-smoothing",
-                "subpixel-antialiased",
-            );
+            $(".tyrano_base").css("-webkit-font-smoothing", "subpixel-antialiased");
         }
 
         //文字の影
         if (this.kag.config.defaultShadow == "true") {
-            this.stat.default_font.shadow = $.convertColor(
-                this.kag.config.defaultShadowColor,
-            );
+            this.stat.default_font.shadow = $.convertColor(this.kag.config.defaultShadowColor);
         }
 
         //文字の縁
         if (this.kag.config.defaultEdge == "true") {
-            this.stat.default_font.edge = $.convertColor(
-                this.kag.config.defaultEdgeColor,
-            );
+            this.stat.default_font.edge = $.convertColor(this.kag.config.defaultEdgeColor);
         }
 
         this.stat.vertical = this.kag.config.vertical;
 
         //デフォルトフォントの状態を設定
-        this.kag.stat.font = $.extend(
-            true,
-            $.cloneObject(this.kag.stat.font),
-            this.stat.default_font,
-        );
+        this.kag.stat.font = $.extend(true, $.cloneObject(this.kag.stat.font), this.stat.default_font);
 
         //タイトルの設定
         this.setTitle(this.config["System.title"]);
@@ -1177,10 +1090,7 @@ tyrano.plugin.kag = {
         }
 
         //vchat形式で便利なメニューの表示。
-        if (
-            this.kag.config["vchatMenuVisible"] &&
-            this.kag.config["vchatMenuVisible"] == "true"
-        ) {
+        if (this.kag.config["vchatMenuVisible"] && this.kag.config["vchatMenuVisible"] == "true") {
             //コンフィグを表示する。
             setTimeout(function () {
                 (function () {
@@ -1188,9 +1098,7 @@ tyrano.plugin.kag = {
                     var j_menu_button = $(
                         "<div id='player_menu_button' class='player_menu_area' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white;font-size:2em'><span style='color:#6495ED'>メニュー</span></div>",
                     );
-                    var j_menu_area = $(
-                        "<div style='display:none;position:absolute;left:10px;top:10px;font-size:2em'></div>",
-                    );
+                    var j_menu_area = $("<div style='display:none;position:absolute;left:10px;top:10px;font-size:2em'></div>");
 
                     var j_end_button = $(
                         "<div class='player_menu_area' id='player_end_button' style='opacity:0.6;border-radius:5px;padding:10px;margin:10px 10px 10px 10px;cursor:pointer;left:0px;top:0px;background-color:white;'><span style='color:#6495ED'>タイトルへ</span></div>",
@@ -1344,9 +1252,7 @@ tyrano.plugin.kag = {
             if (index >= 0) {
                 //配列が存在しない場合はpushだ
                 var tmp = this.variable.tf["system"]["backlog"][index];
-                this.variable.tf["system"]["backlog"][
-                    this.variable.tf.system.backlog.length - 1
-                ] = tmp + str;
+                this.variable.tf["system"]["backlog"][this.variable.tf.system.backlog.length - 1] = tmp + str;
             } else {
                 this.variable.tf["system"]["backlog"].push(str);
             }
@@ -1355,10 +1261,7 @@ tyrano.plugin.kag = {
         }
 
         //セーブ用のテキストファイルを保存
-        this.stat.current_save_str =
-            this.variable.tf["system"]["backlog"][
-                this.variable.tf.system.backlog.length - 1
-            ];
+        this.stat.current_save_str = this.variable.tf["system"]["backlog"][this.variable.tf.system.backlog.length - 1];
 
         //上限を超えたらFILO で処理
         if (max_back_log < this.variable.tf["system"]["backlog"].length) {
@@ -1440,9 +1343,7 @@ tyrano.plugin.kag = {
     //吹き出しのスタイルをアップデートする
     updateFuki: function (chara_name, opt = {}) {
         if (!$(".tyrano_base").find("#tmp_style").get(0)) {
-            $(".tyrano_base").prepend(
-                "<style id='tmp_style' type='text/css'></style>",
-            );
+            $(".tyrano_base").prepend("<style id='tmp_style' type='text/css'></style>");
         }
 
         var msg_inner_layer = this.kag.getMessageInnerLayer();
@@ -1643,17 +1544,13 @@ tyrano.plugin.kag = {
             //j_msg_inner.show();
             return j_msg_inner;
         } else {
-            return this.layer
-                .getLayer(this.stat.current_layer, this.stat.current_page)
-                .find(".message_inner");
+            return this.layer.getLayer(this.stat.current_layer, this.stat.current_page).find(".message_inner");
         }
     },
 
     getMessageOuterLayer: function () {
         //console.trace();
-        return this.layer
-            .getLayer(this.stat.current_layer, this.stat.current_page)
-            .find(".message_outer");
+        return this.layer.getLayer(this.stat.current_layer, this.stat.current_page).find(".message_outer");
     },
 
     getMessageCurrentSpan: function () {
@@ -1718,11 +1615,7 @@ tyrano.plugin.kag = {
 
         if (ext == "mp3" || ext == "ogg" || ext == "m4a") {
             // 相対パスの場合"./"を補完
-            if (
-                src.indexOf("http://") !== 0 &&
-                src.indexOf("https://") !== 0 &&
-                src.indexOf("./") !== 0
-            ) {
+            if (src.indexOf("http://") !== 0 && src.indexOf("https://") !== 0 && src.indexOf("./") !== 0) {
                 src = "./" + src;
             }
 
@@ -1748,9 +1641,7 @@ tyrano.plugin.kag = {
                 })
                 .on("error", function (e) {
                     that.kag.error(
-                        "動画ファイル「" +
-                            src +
-                            "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/video/file.mp4",
+                        "動画ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/video/file.mp4",
                     );
                     callbk && callbk();
                 });
@@ -1764,9 +1655,7 @@ tyrano.plugin.kag = {
                     //画像が見つからなかった時のエラー
                     //that.kag.message(画像ファイル「"+src+"」が見つかりません");
                     that.kag.error(
-                        "画像ファイル「" +
-                            src +
-                            "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png",
+                        "画像ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png",
                     );
 
                     if (callbk) callbk();

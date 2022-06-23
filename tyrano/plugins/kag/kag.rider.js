@@ -59,14 +59,7 @@ tyrano.plugin.kag.rider = {
                     stop: function (e, ui) {
                         //j_x.html(ui.position.left);
                         //j_y.html(ui.position.top);
-                        _j_img
-                            .find(".area_pos")
-                            .html(
-                                "x:" +
-                                    ui.position.left +
-                                    " y:" +
-                                    ui.position.top,
-                            );
+                        _j_img.find(".area_pos").html("x:" + ui.position.left + " y:" + ui.position.top);
 
                         //タグのプレビューがここに表示される
                     },

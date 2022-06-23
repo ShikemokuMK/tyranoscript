@@ -9,11 +9,7 @@ tyrano.base = {
     },
 
     setBaseSize: function (width, height) {
-        this.tyrano
-            .get(".tyrano_base")
-            .css("width", width)
-            .css("height", height)
-            .css("background-color", "black");
+        this.tyrano.get(".tyrano_base").css("width", width).css("height", height).css("background-color", "black");
     },
 
     fitBaseSize: function (width, height) {
@@ -52,33 +48,17 @@ tyrano.base = {
             this.tyrano.kag.tmp.base_scale = scale_f;
 
             $.setTimeout(function () {
-                var margin_top =
-                    document.documentElement.clientHeight - window.innerHeight;
+                var margin_top = document.documentElement.clientHeight - window.innerHeight;
 
                 //中央寄せなら、画面サイズ分を引く。
-                if (
-                    that.tyrano.kag.config["ScreenCentering"] &&
-                    that.tyrano.kag.config["ScreenCentering"] == "true"
-                ) {
+                if (that.tyrano.kag.config["ScreenCentering"] && that.tyrano.kag.config["ScreenCentering"] == "true") {
                     $(".tyrano_base").css("transform-origin", "0 0");
                     $(".tyrano_base").css({
                         margin: 0,
                     });
 
-                    var width =
-                        Math.abs(
-                            parseInt(window.innerWidth) -
-                                parseInt(
-                                    that.tyrano.kag.config.scWidth * scale_f,
-                                ),
-                        ) / 2;
-                    var height =
-                        Math.abs(
-                            parseInt(window.innerHeight) -
-                                parseInt(
-                                    that.tyrano.kag.config.scHeight * scale_f,
-                                ),
-                        ) / 2;
+                    var width = Math.abs(parseInt(window.innerWidth) - parseInt(that.tyrano.kag.config.scWidth * scale_f)) / 2;
+                    var height = Math.abs(parseInt(window.innerHeight) - parseInt(that.tyrano.kag.config.scHeight * scale_f)) / 2;
 
                     if (width_f > height_f) {
                         $(".tyrano_base").css("margin-left", width + "px");
@@ -97,13 +77,8 @@ tyrano.base = {
                 }
 
                 //vchat形式が有効ならそのエリアも調整する
-                if (
-                    that.tyrano.kag.config["vchat"] &&
-                    that.tyrano.kag.config["vchat"] == "true"
-                ) {
-                    var base_height = Math.round(
-                        parseInt($("#tyrano_base").css("height")) * scale_f,
-                    );
+                if (that.tyrano.kag.config["vchat"] && that.tyrano.kag.config["vchat"] == "true") {
+                    var base_height = Math.round(parseInt($("#tyrano_base").css("height")) * scale_f);
 
                     var vchat_height = view_height - base_height;
 
@@ -116,10 +91,7 @@ tyrano.base = {
         } else if (screen_ratio == "fit") {
             //スクリーンサイズに合わせて自動的に調整される
             $.setTimeout(function () {
-                $(".tyrano_base").css(
-                    "transform",
-                    "scaleX(" + width_f + ") scaleY(" + height_f + ")",
-                );
+                $(".tyrano_base").css("transform", "scaleX(" + width_f + ") scaleY(" + height_f + ")");
                 window.scrollTo(width, height);
             }, timeout);
         } else {
