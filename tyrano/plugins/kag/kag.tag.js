@@ -306,10 +306,10 @@ tyrano.plugin.kag.ftag = {
             if (val.length > 0 && c === "&") {
                 pm[key] = this.kag.embScript(val.substr(1, val.length));
             } else if (val.length > 0 && c === "%") {
-                // 最新のマクロスタックを取得
-                var map_obj = this.kag.getStack("macro");
+                // 現在のマクロパラメータ(mp)を取得
+                var mp = this.kag.stat.mp;
                 // マクロスタックが取得できた場合はエンティティ置換
-                if (map_obj) {
+                if (mp) {
                     // 文字列を加工して扱いやすくする
                     // もとのvalの例) "%color|0xffffff"
                     var val_sub = val.substring(1); // "color|0xffffff"
@@ -323,9 +323,9 @@ tyrano.plugin.kag.ftag = {
                         default_value = $.trim(default_value);
                     }
 
-                    if (map_key in map_obj.pm) {
+                    if (map_key in mp) {
                         // マクロスタックのパラメータにそのキーが存在する場合、それを取り出して代入
-                        pm[key] = map_obj.pm[map_key];
+                        pm[key] = mp[map_key];
                     } else {
                         // 存在しない場合はデフォルト値を代入
                         pm[key] = default_value;
