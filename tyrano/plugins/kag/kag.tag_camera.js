@@ -493,7 +493,7 @@ tyrano.plugin.kag.tag.mask = {
 
 :param
 time   = 暗転が完了するまでの時間をミリ秒で指定できます。,
-effect = <p>暗転の効果を指定できます。以下のキーワードが指定できます。</p><p>`fadeOut``fadeOutDownBig/``fadeOutLeftBig/``fadeOutRightBig/``fadeOutUpBig/``flipOutX/``flipOutY/``lightSpeedOut/``rotateOut/``rotateOutDownLeft/``rotateOutDownRight/``rotateOutUpLeft/``rotateOutUpRight/``zoomOut/``zoomOutDown/``zoomOutLeft/``zoomOutRight/``zoomOutUp/``slideOutDown/``slideOutLeft/``slideOutRight/``slideOutUp/``bounceOut /``bounceOutDown/``bounceOutLeft/``bounceOutRight/``bounceOutUp/`</p>
+effect = <p>暗転の効果を指定できます。以下のキーワードが指定できます。</p><p>`fadeOut``fadeOutDownBig``fadeOutLeftBig``fadeOutRightBig``fadeOutUpBig``flipOutX``flipOutY``lightSpeedOut``rotateOut``rotateOutDownLeft``rotateOutDownRight``rotateOutUpLeft``rotateOutUpRight``zoomOut``zoomOutDown``zoomOutLeft``zoomOutRight``zoomOutUp``slideOutDown``slideOutLeft``slideOutRight``slideOutUp``bounceOut ``bounceOutDown``bounceOutLeft``bounceOutRight``bounceOutUp`</p>
 
 :demo
 2,kaisetsu/05_mask

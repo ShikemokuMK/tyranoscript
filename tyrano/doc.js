@@ -510,7 +510,7 @@ var PARAM_EXP = {
         //インラインティラノタグ(`[hoge]`)を変換
         p = p.replace(/`\[([^`\s]+)\]`/g, `<a class="tag" href="#$1"><span class="code">[$1]</span></a>`);
         //インラインコード(`hoge`)を変換
-        p = p.replace(/`([^`]+)`/g, `<span class="code">$1</span>`);
+        p = p.replace(/`([^`]+)`/g, ` <span class="code">$1</span> `);
         //URLを検出してリンク化
         p = p.replace(/(?<!href="|')https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+/g, function (url) {
             return `<a href="${url}">${url}</a>`;

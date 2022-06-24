@@ -1381,7 +1381,7 @@ tyrano.plugin.kag.tag.p = {
 
 :exp
 任意の画像をメッセージ中に表示します。絵文字や特殊文字などに活用できます。
-表示する画像はdata/imageフォルダに配置してください。
+表示する画像は`data/image`フォルダに配置してください。
 よく使う記号についてはマクロを組んでおくと楽です。
 
 :sample
@@ -3897,7 +3897,7 @@ page    = 対象レイヤの表ページと裏ページのどちらを対象と�
 visible = `layer`属性で指定したレイヤを表示するかどうか。`true`を指定するとレイヤは表示状態に、`false`を指定すると非表示状態になります。省略すると、表示状態は変更されません。,
 left    = `layer`属性で指定したレイヤの左端位置を指定します。省略すると位置は変更されません。（メッセージウィンドウの位置やデザインを調整したい場合はこのタグの代わりに`[position]`タグを使用します）,
 top     = `layer`属性で指定したレイヤの上端位置を指定します。省略すると位置は変更されません。（メッセージウィンドウの位置やデザインを調整したい場合はこのタグの代わりに`[position]`タグを使用します）,
-opacity = レイヤの不透明度を`0`～`255の範囲で指定します。`0`で完全に透明、`255`で完全に不透明。
+opacity = レイヤの不透明度を`0`～`255`の範囲で指定します。`0`で完全に透明、`255`で完全に不透明。
 
 :demo
 1,kaisetsu/18_window_2
@@ -5513,7 +5513,7 @@ IEなど一部の古いブラウザでは動作しないため、ブラウザゲ
 name    = 合成する画像につける名前を指定します。ここで指定した名前は`[free_layremovde]`で特定の合成のみを消したい際に使用します。,
 graphic = 合成する画像ファイルを指定します。ファイルは`image`フォルダに配置します。,
 color   = 画像を使わず単色を合成することもできます。その場合、このパラメータに合成色を`0xRRGGBB`形式で指定します。,
-mode    = 合成方法を指定できます。以下のキーワードが指定できます。<br>`multiply`(乗算)<br>`screen`(スクリーン)<br>`overlay`(オーバーレイ)<br>`darken`(暗く)<br>`lighten`(明るく)<br>`color-dodge`(覆い焼きカラー)<br>`color-burn`<br>(焼き込みカラー)<br>`hard-light`<br>(ハードライト)`soft-light`<br>(ソフトライト)<br>`difference`(差の絶対値)<br>`exclusion`(除外)<br>`hue`(色相)<br>`saturation`(彩度)<br>`color`(カラー)<br>`luminosity`(輝度),
+mode    = 合成方法を指定できます。以下のキーワードが指定できます。<br>`multiply`(乗算)<br>`screen`(スクリーン)<br>`overlay`(オーバーレイ)<br>`darken`(暗く)<br>`lighten`(明るく)<br>`color-dodge`(覆い焼きカラー)<br>`color-burn`(焼き込みカラー)<br>`hard-light`(ハードライト)<br>`soft-light`(ソフトライト)<br>`difference`(差の絶対値)<br>`exclusion`(除外)<br>`hue`(色相)<br>`saturation`(彩度)<br>`color`(カラー)<br>`luminosity`(輝度),
 folder  = `graphic`で指定する画像のフォルダを変更できます。たとえば`bgimage`と指定すると`bgimage`から画像を取得します。,
 opacity = !!,
 time    = !!fadein,

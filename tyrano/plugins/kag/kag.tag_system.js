@@ -2176,18 +2176,18 @@ tyrano.plugin.kag.tag.dialog = {
 
 `[plugin]`タグには自由にパラメータを指定することができます。たとえば、
 
-`[plugin name="my_plugin" color="black" name="シケモク"]`
+`[plugin name="my_plugin" my_color="black" my_name="シケモク"]`
 
 と指定すると、プラグインの`init.ks`のなかで
 
-`mp.font_color`
-`mp.myname`
+`mp.my_color`
+`mp.my_name`
 
 のような形で引数を利用できます。
 
-これを`&mp.font_color`のように使うことで、カスタマイズ可能なプラグインが作れます。
+これを`&mp.my_color`のように使うことで、カスタマイズ可能なプラグインが作れます。
 
-ただし、マクロで使用可能だった`%font_color`のような形での使用はできません。
+ただし、マクロで使用可能だった`%my_color`のような形での使用はできません。
 
 :sample
 ;プラグイン my_plugin を読み込み
