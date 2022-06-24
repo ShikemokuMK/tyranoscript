@@ -151,6 +151,8 @@ tyrano.plugin.kag.ftag = {
         }
 
         if (this.master_tag[tag.name]) {
+            // マスタータグの場合
+
             //この時点で、変数の中にエンティティがあれば、置き換える必要あり
             //ただし、次の場合はエンティティ置換をしない
             //・[iscript]-[endscript]内
@@ -185,6 +187,16 @@ tyrano.plugin.kag.ftag = {
                 this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
             }
         } else if (this.kag.stat.map_macro[tag.name]) {
+            // マクロの場合
+
+            // マクロスタックを取得してみる
+            var stack = TYRANO.kag.getStack("macro");
+            if (stack) {
+                // マクロスタックが取得できたなら（つまり、マクロの中でマクロが呼ばれたなら）
+                // 現時点でのmpに復元できるように最新のマクロスタックを書き変えておく必要がある
+                stack.pm = $.extend({}, this.kag.stat.mp);
+            }
+
             tag.pm = this.convertEntity(tag.pm);
 
             //マクロの場合、その位置へジャンプ
