@@ -151,11 +151,13 @@ tyrano.plugin.kag.ftag = {
         }
 
         if (this.master_tag[tag.name]) {
+            // マスタータグの場合
+
             //この時点で、変数の中にエンティティがあれば、置き換える必要あり
-            //tag.pm = this.convertEntity(tag.pm);
-            //iscript-endscript内ではエンティティは置き換えない
-            //通常のテキスト(＝内部的には[text]タグ)でもエンティティは停止
-            if (!this.kag.stat.is_script && tag.name !== "text") {
+            //ただし、次の場合はエンティティ置換をしない
+            //・[iscript]-[endscript]内
+            //・エンティティ置換が無効化されている(本文テキスト)
+            if (!this.kag.stat.is_script && tag.is_entity_disabled !== true) {
                 tag.pm = this.convertEntity(tag.pm);
             }
 
@@ -185,6 +187,16 @@ tyrano.plugin.kag.ftag = {
                 this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
             }
         } else if (this.kag.stat.map_macro[tag.name]) {
+            // マクロの場合
+
+            // マクロスタックを取得してみる
+            var stack = TYRANO.kag.getStack("macro");
+            if (stack) {
+                // マクロスタックが取得できたなら（つまり、マクロの中でマクロが呼ばれたなら）
+                // 現時点でのmpに復元できるように最新のマクロスタックを書き変えておく必要がある
+                stack.pm = $.extend({}, this.kag.stat.mp);
+            }
+
             tag.pm = this.convertEntity(tag.pm);
 
             //マクロの場合、その位置へジャンプ
@@ -306,25 +318,29 @@ tyrano.plugin.kag.ftag = {
             if (val.length > 0 && c === "&") {
                 pm[key] = this.kag.embScript(val.substr(1, val.length));
             } else if (val.length > 0 && c === "%") {
-                var map_obj = this.kag.getStack("macro");
-                //最新のコールスタックを取得
+                // 現在のマクロパラメータ(mp)を取得
+                var mp = this.kag.stat.mp;
+                // マクロスタックが取得できた場合はエンティティ置換
+                if (mp) {
+                    // 文字列を加工して扱いやすくする
+                    // もとのvalの例) "%color|0xffffff"
+                    var val_sub = val.substring(1); // "color|0xffffff"
+                    var vertical_bar_hash = val_sub.split("|"); // ["color", "0xffffff"]
+                    var map_key = vertical_bar_hash[0]; // "color"
+                    var default_value = vertical_bar_hash[1] || ""; // "0xffffff"
 
-                // | で分けられていた場合、その値を投入
+                    // トリミング
+                    if (that.kag.config.KeepSpaceInParameterValue !== "3") {
+                        map_key = $.trim(map_key);
+                        default_value = $.trim(default_value);
+                    }
 
-                //もし、スタックが溜まっている状態なら、
-                if (map_obj) {
-                    pm[key] = map_obj.pm[val.substr(1, val.length)];
-                }
-
-                //代替変数の代入処理
-                var d = val.split("|");
-
-                if (d.length == 2) {
-                    //%〇〇の値が渡ってきているか調査
-                    if (map_obj.pm[$.trim(d[0]).substr(1, $.trim(d[0]).length)]) {
-                        pm[key] = map_obj.pm[$.trim(d[0]).substr(1, $.trim(d[0]).length)];
+                    if (map_key in mp) {
+                        // マクロスタックのパラメータにそのキーが存在する場合、それを取り出して代入
+                        pm[key] = mp[map_key];
                     } else {
-                        pm[key] = $.trim(d[1]);
+                        // 存在しない場合はデフォルト値を代入
+                        pm[key] = default_value;
                     }
                 }
             }
@@ -1365,7 +1381,7 @@ tyrano.plugin.kag.tag.p = {
 
 :exp
 任意の画像をメッセージ中に表示します。絵文字や特殊文字などに活用できます。
-表示する画像はdata/imageフォルダに配置してください。
+表示する画像は`data/image`フォルダに配置してください。
 よく使う記号についてはマクロを組んでおくと楽です。
 
 :sample
@@ -3881,7 +3897,7 @@ page    = 対象レイヤの表ページと裏ページのどちらを対象と�
 visible = `layer`属性で指定したレイヤを表示するかどうか。`true`を指定するとレイヤは表示状態に、`false`を指定すると非表示状態になります。省略すると、表示状態は変更されません。,
 left    = `layer`属性で指定したレイヤの左端位置を指定します。省略すると位置は変更されません。（メッセージウィンドウの位置やデザインを調整したい場合はこのタグの代わりに`[position]`タグを使用します）,
 top     = `layer`属性で指定したレイヤの上端位置を指定します。省略すると位置は変更されません。（メッセージウィンドウの位置やデザインを調整したい場合はこのタグの代わりに`[position]`タグを使用します）,
-opacity = レイヤの不透明度を`0`～`255の範囲で指定します。`0`で完全に透明、`255`で完全に不透明。
+opacity = レイヤの不透明度を`0`～`255`の範囲で指定します。`0`で完全に透明、`255`で完全に不透明。
 
 :demo
 1,kaisetsu/18_window_2
@@ -5497,7 +5513,7 @@ IEなど一部の古いブラウザでは動作しないため、ブラウザゲ
 name    = 合成する画像につける名前を指定します。ここで指定した名前は`[free_layremovde]`で特定の合成のみを消したい際に使用します。,
 graphic = 合成する画像ファイルを指定します。ファイルは`image`フォルダに配置します。,
 color   = 画像を使わず単色を合成することもできます。その場合、このパラメータに合成色を`0xRRGGBB`形式で指定します。,
-mode    = 合成方法を指定できます。以下のキーワードが指定できます。<br>`multiply`(乗算)<br>`screen`(スクリーン)<br>`overlay`(オーバーレイ)<br>`darken`(暗く)<br>`lighten`(明るく)<br>`color-dodge`(覆い焼きカラー)<br>`color-burn`<br>(焼き込みカラー)<br>`hard-light`<br>(ハードライト)`soft-light`<br>(ソフトライト)<br>`difference`(差の絶対値)<br>`exclusion`(除外)<br>`hue`(色相)<br>`saturation`(彩度)<br>`color`(カラー)<br>`luminosity`(輝度),
+mode    = 合成方法を指定できます。以下のキーワードが指定できます。<br>`multiply`(乗算)<br>`screen`(スクリーン)<br>`overlay`(オーバーレイ)<br>`darken`(暗く)<br>`lighten`(明るく)<br>`color-dodge`(覆い焼きカラー)<br>`color-burn`(焼き込みカラー)<br>`hard-light`(ハードライト)<br>`soft-light`(ソフトライト)<br>`difference`(差の絶対値)<br>`exclusion`(除外)<br>`hue`(色相)<br>`saturation`(彩度)<br>`color`(カラー)<br>`luminosity`(輝度),
 folder  = `graphic`で指定する画像のフォルダを変更できます。たとえば`bgimage`と指定すると`bgimage`から画像を取得します。,
 opacity = !!,
 time    = !!fadein,

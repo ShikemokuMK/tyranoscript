@@ -245,6 +245,7 @@ tyrano.plugin.kag.parser = {
                                 name: "text",
                                 pm: { val: text },
                                 val: text,
+                                is_entity_disabled: true,
                             };
                             array_s.push(text_obj);
                             text = "";
@@ -266,6 +267,7 @@ tyrano.plugin.kag.parser = {
                         name: "text",
                         pm: { val: text },
                         val: text,
+                        is_entity_disabled: true,
                     };
                     array_s.push(text_obj);
                 }
@@ -311,6 +313,22 @@ tyrano.plugin.kag.parser = {
         var param_value = ""; // パラメータバリュー記憶用
         var end_char_of_param_value = ""; // パラメータバリューの記述終了を検出する文字(クォート3種か空白)
         var keepSpaceConfig = that.kag.config.KeepSpaceInParameterValue;
+
+        // パラメータが確定したときの処理を共通化
+        function makeParam() {
+            obj.pm[param_name] = param_value;
+            // パラメータの値をトリミング（両端の空白を削除）
+            var param_value_trim = $.trim(param_value);
+            // トリミングして"undefined"となるようなら""に変換
+            if (param_value_trim === "undefined") {
+                obj.pm[param_name] = "";
+            }
+            // 空白保持レベルが3でない場合はトリミングした値で上書き
+            // 未定義(V514以前)の場合も含まれる
+            if (keepSpaceConfig !== "3") {
+                obj.pm[param_name] = param_value_trim;
+            }
+        }
 
         // 1文字ずつ見ていくぞ
         for (var j = 0; j < array_c.length; j++) {
@@ -405,18 +423,7 @@ tyrano.plugin.kag.parser = {
                             param_value += c;
                         } else {
                             // パラメータ完成！
-                            obj.pm[param_name] = param_value;
-                            // パラメータの値をトリミング（両端の空白を削除）
-                            var param_value_trim = $.trim(param_value);
-                            // トリミングして"undefined"となるようなら""に変換
-                            if (param_value_trim === "undefined") {
-                                obj.pm[param_name] = "";
-                            }
-                            // 空白保持レベルが3でない場合はトリミングした値で上書き
-                            // 未定義(V514以前)の場合も含まれる
-                            if (keepSpaceConfig !== "3") {
-                                obj.pm[param_name] = param_value_trim;
-                            }
+                            makeParam();
                             param_name = "";
                             param_value = "";
                             end_char_of_param_value = "";
@@ -448,7 +455,7 @@ tyrano.plugin.kag.parser = {
         // 全文字見終わった
         // この時点で未登録のパラメータがあるなら登録
         if (param_name !== "") {
-            obj.pm[param_name] = param_value;
+            makeParam();
         }
 
         // 原文と解釈結果をコンソールで確認

@@ -2211,7 +2211,7 @@ tyrano.plugin.kag.tag.chara_show = {
 キャラクターの退場
 
 :exp
-[chara_show]タグで表示したキャラクターを退場させます。
+`[chara_show]`タグで表示したキャラクターを退場させます。
 
 :sample
 [chara_hide name="yuko"]
@@ -2973,7 +2973,7 @@ tyrano.plugin.kag.tag.chara_layer = {
 キャラクターの差分の定義を変更
 
 :exp
-chara_layerで定義した設定を変更できます。
+`[chara_layer]`タグで定義した設定を変更できます。
 
 :sample
 [chara_layer_mod name="yuko" part=mouse zindex=20 ]
