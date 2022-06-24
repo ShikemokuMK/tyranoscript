@@ -245,6 +245,7 @@ tyrano.plugin.kag.parser = {
                                 name: "text",
                                 pm: { val: text },
                                 val: text,
+                                is_entity_disabled: true,
                             };
                             array_s.push(text_obj);
                             text = "";
@@ -266,6 +267,7 @@ tyrano.plugin.kag.parser = {
                         name: "text",
                         pm: { val: text },
                         val: text,
+                        is_entity_disabled: true,
                     };
                     array_s.push(text_obj);
                 }
