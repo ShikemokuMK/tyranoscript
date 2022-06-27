@@ -332,6 +332,17 @@ tyrano.plugin.kag = {
 
         this.tyrano.test();
 
+        //二重起動チェック ElectronかつTyranoStudioからの起動じゃない場合
+        if ($.isElectron() && window.navigator.userAgent.indexOf("TyranoStudio") == -1) {
+            if (!require("electron").remote.app.requestSingleInstanceLock()) {
+                alert($.lang("double_start"));
+                window.close();
+                if (typeof navigator.app != "undefined") {
+                    navigator.app.exitApp();
+                }
+            }
+        }
+
         //コンフィグファイルの読み込み
         this.parser.loadConfig(function (map_config) {
             that.config = $.extend(true, that.config, map_config);
