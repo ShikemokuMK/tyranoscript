@@ -838,11 +838,19 @@ tyrano.plugin.kag = {
         that.tmp.angle = $.getAngle();
         that.tmp.largerWidth = $.getLargeScreenWidth();
 
-        //スマホの場合は、実施。 PCの場合でも画面を一致させる処理→すべての画面フィットさせる仕様に変更
-        //       if($.userenv() !="pc"){
+        // TYRANO.kag.baseでtyrano.baseを参照できるように
+        this.base = this.tyrano.base;
+
+        // 現在のゲーム画面のスケーリング情報を格納
+        this.tmp.scale_info = {
+            scale_x: 1,
+            scale_y: 1,
+            margin_top: 0,
+            margin_left: 0,
+        };
+
         // ゲーム画面フィットを即実行する
         this.tyrano.base._fitBaseSize(that.config.scWidth, that.config.scHeight, 0);
-        //スマホの場合、傾いた時に再計算させる
 
         //繰り返し実行用の関数
         var timerId = null;
