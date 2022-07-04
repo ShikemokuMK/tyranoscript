@@ -264,6 +264,7 @@ tyrano.plugin.kag.key_mouse = {
                         that.kag.stat.is_click_text = true;
                         return false;
                     }
+                    that.kag.ftag.hideNextImg();
                     that.kag.ftag.nextOrder();
                     return false;
                 }
@@ -299,6 +300,7 @@ tyrano.plugin.kag.key_mouse = {
                 that.kag.layer.hideMessageLayers();
             }
 
+            that.kag.ftag.hideNextImg();
             that.kag.ftag.nextOrder();
         });
     },
