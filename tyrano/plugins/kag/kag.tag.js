@@ -532,15 +532,13 @@ tyrano.plugin.kag.tag.text = {
     start: function (pm) {
         // スクリプト解析状態の場合は早期リターン
         if (this.kag.stat.is_script == true) {
-            this.kag.stat.buff_script += pm.val + "\n";
-            this.kag.ftag.nextOrder();
+            this.buildIScript(pm);
             return;
         }
 
         // HTML解析状態の場合は早期リターン
         if (this.kag.stat.is_html == true) {
-            this.kag.stat.map_html.buff_html += pm.val;
-            this.kag.ftag.nextOrder();
+            this.buildHTML(pm);
             return;
         }
 
@@ -568,6 +566,50 @@ tyrano.plugin.kag.tag.text = {
 
         // showMessageに投げる
         this.showMessage(pm.val, is_vertical);
+    },
+
+    /**
+     * [iscript]中のテキストを組み立てる
+     * @param {{val:string;}} pm テキストタグのパラメータ
+     */
+    buildIScript: function (pm) {
+        this.kag.stat.buff_script += pm.val + "\n";
+        // タグを先読みして、[text]が続く限り文字列の連結処理を継続する
+        // エンティティ置換やcondチェックは不要なのでどんどん生のvalを足していく
+        // [text]以外のタグ([endscript]を想定)を検知した段階で正式なnextOrderを呼ぶ
+        const array_tag = this.kag.ftag.array_tag;
+        for (let i = this.kag.ftag.current_order_index + 1; i < array_tag.length; i++) {
+            const tag = array_tag[i];
+            if (tag.name === "text") {
+                this.kag.stat.buff_script += tag.val + "\n";
+                this.kag.ftag.current_order_index = i;
+            } else {
+                break;
+            }
+        }
+        this.kag.ftag.nextOrder();
+    },
+
+    /**
+     * [html]中のテキストを組み立てる
+     * @param {{val:string;}} pm テキストタグのパラメータ
+     */
+    buildHTML: function (pm) {
+        this.kag.stat.map_html.buff_html += pm.val;
+        // タグを先読みして、[text]が続く限り文字列の連結処理を継続する
+        // エンティティ置換やcondチェックは不要なのでどんどん生のvalを足していく
+        // [text]以外のタグ([emb]や[endhtml]を想定)を検知した段階で正式なnextOrderを呼ぶ
+        const array_tag = this.kag.ftag.array_tag;
+        for (let i = this.kag.ftag.current_order_index + 1; i < array_tag.length; i++) {
+            const tag = array_tag[i];
+            if (tag.name === "text") {
+                this.kag.stat.map_html.buff_html += tag.val;
+                this.kag.ftag.current_order_index = i;
+            } else {
+                break;
+            }
+        }
+        this.kag.ftag.nextOrder();
     },
 
     /**
