@@ -692,7 +692,7 @@ tyrano.plugin.kag.tag.skipstart = {
 
         this.kag.readyAudio();
 
-        this.kag.stat.is_skip = true;
+        this.kag.setSkip(true);
         this.kag.ftag.nextOrder();
     },
 };
@@ -720,7 +720,7 @@ tyrano.plugin.kag.tag.skipstop = {
     pm: {},
 
     start: function (pm) {
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
         this.kag.ftag.nextOrder();
     },
 };
@@ -757,7 +757,7 @@ tyrano.plugin.kag.tag.autostart = {
         this.kag.readyAudio();
 
         //[p][l] の処理に、オート判定が入ってます
-        this.kag.stat.is_auto = true;
+        this.kag.setAuto(true);
         this.kag.ftag.nextOrder();
     },
 };
@@ -787,7 +787,7 @@ tyrano.plugin.kag.tag.autostop = {
     },
 
     start: function (pm) {
-        this.kag.stat.is_auto = false;
+        this.kag.setAuto(false);
         this.kag.stat.is_wait_auto = false;
 
         //↓他から直接呼ばれた時に、２重に実行されるため、コメントにしているが

@@ -131,7 +131,7 @@ tyrano.plugin.kag.key_mouse = {
 
             //スキップ用ホールド解除 mac と windowsでコードが違うctrl 決め打ち
             if (keycode == 91 || keycode == 17) {
-                that.kag.stat.is_skip = false;
+                that.kag.setSkip(false);
             }
         });
 
@@ -378,7 +378,7 @@ tyrano.plugin.kag.key_mouse = {
 
         //roleがクリックされたら、skip停止。スキップ繰り返しでやったりやめたり
         if (that.kag.stat.is_skip == true && role == "skip") {
-            that.kag.stat.is_skip = false;
+            that.kag.setSkip(false);
             return false;
         }
 
@@ -392,7 +392,7 @@ tyrano.plugin.kag.key_mouse = {
             return false;
         }
 
-        that.kag.stat.is_skip = false;
+        that.kag.setSkip(false);
 
         //オートは停止
         if (role != "auto") {
@@ -490,7 +490,7 @@ tyrano.plugin.kag.key_mouse = {
 
         //スキップ中にクリックされたら元に戻す
         if (that.kag.stat.is_skip == true && that.kag.stat.is_strong_stop == false) {
-            that.kag.stat.is_skip = false;
+            that.kag.setSkip(false);
             return false;
         }
 

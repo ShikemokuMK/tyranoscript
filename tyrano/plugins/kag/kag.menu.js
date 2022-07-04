@@ -18,8 +18,8 @@ tyrano.plugin.kag.menu = {
 
         var that = this;
 
-        this.kag.stat.is_skip = false;
-        this.kag.stat.is_auto = false;
+        this.kag.setSkip(false);
+        this.kag.setAuto(false);
         this.kag.stat.is_auto_wait = false;
 
         var layer_menu = this.kag.layer.getMenuLayer();
@@ -46,7 +46,7 @@ tyrano.plugin.kag.menu = {
                         $(".button_menu").show();
                     }
                     //nextOrder にして、
-                    that.kag.stat.is_skip = true;
+                    that.kag.setSkip(true);
 
                     ///処理待ち状態の時は、実行してはいけない
                     if (that.kag.layer.layer_event.css("display") == "none") {
@@ -133,7 +133,7 @@ tyrano.plugin.kag.menu = {
 
         var that = this;
 
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
 
         var array_save = that.getSaveData();
         var array = array_save.data;
@@ -549,7 +549,7 @@ tyrano.plugin.kag.menu = {
     displayLoad: function (cb) {
         var that = this;
 
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
 
         var array_save = that.getSaveData();
         var array = array_save.data;
@@ -1076,7 +1076,7 @@ tyrano.plugin.kag.menu = {
     //バックログ画面表示
     displayLog: function () {
         var that = this;
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
 
         var j_save = $("<div></div>");
 

@@ -838,7 +838,7 @@ tyrano.plugin.kag.tag.text = {
             // このテキストが既読でない場合
             // 未読スキップ機能が無効の場合はここでスキップを停止してやる
             if (this.kag.config.unReadTextSkip == "false") {
-                this.kag.stat.is_skip = false;
+                this.kag.setSkip(false);
             }
         }
     },
@@ -3295,7 +3295,7 @@ tyrano.plugin.kag.tag.link = {
             if (that.kag.stat.skip_link == "true") {
                 e.stopPropagation();
             } else {
-                that.kag.stat.is_skip = false;
+                that.kag.setSkip(false);
             }
         });
 
@@ -4297,7 +4297,7 @@ tyrano.plugin.kag.tag["endmark"] = {
 
 tyrano.plugin.kag.tag.cancelskip = {
     start: function (pm) {
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
         this.kag.ftag.nextOrder();
     },
 };
@@ -4638,7 +4638,7 @@ tyrano.plugin.kag.tag.button = {
                 //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
                 if (_pm.role != "") {
                     //roleがクリックされたら、skip停止
-                    that.kag.stat.is_skip = false;
+                    that.kag.setSkip(false);
 
                     //オートは停止
                     if (_pm.role != "auto") {
@@ -4780,7 +4780,7 @@ tyrano.plugin.kag.tag.button = {
                 if (that.kag.stat.skip_link == "true") {
                     event.stopPropagation();
                 } else {
-                    that.kag.stat.is_skip = false;
+                    that.kag.setSkip(false);
                 }
             });
         })();
@@ -4993,7 +4993,7 @@ tyrano.plugin.kag.tag.glink = {
                 if (that.kag.stat.skip_link == "true") {
                     e.stopPropagation();
                 } else {
-                    that.kag.stat.is_skip = false;
+                    that.kag.setSkip(false);
                 }
             });
 

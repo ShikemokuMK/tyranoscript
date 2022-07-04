@@ -38,7 +38,7 @@ tyrano.plugin.kag.layer = {
 
             //スキップ中にクリックされたら元に戻す
             if(that.kag.stat.is_skip == true){
-                that.kag.stat.is_skip = false;
+                that.kag.setSkip(false)
             }
 
             //オート中でクリックされた場合。オート停止

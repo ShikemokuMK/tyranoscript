@@ -11,8 +11,9 @@ tyrano.plugin.kag = {
     save_key_val: "", //セーブデータ用のキー
 
     cache_html: {},
-
     cache_scenario: {},
+
+    event_listener_map: {},
 
     //セーブ時に保存する属性ホワイトリスト
     array_white_attr: [
@@ -162,8 +163,8 @@ tyrano.plugin.kag = {
 
         set_text_span: false, //メッセージ中のspanを新しく作成するときに真にする
         current_scenario: "first.ks", //シナリオファイルを指定する
-        is_skip: {},
-        is_auto: {},
+        is_skip: false,
+        is_auto: false,
         current_bgm: "", //現在再生中のBGM
         current_bgm_vol: "", //現在再生中のBGMボリューム
         current_bgm_html5: "false", //現在再生中のhtml5パラメータ
@@ -960,7 +961,7 @@ tyrano.plugin.kag = {
         //        }
 
         // この時点ですでにloadが発火済みの場合がありえる！（Electronの場合は基本的に発火済み）
-        // その場合は手動でloadをトリガーすることで上記イベントハンドラを実行する
+        // その場合は手動でloadをトリガーすることで上記イベントリスナを実行する
         if (window.isLoaded === true) {
             $(window).trigger("load");
         }
@@ -1803,6 +1804,146 @@ tyrano.plugin.kag = {
     log: function (obj) {
         if (this.kag.config["debugMenu.visible"] == "true") {
             console.log(obj);
+        }
+    },
+
+    /**
+     * オートモード状態を設定する (現在の状態からの変更がない場合は無視)
+     * @param {boolean} bool オートモードにするかどうか
+     */
+    setAuto: function (bool) {
+        if (this.stat.is_auto === bool) {
+            return;
+        }
+        if (bool) {
+            this.trigger("autostart");
+        } else {
+            this.trigger("autostop");
+        }
+        this.stat.is_auto = bool;
+    },
+
+    /**
+     * スキップモード状態を設定する (現在の状態からの変更がない場合は無視)
+     * @param {boolean} スキップモードにするかどうか
+     */
+    setSkip: function (bool) {
+        if (this.stat.is_skip === bool) {
+            return;
+        }
+        if (bool) {
+            this.trigger("skipstart");
+        } else {
+            this.trigger("skipstop");
+        }
+        this.stat.is_skip = bool;
+    },
+
+    /**
+     * イベントを指定してイベントリスナ(コールバック)を呼び出す
+     * コールバックに引数を渡すこともできる
+     * コールバック内の this には kag が格納される
+     * @param {string} event リスナを呼び出すイベント名
+     * @param  {...any} args コールバックに渡す引数
+     */
+    trigger: function (event, ...args) {
+        const map = this.event_listener_map;
+        if (map[event] === undefined || map[event].length === 0) {
+            return;
+        }
+        for (const listener of map[event]) {
+            if (typeof listener.callback === "function") {
+                listener.callback.apply(this, args);
+            }
+        }
+    },
+
+    /**
+     * イベントリスナを登録する
+     * @param {string} event_names 登録するイベント名 半角スペース区切りで複数イベントに対して一気に登録できる
+     *   イベント名のあとにドット区切りで名前空間を指定できる(複数可能) あとから特定の名前空間のリスナだけを削除できる
+     *   例) "resize load.ABC save.hoge.fuga"
+     * @param {function} callback コールバック
+     */
+    bind: function (event_names, callback) {
+        // 例) "resize load.ABC save.hoge.fuga"
+        const map = this.event_listener_map;
+        const event_name_hash = event_names.split(" ");
+        for (const event_name of event_name_hash) {
+            // 半角スペースで刻んだ各イベント文字列について
+            // 例) "save.hoge.fuga"
+            const dot_hash = event_name.split("."); // ["save", "hoge", "fuga"]
+            const event = dot_hash[0]; // "save"
+            const namespaces = dot_hash.slice(1); // ["hoge", "fuga"]
+            if (event !== "") {
+                if (map[event] === undefined) {
+                    map[event] = [];
+                }
+                map[event].push({
+                    callback: callback,
+                    namespaces: namespaces,
+                });
+            }
+        }
+    },
+
+    /**
+     * イベントリスナを削除する
+     * @param {*} event_names リスナを削除するイベント名
+     *   半角スペース区切りで複数イベントを指定可能 それぞれのイベントリスナを一括で削除できる
+     *   ドット区切りで名前空間を複数指定可能 指定したすべての名前空間を持つリスナだけを削除できる
+     *   いきなりドットで書き始めることで削除対象のリスナを"名前空間だけ"で指定することも可能
+     */
+    unbind: function (event_names) {
+        const map = this.event_listener_map;
+        const event_name_hash = event_names.split(" ");
+        for (const event_name of event_name_hash) {
+            // 半角スペースで刻んだ各イベント文字列について
+            const dot_hash = event_name.split(".");
+            const event = dot_hash[0];
+            const del_namespaces = dot_hash.slice(1);
+            if (map[event] === undefined || map[event].length === 0) {
+                // そのイベントに登録されているイベントリスナがない場合
+                // なにもしなくていい
+            } else if (del_namespaces.length === 0) {
+                // 削除対象の名前空間が指定されていない場合
+                // そのイベントのリスナすべてを消去する
+                if (event !== "") {
+                    delete map[event];
+                }
+            } else {
+                // 名前空間が指定されている場合は登録されている各コールバックを個別に見て選別していく
+                // イベント名が空欄で名前空間だけが指定されている場合はすべてのイベントを処理対象とする
+                const event_list = [];
+                if (event === "") {
+                    event_list = Object.keys(that.event_listener_map);
+                } else {
+                    event_list = [event];
+                }
+                for (const _event of event_list) {
+                    // 各イベントについて
+                    const new_listeners = [];
+                    for (const listener of map[_event]) {
+                        // このイベントに登録されている各リスナについて
+                        // このリスナは生き残るべきだろうか？
+                        const should_keep = false;
+                        // 削除対象名前空間は複数でありうる！その場合はAND指定
+                        // AND指定、つまり、削除対象名前空間を"すべて"持つリスナだけを削除したいので
+                        // 削除対象名前空間のうちのひとつでも保有しないものがあるリスナは生き残り確定
+                        for (const name of del_namespaces) {
+                            if (!listener.namespaces.includes(name)) {
+                                should_keep = true;
+                                break;
+                            }
+                        }
+                        // 生き残り確定のリスナは新しいリスナリストに追加する
+                        if (should_keep) {
+                            new_listeners.push(listener);
+                        }
+                    }
+                    map[_event] = new_listeners;
+                }
+            }
         }
     },
 
