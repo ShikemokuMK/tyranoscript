@@ -1582,11 +1582,7 @@ tyrano.plugin.kag = {
 
         //縦書きと横書きで処理が別れる
         if (jtext.find("p").length == 0) {
-            if (this.stat.vertical == "true") {
-                jtext.append($("<p class='vertical_text'></p>"));
-            } else {
-                jtext.append($("<p class=''></p>"));
-            }
+            this.setNewParagraph(jtext);
         }
 
         if (jtext.find("p").find(".current_span").length > 0) {
@@ -1599,6 +1595,14 @@ tyrano.plugin.kag = {
         jtext.find("p").append(j_span); //縦書きの場合、ここに追加されてないかも
 
         return j_span;
+    },
+
+    setNewParagraph: function (j_inner) {
+        if (this.stat.vertical == "true") {
+            j_inner.append("<p class='vertical_text'></p>");
+        } else {
+            j_inner.append("<p class=''></p>");
+        }
     },
 
     checkMessage: function (jtext) {

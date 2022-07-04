@@ -530,581 +530,733 @@ tyrano.plugin.kag.tag.text = {
 
     //実行
     start: function (pm) {
-        //スクリプト解析状態の場合は、その扱いをする
+        // スクリプト解析状態の場合は早期リターン
         if (this.kag.stat.is_script == true) {
             this.kag.stat.buff_script += pm.val + "\n";
             this.kag.ftag.nextOrder();
             return;
         }
 
-        //HTML解析状態の場合
+        // HTML解析状態の場合は早期リターン
         if (this.kag.stat.is_html == true) {
             this.kag.stat.map_html.buff_html += pm.val;
             this.kag.ftag.nextOrder();
             return;
         }
 
-        var j_inner_message = this.kag.getMessageInnerLayer();
+        // メッセージレイヤのアウターとインナーを取得
+        // div.messageX_fore
+        //   div.message_outer ←
+        //   div.message_inner ← こいつら
+        const j_outer_message = this.kag.getMessageOuterLayer();
+        const j_inner_message = this.kag.getMessageInnerLayer();
 
-        //文字ステータスの設定
+        // インナーにCSSを設定
+        // letter-spacing, line-height, font-family など
+        this.setMessageInnerStyle(j_inner_message);
+
+        //　現在表示中のテキストを格納
+        this.kag.stat.current_message_str = pm.val;
+
+        // 縦書きかどうか
+        const is_vertical = this.kag.stat.vertical == "true";
+
+        // 自動改ページ
+        if (this.kag.config.defaultAutoReturn != "false") {
+            this.autoInsertPageBreak(j_inner_message, j_outer_message, is_vertical);
+        }
+
+        // showMessageに投げる
+        this.showMessage(pm.val, is_vertical);
+    },
+
+    /**
+     * メッセージレイヤのインナーにCSSを当てる
+     * letter-spacing, line-height, font-family など
+     * @param {jQuery} j_inner_message div.message_inner
+     */
+    setMessageInnerStyle: function (j_inner_message) {
         j_inner_message.css({
             "letter-spacing": this.kag.config.defaultPitch + "px",
             "line-height": parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px",
             "font-family": this.kag.config.userFace,
         });
-
-        //現在表示中のテキストを格納
-        this.kag.stat.current_message_str = pm.val;
-
-        //縦書き指定の場合
-        if (this.kag.stat.vertical == "true") {
-            //自動改ページ無効の場合
-            if (this.kag.config.defaultAutoReturn != "false") {
-                //テキストエリアの横幅が、一定以上いっていたばあい、テキストをクリアします
-                var j_outer_message = this.kag.getMessageOuterLayer();
-
-                var limit_width = parseInt(j_outer_message.css("width")) * 0.8;
-                var current_width = parseInt(j_inner_message.find("p").css("width"));
-
-                if (current_width > limit_width) {
-                    if (this.kag.stat.vchat.is_active) {
-                        this.kag.ftag.startTag("vchat_in", {});
-                    } else {
-                        this.kag.getMessageInnerLayer().html("");
-                    }
-                }
-            }
-
-            this.showMessage(pm.val, pm, true);
-        } else {
-            if (this.kag.config.defaultAutoReturn != "false") {
-                //テキストエリアの高さが、一定以上いっていたばあい、テキストをクリアします
-                var j_outer_message = this.kag.getMessageOuterLayer();
-
-                var limit_height = parseInt(j_outer_message.css("height")) * 0.8;
-                var current_height = parseInt(j_inner_message.find("p").css("height"));
-
-                if (current_height > limit_height) {
-                    //画面クリア
-                    if (this.kag.stat.vchat.is_active) {
-                        this.kag.ftag.startTag("vchat_in", {});
-                    } else {
-                        this.kag.getMessageInnerLayer().html("");
-                    }
-                }
-            }
-
-            this.showMessage(pm.val, pm, false);
-        }
-
-        //this.kag.ftag.nextOrder();
     },
 
-    showMessage: function (message_str, pm, isVertical) {
-        var that = this;
+    /**
+     * 自動改ページを行う
+     * @param {jQuery} j_inner_message div.message_inner
+     * @param {jQuery} j_outer_message div.message_outer
+     * @param {boolean} is_vertical 縦書きかどうか
+     */
+    autoInsertPageBreak: function (j_inner_message, j_outer_message, is_vertical) {
+        // 縦書きならwidthを、横書きならheightを文章がはみ出ているかどうかの判定に用いる
+        const target_property = is_vertical ? "width" : "height";
 
-        //特定のタグが直前にあった場合、ログの作り方に気をつける
-        if (that.kag.stat.log_join == "true") {
-            pm.backlog = "join";
+        // インナーサイズがアウターサイズの8割を超えているようならもう満杯。自動で改ページしてやる
+        var limit_width = parseInt(j_outer_message.css(target_property)) * 0.8;
+        var current_width = parseInt(j_inner_message.find("p").css(target_property));
+        if (current_width > limit_width) {
+            if (this.kag.stat.vchat.is_active) {
+                this.kag.ftag.startTag("vchat_in", {});
+            } else {
+                this.kag.getMessageInnerLayer().html("");
+            }
+        }
+    },
+
+    /**
+     * テキストを表示する統括的な処理
+     * @param {string} message_str 表示するテキスト
+     * @param {boolean} is_vertical 縦書きにするかどうか
+     */
+    showMessage: function (message_str, is_vertical) {
+        // 現在の発言者名（誰も喋っていない場合は空の文字列）
+        const chara_name = this.getCharaName();
+
+        // バックログにテキストを追加
+        this.pushTextToBackLog(chara_name, message_str);
+
+        // 読み上げ（有効な場合）
+        if (this.kag.stat.play_speak) {
+            this.speechMessage(message_str);
         }
 
+        // メッセージレイヤのインナーを取得
+        // div.messageX_fore
+        //   div.message_outer
+        //   div.message_inner ← これ
+        const j_msg_inner = this.kag.getMessageInnerLayer();
+
+        // インナーが空なら<p>追加
+        if (j_msg_inner.html() == "") {
+            this.kag.setNewParagraph(j_msg_inner);
+        }
+
+        // vchatモード
+        if (this.kag.stat.vchat.is_active) {
+            j_msg_inner.show();
+        }
+
+        // 新しい span.current_span に切り替える必要があるかチェック (必要があるなら切り替え処理も行う)
+        this.kag.checkMessage(j_msg_inner);
+
+        // span.current_span を取得
+        const j_span = this.kag.getMessageCurrentSpan();
+
+        // span.current_span のスタイルを調整
+        this.setCurrentSpanStyle(j_span, chara_name);
+
+        // 既読処理（有効な場合）
+        if (this.kag.config.autoRecordLabel == "true") {
+            this.manageAlreadyRead(j_span);
+        }
+
+        // アニメーションが無効な場合を検知
+        // undefined, "none" の場合はアニメーション無効
+        if (typeof this.kag.stat.font.effect == "undefined" || this.kag.stat.font.effect == "none") {
+            this.kag.stat.font.effect = "";
+        }
+
+        // 1文字1文字を包む span に inline-block を適用するかどうか
+        let should_use_inline_block = true;
+        if (this.kag.stat.font.effect == "" || this.kag.stat.font.effect == "fadeIn") {
+            // エフェクトなしか単純フェードインの場合は inline
+            // つまり英単語や句読点の禁則処理が有効になる
+            should_use_inline_block = false;
+        }
+
+        // message_str からHTMLを生成する
+        // 入力例) "かきく"
+        // 出力例) "<span>か</span><span>き</span><span>く</span>"
+        // 各<span>には opacity: 0; が適用されており透明な状態
+        const message_html = this.makeMessageHTML(message_str, should_use_inline_block);
+
+        // 生成したHTMLを<span>でラップする
+        const j_message_span = $(`<span>${message_html}</span>`);
+
+        // span.current_span の中に付け加える
+        // div.message_inner
+        //   p ← 改ページ時に作り直される
+        //     span.current_span ← [font]でスタイルが変わったときなどに新しく挿入される
+        //       span       ← これは直前の[text]で表示したやつ
+        //         span あ
+        //         span い
+        //         span う
+        //       span       ← これがいま追加した j_message_span
+        //         span か
+        //         span き
+        //         span く
+        j_message_span.appendTo(j_span);
+
+        // ふきだしのサイズ調整（有効な場合）
+        if (this.kag.stat.fuki.active) {
+            this.adjustFukiSize(j_msg_inner, chara_name);
+        }
+
+        this.addChars(j_message_span);
+    },
+
+    /**
+     * 発言者の名前欄を意味する<p>要素のjQueryオブジェクトを返す
+     * そもそも[chara_config]タグによる chara_ptext の設定が済んでいない場合は空のjQueryオブジェクトを返す
+     * @returns {jQuery}
+     */
+    getCharaNameArea: function () {
+        return this.kag.stat.chara_ptext ? $("." + this.kag.stat.chara_ptext) : $();
+    },
+
+    /**
+     * 発言者の名前を返す
+     * 発言者がいない場合は空の文字列を返す
+     * @returns {string}
+     */
+    getCharaName: function () {
         var chara_name = "";
         if (this.kag.stat.chara_ptext != "") {
             chara_name = $.isNull($("." + this.kag.stat.chara_ptext).html());
         }
+        return chara_name;
+    },
 
-        if ((chara_name != "" && pm.backlog != "join") || (chara_name != "" && this.kag.stat.f_chara_ptext == "true")) {
-            this.kag.pushBackLog(
-                "<b class='backlog_chara_name " +
-                    chara_name +
-                    "'>" +
-                    chara_name +
-                    "</b>：<span class='backlog_text " +
-                    chara_name +
-                    "'>" +
-                    message_str +
-                    "</span>",
-                "add",
-            );
+    /**
+     * テキストをバックログに追加する
+     * @param {string} chara_name 発言者の名前
+     * @param {string} message_str 表示するテキスト
+     */
+    pushTextToBackLog: function (chara_name, message_str) {
+        // ひとつ前のログに連結させるべきかどうか
+        // たとえば[r][font][delay]などのタグを通過したあとは連結が有効になる
+        var should_join_log = this.kag.stat.log_join == "true";
+
+        // バックログへの追加
+        if ((chara_name != "" && !should_join_log) || (chara_name != "" && this.kag.stat.f_chara_ptext == "true")) {
+            // バックログにキャラ名を新しく書き出す場合
+            const log_str =
+                `<b class="backlog_chara_name ${chara_name}">${chara_name}</b>：` +
+                `<span class="backlog_text ${chara_name}">${message_str}</span>`;
+            this.kag.pushBackLog(log_str, "add");
 
             if (this.kag.stat.f_chara_ptext == "true") {
                 this.kag.stat.f_chara_ptext = "false";
                 this.kag.stat.log_join = "true";
             }
         } else {
-            var log_str = "<span class='backlog_text " + chara_name + "'>" + message_str + "</span>";
-
-            if (pm.backlog == "join") {
-                this.kag.pushBackLog(log_str, "join");
-            } else {
-                this.kag.pushBackLog(log_str, "add");
-            }
+            // バックログにキャラ名を新しく書き出す必要がない場合
+            const log_str = `<span class="backlog_text ${chara_name}">${message_str}</span>`;
+            const join_type = should_join_log ? "join" : "add";
+            this.kag.pushBackLog(log_str, join_type);
         }
+    },
 
-        //読み上げ機能が有効な場合
-        if (that.kag.stat.play_speak == true) {
-            speechSynthesis.speak(new SpeechSynthesisUtterance(message_str));
-        }
+    /**
+     * テキストを読み上げる [speak_on]タグで有効になる
+     * @param {string} message_str 読み上げる文字列
+     */
+    speechMessage: function (message_str) {
+        speechSynthesis.speak(new SpeechSynthesisUtterance(message_str));
+    },
 
-        //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
-        that.kag.ftag.hideNextImg();
-
-        // hidden状態で全部追加する
-        //vchatモードのときはメッセージエリアは無視する
-
-        var j_msg_inner = this.kag.getMessageInnerLayer();
-
+    /**
+     * span.current_span のスタイルを調整する
+     * @param {jQuery} j_span span.current_span
+     * @param {string} chara_name 発言者の名前
+     */
+    setCurrentSpanStyle: function (j_span, chara_name) {
         if (this.kag.stat.vchat.is_active) {
-            j_msg_inner.show();
+            // vchatモードの場合
+            if (chara_name == "") {
+                $(".current_vchat").find(".vchat_chara_name").remove();
+                $(".current_vchat").find(".vchat-text-inner").css("margin-top", "0.2em");
+            } else {
+                $(".current_vchat").find(".vchat_chara_name").html(chara_name);
+
+                //キャラ名欄の色
+                var vchat_name_color = $.convertColor(this.kag.stat.vchat.chara_name_color);
+
+                var cpm = this.kag.stat.vchat.charas[chara_name];
+
+                if (cpm) {
+                    //色指定がある場合は、その色を指定する。
+                    if (cpm.color != "") {
+                        vchat_name_color = $.convertColor(cpm.color);
+                    }
+                }
+
+                $(".current_vchat").find(".vchat_chara_name").css("background-color", vchat_name_color);
+
+                $(".current_vchat").find(".vchat-text-inner").css("margin-top", "1.5em");
+            }
+        } else {
+            // vchatモードでない場合
+
+            // 基本のテキストスタイル
+            j_span.css({
+                "color": this.kag.stat.font.color,
+                "font-weight": this.kag.stat.font.bold,
+                "font-size": this.kag.stat.font.size + "px",
+                "font-family": this.kag.stat.font.face,
+                "font-style": this.kag.stat.font.italic,
+            });
+
+            // 特殊な装飾
+            if (this.kag.stat.font.edge != "") {
+                // 縁取り文字
+                var edge_color = this.kag.stat.font.edge;
+                j_span.css(
+                    "text-shadow",
+                    "1px 1px 0 " +
+                        edge_color +
+                        ", -1px 1px 0 " +
+                        edge_color +
+                        ",1px -1px 0 " +
+                        edge_color +
+                        ",-1px -1px 0 " +
+                        edge_color +
+                        "",
+                );
+            } else if (this.kag.stat.font.shadow != "") {
+                // 影文字
+                j_span.css("text-shadow", "2px 2px 2px " + this.kag.stat.font.shadow);
+            }
+        }
+    },
+
+    /**
+     * メッセージ表示時のの既読管理を行う
+     * 既読テキスト→文字色を変更する
+     * 未読テキスト→未読スキップが無効ならスキップを止める
+     * @param {jQuery} j_span span.current_span 既読の場合に文字色を変える
+     */
+    manageAlreadyRead: function (j_span) {
+        // このテキストが既読かどうか
+        if (this.kag.stat.already_read == true) {
+            // このテキストが既読の場合
+            // テキストの色を変更
+            if (this.kag.config.alreadyReadTextColor != "default") {
+                j_span.css("color", $.convertColor(this.kag.config.alreadyReadTextColor));
+            }
+        } else {
+            // このテキストが既読でない場合
+            // 未読スキップ機能が無効の場合はここでスキップを停止してやる
+            if (this.kag.config.unReadTextSkip == "false") {
+                this.kag.stat.is_skip = false;
+            }
+        }
+    },
+
+    /**
+     * テキストを加工して実際にDOMに追加できるHTMLを生成する
+     * たとえば"ウホ"を渡すと`"<span>ウ</span><span>ホ</span>"`が得られる
+     * 各<span>要素にはすべて opacity: 0; スタイルが適用されており透明な状態
+     * @param {string} message_str
+     * @param {boolean} should_use_inline_block
+     * @returns {string}
+     */
+    makeMessageHTML: function (message_str, should_use_inline_block = true) {
+        var message_html = "";
+
+        for (var i = 0; i < message_str.length; i++) {
+            // 1文字ずつ見ていく
+            var c = message_str.charAt(i);
+
+            // ルビ指定がされている場合は<ruby>で囲う
+            if (this.kag.stat.ruby_str != "") {
+                c = "<ruby><rb>" + c + "</rb><rt>" + this.kag.stat.ruby_str + "</rt></ruby>";
+                this.kag.stat.ruby_str = "";
+            }
+
+            // 文字種で場合分け
+            if (c == " ") {
+                // 空白の場合
+                message_html += "<span style='opacity:0'>" + c + "</span>";
+            } else {
+                // 空白以外の場合
+
+                // マーカー処理
+                if (this.kag.stat.mark == 1) {
+                    var mark_style = this.kag.stat.style_mark;
+                    c = "<mark style='" + mark_style + "'>" + c + "</mark>";
+                } else if (this.kag.stat.mark == 2) {
+                    this.kag.stat.mark = 0;
+                }
+
+                // 禁則処理するかどうかで場合分け
+                if (should_use_inline_block) {
+                    message_html += "<span style='opacity:0;display:inline-block;'>" + c + "</span>";
+                } else {
+                    message_html += "<span style='opacity:0'>" + c + "</span>";
+                }
+            }
+        }
+        return message_html;
+    },
+
+    /**
+     * ふきだしのサイズを良い感じに調整する
+     * @param {jQuery} j_msg_inner div.message_inner
+     * @param {string} chara_jname 発言者の名前
+     */
+    adjustFukiSize: function (j_msg_inner, chara_jname) {
+        // メッセージレイヤの表示
+        this.kag.layer.showMessageLayers();
+        this.kag.stat.is_hide_message = false;
+
+        // chara_name_area の隠蔽
+        this.getCharaNameArea().hide();
+
+        // そもそも発言者が空欄ならothers用のふきだし処理にぶん投げる！(早期リターン)
+        if (chara_jname == "") {
+            this.adjustOthersFukiSize(j_msg_inner);
+            return;
         }
 
-        (function (jtext) {
-            if (jtext.html() == "") {
-                //タグ作成
-                if (isVertical) {
-                    jtext.append("<p class='vertical_text'></p>");
-                } else {
-                    jtext.append("<p class=''></p>");
-                }
+        // キャラの name を取得する
+        // ※ chara_name には name ではなく jname (画面表示用の日本語)が入っている
+        let chara_name = chara_jname;
+        if (this.kag.stat.jcharas[chara_jname]) {
+            chara_name = this.kag.stat.jcharas[chara_jname];
+        }
+
+        // キャラ画像のjQueryオブジェクトの取得を試みる
+        let chara_obj;
+        try {
+            chara_obj = $(".layer_fore").find("." + chara_name);
+        } catch (e) {
+            // chara_name にクラス名の禁止文字(たとえば"?")が含まれている場合は
+            // ご丁寧にjQueryが「そのクラス名はおかしいですよ」と例外を投げてくれるので
+            // try...catch で捕捉してやらねばならない
+            console.log(e);
+            chara_obj = undefined;
+        }
+
+        // 次のいずれかにあてはまるならothers用のふきだし処理にぶん投げる！(早期リターン)
+        // - キャラ画像のjQueryオブジェクト取得時に例外(エラー)が発生
+        // - キャラ画像のjQueryオブジェクトがひとつも取れなかった
+        // - いまの発言者に[chara_fuki]が設定されていない
+        if (chara_obj === undefined || !chara_obj.get(0) || this.kag.stat.charas[chara_name]["fuki"]["enable"] !== "true") {
+            this.adjustOthersFukiSize(j_msg_inner);
+            return;
+        }
+
+        // ここまで来たならキャラ専用のふきだしを設定しなければならない
+        this.adjustCharaFukiSize(j_msg_inner, chara_name, chara_obj);
+    },
+
+    /**
+     * キャラ用のふきだしのサイズを良い感じに調整する
+     * @param {jQuery} j_msg_inner div.message_inner
+     * @param {string} chara_name 発言者の名前
+     * @param {jQuery} chara_obj キャラ画像のjQueryオブジェクト
+     */
+    adjustCharaFukiSize: function (j_msg_inner, chara_name, chara_obj) {
+        const chara_fuki = this.kag.stat.charas[chara_name]["fuki"];
+
+        if (chara_fuki["fix_width"] != "") {
+            j_msg_inner.css("max-width", "");
+            j_msg_inner.css("width", parseInt(chara_fuki["fix_width"]));
+        } else {
+            j_msg_inner.css("width", "");
+            j_msg_inner.css("max-width", parseInt(chara_fuki["max_width"]));
+        }
+
+        //縦書きの場合はheightだけ無視で。
+        if (this.kag.stat.vertical == "true") {
+            //safariでも表示させるための処置
+            let w = j_msg_inner.find(".vertical_text").css("width");
+            j_msg_inner.css("width", w);
+            j_msg_inner.css("height", "");
+            j_msg_inner.css("max-height", parseInt(chara_fuki["max_width"]));
+        } else {
+            if (chara_fuki["fix_width"] == "") {
+                j_msg_inner.css("width", "");
+                j_msg_inner.css("height", "");
             }
+        }
 
-            //吹き出しが有効な場合
-            /*
-            if(that.kag.stat.fuki.active){
+        //吹き出しの大きさを自動調整。
+        let width = j_msg_inner.css("width");
+        let height = j_msg_inner.css("height");
 
-                //jtext.find(".current_text_p").css("max-width",300);
-                //jtext.find(".current_text_p").css("display","table");
+        //20 はアイコンの文
+        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
+        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + 20;
 
-            }
-            */
+        let j_outer_message = this.kag.getMessageOuterLayer();
 
-            var current_str = "";
+        j_outer_message.css("width", width);
+        j_outer_message.css("height", height);
 
-            if (jtext.find("p").find(".current_span").length != 0) {
-                //アニメーションは強制停止させる。
-                jtext.find("p").find(".current_span").find("span").css({
-                    opacity: 1,
-                    visibility: "visible",
-                    animation: "",
-                });
+        chara_left = parseInt(chara_obj.css("left"));
+        chara_top = parseInt(chara_obj.css("top"));
 
-                current_str = jtext.find("p").find(".current_span").html();
-            }
+        let fuki_left = chara_fuki["left"];
+        let fuki_top = chara_fuki["top"];
 
-            that.kag.checkMessage(jtext);
+        let fuki_sippo_left = chara_fuki["sippo_left"];
+        let fuki_sippo_top = chara_fuki["sippo_top"];
 
-            //メッセージ領域を取得
-            var j_span = {};
+        let chara_width = parseInt(chara_obj.find("img").css("width"));
+        let chara_height = parseInt(chara_obj.find("img").css("height"));
 
-            if (that.kag.stat.vchat.is_active) {
-                j_span = jtext.find(".current_span");
-                if (chara_name == "") {
-                    $(".current_vchat").find(".vchat_chara_name").remove();
-                    $(".current_vchat").find(".vchat-text-inner").css("margin-top", "0.2em");
-                } else {
-                    $(".current_vchat").find(".vchat_chara_name").html(chara_name);
+        let origin_width = this.kag.stat.charas[chara_name]["origin_width"];
+        let origin_height = this.kag.stat.charas[chara_name]["origin_height"];
 
-                    //キャラ名欄の色
-                    var vchat_name_color = $.convertColor(that.kag.stat.vchat.chara_name_color);
+        //相対位置はキャラのサイズによって座標を調整する
+        let per_width = chara_width / origin_width;
+        let per_height = chara_height / origin_height;
 
-                    var cpm = that.kag.stat.vchat.charas[chara_name];
+        fuki_left = fuki_left * per_width;
+        fuki_top = fuki_top * per_height;
 
-                    if (cpm) {
-                        //色指定がある場合は、その色を指定する。
-                        if (cpm.color != "") {
-                            vchat_name_color = $.convertColor(cpm.color);
-                        }
-                    }
+        fuki_left2 = chara_left + fuki_left;
+        fuki_top2 = chara_top + fuki_top;
 
-                    $(".current_vchat").find(".vchat_chara_name").css("background-color", vchat_name_color);
+        let outer_width = parseInt(j_outer_message.css("width"));
+        let outer_height = parseInt(j_outer_message.css("height"));
 
-                    $(".current_vchat").find(".vchat-text-inner").css("margin-top", "1.5em");
-                }
+        //吹き出し位置によって位置を変更
+        let sippo = chara_fuki["sippo"];
+        if (sippo == "bottom") {
+            fuki_top2 = fuki_top2 - outer_height;
+        } else if (sippo == "left") {
+            fuki_left2 = fuki_left2 + parseInt(chara_fuki["sippo_left"]);
+        } else if (sippo == "right") {
+            fuki_left2 = fuki_left2 - outer_width;
+        }
+
+        //左端と下端の座標
+        let fuki_right = fuki_left2 + outer_width;
+        let fuki_bottom = fuki_top2 + outer_height;
+
+        let sc_width = parseInt(this.kag.config.scWidth);
+        let sc_height = parseInt(this.kag.config.scHeight);
+
+        let sippo_left = 0;
+        let sippo_top = 0;
+
+        //右端に飛び出ていたら
+
+        if (fuki_right >= sc_width) {
+            fuki_left2 = fuki_left2 - (fuki_right - sc_width) - 10;
+            sippo_left = fuki_right - sc_width + 10; //はみ出たぶんだけプラス
+        }
+
+        if (fuki_bottom >= sc_height) {
+            fuki_top2 = fuki_top2 - (fuki_bottom - sc_height) - 10;
+            //sippo_left = (fuki_bottom - -50;
+        }
+
+        if (fuki_left2 <= 0) {
+            //しっぽの位置はマイナスさせる
+            sippo_left = fuki_left2 - 10;
+            fuki_left2 = 10;
+        }
+
+        if (fuki_top2 <= 0) {
+            fuki_top2 = 10;
+        }
+
+        j_outer_message.css("left", fuki_left2);
+        j_outer_message.css("top", fuki_top2);
+
+        //innerの情報
+        j_msg_inner.css({
+            left: parseInt(j_outer_message.css("left")) + 10,
+            top: parseInt(j_outer_message.css("top")) + 10,
+        });
+
+        //調整値。はみ出し多分
+
+        this.setFukiStyle(j_outer_message, chara_fuki);
+
+        //ふきだしの位置を調整//////////////
+        this.kag.updateFuki(chara_name, {
+            sippo_left: sippo_left,
+        });
+    },
+
+    /**
+     * others用のふきだしのサイズを良い感じに調整する
+     * @param {jQuery} j_msg_inner div.message_inner
+     */
+    adjustOthersFukiSize: function (j_msg_inner) {
+        let others_style = this.kag.stat.fuki.others_style;
+        let def_style = this.kag.stat.fuki.def_style;
+
+        let nwidth = others_style.max_width || def_style.width;
+        let nleft = others_style.left || def_style.left;
+        let ntop = others_style.top || def_style.top;
+
+        if (others_style["fix_width"] != "") {
+            j_msg_inner.css("max-width", "");
+            j_msg_inner.css("width", parseInt(others_style["fix_width"]));
+        } else {
+            j_msg_inner.css("width", "");
+            j_msg_inner.css("max-width", parseInt(nwidth));
+        }
+
+        //吹き出しの大きさを自動調整。
+        width = j_msg_inner.css("width");
+        height = j_msg_inner.css("height");
+
+        //20 はアイコンの文
+        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
+        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + 20;
+
+        let j_outer_message = this.kag.getMessageOuterLayer();
+
+        j_outer_message.css("width", width);
+        j_outer_message.css("height", height);
+
+        j_outer_message.css("left", parseInt(nleft));
+        j_outer_message.css("top", parseInt(ntop));
+
+        //通常のポジションに戻す
+        j_msg_inner.css({
+            left: parseInt(j_outer_message.css("left")) + 10,
+            top: parseInt(j_outer_message.css("top")) + 10,
+        });
+
+        this.setFukiStyle(j_outer_message, this.kag.stat.fuki.others_style);
+
+        //ふきだしを消す
+        this.kag.updateFuki("others", { sippo: "none" });
+    },
+
+    /**
+     * 1文字を可視化する
+     * @param {jQuery} j_char_span 1文字の`<span>`のjQueryオブジェクト
+     */
+    makeOneCharVisible: function (j_char_span) {
+        if (this.kag.stat.font.effect != "") {
+            const anim_name = "t" + this.kag.stat.font.effect;
+            let anim_duration = this.kag.stat.font.effect_speed;
+            anim_duration = anim_duration.includes("s") ? anim_duration : anim_duration + "ms";
+            j_char_span
+                .on("animationend", function (e) {
+                    $(e.target).css({
+                        opacity: 1,
+                        visibility: "visible",
+                        animation: "",
+                    });
+                })
+                .css("animation", `${anim_name} ${anim_duration} ease 0s 1 normal forwards`);
+        } else {
+            j_char_span.css({ visibility: "visible", opacity: "1" });
+        }
+    },
+
+    /**
+     * すべての文字を可視化する
+     * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
+     */
+    makeAllCharsVisible: function (j_message_span) {
+        j_message_span.children("span").css({
+            animation: "",
+            visibility: "visible",
+            opacity: "1",
+        });
+    },
+
+    /**
+     * 特定のインデックスの1文字を追加する
+     * @param {number} char_index 表示する文字のインデックス
+     * @param {number} char_length 文字数
+     * @param {jQuery} j_char_span_children 1文字1文字の`<span>`のjQueryオブジェクトのコレクション
+     * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
+     * @param {number} timeout_per_char 次の文字を表示するまでのタイムアウト ただし文字表示途中でクリックされた場合は無潮して瞬間表示になる
+     */
+    addOneChar: function (char_index, char_length, j_char_span_children, j_message_span, timeout_per_char) {
+        // まだ文字表示中だよ
+        this.kag.stat.is_adding_text = true;
+
+        // この1文字を可視化
+        this.makeOneCharVisible(j_char_span_children.eq(char_index));
+
+        // 次の文字のインデックス
+        const next_char_index = char_index + 1;
+
+        // すべての文字を表示し終わったかどうか
+        if (next_char_index < char_length) {
+            // まだ表示していない文字があるようだ
+            // タイムアウトを設けて次の文字を表示しよう
+
+            // ただし文字表示の途中のクリックを検知して処理を変える
+            if (this.kag.stat.is_click_text || this.kag.stat.is_skip === true || this.kag.stat.is_nowait) {
+                // 文字表示の途中でクリックされたようだ
+                // this.addOneChar(next_char_index, char_length, j_char_span_children, 0);
+                this.makeAllCharsVisible(j_message_span);
+                this.finishAddingChars();
             } else {
-                j_span = that.kag.getMessageCurrentSpan();
-
-                j_span.css({
-                    "color": that.kag.stat.font.color,
-                    "font-weight": that.kag.stat.font.bold,
-                    "font-size": that.kag.stat.font.size + "px",
-                    "font-family": that.kag.stat.font.face,
-                    "font-style": that.kag.stat.font.italic,
-                });
-
-                if (that.kag.stat.font.edge != "") {
-                    var edge_color = that.kag.stat.font.edge;
-                    j_span.css(
-                        "text-shadow",
-                        "1px 1px 0 " +
-                            edge_color +
-                            ", -1px 1px 0 " +
-                            edge_color +
-                            ",1px -1px 0 " +
-                            edge_color +
-                            ",-1px -1px 0 " +
-                            edge_color +
-                            "",
-                    );
-                } else if (that.kag.stat.font.shadow != "") {
-                    //j_span.css()
-                    j_span.css("text-shadow", "2px 2px 2px " + that.kag.stat.font.shadow);
-                }
+                $.setTimeout(() => {
+                    this.addOneChar(next_char_index, char_length, j_char_span_children, j_message_span, timeout_per_char);
+                }, timeout_per_char);
             }
+        } else {
+            // すべての文字を表示し終わったようだ
+            $.setTimeout(() => {
+                this.finishAddingChars();
+            }, timeout_per_char);
+        }
+    },
 
-            //既読管理中の場合、現在の場所が既読済みなら、色を変える
-            if (that.kag.config.autoRecordLabel == "true") {
-                if (that.kag.stat.already_read == true) {
-                    //テキストの色調整
-                    if (that.kag.config.alreadyReadTextColor != "default") {
-                        j_span.css("color", $.convertColor(that.kag.config.alreadyReadTextColor));
+    /**
+     * 文字の追加を終えて次のタグに進む
+     */
+    finishAddingChars: function () {
+        this.kag.stat.is_adding_text = false;
+        if (this.kag.stat.is_stop != "true" && !this.kag.stat.is_hide_message) {
+            this.kag.ftag.nextOrder();
+        }
+    },
+
+    /**
+     * 文字を追加していく
+     * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
+     */
+    addChars: function (j_message_span) {
+        // 文字の表示速度 (単位はミリ秒/文字)
+        let timeout_per_char = 30;
+        if (this.kag.stat.ch_speed !== "") {
+            timeout_per_char = parseInt(this.kag.stat.ch_speed);
+        } else if (this.kag.config.chSpeed) {
+            timeout_per_char = parseInt(this.kag.config.chSpeed);
+        }
+
+        // すべてのテキストを一瞬で表示すべきなら全部表示してさっさと早期リターンしよう
+        // 次のいずれかに該当するならすべてのテキストを一瞬で表示すべきである
+        // - スキップモード中である
+        // - [nowait]中である
+        // - 1文字あたりの表示時間が 3 ミリ秒以下である
+        if (this.kag.stat.is_skip === true || this.kag.stat.is_nowait || timeout_per_char <= 3) {
+            // ストップ中じゃなければ
+            if (this.kag.stat.is_stop != "true") {
+                // 全文字表示
+                this.makeAllCharsVisible(j_message_span);
+                // スキップ時間のタイムアウトを設ける
+                $.setTimeout(() => {
+                    // メッセージウィンドウが隠れていなければ次のタグへ
+                    if (!this.kag.stat.is_hide_message) {
+                        this.kag.ftag.nextOrder();
                     }
-                } else {
-                    //未読スキップがfalseの場合は、スキップ停止
-                    if (that.kag.config.unReadTextSkip == "false") {
-                        that.kag.stat.is_skip = false;
-                    }
-                }
+                }, parseInt(this.kag.config.skipSpeed));
             }
+            return;
+        }
 
-            var ch_speed = 30;
+        //
+        // ここまで来たということは1文字ずつ追加していかねばならないようだ
+        //
 
-            if (that.kag.stat.ch_speed != "") {
-                ch_speed = parseInt(that.kag.stat.ch_speed);
-            } else if (that.kag.config.chSpeed) {
-                ch_speed = parseInt(that.kag.config.chSpeed);
-            }
+        // テキスト追加中だよ
+        this.kag.stat.is_adding_text = true;
 
-            //アニメーション設定。無効な場合がある
-            if (typeof that.kag.stat.font.effect == "undefined" || that.kag.stat.font.effect == "none") {
-                that.kag.stat.font.effect = "";
-            }
+        // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
+        const j_char_span_children = j_message_span.children("span");
 
-            //禁則処理を有効にするための処置。エフェクトによっては有効にできないようにする
-            var flag_in_block = true;
-            if (that.kag.stat.font.effect == "" || that.kag.stat.font.effect == "fadeIn") {
-                flag_in_block = false;
-            }
-
-            var append_str = "";
-            for (var i = 0; i < message_str.length; i++) {
-                var c = message_str.charAt(i);
-                //ルビ指定がされている場合
-                if (that.kag.stat.ruby_str != "") {
-                    c = "<ruby><rb>" + c + "</rb><rt>" + that.kag.stat.ruby_str + "</rt></ruby>";
-                    that.kag.stat.ruby_str = "";
-                }
-
-                if (c == " ") {
-                    append_str += "<span style='opacity:0'>" + c + "</span>";
-                } else {
-                    if (that.kag.stat.mark == 1) {
-                        var mark_style = that.kag.stat.style_mark;
-                        c = "<mark style='" + mark_style + "'>" + c + "</mark>";
-                    } else if (that.kag.stat.mark == 2) {
-                        that.kag.stat.mark = 0;
-                    }
-
-                    if (flag_in_block) {
-                        append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
-                    } else {
-                        append_str += "<span style='opacity:0'>" + c + "</span>";
-                    }
-                }
-            }
-
-            current_str += "<span>" + append_str + "</span>";
-
-            // hidden状態で全部追加する
-            that.kag.appendMessage(jtext, current_str);
-
-            //吹き出しが有効な場合は位置を自動調整
-            if (that.kag.stat.fuki.active) {
-                //メッセージレイヤの表示
-                that.kag.layer.showMessageLayers();
-                that.kag.stat.is_hide_message = false;
-
-                let chara_fuki = {};
-
-                //位置を調整。
-                let is_chara_show = false;
-
-                if (chara_name == "") {
-                    is_chara_show = false;
-                } else {
-                    let original_name = chara_name;
-
-                    if (that.kag.stat.jcharas[chara_name]) {
-                        original_name = that.kag.stat.jcharas[chara_name];
-                    }
-
-                    var chara_obj;
-
-                    try {
-                        chara_obj = $(".layer_fore").find("." + original_name);
-                    } catch (e) {
-                        console.log(e);
-                        chara_obj = undefined;
-                    }
-
-                    if (
-                        typeof chara_obj != "undefined" &&
-                        chara_obj.get(0) &&
-                        that.kag.stat.charas[original_name]["fuki"]["enable"] == "true"
-                    ) {
-                        is_chara_show = true;
-
-                        //chara_p_textを排除
-                        $(".tyrano_base").find(".chara_name_area").hide();
-
-                        chara_fuki = that.kag.stat.charas[original_name]["fuki"];
-
-                        if (chara_fuki["fix_width"] != "") {
-                            j_msg_inner.css("max-width", "");
-                            j_msg_inner.css("width", parseInt(chara_fuki["fix_width"]));
-                        } else {
-                            j_msg_inner.css("width", "");
-                            j_msg_inner.css("max-width", parseInt(chara_fuki["max_width"]));
-                        }
-
-                        //縦書きの場合はheightだけ無視で。
-                        if (that.kag.stat.vertical == "true") {
-                            //safariでも表示させるための処置
-                            let w = j_msg_inner.find(".vertical_text").css("width");
-                            j_msg_inner.css("width", w);
-                            j_msg_inner.css("height", "");
-                            j_msg_inner.css("max-height", parseInt(chara_fuki["max_width"]));
-                        } else {
-                            if (chara_fuki["fix_width"] == "") {
-                                j_msg_inner.css("width", "");
-                                j_msg_inner.css("height", "");
-                            }
-                        }
-
-                        //吹き出しの大きさを自動調整。
-                        let width = j_msg_inner.css("width");
-                        let height = j_msg_inner.css("height");
-
-                        //20 はアイコンの文
-                        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
-                        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
-
-                        var j_outer_message = that.kag.getMessageOuterLayer();
-
-                        j_outer_message.css("width", width);
-                        j_outer_message.css("height", height);
-
-                        chara_left = parseInt(chara_obj.css("left"));
-                        chara_top = parseInt(chara_obj.css("top"));
-
-                        let fuki_left = chara_fuki["left"];
-                        let fuki_top = chara_fuki["top"];
-
-                        let fuki_sippo_left = chara_fuki["sippo_left"];
-                        let fuki_sippo_top = chara_fuki["sippo_top"];
-
-                        let chara_width = parseInt(chara_obj.find("img").css("width"));
-                        let chara_height = parseInt(chara_obj.find("img").css("height"));
-
-                        let origin_width = that.kag.stat.charas[original_name]["origin_width"];
-                        let origin_height = that.kag.stat.charas[original_name]["origin_height"];
-
-                        //相対位置はキャラのサイズによって座標を調整する
-                        let per_width = chara_width / origin_width;
-                        let per_height = chara_height / origin_height;
-
-                        fuki_left = fuki_left * per_width;
-                        fuki_top = fuki_top * per_height;
-
-                        fuki_left2 = chara_left + fuki_left;
-                        fuki_top2 = chara_top + fuki_top;
-
-                        let outer_width = parseInt(j_outer_message.css("width"));
-                        let outer_height = parseInt(j_outer_message.css("height"));
-
-                        //吹き出し位置によって位置を変更
-                        let sippo = chara_fuki["sippo"];
-                        if (sippo == "bottom") {
-                            fuki_top2 = fuki_top2 - outer_height;
-                        } else if (sippo == "left") {
-                            fuki_left2 = fuki_left2 + parseInt(chara_fuki["sippo_left"]);
-                        } else if (sippo == "right") {
-                            fuki_left2 = fuki_left2 - outer_width;
-                        }
-
-                        //左端と下端の座標
-                        let fuki_right = fuki_left2 + outer_width;
-                        let fuki_bottom = fuki_top2 + outer_height;
-
-                        let sc_width = parseInt(that.kag.config.scWidth);
-                        let sc_height = parseInt(that.kag.config.scHeight);
-
-                        let sippo_left = 0;
-                        let sippo_top = 0;
-
-                        //右端に飛び出ていたら
-
-                        if (fuki_right >= sc_width) {
-                            fuki_left2 = fuki_left2 - (fuki_right - sc_width) - 10;
-                            sippo_left = fuki_right - sc_width + 10; //はみ出たぶんだけプラス
-                        }
-
-                        if (fuki_bottom >= sc_height) {
-                            fuki_top2 = fuki_top2 - (fuki_bottom - sc_height) - 10;
-                            //sippo_left = (fuki_bottom - -50;
-                        }
-
-                        if (fuki_left2 <= 0) {
-                            //しっぽの位置はマイナスさせる
-                            sippo_left = fuki_left2 - 10;
-                            fuki_left2 = 10;
-                        }
-
-                        if (fuki_top2 <= 0) {
-                            fuki_top2 = 10;
-                        }
-
-                        //alert(fuki_left);
-                        j_outer_message.css("left", fuki_left2);
-                        j_outer_message.css("top", fuki_top2);
-
-                        //innerの情報
-                        j_msg_inner.css({
-                            left: parseInt(j_outer_message.css("left")) + 10,
-                            top: parseInt(j_outer_message.css("top")) + 10,
-                        });
-
-                        //調整値。はみ出し多分
-
-                        that.setFukiStyle(j_outer_message, chara_fuki);
-
-                        //ふきだしの位置を調整//////////////
-                        that.kag.updateFuki(original_name, {
-                            sippo_left: sippo_left,
-                        });
-                    } else {
-                        is_chara_show = false;
-                    }
-                }
-
-                //othersのポジションに戻す。
-                if (is_chara_show == false) {
-                    //chara_p_textを排除
-                    $(".tyrano_base").find(".chara_name_area").hide();
-
-                    let others_style = that.kag.stat.fuki.others_style;
-                    let def_style = that.kag.stat.fuki.def_style;
-
-                    let nwidth = others_style.max_width || def_style.width;
-                    let nleft = others_style.left || def_style.left;
-                    let ntop = others_style.top || def_style.top;
-
-                    if (others_style["fix_width"] != "") {
-                        j_msg_inner.css("max-width", "");
-                        j_msg_inner.css("width", parseInt(others_style["fix_width"]));
-                    } else {
-                        j_msg_inner.css("width", "");
-                        j_msg_inner.css("max-width", parseInt(nwidth));
-                    }
-
-                    //吹き出しの大きさを自動調整。
-                    width = j_msg_inner.css("width");
-                    height = j_msg_inner.css("height");
-
-                    //20 はアイコンの文
-                    width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
-                    height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
-
-                    var j_outer_message = that.kag.getMessageOuterLayer();
-
-                    j_outer_message.css("width", width);
-                    j_outer_message.css("height", height);
-
-                    j_outer_message.css("left", parseInt(nleft));
-                    j_outer_message.css("top", parseInt(ntop));
-
-                    //通常のポジションに戻す
-                    j_msg_inner.css({
-                        left: parseInt(j_outer_message.css("left")) + 10,
-                        top: parseInt(j_outer_message.css("top")) + 10,
-                    });
-
-                    chara_fuki = that.kag.stat.fuki.others_style;
-
-                    that.setFukiStyle(j_outer_message, chara_fuki);
-
-                    //ふきだしを消す
-                    that.kag.updateFuki("others", { sippo: "none" });
-                }
-            }
-
-            var append_span = j_span.children("span:last-child");
-            var makeVisible = function (index) {
-                //append_span.children("span:eq(" + index + ")").addClass("fadeIn");
-                //append_span.children("span:eq(" + index + ")").css('animation','rollIn 0.2s ease 0s 1 normal forwards');
-
-                if (that.kag.stat.font.effect != "") {
-                    append_span.children("span:eq(" + index + ")").on("animationend", function (e) {
-                        $(e.target).css({
-                            opacity: 1,
-                            visibility: "visible",
-                            animation: "",
-                        });
-                    });
-
-                    append_span
-                        .children("span:eq(" + index + ")")
-                        .css(
-                            "animation",
-                            "t" + that.kag.stat.font.effect + " " + that.kag.stat.font.effect_speed + " ease 0s 1 normal forwards",
-                        );
-                } else {
-                    append_span.children("span:eq(" + index + ")").css({ visibility: "visible", opacity: "1" });
-                }
-            };
-            var makeVisibleAll = function () {
-                append_span.children("span").css({ visibility: "visible", opacity: "1" });
-            };
-
-            var pchar = function (index) {
-                // 一文字ずつ表示するか？
-                var isOneByOne = that.kag.stat.is_skip != true && that.kag.stat.is_nowait != true && ch_speed >= 3;
-
-                if (isOneByOne) {
-                    makeVisible(index);
-                }
-
-                if (index <= message_str.length) {
-                    that.kag.stat.is_adding_text = true;
-
-                    //再生途中にクリックされて、残りを一瞬で表示する
-                    if (that.kag.stat.is_click_text == true || that.kag.stat.is_skip == true || that.kag.stat.is_nowait == true) {
-                        pchar(++index);
-                    } else {
-                        setTimeout(function () {
-                            pchar(++index);
-                        }, ch_speed);
-                    }
-                } else {
-                    that.kag.stat.is_adding_text = false;
-                    that.kag.stat.is_click_text = false;
-
-                    //すべて表示完了 ここまではイベント残ってたな
-
-                    if (that.kag.stat.is_stop != "true") {
-                        if (!isOneByOne) {
-                            makeVisibleAll();
-                            setTimeout(function () {
-                                if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
-                            }, parseInt(that.kag.config.skipSpeed));
-                        } else {
-                            if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
-                        }
-                    }
-                }
-            };
-
-            pchar(0);
-        })(j_msg_inner);
+        // 1文字目を追加 あとは関数内で再帰して表示
+        this.addOneChar(0, j_char_span_children.length, j_char_span_children, j_message_span, timeout_per_char);
     },
 
     nextOrder: function () {},
@@ -1278,6 +1430,7 @@ tyrano.plugin.kag.tag.l = {
     start: function () {
         var that = this;
 
+        this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
         //クリックするまで、次へすすまないようにする
@@ -1342,6 +1495,7 @@ tyrano.plugin.kag.tag.p = {
         //改ページ
         this.kag.stat.flag_ref_page = true;
 
+        this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
         if (this.kag.stat.is_skip == true) {
@@ -1509,15 +1663,8 @@ tyrano.plugin.kag.tag.r = {
 
     start: function () {
         var that = this;
-        //クリックするまで、次へすすまないようにする
-        var j_inner_message = this.kag.getMessageInnerLayer();
-
-        var txt = j_inner_message.find("p").find(".current_span").html() + "<br>";
-        j_inner_message.find("p").find(".current_span").html(txt);
-
-        setTimeout(function () {
-            that.kag.ftag.nextOrder();
-        }, 5);
+        this.kag.getMessageInnerLayer().find("p").find(".current_span").append("<br>");
+        this.kag.ftag.nextOrder();
     },
 };
 
