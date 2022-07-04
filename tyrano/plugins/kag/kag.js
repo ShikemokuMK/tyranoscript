@@ -225,6 +225,7 @@ tyrano.plugin.kag = {
             italic: "",
             effect: "",
             effect_speed: "0.2s",
+            edge_method: "shadow",
         },
 
         //qr系の設定
@@ -250,6 +251,7 @@ tyrano.plugin.kag = {
             shadow: "",
             effect: "",
             effect_speed: "",
+            edge_method: "shadow",
         },
 
         //ふきだしで使用するパラメータ郡

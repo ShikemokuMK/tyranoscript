@@ -802,19 +802,17 @@ tyrano.plugin.kag.tag.text = {
             // 特殊な装飾
             if (this.kag.stat.font.edge != "") {
                 // 縁取り文字
-                var edge_color = this.kag.stat.font.edge;
-                j_span.css(
-                    "text-shadow",
-                    "1px 1px 0 " +
-                        edge_color +
-                        ", -1px 1px 0 " +
-                        edge_color +
-                        ",1px -1px 0 " +
-                        edge_color +
-                        ",-1px -1px 0 " +
-                        edge_color +
-                        "",
-                );
+                const edge_str = this.kag.stat.font.edge;
+                console.log(this.kag.stat.font.edge_method);
+                switch (this.kag.stat.font.edge_method) {
+                    default:
+                    case "shadow":
+                        j_span.css("text-shadow", $.generateTextShadowStrokeCSS(edge_str));
+                        break;
+                    case "filter":
+                        j_span.css("filter", $.generateDropShadowStrokeCSS(edge_str));
+                        break;
+                }
             } else if (this.kag.stat.font.shadow != "") {
                 // 影文字
                 j_span.css("text-shadow", "2px 2px 2px " + this.kag.stat.font.shadow);
@@ -3624,7 +3622,8 @@ color        = 文字色を`0xRRGGBB`形式で指定します。,
 bold         = 太字にするかどうか。`true`または`false`で指定します。,
 italic       = イタリック体にするかどうか。`true`または`false`で指定します。,
 face         = フォントの種類を指定します。Webフォントを使用する場合は`tyrano/css/font.css`に定義を記述してください。,
-edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式で指定します。縁取りを解除する場合は`none`と指定します。,
+edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。縁取りを解除する場合は`none`と指定します。<br>V515以降: 縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
+edge_method  = 縁取りの実装方式を選択できます。指定できるキーワードは`shadow`または`filter`。,
 shadow       = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。影を解除する場合は`none`と指定します。,
 effect       = フォントの表示演出にアニメーションを設定できます。`none`を指定すると無効。指定できるキーワードは以下のとおり。`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``rotateIn``zoomIn``slideIn``bounceIn``vanishIn``puffIn``rollIn``none`,
 effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。
@@ -3686,6 +3685,10 @@ tyrano.plugin.kag.tag.font = {
             }
         }
 
+        if (pm.edge_method) {
+            this.kag.stat.font.edge_method = pm.edge_method;
+        }
+
         if (pm.shadow) {
             if (pm.shadow == "none" || pm.shadow == "") {
                 this.kag.stat.font.shadow = "";
@@ -3721,7 +3724,8 @@ color        = 文字色を`0xRRGGBB`形式で指定します。,
 bold         = 太字にするかどうか。`true`または`false`で指定します。,
 italic       = イタリック体にするかどうか。`true`または`false`で指定します。,
 face         = フォントの種類を指定します。Webフォントも利用可能。Webフォントを使用する場合、フォントファイルを`data/others`フォルダに配置し、`tyrano.css`で`@font-face`を設定する必要があります。,
-edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式で指定します。縁取りを解除する場合は`none`と指定します。,
+edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。縁取りを解除する場合は`none`と指定します。<br>V515以降: 縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
+edge_method  = 縁取りの実装方式を選択できます。指定できるキーワードは`shadow`または`filter`。,
 shadow       = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。影を解除する場合は`none`と指定します。,
 effect       = フォントの表示演出にアニメーションを設定できます。`none`を指定すると無効。指定できるキーワードは以下。`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``rotateIn``zoomIn``slideIn``bounceIn``vanishIn``puffIn``rollIn``none`,
 effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。
@@ -3777,6 +3781,10 @@ tyrano.plugin.kag.tag.deffont = {
             } else {
                 this.kag.stat.default_font.edge = $.convertColor(pm.edge);
             }
+        }
+
+        if (pm.edge_method) {
+            this.kag.stat.default_font.edge_method = pm.edge_method;
         }
 
         if (pm.shadow) {

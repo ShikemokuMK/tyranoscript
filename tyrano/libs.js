@@ -1336,6 +1336,213 @@
         callback();
         return 0;
     };
+
+    /**
+     * @typedef {Object} EdgeOption
+     * @property {string} color
+     * @property {number} width
+     * @property {number} total_width
+     */
+    /**
+     * 縁取りの太さと幅を指定した文字列を解析してEdgeの配列を返す
+     * たとえば $.parseEdgeOptions("4px rgb(255,0,0), 2px 0xFFFFFF, blue") は次の配列を返す
+     * [
+     *   {color: "rgb(255,0,0)", width: 4, total_width: 4},
+     *   {color: "#FFFFFF", width: 2, total_width: 6},
+     *   {color: "blue", width: 1, total_width: 7}
+     * ]
+     * @param {string} edge_str 縁取りの太さと幅 (例) "4px rgb(255,0,0), 2px 0xFFFFFF"
+     * @returns {EdgeOption[]}
+     */
+    $.parseEdgeOptions = function (edge_str) {
+        // 戻り値となるEdgeの配列
+        const edges = [];
+
+        // 文字列を「カッコの外にあるカンマ」で刻む
+        // 色指定自体にカンマが含まれるケース（"rgb(255,255,255)"のような）を考慮しなければならない
+        const edge_str_hash = edge_str.split(/,(?![^\(]*\))/);
+
+        // 内側から加算していった合計の縁取り太さ（複数縁取りを行う場合に意味を持つ）
+        // filter: drop-shadow()方式では不要、text-shadow方式や-webkit-text-stroke方式では必要
+        let total_width = 0;
+
+        for (const this_edge_str of edge_str_hash) {
+            // 例) "6px Black"
+            const this_edge_str_trim = $.trim(this_edge_str);
+
+            // 先頭の〇〇pxをチェック
+            const width_match = this_edge_str_trim.match(/^[0-9\.]+px /);
+
+            let width;
+            let width_str;
+            if (width_match) {
+                // 先頭の〇〇pxが見つかればそれを縁取りの太さとして解釈し、〇〇pxよりもあとの文字列を色解析に回す
+                width = parseFloat(width_match[0]);
+                width_str = this_edge_str_trim.substring(width_match[0].length);
+            } else {
+                // 先頭の〇〇pxが見つからなければ太さは1とし、文字列をまるごと色解析に回す
+                width = 1;
+                width_str = this_edge_str_trim;
+            }
+
+            const color = $.convertColor($.trim(width_str));
+            total_width += width;
+            if (color) {
+                edges.push({ color, width, total_width });
+            }
+        }
+        return edges;
+    };
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのfilterプロパティにセットするべき値を生成する
+     * @param {string} edge_str 縁取りの太さと幅 (例) "4px red, 2px white"
+     * @returns {string} (例) "drop-shadow(0 0 4px red) drop-shadow(0 0 red) ..."
+     */
+    $.generateDropShadowStrokeCSS = function (edge_str) {
+        // 毎回計算するのは意外と重いのでキャッシュを活用
+        const cache_map = $.generateDropShadowStrokeCSS.cache;
+        if (edge_str in cache_map) {
+            return cache_map[edge_str];
+        }
+
+        // "drop-shadow(...)" を格納していく配列
+        const css_arr = [];
+
+        const edges = $.parseEdgeOptions(edge_str);
+        for (const edge of edges) {
+            css_arr.push($.generateDropShadowStrokeCSSOne(edge.color, edge.width));
+        }
+
+        const css_value = css_arr.join(" ");
+        cache_map[edge_str] = css_value;
+        return css_value;
+    };
+    $.generateDropShadowStrokeCSS.cache = {};
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのfilterプロパティにセットするべき値を生成する
+     * @param {string} color 縁取りの色 (例) "red"
+     * @param {number} width 縁取りの幅 (例) 3
+     * @returns {string} 例) "drop-shadow(0 0 3px red) drop-shadow(0 0 red) ..."
+     */
+    $.generateDropShadowStrokeCSSOne = function (color = "black", width = 1) {
+        // drop-shadow(...)を重ねる
+        // 試行錯誤の結果これが良い感じと思われた
+        const shadow_width = (width - 1) * 0.4;
+        const css_array = [];
+        if (shadow_width > 0) {
+            css_array.push(`drop-shadow(0 0 ${shadow_width.toFixed(2)}px ${color})`);
+            for (let i = 0; i < 8; i++) {
+                css_array.push(`drop-shadow(0 0 ${color})`);
+            }
+        }
+        // 最後にうっすらとぼかした細い影を落とすことでアンチエイリアス効果を与える
+        // これがないと縁取りがガビガビに見えてしまう
+        css_array.push(`drop-shadow(0 0 0.4px ${color})`);
+        css_array.push(`drop-shadow(0 0 0.4px ${color})`);
+        css_array.push(`drop-shadow(0 0 0.2px ${color})`);
+        return css_array.join(" ");
+    };
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのtext-shadowプロパティにセットするべき値を生成する
+     * @param {string} edge_str 縁取りの太さと幅 (例) "4px red, 2px white"
+     * @returns {string} 例) "1px 1px 0px red, -1px 1px 0px red, ..."
+     */
+    $.generateTextShadowStrokeCSS = function (edge_str) {
+        // 毎回計算するのは意外と重いのでキャッシュを活用
+        const cache_map = $.generateTextShadowStrokeCSS.cache;
+        if (edge_str in cache_map) {
+            return cache_map[edge_str];
+        }
+
+        // "1px 1px 0px black" のような文字列を格納していく配列
+        const css_arr = [];
+
+        const edges = $.parseEdgeOptions(edge_str);
+        for (const edge of edges) {
+            css_arr.push($.generateTextShadowStrokeCSSOne(edge.color, edge.total_width));
+        }
+
+        const css_value = css_arr.join(",");
+        cache_map[edge_str] = css_value;
+        return css_value;
+    };
+    $.generateTextShadowStrokeCSS.cache = {};
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのtext-shadowプロパティにセットするべき値を生成する
+     * @param {string} color 縁取りの色 例) "black"
+     * @param {number} width 縁取りの幅 例) 3
+     * @returns {string} 例) "1px 1px 0px black, -1px 1px 0px black, ..."
+     */
+    $.generateTextShadowStrokeCSSOne = function (color = "black", width = 1) {
+        // 円周上の頂点を取得
+        const points = $.calcTextShadowStrokePoints(width);
+
+        // 座標の小数点以下の桁数
+        const position_digits = 2;
+
+        // text-shadowを重ねる
+        const css_array = [];
+        for (let p of points) {
+            const x = p.x.toFixed(position_digits);
+            const y = p.y.toFixed(position_digits);
+            const css = `${x}px ${y}px 0px ${color}`;
+            css_array.push(css);
+        }
+
+        return css_array.join(",");
+    };
+
+    /**
+     * text-shadowで文字の縁取りを行うときの、陰をずらす先の頂点の座標配列を計算する
+     * 太い縁取りを行う場合ほど大量の頂点を生み出す必要がある
+     * @param {number} width 縁取りの幅 (例) 3
+     * @returns {{x: number; y: number;}[]}
+     */
+    $.calcTextShadowStrokePoints = function (width) {
+        // 太さが1以下の場合は固定値を返す
+        if (width <= 1) {
+            return [
+                { x: 1, y: -1 },
+                { x: 1, y: 1 },
+                { x: -1, y: 1 },
+                { x: -1, y: -1 },
+            ];
+        }
+
+        // 円周の長さ
+        const circumference = 2 * width * Math.PI;
+
+        // 円周をこの長さで分割する
+        const hash_length = 1;
+
+        // 頂点の数の最低値
+        const point_num_min = 8;
+
+        // 頂点の数（円周の長さ÷分割する長さ）
+        const point_num = Math.max(point_num_min, circumference / hash_length);
+
+        // 1周（2πラジアン＝360°）
+        const round = 2 * Math.PI;
+
+        // 1周をこの角度で分割する
+        const hash_angle = round / point_num;
+
+        // 円周上の点の座標を格納する配列
+        const points = [];
+
+        for (let angle = 0; angle < round; angle += hash_angle) {
+            points.push({
+                x: width * Math.cos(angle),
+                y: width * Math.sin(angle),
+            });
+        }
+
+        return points;
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {
