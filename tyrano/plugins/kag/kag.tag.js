@@ -1228,6 +1228,12 @@ tyrano.plugin.kag.tag.text = {
      * @param {jQuery} j_char_span 1文字の`<span>`のjQueryオブジェクト
      */
     makeOneCharVisible: function (j_char_span) {
+        // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
+        // span.charそのものではなくその中の子要素に対してアニメーションを当てる
+        if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
+            j_char_span = j_char_span.find(".stroke, .fill");
+        }
+
         if (this.kag.stat.font.effect != "") {
             const anim_name = "t" + this.kag.stat.font.effect;
 
@@ -1235,12 +1241,6 @@ tyrano.plugin.kag.tag.text = {
             let anim_duration = this.kag.tmp.effect_speed;
             if (!anim_duration.includes("s")) {
                 anim_duration += "ms";
-            }
-
-            // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
-            // span.charそのものではなくその中の子要素に対してアニメーションを当てる
-            if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
-                j_char_span = j_char_span.find(".stroke, .fill");
             }
 
             // アニメ―ション終了時に文字を完全表示
@@ -1266,6 +1266,11 @@ tyrano.plugin.kag.tag.text = {
      * @param {jQuery} j_char_span_children 1文字1文字の`<span>`のjQueryオブジェクトのコレクション
      */
     makeAllCharsVisible: function (j_char_span_children) {
+        // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
+        // span.charそのものではなくその中の子要素に対してアニメーションを当てる
+        if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
+            j_char_span_children = j_char_span_children.find(".stroke, .fill");
+        }
         j_char_span_children.css({
             animation: "",
             visibility: "visible",
