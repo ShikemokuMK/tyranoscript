@@ -710,16 +710,24 @@
 
     $.getOS = function () {
         if ($.isElectron()) {
-            let os = "";
-
             if (process.platform == "darwin") {
-                os = "mac";
+                return "mac";
             } else {
-                os = "win";
+                return "win";
             }
-            return os;
         } else {
-            return "";
+            const ua = window.navigator.userAgent.toLowerCase();
+            if (ua.includes("windows nt")) {
+                return "win";
+            } else if (ua.includes("android")) {
+                return "android";
+            } else if (ua.includes("iphone") || ua.includes("ipad")) {
+                return "ios";
+            } else if (ua.includes("mac os x")) {
+                return "win";
+            } else {
+                return "";
+            }
         }
     };
 

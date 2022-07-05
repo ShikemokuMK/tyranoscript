@@ -93,6 +93,16 @@ tyrano.plugin.kag.key_mouse = {
         this.map_mouse = this.keyconfig["mouse"];
         this.map_ges = this.keyconfig["gesture"];
 
+        // Windowsの場合に限りWindowsキー(KeyCode 91)に割り当てられているロールを破棄する
+        // Macの場合は⌘(コマンド)キーにKeyCode 91が割り当てられている
+        if ($.getOS() === "win") {
+            delete this.map_key["91"];
+        }
+
+        //
+        // keydown キーダウン
+        //
+
         $(document).keydown(function (e) {
             if (that.kag.stat.enable_keyconfig == true) {
                 if (that.is_keydown == true) {
@@ -123,17 +133,26 @@ tyrano.plugin.kag.key_mouse = {
             }
         });
 
+        //
+        // keyup キーアップ
+        //
+
         //keyup はコントローラーのときや押しっぱなし対応
         $(document).keyup(function (e) {
             that.is_keydown = false;
 
             var keycode = e.keyCode;
 
-            //スキップ用ホールド解除 mac と windowsでコードが違うctrl 決め打ち
-            if (keycode == 91 || keycode == 17) {
+            // いま離したキーに"スキップ"ロールが割り当てられているならスキップ解除
+            // スキップキーを押している(ホールド)間だけスキップできるようにする
+            if (that.map_key[keycode] === "skip") {
                 that.kag.setSkip(false);
             }
         });
+
+        //
+        // mousedown マウスダウン
+        //
 
         $(document).on("mousedown", function (e) {
             that.clearSkip();
@@ -156,6 +175,10 @@ tyrano.plugin.kag.key_mouse = {
                 }
             }
         });
+
+        //
+        // mousewheel マウスホイール
+        //
 
         var mousewheelevent = "onwheel" in document ? "wheel" : "onmousewheel" in document ? "mousewheel" : "DOMMouseScroll";
         $(document).on(mousewheelevent, function (e) {
@@ -203,6 +226,10 @@ tyrano.plugin.kag.key_mouse = {
 
         //スマートフォンイベント
         if ($.userenv() != "pc") {
+            //
+            // スワイプ
+            //
+
             layer_obj_click.swipe({
                 swipe: function (event, direction, distance, duration, fingerCount, fingerData) {
                     that.is_swipe = true;
@@ -225,6 +252,10 @@ tyrano.plugin.kag.key_mouse = {
 
                 fingers: "all",
             });
+
+            //
+            // タッチスタート、タッチエンド
+            //
 
             layer_obj_click
                 .on("touchstart", function () {
@@ -253,6 +284,10 @@ tyrano.plugin.kag.key_mouse = {
                 t = now;
             });
         }
+
+        //
+        // イベントレイヤのクリック
+        //
 
         layer_obj_click.click(function (e) {
             if (that.kag.tmp.ready_audio == false) {
