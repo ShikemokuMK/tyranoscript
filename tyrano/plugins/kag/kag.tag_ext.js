@@ -3347,20 +3347,8 @@ tyrano.plugin.kag.tag.filter = {
         blur: "",
     },
 
-    start: function (pm) {
-        var filter_str = "";
-
-        var j_obj = {};
-
-        if (pm.layer == "all") {
-            j_obj = $(".layer_camera");
-        } else {
-            j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
-        }
-
-        if (pm.name != "") {
-            j_obj = j_obj.find("." + pm.name);
-        }
+    buildFilterPropertyValue: function (pm) {
+        let filter_str = "";
 
         if (pm.grayscale != "") {
             filter_str += "grayscale(" + pm.grayscale + "%) ";
@@ -3398,25 +3386,27 @@ tyrano.plugin.kag.tag.filter = {
             filter_str += "blur(" + pm.blur + "px) ";
         }
 
-        j_obj.css({
-            "-webkit-filter": filter_str,
-            "-ms-filter": filter_str,
-            "-moz-filter": filter_str,
-        });
+        return filter_str;
+    },
+
+    start: function (pm) {
+        var j_obj = {};
+
+        if (pm.layer == "all") {
+            j_obj = $(".layer_camera");
+        } else {
+            j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+        }
+
+        if (pm.name != "") {
+            j_obj = j_obj.find("." + pm.name);
+        }
+
+        const filter_str = this.buildFilterPropertyValue(pm);
+
+        j_obj.setFilterCSS(filter_str);
 
         j_obj.addClass("tyrano_filter_effect");
-
-        /*
-        grayscale:"",
-        sepia:"",
-        saturate:"",
-        hue:"",
-        invert:"",
-        opacity:"",
-        brightness:"",
-        contrast:"",
-        blur:""
-        */
 
         this.kag.ftag.nextOrder();
     },
@@ -3483,6 +3473,99 @@ tyrano.plugin.kag.tag.free_filter = {
         });
 
         j_obj.removeClass("tyrano_filter_effect");
+
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[position_filter]
+
+:group
+レイヤ関連
+
+:title
+メッセージウィンドウ裏にフィルター効果
+
+:exp
+メッセージウィンドウの裏側にフィルター効果をかけることができます。
+これによって、たとえばメッセージウィンドウをすりガラスのように見せることができます。
+
+:sample
+フィルターをかける[p]
+[position_filter blur="5"]
+すりガラスのような効果[p]
+[position_filter invert="100"]
+色調反転[p]
+[position_filter grayscale="100"]
+グレースケールに[p]
+
+:param
+layer      = 対象とするメッセージレイヤを指定します。,
+page       = !!,
+grayscale  = `0`(デフォルト)～`100`を指定することで、画像の表示をグレースケールに変換できます。,
+sepia      = `0`(デフォルト)～`100`を指定することで、画像の表示をセピア調に変換できます。,
+saturate   = `0`～`100`(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。,
+hue        = `0`(デフォルト)～`360`を指定することで、画像の表示の色相を変更できます。,
+invert     = `0`(デフォルト)～`100`を指定することで、画像の表示の階調を反転させることができます。,
+opacity    = `0`～`100`(デフォルト)を指定することで、画像の表示の透過度を変更できます。,
+brightness = `100`(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。`0`で真っ暗に、`100`以上の数値でより明るくなります。,
+contrast   = `0`～`100`(デフォルト)を指定することで、画像の表示のコントラストを変更できます。,
+blur       = `0`(デフォルト)～`任意の値`を指定することで、画像の表示をぼかすことができます。
+
+:demo
+2,kaisetsu/04_filter
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.position_filter = {
+    vital: [],
+
+    pm: {
+        layer: "message0",
+        page: "fore",
+
+        grayscale: "",
+        sepia: "",
+        saturate: "",
+        hue: "",
+        invert: "",
+        opacity: "",
+        brightness: "",
+        contrast: "",
+        blur: "",
+    },
+
+    start: function (pm) {
+        // メッセージレイヤとアウター
+        const j_message_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+        const j_message_outer = j_message_layer.find(".message_outer");
+
+        // 古いフィルターは捨てる
+        j_message_layer.find(".message_filter").remove();
+
+        // アウターのクローンを作成する クラスは変更しておく message_outer → message_filter
+        const j_message_outer_clone = j_message_outer.clone();
+        j_message_outer_clone.removeClass("message_outer").addClass("message_filter");
+
+        // フィルターをかけたいだけなので背景設定はすべて取り除く
+        // フィルターを薄くしないために opacity は確定で 1
+        j_message_outer_clone.css({
+            "opacity": "1",
+            "background-image": "none",
+            "background-color": "transparent",
+        });
+
+        // pm から backdrop-filter に設定する値を組み立てて突っ込む
+        const filter_str = this.kag.ftag.master_tag.filter.buildFilterPropertyValue(pm);
+        j_message_outer_clone.css({
+            "-webkit-backdrop-filter": filter_str,
+            "backdrop-filter": filter_str,
+        });
+
+        // アウターの前に挿入するのがいいだろう
+        j_message_outer_clone.insertBefore(j_message_outer);
 
         this.kag.ftag.nextOrder();
     },

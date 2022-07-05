@@ -1551,6 +1551,18 @@
 
         return points;
     };
+
+    /**
+     * CSSのfilterプロパティに値をセット
+     * prefixを考慮
+     */
+    $.fn.setFilterCSS = function (str) {
+        this.css({
+            "-webkit-filter": str,
+            "-ms-filter": str,
+            "-moz-filter": str,
+        });
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {

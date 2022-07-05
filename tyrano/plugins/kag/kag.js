@@ -1989,11 +1989,7 @@ tyrano.plugin.kag = {
      */
     setNotSpeakerStyle: function (j_chara) {
         const filter = this.stat.apply_filter_str;
-        j_chara.css({
-            "-webkit-filter": filter,
-            "-ms-filter": filter,
-            "-moz-filter": filter,
-        });
+        j_chara.setFilterCSS(filter);
     },
 
     /**
@@ -2003,11 +1999,7 @@ tyrano.plugin.kag = {
     setSpeakerStyle: function (j_chara) {
         // 発言していない人はフィルターなし
         const filter = "";
-        j_chara.css({
-            "-webkit-filter": filter,
-            "-ms-filter": filter,
-            "-moz-filter": filter,
-        });
+        j_chara.setFilterCSS(filter);
     },
 
     test: function () {},
