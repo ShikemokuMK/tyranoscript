@@ -198,6 +198,14 @@ tyrano.plugin.kag.tag.playbgm = {
             onend: (e) => {
                 //this.j_btnPreviewBgm.parent().removeClass("soundOn");
             },
+            // ボイスの読み込みに失敗したとき
+            onloaderror: (_, e) => {
+                console.error(e);
+                that.kag.layer.showEventLayer();
+                if (pm.stop == "false") {
+                    that.kag.ftag.nextOrder();
+                }
+            },
         };
 
         //HTML5 audioを強制する
