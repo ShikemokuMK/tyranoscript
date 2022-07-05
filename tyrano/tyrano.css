@@ -485,13 +485,13 @@ body{
 .message_inner .char.text-stroke .fill {
     z-index: 1000;
     transform: translateZ(0);
+    height: 2em;
     /* 次のようなスタイルを当てることでグラデーションテキストにすることも可能 */
     /*
     background-image: repeating-linear-gradient(0deg, #B67B03 0.1em, #DAAF08 0.2em, #FEE9A0 0.3em, #DAAF08 0.4em, #B67B03 0.5em);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    height: 2em;
     /**/
 }
 

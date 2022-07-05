@@ -841,20 +841,22 @@ tyrano.plugin.kag.tag.text = {
         } else {
             // vchatモードでない場合
 
+            const font = this.kag.stat.font;
+
             // 基本のテキストスタイル
             j_span.css({
-                "color": this.kag.stat.font.color,
-                "font-weight": this.kag.stat.font.bold,
-                "font-size": this.kag.stat.font.size + "px",
-                "font-family": this.kag.stat.font.face,
-                "font-style": this.kag.stat.font.italic,
+                "color": font.color,
+                "font-weight": font.bold,
+                "font-size": font.size + "px",
+                "font-family": font.face,
+                "font-style": font.italic,
             });
 
             // 特殊な装飾
-            if (this.kag.stat.font.edge != "") {
+            if (font.edge != "") {
                 // 縁取り文字
-                const edge_str = this.kag.stat.font.edge;
-                switch (this.kag.stat.font.edge_method) {
+                const edge_str = font.edge;
+                switch (font.edge_method) {
                     default:
                     case "shadow":
                         j_span.css("text-shadow", $.generateTextShadowStrokeCSS(edge_str));
@@ -865,9 +867,9 @@ tyrano.plugin.kag.tag.text = {
                     case "stroke":
                         break;
                 }
-            } else if (this.kag.stat.font.shadow != "") {
+            } else if (font.shadow != "") {
                 // 影文字
-                j_span.css("text-shadow", "2px 2px 2px " + this.kag.stat.font.shadow);
+                j_span.css("text-shadow", "2px 2px 2px " + font.shadow);
             }
         }
     },
@@ -1365,6 +1367,13 @@ tyrano.plugin.kag.tag.text = {
 
         // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
         const j_char_span_children = j_message_span.find(".char");
+
+        // グラデーションの設定が有効の場合
+        const font = this.kag.stat.font;
+        if (font.gradient && font.gradient !== "none") {
+            const j_target = this.kag.tmp.is_text_stroke ? j_char_span_children.find(".fill") : j_char_span_children;
+            j_target.setGradientText(font.gradient);
+        }
 
         // すべてのテキストを一瞬で表示すべきなら全部表示してさっさと早期リターンしよう
         // 次のいずれかに該当するならすべてのテキストを一瞬で表示すべきである
@@ -2041,7 +2050,8 @@ marginb      = メッセージウィンドウの下余白を指定します。,
 margin       = メッセージウィンドウの余白を一括で指定します。たとえば`30`と指定すると上下左右すべてに30pxの余白ができます。<br>カンマ区切りで方向ごとの余白を一括指定することもできます。`上下,左右`、`上,左右,下`、`上,右,下,左`のように指定できます（方向の部分は数値に変えてください）。
 radius       = メッセージウィンドウの角の丸みを数値で指定します。例：`10`(控えめな角丸)、`30`(普通の角丸)、`100`(巨大な角丸),
 vertical     = メッセージウィンドウを縦書きモードにするかどうか。`true`または`false`で指定します。`true`で縦書き、`false`で横書き。,
-visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`を指定すると、同時にメッセージレイヤの表示状態を操作できます。
+visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`を指定すると、同時にメッセージレイヤの表示状態を操作できます。,
+gradient     = 背景にグラデーションを適用することができます。CSSグラデーション形式で指定します。CSSグラデーションとは、たとえば`linear-gradient(45deg, red 0%, yellow 100%)`のような形式です。<br>CSSグラデーションを簡単に作れるサイトがWeb上にいくつか存在しますので、「CSS グラデーション ジェネレーター」で検索してみてください。
 
 :demo
 1,kaisetsu/17_window_1
@@ -2142,6 +2152,17 @@ tyrano.plugin.kag.tag.position = {
 
         // アウターのスタイル情報を保存
         this.kag.stat.fuki.def_style = $.extend(true, this.kag.stat.fuki.def_style, new_style_outer);
+
+        //
+        // アウターの変更内容を[position_filter]にも反映する
+        //
+
+        const j_filter = j_message_layer.find(".message_filter");
+        if (j_filter.length > 0) {
+            ["left", "top", "width", "height", "border-radius", "border-style", "border-width"].forEach((key) => {
+                j_filter.css(key, j_message_outer.css(key));
+            });
+        }
 
         //
         // インナーのスタイル
@@ -3824,7 +3845,8 @@ edge         = 文字の縁取りを有効にできます。縁取り色を`0xRR
 edge_method  = 縁取りの実装方式を選択できます。指定できるキーワードは`shadow`または`filter`。,
 shadow       = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。影を解除する場合は`none`と指定します。,
 effect       = フォントの表示演出にアニメーションを設定できます。`none`を指定すると無効。指定できるキーワードは以下のとおり。`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``rotateIn``zoomIn``slideIn``bounceIn``vanishIn``puffIn``rollIn``none`,
-effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。
+effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。,
+gradient     = 文字にグラデーションを適用することができます。CSSグラデーション形式で指定します。CSSグラデーションとは、たとえば`linear-gradient(45deg, red 0%, yellow 100%)`のような形式です。<br>CSSグラデーションを簡単に作れるサイトがWeb上にいくつか存在しますので、「CSS グラデーション ジェネレーター」で検索してみてください。
 
 
 :demo
@@ -3849,6 +3871,10 @@ tyrano.plugin.kag.tag.font = {
 
         if (pm.color) {
             this.kag.stat.font.color = $.convertColor(pm.color);
+        }
+
+        if (pm.gradient) {
+            this.kag.stat.font.gradient = pm.gradient;
         }
 
         if (pm.bold) {
@@ -3926,7 +3952,8 @@ edge         = 文字の縁取りを有効にできます。縁取り色を`0xRR
 edge_method  = 縁取りの実装方式を選択できます。指定できるキーワードは`shadow`または`filter`。,
 shadow       = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。影を解除する場合は`none`と指定します。,
 effect       = フォントの表示演出にアニメーションを設定できます。`none`を指定すると無効。指定できるキーワードは以下。`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``rotateIn``zoomIn``slideIn``bounceIn``vanishIn``puffIn``rollIn``none`,
-effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。
+effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。,
+gradient     = 文字にグラデーションを適用することができます。CSSのグラデーション関数を指定します。グラデーション関数とは`linear-gradient(45deg, red 0%, yellow 100%)`のような文字列です。<br>グラデーション関数を簡単に作れるサイトがWeb上にいくつか存在しますので、「CSS グラデーション ジェネレーター」で検索してみてください。
 
 :demo
 1,kaisetsu/22_font
@@ -3947,6 +3974,10 @@ tyrano.plugin.kag.tag.deffont = {
 
         if (pm.color) {
             this.kag.stat.default_font.color = $.convertColor(pm.color);
+        }
+
+        if (pm.gradient) {
+            this.kag.stat.default_font.gradient = pm.gradient;
         }
 
         if (pm.bold) {

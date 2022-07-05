@@ -1571,6 +1571,33 @@
             "-moz-filter": str,
         });
     };
+
+    /**
+     * グラデーションテキストを設定する
+     * @param {string} gradient CSSのグラデーション関数文字列 linear-gradient(...)
+     */
+    $.fn.setGradientText = function (gradient) {
+        this.css({
+            "background-image": gradient,
+            "-webkit-background-clip": "text",
+            "background-clip": "text",
+            "color": "transparent",
+        });
+    };
+
+    /**
+     * グラデーションテキストを復元する
+     */
+    $.fn.restoreGradientText = function () {
+        if (this.length === 0) {
+            return;
+        }
+        const style = this.attr("style");
+        if (style && style.includes("background-clip")) {
+            const new_style = style.replace("background-clip", "-webkit-background-clip: text; background-clip");
+            this.attr("style", new_style);
+        }
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {

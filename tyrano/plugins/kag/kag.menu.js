@@ -491,6 +491,7 @@ tyrano.plugin.kag.menu = {
                         scale: 1,
                         height: that.kag.config.scHeight,
                         width: that.kag.config.scWidth,
+                        logging: that.kag.config["debugMenu.visible"] === "true",
                     };
 
                     html2canvas(tmp_base.get(0), opt).then(function (canvas) {
@@ -666,8 +667,12 @@ tyrano.plugin.kag.menu = {
         }
 
         //layerの復元
-        console.log(data.layer);
+        //console.log(data.layer);
         this.kag.layer.setLayerHtml(data.layer);
+
+        // グラデーションテキストの復元
+        $(".char").restoreGradientText();
+        $(".char .fill").restoreGradientText();
 
         //バックログの初期化
         //awakegame考慮もれ。一旦戻す
