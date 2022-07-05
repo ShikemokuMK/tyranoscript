@@ -1355,6 +1355,12 @@
      * @returns {EdgeOption[]}
      */
     $.parseEdgeOptions = function (edge_str) {
+        // キャッシュを活用
+        const cache_map = $.parseEdgeOptions.cache;
+        if (edge_str in cache_map) {
+            return cache_map[edge_str];
+        }
+
         // 戻り値となるEdgeの配列
         const edges = [];
 
@@ -1391,8 +1397,10 @@
                 edges.push({ color, width, total_width });
             }
         }
+        cache_map[edge_str] = edges;
         return edges;
     };
+    $.parseEdgeOptions.cache = {};
 
     /**
      * 縁取りしたいDOM要素のスタイルのfilterプロパティにセットするべき値を生成する

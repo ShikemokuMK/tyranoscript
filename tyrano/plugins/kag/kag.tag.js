@@ -534,6 +534,7 @@ tyrano.plugin.kag.tag.text = {
     default_message_config: {
         ch_speed_in_click: "1",
         effect_speed_in_click: "100ms",
+        edge_overlap_text: "false",
     },
 
     /**
@@ -729,11 +730,20 @@ tyrano.plugin.kag.tag.text = {
             should_use_inline_block = false;
         }
 
+        // -webkit-text-strokeによる縁取りを行うかどうか
+        this.kag.tmp.is_text_stroke = this.kag.stat.font.edge && this.kag.stat.font.edge_method === "stroke";
+
+        // -webkit-text-strokeによる縁取りを行う場合に限り縁取り情報をパースしておく
+        this.kag.tmp.text_stroke_edges = this.kag.tmp.is_text_stroke ? $.parseEdgeOptions(this.kag.stat.font.edge) : null;
+
+        // 縁を前の文字に重ねるかどうか
+        this.kag.tmp.is_edge_overlap = this.getMessageConfig("edge_overlap_text") === "true";
+
         // message_str からHTMLを生成する
         // 入力例) "かきく"
         // 出力例) "<span>か</span><span>き</span><span>く</span>"
         // 各<span>には opacity: 0; が適用されており透明な状態
-        const message_html = this.makeMessageHTML(message_str, should_use_inline_block);
+        const message_html = this.buildMessageHTML(message_str, should_use_inline_block);
 
         // 生成したHTMLを<span>でラップする
         const j_message_span = $(`<span>${message_html}</span>`);
@@ -852,6 +862,8 @@ tyrano.plugin.kag.tag.text = {
                     case "filter":
                         j_span.css("filter", $.generateDropShadowStrokeCSS(edge_str));
                         break;
+                    case "stroke":
+                        break;
                 }
             } else if (this.kag.stat.font.shadow != "") {
                 // 影文字
@@ -891,12 +903,12 @@ tyrano.plugin.kag.tag.text = {
      * @param {boolean} should_use_inline_block
      * @returns {string}
      */
-    makeMessageHTML: function (message_str, should_use_inline_block = true) {
-        var message_html = "";
+    buildMessageHTML: function (message_str, should_use_inline_block = true) {
+        let message_html = "";
 
-        for (var i = 0; i < message_str.length; i++) {
+        for (let i = 0; i < message_str.length; i++) {
             // 1文字ずつ見ていく
-            var c = message_str.charAt(i);
+            let c = message_str.charAt(i);
 
             // ルビ指定がされている場合は<ruby>で囲う
             if (this.kag.stat.ruby_str != "") {
@@ -919,15 +931,62 @@ tyrano.plugin.kag.tag.text = {
                     this.kag.stat.mark = 0;
                 }
 
-                // 禁則処理するかどうかで場合分け
-                if (should_use_inline_block) {
-                    message_html += `<span class="char" style="opacity:0;display:inline-block;">${c}</span>`;
+                if (!this.kag.tmp.is_text_stroke) {
+                    // 通常はこちら
+                    if (should_use_inline_block) {
+                        message_html += `<span class="char" style="opacity:0;display:inline-block;">${c}</span>`;
+                    } else {
+                        message_html += `<span class="char" style="opacity:0">${c}</span>`;
+                    }
                 } else {
-                    message_html += `<span class="char" style="opacity:0">${c}</span>`;
+                    // -webkit-text-strokeによる縁取りを行なう場合
+                    message_html += this.buildTextStrokeChar(c);
                 }
             }
         }
         return message_html;
+    },
+
+    /**
+     * -webkit-text-strokeで文字を縁取りするためのHTMLを組み立てる
+     * @param {string} c 縁取りする1文字
+     * @returns {string} ビルドされたHTML文字列
+     */
+    buildTextStrokeChar: function (c) {
+        let char_html = "";
+
+        // span.char.text-stroke の開始
+        if (this.kag.tmp.is_edge_overlap) {
+            // 縁取りをひとつ前の文字に重ねてもいい場合は z-index: 10; をセット
+            // スタックコンテキストが生成されるため重なり順に影響が出る
+            char_html += `<span class="char text-stroke" style="z-index:10;opacity:0;">`;
+        } else {
+            char_html += `<span class="char text-stroke">`;
+        }
+
+        // チラつきを無くすおまじない
+        // 巨大な文字を加えておくことでレンダリングエリアを広げる効果がある(透明にしておく)
+        char_html += `<span class="dummy" style="transform: scale(2);">${c}</span>`;
+
+        // テキストの縁取り部分を作成
+        for (let i = this.kag.tmp.text_stroke_edges.length - 1; i >= 0; i--) {
+            const edge = this.kag.tmp.text_stroke_edges[i];
+            let style = `-webkit-text-stroke: ${edge.total_width * 2}px ${edge.color};z-index:${100 - i};`;
+            if (this.kag.tmp.is_edge_overlap) {
+                style += "opacity:1;";
+            }
+            char_html += `<span class="stroke" style="${style}">${c}</span>`;
+        }
+
+        // テキストの本体を作成
+        let style = this.kag.tmp.is_edge_overlap ? "opacity:1;" : "";
+        char_html += `<span class="fill" style="${style}">${c}</span>`;
+
+        // 上の要素はいずれも absolute なため width, height の構成要件にならない
+        // relative, inline なダミーを追加して width, height を確保する
+        char_html += `<span class="dummy" style="position:relative;display:inline;">${c}</span>`;
+
+        return char_html + `</span>`;
     },
 
     /**
@@ -1176,6 +1235,12 @@ tyrano.plugin.kag.tag.text = {
                 anim_duration += "ms";
             }
 
+            // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
+            // span.charそのものではなくその中の子要素に対してアニメーションを当てる
+            if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
+                j_char_span = j_char_span.find(".stroke, .fill");
+            }
+
             // アニメ―ション終了時に文字を完全表示
             j_char_span.on("animationend", function (e) {
                 j_char_span.removeClass("animchar");
@@ -1267,7 +1332,7 @@ tyrano.plugin.kag.tag.text = {
                 if (!effect_speed_in_click.includes("s")) {
                     effect_speed_in_click += "ms";
                 }
-                j_msg_inner.find(".char.animchar").css({
+                j_msg_inner.find(".animchar").css({
                     "animation-duration": effect_speed_in_click,
                 });
             }
@@ -3944,15 +4009,17 @@ tyrano.plugin.kag.tag.deffont = {
 
 :exp
 メッセージに関連する詳細な設定を行えます。
+省略した属性の設定は変更されません。
 
 :param
-ch_speed_in_click     = 文字表示の途中でクリックされたあとの文字表示速度（1文字あたりの表示時間をミリ秒で指定）,
-effect_speed_in_click = 文字表示の途中でクリックされたあとの文字エフェクト速度,
+ch_speed_in_click     = 文字表示の途中でクリックされたあとの文字表示速度。1文字あたりの表示時間をミリ秒で指定します。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
+effect_speed_in_click = 文字表示の途中でクリックされたあとの文字エフェクト速度。`0.2s`、`200ms`、あるいは単に`200`などで指定します。例はいずれも200ミリ秒となります。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
+edge_overlap_text     = 縁取りテキストの縁をひとつ前の文字に重ねるかどうか。`true`または`false`で指定します。
 
 :sample
 [message_config ch_speed_in_click="5" effect_speed_in_click="100ms"]
 
-;クリックされたら瞬間表示
+;クリックされたら残りを瞬間表示
 [message_config ch_speed_in_click="0" effect_speed_in_click="0ms"]
 
 #[end]
