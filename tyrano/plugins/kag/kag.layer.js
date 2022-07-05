@@ -193,6 +193,16 @@ tyrano.plugin.kag.layer = {
         this.showFixLayer();
     },
 
+    showLayer: function (j_layer) {
+        j_layer.css("display", "");
+        j_layer.attr("l_visible", "true");
+    },
+
+    hideLayer: function (j_layer) {
+        j_layer.css("display", "none");
+        j_layer.attr("l_visible", "false");
+    },
+
     showFixLayer: function () {
         $(".fixlayer").show();
     },

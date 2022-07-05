@@ -721,10 +721,11 @@ tyrano.plugin.kag.tag.text = {
         }
 
         // 1文字1文字を包む span に inline-block を適用するかどうか
+        // エフェクトによって文字を transform で動かすためには inline-block でなければならない！
         let should_use_inline_block = true;
         if (this.kag.stat.font.effect == "" || this.kag.stat.font.effect == "fadeIn") {
-            // エフェクトなしか単純フェードインの場合は inline
-            // つまり英単語や句読点の禁則処理が有効になる
+            // エフェクトなし、あるいはただのフェードインの場合は inline でも動くので inline にする
+            // inline にしておくと英単語や句読点の禁則処理が有効になるので便利
             should_use_inline_block = false;
         }
 
@@ -1966,37 +1967,38 @@ tyrano.plugin.kag.tag.current = {
 レイヤ関連
 
 :title
-メッセージレイヤの属性変更
+メッセージウィンドウの属性変更
 
 :exp
-メッセージレイヤに対する様々な属性を指定します。
+メッセージウィンドウに対する様々な属性を指定します。
 いずれの属性も、省略すれば設定は変更されません。
 
 :sample
-;メッセージレイヤの位置とサイズを変更
+;メッセージウィンドウの位置とサイズを変更
 [position width=400 height=300 top=100 left=20]
-;メッセージレイヤの色と透明度を変更
+;メッセージウィンドウの色と透明度を変更
 [position color=blue opacity=100]
 
 :param
 layer        = 対象とするメッセージレイヤを指定します。,
 page         = !!,
-left         = メッセージレイヤの左端位置を指定します。（ピクセル）,
-top          = メッセージレイヤの上端位置を指定します。（ピクセル）,
-width        = メッセージレイヤの横幅を指定します。（ピクセル）,
-height       = メッセージレイヤの高さを指定します。（ピクセル）,
-frame        = <p>メッセージレイヤのフレーム画像として表示させる画像を指定します。メッセージエリアをカスタマイズしたい場合に利用できます。</p><p>画像サイズは`width`と`height`属性に準じて調整してください。`margin`属性で実際にメッセージが表示される箇所の調整も行いましょう。</p><p>`none`と指定することで標準枠に戻すこともできます。,
-color        = メッセージレイヤの表示色を`0xRRGGBB`形式で指定します。 ,
+left         = メッセージウィンドウの左端位置を指定します。（ピクセル）,
+top          = メッセージウィンドウの上端位置を指定します。（ピクセル）,
+width        = メッセージウィンドウの横幅を指定します。（ピクセル）,
+height       = メッセージウィンドウの高さを指定します。（ピクセル）,
+frame        = <p>メッセージウィンドウのフレーム画像として表示させる画像を指定します。</p><p>画像サイズは`width`と`height`属性に準じて調整してください。`margin`属性で実際にメッセージが表示される箇所の調整も行いましょう。</p><p>`none`と指定することで標準枠に戻すこともできます。,
+color        = メッセージウィンドウの表示色を`0xRRGGBB`形式で指定します。 ,
 border_color = 外枠の線が有効な場合の色を`0xRRGGBB`形式で指定します。`border_size`属性の指定が同時に必要です,
 border_size  = 外枠の線が有効な場合の太さを指定します。`0`を指定すると外枠は表示されません。初期値は`0`です。,
-opacity      = メッセージレイヤの不透明度を`0`～`255`の数値で指定します。`0`で完全に透明。（文字の不透明度や、レイヤ自体の不透明度ではありません）,
-marginl      = メッセージレイヤの左余白を指定します。,
-margint      = メッセージレイヤの上余白を指定します。,
-marginr      = メッセージレイヤの右余白を指定します。,
-marginb      = メッセージレイヤの下余白を指定します。,
-radius       = メッセージレイヤの角の丸みを数値で指定します。例：`10`(控えめな角丸)、`30`(普通の角丸)、`100`(巨大な角丸),
-vertical     = メッセージレイヤを縦書きモードにするかどうか。`true`または`false`で指定します。`true`で縦書き、`false`で横書き。,
-visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`で指定します。
+opacity      = メッセージウィンドウの不透明度を`0`～`255`の数値で指定します。`0`で完全に透明。（文字の不透明度や、レイヤ自体の不透明度ではありません）,
+marginl      = メッセージウィンドウの左余白を指定します。,
+margint      = メッセージウィンドウの上余白を指定します。,
+marginr      = メッセージウィンドウの右余白を指定します。,
+marginb      = メッセージウィンドウの下余白を指定します。,
+margin       = メッセージウィンドウの余白を一括で指定します。たとえば`30`と指定すると上下左右すべてに30pxの余白ができます。<br>カンマ区切りで方向ごとの余白を一括指定することもできます。`上下,左右`、`上,左右,下`、`上,右,下,左`のように指定できます（方向の部分は数値に変えてください）。
+radius       = メッセージウィンドウの角の丸みを数値で指定します。例：`10`(控えめな角丸)、`30`(普通の角丸)、`100`(巨大な角丸),
+vertical     = メッセージウィンドウを縦書きモードにするかどうか。`true`または`false`で指定します。`true`で縦書き、`false`で横書き。,
+visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`を指定すると、同時にメッセージレイヤの表示状態を操作できます。
 
 :demo
 1,kaisetsu/17_window_1
@@ -2019,109 +2021,156 @@ tyrano.plugin.kag.tag.position = {
         radius: "",
         border_color: "",
         border_size: "",
-        marginl: "0", //左余白
-        margint: "0", //上余白
-        marginr: "0", //右余白
-        marginb: "0", //下余白
-
+        marginl: "", //左余白
+        margint: "", //上余白
+        marginr: "", //右余白
+        marginb: "", //下余白
+        margin: "", //一括余白
+        gradient: "",
+        visible: "",
         next: "true",
     },
 
     start: function (pm) {
-        //指定のレイヤを取得
-        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_outer");
+        // メッセージレイヤ、アウター、インナー
+        const j_message_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+        const j_message_outer = j_message_layer.find(".message_outer");
+        const j_message_inner = j_message_layer.find(".message_inner");
 
-        var new_style = {};
-
-        if (pm.left != "") new_style["left"] = pm.left + "px";
-        if (pm.top != "") new_style["top"] = pm.top + "px";
-        if (pm.width != "") new_style["width"] = pm.width + "px";
-        if (pm.height != "") new_style["height"] = pm.height + "px";
-        if (pm.color != "") new_style["background-color"] = $.convertColor(pm.color);
-
-        if (pm.radius != "") {
-            new_style["border-radius"] = parseInt(pm.radius) + "px";
+        if (pm.visible !== "") {
+            if (pm.visible === "true") {
+                this.kag.layer.showLayer(j_message_layer);
+            } else {
+                this.kag.layer.hideLayer(j_message_layer);
+            }
         }
 
-        if (pm.border_size != "") {
-            new_style["border-width"] = parseInt(pm.border_size) + "px";
-            target_layer.css("border-style", "solid");
+        //
+        // アウターのスタイル
+        //
+
+        const new_style_outer = {};
+
+        if (pm.left !== "") new_style_outer["left"] = pm.left + "px";
+        if (pm.top !== "") new_style_outer["top"] = pm.top + "px";
+        if (pm.width !== "") new_style_outer["width"] = pm.width + "px";
+        if (pm.height !== "") new_style_outer["height"] = pm.height + "px";
+        if (pm.radius !== "") {
+            new_style_outer["border-radius"] = parseInt(pm.radius) + "px";
+        }
+        if (pm.border_size !== "") {
+            new_style_outer["border-width"] = parseInt(pm.border_size) + "px";
+            j_message_outer.css("border-style", "solid");
+        }
+        if (pm.border_color !== "") {
+            new_style_outer["border-color"] = $.convertColor(pm.border_color);
+        }
+        if (pm.opacity !== "") {
+            new_style_outer["opacity"] = $.convertOpacity(pm.opacity);
+        }
+        if (pm.color !== "") {
+            new_style_outer["background-color"] = $.convertColor(pm.color);
+            j_message_outer.css("background-image", "");
+        }
+        if (pm.gradient !== "") {
+            new_style_outer["background-image"] = pm.gradient;
         }
 
-        if (pm.border_color != "") {
-            new_style["border-color"] = $.convertColor(pm.border_color);
-        }
-
-        //背景フレーム画像の設定 透明度も自分で設定する
-
+        // 背景フレームの設定 単色か画像か
         if (pm.frame == "none") {
-            target_layer.css("opacity", $.convertOpacity(this.kag.config.frameOpacity));
-            target_layer.css("background-image", "");
-            target_layer.css("background-color", $.convertColor(this.kag.config.frameColor));
-        } else if (pm.frame != "") {
-            var storage_url = "";
-
+            // 単色
+            j_message_outer.css("background-image", "");
+            j_message_outer.css("background-color", $.convertColor(this.kag.config.frameColor));
+        } else if (pm.frame !== "") {
+            // 画像のパス
+            let storage_url = "";
             if ($.isHTTP(pm.frame)) {
                 storage_url = pm.frame;
             } else {
-                storage_url = "./data/image/" + pm.frame + "";
+                storage_url = "./data/image/" + pm.frame;
             }
-
-            target_layer.css("background-image", "url(" + storage_url + ")");
-            target_layer.css("background-repeat", "no-repeat");
-            target_layer.css("opacity", 1);
-            target_layer.css("background-color", "");
+            j_message_outer.css("background-image", "url(" + storage_url + ")");
+            j_message_outer.css("background-repeat", "no-repeat");
+            j_message_outer.css("background-color", "");
         }
 
-        if (pm.opacity != "") {
-            new_style["opacity"] = $.convertOpacity(pm.opacity);
-        }
+        // アウターにスタイルを当てる
+        this.kag.setStyles(j_message_outer, new_style_outer);
 
-        //outer のレイヤを変更
-        this.kag.setStyles(target_layer, new_style);
+        // アウターのスタイル情報を保存
+        this.kag.stat.fuki.def_style = $.extend(true, this.kag.stat.fuki.def_style, new_style_outer);
 
-        //outerレイヤを保存
-        this.kag.stat.fuki.def_style = $.extend(true, this.kag.stat.fuki.def_style, new_style);
+        //
+        // インナーのスタイル
+        //
 
-        //複数のレイヤに影響がでないように。
+        // インナーのリフレッシュ
+        // インナーの left, top, width, height を操作して全体的にアウターの10px内側に収まるようにする処理
         this.kag.layer.refMessageLayer(pm.layer);
 
-        //message_inner のスタイルを変更する必要もある
-
-        var layer_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
-
-        //縦書き指定
+        // 縦書き指定
         if (pm.vertical != "") {
             if (pm.vertical == "true") {
                 this.kag.stat.vertical = "true";
-                layer_inner.find("p").addClass("vertical_text");
+                j_message_inner.find("p").addClass("vertical_text");
             } else {
                 this.kag.stat.vertical = "false";
-                layer_inner.find("p").removeClass("vertical_text");
+                j_message_inner.find("p").removeClass("vertical_text");
             }
         }
 
-        var new_style_inner = {};
+        // インナーに box-sizing: border-box を採用
+        // https://developer.mozilla.org/ja/docs/Web/CSS/box-sizing
+        // 旧実装では marginr, marginb を実現するために width, height を操作していたが
+        // [position]タグ実行時には必ず上のインナーリフレッシュによって width, height が破壊されてしまうため、
+        // 『marginr, marginb が指定されていない[position]タグ』を通過するときにそれまでの marginr, marginb が破棄される問題があった
+        // (タグリファレンスの『いずれの属性も、指定しなければ変更は行われません。』という説明と矛盾していた)
+        const new_style_inner = {
+            "box-sizing": "border-box",
+        };
 
-        if (pm.marginl != "0") new_style_inner["padding-left"] = parseInt(pm.marginl) + "px";
-        if (pm.margint != "0") new_style_inner["padding-top"] = parseInt(pm.margint) + "px";
-
-        if (pm.marginr != "0") {
-            new_style_inner["width"] = parseInt(layer_inner.css("width")) - parseInt(pm.marginr) - parseInt(pm.marginl) + "px";
-            this.kag.stat.fuki.marginr = parseInt(pm.marginr);
+        // marginパラメータで一括指定
+        if (pm.margin !== "") {
+            const hash = pm.margin.split(",");
+            switch (hash.length) {
+                default:
+                case 1:
+                    pm.margint = pm.marginr = pm.marginb = pm.marginl = pm.margin;
+                    break;
+                case 2:
+                    pm.margint = pm.marginb = hash[0];
+                    pm.marginl = pm.marginr = hash[1];
+                    break;
+                case 3:
+                    pm.margint = hash[0];
+                    pm.marginl = pm.marginr = hash[1];
+                    pm.marginb = hash[2];
+                    break;
+                case 4:
+                    pm.margint = hash[0];
+                    pm.marginr = hash[1];
+                    pm.marginb = hash[2];
+                    pm.marginl = hash[3];
+                    break;
+            }
         }
 
-        if (pm.marginb != "0") {
-            new_style_inner["height"] = parseInt(layer_inner.css("height")) - parseInt(pm.marginb) - parseInt(pm.margint) + "px";
+        if (pm.marginl !== "") new_style_inner["padding-left"] = parseInt(pm.marginl) + "px";
+        if (pm.margint !== "") new_style_inner["padding-top"] = parseInt(pm.margint) + "px";
+        if (pm.marginr !== "") {
+            new_style_inner["padding-right"] = parseInt(pm.marginr) + "px";
+            this.kag.stat.fuki.marginr = parseInt(pm.marginr);
+        }
+        if (pm.marginb !== "") {
+            new_style_inner["padding-bottom"] = parseInt(pm.marginb) + "px";
             this.kag.stat.fuki.marginb = parseInt(pm.marginb);
         }
 
-        this.kag.setStyles(layer_inner, new_style_inner);
+        // インナーにスタイルを当てる
+        this.kag.setStyles(j_message_inner, new_style_inner);
 
-        //innerレイヤを保存
+        // インナーのスタイル情報を保存
         this.kag.stat.fuki.def_style_inner = $.extend(true, this.kag.stat.fuki.def_style_inner, new_style_inner);
-
-        //レイヤーをリフレッシュする
 
         if (pm.next == "true") {
             this.kag.ftag.nextOrder();
@@ -3924,6 +3973,9 @@ effect_speed_in_click = 文字表示の途中でクリックされたあとの�
 
 :sample
 [message_config ch_speed_in_click="5" effect_speed_in_click="100ms"]
+
+;クリックされたら瞬間表示
+[message_config ch_speed_in_click="0" effect_speed_in_click="0ms"]
 
 #[end]
 */
