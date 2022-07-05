@@ -1949,6 +1949,67 @@ tyrano.plugin.kag = {
         }
     },
 
+    /**
+     * 発言者の名前欄を意味する<p>要素のjQueryオブジェクトを返す
+     * そもそも[chara_config]タグによる chara_ptext の設定が済んでいない場合は空のjQueryオブジェクトを返す
+     * @returns {jQuery}
+     */
+    getCharaNameArea: function () {
+        return this.stat.chara_ptext ? $("." + this.stat.chara_ptext) : $();
+    },
+
+    /**
+     * 発言者の名前を返す
+     * 発言者がいない場合は空の文字列を返す
+     * @returns {string}
+     */
+    getCharaName: function () {
+        var chara_name = "";
+        if (this.stat.chara_ptext != "") {
+            chara_name = $.isNull($("." + this.stat.chara_ptext).html());
+        }
+        return chara_name;
+    },
+
+    /**
+     * キャラクターのjQueryオブジェクトを返す
+     * @returns {jQuery}
+     */
+    getCharaElement: function (chara_name) {
+        let selector = ".tyrano_chara";
+        if (chara_name) {
+            selector += "." + chara_name;
+        }
+        return $("#tyrano_base").find(selector);
+    },
+
+    /**
+     * 発言していない人用のスタイルを当てる
+     * @param {jQuery} j_chara
+     */
+    setNotSpeakerStyle: function (j_chara) {
+        const filter = this.stat.apply_filter_str;
+        j_chara.css({
+            "-webkit-filter": filter,
+            "-ms-filter": filter,
+            "-moz-filter": filter,
+        });
+    },
+
+    /**
+     * 発言者用のスタイルを当てる
+     * @param {jQuery} j_chara
+     */
+    setSpeakerStyle: function (j_chara) {
+        // 発言していない人はフィルターなし
+        const filter = "";
+        j_chara.css({
+            "-webkit-filter": filter,
+            "-ms-filter": filter,
+            "-moz-filter": filter,
+        });
+    },
+
     test: function () {},
 };
 

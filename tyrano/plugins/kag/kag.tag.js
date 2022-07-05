@@ -674,7 +674,7 @@ tyrano.plugin.kag.tag.text = {
      */
     showMessage: function (message_str, is_vertical) {
         // 現在の発言者名（誰も喋っていない場合は空の文字列）
-        const chara_name = this.getCharaName();
+        const chara_name = this.kag.getCharaName();
 
         // バックログにテキストを追加
         this.pushTextToBackLog(chara_name, message_str);
@@ -758,28 +758,6 @@ tyrano.plugin.kag.tag.text = {
         }
 
         this.addChars(j_message_span, j_msg_inner);
-    },
-
-    /**
-     * 発言者の名前欄を意味する<p>要素のjQueryオブジェクトを返す
-     * そもそも[chara_config]タグによる chara_ptext の設定が済んでいない場合は空のjQueryオブジェクトを返す
-     * @returns {jQuery}
-     */
-    getCharaNameArea: function () {
-        return this.kag.stat.chara_ptext ? $("." + this.kag.stat.chara_ptext) : $();
-    },
-
-    /**
-     * 発言者の名前を返す
-     * 発言者がいない場合は空の文字列を返す
-     * @returns {string}
-     */
-    getCharaName: function () {
-        var chara_name = "";
-        if (this.kag.stat.chara_ptext != "") {
-            chara_name = $.isNull($("." + this.kag.stat.chara_ptext).html());
-        }
-        return chara_name;
     },
 
     /**
@@ -963,7 +941,7 @@ tyrano.plugin.kag.tag.text = {
         this.kag.stat.is_hide_message = false;
 
         // chara_name_area の隠蔽
-        this.getCharaNameArea().hide();
+        this.kag.getCharaNameArea().hide();
 
         // そもそも発言者が空欄ならothers用のふきだし処理にぶん投げる！(早期リターン)
         if (chara_jname == "") {

@@ -1461,87 +1461,86 @@ tyrano.plugin.kag.tag.chara_ptext = {
     },
 
     start: function (pm) {
-        var that = this;
         this.kag.layer.hideEventLayer();
+        const j_chara_name = this.kag.getCharaNameArea();
+
+        //
+        // 発言者名
+        //
 
         if (pm.name == "") {
-            $("." + this.kag.stat.chara_ptext).html("");
+            // 誰も話していない
+            j_chara_name.html("");
 
-            //全員の明度を下げる。誰も話していないから
-            //明度設定が有効な場合
+            // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
             if (this.kag.stat.chara_talk_focus != "none") {
-                $("#tyrano_base").find(".tyrano_chara").css({
-                    "-webkit-filter": this.kag.stat.apply_filter_str,
-                    "-ms-filter": this.kag.stat.apply_filter_str,
-                    "-moz-filter": this.kag.stat.apply_filter_str,
-                });
+                this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
             }
         } else {
-            //日本語から逆変換することも可能とする
+            // 誰かが話している
+
+            // 日本語で指定されていた場合はIDに直す
+            // 例) "あかね" → "akane"
             if (this.kag.stat.jcharas[pm.name]) {
                 pm.name = this.kag.stat.jcharas[pm.name];
             }
 
-            var cpm = this.kag.stat.charas[pm.name];
-
+            // キャラクター定義を取得
+            const cpm = this.kag.stat.charas[pm.name];
             if (cpm) {
-                //キャラクター名出力
-                $("." + this.kag.stat.chara_ptext).html(cpm.jname);
+                // キャラクターが取得できた場合
 
-                //色指定がある場合は、その色を指定する。
+                // キャラクター名出力
+                j_chara_name.html(cpm.jname);
+
+                // 色指定がある場合は、その色を指定する。
                 if (cpm.color != "") {
-                    $("." + this.kag.stat.chara_ptext).css("color", $.convertColor(cpm.color));
+                    j_chara_name.css("color", $.convertColor(cpm.color));
                 }
 
-                //明度設定が有効な場合
+                const j_chara_speaker = this.kag.getCharaElement(pm.name);
+
+                // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当ててから
+                // 発言者にのみ発言者用のスタイルを当てる
                 if (this.kag.stat.chara_talk_focus != "none") {
-                    $("#tyrano_base").find(".tyrano_chara").css({
-                        "-webkit-filter": this.kag.stat.apply_filter_str,
-                        "-ms-filter": this.kag.stat.apply_filter_str,
-                        "-moz-filter": this.kag.stat.apply_filter_str,
-                    });
-
-                    $("#tyrano_base")
-                        .find("." + pm.name + ".tyrano_chara")
-                        .css({
-                            "-webkit-filter": "brightness(100%) blur(0px)",
-                            "-ms-filter": "brightness(100%) blur(0px)",
-                            "-moz-filter": "brightness(100%) blur(0px)",
-                        });
+                    this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
+                    this.kag.setSpeakerStyle(j_chara_speaker);
                 }
 
-                //指定したキャラクターでアニメーション設定があった場合
-                if (this.kag.stat.chara_talk_anim != "none") {
-                    var chara_obj = $("#tyrano_base").find("." + pm.name + ".tyrano_chara");
-                    if (chara_obj.get(0)) {
-                        this.animChara(chara_obj, this.kag.stat.chara_talk_anim, pm.name);
-
-                        if (pm.face != "") {
-                            //即表情変更、アニメーション中になるから
-                            this.kag.ftag.startTag("chara_mod", {
-                                name: pm.name,
-                                face: pm.face,
-                                time: "0",
-                            });
-                        }
+                // 発言時アニメーション機能が有効な場合
+                if (this.kag.stat.chara_talk_anim != "none" && j_chara_speaker.get(0)) {
+                    let timeout = 0;
+                    if (pm.face != "") {
+                        // 表情の指定があれば一瞬で変更する！このあとアニメーションになるから
+                        this.kag.ftag.startTag("chara_mod", {
+                            name: pm.name,
+                            face: pm.face,
+                            next: "false",
+                            time: "0",
+                        });
+                        // [chara_mod]は非同期処理(プリロードを挟む)なのでタイムアウトを付ける
+                        timeout = 10;
                     }
+                    // アニメ―ションを再生
+                    $.setTimeout(() => {
+                        this.animChara(j_chara_speaker, this.kag.stat.chara_talk_anim, pm.name);
+                    }, timeout);
                 }
             } else {
-                //存在しない場合はそのまま表示できる
-                $("." + this.kag.stat.chara_ptext).html(pm.name);
+                // キャラクター定義が存在しない場合は指定ワードをそのまま表示
+                j_chara_name.html(pm.name);
 
-                //存在しない場合は全員の明度を下げる。
+                // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
                 if (this.kag.stat.chara_talk_focus != "none") {
-                    $("#tyrano_base").find(".tyrano_chara").css({
-                        "-webkit-filter": this.kag.stat.apply_filter_str,
-                        "-ms-filter": this.kag.stat.apply_filter_str,
-                        "-moz-filter": this.kag.stat.apply_filter_str,
-                    });
+                    this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
                 }
             }
         }
 
-        //ボイス設定が有効な場合
+        //
+        // ボイス設定
+        //
+
         if (this.kag.stat.vostart == true) {
             //キャラクターのボイス設定がある場合
 
@@ -1565,32 +1564,19 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
         this.kag.stat.f_chara_ptext = "true";
 
-        //表情の変更もあわせてできる
-        if (pm.face != "") {
-            if (!this.kag.stat.charas[pm.name]["map_face"][pm.face]) {
-                this.kag.error(
-                    "指定されたキャラクター「" +
-                        pm.name +
-                        "」もしくはface:「" +
-                        pm.face +
-                        "」は定義されていません。もう一度確認をお願いします",
-                );
-                return;
-            }
+        //
+        // 表情の変更もあわせてできる
+        //
 
-            var storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
-
-            //chara_mod タグで実装するように調整
-            if (this.kag.stat.chara_talk_anim == "none") {
-                this.kag.ftag.startTag("chara_mod", {
-                    name: pm.name,
-                    face: pm.face,
-                });
-            }
-
-            //$("."+pm.name).attr("src",storage_url);
+        this.kag.layer.showEventLayer();
+        if (pm.face != "" && this.kag.stat.chara_talk_anim == "none") {
+            // ※発言時アニメーション機能が有効な場合はすでに上のほうで表情変更済み
+            // [chara_mod]に丸投げする！ nextOrder もこれに任せる
+            this.kag.ftag.startTag("chara_mod", {
+                name: pm.name,
+                face: pm.face,
+            });
         } else {
-            this.kag.layer.showEventLayer();
             this.kag.ftag.nextOrder();
         }
     },
@@ -2548,6 +2534,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         time: "",
         cross: "true",
         wait: "true",
+        next: "true",
     },
 
     start: function (pm) {
@@ -2586,7 +2573,9 @@ tyrano.plugin.kag.tag.chara_mod = {
             this.kag.stat.charas[pm.name]["storage"] = storage_url;
             this.kag.stat.charas[pm.name]["reflect"] = pm.reflect;
             this.kag.layer.showEventLayer();
-            this.kag.ftag.nextOrder();
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
             return;
         }
 
@@ -2622,7 +2611,9 @@ tyrano.plugin.kag.tag.chara_mod = {
         //storageが指定されていない場合は終わり
         if (storage_url == "") {
             that.kag.layer.showEventLayer();
-            this.kag.ftag.nextOrder();
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
             return;
         }
 
@@ -2660,7 +2651,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
                             if (pm.wait == "true") {
                                 that.kag.layer.showEventLayer();
-                                that.kag.ftag.nextOrder();
+                                if (pm.next !== "false") {
+                                    that.kag.ftag.nextOrder();
+                                }
                             }
                         });
                     } else {
@@ -2668,7 +2661,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
                         if (pm.wait == "true") {
                             that.kag.layer.showEventLayer();
-                            that.kag.ftag.nextOrder();
+                            if (pm.next !== "false") {
+                                that.kag.ftag.nextOrder();
+                            }
                         }
                     }
                 });
@@ -2685,7 +2680,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
                 if (pm.wait == "true") {
                     that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
+                    if (pm.next !== "false") {
+                        that.kag.ftag.nextOrder();
+                    }
                 }
             }
 
@@ -2694,7 +2691,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
             if (pm.wait == "false") {
                 that.kag.layer.showEventLayer();
-                that.kag.ftag.nextOrder();
+                if (pm.next !== "false") {
+                    that.kag.ftag.nextOrder();
+                }
             }
         });
     },
