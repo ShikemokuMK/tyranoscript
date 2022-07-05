@@ -528,7 +528,27 @@ tyrano.plugin.kag.tag.text = {
         backlog: "add" /*バックログ用の文字列。改行するかどうか。add join */,
     },
 
-    //実行
+    /**
+     * メッセージ関連のデフォルトのコンフィグ
+     */
+    default_message_config: {
+        ch_speed_in_click: "1",
+        effect_speed_in_click: "100ms",
+    },
+
+    /**
+     * メッセージ関連のコンフィグを取り出す
+     * 基本的にstat.message_configから取り出すがそれが不可の場合はdefault_message_configを参照
+     * (旧バージョンのセーブデータではstat.message_configが定義されていない点に留意)
+     * @param {string} key
+     * @returns {*}
+     */
+    getMessageConfig: function (key) {
+        const config = this.kag.stat.message_config || {};
+        return config[key] || this.default_message_config[key];
+    },
+
+    // 実行
     start: function (pm) {
         // スクリプト解析状態の場合は早期リターン
         if (this.kag.stat.is_script == true) {
@@ -736,7 +756,7 @@ tyrano.plugin.kag.tag.text = {
             this.adjustFukiSize(j_msg_inner, chara_name);
         }
 
-        this.addChars(j_message_span);
+        this.addChars(j_message_span, j_msg_inner);
     },
 
     /**
@@ -845,7 +865,6 @@ tyrano.plugin.kag.tag.text = {
             if (this.kag.stat.font.edge != "") {
                 // 縁取り文字
                 const edge_str = this.kag.stat.font.edge;
-                console.log(this.kag.stat.font.edge_method);
                 switch (this.kag.stat.font.edge_method) {
                     default:
                     case "shadow":
@@ -902,30 +921,30 @@ tyrano.plugin.kag.tag.text = {
 
             // ルビ指定がされている場合は<ruby>で囲う
             if (this.kag.stat.ruby_str != "") {
-                c = "<ruby><rb>" + c + "</rb><rt>" + this.kag.stat.ruby_str + "</rt></ruby>";
+                c = `<ruby><rb>${c}</rb><rt>${this.kag.stat.ruby_str}</rt></ruby>`;
                 this.kag.stat.ruby_str = "";
             }
 
             // 文字種で場合分け
             if (c == " ") {
                 // 空白の場合
-                message_html += "<span style='opacity:0'>" + c + "</span>";
+                message_html += `<span class="char" style="opacity:0">${c}</span>`;
             } else {
                 // 空白以外の場合
 
                 // マーカー処理
                 if (this.kag.stat.mark == 1) {
                     var mark_style = this.kag.stat.style_mark;
-                    c = "<mark style='" + mark_style + "'>" + c + "</mark>";
+                    c = `<mark style="${mark_style}">${c}</mark>`;
                 } else if (this.kag.stat.mark == 2) {
                     this.kag.stat.mark = 0;
                 }
 
                 // 禁則処理するかどうかで場合分け
                 if (should_use_inline_block) {
-                    message_html += "<span style='opacity:0;display:inline-block;'>" + c + "</span>";
+                    message_html += `<span class="char" style="opacity:0;display:inline-block;">${c}</span>`;
                 } else {
-                    message_html += "<span style='opacity:0'>" + c + "</span>";
+                    message_html += `<span class="char" style="opacity:0">${c}</span>`;
                 }
             }
         }
@@ -1171,17 +1190,26 @@ tyrano.plugin.kag.tag.text = {
     makeOneCharVisible: function (j_char_span) {
         if (this.kag.stat.font.effect != "") {
             const anim_name = "t" + this.kag.stat.font.effect;
-            let anim_duration = this.kag.stat.font.effect_speed;
-            anim_duration = anim_duration.includes("s") ? anim_duration : anim_duration + "ms";
-            j_char_span
-                .on("animationend", function (e) {
-                    $(e.target).css({
-                        opacity: 1,
-                        visibility: "visible",
-                        animation: "",
-                    });
-                })
-                .css("animation", `${anim_name} ${anim_duration} ease 0s 1 normal forwards`);
+
+            // エフェクト時間を決定する
+            let anim_duration = this.kag.tmp.effect_speed;
+            if (!anim_duration.includes("s")) {
+                anim_duration += "ms";
+            }
+
+            // アニメ―ション終了時に文字を完全表示
+            j_char_span.on("animationend", function (e) {
+                j_char_span.removeClass("animchar");
+                j_char_span.css({
+                    opacity: 1,
+                    visibility: "visible",
+                    animation: "",
+                });
+            });
+
+            //　クラスを付けてアニメーション再生開始
+            j_char_span.addClass("animchar");
+            j_char_span.css("animation", `${anim_name} ${anim_duration} ease 0s 1 normal forwards`);
         } else {
             j_char_span.css({ visibility: "visible", opacity: "1" });
         }
@@ -1189,10 +1217,10 @@ tyrano.plugin.kag.tag.text = {
 
     /**
      * すべての文字を可視化する
-     * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
+     * @param {jQuery} j_char_span_children 1文字1文字の`<span>`のjQueryオブジェクトのコレクション
      */
-    makeAllCharsVisible: function (j_message_span) {
-        j_message_span.children("span").css({
+    makeAllCharsVisible: function (j_char_span_children) {
+        j_char_span_children.css({
             animation: "",
             visibility: "visible",
             opacity: "1",
@@ -1202,14 +1230,16 @@ tyrano.plugin.kag.tag.text = {
     /**
      * 特定のインデックスの1文字を追加する
      * @param {number} char_index 表示する文字のインデックス
-     * @param {number} char_length 文字数
      * @param {jQuery} j_char_span_children 1文字1文字の`<span>`のjQueryオブジェクトのコレクション
      * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
-     * @param {number} timeout_per_char 次の文字を表示するまでのタイムアウト ただし文字表示途中でクリックされた場合は無潮して瞬間表示になる
+     * @param {jQuery} j_msg_inner div.message_inner
      */
-    addOneChar: function (char_index, char_length, j_char_span_children, j_message_span, timeout_per_char) {
+    addOneChar: function (char_index, j_char_span_children, j_message_span, j_msg_inner) {
         // まだ文字表示中だよ
         this.kag.stat.is_adding_text = true;
+
+        // 表示中のクリック割り込みを検知するよ
+        this.checkClickInterrupt(j_msg_inner);
 
         // この1文字を可視化
         this.makeOneCharVisible(j_char_span_children.eq(char_index));
@@ -1218,26 +1248,50 @@ tyrano.plugin.kag.tag.text = {
         const next_char_index = char_index + 1;
 
         // すべての文字を表示し終わったかどうか
-        if (next_char_index < char_length) {
+        if (next_char_index < j_char_span_children.length) {
             // まだ表示していない文字があるようだ
             // タイムアウトを設けて次の文字を表示しよう
-
-            // ただし文字表示の途中のクリックを検知して処理を変える
-            if (this.kag.stat.is_click_text || this.kag.stat.is_skip === true || this.kag.stat.is_nowait) {
-                // 文字表示の途中でクリックされたようだ
-                // this.addOneChar(next_char_index, char_length, j_char_span_children, 0);
-                this.makeAllCharsVisible(j_message_span);
-                this.finishAddingChars();
-            } else {
-                $.setTimeout(() => {
-                    this.addOneChar(next_char_index, char_length, j_char_span_children, j_message_span, timeout_per_char);
-                }, timeout_per_char);
-            }
+            $.setTimeout(() => {
+                this.addOneChar(next_char_index, j_char_span_children, j_message_span, j_msg_inner);
+            }, this.kag.tmp.ch_speed);
         } else {
             // すべての文字を表示し終わったようだ
             $.setTimeout(() => {
                 this.finishAddingChars();
-            }, timeout_per_char);
+            }, this.kag.tmp.ch_speed);
+        }
+    },
+
+    /**
+     * 文字表示中のクリック割り込みを検知する
+     * 文字表示中のスキップ割り込みについても対応を検討(現在は[skipstart]の部分で文字表示中のスキップ開始を拒否している)
+     */
+    checkClickInterrupt: function (j_msg_inner) {
+        // スキップ割り込み
+        const is_skip = this.kag.stat.is_skip;
+        if ((this.kag.stat.is_click_text || is_skip) && !this.kag.tmp.processed_click_interrupt) {
+            this.kag.tmp.processed_click_interrupt = true;
+            // 文字表示の途中でクリックされたようだ
+
+            // 文字途中クリック時の文字表示速度の設定を見る
+            const ch_speed_in_click = is_skip ? "0" : this.getMessageConfig("ch_speed_in_click");
+            if (ch_speed_in_click !== "default") {
+                this.kag.tmp.ch_speed = parseInt(ch_speed_in_click);
+            }
+
+            // 文字途中クリック時のエフェクト速度の設定を見る
+            let effect_speed_in_click = is_skip ? "0ms" : this.getMessageConfig("effect_speed_in_click");
+
+            if (effect_speed_in_click !== "default" || is_skip) {
+                this.kag.tmp.effect_speed = effect_speed_in_click;
+                // すでにアニメーションが始まっている文字のアニメ―ション時間も短くしておく
+                if (!effect_speed_in_click.includes("s")) {
+                    effect_speed_in_click += "ms";
+                }
+                j_msg_inner.find(".char.animchar").css({
+                    "animation-duration": effect_speed_in_click,
+                });
+            }
         }
     },
 
@@ -1254,26 +1308,30 @@ tyrano.plugin.kag.tag.text = {
     /**
      * 文字を追加していく
      * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
+     * @param {jQuery} j_msg_inner div.message_inner
      */
-    addChars: function (j_message_span) {
+    addChars: function (j_message_span, j_msg_inner) {
         // 文字の表示速度 (単位はミリ秒/文字)
-        let timeout_per_char = 30;
+        let ch_speed = 30;
         if (this.kag.stat.ch_speed !== "") {
-            timeout_per_char = parseInt(this.kag.stat.ch_speed);
+            ch_speed = parseInt(this.kag.stat.ch_speed);
         } else if (this.kag.config.chSpeed) {
-            timeout_per_char = parseInt(this.kag.config.chSpeed);
+            ch_speed = parseInt(this.kag.config.chSpeed);
         }
+
+        // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
+        const j_char_span_children = j_message_span.find(".char");
 
         // すべてのテキストを一瞬で表示すべきなら全部表示してさっさと早期リターンしよう
         // 次のいずれかに該当するならすべてのテキストを一瞬で表示すべきである
         // - スキップモード中である
         // - [nowait]中である
         // - 1文字あたりの表示時間が 3 ミリ秒以下である
-        if (this.kag.stat.is_skip === true || this.kag.stat.is_nowait || timeout_per_char <= 3) {
+        if (this.kag.stat.is_skip === true || this.kag.stat.is_nowait || ch_speed <= 3) {
             // ストップ中じゃなければ
             if (this.kag.stat.is_stop != "true") {
                 // 全文字表示
-                this.makeAllCharsVisible(j_message_span);
+                this.makeAllCharsVisible(j_char_span_children);
                 // スキップ時間のタイムアウトを設ける
                 $.setTimeout(() => {
                     // メッセージウィンドウが隠れていなければ次のタグへ
@@ -1292,11 +1350,17 @@ tyrano.plugin.kag.tag.text = {
         // テキスト追加中だよ
         this.kag.stat.is_adding_text = true;
 
-        // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
-        const j_char_span_children = j_message_span.children("span");
+        // クリックの割り込みを処理したかどうか
+        this.kag.tmp.processed_click_interrupt = false;
+
+        // 文字表示速度
+        this.kag.tmp.ch_speed = ch_speed;
+
+        // エフェクト速度
+        this.kag.tmp.effect_speed = this.kag.stat.font.effect_speed;
 
         // 1文字目を追加 あとは関数内で再帰して表示
-        this.addOneChar(0, j_char_span_children.length, j_char_span_children, j_message_span, timeout_per_char);
+        this.addOneChar(0, j_char_span_children, j_message_span, j_msg_inner);
     },
 
     nextOrder: function () {},
@@ -3839,6 +3903,50 @@ tyrano.plugin.kag.tag.deffont = {
 
         this.kag.ftag.nextOrder();
         ///////////////////
+    },
+};
+
+/*
+#[message_config]
+
+:group
+システム操作
+
+:title
+メッセージコンフィグ
+
+:exp
+メッセージに関連する詳細な設定を行えます。
+
+:param
+ch_speed_in_click     = 文字表示の途中でクリックされたあとの文字表示速度（1文字あたりの表示時間をミリ秒で指定）,
+effect_speed_in_click = 文字表示の途中でクリックされたあとの文字エフェクト速度,
+
+:sample
+[message_config ch_speed_in_click="5" effect_speed_in_click="100ms"]
+
+#[end]
+*/
+tyrano.plugin.kag.tag.message_config = {
+    pm: {},
+
+    start: function (pm) {
+        const default_message_config = this.kag.ftag.master_tag.text.default_message_config || {};
+
+        // stat.message_configを(必要であれば)初期化してその参照を取得
+        if (!this.kag.stat.message_config) {
+            this.kag.stat.message_config = {};
+        }
+        const message_config = this.kag.stat.message_config;
+
+        // pmが持つプロパティのうち記憶対象(default_message_configに備わっている)キーのものだけstatに移す
+        for (const key in default_message_config) {
+            if (key in pm) {
+                message_config[key] = pm[key];
+            }
+        }
+
+        this.kag.ftag.nextOrder();
     },
 };
 
