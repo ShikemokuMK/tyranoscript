@@ -535,8 +535,9 @@ tyrano.plugin.kag.tag.text = {
         ch_speed_in_click: "1",
         effect_speed_in_click: "100ms",
         edge_overlap_text: "false",
-        serifu_reverse_indent: "true",
+        serifu_reverse_indent: "false",
         reverse_indent_margin: "false",
+        karning: "false",
     },
 
     /**
@@ -645,6 +646,11 @@ tyrano.plugin.kag.tag.text = {
             "letter-spacing": this.kag.config.defaultPitch + "px",
             "line-height": parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px",
             "font-family": this.kag.config.userFace,
+        });
+
+        const font_feature_settings = this.getMessageConfig("karning") === "true" ? '"palt"' : "initial";
+        j_inner_message.css({
+            "font-feature-settings": font_feature_settings,
         });
     },
 
