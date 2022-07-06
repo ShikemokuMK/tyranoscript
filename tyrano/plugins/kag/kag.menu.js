@@ -324,6 +324,9 @@ tyrano.plugin.kag.menu = {
 
     //セーブ状態のスナップを保存します。
     snapSave: function (title, call_back, flag_thumb) {
+        // savestart イベントを発火
+        this.kag.trigger("savestart");
+
         var that = this;
 
         //画面のキャプチャも取るよ
@@ -378,6 +381,9 @@ tyrano.plugin.kag.menu = {
 
             if (call_back) {
                 call_back();
+
+                // savecomplete イベントを発火
+                this.kag.trigger("savecomplete");
             }
         } else {
             $("#tyrano_base").find(".layer_blend_mode").css("display", "none");
@@ -403,6 +409,9 @@ tyrano.plugin.kag.menu = {
 
                     if (call_back) {
                         call_back();
+
+                        // savecomplete イベントを発火
+                        that.kag.trigger("savecomplete");
                     }
                 };
 
@@ -642,6 +651,9 @@ tyrano.plugin.kag.menu = {
     },
 
     loadGameData: function (data, options) {
+        // loadstart イベントを発火
+        this.kag.trigger("loadstart");
+
         var auto_next = "no";
 
         //普通のロードの場合
@@ -955,6 +967,9 @@ tyrano.plugin.kag.menu = {
 
         //添付変数は消す。
         this.kag.clearTmpVariable();
+
+        // loadcomplete イベントを発火
+        this.kag.trigger("loadcomplete");
 
         this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
     },

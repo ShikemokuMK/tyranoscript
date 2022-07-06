@@ -1846,17 +1846,18 @@ tyrano.plugin.kag = {
      * イベントを指定してイベントリスナ(コールバック)を呼び出す
      * コールバックに引数を渡すこともできる
      * コールバック内の this には kag が格納される
-     * @param {string} event リスナを呼び出すイベント名
-     * @param  {...any} args コールバックに渡す引数
+     * @param {string} event_name リスナを呼び出すイベント名
+     * @param  {Object} [event_obj] リスナのコールバックに引数として渡すオブジェクト nameプロパティにはイベント名がセットされる
      */
-    trigger: function (event, ...args) {
+    trigger: function (event_name, event_obj = {}) {
+        event_obj.name = event_name;
         const map = this.event_listener_map;
-        if (map[event] === undefined || map[event].length === 0) {
+        if (map[event_name] === undefined || map[event_name].length === 0) {
             return;
         }
-        for (const listener of map[event]) {
+        for (const listener of map[event_name]) {
             if (typeof listener.callback === "function") {
-                listener.callback.apply(this, args);
+                listener.callback.call(this, event_obj);
             }
         }
     },
@@ -1905,7 +1906,7 @@ tyrano.plugin.kag = {
             const dot_hash = event_name.split(".");
             const event = dot_hash[0];
             const del_namespaces = dot_hash.slice(1);
-            if (map[event] === undefined || map[event].length === 0) {
+            if (event && (map[event] === undefined || map[event].length === 0)) {
                 // そのイベントに登録されているイベントリスナがない場合
                 // なにもしなくていい
             } else if (del_namespaces.length === 0) {
@@ -1917,9 +1918,9 @@ tyrano.plugin.kag = {
             } else {
                 // 名前空間が指定されている場合は登録されている各コールバックを個別に見て選別していく
                 // イベント名が空欄で名前空間だけが指定されている場合はすべてのイベントを処理対象とする
-                const event_list = [];
+                let event_list;
                 if (event === "") {
-                    event_list = Object.keys(that.event_listener_map);
+                    event_list = Object.keys(map);
                 } else {
                     event_list = [event];
                 }
@@ -1929,7 +1930,7 @@ tyrano.plugin.kag = {
                     for (const listener of map[_event]) {
                         // このイベントに登録されている各リスナについて
                         // このリスナは生き残るべきだろうか？
-                        const should_keep = false;
+                        let should_keep = false;
                         // 削除対象名前空間は複数でありうる！その場合はAND指定
                         // AND指定、つまり、削除対象名前空間を"すべて"持つリスナだけを削除したいので
                         // 削除対象名前空間のうちのひとつでも保有しないものがあるリスナは生き残り確定
