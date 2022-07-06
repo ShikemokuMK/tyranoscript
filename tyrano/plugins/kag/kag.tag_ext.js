@@ -3503,6 +3503,7 @@ tyrano.plugin.kag.tag.free_filter = {
 :param
 layer      = 対象とするメッセージレイヤを指定します。,
 page       = !!,
+remove     = `true`または`false`。`true`を指定すると、フィルターを除去する処理を行います。,
 grayscale  = `0`(デフォルト)～`100`を指定することで、画像の表示をグレースケールに変換できます。,
 sepia      = `0`(デフォルト)～`100`を指定することで、画像の表示をセピア調に変換できます。,
 saturate   = `0`～`100`(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。,
@@ -3513,9 +3514,6 @@ brightness = `100`(デフォルト)を基準とする数値を指定すること
 contrast   = `0`～`100`(デフォルト)を指定することで、画像の表示のコントラストを変更できます。,
 blur       = `0`(デフォルト)～`任意の値`を指定することで、画像の表示をぼかすことができます。
 
-:demo
-2,kaisetsu/04_filter
-
 #[end]
 */
 
@@ -3525,7 +3523,7 @@ tyrano.plugin.kag.tag.position_filter = {
     pm: {
         layer: "message0",
         page: "fore",
-
+        remove: "false",
         grayscale: "",
         sepia: "",
         saturate: "",
@@ -3544,6 +3542,12 @@ tyrano.plugin.kag.tag.position_filter = {
 
         // 古いフィルターは捨てる
         j_message_layer.find(".message_filter").remove();
+
+        // remove="true"のときは単に削除するだけ
+        if (pm.remove === "true") {
+            this.kag.ftag.nextOrder();
+            return;
+        }
 
         // アウターのクローンを作成する クラスは変更しておく message_outer → message_filter
         const j_message_outer_clone = j_message_outer.clone();

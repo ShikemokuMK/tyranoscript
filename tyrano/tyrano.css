@@ -450,6 +450,7 @@ body{
 .message_inner > p > span {
     position: relative;
 }
+
 /*------　text-strokeによる縁取りの設定 -------*/
 /* ★縁取りテキスト1文字を構成する要素ツリー
 /* span.char.text-stroke
@@ -462,7 +463,6 @@ body{
     opacity: 1;
     display: inline-block;
     position: relative;
-    font-feature-settings: 'palt';
     z-index: auto;
     /* z-index に auto でも 0 でもない値がセットされている場合は
     /* 新しいスタックコンテキストが作成されるため、重なり順の違いが出る仕様がある
@@ -489,7 +489,7 @@ body{
 .message_inner .char.text-stroke .fill {
     z-index: 1000;
     transform: translateZ(0);
-    height: 2em;
+    height: 100%;
     /* 次のようなスタイルを当てることでグラデーションテキストにすることも可能 */
     /*
     background-image: repeating-linear-gradient(0deg, #B67B03 0.1em, #DAAF08 0.2em, #FEE9A0 0.3em, #DAAF08 0.4em, #B67B03 0.5em);

@@ -535,11 +535,13 @@ tyrano.plugin.kag.tag.text = {
         ch_speed_in_click: "1",
         effect_speed_in_click: "100ms",
         edge_overlap_text: "false",
-        serifu_reverse_indent: "false",
-        reverse_indent_margin: "false",
+        speech_bracket_float: "false",
+        speech_margin_left: "false",
         kerning: "false",
         line_spacing: "",
         letter_spacing: "",
+        control_line_break: "false",
+        control_line_break_chars: "、。）」』】,.)]",
     },
 
     /**
@@ -703,6 +705,7 @@ tyrano.plugin.kag.tag.text = {
         // インナーが空なら<p>追加
         if (j_msg_inner.html() == "") {
             this.kag.setNewParagraph(j_msg_inner);
+            this.kag.tmp.last_char_info = null;
         }
 
         // vchatモード
@@ -716,8 +719,8 @@ tyrano.plugin.kag.tag.text = {
         // span.current_span を取得
         const j_span = this.kag.getMessageCurrentSpan();
 
-        // 逆インデントを行うべきか メッセージウィンドウがまっさらのときだけ有効
-        this.kag.tmp.should_set_reverse_indent = chara_name && !j_span.text() && this.getMessageConfig("serifu_reverse_indent") !== "false";
+        // カギカッコフロートを行うべきか メッセージウィンドウがまっさらのときだけ有効
+        this.kag.tmp.should_set_reverse_indent = chara_name && !j_span.text() && this.getMessageConfig("speech_bracket_float") !== "false";
 
         // span.current_span のスタイルを調整
         this.setCurrentSpanStyle(j_span, chara_name);
@@ -779,7 +782,7 @@ tyrano.plugin.kag.tag.text = {
             this.adjustFukiSize(j_msg_inner, chara_name);
         }
 
-        this.addChars(j_message_span, j_msg_inner);
+        this.addChars(j_message_span, j_msg_inner, is_vertical);
     },
 
     /**
@@ -1432,8 +1435,9 @@ tyrano.plugin.kag.tag.text = {
      * 文字を追加していく
      * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
      * @param {jQuery} j_msg_inner div.message_inner
+     * @param {boolean} is_vertical 縦書きかどうか
      */
-    addChars: function (j_message_span, j_msg_inner) {
+    addChars: function (j_message_span, j_msg_inner, is_vertical) {
         // 文字の表示速度 (単位はミリ秒/文字)
         let ch_speed = 30;
         if (this.kag.stat.ch_speed !== "") {
@@ -1452,9 +1456,14 @@ tyrano.plugin.kag.tag.text = {
             j_target.setGradientText(font.gradient);
         }
 
-        //　セリフの逆インデント
+        //　セリフのカギカッコフロート
         if (this.kag.tmp.should_set_reverse_indent) {
             this.setReverseIndent(j_msg_inner, j_char_span_children);
+        }
+
+        // 禁則処理
+        if (this.getMessageConfig("control_line_break") === "true") {
+            this.controlLineBreak(j_char_span_children, is_vertical);
         }
 
         // すべてのテキストを一瞬で表示すべきなら全部表示してさっさと早期リターンしよう
@@ -1503,12 +1512,12 @@ tyrano.plugin.kag.tag.text = {
      * 内部的には最初のカギカッコだけ absolute にして左にずらす！
      *
      * 　「こんにちは
-     * 　逆インデントなしだよ」
+     * 　カギカッコフロートなしだよ」
      *
      * これをこうしてこうじゃ
      *
      * 「こんにちは
-     * 　逆インデントだよ」
+     * 　カギカッコフロートありだよ」
      * @param {jQuery} j_msg_inner div.message_inner
      * @param {jQuery} j_children 1文字1文字の span.char のコレクション
      */
@@ -1517,8 +1526,8 @@ tyrano.plugin.kag.tag.text = {
         const j_first_char = j_children.eq(0);
 
         // 設定を取得
-        const indent_config = this.getMessageConfig("serifu_reverse_indent");
-        const margin_config = this.getMessageConfig("reverse_indent_margin");
+        const indent_config = this.getMessageConfig("speech_bracket_float");
+        const margin_config = this.getMessageConfig("speech_margin_left");
 
         // 最初の1文字の横幅が何ピクセルなのか調査する
         let first_char_width = 0;
@@ -1557,7 +1566,7 @@ tyrano.plugin.kag.tag.text = {
         // 最初の1文字を absolute にしてしまおう
         j_first_char.css({
             position: "absolute",
-            top: "0",
+            // top: "0",
             left: `-${indent}${px_indent}`,
         });
 
@@ -1591,6 +1600,64 @@ tyrano.plugin.kag.tag.text = {
                 "box-sizing": "border-box",
                 "padding-left": `${margin}${px_margin}`,
             });
+        }
+    },
+
+    /**
+     * 禁則処理
+     * 特定の文字が行頭に来ていたら改行を早める
+     * @param {jQuery} j_char_children 各1文字1文字のjQueryコレクション
+     * @param {boolean} is_vertical 縦書きかどうか
+     */
+    controlLineBreak: function (j_char_children, is_vertical) {
+        // 今回の[text]を表示する前にメッセージウィンドウ上に存在していた最後の1文字の情報を取得
+        // [p][cm][er]などでまっさらになっている場合はもちろん取れないので初期値を設定
+        const prev = this.kag.tmp.last_char_info || {
+            left: -Infinity,
+            top: -Infinity,
+            j_char: null,
+        };
+
+        // 最初の1文字のy座標と最後の1文字のy座標を取得
+        const first_char_top = j_char_children.first().offset().top;
+        const last_j_char = j_char_children.last();
+        const last_char_offset = last_j_char.offset();
+
+        // 最後の1文字の情報は一時データに記憶しておく
+        this.kag.tmp.last_char_info = {
+            left: last_char_offset.left,
+            top: last_char_offset.top,
+            j_char: last_j_char,
+        };
+
+        // 最初と最後の文字のy座標が一致している(改行が生じていない)かつ今回の[text]よりも前のテキストが存在していない
+        // なら、禁則処理は必要ないとわかるので早期リターン
+        if (first_char_top === last_char_offset.top && !prev.j_char) {
+            return;
+        }
+
+        // 先頭に来てはいけない文字列
+        const bad_chars = this.getMessageConfig("control_line_break_chars");
+
+        // さあ、1文字ずつ見ていくぞ
+        for (let i = 0, len = j_char_children.length; i < len; i++) {
+            const j_this = j_char_children.eq(i);
+            const offset = j_this.offset();
+            const char = j_this.text().charAt(0);
+            const is_new_line = is_vertical ? offset.left < prev.left : offset.top > prev.top;
+            if (is_new_line) {
+                // この文字が禁則処理対象の文字であるとき『ひとつ前の文字』の前に改行を入れる
+                if (bad_chars.includes(char)) {
+                    prev.j_char.before("<br>");
+                }
+                // ここで最後の1文字とy座標を比較 一致するならもうこの先に改行はない
+                if (offset.top === last_char_offset.top) {
+                    break;
+                }
+            }
+            prev.top = offset.top;
+            prev.left = offset.left;
+            prev.j_char = j_this;
         }
     },
 
@@ -4224,13 +4291,15 @@ tyrano.plugin.kag.tag.deffont = {
 ch_speed_in_click     = 文字表示の途中でクリックされたあとの文字表示速度。1文字あたりの表示時間をミリ秒で指定します。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
 effect_speed_in_click = 文字表示の途中でクリックされたあとの文字エフェクト速度。`0.2s`、`200ms`、あるいは単に`200`などで指定します。例はいずれも200ミリ秒となります。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
 edge_overlap_text     = 縁取りテキストの縁をひとつ前の文字に重ねるかどうか。`true`または`false`で指定します。現状は`edge_method`が`stroke`の場合にのみ有効なパラメータです。,
-serifu_reverse_indent = キャラのセリフ(発言者欄に文字が入っているときのメッセージ)において、開始カギカッコの下に文字が周りこまないようにするための設定です。`true`を指定すると、開始カギカッコだけが左側にずれます。`false`で無効。`true`のかわりに`20`のような数値を指定することで、開始カギカッコを左側にずらす量を直接指定できます。,
-reverse_indent_margin = `serifu_reverse_indent`が有効のときに、さらにテキスト全体を右側に動かすことができます。`true`で有効、`false`で無効。`20`のように数値で直接指定することで全体を右側にずらす量を直接指定できます。,
+speech_bracket_float  = キャラのセリフの最初のカギカッコを左側に浮かして、開始カギカッコの下に文字が周りこまないようにするための設定です。`true`を指定すると、開始カギカッコだけが左側にずれます。`false`で無効。`true`のかわりに`20`のような数値を指定することで、開始カギカッコを左側にずらす量を直接指定できます。,
+speech_margin_left    = `speech_bracket_float`が有効のときに、さらにテキスト全体を右側に動かすことができます。`true`で有効、`false`で無効。`20`のように数値で直接指定することで全体を右側にずらす量を直接指定できます。,
 kerning               = 字詰めを有効にするか。`true`または`false`で指定します。フォント、もともとの字間設定、プレイヤーの使用ブラウザによっては効果が見られないこともあります。（高度な知識：CSSのfont-feature-settingsプロパティを設定する機能です）,
 add_word_nobreak      = ワードブレイク(単語の途中で自然改行される現象)を禁止する単語を追加できます。カンマ区切りで複数指定可能。,
 remove_word_nobreak   = 一度追加したワードブレイク禁止単語を除外できます。カンマ区切りで複数指定可能。,
 line_spacing          = 行間のサイズをpx単位で指定できます。,
-letter_spacing        = 字間のサイズをpx単位で指定できます。
+letter_spacing        = 字間のサイズをpx単位で指定できます。,
+control_line_break    = 禁則処理を手動で行なうかどうかを`true`または`false`で指定します。`。`や`、`などの特定の文字が行頭に来ていたとき、そのひとつ前の文字で改行するようにします。基本的にはこれを指定しなくても自動で禁則処理が行われますが、フォントの設定（エフェクトや縁取りなど）によっては禁則処理が自動で行われなくなることがあるので、その場合はこのパラメータに`true`を指定してみてください。,
+control_line_break_chars = 行頭に来ていたときに禁則処理を行なう文字をまとめて指定します。デフォルトでは`、。）」』】,.)]`が禁則処理の対象です。,
 
 :sample
 ;クリックされても文字表示速度を変更しない
@@ -4240,7 +4309,7 @@ letter_spacing        = 字間のサイズをpx単位で指定できます。
 [message_config ch_speed_in_click="0" effect_speed_in_click="0ms"]
 
 ;セリフの先頭のカギカッコだけを左側にずらして、カギカッコの下に文章が回り込まないようにする
-[message_config serifu_reverse_indent="true"]
+[message_config speech_bracket_float="true"]
 
 ;"――"はワードブレイクされてほしくない
 [message_config add_word_nobreak="――"]
