@@ -538,6 +538,8 @@ tyrano.plugin.kag.tag.text = {
         serifu_reverse_indent: "false",
         reverse_indent_margin: "false",
         kerning: "false",
+        line_spacing: "",
+        letter_spacing: "",
     },
 
     /**
@@ -642,14 +644,13 @@ tyrano.plugin.kag.tag.text = {
      * @param {jQuery} j_inner_message div.message_inner
      */
     setMessageInnerStyle: function (j_inner_message) {
+        // 字詰め
+        const font_feature_settings = this.getMessageConfig("kerning") === "true" ? '"palt"' : "initial";
+
         j_inner_message.css({
             "letter-spacing": this.kag.config.defaultPitch + "px",
             "line-height": parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px",
             "font-family": this.kag.config.userFace,
-        });
-
-        const font_feature_settings = this.getMessageConfig("kerning") === "true" ? '"palt"' : "initial";
-        j_inner_message.css({
             "font-feature-settings": font_feature_settings,
         });
     },
@@ -861,6 +862,15 @@ tyrano.plugin.kag.tag.text = {
                 "font-size": font.size + "px",
                 "font-family": font.face,
                 "font-style": font.italic,
+            });
+
+            // 字間と行の高さ
+            const letter_spacing = this.getMessageConfig("letter_spacing") || this.kag.config.defaultPitch;
+            const line_spacing = this.getMessageConfig("line_spacing") || this.kag.config.defaultLineSpacing;
+            const line_height = parseInt(font.size) + parseInt(line_spacing);
+            j_span.css({
+                "letter-spacing": `${letter_spacing}px`,
+                "line-height": `${line_height}px`,
             });
 
             // 特殊な装飾
@@ -4216,9 +4226,11 @@ effect_speed_in_click = 文字表示の途中でクリックされたあとの�
 edge_overlap_text     = 縁取りテキストの縁をひとつ前の文字に重ねるかどうか。`true`または`false`で指定します。現状は`edge_method`が`stroke`の場合にのみ有効なパラメータです。,
 serifu_reverse_indent = キャラのセリフ(発言者欄に文字が入っているときのメッセージ)において、開始カギカッコの下に文字が周りこまないようにするための設定です。`true`を指定すると、開始カギカッコだけが左側にずれます。`false`で無効。`true`のかわりに`20`のような数値を指定することで、開始カギカッコを左側にずらす量を直接指定できます。,
 reverse_indent_margin = `serifu_reverse_indent`が有効のときに、さらにテキスト全体を右側に動かすことができます。`true`で有効、`false`で無効。`20`のように数値で直接指定することで全体を右側にずらす量を直接指定できます。,
-kerning               = 字詰めを有効にするか。`true`または`false`で指定します。フォントやもともとの字間設定によっては効果が見られないこともあります。（高度な知識：font-feature-settingsを設定する機能です）,
-add_word_nobreak      = ワードブレイク(単語の途中で自然改行される現象)を禁止する単語を追加できます。カンマ区切りで複数指定可能。
-remove_word_nobreak   = 一度追加したワードブレイク禁止単語を除外できます。
+kerning               = 字詰めを有効にするか。`true`または`false`で指定します。フォント、もともとの字間設定、プレイヤーの使用ブラウザによっては効果が見られないこともあります。（高度な知識：CSSのfont-feature-settingsプロパティを設定する機能です）,
+add_word_nobreak      = ワードブレイク(単語の途中で自然改行される現象)を禁止する単語を追加できます。カンマ区切りで複数指定可能。,
+remove_word_nobreak   = 一度追加したワードブレイク禁止単語を除外できます。カンマ区切りで複数指定可能。,
+line_spacing          = 行間のサイズをpx単位で指定できます。,
+letter_spacing        = 字間のサイズをpx単位で指定できます。
 
 :sample
 ;クリックされても文字表示速度を変更しない
@@ -4233,12 +4245,25 @@ remove_word_nobreak   = 一度追加したワードブレイク禁止単語を�
 ;"――"はワードブレイクされてほしくない
 [message_config add_word_nobreak="――"]
 
+;行間も字間もめちゃくちゃ広げてみる
+[message_config line_spacing="50" letter_spacing="30"]
+
+;ダッシュの字間を詰めてみる
+@macro name="――"
+  [message_config letter_spacing="-4"]―[message_config letter_spacing="0"]―
+@endmacro
+――力が欲しいか？[l][r]
+[――]力が欲しいか？[l][r]
+
 #[end]
 */
 tyrano.plugin.kag.tag.message_config = {
     pm: {},
 
     start: function (pm) {
+        // span.current_span を新しくする
+        this.kag.setMessageCurrentSpan();
+
         // デフォルトのコンフィグ
         const default_message_config = this.kag.ftag.master_tag.text.default_message_config || {};
 
