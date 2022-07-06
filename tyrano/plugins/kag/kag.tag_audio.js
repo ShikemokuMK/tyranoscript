@@ -276,16 +276,26 @@ tyrano.plugin.kag.tag.playbgm = {
             audio_obj.on("end", function (e) {
                 if (pm.target == "se") {
                     that.kag.tmp.is_se_play = false;
-                    that.kag.tmp.is_vo_play = false;
+                    // いま再生し終わったこの音声がボイスである場合、すなわち、
+                    // このスロットが[voconfig]によってボイス用に設定されている場合にだけボイス再生中フラグを折る
+                    if (that.kag.stat.map_vo.vobuf[pm.buf]) {
+                        that.kag.tmp.is_vo_play = false;
+                    }
 
+                    // 状態によってはここで nextOrder を呼び出す
                     if (that.kag.tmp.is_se_play_wait == true) {
+                        // [wse]に到達してSEの再生終了を待っている状態
                         that.kag.tmp.is_se_play_wait = false;
                         that.kag.ftag.nextOrder();
                     } else if (that.kag.tmp.is_vo_play_wait == true) {
-                        that.kag.tmp.is_vo_play_wait = false;
-                        setTimeout(function () {
-                            that.kag.ftag.nextOrder();
-                        }, 500);
+                        // オートモード中に[l]や[p]に到達してボイスの再生終了を待っている状態
+                        // この音声がボイスである場合にのみ実行
+                        if (that.kag.stat.map_vo.vobuf[pm.buf]) {
+                            that.kag.tmp.is_vo_play_wait = false;
+                            setTimeout(function () {
+                                that.kag.ftag.nextOrder();
+                            }, 500);
+                        }
                     }
                 } else if (pm.target == "bgm") {
                     that.kag.tmp.is_bgm_play = false;
