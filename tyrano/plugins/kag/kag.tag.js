@@ -535,6 +535,8 @@ tyrano.plugin.kag.tag.text = {
         ch_speed_in_click: "1",
         effect_speed_in_click: "100ms",
         edge_overlap_text: "false",
+        serifu_reverse_indent: "true",
+        reverse_indent_margin: "false",
     },
 
     /**
@@ -706,6 +708,9 @@ tyrano.plugin.kag.tag.text = {
 
         // span.current_span を取得
         const j_span = this.kag.getMessageCurrentSpan();
+
+        // 逆インデントを行うべきか メッセージウィンドウがまっさらのときだけ有効
+        this.kag.tmp.should_set_reverse_indent = chara_name && !j_span.text() && this.getMessageConfig("serifu_reverse_indent") !== "false";
 
         // span.current_span のスタイルを調整
         this.setCurrentSpanStyle(j_span, chara_name);
@@ -1380,6 +1385,11 @@ tyrano.plugin.kag.tag.text = {
             j_target.setGradientText(font.gradient);
         }
 
+        //　セリフの逆インデント
+        if (this.kag.tmp.should_set_reverse_indent) {
+            this.setReverseIndent(j_msg_inner, j_char_span_children);
+        }
+
         // すべてのテキストを一瞬で表示すべきなら全部表示してさっさと早期リターンしよう
         // 次のいずれかに該当するならすべてのテキストを一瞬で表示すべきである
         // - スキップモード中である
@@ -1419,6 +1429,102 @@ tyrano.plugin.kag.tag.text = {
 
         // 1文字目を追加 あとは関数内で再帰して表示
         this.addOneChar(0, j_char_span_children, j_message_span, j_msg_inner);
+    },
+
+    /**
+     * カギカッコの下に文章が回り込まないように、最初の行だけ左側にずらす
+     * 内部的には最初のカギカッコだけ absolute にして左にずらす！
+     *
+     * 　「こんにちは
+     * 　逆インデントなしだよ」
+     *
+     * これをこうしてこうじゃ
+     *
+     * 「こんにちは
+     * 　逆インデントだよ」
+     * @param {jQuery} j_msg_inner div.message_inner
+     * @param {jQuery} j_children 1文字1文字の span.char のコレクション
+     */
+    setReverseIndent: function (j_msg_inner, j_children) {
+        // 最初の1文字
+        const j_first_char = j_children.eq(0);
+
+        // 設定を取得
+        const indent_config = this.getMessageConfig("serifu_reverse_indent");
+        const margin_config = this.getMessageConfig("reverse_indent_margin");
+
+        // 最初の1文字の横幅が何ピクセルなのか調査する
+        let first_char_width = 0;
+        if (indent_config === "true" || margin_config === "true") {
+            const j_width_check = j_first_char.clone();
+            j_width_check.css({
+                "opacity": "0",
+                "position": "fixed",
+                "display": "inline-block",
+                "z-index": "1",
+                "top": "-9999px",
+                "left": "-9999px",
+            });
+            j_width_check.insertBefore(j_first_char);
+            first_char_width = j_width_check.width();
+            j_width_check.remove();
+        }
+
+        // インデント幅を決定 コンフィグの値によって場合分け
+        // - "true" が指定されている場合は、上で調査した文字幅を自動で使う
+        // - 単位のない数値が指定されている場合は、その数値に"px"を付けて使う
+        // - 単位のある数値が指定されている場合は、それをそのまま使う
+        let indent = 0;
+        let px_indent = "px";
+        switch (indent_config) {
+            case "true":
+                indent = first_char_width;
+                break;
+            default:
+                indent = indent_config;
+                if (indent_config.match(/em|%|px|vw|vh/)) {
+                    px_indent = "";
+                }
+        }
+
+        // 最初の1文字を absolute にしてしまおう
+        j_first_char.css({
+            position: "absolute",
+            top: "0",
+            left: `-${indent}${px_indent}`,
+        });
+
+        //
+        // さらに全体を右側に動かす
+        //
+
+        // 右側に動かす量を決定 コンフィグの値によって場合分け
+        // - "false" が指定されている場合は、右側に動かす処理を行わない
+        // - "true" が指定されている場合は、上で調査した文字幅を自動で使う
+        // - 単位のない数値が指定されている場合は、その数値に"px"を付けて使う
+        // - 単位のある数値が指定されている場合は、それをそのまま使う
+        let margin = 0;
+        let px_margin = "px";
+        switch (margin_config) {
+            case "false":
+                break;
+            case "true":
+                margin = first_char_width;
+                break;
+            default:
+                margin = margin_config;
+                if (margin_config.match(/em|%|px|vw|vh/)) {
+                    px_margin = "";
+                }
+        }
+
+        // border-box にしつつ左側に padding を付ける
+        if (margin !== 0) {
+            j_msg_inner.find("p").css({
+                "box-sizing": "border-box",
+                "padding-left": `${margin}${px_margin}`,
+            });
+        }
     },
 
     nextOrder: function () {},

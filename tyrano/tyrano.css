@@ -446,6 +446,10 @@ body{
 
 
 
+/*------　逆字下げのための設定 -------*/
+.message_inner > p > span {
+    position: relative;
+}
 /*------　text-strokeによる縁取りの設定 -------*/
 /* ★縁取りテキスト1文字を構成する要素ツリー
 /* span.char.text-stroke
