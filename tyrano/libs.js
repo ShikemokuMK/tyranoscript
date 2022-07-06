@@ -1667,6 +1667,18 @@
             this.attr("style", new_style);
         }
     };
+
+    /**
+     * 引数が"空でない文字列"であるかどうかを返す
+     * @param {any} val
+     * @returns {boolean}
+     */
+    $.isNonEmptyStr = function (val) {
+        if (typeof val === "string" && val !== "") {
+            return true;
+        }
+        return false;
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {

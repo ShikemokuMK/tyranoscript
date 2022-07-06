@@ -537,7 +537,7 @@ tyrano.plugin.kag.tag.text = {
         edge_overlap_text: "false",
         serifu_reverse_indent: "false",
         reverse_indent_margin: "false",
-        karning: "false",
+        kerning: "false",
     },
 
     /**
@@ -648,7 +648,7 @@ tyrano.plugin.kag.tag.text = {
             "font-family": this.kag.config.userFace,
         });
 
-        const font_feature_settings = this.getMessageConfig("karning") === "true" ? '"palt"' : "initial";
+        const font_feature_settings = this.getMessageConfig("kerning") === "true" ? '"palt"' : "initial";
         j_inner_message.css({
             "font-feature-settings": font_feature_settings,
         });
@@ -919,9 +919,44 @@ tyrano.plugin.kag.tag.text = {
     buildMessageHTML: function (message_str, should_use_inline_block = true) {
         let message_html = "";
 
+        //
+        // ワードブレイク禁止処理
+        //
+
+        // メッセージ中に含まれていない記号を適当に選んでエスケープ用の文字にする
+        const escape_char = this.getEscapeChar(message_str);
+        let is_escaping = false;
+
+        // ワードブレイク(単語の途中での自然改行)を禁止する単語のリスト
+        const word_nobreak_list = this.kag.stat.word_nobreak_list || [];
+
+        // メッセージ中に含まれる該当単語をエスケープ文字で囲む
+        // 処理前の例) "「俺は――ゴリラだ」" … このうち"――"をワードブレイクしないように保護したい
+        // 処理後の例) "「俺は#――#ゴリラだ」" … このとき"#"はもとのメッセージ中には存在しないことが保証されている
+        word_nobreak_list.forEach((word) => {
+            const reg = new RegExp(word, "g");
+            message_str = message_str.replace(reg, escape_char + word + escape_char);
+        });
+
+        //
+        // 1文字ずつ見ていきながらHTML生成
+        //
+
         for (let i = 0; i < message_str.length; i++) {
             // 1文字ずつ見ていく
             let c = message_str.charAt(i);
+
+            // ワードブレイク禁止処理
+            if (c === escape_char) {
+                if (is_escaping) {
+                    is_escaping = false;
+                    message_html += "</span>";
+                } else {
+                    is_escaping = true;
+                    message_html += '<span style="display: inline-block;">';
+                }
+                continue;
+            }
 
             // ルビ指定がされている場合は<ruby>で囲う
             if (this.kag.stat.ruby_str != "") {
@@ -958,6 +993,22 @@ tyrano.plugin.kag.tag.text = {
             }
         }
         return message_html;
+    },
+
+    /**
+     * 引数の文字列に含まれていない適当な記号を返す
+     * @param {string} message_str
+     * @return {string} 適当な1文字
+     */
+    getEscapeChar: function (message_str) {
+        // 999まで見れば大丈夫だろ…
+        for (let i = 34; i < 999; i++) {
+            const c = String.fromCharCode(i);
+            if (!message_str.includes(c)) {
+                return c;
+            }
+        }
+        return "∅";
     },
 
     /**
@@ -4162,13 +4213,25 @@ tyrano.plugin.kag.tag.deffont = {
 :param
 ch_speed_in_click     = 文字表示の途中でクリックされたあとの文字表示速度。1文字あたりの表示時間をミリ秒で指定します。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
 effect_speed_in_click = 文字表示の途中でクリックされたあとの文字エフェクト速度。`0.2s`、`200ms`、あるいは単に`200`などで指定します。例はいずれも200ミリ秒となります。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
-edge_overlap_text     = 縁取りテキストの縁をひとつ前の文字に重ねるかどうか。`true`または`false`で指定します。
+edge_overlap_text     = 縁取りテキストの縁をひとつ前の文字に重ねるかどうか。`true`または`false`で指定します。現状は`edge_method`が`stroke`の場合にのみ有効なパラメータです。,
+serifu_reverse_indent = キャラのセリフ(発言者欄に文字が入っているときのメッセージ)において、開始カギカッコの下に文字が周りこまないようにするための設定です。`true`を指定すると、開始カギカッコだけが左側にずれます。`false`で無効。`true`のかわりに`20`のような数値を指定することで、開始カギカッコを左側にずらす量を直接指定できます。,
+reverse_indent_margin = `serifu_reverse_indent`が有効のときに、さらにテキスト全体を右側に動かすことができます。`true`で有効、`false`で無効。`20`のように数値で直接指定することで全体を右側にずらす量を直接指定できます。,
+kerning               = 字詰めを有効にするか。`true`または`false`で指定します。フォントやもともとの字間設定によっては効果が見られないこともあります。（高度な知識：font-feature-settingsを設定する機能です）,
+add_word_nobreak      = ワードブレイク(単語の途中で自然改行される現象)を禁止する単語を追加できます。カンマ区切りで複数指定可能。
+remove_word_nobreak   = 一度追加したワードブレイク禁止単語を除外できます。
 
 :sample
-[message_config ch_speed_in_click="5" effect_speed_in_click="100ms"]
+;クリックされても文字表示速度を変更しない
+[message_config ch_speed_in_click="default" effect_speed_in_click="default"]
 
 ;クリックされたら残りを瞬間表示
 [message_config ch_speed_in_click="0" effect_speed_in_click="0ms"]
+
+;セリフの先頭のカギカッコだけを左側にずらして、カギカッコの下に文章が回り込まないようにする
+[message_config serifu_reverse_indent="true"]
+
+;"――"はワードブレイクされてほしくない
+[message_config add_word_nobreak="――"]
 
 #[end]
 */
@@ -4176,19 +4239,49 @@ tyrano.plugin.kag.tag.message_config = {
     pm: {},
 
     start: function (pm) {
+        // デフォルトのコンフィグ
         const default_message_config = this.kag.ftag.master_tag.text.default_message_config || {};
 
-        // stat.message_configを(必要であれば)初期化してその参照を取得
+        // stat.message_configを必要であれば初期化してその参照を取得
         if (!this.kag.stat.message_config) {
             this.kag.stat.message_config = {};
         }
         const message_config = this.kag.stat.message_config;
 
-        // pmが持つプロパティのうち記憶対象(default_message_configに備わっている)キーのものだけstatに移す
+        // pmが持つプロパティのうち記憶対象のものだけstatに移す
+        // デフォルトのコンフィグに存在するプロパティが記憶対象
         for (const key in default_message_config) {
             if (key in pm) {
                 message_config[key] = pm[key];
             }
+        }
+
+        // ワードブレイク禁止単語リストを必要であれば初期化してその参照を取得
+        if (!this.kag.stat.word_nobreak_list) {
+            this.kag.stat.word_nobreak_list = [];
+        }
+        const list = this.kag.stat.word_nobreak_list;
+
+        // ワードブレイク禁止単語を追加していく
+        if ($.isNonEmptyStr(pm.add_word_nobreak)) {
+            pm.add_word_nobreak.split(",").forEach((word) => {
+                const word_trimed = $.trim(word);
+                if (!list.includes(word_trimed)) {
+                    list.push(word_trimed);
+                }
+            });
+        }
+
+        // ワードブレイク禁止単語を除外していく
+        if ($.isNonEmptyStr(pm.remove_word_nobreak)) {
+            let filterd_list = list;
+            pm.remove_word_nobreak.split(",").forEach((word) => {
+                const word_trimed = $.trim(word);
+                // filter メソッドで新しい配列を生成して変数を更新していく
+                filterd_list = filterd_list.filter((item) => item !== word_trimed);
+            });
+            // 最後に変数をもとの参照に放り込む
+            this.kag.stat.word_nobreak_list = filterd_list;
         }
 
         this.kag.ftag.nextOrder();

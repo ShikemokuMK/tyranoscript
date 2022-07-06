@@ -338,6 +338,7 @@ tyrano.plugin.kag = {
         },
 
         message_config: {},
+        word_nobreak_list: [],
 
         title: "", //ゲームのタイトル
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
