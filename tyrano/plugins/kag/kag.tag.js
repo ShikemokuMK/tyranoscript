@@ -1613,7 +1613,7 @@ tyrano.plugin.kag.tag.text = {
         // 今回の[text]を表示する前にメッセージウィンドウ上に存在していた最後の1文字の情報を取得
         // [p][cm][er]などでまっさらになっている場合はもちろん取れないので初期値を設定
         const prev = this.kag.tmp.last_char_info || {
-            left: -Infinity,
+            left: is_vertical ? Infinity : -Infinity,
             top: -Infinity,
             j_char: null,
         };
