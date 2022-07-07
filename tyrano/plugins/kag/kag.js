@@ -1952,6 +1952,22 @@ tyrano.plugin.kag = {
     },
 
     /**
+     * @typedef {Object} Tag タグのロジック定義
+     * @property {Object} pm タグのパラメータの初期値 これにユーザーの指定パラメータがマージされたものがstartに渡される
+     * @property {Array} vital 必須パラメータ名の配列
+     * @property {function} start タグの処理ロジック このなかで this.kag.ftag.nextOrder() しないと次のタグに進まない
+     * @property {Object} kag TYRANO.kagへの参照
+     */
+    /**
+     * タグのロジック定義への参照を取得する
+     * @param {string} tag_name
+     * @returns {Tag}
+     */
+    getTag: function (tag_name = "") {
+        return this.ftag.master_tag[tag_name];
+    },
+
+    /**
      * 発言者の名前欄を意味する<p>要素のjQueryオブジェクトを返す
      * そもそも[chara_config]タグによる chara_ptext の設定が済んでいない場合は空のjQueryオブジェクトを返す
      * @returns {jQuery}

@@ -1672,6 +1672,23 @@
     };
 
     /**
+     * -webkit-text-strokeで縁取りされている可能性のある
+     * [ptext]のテキスト内容を書き換える
+     */
+    $.fn.updatePText = function (str) {
+        if (this.length === 0) {
+            return;
+        }
+        this.each(function () {
+            if (typeof this.updateText === "function") {
+                this.updateText(str);
+            } else {
+                $(this).html(str);
+            }
+        });
+    };
+
+    /**
      * 引数が"空でない文字列"であるかどうかを返す
      * @param {any} val
      * @returns {boolean}

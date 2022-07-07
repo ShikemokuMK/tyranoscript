@@ -1001,7 +1001,7 @@ tyrano.plugin.kag.tag.text = {
                     }
                 } else {
                     // -webkit-text-strokeによる縁取りを行なう場合
-                    message_html += this.buildTextStrokeChar(c);
+                    message_html += this.buildTextStrokeChar(c, this.kag.tmp.text_stroke_edges);
                 }
             }
         }
@@ -1027,18 +1027,23 @@ tyrano.plugin.kag.tag.text = {
     /**
      * -webkit-text-strokeで文字を縁取りするためのHTMLを組み立てる
      * @param {string} c 縁取りする1文字
+     * @param {EdgeOption[]} edges 縁取りオプション配列
+     * @param {boolean} is_visible 最初から表示状態にするか
      * @returns {string} ビルドされたHTML文字列
      */
-    buildTextStrokeChar: function (c) {
+    buildTextStrokeChar: function (c, edges, is_visible = false) {
         let char_html = "";
+
+        // 最初から表示するか
+        const visible_class = is_visible ? "visible" : "";
 
         // span.char.text-stroke の開始
         if (this.kag.tmp.is_edge_overlap) {
             // 縁取りをひとつ前の文字に重ねてもいい場合は z-index: 10; をセット
             // スタックコンテキストが生成されるため重なり順に影響が出る
-            char_html += `<span class="char text-stroke" style="z-index:10;opacity:0;">`;
+            char_html += `<span class="char text-stroke ${visible_class}" style="z-index:10;opacity:0;">`;
         } else {
-            char_html += `<span class="char text-stroke">`;
+            char_html += `<span class="char text-stroke ${visible_class}">`;
         }
 
         // チラつきを無くすおまじない
@@ -1046,18 +1051,18 @@ tyrano.plugin.kag.tag.text = {
         char_html += `<span class="dummy" style="transform: scale(2);">${c}</span>`;
 
         // テキストの縁取り部分を作成
-        for (let i = this.kag.tmp.text_stroke_edges.length - 1; i >= 0; i--) {
-            const edge = this.kag.tmp.text_stroke_edges[i];
+        for (let i = edges.length - 1; i >= 0; i--) {
+            const edge = edges[i];
             let style = `-webkit-text-stroke: ${edge.total_width * 2}px ${edge.color};z-index:${100 - i};`;
             if (this.kag.tmp.is_edge_overlap) {
                 style += "opacity:1;";
             }
-            char_html += `<span class="stroke" style="${style}">${c}</span>`;
+            char_html += `<span class="stroke entity" style="${style}">${c}</span>`;
         }
 
         // テキストの本体を作成
         let style = this.kag.tmp.is_edge_overlap ? "opacity:1;" : "";
-        char_html += `<span class="fill" style="${style}">${c}</span>`;
+        char_html += `<span class="fill entity" style="${style}">${c}</span>`;
 
         // 上の要素はいずれも absolute なため width, height の構成要件にならない
         // relative, inline なダミーを追加して width, height を確保する
@@ -1306,7 +1311,7 @@ tyrano.plugin.kag.tag.text = {
         // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
         // span.charそのものではなくその中の子要素に対してアニメーションを当てる
         if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
-            j_char_span = j_char_span.find(".stroke, .fill");
+            j_char_span = j_char_span.find(".entity");
         }
 
         if (this.kag.stat.font.effect != "") {
@@ -1344,7 +1349,7 @@ tyrano.plugin.kag.tag.text = {
         // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
         // span.charそのものではなくその中の子要素に対してアニメーションを当てる
         if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
-            j_char_span_children = j_char_span_children.find(".stroke, .fill");
+            j_char_span_children = j_char_span_children.find(".entity");
         }
         j_char_span_children.css({
             animation: "",
@@ -3239,13 +3244,13 @@ tyrano.plugin.kag.tag.ptext = {
     start: function (pm) {
         var that = this;
 
-        //visible true が指定されている場合は表示状態に持っていけ
-        //これはレイヤのスタイル
+        //
+        // 上書き指定
+        //
 
-        //上書き指定
         if (pm.overwrite == "true" && pm.name != "") {
             if ($("." + pm.name).length > 0) {
-                $("." + pm.name).html(pm.text);
+                $("." + pm.name).updatePText(pm.text);
 
                 //サイズとか位置とかも調整できるならやっとく
                 if (pm.x != 0) {
@@ -3269,18 +3274,32 @@ tyrano.plugin.kag.tag.ptext = {
             }
         }
 
-        //指定がない場合はデフォルトフォントを適応する
+        //
+        // 指定がない場合はデフォルトフォントを適応する
+        //
+
+        const font = this.kag.stat.font;
+
         if (pm.face == "") {
-            pm.face = that.kag.stat.font.face;
+            pm.face = font.face;
         }
 
         if (pm.color == "") {
-            pm.color = $.convertColor(that.kag.stat.font.color);
+            pm.color = $.convertColor(font.color);
         } else {
             pm.color = $.convertColor(pm.color);
         }
 
-        var font_new_style = {
+        // bold="true" が指定されているなら font-weight: bold; を指定したい
+        if (pm.bold === "true") {
+            pm.bold = "bold";
+        }
+
+        //
+        // CSSを準備
+        //
+
+        const font_new_style = {
             "color": pm.color,
             "font-weight": pm.bold,
             "font-style": pm.fontstyle,
@@ -3290,41 +3309,67 @@ tyrano.plugin.kag.tag.ptext = {
             "text": "",
         };
 
+        const edge_method = pm.edge_method || font.edge_method;
         if (pm.edge != "") {
-            var edge_color = $.convertColor(pm.edge);
-            font_new_style["text-shadow"] =
-                "1px 1px 0 " + edge_color + ", -1px 1px 0 " + edge_color + ",1px -1px 0 " + edge_color + ",-1px -1px 0 " + edge_color + "";
+            // 縁取り文字
+            switch (edge_method) {
+                default:
+                case "shadow":
+                    font_new_style["text-shadow"] = $.generateTextShadowStrokeCSS(pm.edge);
+                    break;
+                case "filter":
+                    font_new_style["filter"] = $.generateDropShadowStrokeCSS(pm.edge);
+                    break;
+                case "stroke":
+                    break;
+            }
         } else if (pm.shadow != "") {
             font_new_style["text-shadow"] = "2px 2px 2px " + $.convertColor(pm.shadow);
         }
 
-        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+        //
+        // DOM(jQueryオブジェクト)生成
+        //
 
-        var tobj = $("<p></p>");
+        const tobj = $("<p></p>");
 
+        // スタイルをセット
         tobj.css("position", "absolute");
         tobj.css("top", pm.y + "px");
         tobj.css("left", pm.x + "px");
         tobj.css("width", pm.width);
-
         tobj.css("text-align", pm.align);
+        this.kag.setStyles(tobj, font_new_style);
 
+        // クラスをセット
         if (pm.vertical == "true") {
             tobj.addClass("vertical_text");
         }
-
-        //オブジェクトにクラス名をセットします
-        $.setName(tobj, pm.name);
-
-        tobj.html(pm.text);
-
-        this.kag.setStyles(tobj, font_new_style);
-
         if (pm.layer == "fix") {
             tobj.addClass("fixlayer");
         }
+        $.setName(tobj, pm.name);
 
-        //時間指定
+        // strokeの縁取りが有効ならhtmlメソッドを書き変える必要アリ
+        if (edge_method === "stroke") {
+            this.kag.event.addEventElement({
+                tag: "ptext",
+                j_target: tobj,
+                pm: pm,
+            });
+            this.setEvent(tobj, pm);
+        }
+
+        // innerHTMLをセット！
+        tobj.updatePText(pm.text);
+
+        //
+        // レイヤに追加
+        //
+
+        const target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+
+        //　時間指定
         if (pm.time != "") {
             tobj.css("opacity", 0);
             target_layer.append(tobj);
@@ -3335,6 +3380,21 @@ tyrano.plugin.kag.tag.ptext = {
             target_layer.append(tobj);
             this.kag.ftag.nextOrder();
         }
+    },
+
+    setEvent: function (j_target, pm) {
+        const that = TYRANO;
+        const edges = $.parseEdgeOptions(pm.edge);
+        j_target.get(0).updateText = (str) => {
+            const inner_html = Array.prototype.reduce.call(
+                str,
+                (total_html, this_char) => {
+                    return total_html + that.kag.getTag("text").buildTextStrokeChar(this_char, edges, true);
+                },
+                "",
+            );
+            j_target.html(inner_html);
+        };
     },
 };
 

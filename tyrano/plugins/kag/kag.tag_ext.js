@@ -1470,7 +1470,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
         if (pm.name == "") {
             // 誰も話していない
-            j_chara_name.html("");
+            j_chara_name.updatePText("");
 
             // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
             if (this.kag.stat.chara_talk_focus != "none") {
@@ -1491,7 +1491,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
                 // キャラクターが取得できた場合
 
                 // キャラクター名出力
-                j_chara_name.html(cpm.jname);
+                j_chara_name.updatePText(cpm.jname);
 
                 // 色指定がある場合は、その色を指定する。
                 if (cpm.color != "") {
@@ -1528,7 +1528,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
                 }
             } else {
                 // キャラクター定義が存在しない場合は指定ワードをそのまま表示
-                j_chara_name.html(pm.name);
+                j_chara_name.updatePText(pm.name);
 
                 // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
                 if (this.kag.stat.chara_talk_focus != "none") {

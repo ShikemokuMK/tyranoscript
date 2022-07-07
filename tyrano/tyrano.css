@@ -459,7 +459,7 @@ body{
 /*   span.text あ   … テキスト本体。absolute。
 /*   span.dummy あ  … ダミー。透明。relative。縁取りとテキスト本体が absolute なせいで widht, height を構成しないので
 /*                    かわりにこれで width, height を構成する。*/
-.message_inner .char.text-stroke {
+p .char.text-stroke {
     opacity: 1;
     display: inline-block;
     position: relative;
@@ -473,7 +473,11 @@ body{
     /**/
 }
 
-.message_inner .char.text-stroke span {
+p .char.text-stroke.visible .entity {
+    opacity: 1;
+}
+
+p .char.text-stroke span {
     margin: 0;
     padding: 0;
     position: absolute;
@@ -481,12 +485,12 @@ body{
     opacity: 0;
 }
 
-.message_inner .char.text-stroke .stroke {
+p .char.text-stroke .stroke {
     z-index: 100;
     transform: translateZ(0);
 }
 
-.message_inner .char.text-stroke .fill {
+p .char.text-stroke .fill {
     z-index: 1000;
     transform: translateZ(0);
     height: 100%;
