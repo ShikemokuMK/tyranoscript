@@ -683,8 +683,7 @@ tyrano.plugin.kag.menu = {
         this.kag.layer.setLayerHtml(data.layer);
 
         // グラデーションテキストの復元
-        $(".char").restoreGradientText();
-        $(".char .fill").restoreGradientText();
+        $(".gradient-text").restoreGradientText();
 
         //バックログの初期化
         //awakegame考慮もれ。一旦戻す

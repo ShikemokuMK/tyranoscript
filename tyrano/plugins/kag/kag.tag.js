@@ -3309,8 +3309,10 @@ tyrano.plugin.kag.tag.ptext = {
             "text": "",
         };
 
+        const is_edge_enabled = pm.edge !== "";
         const edge_method = pm.edge_method || font.edge_method;
-        if (pm.edge != "") {
+        pm.is_stroke_edge_enabled = is_edge_enabled && edge_method === "stroke";
+        if (is_edge_enabled) {
             // 縁取り文字
             switch (edge_method) {
                 default:
@@ -3352,6 +3354,7 @@ tyrano.plugin.kag.tag.ptext = {
 
         // strokeの縁取りが有効ならhtmlメソッドを書き変える必要アリ
         if (edge_method === "stroke") {
+            tobj.addClass("text-stroke");
             this.kag.event.addEventElement({
                 tag: "ptext",
                 j_target: tobj,
@@ -3362,6 +3365,11 @@ tyrano.plugin.kag.tag.ptext = {
 
         // innerHTMLをセット！
         tobj.updatePText(pm.text);
+
+        // グラデーションの設定
+        if (pm.gradient && pm.gradient !== "none" && !pm.is_stroke_edge_enabled) {
+            tobj.setGradientText(pm.gradient);
+        }
 
         //
         // レイヤに追加
@@ -3394,6 +3402,9 @@ tyrano.plugin.kag.tag.ptext = {
                 "",
             );
             j_target.html(inner_html);
+            if (pm.gradient && pm.gradient !== "none") {
+                j_target.find(".fill").setGradientText(pm.gradient);
+            }
         };
     },
 };

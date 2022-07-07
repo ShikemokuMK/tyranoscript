@@ -1646,11 +1646,18 @@
      * @param {string} gradient CSSのグラデーション関数文字列 linear-gradient(...)
      */
     $.fn.setGradientText = function (gradient) {
-        this.css({
-            "background-image": gradient,
-            "-webkit-background-clip": "text",
-            "background-clip": "text",
-            "color": "transparent",
+        if (this.length === 0) {
+            return;
+        }
+        this.each(function () {
+            $(this)
+                .css({
+                    "background-image": gradient,
+                    "-webkit-background-clip": "text",
+                    "background-clip": "text",
+                    "color": "transparent",
+                })
+                .addClass("gradient-text");
         });
     };
 

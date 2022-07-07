@@ -1982,9 +1982,28 @@ tyrano.plugin.kag = {
      * @returns {string}
      */
     getCharaName: function () {
-        var chara_name = "";
+        let chara_name = "";
         if (this.stat.chara_ptext != "") {
-            chara_name = $.isNull($("." + this.stat.chara_ptext).html());
+            // 発言者エリアを取得
+            const j_chara_name = this.getCharaNameArea();
+            if (!j_chara_name.hasClass("text-stroke")) {
+                // ふつうはこれでよい
+                chara_name = $.isNull(j_chara_name.html());
+            } else {
+                // -webkit-text-strokeによる縁取りが施されている場合
+                // この場合はそのままhtml()するとエラいことになる！
+                // span
+                //   span.stroke あ
+                //   span.fill   あ
+                // span
+                //   span.stroke か
+                //   span.fill   か
+                // span
+                //   span.stroke ね
+                //   span.fill   ね
+                // こんな構造になっているから
+                chara_name = j_chara_name.find(".fill").text();
+            }
         }
         return chara_name;
     },
