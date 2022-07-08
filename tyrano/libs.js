@@ -1771,6 +1771,26 @@
         }
         return this;
     };
+
+    /**
+     * CSSのキーとバリューを渡してセットする
+     * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
+     * こちらのメソッドであれば処理時間が40-50%ほどで済む
+     * @param {Object} key
+     * @param {Object} value
+     * @return {jQuery}
+     */
+    $.fn.setStyle = function (key, value) {
+        const len = this.length;
+        if (this.length === 0) {
+            return this;
+        }
+        for (let i = 0; i < len; i++) {
+            const elm = this[i];
+            elm.style.setProperty(key, value);
+        }
+        return this;
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {

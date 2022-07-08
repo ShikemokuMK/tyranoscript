@@ -446,12 +446,12 @@ body{
 
 
 
-/*------　逆字下げのための設定 -------*/
+/*------　カギカッコフロートのための設定 -------*/
 .message_inner > p > span {
     position: relative;
 }
 
-/*------　text-strokeによる縁取りの設定 -------*/
+/*------　text-stroke による縁取りの設定 -------*/
 /* ★縁取りテキスト1文字を構成する要素ツリー
 /* span.char.text-stroke
 /*   span.dummy あ  … ダミー。透明。absolute。レンダリング領域を広げる役割。
@@ -494,13 +494,43 @@ p .char.text-stroke .fill {
     z-index: 1000;
     transform: translateZ(0);
     height: 100%;
-    /* 次のようなスタイルを当てることでグラデーションテキストにすることも可能 */
-    /*
-    background-image: repeating-linear-gradient(0deg, #B67B03 0.1em, #DAAF08 0.2em, #FEE9A0 0.3em, #DAAF08 0.4em, #B67B03 0.5em);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    /**/
+}
+
+/*------　text-shadow による個別縁取りの設定 -------*/
+/* ★縁取りテキスト1文字を構成する要素ツリー
+/* span.char.text-shadow
+/*   span.stroke あ … 縁取り。absolute。複数個でありうる。
+/*   span.text あ   … テキスト本体。absolute。
+/*   span.dummy あ  … ダミー。透明。relative。縁取りとテキスト本体が absolute なせいで widht, height を構成しないので
+/*                    かわりにこれで width, height を構成する。*/
+p .char.text-shadow {
+    opacity: 1;
+    display: inline-block;
+    position: relative;
+    z-index: auto;
+}
+
+p .char.text-shadow.visible .entity {
+    opacity: 1;
+}
+
+p .char.text-shadow span {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    display: inline-block;
+    opacity: 0;
+}
+
+p .char.text-shadow .stroke {
+    z-index: auto;
+    transform: translateZ(0);
+}
+
+p .char.text-shadow .fill {
+    z-index: 1000;
+    transform: translateZ(0);
+    height: 100%;
 }
 
 

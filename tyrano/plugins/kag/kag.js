@@ -1986,11 +1986,11 @@ tyrano.plugin.kag = {
         if (this.stat.chara_ptext != "") {
             // 発言者エリアを取得
             const j_chara_name = this.getCharaNameArea();
-            if (!j_chara_name.hasClass("text-stroke")) {
+            if (!j_chara_name.hasClass("multiple-text")) {
                 // ふつうはこれでよい
                 chara_name = $.isNull(j_chara_name.html());
             } else {
-                // -webkit-text-strokeによる縁取りが施されている場合
+                // 個別縁取りが施されている場合
                 // この場合はそのままhtml()するとエラいことになる！
                 // span
                 //   span.stroke あ

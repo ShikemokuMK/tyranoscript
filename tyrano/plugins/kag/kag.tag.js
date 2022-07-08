@@ -534,7 +534,7 @@ tyrano.plugin.kag.tag.text = {
     default_message_config: {
         ch_speed_in_click: "1",
         effect_speed_in_click: "100ms",
-        edge_overlap_text: "false",
+        edge_overlap_text: "true",
         speech_bracket_float: "false",
         speech_margin_left: "false",
         kerning: "false",
@@ -649,7 +649,7 @@ tyrano.plugin.kag.tag.text = {
         // 字詰め
         const font_feature_settings = this.getMessageConfig("kerning") === "true" ? '"palt"' : "initial";
 
-        j_inner_message.css({
+        j_inner_message.setStyleMap({
             "letter-spacing": this.kag.config.defaultPitch + "px",
             "line-height": parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px",
             "font-family": this.kag.config.userFace,
@@ -720,7 +720,33 @@ tyrano.plugin.kag.tag.text = {
         const j_span = this.kag.getMessageCurrentSpan();
 
         // カギカッコフロートを行うべきか メッセージウィンドウがまっさらのときだけ有効
-        this.kag.tmp.should_set_reverse_indent = chara_name && !j_span.text() && this.getMessageConfig("speech_bracket_float") !== "false";
+        const tmp = this.kag.tmp;
+        tmp.should_set_reverse_indent = chara_name && !j_span.text() && this.getMessageConfig("speech_bracket_float") !== "false";
+
+        // アニメーションやグラデーションが無効な場合を検知
+        // undefined, "none" の場合は無効
+        const font = this.kag.stat.font;
+        if (font.effect === undefined || font.effect === "none") {
+            font.effect = "";
+        }
+        if (font.gradient === undefined || font.gradient === "none") {
+            font.gradient = "";
+        }
+
+        // -webkit-text-strokeによる縁取りを行うかどうか
+        tmp.is_text_stroke = font.edge && font.edge_method === "stroke";
+
+        // 縁を前の文字に重ねるかどうか
+        tmp.is_edge_overlap = this.getMessageConfig("edge_overlap_text") === "true";
+
+        // 1文字1文字を個別に装飾するかどうか
+        // * -webkit-text-strokeによる縁取りを行なう場合 → true
+        // * text-shadowによる縁取りを行なう場合
+        //   * 前の文字に縁を重ねたくない → true
+        //   * グラデーションをかけたい → true
+        //   * それ以外 → false (個別にtext-shadowをかけなくてもいい。各文字をラップする親のspanにtext-shadowをかけるだけでいい)
+        tmp.is_individual_decoration =
+            tmp.is_text_stroke || (font.edge && font.edge_method === "shadow" && (!tmp.is_edge_overlap || font.gradient));
 
         // span.current_span のスタイルを調整
         this.setCurrentSpanStyle(j_span, chara_name);
@@ -730,30 +756,14 @@ tyrano.plugin.kag.tag.text = {
             this.manageAlreadyRead(j_span);
         }
 
-        // アニメーションが無効な場合を検知
-        // undefined, "none" の場合はアニメーション無効
-        if (typeof this.kag.stat.font.effect == "undefined" || this.kag.stat.font.effect == "none") {
-            this.kag.stat.font.effect = "";
-        }
-
         // 1文字1文字を包む span に inline-block を適用するかどうか
         // エフェクトによって文字を transform で動かすためには inline-block でなければならない！
         let should_use_inline_block = true;
-        if (this.kag.stat.font.effect == "" || this.kag.stat.font.effect == "fadeIn") {
+        if (font.effect == "" || font.effect == "fadeIn") {
             // エフェクトなし、あるいはただのフェードインの場合は inline でも動くので inline にする
             // inline にしておくと英単語や句読点の禁則処理が有効になるので便利
             should_use_inline_block = false;
         }
-
-        // -webkit-text-strokeによる縁取りを行うかどうか
-        this.kag.tmp.is_text_stroke = this.kag.stat.font.edge && this.kag.stat.font.edge_method === "stroke";
-
-        // -webkit-text-strokeによる縁取りを行う場合に限り縁取り情報をパースしておく
-        this.kag.tmp.text_stroke_edges = this.kag.tmp.is_text_stroke ? $.parseEdgeOptions(this.kag.stat.font.edge) : null;
-
-        // 縁を前の文字に重ねるかどうか
-        this.kag.tmp.is_edge_overlap = this.getMessageConfig("edge_overlap_text") === "true";
-
         // message_str からHTMLを生成する
         // 入力例) "かきく"
         // 出力例) "<span>か</span><span>き</span><span>く</span>"
@@ -859,7 +869,7 @@ tyrano.plugin.kag.tag.text = {
             const font = this.kag.stat.font;
 
             // 基本のテキストスタイル
-            j_span.css({
+            j_span.setStyleMap({
                 "color": font.color,
                 "font-weight": font.bold,
                 "font-size": font.size + "px",
@@ -871,7 +881,7 @@ tyrano.plugin.kag.tag.text = {
             const letter_spacing = this.getMessageConfig("letter_spacing") || this.kag.config.defaultPitch;
             const line_spacing = this.getMessageConfig("line_spacing") || this.kag.config.defaultLineSpacing;
             const line_height = parseInt(font.size) + parseInt(line_spacing);
-            j_span.css({
+            j_span.setStyleMap({
                 "letter-spacing": `${letter_spacing}px`,
                 "line-height": `${line_height}px`,
             });
@@ -883,10 +893,19 @@ tyrano.plugin.kag.tag.text = {
                 switch (font.edge_method) {
                     default:
                     case "shadow":
-                        if (font.gradient) {
-                            font.edge_method = "stroke";
+                        if (!this.kag.tmp.is_individual_decoration) {
+                            // 個別縁取りが無効な場合だけでよい
+                            j_span.setStyle("text-shadow", $.generateTextShadowStrokeCSS(edge_str));
                         } else {
-                            j_span.css("text-shadow", $.generateTextShadowStrokeCSS(edge_str));
+                            // 個別縁取りが有効な場合
+                            const edges = $.parseEdgeOptions(edge_str);
+                            this.kag.tmp.text_shadow_values = [];
+                            for (let i = edges.length - 1; i >= 0; i--) {
+                                const edge = edges[i];
+                                const text_shadow_value = $.generateTextShadowStrokeCSSOne(edge.color, edge.total_width);
+                                this.kag.tmp.text_shadow_values.push(text_shadow_value);
+                            }
+                            this.kag.tmp.inside_stroke_color = edges[0].color;
                         }
                         break;
                     case "filter":
@@ -897,7 +916,7 @@ tyrano.plugin.kag.tag.text = {
                 }
             } else if (font.shadow != "") {
                 // 影文字
-                j_span.css("text-shadow", "2px 2px 2px " + font.shadow);
+                j_span.setStyle("text-shadow", "2px 2px 2px " + font.shadow);
             }
         }
     },
@@ -914,7 +933,7 @@ tyrano.plugin.kag.tag.text = {
             // このテキストが既読の場合
             // テキストの色を変更
             if (this.kag.config.alreadyReadTextColor != "default") {
-                j_span.css("color", $.convertColor(this.kag.config.alreadyReadTextColor));
+                j_span.setStyle("color", $.convertColor(this.kag.config.alreadyReadTextColor));
             }
         } else {
             // このテキストが既読でない場合
@@ -940,20 +959,28 @@ tyrano.plugin.kag.tag.text = {
         // ワードブレイク禁止処理
         //
 
-        // メッセージ中に含まれていない記号を適当に選んでエスケープ用の文字にする
-        const escape_char = this.getEscapeChar(message_str);
-        let is_escaping = false;
-
         // ワードブレイク(単語の途中での自然改行)を禁止する単語のリスト
         const word_nobreak_list = this.kag.stat.word_nobreak_list || [];
 
-        // メッセージ中に含まれる該当単語をエスケープ文字で囲む
-        // 処理前の例) "「俺は――ゴリラだ」" … このうち"――"をワードブレイクしないように保護したい
-        // 処理後の例) "「俺は#――#ゴリラだ」" … このとき"#"はもとのメッセージ中には存在しないことが保証されている
-        word_nobreak_list.forEach((word) => {
-            const reg = new RegExp(word, "g");
-            message_str = message_str.replace(reg, escape_char + word + escape_char);
-        });
+        // ワードブレイク禁止単語がないならチェックする必要はない
+        const should_check_word_break = word_nobreak_list.length > 0;
+
+        let escape_char;
+        let is_escaping = false;
+
+        if (should_check_word_break) {
+            // メッセージ中に含まれていない記号を適当に選んでエスケープ用の文字にする
+            const escape_char = this.getEscapeChar(message_str);
+            let is_escaping = false;
+
+            // メッセージ中に含まれる該当単語をエスケープ文字で囲む
+            // 処理前の例) "「俺は――ゴリラだ」" … このうち"――"をワードブレイクしないように保護したい
+            // 処理後の例) "「俺は#――#ゴリラだ」" … このとき"#"はもとのメッセージ中には存在しないことが保証されている
+            word_nobreak_list.forEach((word) => {
+                const reg = new RegExp(word, "g");
+                message_str = message_str.replace(reg, escape_char + word + escape_char);
+            });
+        }
 
         //
         // 1文字ずつ見ていきながらHTML生成
@@ -964,7 +991,7 @@ tyrano.plugin.kag.tag.text = {
             let c = message_str.charAt(i);
 
             // ワードブレイク禁止処理
-            if (c === escape_char) {
+            if (should_check_word_break && c === escape_char) {
                 if (is_escaping) {
                     is_escaping = false;
                     message_html += "</span>";
@@ -996,7 +1023,7 @@ tyrano.plugin.kag.tag.text = {
                     this.kag.stat.mark = 0;
                 }
 
-                if (!this.kag.tmp.is_text_stroke) {
+                if (!this.kag.tmp.is_individual_decoration) {
                     // 通常はこちら
                     if (should_use_inline_block) {
                         message_html += `<span class="char" style="opacity:0;display:inline-block;">${c}</span>`;
@@ -1004,8 +1031,14 @@ tyrano.plugin.kag.tag.text = {
                         message_html += `<span class="char" style="opacity:0">${c}</span>`;
                     }
                 } else {
-                    // -webkit-text-strokeによる縁取りを行なう場合
-                    message_html += this.buildTextStrokeChar(c, this.kag.tmp.text_stroke_edges);
+                    // 1文字1文字に個別に装飾を当てる場合
+                    if (this.kag.tmp.is_text_stroke) {
+                        // -webkit-text-strokeによる個別縁取りを行なう場合
+                        message_html += this.buildTextStrokeChar(c, this.kag.stat.font.edge);
+                    } else {
+                        // text-shadowによる個別縁取りを行なう場合
+                        message_html += this.buildTextShadowChar(c, this.kag.stat.font.edge);
+                    }
                 }
             }
         }
@@ -1029,20 +1062,64 @@ tyrano.plugin.kag.tag.text = {
     },
 
     /**
-     * -webkit-text-strokeで文字を縁取りするためのHTMLを組み立てる
+     * text-shadowで文字を"1文字ずつ"縁取りしたHTMLを組み立てる
      * @param {string} c 縁取りする1文字
-     * @param {EdgeOption[]} edges 縁取りオプション配列
+     * @param {string} edge_str 縁取りを定義した文字列
      * @param {boolean} is_visible 最初から表示状態にするか
      * @returns {string} ビルドされたHTML文字列
      */
-    buildTextStrokeChar: function (c, edges, is_visible = false) {
+    buildTextShadowChar: function (c, edge_str, is_visible = false) {
         let char_html = "";
+
+        // 縁を前の文字の上に重ねるかどうか
+        const is_edge_overlap = this.kag.tmp.is_edge_overlap;
+
+        // 最初から表示するか
+        const visible_class = is_visible ? "visible" : "";
+
+        // span.char.text-shadow の開始
+        const style = is_edge_overlap ? "z-index: 10; opacity: 0; " : "";
+        char_html += `<span class="char text-shadow ${visible_class}" style="${style}">`;
+
+        // テキストの縁取り部分を作成
+        const opacity_style = is_edge_overlap ? "opacity: 1; " : "";
+        this.kag.tmp.text_shadow_values.forEach((text_shadow_value, i, arr) => {
+            const z_index = 11 + i;
+            const color_style = i + 1 < arr.length ? "" : `color: ${this.kag.tmp.inside_stroke_color}; `;
+            char_html += `<span class="stroke entity" style="${color_style}${opacity_style}text-shadow: ${text_shadow_value}; z-index: ${z_index};">${c}</span>`;
+        });
+
+        // テキストの本体を作成
+        char_html += `<span class="fill entity" style="${opacity_style}">${c}</span>`;
+
+        // 上の要素はいずれも absolute なため width, height の構成要件にならない
+        // relative, inline なダミーを追加して width, height を確保する
+        char_html += `<span class="dummy" style="position:relative;display:inline;">${c}</span>`;
+
+        return char_html + `</span>`;
+    },
+
+    /**
+     * -webkit-text-strokeで文字を縁取りするためのHTMLを組み立てる
+     * @param {string} c 縁取りする1文字
+     * @param {string} edge_str 縁取りを定義した文字列
+     * @param {boolean} is_visible 最初から表示状態にするか
+     * @returns {string} ビルドされたHTML文字列
+     */
+    buildTextStrokeChar: function (c, edge_str, is_visible = false) {
+        let char_html = "";
+
+        // 縁取り定義をパース
+        const edges = $.parseEdgeOptions(edge_str);
+
+        // 縁を前の文字の上に重ねるかどうか
+        const is_edge_overlap = this.kag.tmp.is_edge_overlap;
 
         // 最初から表示するか
         const visible_class = is_visible ? "visible" : "";
 
         // span.char.text-stroke の開始
-        if (this.kag.tmp.is_edge_overlap) {
+        if (is_edge_overlap) {
             // 縁取りをひとつ前の文字に重ねてもいい場合は z-index: 10; をセット
             // スタックコンテキストが生成されるため重なり順に影響が出る
             char_html += `<span class="char text-stroke ${visible_class}" style="z-index:10;opacity:0;">`;
@@ -1061,14 +1138,14 @@ tyrano.plugin.kag.tag.text = {
             let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${
                 100 - i
             }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
-            if (this.kag.tmp.is_edge_overlap) {
+            if (is_edge_overlap) {
                 style += "opacity:1;";
             }
             char_html += `<span class="stroke entity" style="${style}">${c}</span>`;
         }
 
         // テキストの本体を作成
-        let style = this.kag.tmp.is_edge_overlap ? "opacity:1;" : "";
+        let style = is_edge_overlap ? "opacity:1;" : "";
         char_html += `<span class="fill entity" style="${style}">${c}</span>`;
 
         // 上の要素はいずれも absolute なため width, height の構成要件にならない
@@ -1315,9 +1392,9 @@ tyrano.plugin.kag.tag.text = {
      * @param {jQuery} j_char_span 1文字の`<span>`のjQueryオブジェクト
      */
     makeOneCharVisible: function (j_char_span) {
-        // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
+        // 個別縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
         // span.charそのものではなくその中の子要素に対してアニメーションを当てる
-        if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
+        if (this.kag.tmp.is_individual_decoration && !this.kag.tmp.is_edge_overlap) {
             j_char_span = j_char_span.find(".entity");
         }
 
@@ -1333,7 +1410,7 @@ tyrano.plugin.kag.tag.text = {
             // アニメ―ション終了時に文字を完全表示
             j_char_span.on("animationend", function (e) {
                 j_char_span.removeClass("animchar");
-                j_char_span.css({
+                j_char_span.setStyleMap({
                     opacity: 1,
                     visibility: "visible",
                     animation: "",
@@ -1342,9 +1419,9 @@ tyrano.plugin.kag.tag.text = {
 
             //　クラスを付けてアニメーション再生開始
             j_char_span.addClass("animchar");
-            j_char_span.css("animation", `${anim_name} ${anim_duration} ease 0s 1 normal forwards`);
+            j_char_span.setStyle("animation", `${anim_name} ${anim_duration} ease 0s 1 normal forwards`);
         } else {
-            j_char_span.css({ visibility: "visible", opacity: "1" });
+            j_char_span.setStyleMap({ visibility: "visible", opacity: "1" });
         }
     },
 
@@ -1358,7 +1435,7 @@ tyrano.plugin.kag.tag.text = {
         if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
             j_char_span_children = j_char_span_children.find(".entity");
         }
-        j_char_span_children.css({
+        j_char_span_children.setStyleMap({
             animation: "",
             visibility: "visible",
             opacity: "1",
@@ -1426,7 +1503,7 @@ tyrano.plugin.kag.tag.text = {
                 if (!effect_speed_in_click.includes("s")) {
                     effect_speed_in_click += "ms";
                 }
-                j_msg_inner.find(".animchar").css({
+                j_msg_inner.find(".animchar").setStyleMap({
                     "animation-duration": effect_speed_in_click,
                 });
             }
@@ -1464,7 +1541,7 @@ tyrano.plugin.kag.tag.text = {
         // グラデーションの設定が有効の場合
         const font = this.kag.stat.font;
         if (font.gradient && font.gradient !== "none") {
-            const j_target = this.kag.tmp.is_text_stroke ? j_char_span_children.find(".fill") : j_char_span_children;
+            const j_target = this.kag.tmp.is_individual_decoration ? j_char_span_children.find(".fill") : j_char_span_children;
             j_target.setGradientText(font.gradient);
         }
 
@@ -1545,7 +1622,7 @@ tyrano.plugin.kag.tag.text = {
         let first_char_width = 0;
         if (indent_config === "true" || margin_config === "true") {
             const j_width_check = j_first_char.clone();
-            j_width_check.css({
+            j_width_check.setStyleMap({
                 "opacity": "0",
                 "position": "fixed",
                 "display": "inline-block",
@@ -1576,7 +1653,7 @@ tyrano.plugin.kag.tag.text = {
         }
 
         // 最初の1文字を absolute にしてしまおう
-        j_first_char.css({
+        j_first_char.setStyleMap({
             position: "absolute",
             // top: "0",
             left: `-${indent}${px_indent}`,
@@ -1608,7 +1685,7 @@ tyrano.plugin.kag.tag.text = {
 
         // border-box にしつつ左側に padding を付ける
         if (margin !== 0) {
-            j_msg_inner.find("p").css({
+            j_msg_inner.find("p").setStyleMap({
                 "box-sizing": "border-box",
                 "padding-left": `${margin}${px_margin}`,
             });
@@ -3339,20 +3416,20 @@ tyrano.plugin.kag.tag.ptext = {
         // 縁取り有効か
         const is_edge_enabled = pm.edge !== "";
         // 縁取りタイプ
-        let edge_method = pm.edge_method || font.edge_method;
-        // strokeタイプの縁取りが有効か
-        pm.is_stroke_edge_enabled = is_edge_enabled && edge_method === "stroke";
-        // 縁取りが有効でグラデーションも設定しようとしているときはshadowタイプの縁取りは不可
-        if (is_edge_enabled && (edge_method === "shadow" || edge_method === "") && pm.gradient) {
-            edge_method = "stroke";
-            pm.is_stroke_edge_enabled = true;
+        pm.edge_method = pm.edge_method || font.edge_method || "shadow";
+        // 1文字1文字を個別に装飾すべきか
+        let is_individual_decoration = is_edge_enabled && pm.edge_method === "stroke";
+        // shadowタイプの縁取りが有効でグラデーションも設定しようとしているなら個別装飾
+        if (is_edge_enabled && pm.edge_method === "shadow" && pm.gradient) {
+            is_individual_decoration = true;
         }
         if (is_edge_enabled) {
             // 縁取り文字
-            switch (edge_method) {
-                default:
+            switch (pm.edge_method) {
                 case "shadow":
-                    tobj.css("text-shadow", $.generateTextShadowStrokeCSS(pm.edge));
+                    if (!is_individual_decoration) {
+                        tobj.css("text-shadow", $.generateTextShadowStrokeCSS(pm.edge));
+                    }
                     break;
                 case "filter":
                     tobj.setFilterCSS($.generateDropShadowStrokeCSS(pm.edge));
@@ -3373,9 +3450,9 @@ tyrano.plugin.kag.tag.ptext = {
         }
         $.setName(tobj, pm.name);
 
-        // strokeの縁取りが有効ならhtmlメソッドを書き変える必要アリ
-        if (edge_method === "stroke") {
-            tobj.addClass("text-stroke");
+        // 個別装飾が有効なら単純なhtml()では書き変えられなくなるので特別な処理
+        if (is_individual_decoration) {
+            tobj.addClass("multiple-text");
             this.kag.event.addEventElement({
                 tag: "ptext",
                 j_target: tobj,
@@ -3388,7 +3465,10 @@ tyrano.plugin.kag.tag.ptext = {
         tobj.updatePText(pm.text);
 
         // グラデーションの設定
-        if (pm.gradient && pm.gradient !== "none" && !pm.is_stroke_edge_enabled) {
+        if (pm.gradient === "none") {
+            pm.gradient = "";
+        }
+        if (pm.gradient && !is_individual_decoration) {
             tobj.setGradientText(pm.gradient);
         }
 
@@ -3413,17 +3493,40 @@ tyrano.plugin.kag.tag.ptext = {
 
     setEvent: function (j_target, pm) {
         const that = TYRANO;
-        const edges = $.parseEdgeOptions(pm.edge);
+
+        /**
+         * 生のElementにupdateTextメソッドを追加する
+         * @param {string} str 新しくセットするテキスト
+         */
         j_target.get(0).updateText = (str) => {
+            that.kag.tmp.is_edge_overlap = false;
+
+            // 個別縁取りが有効な場合
+            const is_shadow = pm.edge_method === "shadow";
+            if (is_shadow) {
+                const edges = $.parseEdgeOptions(pm.edge);
+                that.kag.tmp.text_shadow_values = [];
+                for (let i = edges.length - 1; i >= 0; i--) {
+                    const edge = edges[i];
+                    const text_shadow_value = $.generateTextShadowStrokeCSSOne(edge.color, edge.total_width);
+                    that.kag.tmp.text_shadow_values.push(text_shadow_value);
+                }
+                that.kag.tmp.inside_stroke_color = edges[0].color;
+            }
+
             const inner_html = Array.prototype.reduce.call(
                 str,
                 (total_html, this_char) => {
-                    return total_html + that.kag.getTag("text").buildTextStrokeChar(this_char, edges, true);
+                    if (is_shadow) {
+                        return total_html + that.kag.getTag("text").buildTextShadowChar(this_char, pm.edge, true);
+                    } else {
+                        return total_html + that.kag.getTag("text").buildTextStrokeChar(this_char, pm.edge, true);
+                    }
                 },
                 "",
             );
             j_target.html(inner_html);
-            if (pm.gradient && pm.gradient !== "none") {
+            if (pm.gradient) {
                 j_target.find(".fill").setGradientText(pm.gradient);
             }
         };
