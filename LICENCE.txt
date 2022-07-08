@@ -33,8 +33,8 @@ Licensed under the MIT license - https://opensource.org/licenses/MIT
 Copyright (c) 2016 Daniel Eden
 
 ----------------
-html2canvas 1.1.4 <https://html2canvas.hertzen.com>
-Copyright (c) 2021 Niklas von Hertzen <https://hertzen.com>
+html2canvas 1.4.1 <https://html2canvas.hertzen.com>
+Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
 Released under MIT License
 
 ----------------
