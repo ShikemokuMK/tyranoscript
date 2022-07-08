@@ -1711,7 +1711,7 @@
         this.each(function () {
             const j_this = $(this);
             const style = j_this.attr("style");
-            if (style && style.includes("background-clip")) {
+            if (style && !style.includes("-webkit-background-clip") && style.includes("background-clip")) {
                 const new_style = style.replace("background-clip", "-webkit-background-clip: text; background-clip");
                 j_this.attr("style", new_style);
             }
