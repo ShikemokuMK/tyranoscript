@@ -1430,9 +1430,8 @@ tyrano.plugin.kag.tag.text = {
      * @param {jQuery} j_char_span_children 1文字1文字の`<span>`のjQueryオブジェクトのコレクション
      */
     makeAllCharsVisible: function (j_char_span_children) {
-        // -webkit-text-strokeによる縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
-        // span.charそのものではなくその中の子要素に対してアニメーションを当てる
-        if (this.kag.tmp.is_text_stroke && !this.kag.tmp.is_edge_overlap) {
+        // 個別文字装飾が有効な場合はspan.charそのものではなくその中の子要素に対してアニメーションを当てる
+        if (this.kag.tmp.is_individual_decoration) {
             j_char_span_children = j_char_span_children.find(".entity");
         }
         j_char_span_children.setStyleMap({
@@ -5615,6 +5614,7 @@ clickse    = ボタンをクリックした時に再生される効果音を設�
 enterse    = ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください,
 leavese    = ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください。,
 cm         = <p>ボタンクリック後に`[cm]`を実行するかどうか。`[glink]`は通常、ボタンクリック後に自動的に`[cm]`が実行されますが、`false`を指定するとこの`[cm]`を実行しません。</p><p>プレイヤー入力などの決定を`[glink]`で行いたい場合は`false`を指定しておき、`[commit]`後に手動で`[cm]`を実行してボタンや入力ボックスを消してください。</p>,
+opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0`で完全に透明です。,
 exp       = ボタンがクリックされた時に実行されるJSを指定できます。,
 preexp    = タグが実行された時点で、この属性に指定した値が変数`preexp`に格納されます。そしてボタンがクリックされた時に`exp`内で`preexp`という変数が利用できるようになります。
 
@@ -5641,6 +5641,7 @@ tyrano.plugin.kag.tag.glink = {
         graphic: "",
         enterimg: "",
         cm: "true",
+        opacity: "",
         clickse: "",
         enterse: "",
         leavese: "",
@@ -5671,6 +5672,10 @@ tyrano.plugin.kag.tag.glink = {
 
         if (pm.width != "") {
             j_button.css("width", pm.width + "px");
+        }
+
+        if (pm.opacity != "") {
+            j_button.css("opacity", $.convertOpacity(pm.opacity));
         }
 
         //graphic 背景画像を指定できます。
