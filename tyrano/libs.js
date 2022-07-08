@@ -1530,6 +1530,21 @@
         return css_array.join(" ");
     };
 
+    if ($.getOS() === "ios" && $.getBrowser() === "safari") {
+        $.generateDropShadowStrokeCSSOne = function (color = "black", width = 1) {
+            const shadow_width = Math.max(1, parseInt(width * 0.5));
+            console.warn(shadow_width);
+            const css_array = [];
+            if (shadow_width > 0) {
+                css_array.push(`drop-shadow(0 0 ${shadow_width}px ${color})`);
+                for (let i = 0; i < 8; i++) {
+                    css_array.push(`drop-shadow(0 0 ${color})`);
+                }
+            }
+            return css_array.join(" ");
+        };
+    }
+
     /**
      * 縁取りしたいDOM要素のスタイルのtext-shadowプロパティにセットするべき値を生成する
      * @param {string} edge_str 縁取りの太さと幅 (例) "4px red, 2px white"
@@ -1632,26 +1647,49 @@
     /**
      * CSSのfilterプロパティに値をセット
      * prefixを考慮
+     * @param {string} str filterプロパティに値をセット
+     * @return {jQuery}
      */
     $.fn.setFilterCSS = function (str) {
-        this.css({
+        // transform: translateZ(0); でGPUレイヤー作成を促す
+        // Safari on iOS においてfilterプロパティだけではGPUレイヤーが作成されず
+        // filterが崩れる可能性がある
+        return this.setStyleMap({
             "-webkit-filter": str,
             "-ms-filter": str,
             "-moz-filter": str,
+            "transform": "translateZ(0)",
         });
+    };
+
+    // グラデーションのプリセット
+    $.gradientPresetMap = {
+        dark: "linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 41%, rgba(126,126,126,1) 100%)",
+        light: "linear-gradient(0deg, rgba(193,245,239,1) 0%, rgba(255,255,255,1) 34%, rgba(255,255,255,1) 100%)",
+        fire: "linear-gradient(0deg, rgba(255,0,0,1) 0%, rgba(255,239,0,1) 100%)",
+        sky: "linear-gradient(0deg, rgba(0,255,235,1) 0%, rgba(0,18,255,1) 100%)",
+        leaf: "linear-gradient(0deg, rgba(234,240,0,1) 0%, rgba(0,226,49,1) 100%)",
+        gold: "repeating-linear-gradient(0deg, #B67B03 0.1em, #DAAF08 0.2em, #FEE9A0 0.3em, #DAAF08 0.4em, #B67B03 0.5em)",
+        gold2: "linear-gradient(0deg, #b8751e 0%, #ffce08 37%, #fefeb2 47%, #fafad6 50%, #fefeb2 53%, #e1ce08 63%, #b8751e 100%)",
+        silver: "repeating-linear-gradient(0deg, #a8c7c3 0.1em, #b6c9d1 0.2em, #e7fbff 0.3em, #c7d5d6 0.4em, #a6b2b6 0.5em)",
+        silver2: "linear-gradient(0deg, #acb4b8 0%, #e6f8ff 37%, #e6f7f8 47%, #e2f3fd 50%, #eff9ff 53%, #d8e4e7 63%, #b5bbbd 100%)",
     };
 
     /**
      * グラデーションテキストを設定する
      * @param {string} gradient CSSのグラデーション関数文字列 linear-gradient(...)
+     * @return {jQuery}
      */
     $.fn.setGradientText = function (gradient) {
         if (this.length === 0) {
-            return;
+            return this;
+        }
+        if (gradient in $.gradientPresetMap) {
+            gradient = $.gradientPresetMap[gradient];
         }
         this.each(function () {
             $(this)
-                .css({
+                .setStyleMap({
                     "background-image": gradient,
                     "-webkit-background-clip": "text",
                     "background-clip": "text",
@@ -1659,14 +1697,16 @@
                 })
                 .addClass("gradient-text");
         });
+        return this;
     };
 
     /**
      * グラデーションテキストを復元する
+     * @return {jQuery}
      */
     $.fn.restoreGradientText = function () {
         if (this.length === 0) {
-            return;
+            return this;
         }
         this.each(function () {
             const j_this = $(this);
@@ -1676,15 +1716,18 @@
                 j_this.attr("style", new_style);
             }
         });
+        return this;
     };
 
     /**
      * -webkit-text-strokeで縁取りされている可能性のある
      * [ptext]のテキスト内容を書き換える
+     * @param {string} str 新しいテキスト
+     * @return {jQuery}
      */
     $.fn.updatePText = function (str) {
         if (this.length === 0) {
-            return;
+            return this;
         }
         this.each(function () {
             if (typeof this.updateText === "function") {
@@ -1693,6 +1736,7 @@
                 $(this).html(str);
             }
         });
+        return this;
     };
 
     /**
@@ -1705,6 +1749,27 @@
             return true;
         }
         return false;
+    };
+
+    /**
+     * CSSのオブジェクトを渡してセットする
+     * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
+     * こちらのメソッドであれば処理時間が40-50%ほどで済む
+     * @param {Object} map CSSのプロパティと値が対になっているオブジェクト
+     * @return {jQuery}
+     */
+    $.fn.setStyleMap = function (map) {
+        const len = this.length;
+        if (this.length === 0) {
+            return this;
+        }
+        for (let i = 0; i < len; i++) {
+            const elm = this[i];
+            for (const key in map) {
+                elm.style.setProperty(key, map[key]);
+            }
+        }
+        return this;
     };
 })(jQuery);
 

@@ -883,10 +883,14 @@ tyrano.plugin.kag.tag.text = {
                 switch (font.edge_method) {
                     default:
                     case "shadow":
-                        j_span.css("text-shadow", $.generateTextShadowStrokeCSS(edge_str));
+                        if (font.gradient) {
+                            font.edge_method = "stroke";
+                        } else {
+                            j_span.css("text-shadow", $.generateTextShadowStrokeCSS(edge_str));
+                        }
                         break;
                     case "filter":
-                        j_span.css("filter", $.generateDropShadowStrokeCSS(edge_str));
+                        j_span.setFilterCSS($.generateDropShadowStrokeCSS(edge_str));
                         break;
                     case "stroke":
                         break;
@@ -1053,7 +1057,10 @@ tyrano.plugin.kag.tag.text = {
         // テキストの縁取り部分を作成
         for (let i = edges.length - 1; i >= 0; i--) {
             const edge = edges[i];
-            let style = `-webkit-text-stroke: ${edge.total_width * 2}px ${edge.color};z-index:${100 - i};`;
+            const width = edge.total_width * 2;
+            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${
+                100 - i
+            }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
             if (this.kag.tmp.is_edge_overlap) {
                 style += "opacity:1;";
             }
@@ -3309,26 +3316,6 @@ tyrano.plugin.kag.tag.ptext = {
             "text": "",
         };
 
-        const is_edge_enabled = pm.edge !== "";
-        const edge_method = pm.edge_method || font.edge_method;
-        pm.is_stroke_edge_enabled = is_edge_enabled && edge_method === "stroke";
-        if (is_edge_enabled) {
-            // 縁取り文字
-            switch (edge_method) {
-                default:
-                case "shadow":
-                    font_new_style["text-shadow"] = $.generateTextShadowStrokeCSS(pm.edge);
-                    break;
-                case "filter":
-                    font_new_style["filter"] = $.generateDropShadowStrokeCSS(pm.edge);
-                    break;
-                case "stroke":
-                    break;
-            }
-        } else if (pm.shadow != "") {
-            font_new_style["text-shadow"] = "2px 2px 2px " + $.convertColor(pm.shadow);
-        }
-
         //
         // DOM(jQueryオブジェクト)生成
         //
@@ -3336,12 +3323,46 @@ tyrano.plugin.kag.tag.ptext = {
         const tobj = $("<p></p>");
 
         // スタイルをセット
-        tobj.css("position", "absolute");
-        tobj.css("top", pm.y + "px");
-        tobj.css("left", pm.x + "px");
-        tobj.css("width", pm.width);
-        tobj.css("text-align", pm.align);
+        tobj.css({
+            "position": "absolute",
+            "top": pm.y + "px",
+            "left": pm.x + "px",
+            "width": pm.width,
+            "text-align": pm.align,
+        });
         this.kag.setStyles(tobj, font_new_style);
+
+        //
+        // 縁取り・影付き
+        //
+
+        // 縁取り有効か
+        const is_edge_enabled = pm.edge !== "";
+        // 縁取りタイプ
+        let edge_method = pm.edge_method || font.edge_method;
+        // strokeタイプの縁取りが有効か
+        pm.is_stroke_edge_enabled = is_edge_enabled && edge_method === "stroke";
+        // 縁取りが有効でグラデーションも設定しようとしているときはshadowタイプの縁取りは不可
+        if (is_edge_enabled && (edge_method === "shadow" || edge_method === "") && pm.gradient) {
+            edge_method = "stroke";
+            pm.is_stroke_edge_enabled = true;
+        }
+        if (is_edge_enabled) {
+            // 縁取り文字
+            switch (edge_method) {
+                default:
+                case "shadow":
+                    tobj.css("text-shadow", $.generateTextShadowStrokeCSS(pm.edge));
+                    break;
+                case "filter":
+                    tobj.setFilterCSS($.generateDropShadowStrokeCSS(pm.edge));
+                    break;
+                case "stroke":
+                    break;
+            }
+        } else if (pm.shadow != "") {
+            tobj.css("text-shadow", "2px 2px 2px " + $.convertColor(pm.shadow));
+        }
 
         // クラスをセット
         if (pm.vertical == "true") {
