@@ -361,7 +361,9 @@ tyrano.plugin.kag.menu = {
         }
 
         if (flag_thumb == "false") {
-            //サムネデータを保存しない
+            //
+            // サムネイルデータを作成しない場合
+            //
             var img_code = "";
             var data = {};
 
@@ -386,9 +388,15 @@ tyrano.plugin.kag.menu = {
                 this.kag.trigger("savecomplete");
             }
         } else {
+            //
+            //
+            //
             $("#tyrano_base").find(".layer_blend_mode").css("display", "none");
 
             setTimeout(function () {
+                //
+                // キャプチャ完了時コールバック
+                //
                 var completeImage = function (img_code) {
                     var data = {};
 
@@ -416,6 +424,10 @@ tyrano.plugin.kag.menu = {
                 };
 
                 if (that.kag.stat.save_img != "") {
+                    //
+                    // サムネイルに使う画像が[save_img]タグで直接指定されている場合
+                    //
+
                     var img = new Image();
                     img.src = _stat.save_img;
                     img.onload = function () {
@@ -431,6 +443,10 @@ tyrano.plugin.kag.menu = {
                         completeImage(img_code);
                     };
                 } else {
+                    //
+                    // html2canvas.jsでゲーム画面のキャプチャを実行する場合
+                    //
+
                     //ビデオをキャプチャするための仕組み
                     let canvas = document.createElement("canvas"); // declare a canvas element in your html
                     let ctx = canvas.getContext("2d");
@@ -507,8 +523,18 @@ tyrano.plugin.kag.menu = {
                         $("#tyrano_base").find(".layer_blend_mode").css("display", "");
                         $("#tyrano_base").find(".tmp_video_canvas").css("backgroundImage", "");
 
-                        // canvas is the final rendered <canvas> element
-                        //console.log(canvas);
+                        // キャプチャした画像をDOMに追加してクオリティチェック
+                        // コメントトグル:  ⌘ + /  または  Ctrl + /
+                        // $("body").css({
+                        //     overflow: "scroll",
+                        // });
+                        // $(canvas)
+                        //     .css({
+                        //         position: "absolute",
+                        //         top: $.getViewPort().height,
+                        //     })
+                        //     .appendTo("body");
+                        // console.log(canvas)
                         var img_code = that.createImgCode(canvas);
 
                         completeImage(img_code);
