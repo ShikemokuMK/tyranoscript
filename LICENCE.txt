@@ -94,3 +94,9 @@ goldfirestudios.com
 MIT License
 
 ----------------
+anime.js v3.2.1
+animejs.com
+(c) 2020 Julian Garnier
+Released under the MIT license
+
+----------------
