@@ -113,29 +113,98 @@
         return txtVal;
     };
 
+    const dateFormatter = {
+        _fmt: {
+            hh: function (date) {
+                return ("0" + date.getHours()).slice(-2);
+            },
+            h: function (date) {
+                return date.getHours();
+            },
+            mm: function (date) {
+                return ("0" + date.getMinutes()).slice(-2);
+            },
+            m: function (date) {
+                return date.getMinutes();
+            },
+            ss: function (date) {
+                return ("0" + date.getSeconds()).slice(-2);
+            },
+            dd: function (date) {
+                return ("0" + date.getDate()).slice(-2);
+            },
+            d: function (date) {
+                return date.getDate();
+            },
+            s: function (date) {
+                return date.getSeconds();
+            },
+            yyyy: function (date) {
+                return date.getFullYear() + "";
+            },
+            yy: function (date) {
+                return date.getYear() + "";
+            },
+            t: function (date) {
+                return date.getDate() <= 3 ? ["st", "nd", "rd"][date.getDate() - 1] : "th";
+            },
+            w: function (date) {
+                return ["Sun", "$on", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+            },
+            MMMM: function (date) {
+                return [
+                    "January",
+                    "February",
+                    "$arch",
+                    "April",
+                    "$ay",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
+                ][date.getMonth()];
+            },
+            MMM: function (date) {
+                return ["Jan", "Feb", "$ar", "Apr", "$ay", "Jun", "Jly", "Aug", "Spt", "Oct", "Nov", "Dec"][date.getMonth()];
+            },
+            MM: function (date) {
+                return ("0" + (date.getMonth() + 1)).slice(-2);
+            },
+            M: function (date) {
+                return date.getMonth() + 1;
+            },
+            $: function (date) {
+                return "M";
+            },
+        },
+        _priority: ["hh", "h", "mm", "m", "ss", "dd", "d", "s", "yyyy", "yy", "t", "w", "MMMM", "MMM", "MM", "M", "$"],
+        format: function (date, format) {
+            return this._priority.reduce((res, fmt) => res.replace(fmt, this._fmt[fmt](date)), format);
+        },
+    };
+
+    /**
+     * Dateをフォーマットする
+     * @param {Date} date 日付
+     * @param {string} format フォーマット (例) "yyyy/M/d hh:mm:ss"
+     * @returns {string}
+     */
+    $.formatDate = function (date, format) {
+        return dateFormatter.format(date, format);
+    };
+
     //現在時刻を取得
     //現在の日
-    $.getNowDate = function () {
-        var nowdate = new Date();
-        var year = nowdate.getFullYear();
-        // 年
-        var mon = nowdate.getMonth() + 1;
-        // 月
-        var date = nowdate.getDate();
-        // 日
-
-        return year + "/" + mon + "/" + date;
+    $.getNowDate = function (format = "yyyy/M/d") {
+        return $.formatDate(new Date(), format);
     };
 
     //現在の時刻
-    $.getNowTime = function () {
-        var nowdate = new Date();
-
-        var h = nowdate.getHours();
-        var m = nowdate.getMinutes();
-        var s = nowdate.getSeconds();
-
-        return h + "：" + m + "：" + s;
+    $.getNowTime = function (format = "hh：mm：ss") {
+        return $.formatDate(new Date(), format);
     };
 
     $.convertRem = function (px_val) {
@@ -710,16 +779,24 @@
 
     $.getOS = function () {
         if ($.isElectron()) {
-            let os = "";
-
             if (process.platform == "darwin") {
-                os = "mac";
+                return "mac";
             } else {
-                os = "win";
+                return "win";
             }
-            return os;
         } else {
-            return "";
+            const ua = window.navigator.userAgent.toLowerCase();
+            if (ua.includes("windows nt")) {
+                return "win";
+            } else if (ua.includes("android")) {
+                return "android";
+            } else if (ua.includes("iphone") || ua.includes("ipad")) {
+                return "ios";
+            } else if (ua.includes("mac os x")) {
+                return "win";
+            } else {
+                return "";
+            }
         }
     };
 
@@ -1335,6 +1412,534 @@
         }
         callback();
         return 0;
+    };
+
+    /**
+     * @typedef {Object} EdgeOption
+     * @property {string} color
+     * @property {number} width
+     * @property {number} total_width
+     */
+    /**
+     * 縁取りの太さと幅を指定した文字列を解析してEdgeの配列を返す
+     * たとえば $.parseEdgeOptions("4px rgb(255,0,0), 2px 0xFFFFFF, blue") は次の配列を返す
+     * [
+     *   {color: "rgb(255,0,0)", width: 4, total_width: 4},
+     *   {color: "#FFFFFF", width: 2, total_width: 6},
+     *   {color: "blue", width: 1, total_width: 7}
+     * ]
+     * @param {string} edge_str 縁取りの太さと幅 (例) "4px rgb(255,0,0), 2px 0xFFFFFF"
+     * @returns {EdgeOption[]}
+     */
+    $.parseEdgeOptions = function (edge_str) {
+        // キャッシュを活用
+        const cache_map = $.parseEdgeOptions.cache;
+        if (edge_str in cache_map) {
+            return cache_map[edge_str];
+        }
+
+        // 戻り値となるEdgeの配列
+        const edges = [];
+
+        // 文字列を「カッコの外にあるカンマ」で刻む
+        // 色指定自体にカンマが含まれるケース（"rgb(255,255,255)"のような）を考慮しなければならない
+        const edge_str_hash = edge_str.split(/,(?![^\(]*\))/);
+
+        // 内側から加算していった合計の縁取り太さ（複数縁取りを行う場合に意味を持つ）
+        // filter: drop-shadow()方式では不要、text-shadow方式や-webkit-text-stroke方式では必要
+        let total_width = 0;
+
+        for (const this_edge_str of edge_str_hash) {
+            // 例) "6px Black"
+            const this_edge_str_trim = $.trim(this_edge_str);
+
+            // 先頭の〇〇pxをチェック
+            const width_match = this_edge_str_trim.match(/^[0-9\.]+px /);
+
+            let width;
+            let width_str;
+            if (width_match) {
+                // 先頭の〇〇pxが見つかればそれを縁取りの太さとして解釈し、〇〇pxよりもあとの文字列を色解析に回す
+                width = parseFloat(width_match[0]);
+                width_str = this_edge_str_trim.substring(width_match[0].length);
+            } else {
+                // 先頭の〇〇pxが見つからなければ太さは1とし、文字列をまるごと色解析に回す
+                width = 1;
+                width_str = this_edge_str_trim;
+            }
+
+            const color = $.convertColor($.trim(width_str));
+            total_width += width;
+            if (color) {
+                edges.push({ color, width, total_width });
+            }
+        }
+        cache_map[edge_str] = edges;
+        return edges;
+    };
+    $.parseEdgeOptions.cache = {};
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのfilterプロパティにセットするべき値を生成する
+     * @param {string} edge_str 縁取りの太さと幅 (例) "4px red, 2px white"
+     * @returns {string} (例) "drop-shadow(0 0 4px red) drop-shadow(0 0 red) ..."
+     */
+    $.generateDropShadowStrokeCSS = function (edge_str) {
+        // 毎回計算するのは意外と重いのでキャッシュを活用
+        const cache_map = $.generateDropShadowStrokeCSS.cache;
+        if (edge_str in cache_map) {
+            return cache_map[edge_str];
+        }
+
+        // "drop-shadow(...)" を格納していく配列
+        const css_arr = [];
+
+        const edges = $.parseEdgeOptions(edge_str);
+        for (const edge of edges) {
+            css_arr.push($.generateDropShadowStrokeCSSOne(edge.color, edge.width));
+        }
+
+        const css_value = css_arr.join(" ");
+        cache_map[edge_str] = css_value;
+        return css_value;
+    };
+    $.generateDropShadowStrokeCSS.cache = {};
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのfilterプロパティにセットするべき値を生成する
+     * @param {string} color 縁取りの色 (例) "red"
+     * @param {number} width 縁取りの幅 (例) 3
+     * @returns {string} 例) "drop-shadow(0 0 3px red) drop-shadow(0 0 red) ..."
+     */
+    $.generateDropShadowStrokeCSSOne = function (color = "black", width = 1) {
+        // drop-shadow(...)を重ねる
+        // 試行錯誤の結果これが良い感じと思われた
+        const shadow_width = (width - 1) * 0.4;
+        const css_array = [];
+        if (shadow_width > 0) {
+            css_array.push(`drop-shadow(0 0 ${shadow_width.toFixed(2)}px ${color})`);
+            for (let i = 0; i < 8; i++) {
+                css_array.push(`drop-shadow(0 0 ${color})`);
+            }
+        }
+        // 最後にうっすらとぼかした細い影を落とすことでアンチエイリアス効果を与える
+        // これがないと縁取りがガビガビに見えてしまう
+        css_array.push(`drop-shadow(0 0 0.4px ${color})`);
+        css_array.push(`drop-shadow(0 0 0.4px ${color})`);
+        css_array.push(`drop-shadow(0 0 0.2px ${color})`);
+        return css_array.join(" ");
+    };
+
+    if ($.getOS() === "ios" && $.getBrowser() === "safari") {
+        $.generateDropShadowStrokeCSSOne = function (color = "black", width = 1) {
+            const shadow_width = Math.max(1, parseInt(width * 0.5));
+            console.warn(shadow_width);
+            const css_array = [];
+            if (shadow_width > 0) {
+                css_array.push(`drop-shadow(0 0 ${shadow_width}px ${color})`);
+                for (let i = 0; i < 8; i++) {
+                    css_array.push(`drop-shadow(0 0 ${color})`);
+                }
+            }
+            return css_array.join(" ");
+        };
+    }
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのtext-shadowプロパティにセットするべき値を生成する
+     * @param {string} edge_str 縁取りの太さと幅 (例) "4px red, 2px white"
+     * @returns {string} 例) "1px 1px 0px red, -1px 1px 0px red, ..."
+     */
+    $.generateTextShadowStrokeCSS = function (edge_str) {
+        // 毎回計算するのは意外と重いのでキャッシュを活用
+        const cache_map = $.generateTextShadowStrokeCSS.cache;
+        if (edge_str in cache_map) {
+            return cache_map[edge_str];
+        }
+
+        // "1px 1px 0px black" のような文字列を格納していく配列
+        const css_arr = [];
+
+        const edges = $.parseEdgeOptions(edge_str);
+        for (const edge of edges) {
+            css_arr.push($.generateTextShadowStrokeCSSOne(edge.color, edge.total_width));
+        }
+
+        const css_value = css_arr.join(",");
+        cache_map[edge_str] = css_value;
+        return css_value;
+    };
+    $.generateTextShadowStrokeCSS.cache = {};
+
+    /**
+     * 縁取りしたいDOM要素のスタイルのtext-shadowプロパティにセットするべき値を生成する
+     * @param {string} color 縁取りの色 例) "black"
+     * @param {number} width 縁取りの幅 例) 3
+     * @returns {string} 例) "1px 1px 0px black, -1px 1px 0px black, ..."
+     */
+    $.generateTextShadowStrokeCSSOne = function (color = "black", width = 1) {
+        // 円周上の頂点を取得
+        const points = $.calcTextShadowStrokePoints(width);
+
+        // 座標の小数点以下の桁数
+        const position_digits = 2;
+
+        // text-shadowを重ねる
+        const css_array = [];
+        for (let p of points) {
+            const x = p.x.toFixed(position_digits);
+            const y = p.y.toFixed(position_digits);
+            const css = `${x}px ${y}px 0px ${color}`;
+            css_array.push(css);
+        }
+
+        return css_array.join(",");
+    };
+
+    /**
+     * text-shadowで文字の縁取りを行うときの、陰をずらす先の頂点の座標配列を計算する
+     * 太い縁取りを行う場合ほど大量の頂点を生み出す必要がある
+     * @param {number} width 縁取りの幅 (例) 3
+     * @returns {{x: number; y: number;}[]}
+     */
+    $.calcTextShadowStrokePoints = function (width) {
+        // 太さが1以下の場合は固定値を返す
+        if (width <= 1) {
+            return [
+                { x: 1, y: -1 },
+                { x: 1, y: 1 },
+                { x: -1, y: 1 },
+                { x: -1, y: -1 },
+            ];
+        }
+
+        // 円周の長さ
+        const circumference = 2 * width * Math.PI;
+
+        // 円周をこの長さで分割する
+        const hash_length = 1;
+
+        // 頂点の数の最低値
+        const point_num_min = 8;
+
+        // 頂点の数（円周の長さ÷分割する長さ）
+        const point_num = Math.max(point_num_min, circumference / hash_length);
+
+        // 1周（2πラジアン＝360°）
+        const round = 2 * Math.PI;
+
+        // 1周をこの角度で分割する
+        const hash_angle = round / point_num;
+
+        // 円周上の点の座標を格納する配列
+        const points = [];
+
+        for (let angle = 0; angle < round; angle += hash_angle) {
+            points.push({
+                x: width * Math.cos(angle),
+                y: width * Math.sin(angle),
+            });
+        }
+
+        return points;
+    };
+
+    /**
+     * CSSのfilterプロパティに値をセット
+     * prefixを考慮
+     * @param {string} str filterプロパティに値をセット
+     * @return {jQuery}
+     */
+    $.fn.setFilterCSS = function (str) {
+        // transform: translateZ(0); でGPUレイヤー作成を促す
+        // Safari on iOS においてfilterプロパティだけではGPUレイヤーが作成されず
+        // filterが崩れる可能性がある
+        return this.setStyleMap({
+            "-webkit-filter": str,
+            "-ms-filter": str,
+            "-moz-filter": str,
+            "transform": "translateZ(0)",
+        });
+    };
+
+    /**
+     * CSSグラデーションのプリセット
+     */
+    $.gradientPresetMap = {
+        dark: "linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 41%, rgba(126,126,126,1) 100%)",
+        light: "linear-gradient(0deg, rgba(193,245,239,1) 0%, rgba(255,255,255,1) 34%, rgba(255,255,255,1) 100%)",
+        fire: "linear-gradient(0deg, rgba(255,0,0,1) 0%, rgba(255,239,0,1) 100%)",
+        sky: "linear-gradient(0deg, rgba(0,255,235,1) 0%, rgba(0,18,255,1) 100%)",
+        leaf: "linear-gradient(0deg, rgba(234,240,0,1) 0%, rgba(0,226,49,1) 100%)",
+        gold: "repeating-linear-gradient(0deg, #B67B03 0.1em, #DAAF08 0.2em, #FEE9A0 0.3em, #DAAF08 0.4em, #B67B03 0.5em)",
+        gold2: "linear-gradient(0deg, #b8751e 0%, #ffce08 37%, #fefeb2 47%, #fafad6 50%, #fefeb2 53%, #e1ce08 63%, #b8751e 100%)",
+        silver: "repeating-linear-gradient(0deg, #a8c7c3 0.1em, #b6c9d1 0.2em, #e7fbff 0.3em, #c7d5d6 0.4em, #a6b2b6 0.5em)",
+        silver2: "linear-gradient(0deg, #acb4b8 0%, #e6f8ff 37%, #e6f7f8 47%, #e2f3fd 50%, #eff9ff 53%, #d8e4e7 63%, #b5bbbd 100%)",
+    };
+
+    /**
+     * グラデーションテキストを設定する
+     * @param {string} gradient CSSのグラデーション関数文字列 linear-gradient(...)
+     * @return {jQuery}
+     */
+    $.fn.setGradientText = function (gradient) {
+        if (this.length === 0) {
+            return this;
+        }
+        if (gradient in $.gradientPresetMap) {
+            gradient = $.gradientPresetMap[gradient];
+        }
+        this.each(function () {
+            $(this)
+                .setStyleMap({
+                    "background-image": gradient,
+                    "-webkit-background-clip": "text",
+                    "background-clip": "text",
+                    "color": "transparent",
+                })
+                .addClass("gradient-text");
+        });
+        return this;
+    };
+
+    /**
+     * グラデーションテキストを復元する
+     * @return {jQuery}
+     */
+    $.fn.restoreGradientText = function () {
+        if (this.length === 0) {
+            return this;
+        }
+        this.each(function () {
+            const j_this = $(this);
+            const style = j_this.attr("style");
+            if (style && !style.includes("-webkit-background-clip") && style.includes("background-clip")) {
+                const new_style = style.replace("background-clip", "-webkit-background-clip: text; background-clip");
+                j_this.attr("style", new_style);
+            }
+        });
+        return this;
+    };
+
+    /**
+     * -webkit-text-strokeで縁取りされている可能性のある
+     * [ptext]のテキスト内容を書き換える
+     * @param {string} str 新しいテキスト
+     * @return {jQuery}
+     */
+    $.fn.updatePText = function (str) {
+        if (this.length === 0) {
+            return this;
+        }
+        this.each(function () {
+            if (typeof this.updateText === "function") {
+                this.updateText(str);
+            } else {
+                $(this).html(str);
+            }
+        });
+        return this;
+    };
+
+    /**
+     * 引数が"空でない文字列"であるかどうかを返す
+     * @param {any} val
+     * @returns {boolean}
+     */
+    $.isNonEmptyStr = function (val) {
+        if (typeof val === "string" && val !== "") {
+            return true;
+        }
+        return false;
+    };
+
+    /**
+     * CSSのオブジェクトを渡してセットする
+     * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
+     * こちらのメソッドであれば処理時間が40-50%ほどで済む
+     * @param {Object} map CSSのプロパティと値が対になっているオブジェクト
+     * @return {jQuery}
+     */
+    $.fn.setStyleMap = function (map) {
+        const len = this.length;
+        if (len === 0) {
+            return this;
+        }
+        for (let i = 0; i < len; i++) {
+            const elm = this[i];
+            for (const key in map) {
+                elm.style.setProperty(key, map[key]);
+            }
+        }
+        return this;
+    };
+
+    /**
+     * CSSのキーとバリューを渡してセットする
+     * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
+     * こちらのメソッドであれば処理時間が40-50%ほどで済む
+     * @param {Object} key
+     * @param {Object} value
+     * @return {jQuery}
+     */
+    $.fn.setStyle = function (key, value) {
+        const len = this.length;
+        if (len === 0) {
+            return this;
+        }
+        for (let i = 0; i < len; i++) {
+            const elm = this[i];
+            elm.style.setProperty(key, value);
+        }
+        return this;
+    };
+
+    /**
+     * ティラノスクリプトの[kanim]に渡されたパラメータを用いて
+     * 任意のDOM要素にWeb Animation APIによるキーフレームアニメーションを適用する
+     * @param {Object} pm
+     * @return {jQuery}
+     */
+    $.fn.animateWithTyranoKeyframes = function (pm) {
+        const len = this.length;
+        if (len === 0) {
+            return this;
+        }
+        const keyframes = TYRANO.kag.parseKeyframesForWebAnimationAPI(pm.keyframe);
+        if (!keyframes) {
+            return this;
+        }
+        for (let i = 0; i < len; i++) {
+            this[i].animate(keyframes, {
+                delay: parseInt(pm.delay) || 0,
+                direction: pm.direction || "normal",
+                duration: parseInt(pm.time) || 1000,
+                easing: pm.easing || "linear",
+                iterations: pm.count === "infinite" ? Infinity : parseInt(pm.count) || Infinity,
+                fill: pm.mode || "forwards",
+            });
+        }
+        return this;
+    };
+
+    /**
+     * dataフォルダに入っていることが想定されるフォルダ名("scenario", "image"など)を格納した配列
+     */
+    const data_folder_names = ["scenario", "image", "fgimage", "bgimage", "video", "sound", "bgm", "others", "others/plugin"];
+
+    /**
+     * タグのstorageパラメータに指定された値を実際に使えるパスに直す
+     * @param {string} storage "foo.png"
+     * @param {string} dir_name "fgimage"
+     * @returns {string}
+     * @example
+     * $.parseStorage("foo.png", "fgimage");
+     * // "./data/fgimage/foo.png"
+     * $.parseStorage("https://tyrano.jp/foo.png", "fgimage");
+     * // "https://tyrano.jp/foo.png"
+     * $.parseStorage("foo.png", "tyrano/images/system");
+     * // "./tyrano/images/system/foo.png"
+     * $.parseStorage("foo.png", "data/fgimage");
+     * // "./data/fgimage/foo.png"
+     * $.parseStorage("../image/foo.png", "data/fgimage");
+     * // "./data/fgimage/../image/foo.png"
+     */
+    $.parseStorage = function (storage, dir_name = "") {
+        // "http"で始まっているならそのまま返す
+        if ($.isHTTP(storage)) {
+            return storage;
+        }
+        // フォルダパスを特定
+        let dir_path;
+        if (!dir_name) {
+            dir_path = ".";
+        } else if (dir_name && data_folder_names.includes(dir_name)) {
+            // dataフォルダに入っているフォルダ名が指定されている場合は自動的に"./data/"を足す
+            // たとえば"scenario"を"./data/scenario"に変換する
+            dir_path = `./data/${dir_name}`;
+        } else {
+            dir_path = dir_name;
+            // 末尾の"/"は消す
+            if (dir_path.slice(-1) === "/") {
+                dir_path = dir_path.substring(0, dir_path.length - 1);
+            }
+            // 先頭が"./"から始まることを保証する
+            const c = dir_path.charAt(0);
+            if (c === "/") {
+                dir_path = "." + dir_path;
+            } else if (c !== ".") {
+                dir_path = "./" + dir_path;
+            }
+        }
+        // storageの先頭の"./"は消していい
+        if (storage.substring(0, 2) === "./") {
+            storage = storage.substring(2);
+        }
+        // フォルダパス / ファイル名
+        const path = `${dir_path}/${storage}`;
+        // 連続する"/"は消して返す
+        return path.replace(/\/+/g, "/");
+    };
+
+    /**
+     * "300", "0.3s", "300ms" などでありうる文字列を
+     * animation-duration にセットできる値に変換する
+     * @param {string} str
+     * @returns
+     */
+    $.convertDuration = function (str, default_value = "0s") {
+        if (typeof str !== "string" || str === "") {
+            return default_value;
+        }
+        if (str.includes("s")) {
+            return str;
+        }
+        return str + "ms";
+    };
+
+    /**
+     * スネークケース(ハイフン区切り)のCSSのプロパティ名を
+     * キャメルケースに変換して返す
+     * @param {string} str
+     * @returns {string}
+     * @example
+     * $.parseCamelCaseCSS("-webkit-text-stroke");
+     * // "webkitTextStroke"
+     */
+    $.parseCamelCaseCSS = function (str) {
+        if (typeof str !== "string") {
+            return "";
+        }
+        // 先頭のハイフンはただ消去するだけでいい
+        if (str.charAt(0) === "-") {
+            str = str.substring(1);
+        }
+        // ハイフン＋なんらかの小文字アルファベットのマッチ
+        const match = str.match(/\-[a-z]/);
+        // マッチしなくなったら完成
+        if (!match) {
+            return str;
+        }
+        // マッチし続ける限り再帰する
+        return $.parseCamelCaseCSS(str.replace(match[0], match[0].charAt(1).toUpperCase()));
+    };
+
+    $.findAnimTargets = function (pm = {}) {
+        // アニメーション対象
+        let j_target = null;
+
+        if (pm.name) {
+            // nameパラメータが指定されている場合
+            j_target = $("." + pm.name);
+        } else if (pm.layer) {
+            // nameパラメータは指定されていないがlayerパラメータが指定されている場合
+            // 対象レイヤのクラス名を取得 (例) "layer_free", "0_fore", "1_fore"
+            const layer_name = pm.layer == "free" ? "layer_free" : pm.layer + "_fore";
+            // レイヤ内の子要素をすべて対象に取る
+            j_target = $("." + layer_name).children();
+        }
+
+        return j_target || $();
     };
 })(jQuery);
 

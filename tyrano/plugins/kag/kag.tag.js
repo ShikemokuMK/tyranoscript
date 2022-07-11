@@ -45,21 +45,175 @@ tyrano.plugin.kag.ftag = {
         }
     },
 
-    //次へボタンを隠します
+    /**
+     * クリック待ちグリフを削除または隠蔽する
+     */
     hideNextImg: function () {
         $(".img_next").remove();
         $(".glyph_image").hide();
     },
 
+    /**
+     * クリック待ちグリフを表示する
+     */
     showNextImg: function () {
-        //グリフが指定されている場合はこちらを適用
+        // メッセージウィンドウ内グリフか、画面上固定グリフか
         if (this.kag.stat.flag_glyph == "false") {
+            // メッセージウィンドウ内グリフの場合
             $(".img_next").remove();
-            var jtext = this.kag.getMessageInnerLayer();
-            jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/" + this.kag.stat.path_glyph + "' />");
+            const j_glyph = this.createNextImg();
+            this.kag.getMessageInnerLayer().find("p").append(j_glyph);
         } else {
+            // 画面上固定グリフの場合
+            // [glyph]タグの時点ですでに要素として追加済みなので表示状態を操作するだけでよい
             $(".glyph_image").show();
         }
+    },
+
+    /**
+     * 現在の設定に基づいてクリック待ちグリフのjQueryオブジェクトを作成して返す
+     * @returns {jQuery} クリック待ちグリフの<img>または<div>を含むjQueryオブジェクト
+     */
+    createNextImg: function () {
+        // 参照
+        const stat = this.kag.stat;
+        const pm = stat.glyph_pm || {};
+
+        // クラスの配列
+        const class_names = [];
+
+        // クラス追加：固定グリフかどうかでクラス名が違う
+        if (stat.flag_glyph === "false") {
+            class_names.push("img_next");
+        } else {
+            class_names.push("glyph_image");
+        }
+
+        // jQueryオブジェクトを生成
+        let j_glyph;
+        let img_src;
+        switch (pm.type) {
+            // 画像パス指定
+            default:
+            case "image":
+                img_src = $.parseStorage(stat.path_glyph, "tyrano/images/system");
+                j_glyph = $(`<img src="${img_src}">`);
+                // 横幅と高さ
+                if (pm.width) {
+                    j_glyph.setStyle("width", pm.width + "px");
+                }
+                if (pm.height) {
+                    j_glyph.setStyle("height", pm.height + "px");
+                }
+                break;
+            // innerHTML直接指定
+            case "html":
+                j_glyph = $(`<div>${pm.html}</div>`);
+                // 横幅と高さ
+                // 横幅だけが指定されている場合は横幅を高さに流用する
+                if (pm.width) {
+                    j_glyph.setStyle("width", pm.width + "px");
+                }
+                if (pm.height) {
+                    j_glyph.setStyle("height", pm.height + "px");
+                } else if (pm.width) {
+                    j_glyph.setStyle("height", pm.width + "px");
+                }
+                break;
+            // 図形指定
+            case "figure":
+                // クラス追加：図形
+                if (pm.figure) {
+                    class_names.push("img_next_" + pm.figure);
+                }
+                j_glyph = $(`<div></div>`);
+                // 色
+                if (pm.color) {
+                    j_glyph.setStyle("background-color", $.convertColor(pm.color));
+                }
+                // 横幅と高さ
+                // 横幅だけが指定されている場合は横幅を高さに流用する
+                if (pm.width) {
+                    j_glyph.setStyle("width", pm.width + "px");
+                }
+                if (pm.height) {
+                    j_glyph.setStyle("height", pm.height + "px");
+                } else if (pm.width) {
+                    j_glyph.setStyle("height", pm.width + "px");
+                }
+                break;
+            // コマアニメ
+            case "koma_anim":
+                img_src = $.parseStorage(pm.koma_anim, "tyrano/images/system");
+                j_glyph = $(`<div></div>`);
+                const j_koma_anim = $(`<div></div>`);
+                j_koma_anim.setStyleMap({
+                    "display": "inline-block",
+                    "vertical-align": "sub",
+                    "background-color": "transparent",
+                    "background-image": `url(${img_src})`,
+                    "background-repeat": "no-repeat",
+                    "background-position": "0px 0px",
+                    "background-size": `${pm.image_width}px ${pm.image_height}px`,
+                    "width": `${pm.koma_width}px`,
+                    "height": `${pm.koma_height}px`,
+                });
+                j_koma_anim.get(0).animate(
+                    {
+                        backgroundPositionX: ["0px", `-${pm.image_width}px`],
+                    },
+                    {
+                        delay: 0,
+                        direction: "normal",
+                        duration: parseInt(pm.koma_anim_time) || 1000,
+                        easing: `steps(${pm.koma_count}, end)`,
+                        iterations: Infinity,
+                        fill: pm.mode || "forwards",
+                    },
+                );
+                j_glyph.append(j_koma_anim);
+                break;
+        }
+
+        if (pm.keyframe) {
+            // ティラノタグで定義したキーフレームアニメーションを使う場合
+            j_glyph.animateWithTyranoKeyframes(pm);
+        } else if (pm.anim) {
+            // プリセットのアニメーションを使用する場合
+            // クラス追加
+            class_names.push("img_next_" + pm.anim);
+            if (pm.time) {
+                j_glyph.setStyle("animation-duration", $.convertDuration(pm.time));
+            }
+            if (pm.delay) {
+                j_glyph.setStyle("animation-delay", $.convertDuration(pm.delay));
+            }
+            if (pm.count) {
+                j_glyph.setStyle("animation-iteration-count", pm.count);
+            }
+            if (pm.mode) {
+                j_glyph.setStyle("animation-fill-mode", pm.mode);
+            }
+            if (pm.easing) {
+                j_glyph.setStyle("animation-timing-function", pm.easing);
+            }
+            if (pm.direction) {
+                j_glyph.setStyle("animation-direction", pm.direction);
+            }
+        }
+
+        // マージン設定がある場合
+        if (pm.marginl) {
+            j_glyph.setStyle("margin-left", pm.marginl + "px");
+        }
+        if (pm.marginb) {
+            j_glyph.setStyle("margin-bottom", pm.marginb + "px");
+        }
+
+        // 貯めこんだクラス名をここでセット
+        j_glyph.attr("class", class_names.join(" "));
+
+        return j_glyph;
     },
 
     //次の命令を実行する
@@ -528,583 +682,1225 @@ tyrano.plugin.kag.tag.text = {
         backlog: "add" /*バックログ用の文字列。改行するかどうか。add join */,
     },
 
-    //実行
+    /**
+     * メッセージ関連のデフォルトのコンフィグ
+     */
+    default_message_config: {
+        ch_speed_in_click: "1",
+        effect_speed_in_click: "100ms",
+        edge_overlap_text: "true",
+        speech_bracket_float: "false",
+        speech_margin_left: "false",
+        kerning: "false",
+        line_spacing: "",
+        letter_spacing: "",
+        control_line_break: "false",
+        control_line_break_chars: "、。）」』】,.)]",
+    },
+
+    /**
+     * メッセージ関連のコンフィグを取り出す
+     * 基本的にstat.message_configから取り出すがそれが不可の場合はdefault_message_configを参照
+     * (旧バージョンのセーブデータではstat.message_configが定義されていない点に留意)
+     * @param {string} key
+     * @returns {*}
+     */
+    getMessageConfig: function (key) {
+        const config = this.kag.stat.message_config || {};
+        return config[key] || this.default_message_config[key];
+    },
+
+    // 実行
     start: function (pm) {
-        //スクリプト解析状態の場合は、その扱いをする
+        // スクリプト解析状態の場合は早期リターン
         if (this.kag.stat.is_script == true) {
-            this.kag.stat.buff_script += pm.val + "\n";
-            this.kag.ftag.nextOrder();
+            this.buildIScript(pm);
             return;
         }
 
-        //HTML解析状態の場合
+        // HTML解析状態の場合は早期リターン
         if (this.kag.stat.is_html == true) {
-            this.kag.stat.map_html.buff_html += pm.val;
-            this.kag.ftag.nextOrder();
+            this.buildHTML(pm);
             return;
         }
 
-        var j_inner_message = this.kag.getMessageInnerLayer();
+        // メッセージレイヤのアウターとインナーを取得
+        // div.messageX_fore
+        //   div.message_outer ←
+        //   div.message_inner ← こいつら
+        const j_outer_message = this.kag.getMessageOuterLayer();
+        const j_inner_message = this.kag.getMessageInnerLayer();
 
-        //文字ステータスの設定
-        j_inner_message.css({
+        // インナーにCSSを設定
+        // letter-spacing, line-height, font-family など
+        this.setMessageInnerStyle(j_inner_message);
+
+        //　現在表示中のテキストを格納
+        this.kag.stat.current_message_str = pm.val;
+
+        // 縦書きかどうか
+        const is_vertical = this.kag.stat.vertical == "true";
+
+        // 自動改ページ
+        if (this.kag.config.defaultAutoReturn != "false") {
+            this.autoInsertPageBreak(j_inner_message, j_outer_message, is_vertical);
+        }
+
+        // showMessageに投げる
+        this.showMessage(pm.val, is_vertical);
+    },
+
+    /**
+     * [iscript]中のテキストを組み立てる
+     * @param {{val:string;}} pm テキストタグのパラメータ
+     */
+    buildIScript: function (pm) {
+        this.kag.stat.buff_script += pm.val + "\n";
+        // タグを先読みして、[text]が続く限り文字列の連結処理を継続する
+        // エンティティ置換やcondチェックは不要なのでどんどん生のvalを足していく
+        // [text]以外のタグ([endscript]を想定)を検知した段階で正式なnextOrderを呼ぶ
+        const array_tag = this.kag.ftag.array_tag;
+        for (let i = this.kag.ftag.current_order_index + 1; i < array_tag.length; i++) {
+            const tag = array_tag[i];
+            if (tag.name === "text") {
+                this.kag.stat.buff_script += tag.val + "\n";
+                this.kag.ftag.current_order_index = i;
+            } else {
+                break;
+            }
+        }
+        this.kag.ftag.nextOrder();
+    },
+
+    /**
+     * [html]中のテキストを組み立てる
+     * @param {{val:string;}} pm テキストタグのパラメータ
+     */
+    buildHTML: function (pm) {
+        this.kag.stat.map_html.buff_html += pm.val;
+        // タグを先読みして、[text]が続く限り文字列の連結処理を継続する
+        // エンティティ置換やcondチェックは不要なのでどんどん生のvalを足していく
+        // [text]以外のタグ([emb]や[endhtml]を想定)を検知した段階で正式なnextOrderを呼ぶ
+        const array_tag = this.kag.ftag.array_tag;
+        for (let i = this.kag.ftag.current_order_index + 1; i < array_tag.length; i++) {
+            const tag = array_tag[i];
+            if (tag.name === "text") {
+                this.kag.stat.map_html.buff_html += tag.val;
+                this.kag.ftag.current_order_index = i;
+            } else {
+                break;
+            }
+        }
+        this.kag.ftag.nextOrder();
+    },
+
+    /**
+     * メッセージレイヤのインナーにCSSを当てる
+     * letter-spacing, line-height, font-family など
+     * @param {jQuery} j_inner_message div.message_inner
+     */
+    setMessageInnerStyle: function (j_inner_message) {
+        // 字詰め
+        const font_feature_settings = this.getMessageConfig("kerning") === "true" ? '"palt"' : "initial";
+
+        j_inner_message.setStyleMap({
             "letter-spacing": this.kag.config.defaultPitch + "px",
             "line-height": parseInt(this.kag.config.defaultFontSize) + parseInt(this.kag.config.defaultLineSpacing) + "px",
             "font-family": this.kag.config.userFace,
+            "font-feature-settings": font_feature_settings,
         });
-
-        //現在表示中のテキストを格納
-        this.kag.stat.current_message_str = pm.val;
-
-        //縦書き指定の場合
-        if (this.kag.stat.vertical == "true") {
-            //自動改ページ無効の場合
-            if (this.kag.config.defaultAutoReturn != "false") {
-                //テキストエリアの横幅が、一定以上いっていたばあい、テキストをクリアします
-                var j_outer_message = this.kag.getMessageOuterLayer();
-
-                var limit_width = parseInt(j_outer_message.css("width")) * 0.8;
-                var current_width = parseInt(j_inner_message.find("p").css("width"));
-
-                if (current_width > limit_width) {
-                    if (this.kag.stat.vchat.is_active) {
-                        this.kag.ftag.startTag("vchat_in", {});
-                    } else {
-                        this.kag.getMessageInnerLayer().html("");
-                    }
-                }
-            }
-
-            this.showMessage(pm.val, pm, true);
-        } else {
-            if (this.kag.config.defaultAutoReturn != "false") {
-                //テキストエリアの高さが、一定以上いっていたばあい、テキストをクリアします
-                var j_outer_message = this.kag.getMessageOuterLayer();
-
-                var limit_height = parseInt(j_outer_message.css("height")) * 0.8;
-                var current_height = parseInt(j_inner_message.find("p").css("height"));
-
-                if (current_height > limit_height) {
-                    //画面クリア
-                    if (this.kag.stat.vchat.is_active) {
-                        this.kag.ftag.startTag("vchat_in", {});
-                    } else {
-                        this.kag.getMessageInnerLayer().html("");
-                    }
-                }
-            }
-
-            this.showMessage(pm.val, pm, false);
-        }
-
-        //this.kag.ftag.nextOrder();
     },
 
-    showMessage: function (message_str, pm, isVertical) {
-        var that = this;
+    /**
+     * 自動改ページを行う
+     * @param {jQuery} j_inner_message div.message_inner
+     * @param {jQuery} j_outer_message div.message_outer
+     * @param {boolean} is_vertical 縦書きかどうか
+     */
+    autoInsertPageBreak: function (j_inner_message, j_outer_message, is_vertical) {
+        // 縦書きならwidthを、横書きならheightを文章がはみ出ているかどうかの判定に用いる
+        const target_property = is_vertical ? "width" : "height";
 
-        //特定のタグが直前にあった場合、ログの作り方に気をつける
-        if (that.kag.stat.log_join == "true") {
-            pm.backlog = "join";
+        // インナーサイズがアウターサイズの8割を超えているようならもう満杯。自動で改ページしてやる
+        var limit_width = parseInt(j_outer_message.css(target_property)) * 0.8;
+        var current_width = parseInt(j_inner_message.find("p").css(target_property));
+        if (current_width > limit_width) {
+            if (this.kag.stat.vchat.is_active) {
+                this.kag.ftag.startTag("vchat_in", {});
+            } else {
+                this.kag.getMessageInnerLayer().html("");
+            }
+        }
+    },
+
+    /**
+     * テキストを表示する統括的な処理
+     * @param {string} message_str 表示するテキスト
+     * @param {boolean} is_vertical 縦書きにするかどうか
+     */
+    showMessage: function (message_str, is_vertical) {
+        // 現在の発言者名（誰も喋っていない場合は空の文字列）
+        const chara_name = this.kag.getCharaName();
+
+        // バックログにテキストを追加
+        this.pushTextToBackLog(chara_name, message_str);
+
+        // 読み上げ（有効な場合）
+        if (this.kag.stat.play_speak) {
+            this.speechMessage(message_str);
         }
 
-        var chara_name = "";
-        if (this.kag.stat.chara_ptext != "") {
-            chara_name = $.isNull($("." + this.kag.stat.chara_ptext).html());
+        // メッセージレイヤのインナーを取得
+        // div.messageX_fore
+        //   div.message_outer
+        //   div.message_inner ← これ
+        const j_msg_inner = this.kag.getMessageInnerLayer();
+
+        // インナーが空なら<p>追加
+        if (j_msg_inner.html() == "") {
+            this.kag.setNewParagraph(j_msg_inner);
+            this.kag.tmp.last_char_info = null;
         }
 
-        if ((chara_name != "" && pm.backlog != "join") || (chara_name != "" && this.kag.stat.f_chara_ptext == "true")) {
-            this.kag.pushBackLog(
-                "<b class='backlog_chara_name " +
-                    chara_name +
-                    "'>" +
-                    chara_name +
-                    "</b>：<span class='backlog_text " +
-                    chara_name +
-                    "'>" +
-                    message_str +
-                    "</span>",
-                "add",
-            );
+        // vchatモード
+        if (this.kag.stat.vchat.is_active) {
+            j_msg_inner.show();
+        }
+
+        // 新しい span.current_span に切り替える必要があるかチェック (必要があるなら切り替え処理も行う)
+        this.kag.checkMessage(j_msg_inner);
+
+        // span.current_span を取得
+        const j_span = this.kag.getMessageCurrentSpan();
+
+        // カギカッコフロートを行うべきか メッセージウィンドウがまっさらのときだけ有効
+        const tmp = this.kag.tmp;
+        tmp.should_set_reverse_indent = chara_name && !j_span.text() && this.getMessageConfig("speech_bracket_float") !== "false";
+
+        // アニメーションやグラデーションが無効な場合を検知
+        // undefined, "none" の場合は無効
+        const font = this.kag.stat.font;
+        if (font.effect === undefined || font.effect === "none") {
+            font.effect = "";
+        }
+        if (font.gradient === undefined || font.gradient === "none") {
+            font.gradient = "";
+        }
+
+        // -webkit-text-strokeによる縁取りを行うかどうか
+        tmp.is_text_stroke = font.edge && font.edge_method === "stroke";
+
+        // 縁を前の文字に重ねるかどうか
+        tmp.is_edge_overlap = this.getMessageConfig("edge_overlap_text") === "true";
+
+        // 1文字1文字を個別に装飾するかどうか
+        // * -webkit-text-strokeによる縁取りを行なう場合 → true
+        // * text-shadowによる縁取りを行なう場合
+        //   * 前の文字に縁を重ねたくない → true
+        //   * グラデーションをかけたい → true
+        //   * それ以外 → false (個別にtext-shadowをかけなくてもいい。各文字をラップする親のspanにtext-shadowをかけるだけでいい)
+        tmp.is_individual_decoration =
+            tmp.is_text_stroke || (font.edge && font.edge_method === "shadow" && (!tmp.is_edge_overlap || font.gradient));
+
+        // span.current_span のスタイルを調整
+        this.setCurrentSpanStyle(j_span, chara_name);
+
+        // 既読処理（有効な場合）
+        if (this.kag.config.autoRecordLabel == "true") {
+            this.manageAlreadyRead(j_span);
+        }
+
+        // 1文字1文字を包む span に inline-block を適用するかどうか
+        // エフェクトによって文字を transform で動かすためには inline-block でなければならない！
+        let should_use_inline_block = true;
+        if (font.effect == "" || font.effect == "fadeIn") {
+            // エフェクトなし、あるいはただのフェードインの場合は inline でも動くので inline にする
+            // inline にしておくと英単語や句読点の禁則処理が有効になるので便利
+            should_use_inline_block = false;
+        }
+        // message_str からHTMLを生成する
+        // 入力例) "かきく"
+        // 出力例) "<span>か</span><span>き</span><span>く</span>"
+        // 各<span>には opacity: 0; が適用されており透明な状態
+        const message_html = this.buildMessageHTML(message_str, should_use_inline_block);
+
+        // 生成したHTMLを<span>でラップする
+        const j_message_span = $(`<span>${message_html}</span>`);
+
+        // span.current_span の中に付け加える
+        // div.message_inner
+        //   p ← 改ページ時に作り直される
+        //     span.current_span ← [font]でスタイルが変わったときなどに新しく挿入される
+        //       span       ← これは直前の[text]で表示したやつ
+        //         span あ
+        //         span い
+        //         span う
+        //       span       ← これがいま追加した j_message_span
+        //         span か
+        //         span き
+        //         span く
+        j_message_span.appendTo(j_span);
+
+        // ふきだしのサイズ調整（有効な場合）
+        if (this.kag.stat.fuki.active) {
+            this.adjustFukiSize(j_msg_inner, chara_name);
+        }
+
+        this.addChars(j_message_span, j_msg_inner, is_vertical);
+    },
+
+    /**
+     * テキストをバックログに追加する
+     * @param {string} chara_name 発言者の名前
+     * @param {string} message_str 表示するテキスト
+     */
+    pushTextToBackLog: function (chara_name, message_str) {
+        // ひとつ前のログに連結させるべきかどうか
+        // たとえば[r][font][delay]などのタグを通過したあとは連結が有効になる
+        var should_join_log = this.kag.stat.log_join == "true";
+
+        // バックログへの追加
+        if ((chara_name != "" && !should_join_log) || (chara_name != "" && this.kag.stat.f_chara_ptext == "true")) {
+            // バックログにキャラ名を新しく書き出す場合
+            const log_str =
+                `<b class="backlog_chara_name ${chara_name}">${chara_name}</b>：` +
+                `<span class="backlog_text ${chara_name}">${message_str}</span>`;
+            this.kag.pushBackLog(log_str, "add");
 
             if (this.kag.stat.f_chara_ptext == "true") {
                 this.kag.stat.f_chara_ptext = "false";
                 this.kag.stat.log_join = "true";
             }
         } else {
-            var log_str = "<span class='backlog_text " + chara_name + "'>" + message_str + "</span>";
+            // バックログにキャラ名を新しく書き出す必要がない場合
+            const log_str = `<span class="backlog_text ${chara_name}">${message_str}</span>`;
+            const join_type = should_join_log ? "join" : "add";
+            this.kag.pushBackLog(log_str, join_type);
+        }
+    },
 
-            if (pm.backlog == "join") {
-                this.kag.pushBackLog(log_str, "join");
+    /**
+     * テキストを読み上げる [speak_on]タグで有効になる
+     * @param {string} message_str 読み上げる文字列
+     */
+    speechMessage: function (message_str) {
+        speechSynthesis.speak(new SpeechSynthesisUtterance(message_str));
+    },
+
+    /**
+     * span.current_span のスタイルを調整する
+     * @param {jQuery} j_span span.current_span
+     * @param {string} chara_name 発言者の名前
+     */
+    setCurrentSpanStyle: function (j_span, chara_name) {
+        if (this.kag.stat.vchat.is_active) {
+            // vchatモードの場合
+            if (chara_name == "") {
+                $(".current_vchat").find(".vchat_chara_name").remove();
+                $(".current_vchat").find(".vchat-text-inner").css("margin-top", "0.2em");
             } else {
-                this.kag.pushBackLog(log_str, "add");
+                $(".current_vchat").find(".vchat_chara_name").html(chara_name);
+
+                //キャラ名欄の色
+                var vchat_name_color = $.convertColor(this.kag.stat.vchat.chara_name_color);
+
+                var cpm = this.kag.stat.vchat.charas[chara_name];
+
+                if (cpm) {
+                    //色指定がある場合は、その色を指定する。
+                    if (cpm.color != "") {
+                        vchat_name_color = $.convertColor(cpm.color);
+                    }
+                }
+
+                $(".current_vchat").find(".vchat_chara_name").css("background-color", vchat_name_color);
+
+                $(".current_vchat").find(".vchat-text-inner").css("margin-top", "1.5em");
+            }
+        } else {
+            // vchatモードでない場合
+
+            const font = this.kag.stat.font;
+
+            // 基本のテキストスタイル
+            j_span.setStyleMap({
+                "color": font.color,
+                "font-weight": font.bold,
+                "font-size": font.size + "px",
+                "font-family": font.face,
+                "font-style": font.italic,
+            });
+
+            // 字間と行の高さ
+            const letter_spacing = this.getMessageConfig("letter_spacing") || this.kag.config.defaultPitch;
+            const line_spacing = this.getMessageConfig("line_spacing") || this.kag.config.defaultLineSpacing;
+            const line_height = parseInt(font.size) + parseInt(line_spacing);
+            j_span.setStyleMap({
+                "letter-spacing": `${letter_spacing}px`,
+                "line-height": `${line_height}px`,
+            });
+
+            // 特殊な装飾
+            if (font.edge != "") {
+                // 縁取り文字
+                const edge_str = font.edge;
+                switch (font.edge_method) {
+                    default:
+                    case "shadow":
+                        if (!this.kag.tmp.is_individual_decoration) {
+                            // 個別縁取りが無効な場合だけでよい
+                            j_span.setStyle("text-shadow", $.generateTextShadowStrokeCSS(edge_str));
+                        } else {
+                            // 個別縁取りが有効な場合
+                            const edges = $.parseEdgeOptions(edge_str);
+                            this.kag.tmp.text_shadow_values = [];
+                            for (let i = edges.length - 1; i >= 0; i--) {
+                                const edge = edges[i];
+                                const text_shadow_value = $.generateTextShadowStrokeCSSOne(edge.color, edge.total_width);
+                                this.kag.tmp.text_shadow_values.push(text_shadow_value);
+                            }
+                            this.kag.tmp.inside_stroke_color = edges[0].color;
+                        }
+                        break;
+                    case "filter":
+                        j_span.setFilterCSS($.generateDropShadowStrokeCSS(edge_str));
+                        break;
+                    case "stroke":
+                        break;
+                }
+            } else if (font.shadow != "") {
+                // 影文字
+                j_span.setStyle("text-shadow", "2px 2px 2px " + font.shadow);
             }
         }
+    },
 
-        //読み上げ機能が有効な場合
-        if (that.kag.stat.play_speak == true) {
-            speechSynthesis.speak(new SpeechSynthesisUtterance(message_str));
+    /**
+     * メッセージ表示時のの既読管理を行う
+     * 既読テキスト→文字色を変更する
+     * 未読テキスト→未読スキップが無効ならスキップを止める
+     * @param {jQuery} j_span span.current_span 既読の場合に文字色を変える
+     */
+    manageAlreadyRead: function (j_span) {
+        // このテキストが既読かどうか
+        if (this.kag.stat.already_read == true) {
+            // このテキストが既読の場合
+            // テキストの色を変更
+            if (this.kag.config.alreadyReadTextColor != "default") {
+                j_span.setStyle("color", $.convertColor(this.kag.config.alreadyReadTextColor));
+            }
+        } else {
+            // このテキストが既読でない場合
+            // 未読スキップ機能が無効の場合はここでスキップを停止してやる
+            if (this.kag.config.unReadTextSkip == "false") {
+                this.kag.setSkip(false);
+            }
+        }
+    },
+
+    /**
+     * テキストを加工して実際にDOMに追加できるHTMLを生成する
+     * たとえば"ウホ"を渡すと`"<span>ウ</span><span>ホ</span>"`が得られる
+     * 各<span>要素にはすべて opacity: 0; スタイルが適用されており透明な状態
+     * @param {string} message_str
+     * @param {boolean} should_use_inline_block
+     * @returns {string}
+     */
+    buildMessageHTML: function (message_str, should_use_inline_block = true) {
+        let message_html = "";
+
+        //
+        // ワードブレイク禁止処理
+        //
+
+        // ワードブレイク(単語の途中での自然改行)を禁止する単語のリスト
+        const word_nobreak_list = this.kag.stat.word_nobreak_list || [];
+
+        // ワードブレイク禁止単語がないならチェックする必要はない
+        const should_check_word_break = word_nobreak_list.length > 0;
+
+        let escape_char;
+        let is_escaping = false;
+
+        if (should_check_word_break) {
+            // メッセージ中に含まれていない記号を適当に選んでエスケープ用の文字にする
+            const escape_char = this.getEscapeChar(message_str);
+            let is_escaping = false;
+
+            // メッセージ中に含まれる該当単語をエスケープ文字で囲む
+            // 処理前の例) "「俺は――ゴリラだ」" … このうち"――"をワードブレイクしないように保護したい
+            // 処理後の例) "「俺は#――#ゴリラだ」" … このとき"#"はもとのメッセージ中には存在しないことが保証されている
+            word_nobreak_list.forEach((word) => {
+                const reg = new RegExp(word, "g");
+                message_str = message_str.replace(reg, escape_char + word + escape_char);
+            });
         }
 
-        //テキスト表示時に、まず、画面上の次へボタンアイコンを抹消
-        that.kag.ftag.hideNextImg();
+        //
+        // 1文字ずつ見ていきながらHTML生成
+        //
 
-        // hidden状態で全部追加する
-        //vchatモードのときはメッセージエリアは無視する
+        for (let i = 0; i < message_str.length; i++) {
+            // 1文字ずつ見ていく
+            let c = message_str.charAt(i);
 
-        var j_msg_inner = this.kag.getMessageInnerLayer();
-
-        if (this.kag.stat.vchat.is_active) {
-            j_msg_inner.show();
-        }
-
-        (function (jtext) {
-            if (jtext.html() == "") {
-                //タグ作成
-                if (isVertical) {
-                    jtext.append("<p class='vertical_text'></p>");
+            // ワードブレイク禁止処理
+            if (should_check_word_break && c === escape_char) {
+                if (is_escaping) {
+                    is_escaping = false;
+                    message_html += "</span>";
                 } else {
-                    jtext.append("<p class=''></p>");
+                    is_escaping = true;
+                    message_html += '<span style="display: inline-block;">';
+                }
+                continue;
+            }
+
+            // ルビ指定がされている場合は<ruby>で囲う
+            if (this.kag.stat.ruby_str != "") {
+                c = `<ruby><rb>${c}</rb><rt>${this.kag.stat.ruby_str}</rt></ruby>`;
+                this.kag.stat.ruby_str = "";
+            }
+
+            // 文字種で場合分け
+            if (c == " ") {
+                // 空白の場合
+                message_html += `<span class="char" style="opacity:0">${c}</span>`;
+            } else {
+                // 空白以外の場合
+
+                // マーカー処理
+                if (this.kag.stat.mark == 1) {
+                    var mark_style = this.kag.stat.style_mark;
+                    c = `<mark style="${mark_style}">${c}</mark>`;
+                } else if (this.kag.stat.mark == 2) {
+                    this.kag.stat.mark = 0;
+                }
+
+                if (!this.kag.tmp.is_individual_decoration) {
+                    // 通常はこちら
+                    if (should_use_inline_block) {
+                        message_html += `<span class="char" style="opacity:0;display:inline-block;">${c}</span>`;
+                    } else {
+                        message_html += `<span class="char" style="opacity:0">${c}</span>`;
+                    }
+                } else {
+                    // 1文字1文字に個別に装飾を当てる場合
+                    if (this.kag.tmp.is_text_stroke) {
+                        // -webkit-text-strokeによる個別縁取りを行なう場合
+                        message_html += this.buildTextStrokeChar(c, this.kag.stat.font.edge);
+                    } else {
+                        // text-shadowによる個別縁取りを行なう場合
+                        message_html += this.buildTextShadowChar(c, this.kag.stat.font.edge);
+                    }
                 }
             }
+        }
+        return message_html;
+    },
 
-            //吹き出しが有効な場合
-            /*
-            if(that.kag.stat.fuki.active){
-
-                //jtext.find(".current_text_p").css("max-width",300);
-                //jtext.find(".current_text_p").css("display","table");
-
+    /**
+     * 引数の文字列に含まれていない適当な記号を返す
+     * @param {string} message_str
+     * @return {string} 適当な1文字
+     */
+    getEscapeChar: function (message_str) {
+        // 999まで見れば大丈夫だろ…
+        for (let i = 34; i < 999; i++) {
+            const c = String.fromCharCode(i);
+            if (!message_str.includes(c)) {
+                return c;
             }
-            */
+        }
+        return "∅";
+    },
 
-            var current_str = "";
+    /**
+     * text-shadowで文字を"1文字ずつ"縁取りしたHTMLを組み立てる
+     * @param {string} c 縁取りする1文字
+     * @param {string} edge_str 縁取りを定義した文字列
+     * @param {boolean} is_visible 最初から表示状態にするか
+     * @returns {string} ビルドされたHTML文字列
+     */
+    buildTextShadowChar: function (c, edge_str, is_visible = false) {
+        let char_html = "";
 
-            if (jtext.find("p").find(".current_span").length != 0) {
-                //アニメーションは強制停止させる。
-                jtext.find("p").find(".current_span").find("span").css({
+        // 縁を前の文字の上に重ねるかどうか
+        const is_edge_overlap = this.kag.tmp.is_edge_overlap;
+
+        // 最初から表示するか
+        const visible_class = is_visible ? "visible" : "";
+
+        // span.char.text-shadow の開始
+        const style = is_edge_overlap ? "z-index: 10; opacity: 0; " : "";
+        char_html += `<span class="char text-shadow ${visible_class}" style="${style}">`;
+
+        // テキストの縁取り部分を作成
+        const opacity_style = is_edge_overlap ? "opacity: 1; " : "";
+        this.kag.tmp.text_shadow_values.forEach((text_shadow_value, i, arr) => {
+            const z_index = 11 + i;
+            const color_style = i + 1 < arr.length ? "" : `color: ${this.kag.tmp.inside_stroke_color}; `;
+            char_html += `<span class="stroke entity" style="${color_style}${opacity_style}text-shadow: ${text_shadow_value}; z-index: ${z_index};">${c}</span>`;
+        });
+
+        // テキストの本体を作成
+        char_html += `<span class="fill entity" style="${opacity_style}">${c}</span>`;
+
+        // 上の要素はいずれも absolute なため width, height の構成要件にならない
+        // relative, inline なダミーを追加して width, height を確保する
+        char_html += `<span class="dummy" style="position:relative;display:inline;">${c}</span>`;
+
+        return char_html + `</span>`;
+    },
+
+    /**
+     * -webkit-text-strokeで文字を縁取りするためのHTMLを組み立てる
+     * @param {string} c 縁取りする1文字
+     * @param {string} edge_str 縁取りを定義した文字列
+     * @param {boolean} is_visible 最初から表示状態にするか
+     * @returns {string} ビルドされたHTML文字列
+     */
+    buildTextStrokeChar: function (c, edge_str, is_visible = false) {
+        let char_html = "";
+
+        // 縁取り定義をパース
+        const edges = $.parseEdgeOptions(edge_str);
+
+        // 縁を前の文字の上に重ねるかどうか
+        const is_edge_overlap = this.kag.tmp.is_edge_overlap;
+
+        // 最初から表示するか
+        const visible_class = is_visible ? "visible" : "";
+
+        // span.char.text-stroke の開始
+        if (is_edge_overlap) {
+            // 縁取りをひとつ前の文字に重ねてもいい場合は z-index: 10; をセット
+            // スタックコンテキストが生成されるため重なり順に影響が出る
+            char_html += `<span class="char text-stroke ${visible_class}" style="z-index:10;opacity:0;">`;
+        } else {
+            char_html += `<span class="char text-stroke ${visible_class}">`;
+        }
+
+        // チラつきを無くすおまじない
+        // 巨大な文字を加えておくことでレンダリングエリアを広げる効果がある(透明にしておく)
+        char_html += `<span class="dummy" style="transform: scale(2);">${c}</span>`;
+
+        // テキストの縁取り部分を作成
+        for (let i = edges.length - 1; i >= 0; i--) {
+            const edge = edges[i];
+            const width = edge.total_width * 2;
+            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${
+                100 - i
+            }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
+            if (is_edge_overlap) {
+                style += "opacity:1;";
+            }
+            char_html += `<span class="stroke entity" style="${style}">${c}</span>`;
+        }
+
+        // テキストの本体を作成
+        let style = is_edge_overlap ? "opacity:1;" : "";
+        char_html += `<span class="fill entity" style="${style}">${c}</span>`;
+
+        // 上の要素はいずれも absolute なため width, height の構成要件にならない
+        // relative, inline なダミーを追加して width, height を確保する
+        char_html += `<span class="dummy" style="position:relative;display:inline;">${c}</span>`;
+
+        return char_html + `</span>`;
+    },
+
+    /**
+     * ふきだしのサイズを良い感じに調整する
+     * @param {jQuery} j_msg_inner div.message_inner
+     * @param {string} chara_jname 発言者の名前
+     */
+    adjustFukiSize: function (j_msg_inner, chara_jname) {
+        // メッセージレイヤの表示
+        this.kag.layer.showMessageLayers();
+        this.kag.stat.is_hide_message = false;
+
+        // chara_name_area の隠蔽
+        this.kag.getCharaNameArea().hide();
+
+        // そもそも発言者が空欄ならothers用のふきだし処理にぶん投げる！(早期リターン)
+        if (chara_jname == "") {
+            this.adjustOthersFukiSize(j_msg_inner);
+            return;
+        }
+
+        // キャラの name を取得する
+        // ※ chara_name には name ではなく jname (画面表示用の日本語)が入っている
+        let chara_name = chara_jname;
+        if (this.kag.stat.jcharas[chara_jname]) {
+            chara_name = this.kag.stat.jcharas[chara_jname];
+        }
+
+        // キャラ画像のjQueryオブジェクトの取得を試みる
+        let chara_obj;
+        try {
+            chara_obj = $(".layer_fore").find("." + chara_name);
+        } catch (e) {
+            // chara_name にクラス名の禁止文字(たとえば"?")が含まれている場合は
+            // ご丁寧にjQueryが「そのクラス名はおかしいですよ」と例外を投げてくれるので
+            // try...catch で捕捉してやらねばならない
+            console.log(e);
+            chara_obj = undefined;
+        }
+
+        // 次のいずれかにあてはまるならothers用のふきだし処理にぶん投げる！(早期リターン)
+        // - キャラ画像のjQueryオブジェクト取得時に例外(エラー)が発生
+        // - キャラ画像のjQueryオブジェクトがひとつも取れなかった
+        // - いまの発言者に[chara_fuki]が設定されていない
+        if (chara_obj === undefined || !chara_obj.get(0) || this.kag.stat.charas[chara_name]["fuki"]["enable"] !== "true") {
+            this.adjustOthersFukiSize(j_msg_inner);
+            return;
+        }
+
+        // ここまで来たならキャラ専用のふきだしを設定しなければならない
+        this.adjustCharaFukiSize(j_msg_inner, chara_name, chara_obj);
+    },
+
+    /**
+     * キャラ用のふきだしのサイズを良い感じに調整する
+     * @param {jQuery} j_msg_inner div.message_inner
+     * @param {string} chara_name 発言者の名前
+     * @param {jQuery} chara_obj キャラ画像のjQueryオブジェクト
+     */
+    adjustCharaFukiSize: function (j_msg_inner, chara_name, chara_obj) {
+        const chara_fuki = this.kag.stat.charas[chara_name]["fuki"];
+
+        if (chara_fuki["fix_width"] != "") {
+            j_msg_inner.css("max-width", "");
+            j_msg_inner.css("width", parseInt(chara_fuki["fix_width"]));
+        } else {
+            j_msg_inner.css("width", "");
+            j_msg_inner.css("max-width", parseInt(chara_fuki["max_width"]));
+        }
+
+        //縦書きの場合はheightだけ無視で。
+        if (this.kag.stat.vertical == "true") {
+            //safariでも表示させるための処置
+            let w = j_msg_inner.find(".vertical_text").css("width");
+            j_msg_inner.css("width", w);
+            j_msg_inner.css("height", "");
+            j_msg_inner.css("max-height", parseInt(chara_fuki["max_width"]));
+        } else {
+            if (chara_fuki["fix_width"] == "") {
+                j_msg_inner.css("width", "");
+                j_msg_inner.css("height", "");
+            }
+        }
+
+        //吹き出しの大きさを自動調整。
+        let width = j_msg_inner.css("width");
+        let height = j_msg_inner.css("height");
+
+        //20 はアイコンの文
+        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
+        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + 20;
+
+        let j_outer_message = this.kag.getMessageOuterLayer();
+
+        j_outer_message.css("width", width);
+        j_outer_message.css("height", height);
+
+        chara_left = parseInt(chara_obj.css("left"));
+        chara_top = parseInt(chara_obj.css("top"));
+
+        let fuki_left = chara_fuki["left"];
+        let fuki_top = chara_fuki["top"];
+
+        let fuki_sippo_left = chara_fuki["sippo_left"];
+        let fuki_sippo_top = chara_fuki["sippo_top"];
+
+        let chara_width = parseInt(chara_obj.find("img").css("width"));
+        let chara_height = parseInt(chara_obj.find("img").css("height"));
+
+        let origin_width = this.kag.stat.charas[chara_name]["origin_width"];
+        let origin_height = this.kag.stat.charas[chara_name]["origin_height"];
+
+        //相対位置はキャラのサイズによって座標を調整する
+        let per_width = chara_width / origin_width;
+        let per_height = chara_height / origin_height;
+
+        fuki_left = fuki_left * per_width;
+        fuki_top = fuki_top * per_height;
+
+        fuki_left2 = chara_left + fuki_left;
+        fuki_top2 = chara_top + fuki_top;
+
+        let outer_width = parseInt(j_outer_message.css("width"));
+        let outer_height = parseInt(j_outer_message.css("height"));
+
+        //吹き出し位置によって位置を変更
+        let sippo = chara_fuki["sippo"];
+        if (sippo == "bottom") {
+            fuki_top2 = fuki_top2 - outer_height;
+        } else if (sippo == "left") {
+            fuki_left2 = fuki_left2 + parseInt(chara_fuki["sippo_left"]);
+        } else if (sippo == "right") {
+            fuki_left2 = fuki_left2 - outer_width;
+        }
+
+        //左端と下端の座標
+        let fuki_right = fuki_left2 + outer_width;
+        let fuki_bottom = fuki_top2 + outer_height;
+
+        let sc_width = parseInt(this.kag.config.scWidth);
+        let sc_height = parseInt(this.kag.config.scHeight);
+
+        let sippo_left = 0;
+        let sippo_top = 0;
+
+        //右端に飛び出ていたら
+
+        if (fuki_right >= sc_width) {
+            fuki_left2 = fuki_left2 - (fuki_right - sc_width) - 10;
+            sippo_left = fuki_right - sc_width + 10; //はみ出たぶんだけプラス
+        }
+
+        if (fuki_bottom >= sc_height) {
+            fuki_top2 = fuki_top2 - (fuki_bottom - sc_height) - 10;
+            //sippo_left = (fuki_bottom - -50;
+        }
+
+        if (fuki_left2 <= 0) {
+            //しっぽの位置はマイナスさせる
+            sippo_left = fuki_left2 - 10;
+            fuki_left2 = 10;
+        }
+
+        if (fuki_top2 <= 0) {
+            fuki_top2 = 10;
+        }
+
+        j_outer_message.css("left", fuki_left2);
+        j_outer_message.css("top", fuki_top2);
+
+        //innerの情報
+        j_msg_inner.css({
+            left: parseInt(j_outer_message.css("left")) + 10,
+            top: parseInt(j_outer_message.css("top")) + 10,
+        });
+
+        //調整値。はみ出し多分
+
+        this.setFukiStyle(j_outer_message, chara_fuki);
+
+        //ふきだしの位置を調整//////////////
+        this.kag.updateFuki(chara_name, {
+            sippo_left: sippo_left,
+        });
+    },
+
+    /**
+     * others用のふきだしのサイズを良い感じに調整する
+     * @param {jQuery} j_msg_inner div.message_inner
+     */
+    adjustOthersFukiSize: function (j_msg_inner) {
+        let others_style = this.kag.stat.fuki.others_style;
+        let def_style = this.kag.stat.fuki.def_style;
+
+        let nwidth = others_style.max_width || def_style.width;
+        let nleft = others_style.left || def_style.left;
+        let ntop = others_style.top || def_style.top;
+
+        if (others_style["fix_width"] != "") {
+            j_msg_inner.css("max-width", "");
+            j_msg_inner.css("width", parseInt(others_style["fix_width"]));
+        } else {
+            j_msg_inner.css("width", "");
+            j_msg_inner.css("max-width", parseInt(nwidth));
+        }
+
+        //吹き出しの大きさを自動調整。
+        width = j_msg_inner.css("width");
+        height = j_msg_inner.css("height");
+
+        //20 はアイコンの文
+        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
+        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + 20;
+
+        let j_outer_message = this.kag.getMessageOuterLayer();
+
+        j_outer_message.css("width", width);
+        j_outer_message.css("height", height);
+
+        j_outer_message.css("left", parseInt(nleft));
+        j_outer_message.css("top", parseInt(ntop));
+
+        //通常のポジションに戻す
+        j_msg_inner.css({
+            left: parseInt(j_outer_message.css("left")) + 10,
+            top: parseInt(j_outer_message.css("top")) + 10,
+        });
+
+        this.setFukiStyle(j_outer_message, this.kag.stat.fuki.others_style);
+
+        //ふきだしを消す
+        this.kag.updateFuki("others", { sippo: "none" });
+    },
+
+    /**
+     * 1文字を可視化する
+     * @param {jQuery} j_char_span 1文字の`<span>`のjQueryオブジェクト
+     */
+    makeOneCharVisible: function (j_char_span) {
+        // 個別縁取りが有効、かつ、縁を前のテキストに重ねたくない場合は
+        // span.charそのものではなくその中の子要素に対してアニメーションを当てる
+        if (this.kag.tmp.is_individual_decoration && !this.kag.tmp.is_edge_overlap) {
+            j_char_span = j_char_span.find(".entity");
+        }
+
+        if (this.kag.stat.font.effect != "") {
+            const anim_name = "t" + this.kag.stat.font.effect;
+
+            // エフェクト時間を決定する
+            let anim_duration = this.kag.tmp.effect_speed;
+            if (!anim_duration.includes("s")) {
+                anim_duration += "ms";
+            }
+
+            // アニメ―ション終了時に文字を完全表示
+            j_char_span.on("animationend", function (e) {
+                j_char_span.removeClass("animchar");
+                j_char_span.setStyleMap({
                     opacity: 1,
                     visibility: "visible",
                     animation: "",
                 });
+            });
 
-                current_str = jtext.find("p").find(".current_span").html();
+            //　クラスを付けてアニメーション再生開始
+            j_char_span.addClass("animchar");
+            j_char_span.setStyle("animation", `${anim_name} ${anim_duration} ease 0s 1 normal forwards`);
+        } else {
+            j_char_span.setStyleMap({ visibility: "visible", opacity: "1" });
+        }
+    },
+
+    /**
+     * すべての文字を可視化する
+     * @param {jQuery} j_char_span_children 1文字1文字の`<span>`のjQueryオブジェクトのコレクション
+     */
+    makeAllCharsVisible: function (j_char_span_children) {
+        // 個別文字装飾が有効な場合はspan.charそのものではなくその中の子要素に対してアニメーションを当てる
+        if (this.kag.tmp.is_individual_decoration) {
+            j_char_span_children = j_char_span_children.find(".entity");
+        }
+        j_char_span_children.setStyleMap({
+            animation: "",
+            visibility: "visible",
+            opacity: "1",
+        });
+    },
+
+    /**
+     * 特定のインデックスの1文字を追加する
+     * @param {number} char_index 表示する文字のインデックス
+     * @param {jQuery} j_char_span_children 1文字1文字の`<span>`のjQueryオブジェクトのコレクション
+     * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
+     * @param {jQuery} j_msg_inner div.message_inner
+     */
+    addOneChar: function (char_index, j_char_span_children, j_message_span, j_msg_inner) {
+        // まだ文字表示中だよ
+        this.kag.stat.is_adding_text = true;
+
+        // 表示中のクリック割り込みを検知するよ
+        this.checkClickInterrupt(j_msg_inner);
+
+        // この1文字を可視化
+        this.makeOneCharVisible(j_char_span_children.eq(char_index));
+
+        // 次の文字のインデックス
+        const next_char_index = char_index + 1;
+
+        // すべての文字を表示し終わったかどうか
+        if (next_char_index < j_char_span_children.length) {
+            // まだ表示していない文字があるようだ
+            // タイムアウトを設けて次の文字を表示しよう
+            $.setTimeout(() => {
+                this.addOneChar(next_char_index, j_char_span_children, j_message_span, j_msg_inner);
+            }, this.kag.tmp.ch_speed);
+        } else {
+            // すべての文字を表示し終わったようだ
+            $.setTimeout(() => {
+                this.finishAddingChars();
+            }, this.kag.tmp.ch_speed);
+        }
+    },
+
+    /**
+     * 文字表示中のクリック割り込みを検知する
+     * 文字表示中のスキップ割り込みについても対応を検討(現在は[skipstart]の部分で文字表示中のスキップ開始を拒否している)
+     */
+    checkClickInterrupt: function (j_msg_inner) {
+        // スキップ割り込み
+        const is_skip = this.kag.stat.is_skip;
+        if ((this.kag.stat.is_click_text || is_skip) && !this.kag.tmp.processed_click_interrupt) {
+            this.kag.tmp.processed_click_interrupt = true;
+            // 文字表示の途中でクリックされたようだ
+
+            // 文字途中クリック時の文字表示速度の設定を見る
+            const ch_speed_in_click = is_skip ? "0" : this.getMessageConfig("ch_speed_in_click");
+            if (ch_speed_in_click !== "default") {
+                this.kag.tmp.ch_speed = parseInt(ch_speed_in_click);
             }
 
-            that.kag.checkMessage(jtext);
+            // 文字途中クリック時のエフェクト速度の設定を見る
+            let effect_speed_in_click = is_skip ? "0ms" : this.getMessageConfig("effect_speed_in_click");
 
-            //メッセージ領域を取得
-            var j_span = {};
-
-            if (that.kag.stat.vchat.is_active) {
-                j_span = jtext.find(".current_span");
-                if (chara_name == "") {
-                    $(".current_vchat").find(".vchat_chara_name").remove();
-                    $(".current_vchat").find(".vchat-text-inner").css("margin-top", "0.2em");
-                } else {
-                    $(".current_vchat").find(".vchat_chara_name").html(chara_name);
-
-                    //キャラ名欄の色
-                    var vchat_name_color = $.convertColor(that.kag.stat.vchat.chara_name_color);
-
-                    var cpm = that.kag.stat.vchat.charas[chara_name];
-
-                    if (cpm) {
-                        //色指定がある場合は、その色を指定する。
-                        if (cpm.color != "") {
-                            vchat_name_color = $.convertColor(cpm.color);
-                        }
-                    }
-
-                    $(".current_vchat").find(".vchat_chara_name").css("background-color", vchat_name_color);
-
-                    $(".current_vchat").find(".vchat-text-inner").css("margin-top", "1.5em");
+            if (effect_speed_in_click !== "default" || is_skip) {
+                this.kag.tmp.effect_speed = effect_speed_in_click;
+                // すでにアニメーションが始まっている文字のアニメ―ション時間も短くしておく
+                if (!effect_speed_in_click.includes("s")) {
+                    effect_speed_in_click += "ms";
                 }
-            } else {
-                j_span = that.kag.getMessageCurrentSpan();
-
-                j_span.css({
-                    "color": that.kag.stat.font.color,
-                    "font-weight": that.kag.stat.font.bold,
-                    "font-size": that.kag.stat.font.size + "px",
-                    "font-family": that.kag.stat.font.face,
-                    "font-style": that.kag.stat.font.italic,
+                j_msg_inner.find(".animchar").setStyleMap({
+                    "animation-duration": effect_speed_in_click,
                 });
+            }
+        }
+    },
 
-                if (that.kag.stat.font.edge != "") {
-                    var edge_color = that.kag.stat.font.edge;
-                    j_span.css(
-                        "text-shadow",
-                        "1px 1px 0 " +
-                            edge_color +
-                            ", -1px 1px 0 " +
-                            edge_color +
-                            ",1px -1px 0 " +
-                            edge_color +
-                            ",-1px -1px 0 " +
-                            edge_color +
-                            "",
-                    );
-                } else if (that.kag.stat.font.shadow != "") {
-                    //j_span.css()
-                    j_span.css("text-shadow", "2px 2px 2px " + that.kag.stat.font.shadow);
+    /**
+     * 文字の追加を終えて次のタグに進む
+     */
+    finishAddingChars: function () {
+        this.kag.stat.is_adding_text = false;
+        if (this.kag.stat.is_stop != "true" && !this.kag.stat.is_hide_message) {
+            this.kag.ftag.nextOrder();
+        }
+    },
+
+    /**
+     * 文字を追加していく
+     * @param {jQuery} j_message_span 1文字1文字の`<span>`をラップしている親`<span>`のjQueryオブジェクト
+     * @param {jQuery} j_msg_inner div.message_inner
+     * @param {boolean} is_vertical 縦書きかどうか
+     */
+    addChars: function (j_message_span, j_msg_inner, is_vertical) {
+        // 文字の表示速度 (単位はミリ秒/文字)
+        let ch_speed = 30;
+        if (this.kag.stat.ch_speed !== "") {
+            ch_speed = parseInt(this.kag.stat.ch_speed);
+        } else if (this.kag.config.chSpeed) {
+            ch_speed = parseInt(this.kag.config.chSpeed);
+        }
+
+        // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
+        const j_char_span_children = j_message_span.find(".char");
+
+        // グラデーションの設定が有効の場合
+        const font = this.kag.stat.font;
+        if (font.gradient && font.gradient !== "none") {
+            const j_target = this.kag.tmp.is_individual_decoration ? j_char_span_children.find(".fill") : j_char_span_children;
+            j_target.setGradientText(font.gradient);
+        }
+
+        //　セリフのカギカッコフロート
+        if (this.kag.tmp.should_set_reverse_indent) {
+            this.setReverseIndent(j_msg_inner, j_char_span_children);
+        }
+
+        // 禁則処理
+        if (this.getMessageConfig("control_line_break") === "true") {
+            this.controlLineBreak(j_char_span_children, is_vertical);
+        }
+
+        // すべてのテキストを一瞬で表示すべきなら全部表示してさっさと早期リターンしよう
+        // 次のいずれかに該当するならすべてのテキストを一瞬で表示すべきである
+        // - スキップモード中である
+        // - [nowait]中である
+        // - 1文字あたりの表示時間が 3 ミリ秒以下である
+        if (this.kag.stat.is_skip === true || this.kag.stat.is_nowait || ch_speed <= 3) {
+            // ストップ中じゃなければ
+            if (this.kag.stat.is_stop != "true") {
+                // 全文字表示
+                this.makeAllCharsVisible(j_char_span_children);
+                // スキップ時間のタイムアウトを設ける
+                $.setTimeout(() => {
+                    // メッセージウィンドウが隠れていなければ次のタグへ
+                    if (!this.kag.stat.is_hide_message) {
+                        this.kag.ftag.nextOrder();
+                    }
+                }, parseInt(this.kag.config.skipSpeed));
+            }
+            return;
+        }
+
+        //
+        // ここまで来たということは1文字ずつ追加していかねばならないようだ
+        //
+
+        // テキスト追加中だよ
+        this.kag.stat.is_adding_text = true;
+
+        // クリックの割り込みを処理したかどうか
+        this.kag.tmp.processed_click_interrupt = false;
+
+        // 文字表示速度
+        this.kag.tmp.ch_speed = ch_speed;
+
+        // エフェクト速度
+        this.kag.tmp.effect_speed = this.kag.stat.font.effect_speed;
+
+        // 1文字目を追加 あとは関数内で再帰して表示
+        this.addOneChar(0, j_char_span_children, j_message_span, j_msg_inner);
+    },
+
+    /**
+     * カギカッコの下に文章が回り込まないように、最初の行だけ左側にずらす
+     * 内部的には最初のカギカッコだけ absolute にして左にずらす！
+     *
+     * 　「こんにちは
+     * 　カギカッコフロートなしだよ」
+     *
+     * これをこうしてこうじゃ
+     *
+     * 「こんにちは
+     * 　カギカッコフロートありだよ」
+     * @param {jQuery} j_msg_inner div.message_inner
+     * @param {jQuery} j_children 1文字1文字の span.char のコレクション
+     */
+    setReverseIndent: function (j_msg_inner, j_children) {
+        // 最初の1文字
+        const j_first_char = j_children.eq(0);
+
+        // 設定を取得
+        const indent_config = this.getMessageConfig("speech_bracket_float");
+        const margin_config = this.getMessageConfig("speech_margin_left");
+
+        // 最初の1文字の横幅が何ピクセルなのか調査する
+        let first_char_width = 0;
+        if (indent_config === "true" || margin_config === "true") {
+            const j_width_check = j_first_char.clone();
+            j_width_check.setStyleMap({
+                "opacity": "0",
+                "position": "fixed",
+                "display": "inline-block",
+                "z-index": "1",
+                "top": "-9999px",
+                "left": "-9999px",
+            });
+            j_width_check.insertBefore(j_first_char);
+            first_char_width = j_width_check.width();
+            j_width_check.remove();
+        }
+
+        // インデント幅を決定 コンフィグの値によって場合分け
+        // - "true" が指定されている場合は、上で調査した文字幅を自動で使う
+        // - 単位のない数値が指定されている場合は、その数値に"px"を付けて使う
+        // - 単位のある数値が指定されている場合は、それをそのまま使う
+        let indent = 0;
+        let px_indent = "px";
+        switch (indent_config) {
+            case "true":
+                indent = first_char_width;
+                break;
+            default:
+                indent = indent_config;
+                if (indent_config.match(/em|%|px|vw|vh/)) {
+                    px_indent = "";
+                }
+        }
+
+        // 最初の1文字を absolute にしてしまおう
+        j_first_char.setStyleMap({
+            position: "absolute",
+            // top: "0",
+            left: `-${indent}${px_indent}`,
+        });
+
+        //
+        // さらに全体を右側に動かす
+        //
+
+        // 右側に動かす量を決定 コンフィグの値によって場合分け
+        // - "false" が指定されている場合は、右側に動かす処理を行わない
+        // - "true" が指定されている場合は、上で調査した文字幅を自動で使う
+        // - 単位のない数値が指定されている場合は、その数値に"px"を付けて使う
+        // - 単位のある数値が指定されている場合は、それをそのまま使う
+        let margin = 0;
+        let px_margin = "px";
+        switch (margin_config) {
+            case "false":
+                break;
+            case "true":
+                margin = first_char_width;
+                break;
+            default:
+                margin = margin_config;
+                if (margin_config.match(/em|%|px|vw|vh/)) {
+                    px_margin = "";
+                }
+        }
+
+        // border-box にしつつ左側に padding を付ける
+        if (margin !== 0) {
+            j_msg_inner.find("p").setStyleMap({
+                "box-sizing": "border-box",
+                "padding-left": `${margin}${px_margin}`,
+            });
+        }
+    },
+
+    /**
+     * 禁則処理
+     * 特定の文字が行頭に来ていたら改行を早める
+     * @param {jQuery} j_char_children 各1文字1文字のjQueryコレクション
+     * @param {boolean} is_vertical 縦書きかどうか
+     */
+    controlLineBreak: function (j_char_children, is_vertical) {
+        // 今回の[text]を表示する前にメッセージウィンドウ上に存在していた最後の1文字の情報を取得
+        // [p][cm][er]などでまっさらになっている場合はもちろん取れないので初期値を設定
+        const prev = this.kag.tmp.last_char_info || {
+            left: is_vertical ? Infinity : -Infinity,
+            top: -Infinity,
+            j_char: null,
+        };
+
+        // 最初の1文字のy座標と最後の1文字のy座標を取得
+        const first_char_top = j_char_children.first().offset().top;
+        const last_j_char = j_char_children.last();
+        const last_char_offset = last_j_char.offset();
+
+        // 最後の1文字の情報は一時データに記憶しておく
+        this.kag.tmp.last_char_info = {
+            left: last_char_offset.left,
+            top: last_char_offset.top,
+            j_char: last_j_char,
+        };
+
+        // 最初と最後の文字のy座標が一致している(改行が生じていない)かつ今回の[text]よりも前のテキストが存在していない
+        // なら、禁則処理は必要ないとわかるので早期リターン
+        if (first_char_top === last_char_offset.top && !prev.j_char) {
+            return;
+        }
+
+        // 先頭に来てはいけない文字列
+        const bad_chars = this.getMessageConfig("control_line_break_chars");
+
+        // さあ、1文字ずつ見ていくぞ
+        for (let i = 0, len = j_char_children.length; i < len; i++) {
+            const j_this = j_char_children.eq(i);
+            const offset = j_this.offset();
+            const char = j_this.text().charAt(0);
+            const is_new_line = is_vertical ? offset.left < prev.left : offset.top > prev.top;
+            if (is_new_line) {
+                // この文字が禁則処理対象の文字であるとき『ひとつ前の文字』の前に改行を入れる
+                if (bad_chars.includes(char)) {
+                    prev.j_char.before("<br>");
+                }
+                // ここで最後の1文字とy座標を比較 一致するならもうこの先に改行はない
+                if (offset.top === last_char_offset.top) {
+                    break;
                 }
             }
-
-            //既読管理中の場合、現在の場所が既読済みなら、色を変える
-            if (that.kag.config.autoRecordLabel == "true") {
-                if (that.kag.stat.already_read == true) {
-                    //テキストの色調整
-                    if (that.kag.config.alreadyReadTextColor != "default") {
-                        j_span.css("color", $.convertColor(that.kag.config.alreadyReadTextColor));
-                    }
-                } else {
-                    //未読スキップがfalseの場合は、スキップ停止
-                    if (that.kag.config.unReadTextSkip == "false") {
-                        that.kag.stat.is_skip = false;
-                    }
-                }
-            }
-
-            var ch_speed = 30;
-
-            if (that.kag.stat.ch_speed != "") {
-                ch_speed = parseInt(that.kag.stat.ch_speed);
-            } else if (that.kag.config.chSpeed) {
-                ch_speed = parseInt(that.kag.config.chSpeed);
-            }
-
-            //アニメーション設定。無効な場合がある
-            if (typeof that.kag.stat.font.effect == "undefined" || that.kag.stat.font.effect == "none") {
-                that.kag.stat.font.effect = "";
-            }
-
-            //禁則処理を有効にするための処置。エフェクトによっては有効にできないようにする
-            var flag_in_block = true;
-            if (that.kag.stat.font.effect == "" || that.kag.stat.font.effect == "fadeIn") {
-                flag_in_block = false;
-            }
-
-            var append_str = "";
-            for (var i = 0; i < message_str.length; i++) {
-                var c = message_str.charAt(i);
-                //ルビ指定がされている場合
-                if (that.kag.stat.ruby_str != "") {
-                    c = "<ruby><rb>" + c + "</rb><rt>" + that.kag.stat.ruby_str + "</rt></ruby>";
-                    that.kag.stat.ruby_str = "";
-                }
-
-                if (c == " ") {
-                    append_str += "<span style='opacity:0'>" + c + "</span>";
-                } else {
-                    if (that.kag.stat.mark == 1) {
-                        var mark_style = that.kag.stat.style_mark;
-                        c = "<mark style='" + mark_style + "'>" + c + "</mark>";
-                    } else if (that.kag.stat.mark == 2) {
-                        that.kag.stat.mark = 0;
-                    }
-
-                    if (flag_in_block) {
-                        append_str += "<span style='display:inline-block;opacity:0'>" + c + "</span>";
-                    } else {
-                        append_str += "<span style='opacity:0'>" + c + "</span>";
-                    }
-                }
-            }
-
-            current_str += "<span>" + append_str + "</span>";
-
-            // hidden状態で全部追加する
-            that.kag.appendMessage(jtext, current_str);
-
-            //吹き出しが有効な場合は位置を自動調整
-            if (that.kag.stat.fuki.active) {
-                //メッセージレイヤの表示
-                that.kag.layer.showMessageLayers();
-                that.kag.stat.is_hide_message = false;
-
-                let chara_fuki = {};
-
-                //位置を調整。
-                let is_chara_show = false;
-
-                if (chara_name == "") {
-                    is_chara_show = false;
-                } else {
-                    let original_name = chara_name;
-
-                    if (that.kag.stat.jcharas[chara_name]) {
-                        original_name = that.kag.stat.jcharas[chara_name];
-                    }
-
-                    var chara_obj;
-
-                    try {
-                        chara_obj = $(".layer_fore").find("." + original_name);
-                    } catch (e) {
-                        console.log(e);
-                        chara_obj = undefined;
-                    }
-
-                    if (
-                        typeof chara_obj != "undefined" &&
-                        chara_obj.get(0) &&
-                        that.kag.stat.charas[original_name]["fuki"]["enable"] == "true"
-                    ) {
-                        is_chara_show = true;
-
-                        //chara_p_textを排除
-                        $(".tyrano_base").find(".chara_name_area").hide();
-
-                        chara_fuki = that.kag.stat.charas[original_name]["fuki"];
-
-                        if (chara_fuki["fix_width"] != "") {
-                            j_msg_inner.css("max-width", "");
-                            j_msg_inner.css("width", parseInt(chara_fuki["fix_width"]));
-                        } else {
-                            j_msg_inner.css("width", "");
-                            j_msg_inner.css("max-width", parseInt(chara_fuki["max_width"]));
-                        }
-
-                        //縦書きの場合はheightだけ無視で。
-                        if (that.kag.stat.vertical == "true") {
-                            //safariでも表示させるための処置
-                            let w = j_msg_inner.find(".vertical_text").css("width");
-                            j_msg_inner.css("width", w);
-                            j_msg_inner.css("height", "");
-                            j_msg_inner.css("max-height", parseInt(chara_fuki["max_width"]));
-                        } else {
-                            if (chara_fuki["fix_width"] == "") {
-                                j_msg_inner.css("width", "");
-                                j_msg_inner.css("height", "");
-                            }
-                        }
-
-                        //吹き出しの大きさを自動調整。
-                        let width = j_msg_inner.css("width");
-                        let height = j_msg_inner.css("height");
-
-                        //20 はアイコンの文
-                        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
-                        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
-
-                        var j_outer_message = that.kag.getMessageOuterLayer();
-
-                        j_outer_message.css("width", width);
-                        j_outer_message.css("height", height);
-
-                        chara_left = parseInt(chara_obj.css("left"));
-                        chara_top = parseInt(chara_obj.css("top"));
-
-                        let fuki_left = chara_fuki["left"];
-                        let fuki_top = chara_fuki["top"];
-
-                        let fuki_sippo_left = chara_fuki["sippo_left"];
-                        let fuki_sippo_top = chara_fuki["sippo_top"];
-
-                        let chara_width = parseInt(chara_obj.find("img").css("width"));
-                        let chara_height = parseInt(chara_obj.find("img").css("height"));
-
-                        let origin_width = that.kag.stat.charas[original_name]["origin_width"];
-                        let origin_height = that.kag.stat.charas[original_name]["origin_height"];
-
-                        //相対位置はキャラのサイズによって座標を調整する
-                        let per_width = chara_width / origin_width;
-                        let per_height = chara_height / origin_height;
-
-                        fuki_left = fuki_left * per_width;
-                        fuki_top = fuki_top * per_height;
-
-                        fuki_left2 = chara_left + fuki_left;
-                        fuki_top2 = chara_top + fuki_top;
-
-                        let outer_width = parseInt(j_outer_message.css("width"));
-                        let outer_height = parseInt(j_outer_message.css("height"));
-
-                        //吹き出し位置によって位置を変更
-                        let sippo = chara_fuki["sippo"];
-                        if (sippo == "bottom") {
-                            fuki_top2 = fuki_top2 - outer_height;
-                        } else if (sippo == "left") {
-                            fuki_left2 = fuki_left2 + parseInt(chara_fuki["sippo_left"]);
-                        } else if (sippo == "right") {
-                            fuki_left2 = fuki_left2 - outer_width;
-                        }
-
-                        //左端と下端の座標
-                        let fuki_right = fuki_left2 + outer_width;
-                        let fuki_bottom = fuki_top2 + outer_height;
-
-                        let sc_width = parseInt(that.kag.config.scWidth);
-                        let sc_height = parseInt(that.kag.config.scHeight);
-
-                        let sippo_left = 0;
-                        let sippo_top = 0;
-
-                        //右端に飛び出ていたら
-
-                        if (fuki_right >= sc_width) {
-                            fuki_left2 = fuki_left2 - (fuki_right - sc_width) - 10;
-                            sippo_left = fuki_right - sc_width + 10; //はみ出たぶんだけプラス
-                        }
-
-                        if (fuki_bottom >= sc_height) {
-                            fuki_top2 = fuki_top2 - (fuki_bottom - sc_height) - 10;
-                            //sippo_left = (fuki_bottom - -50;
-                        }
-
-                        if (fuki_left2 <= 0) {
-                            //しっぽの位置はマイナスさせる
-                            sippo_left = fuki_left2 - 10;
-                            fuki_left2 = 10;
-                        }
-
-                        if (fuki_top2 <= 0) {
-                            fuki_top2 = 10;
-                        }
-
-                        //alert(fuki_left);
-                        j_outer_message.css("left", fuki_left2);
-                        j_outer_message.css("top", fuki_top2);
-
-                        //innerの情報
-                        j_msg_inner.css({
-                            left: parseInt(j_outer_message.css("left")) + 10,
-                            top: parseInt(j_outer_message.css("top")) + 10,
-                        });
-
-                        //調整値。はみ出し多分
-
-                        that.setFukiStyle(j_outer_message, chara_fuki);
-
-                        //ふきだしの位置を調整//////////////
-                        that.kag.updateFuki(original_name, {
-                            sippo_left: sippo_left,
-                        });
-                    } else {
-                        is_chara_show = false;
-                    }
-                }
-
-                //othersのポジションに戻す。
-                if (is_chara_show == false) {
-                    //chara_p_textを排除
-                    $(".tyrano_base").find(".chara_name_area").hide();
-
-                    let others_style = that.kag.stat.fuki.others_style;
-                    let def_style = that.kag.stat.fuki.def_style;
-
-                    let nwidth = others_style.max_width || def_style.width;
-                    let nleft = others_style.left || def_style.left;
-                    let ntop = others_style.top || def_style.top;
-
-                    if (others_style["fix_width"] != "") {
-                        j_msg_inner.css("max-width", "");
-                        j_msg_inner.css("width", parseInt(others_style["fix_width"]));
-                    } else {
-                        j_msg_inner.css("width", "");
-                        j_msg_inner.css("max-width", parseInt(nwidth));
-                    }
-
-                    //吹き出しの大きさを自動調整。
-                    width = j_msg_inner.css("width");
-                    height = j_msg_inner.css("height");
-
-                    //20 はアイコンの文
-                    width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + that.kag.stat.fuki.marginr + 20;
-                    height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + that.kag.stat.fuki.marginb + 20;
-
-                    var j_outer_message = that.kag.getMessageOuterLayer();
-
-                    j_outer_message.css("width", width);
-                    j_outer_message.css("height", height);
-
-                    j_outer_message.css("left", parseInt(nleft));
-                    j_outer_message.css("top", parseInt(ntop));
-
-                    //通常のポジションに戻す
-                    j_msg_inner.css({
-                        left: parseInt(j_outer_message.css("left")) + 10,
-                        top: parseInt(j_outer_message.css("top")) + 10,
-                    });
-
-                    chara_fuki = that.kag.stat.fuki.others_style;
-
-                    that.setFukiStyle(j_outer_message, chara_fuki);
-
-                    //ふきだしを消す
-                    that.kag.updateFuki("others", { sippo: "none" });
-                }
-            }
-
-            var append_span = j_span.children("span:last-child");
-            var makeVisible = function (index) {
-                //append_span.children("span:eq(" + index + ")").addClass("fadeIn");
-                //append_span.children("span:eq(" + index + ")").css('animation','rollIn 0.2s ease 0s 1 normal forwards');
-
-                if (that.kag.stat.font.effect != "") {
-                    append_span.children("span:eq(" + index + ")").on("animationend", function (e) {
-                        $(e.target).css({
-                            opacity: 1,
-                            visibility: "visible",
-                            animation: "",
-                        });
-                    });
-
-                    append_span
-                        .children("span:eq(" + index + ")")
-                        .css(
-                            "animation",
-                            "t" + that.kag.stat.font.effect + " " + that.kag.stat.font.effect_speed + " ease 0s 1 normal forwards",
-                        );
-                } else {
-                    append_span.children("span:eq(" + index + ")").css({ visibility: "visible", opacity: "1" });
-                }
-            };
-            var makeVisibleAll = function () {
-                append_span.children("span").css({ visibility: "visible", opacity: "1" });
-            };
-
-            var pchar = function (index) {
-                // 一文字ずつ表示するか？
-                var isOneByOne = that.kag.stat.is_skip != true && that.kag.stat.is_nowait != true && ch_speed >= 3;
-
-                if (isOneByOne) {
-                    makeVisible(index);
-                }
-
-                if (index <= message_str.length) {
-                    that.kag.stat.is_adding_text = true;
-
-                    //再生途中にクリックされて、残りを一瞬で表示する
-                    if (that.kag.stat.is_click_text == true || that.kag.stat.is_skip == true || that.kag.stat.is_nowait == true) {
-                        pchar(++index);
-                    } else {
-                        setTimeout(function () {
-                            pchar(++index);
-                        }, ch_speed);
-                    }
-                } else {
-                    that.kag.stat.is_adding_text = false;
-                    that.kag.stat.is_click_text = false;
-
-                    //すべて表示完了 ここまではイベント残ってたな
-
-                    if (that.kag.stat.is_stop != "true") {
-                        if (!isOneByOne) {
-                            makeVisibleAll();
-                            setTimeout(function () {
-                                if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
-                            }, parseInt(that.kag.config.skipSpeed));
-                        } else {
-                            if (!that.kag.stat.is_hide_message) that.kag.ftag.nextOrder();
-                        }
-                    }
-                }
-            };
-
-            pchar(0);
-        })(j_msg_inner);
+            prev.top = offset.top;
+            prev.left = offset.left;
+            prev.j_char = j_this;
+        }
     },
 
     nextOrder: function () {},
@@ -1278,6 +2074,7 @@ tyrano.plugin.kag.tag.l = {
     start: function () {
         var that = this;
 
+        this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
         //クリックするまで、次へすすまないようにする
@@ -1342,6 +2139,7 @@ tyrano.plugin.kag.tag.p = {
         //改ページ
         this.kag.stat.flag_ref_page = true;
 
+        this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
         if (this.kag.stat.is_skip == true) {
@@ -1509,15 +2307,8 @@ tyrano.plugin.kag.tag.r = {
 
     start: function () {
         var that = this;
-        //クリックするまで、次へすすまないようにする
-        var j_inner_message = this.kag.getMessageInnerLayer();
-
-        var txt = j_inner_message.find("p").find(".current_span").html() + "<br>";
-        j_inner_message.find("p").find(".current_span").html(txt);
-
-        setTimeout(function () {
-            that.kag.ftag.nextOrder();
-        }, 5);
+        this.kag.getMessageInnerLayer().find("p").find(".current_span").append("<br>");
+        this.kag.ftag.nextOrder();
     },
 };
 
@@ -1715,37 +2506,39 @@ tyrano.plugin.kag.tag.current = {
 レイヤ関連
 
 :title
-メッセージレイヤの属性変更
+メッセージウィンドウの属性変更
 
 :exp
-メッセージレイヤに対する様々な属性を指定します。
+メッセージウィンドウに対する様々な属性を指定します。
 いずれの属性も、省略すれば設定は変更されません。
 
 :sample
-;メッセージレイヤの位置とサイズを変更
+;メッセージウィンドウの位置とサイズを変更
 [position width=400 height=300 top=100 left=20]
-;メッセージレイヤの色と透明度を変更
+;メッセージウィンドウの色と透明度を変更
 [position color=blue opacity=100]
 
 :param
 layer        = 対象とするメッセージレイヤを指定します。,
 page         = !!,
-left         = メッセージレイヤの左端位置を指定します。（ピクセル）,
-top          = メッセージレイヤの上端位置を指定します。（ピクセル）,
-width        = メッセージレイヤの横幅を指定します。（ピクセル）,
-height       = メッセージレイヤの高さを指定します。（ピクセル）,
-frame        = <p>メッセージレイヤのフレーム画像として表示させる画像を指定します。メッセージエリアをカスタマイズしたい場合に利用できます。</p><p>画像サイズは`width`と`height`属性に準じて調整してください。`margin`属性で実際にメッセージが表示される箇所の調整も行いましょう。</p><p>`none`と指定することで標準枠に戻すこともできます。,
-color        = メッセージレイヤの表示色を`0xRRGGBB`形式で指定します。 ,
+left         = メッセージウィンドウの左端位置を指定します。（ピクセル）,
+top          = メッセージウィンドウの上端位置を指定します。（ピクセル）,
+width        = メッセージウィンドウの横幅を指定します。（ピクセル）,
+height       = メッセージウィンドウの高さを指定します。（ピクセル）,
+frame        = <p>メッセージウィンドウのフレーム画像として表示させる画像を指定します。</p><p>画像サイズは`width`と`height`属性に準じて調整してください。`margin`属性で実際にメッセージが表示される箇所の調整も行いましょう。</p><p>`none`と指定することで標準枠に戻すこともできます。,
+color        = メッセージウィンドウの表示色を`0xRRGGBB`形式で指定します。 ,
 border_color = 外枠の線が有効な場合の色を`0xRRGGBB`形式で指定します。`border_size`属性の指定が同時に必要です,
 border_size  = 外枠の線が有効な場合の太さを指定します。`0`を指定すると外枠は表示されません。初期値は`0`です。,
-opacity      = メッセージレイヤの不透明度を`0`～`255`の数値で指定します。`0`で完全に透明。（文字の不透明度や、レイヤ自体の不透明度ではありません）,
-marginl      = メッセージレイヤの左余白を指定します。,
-margint      = メッセージレイヤの上余白を指定します。,
-marginr      = メッセージレイヤの右余白を指定します。,
-marginb      = メッセージレイヤの下余白を指定します。,
-radius       = メッセージレイヤの角の丸みを数値で指定します。例：`10`(控えめな角丸)、`30`(普通の角丸)、`100`(巨大な角丸),
-vertical     = メッセージレイヤを縦書きモードにするかどうか。`true`または`false`で指定します。`true`で縦書き、`false`で横書き。,
-visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`で指定します。
+opacity      = メッセージウィンドウの不透明度を`0`～`255`の数値で指定します。`0`で完全に透明。（文字の不透明度や、レイヤ自体の不透明度ではありません）,
+marginl      = メッセージウィンドウの左余白を指定します。,
+margint      = メッセージウィンドウの上余白を指定します。,
+marginr      = メッセージウィンドウの右余白を指定します。,
+marginb      = メッセージウィンドウの下余白を指定します。,
+margin       = メッセージウィンドウの余白を一括で指定します。たとえば`30`と指定すると上下左右すべてに30pxの余白ができます。<br>カンマ区切りで方向ごとの余白を一括指定することもできます。`上下,左右`、`上,左右,下`、`上,右,下,左`のように指定できます（方向の部分は数値に変えてください）。
+radius       = メッセージウィンドウの角の丸みを数値で指定します。例：`10`(控えめな角丸)、`30`(普通の角丸)、`100`(巨大な角丸),
+vertical     = メッセージウィンドウを縦書きモードにするかどうか。`true`または`false`で指定します。`true`で縦書き、`false`で横書き。,
+visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`を指定すると、同時にメッセージレイヤの表示状態を操作できます。,
+gradient     = 背景にグラデーションを適用することができます。CSSグラデーション形式で指定します。CSSグラデーションとは、たとえば`linear-gradient(45deg, red 0%, yellow 100%)`のような形式です。<br>CSSグラデーションを簡単に作れるサイトがWeb上にいくつか存在しますので、「CSS グラデーション ジェネレーター」で検索してみてください。
 
 :demo
 1,kaisetsu/17_window_1
@@ -1768,109 +2561,167 @@ tyrano.plugin.kag.tag.position = {
         radius: "",
         border_color: "",
         border_size: "",
-        marginl: "0", //左余白
-        margint: "0", //上余白
-        marginr: "0", //右余白
-        marginb: "0", //下余白
-
+        marginl: "", //左余白
+        margint: "", //上余白
+        marginr: "", //右余白
+        marginb: "", //下余白
+        margin: "", //一括余白
+        gradient: "",
+        visible: "",
         next: "true",
     },
 
     start: function (pm) {
-        //指定のレイヤを取得
-        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_outer");
+        // メッセージレイヤ、アウター、インナー
+        const j_message_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+        const j_message_outer = j_message_layer.find(".message_outer");
+        const j_message_inner = j_message_layer.find(".message_inner");
 
-        var new_style = {};
-
-        if (pm.left != "") new_style["left"] = pm.left + "px";
-        if (pm.top != "") new_style["top"] = pm.top + "px";
-        if (pm.width != "") new_style["width"] = pm.width + "px";
-        if (pm.height != "") new_style["height"] = pm.height + "px";
-        if (pm.color != "") new_style["background-color"] = $.convertColor(pm.color);
-
-        if (pm.radius != "") {
-            new_style["border-radius"] = parseInt(pm.radius) + "px";
+        if (pm.visible !== "") {
+            if (pm.visible === "true") {
+                this.kag.layer.showLayer(j_message_layer);
+            } else {
+                this.kag.layer.hideLayer(j_message_layer);
+            }
         }
 
-        if (pm.border_size != "") {
-            new_style["border-width"] = parseInt(pm.border_size) + "px";
-            target_layer.css("border-style", "solid");
+        //
+        // アウターのスタイル
+        //
+
+        const new_style_outer = {};
+
+        if (pm.left !== "") new_style_outer["left"] = pm.left + "px";
+        if (pm.top !== "") new_style_outer["top"] = pm.top + "px";
+        if (pm.width !== "") new_style_outer["width"] = pm.width + "px";
+        if (pm.height !== "") new_style_outer["height"] = pm.height + "px";
+        if (pm.radius !== "") {
+            new_style_outer["border-radius"] = parseInt(pm.radius) + "px";
+        }
+        if (pm.border_size !== "") {
+            new_style_outer["border-width"] = parseInt(pm.border_size) + "px";
+            j_message_outer.css("border-style", "solid");
+        }
+        if (pm.border_color !== "") {
+            new_style_outer["border-color"] = $.convertColor(pm.border_color);
+        }
+        if (pm.opacity !== "") {
+            new_style_outer["opacity"] = $.convertOpacity(pm.opacity);
+        }
+        if (pm.color !== "") {
+            new_style_outer["background-color"] = $.convertColor(pm.color);
+            j_message_outer.css("background-image", "");
+        }
+        if (pm.gradient !== "") {
+            new_style_outer["background-image"] = pm.gradient;
         }
 
-        if (pm.border_color != "") {
-            new_style["border-color"] = $.convertColor(pm.border_color);
-        }
-
-        //背景フレーム画像の設定 透明度も自分で設定する
-
+        // 背景フレームの設定 単色か画像か
         if (pm.frame == "none") {
-            target_layer.css("opacity", $.convertOpacity(this.kag.config.frameOpacity));
-            target_layer.css("background-image", "");
-            target_layer.css("background-color", $.convertColor(this.kag.config.frameColor));
-        } else if (pm.frame != "") {
-            var storage_url = "";
-
+            // 単色
+            j_message_outer.css("background-image", "");
+            j_message_outer.css("background-color", $.convertColor(this.kag.config.frameColor));
+        } else if (pm.frame !== "") {
+            // 画像のパス
+            let storage_url = "";
             if ($.isHTTP(pm.frame)) {
                 storage_url = pm.frame;
             } else {
-                storage_url = "./data/image/" + pm.frame + "";
+                storage_url = "./data/image/" + pm.frame;
             }
-
-            target_layer.css("background-image", "url(" + storage_url + ")");
-            target_layer.css("background-repeat", "no-repeat");
-            target_layer.css("opacity", 1);
-            target_layer.css("background-color", "");
+            j_message_outer.css("background-image", "url(" + storage_url + ")");
+            j_message_outer.css("background-repeat", "no-repeat");
+            j_message_outer.css("background-color", "");
         }
 
-        if (pm.opacity != "") {
-            new_style["opacity"] = $.convertOpacity(pm.opacity);
+        // アウターにスタイルを当てる
+        this.kag.setStyles(j_message_outer, new_style_outer);
+
+        // アウターのスタイル情報を保存
+        this.kag.stat.fuki.def_style = $.extend(true, this.kag.stat.fuki.def_style, new_style_outer);
+
+        //
+        // アウターの変更内容を[position_filter]にも反映する
+        //
+
+        const j_filter = j_message_layer.find(".message_filter");
+        if (j_filter.length > 0) {
+            ["left", "top", "width", "height", "border-radius", "border-style", "border-width"].forEach((key) => {
+                j_filter.css(key, j_message_outer.css(key));
+            });
         }
 
-        //outer のレイヤを変更
-        this.kag.setStyles(target_layer, new_style);
+        //
+        // インナーのスタイル
+        //
 
-        //outerレイヤを保存
-        this.kag.stat.fuki.def_style = $.extend(true, this.kag.stat.fuki.def_style, new_style);
-
-        //複数のレイヤに影響がでないように。
+        // インナーのリフレッシュ
+        // インナーの left, top, width, height を操作して全体的にアウターの10px内側に収まるようにする処理
         this.kag.layer.refMessageLayer(pm.layer);
 
-        //message_inner のスタイルを変更する必要もある
-
-        var layer_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
-
-        //縦書き指定
+        // 縦書き指定
         if (pm.vertical != "") {
             if (pm.vertical == "true") {
                 this.kag.stat.vertical = "true";
-                layer_inner.find("p").addClass("vertical_text");
+                j_message_inner.find("p").addClass("vertical_text");
             } else {
                 this.kag.stat.vertical = "false";
-                layer_inner.find("p").removeClass("vertical_text");
+                j_message_inner.find("p").removeClass("vertical_text");
             }
         }
 
-        var new_style_inner = {};
+        // インナーに box-sizing: border-box を採用
+        // https://developer.mozilla.org/ja/docs/Web/CSS/box-sizing
+        // 旧実装では marginr, marginb を実現するために width, height を操作していたが
+        // [position]タグ実行時には必ず上のインナーリフレッシュによって width, height が破壊されてしまうため、
+        // 『marginr, marginb が指定されていない[position]タグ』を通過するときにそれまでの marginr, marginb が破棄される問題があった
+        // (タグリファレンスの『いずれの属性も、指定しなければ変更は行われません。』という説明と矛盾していた)
+        const new_style_inner = {
+            "box-sizing": "border-box",
+        };
 
-        if (pm.marginl != "0") new_style_inner["padding-left"] = parseInt(pm.marginl) + "px";
-        if (pm.margint != "0") new_style_inner["padding-top"] = parseInt(pm.margint) + "px";
-
-        if (pm.marginr != "0") {
-            new_style_inner["width"] = parseInt(layer_inner.css("width")) - parseInt(pm.marginr) - parseInt(pm.marginl) + "px";
-            this.kag.stat.fuki.marginr = parseInt(pm.marginr);
+        // marginパラメータで一括指定
+        if (pm.margin !== "") {
+            const hash = pm.margin.split(",");
+            switch (hash.length) {
+                default:
+                case 1:
+                    pm.margint = pm.marginr = pm.marginb = pm.marginl = pm.margin;
+                    break;
+                case 2:
+                    pm.margint = pm.marginb = hash[0];
+                    pm.marginl = pm.marginr = hash[1];
+                    break;
+                case 3:
+                    pm.margint = hash[0];
+                    pm.marginl = pm.marginr = hash[1];
+                    pm.marginb = hash[2];
+                    break;
+                case 4:
+                    pm.margint = hash[0];
+                    pm.marginr = hash[1];
+                    pm.marginb = hash[2];
+                    pm.marginl = hash[3];
+                    break;
+            }
         }
 
-        if (pm.marginb != "0") {
-            new_style_inner["height"] = parseInt(layer_inner.css("height")) - parseInt(pm.marginb) - parseInt(pm.margint) + "px";
+        if (pm.marginl !== "") new_style_inner["padding-left"] = parseInt(pm.marginl) + "px";
+        if (pm.margint !== "") new_style_inner["padding-top"] = parseInt(pm.margint) + "px";
+        if (pm.marginr !== "") {
+            new_style_inner["padding-right"] = parseInt(pm.marginr) + "px";
+            this.kag.stat.fuki.marginr = parseInt(pm.marginr);
+        }
+        if (pm.marginb !== "") {
+            new_style_inner["padding-bottom"] = parseInt(pm.marginb) + "px";
             this.kag.stat.fuki.marginb = parseInt(pm.marginb);
         }
 
-        this.kag.setStyles(layer_inner, new_style_inner);
+        // インナーにスタイルを当てる
+        this.kag.setStyles(j_message_inner, new_style_inner);
 
-        //innerレイヤを保存
+        // インナーのスタイル情報を保存
         this.kag.stat.fuki.def_style_inner = $.extend(true, this.kag.stat.fuki.def_style_inner, new_style_inner);
-
-        //レイヤーをリフレッシュする
 
         if (pm.next == "true") {
             this.kag.ftag.nextOrder();
@@ -2584,14 +3435,16 @@ vertical  = 縦書きにするかどうか。`true`または`false`で指定し�
 size      = フォントサイズをピクセル単位で指定します。,
 face      = フォントの種類を指定します。非KAG互換ですが、ウェブフォントも使用できます。,
 color     = フォントの色を`0xRRGGBB`形式で指定します。,
-bold      = 太字指定 boldと指定します　HTML５互換ならfont-style指定に変換できます。,
-edge      = 文字の縁取りを有効にできます。縁取りする文字色を`0xRRGGBB`形式で指定します。,
+bold      = 太字にする場合は`bold`と指定します。（このパラメータをCSSの`font-style`にセットします）<br>V515以降：`true`でも太字にできるようにしました。,
+edge      = 文字の縁取りを有効にできます。縁取りする文字色を`0xRRGGBB`形式で指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
 shadow    = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。縁取りをしている場合は無効化されます。,
 name      = !!,
 width     = テキスト表示部分の横幅をピクセルで指定します。,
 align     = 文字の横方向に関する位置を指定できます。`width`パラメータを同時に指定する必要があります。`left`(左寄せ)、`center`(中央寄せ)、`right`（右寄せ),
 time      = !!fadein,
-overwrite = 上書きするかどうかを`true`または`false`で指定します。`true`を指定すると、同じ`name`が指定されたテキストがすでに存在している場合に、新規テキストを追加するのではなく既存のテキストの内容を書き変える処理を行います。
+overwrite = 上書きするかどうかを`true`または`false`で指定します。`true`を指定すると、同じ`name`が指定されたテキストがすでに存在している場合に、新規テキストを追加するのではなく既存のテキストの内容を書き変える処理を行います。,
+gradient  = V515以降：文字にグラデーションを適用することができます。CSSのグラデーション関数を指定します。グラデーション関数とは`linear-gradient(45deg, red 0%, yellow 100%)`のような文字列です。<br>グラデーション関数を簡単に作れるサイトがWeb上にいくつか存在しますので、「CSS グラデーション ジェネレーター」で検索してみてください。
+
 
 :demo
 1,kaisetsu/06_ptext
@@ -2630,13 +3483,13 @@ tyrano.plugin.kag.tag.ptext = {
     start: function (pm) {
         var that = this;
 
-        //visible true が指定されている場合は表示状態に持っていけ
-        //これはレイヤのスタイル
+        //
+        // 上書き指定
+        //
 
-        //上書き指定
         if (pm.overwrite == "true" && pm.name != "") {
             if ($("." + pm.name).length > 0) {
-                $("." + pm.name).html(pm.text);
+                $("." + pm.name).updatePText(pm.text);
 
                 //サイズとか位置とかも調整できるならやっとく
                 if (pm.x != 0) {
@@ -2660,18 +3513,32 @@ tyrano.plugin.kag.tag.ptext = {
             }
         }
 
-        //指定がない場合はデフォルトフォントを適応する
+        //
+        // 指定がない場合はデフォルトフォントを適応する
+        //
+
+        const font = this.kag.stat.font;
+
         if (pm.face == "") {
-            pm.face = that.kag.stat.font.face;
+            pm.face = font.face;
         }
 
         if (pm.color == "") {
-            pm.color = $.convertColor(that.kag.stat.font.color);
+            pm.color = $.convertColor(font.color);
         } else {
             pm.color = $.convertColor(pm.color);
         }
 
-        var font_new_style = {
+        // bold="true" が指定されているなら font-weight: bold; を指定したい
+        if (pm.bold === "true") {
+            pm.bold = "bold";
+        }
+
+        //
+        // CSSを準備
+        //
+
+        const font_new_style = {
             "color": pm.color,
             "font-weight": pm.bold,
             "font-style": pm.fontstyle,
@@ -2681,41 +3548,92 @@ tyrano.plugin.kag.tag.ptext = {
             "text": "",
         };
 
-        if (pm.edge != "") {
-            var edge_color = $.convertColor(pm.edge);
-            font_new_style["text-shadow"] =
-                "1px 1px 0 " + edge_color + ", -1px 1px 0 " + edge_color + ",1px -1px 0 " + edge_color + ",-1px -1px 0 " + edge_color + "";
+        //
+        // DOM(jQueryオブジェクト)生成
+        //
+
+        const tobj = $("<p></p>");
+
+        // スタイルをセット
+        tobj.css({
+            "position": "absolute",
+            "top": pm.y + "px",
+            "left": pm.x + "px",
+            "width": pm.width,
+            "text-align": pm.align,
+        });
+        this.kag.setStyles(tobj, font_new_style);
+
+        //
+        // 縁取り・影付き
+        //
+
+        // 縁取り有効か
+        const is_edge_enabled = pm.edge !== "";
+        // 縁取りタイプ
+        pm.edge_method = pm.edge_method || font.edge_method || "shadow";
+        // 1文字1文字を個別に装飾すべきか
+        let is_individual_decoration = is_edge_enabled && pm.edge_method === "stroke";
+        // shadowタイプの縁取りが有効でグラデーションも設定しようとしているなら個別装飾
+        if (is_edge_enabled && pm.edge_method === "shadow" && pm.gradient) {
+            is_individual_decoration = true;
+        }
+        if (is_edge_enabled) {
+            // 縁取り文字
+            switch (pm.edge_method) {
+                case "shadow":
+                    if (!is_individual_decoration) {
+                        tobj.css("text-shadow", $.generateTextShadowStrokeCSS(pm.edge));
+                    }
+                    break;
+                case "filter":
+                    tobj.setFilterCSS($.generateDropShadowStrokeCSS(pm.edge));
+                    break;
+                case "stroke":
+                    break;
+            }
         } else if (pm.shadow != "") {
-            font_new_style["text-shadow"] = "2px 2px 2px " + $.convertColor(pm.shadow);
+            tobj.css("text-shadow", "2px 2px 2px " + $.convertColor(pm.shadow));
         }
 
-        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
-
-        var tobj = $("<p></p>");
-
-        tobj.css("position", "absolute");
-        tobj.css("top", pm.y + "px");
-        tobj.css("left", pm.x + "px");
-        tobj.css("width", pm.width);
-
-        tobj.css("text-align", pm.align);
-
+        // クラスをセット
         if (pm.vertical == "true") {
             tobj.addClass("vertical_text");
         }
-
-        //オブジェクトにクラス名をセットします
-        $.setName(tobj, pm.name);
-
-        tobj.html(pm.text);
-
-        this.kag.setStyles(tobj, font_new_style);
-
         if (pm.layer == "fix") {
             tobj.addClass("fixlayer");
         }
+        $.setName(tobj, pm.name);
 
-        //時間指定
+        // 個別装飾が有効なら単純なhtml()では書き変えられなくなるので特別な処理
+        if (is_individual_decoration) {
+            tobj.addClass("multiple-text");
+            this.kag.event.addEventElement({
+                tag: "ptext",
+                j_target: tobj,
+                pm: pm,
+            });
+            this.setEvent(tobj, pm);
+        }
+
+        // innerHTMLをセット！
+        tobj.updatePText(pm.text);
+
+        // グラデーションの設定
+        if (pm.gradient === "none") {
+            pm.gradient = "";
+        }
+        if (pm.gradient && !is_individual_decoration) {
+            tobj.setGradientText(pm.gradient);
+        }
+
+        //
+        // レイヤに追加
+        //
+
+        const target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+
+        //　時間指定
         if (pm.time != "") {
             tobj.css("opacity", 0);
             target_layer.append(tobj);
@@ -2726,6 +3644,47 @@ tyrano.plugin.kag.tag.ptext = {
             target_layer.append(tobj);
             this.kag.ftag.nextOrder();
         }
+    },
+
+    setEvent: function (j_target, pm) {
+        const that = TYRANO;
+
+        /**
+         * 生のElementにupdateTextメソッドを追加する
+         * @param {string} str 新しくセットするテキスト
+         */
+        j_target.get(0).updateText = (str) => {
+            that.kag.tmp.is_edge_overlap = false;
+
+            // 個別縁取りが有効な場合
+            const is_shadow = pm.edge_method === "shadow";
+            if (is_shadow) {
+                const edges = $.parseEdgeOptions(pm.edge);
+                that.kag.tmp.text_shadow_values = [];
+                for (let i = edges.length - 1; i >= 0; i--) {
+                    const edge = edges[i];
+                    const text_shadow_value = $.generateTextShadowStrokeCSSOne(edge.color, edge.total_width);
+                    that.kag.tmp.text_shadow_values.push(text_shadow_value);
+                }
+                that.kag.tmp.inside_stroke_color = edges[0].color;
+            }
+
+            const inner_html = Array.prototype.reduce.call(
+                str,
+                (total_html, this_char) => {
+                    if (is_shadow) {
+                        return total_html + that.kag.getTag("text").buildTextShadowChar(this_char, pm.edge, true);
+                    } else {
+                        return total_html + that.kag.getTag("text").buildTextStrokeChar(this_char, pm.edge, true);
+                    }
+                },
+                "",
+            );
+            j_target.html(inner_html);
+            if (pm.gradient) {
+                j_target.find(".fill").setGradientText(pm.gradient);
+            }
+        };
     },
 };
 
@@ -3150,7 +4109,7 @@ tyrano.plugin.kag.tag.link = {
             if (that.kag.stat.skip_link == "true") {
                 e.stopPropagation();
             } else {
-                that.kag.stat.is_skip = false;
+                that.kag.setSkip(false);
             }
         });
 
@@ -3477,10 +4436,12 @@ color        = 文字色を`0xRRGGBB`形式で指定します。,
 bold         = 太字にするかどうか。`true`または`false`で指定します。,
 italic       = イタリック体にするかどうか。`true`または`false`で指定します。,
 face         = フォントの種類を指定します。Webフォントを使用する場合は`tyrano/css/font.css`に定義を記述してください。,
-edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式で指定します。縁取りを解除する場合は`none`と指定します。,
+edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。縁取りを解除する場合は`none`と指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
+edge_method  = 縁取りの実装方式を選択できます。指定できるキーワードは`shadow`または`filter`。,
 shadow       = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。影を解除する場合は`none`と指定します。,
 effect       = フォントの表示演出にアニメーションを設定できます。`none`を指定すると無効。指定できるキーワードは以下のとおり。`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``rotateIn``zoomIn``slideIn``bounceIn``vanishIn``puffIn``rollIn``none`,
-effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。
+effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。,
+gradient     = V515以降：文字にグラデーションを適用することができます。CSSグラデーション形式で指定します。CSSグラデーションとは、たとえば`linear-gradient(45deg, red 0%, yellow 100%)`のような形式です。<br>CSSグラデーションを簡単に作れるサイトがWeb上にいくつか存在しますので、「CSS グラデーション ジェネレーター」で検索してみてください。,
 
 
 :demo
@@ -3505,6 +4466,10 @@ tyrano.plugin.kag.tag.font = {
 
         if (pm.color) {
             this.kag.stat.font.color = $.convertColor(pm.color);
+        }
+
+        if (pm.gradient) {
+            this.kag.stat.font.gradient = pm.gradient;
         }
 
         if (pm.bold) {
@@ -3537,6 +4502,10 @@ tyrano.plugin.kag.tag.font = {
             } else {
                 this.kag.stat.font.edge = $.convertColor(pm.edge);
             }
+        }
+
+        if (pm.edge_method) {
+            this.kag.stat.font.edge_method = pm.edge_method;
         }
 
         if (pm.shadow) {
@@ -3574,10 +4543,12 @@ color        = 文字色を`0xRRGGBB`形式で指定します。,
 bold         = 太字にするかどうか。`true`または`false`で指定します。,
 italic       = イタリック体にするかどうか。`true`または`false`で指定します。,
 face         = フォントの種類を指定します。Webフォントも利用可能。Webフォントを使用する場合、フォントファイルを`data/others`フォルダに配置し、`tyrano.css`で`@font-face`を設定する必要があります。,
-edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式で指定します。縁取りを解除する場合は`none`と指定します。,
+edge         = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。縁取りを解除する場合は`none`と指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
+edge_method  = 縁取りの実装方式を選択できます。指定できるキーワードは`shadow`または`filter`。,
 shadow       = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。影を解除する場合は`none`と指定します。,
 effect       = フォントの表示演出にアニメーションを設定できます。`none`を指定すると無効。指定できるキーワードは以下。`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``rotateIn``zoomIn``slideIn``bounceIn``vanishIn``puffIn``rollIn``none`,
-effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。
+effect_speed = `effect`パラメータが`none`以外の場合に、表示されるまでの時間を指定します。デフォルトは`0.2s`です。`s`は秒を表します。,
+gradient     = V515以降：文字にグラデーションを適用することができます。CSSのグラデーション関数を指定します。グラデーション関数とは`linear-gradient(45deg, red 0%, yellow 100%)`のような文字列です。<br>グラデーション関数を簡単に作れるサイトがWeb上にいくつか存在しますので、「CSS グラデーション ジェネレーター」で検索してみてください。
 
 :demo
 1,kaisetsu/22_font
@@ -3598,6 +4569,10 @@ tyrano.plugin.kag.tag.deffont = {
 
         if (pm.color) {
             this.kag.stat.default_font.color = $.convertColor(pm.color);
+        }
+
+        if (pm.gradient) {
+            this.kag.stat.default_font.gradient = pm.gradient;
         }
 
         if (pm.bold) {
@@ -3632,6 +4607,10 @@ tyrano.plugin.kag.tag.deffont = {
             }
         }
 
+        if (pm.edge_method) {
+            this.kag.stat.default_font.edge_method = pm.edge_method;
+        }
+
         if (pm.shadow) {
             if (pm.shadow == "none" || pm.shadow == "") {
                 this.kag.stat.default_font.shadow = "";
@@ -3642,6 +4621,115 @@ tyrano.plugin.kag.tag.deffont = {
 
         this.kag.ftag.nextOrder();
         ///////////////////
+    },
+};
+
+/*
+#[message_config]
+
+:group
+システム操作
+
+:title
+メッセージコンフィグ
+
+:exp
+ティラノスクリプトV515以降。
+メッセージに関連する詳細な設定を行えます。
+省略した属性の設定は変更されません。
+
+:param
+ch_speed_in_click     = 文字表示の途中でクリックされたあとの文字表示速度。1文字あたりの表示時間をミリ秒で指定します。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
+effect_speed_in_click = 文字表示の途中でクリックされたあとの文字エフェクト速度。`0.2s`、`200ms`、あるいは単に`200`などで指定します。例はいずれも200ミリ秒となります。<br>`default`と指定した場合はクリック前の文字表示速度を引き継ぐようになります。,
+edge_overlap_text     = 縁取りテキストの縁をひとつ前の文字に重ねるかどうか。`true`または`false`で指定します。現状は`edge_method`が`stroke`の場合にのみ有効なパラメータです。,
+speech_bracket_float  = キャラのセリフの最初のカギカッコを左側に浮かして、開始カギカッコの下に文字が周りこまないようにするための設定です。`true`を指定すると、開始カギカッコだけが左側にずれます。`false`で無効。`true`のかわりに`20`のような数値を指定することで、開始カギカッコを左側にずらす量を直接指定できます。,
+speech_margin_left    = `speech_bracket_float`が有効のときに、さらにテキスト全体を右側に動かすことができます。`true`で有効、`false`で無効。`20`のように数値で直接指定することで全体を右側にずらす量を直接指定できます。,
+kerning               = 字詰めを有効にするか。`true`または`false`で指定します。フォント、もともとの字間設定、プレイヤーの使用ブラウザによっては効果が見られないこともあります。（高度な知識：CSSのfont-feature-settingsプロパティを設定する機能です）,
+add_word_nobreak      = ワードブレイク(単語の途中で自然改行される現象)を禁止する単語を追加できます。カンマ区切りで複数指定可能。,
+remove_word_nobreak   = 一度追加したワードブレイク禁止単語を除外できます。カンマ区切りで複数指定可能。,
+line_spacing          = 行間のサイズをpx単位で指定できます。,
+letter_spacing        = 字間のサイズをpx単位で指定できます。,
+control_line_break    = 禁則処理を手動で行なうかどうかを`true`または`false`で指定します。`。`や`、`などの特定の文字が行頭に来ていたとき、そのひとつ前の文字で改行するようにします。基本的にはこれを指定しなくても自動で禁則処理が行われますが、フォントの設定（エフェクトや縁取りなど）によっては禁則処理が自動で行われなくなることがあるので、その場合はこのパラメータに`true`を指定してみてください。,
+control_line_break_chars = 行頭に来ていたときに禁則処理を行なう文字をまとめて指定します。デフォルトでは`、。）」』】,.)]`が禁則処理の対象です。,
+
+:sample
+;クリックされても文字表示速度を変更しない
+[message_config ch_speed_in_click="default" effect_speed_in_click="default"]
+
+;クリックされたら残りを瞬間表示
+[message_config ch_speed_in_click="0" effect_speed_in_click="0ms"]
+
+;セリフの先頭のカギカッコだけを左側にずらして、カギカッコの下に文章が回り込まないようにする
+[message_config speech_bracket_float="true"]
+
+;"――"はワードブレイクされてほしくない
+[message_config add_word_nobreak="――"]
+
+;行間も字間もめちゃくちゃ広げてみる
+[message_config line_spacing="50" letter_spacing="30"]
+
+;ダッシュの字間を詰めてみる
+@macro name="――"
+  [message_config letter_spacing="-4"]―[message_config letter_spacing="0"]―
+@endmacro
+――力が欲しいか？[l][r]
+[――]力が欲しいか？[l][r]
+
+#[end]
+*/
+tyrano.plugin.kag.tag.message_config = {
+    pm: {},
+
+    start: function (pm) {
+        // span.current_span を新しくする
+        this.kag.setMessageCurrentSpan();
+
+        // デフォルトのコンフィグ
+        const default_message_config = this.kag.ftag.master_tag.text.default_message_config || {};
+
+        // stat.message_configを必要であれば初期化してその参照を取得
+        if (!this.kag.stat.message_config) {
+            this.kag.stat.message_config = {};
+        }
+        const message_config = this.kag.stat.message_config;
+
+        // pmが持つプロパティのうち記憶対象のものだけstatに移す
+        // デフォルトのコンフィグに存在するプロパティが記憶対象
+        for (const key in default_message_config) {
+            if (key in pm) {
+                message_config[key] = pm[key];
+            }
+        }
+
+        // ワードブレイク禁止単語リストを必要であれば初期化してその参照を取得
+        if (!this.kag.stat.word_nobreak_list) {
+            this.kag.stat.word_nobreak_list = [];
+        }
+        const list = this.kag.stat.word_nobreak_list;
+
+        // ワードブレイク禁止単語を追加していく
+        if ($.isNonEmptyStr(pm.add_word_nobreak)) {
+            pm.add_word_nobreak.split(",").forEach((word) => {
+                const word_trimed = $.trim(word);
+                if (!list.includes(word_trimed)) {
+                    list.push(word_trimed);
+                }
+            });
+        }
+
+        // ワードブレイク禁止単語を除外していく
+        if ($.isNonEmptyStr(pm.remove_word_nobreak)) {
+            let filterd_list = list;
+            pm.remove_word_nobreak.split(",").forEach((word) => {
+                const word_trimed = $.trim(word);
+                // filter メソッドで新しい配列を生成して変数を更新していく
+                filterd_list = filterd_list.filter((item) => item !== word_trimed);
+            });
+            // 最後に変数をもとの参照に放り込む
+            this.kag.stat.word_nobreak_list = filterd_list;
+        }
+
+        this.kag.ftag.nextOrder();
     },
 };
 
@@ -4142,7 +5230,7 @@ tyrano.plugin.kag.tag["endmark"] = {
 
 tyrano.plugin.kag.tag.cancelskip = {
     start: function (pm) {
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
         this.kag.ftag.nextOrder();
     },
 };
@@ -4483,7 +5571,7 @@ tyrano.plugin.kag.tag.button = {
                 //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
                 if (_pm.role != "") {
                     //roleがクリックされたら、skip停止
-                    that.kag.stat.is_skip = false;
+                    that.kag.setSkip(false);
 
                     //オートは停止
                     if (_pm.role != "auto") {
@@ -4625,7 +5713,7 @@ tyrano.plugin.kag.tag.button = {
                 if (that.kag.stat.skip_link == "true") {
                     event.stopPropagation();
                 } else {
-                    that.kag.stat.is_skip = false;
+                    that.kag.setSkip(false);
                 }
             });
         })();
@@ -4683,6 +5771,7 @@ clickse    = ボタンをクリックした時に再生される効果音を設�
 enterse    = ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください,
 leavese    = ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください。,
 cm         = <p>ボタンクリック後に`[cm]`を実行するかどうか。`[glink]`は通常、ボタンクリック後に自動的に`[cm]`が実行されますが、`false`を指定するとこの`[cm]`を実行しません。</p><p>プレイヤー入力などの決定を`[glink]`で行いたい場合は`false`を指定しておき、`[commit]`後に手動で`[cm]`を実行してボタンや入力ボックスを消してください。</p>,
+opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0`で完全に透明です。,
 exp       = ボタンがクリックされた時に実行されるJSを指定できます。,
 preexp    = タグが実行された時点で、この属性に指定した値が変数`preexp`に格納されます。そしてボタンがクリックされた時に`exp`内で`preexp`という変数が利用できるようになります。
 
@@ -4709,6 +5798,7 @@ tyrano.plugin.kag.tag.glink = {
         graphic: "",
         enterimg: "",
         cm: "true",
+        opacity: "",
         clickse: "",
         enterse: "",
         leavese: "",
@@ -4739,6 +5829,10 @@ tyrano.plugin.kag.tag.glink = {
 
         if (pm.width != "") {
             j_button.css("width", pm.width + "px");
+        }
+
+        if (pm.opacity != "") {
+            j_button.css("opacity", $.convertOpacity(pm.opacity));
         }
 
         //graphic 背景画像を指定できます。
@@ -4838,7 +5932,7 @@ tyrano.plugin.kag.tag.glink = {
                 if (that.kag.stat.skip_link == "true") {
                     e.stopPropagation();
                 } else {
-                    that.kag.stat.is_skip = false;
+                    that.kag.setSkip(false);
                 }
             });
 
@@ -5034,19 +6128,105 @@ tyrano.plugin.kag.tag.clickable = {
 システム操作
 
 :title
-クリック待ち画像の設定
+クリック待ちグリフの設定
 
 :exp
-クリック待ち画像の位置や画像ファイルを変更できます。
+クリック待ちグリフ（`[l]`や`[p]`でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。
+
+使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。画像を用意しなくても、丸や三角などの簡易な図形を使用できます。アニメーションを既定のものから選んだり、自分で`[keyframe]`タグで定義したキーフレームアニメーションを適用したり、各コマが横並びで連結された画像を指定することでコマアニメを定義することもできます。位置や画像ファイルを変更できます。
+
+クリック待ちグリフのコンテンツには以下のパターンがあります。
+①画像を使用する（`line`パラメータを指定する）※gif動画もOK
+②図形を使用する（`figure`パラメータを指定する）
+③コマアニメーションを指定する（`koma_anim`パラメータを指定する）
+④HTMLを直接指定する（`html`パラメータを指定する）※上級者向け
+
+画像ではなく図形を選んでクリック待ちグリフを作ることができます。図形には色を自由に指定できます。
+
+アニメーションをプリセットから選んで適用したり、自分で`[keyframe]`タグで定義したキーフレームアニメーションを適用したりできます。
+
+※クリック待ちグリフの設定は`[glyph]`タグを通過するたびに（指定しなかったパラメータも含めて）初期化されます。`[position]`や`[font]`のように複数タグに分割して定義することはできませんのでご注意ください。
 
 :sample
-[glyph  fix=true left=200 top=100]
+[glyph]
+デフォルトのクリック待ちグリフ（gif動画）[p]
+
+[glyph fix="true" left="640" top="600"]
+画面下中央に固定表示[p]
+
+[glyph figure="rectangle" anim="bounce" width="5" color="0xCEE7F5" marginl="15"]
+デフォルトのクリック待ちグリフを図形＋アニメーションで再現[p]
+
+[glyph figure="v_triangle" anim="flash_momentary" delay="200"]
+瞬間的に点滅する下向き三角[p]
+
+[glyph figure="diamond" anim="flash"]
+滑らかに点滅するひし形[p]
+
+[glyph figure="circle" anim="soft_bounce" marginl="10"]
+やわらかく弾む円[p]
+
+[glyph figure="rectangle" anim="rotate_bounce"]
+ぐるぐるしながらバウンドする四角[p]
+
+[glyph figure="star" anim="spin_y" color="yellow"]
+Y軸スピンする星[p]
+
+[glyph figure="star" anim="spin_x" color="yellow"]
+X軸スピンする星[p]
+
+[glyph figure="star" anim="spin_z" color="yellow"]
+Z軸スピンする星[p]
+
+[glyph figure="star" anim="zoom" color="yellow"]
+拡縮する星[p]
+
+[glyph koma_anim="stepanim.jpg" koma_count="4" width="28"]
+コマアニメ[p]
+
+[glyph html='<span style="color: white; font-size: 20px;">🥺</span>']
+HTMLを直接指定[p]
+
+[keyframe name="yoko"]
+[frame p="0%" x="0"]
+[frame p="50%" x="10"]
+[frame p="100%" x="0"]
+[endkeyframe]
+[glyph line="nextpage.gif" easing="linear" keyframe="yoko"]
+自分で定義したキーフレームアニメーションを適用[p]
 
 :param
-line = クリック待ちの表示画像を指定できます。画像ファイルは`tyrano/images/system`フォルダ（`nextpage.gif`があるフォルダ）に配置します。,
-fix  = `true`を指定すると、クリック待ち画像がテキスト末端ではなくゲーム画面上の固定された位置に表示されます。,
-left = クリック画像を表示する横の位置を指定します。（`fix`属性を`true`にした場合に有効）,
-top  = クリック画像を表示する縦の位置を指定します。（`fix`属性を`true`にした場合に有効）
+line = グリフに使用する画像を指定できます。画像ファイルは`tyrano/images/system`フォルダ（`nextpage.gif`があるフォルダ）に配置します。,
+fix  = `true`を指定すると、グリフがメッセージの末尾ではなくゲーム画面上の固定位置に表示されます。,
+left = グリフを表示する横の位置を指定します。（`fix`属性を`true`にした場合に有効）,
+top  = グリフを表示する縦の位置を指定します。（`fix`属性を`true`にした場合に有効）,
+
+width   = グリフの横幅をpx単位で指定できます。,
+height  = グリフの高さをpx単位で指定できます。,
+anim    = グリフに適用するアニメーションを以下のキーワードから指定できます。<br>`flash_momentary`(瞬間的な点滅)<br>`flash`(滑らかな点滅)<br>`spin_x`(X軸を中心に回転)<br>`spin_y`(Y軸を中心に回転)<br>`spin_z`(Z軸を中心に回転)<br>`bounce`(バウンド)<br>`rotate_bounce`(回転しながらバウンド)<br>`soft_bounce`(ぽよんと弾むバウンド)<br>`zoom`(拡縮),
+time    = グリフに適用するアニメーションの時間をミリ秒単位で指定します。,
+figure  = グリフに使用する図形を以下のキーワードから指定できます。<br>`circle`(円)<br>`triangle`(三角形)<br>`v_triangle`(下向き三角形)<br>`rectangle`(四角形)<br>`diamond`(ひし形)<br>`start`(星),
+color   = グリフに図形を使用する場合に、図形の色を指定できます。,
+html    = グリフに含めるHTMLを直接指定できます。（上級者向け）,
+marginl = グリフの左側の余白をpx単位で指定できます。グリフを右側にずらしたいときはこれを指定してください。,
+
+keyframe   = 適用するキーフレームアニメーションの`name`を指定します。`anim`と併用することはできません。,
+easing     = アニメーションの変化パターンを指定できます。以下のキーワードが指定できます。<br>
+`ease`(開始時点と終了時点を滑らかに再生する)<br>
+`linear`(一定の間隔で再生する)<br>
+`ease-in`(開始時点をゆっくり再生する)<br>
+`ease-out`(終了時点をゆっくり再生する)<br>
+`ease-in-out`(開始時点と終了時点をゆっくり再生する)<br>
+この他に`cubic-bezier`関数を使って独自のイージングを指定することも可能です。,
+count      =  再生回数を指定できます。`infinite`を指定することで無限ループさせることもできます。,
+delay      =  開始までの時間を指定できます。初期値は`0`、つまり遅延なしです。,
+direction  =  アニメーションを複数回ループさせる場合に、偶数回目のアニメーションを逆再生にするかを設定できます。偶数回目を逆再生にする場合は`alternate`を指定します。,
+mode       =  アニメーションの最後のフレームの状態（位置、回転など）をアニメーション終了後も維持するかを設定できます。`forwards`(デフォルト)で維持。`none`を指定すると、アニメーション再生前の状態に戻ります。,
+
+koma_anim      = グリフに使用するコマアニメの画像を指定できます。画像ファイルは`tyrano/images/system`フォルダに配置します。<br><br>コマアニメに使用する画像は「すべてのコマが横並びで連結されたひとつの画像ファイル」である必要があります。,
+koma_count     = コマアニメを使用する場合、画像に含まれるコマ数を指定します。これを指定した場合、`koma_width`を省略できます。,
+koma_width     = コマアニメを使用する場合、1コマあたりの横幅をpx単位で指定します。これを指定した場合、`koma_count`を省略できます。,
+koma_anim_time = コマアニメが1周するまでの時間をミリ秒単位で指定します。
 
 :demo
 1,kaisetsu/02_decotext
@@ -5057,40 +6237,131 @@ top  = クリック画像を表示する縦の位置を指定します。（`fix
 //指定した位置にグラフィックボタンを配置する
 tyrano.plugin.kag.tag.glyph = {
     pm: {
+        // 基本
         line: "nextpage.gif",
         layer: "message0",
         fix: "false",
-        left: 0,
-        top: 0,
+        left: "0",
+        top: "0",
+
+        // 拡張
+        width: "",
+        height: "",
+        anim: "",
+        time: "",
+        figure: "",
+        color: "0xFFFFFF",
+        html: "",
+        marginl: "3",
+        marginb: "0",
+
+        // クリック待ちグリフに[keyframe]タグで定義した
+        // キーフレームアニメーションを適用したい場合のパラメータ
+        keyframe: "",
+        easing: "",
+        count: "",
+        delay: "",
+        derection: "",
+        mode: "",
+
+        // 各コマを連結して1枚の画像にしたパラパラ漫画アニメーションを使用したい場合のパラメータ
+        koma_anim: "",
+        koma_count: "",
+        koma_width: "",
+        koma_anim_time: "1000",
     },
 
-    //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
-    //cmで抹消しよう
     start: function (pm) {
         var that = this;
 
+        // 固定グリフは削除
         $(".glyph_image").remove();
 
-        if (pm.fix == "true") {
-            var j_layer = this.kag.layer.getLayer(pm.layer);
-
-            var j_next = $("<img class='glyph_image' />");
-            j_next.attr("src", "./tyrano/images/system/" + pm.line);
-            j_next.css("position", "absolute");
-            j_next.css("z-index", 9998);
-            j_next.css("top", pm.top + "px");
-            j_next.css("left", pm.left + "px");
-            j_next.css("display", "none");
-
-            j_layer.append(j_next);
-
-            this.kag.stat.flag_glyph = "true";
+        // グリフタイプを決定
+        if (pm.figure) {
+            pm.type = "figure";
+        } else if (pm.html) {
+            pm.type = "html";
+        } else if (pm.koma_anim) {
+            pm.type = "koma_anim";
         } else {
-            this.kag.stat.flag_glyph = "false";
-            this.kag.stat.path_glyph = pm.line;
+            pm.type = "image";
         }
 
-        this.kag.ftag.nextOrder();
+        // キーフレームが設定されている場合はanimを無視
+        if (pm.keyframe) {
+            pm.anim = "";
+        }
+
+        // 画像パスを格納
+        this.kag.stat.path_glyph = pm.line;
+
+        // 画面上固定タイプか、メッセージ末尾タイプか
+        if (pm.fix == "true") {
+            // 画面上固定タイプ
+            this.kag.stat.flag_glyph = "true";
+            // もう作っておいて非表示で画面上に配置しちゃおう
+            const j_next = this.kag.ftag.createNextImg();
+            j_next.setStyleMap({
+                "position": "absolute",
+                "z-index": "9998",
+                "top": pm.top + "px",
+                "left": pm.left + "px",
+                "display": "none",
+            });
+            this.kag.layer.getLayer(pm.layer).append(j_next);
+        } else {
+            // メッセージ末尾タイプ
+            this.kag.stat.flag_glyph = "false";
+        }
+
+        // コマアニメを使用しない場合は早期リターン
+        if (!pm.koma_anim) {
+            this.kag.stat.glyph_pm = $.extend({}, pm);
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        // コマアニメを使用する場合
+        // 画像幅を取得したいのでプリロードする
+        this.kag.preload($.parseStorage(pm.koma_anim, "tyrano/images/system"), (img) => {
+            pm.image_width = img.naturalWidth;
+            pm.image_height = img.naturalHeight;
+            pm.koma_height = pm.image_height;
+            // コマ数が指定されている場合、コマ数からコマ幅を計算
+            if (pm.koma_count) {
+                pm.koma_count = parseInt(pm.koma_count);
+                pm.koma_width = Math.round(pm.image_width / pm.koma_count);
+            }
+            // コマ幅が指定されている場合、コマ幅からコマ数を計算
+            if (pm.koma_width) {
+                pm.koma_width = parseInt(pm.koma_width);
+                pm.koma_count = Math.round(pm.image_width / pm.koma_width);
+            }
+            // 画像幅あるいは高さの指定がある場合はスケーリングする必要がある
+            pm.scale_x = 1;
+            pm.scale_y = 1;
+            if (pm.width && !pm.height) {
+                // widthだけが指定されている
+                pm.scale_x = parseInt(pm.width) / pm.koma_width;
+                pm.scale_y = pm.scale_x;
+            } else if (!pm.width && pm.height) {
+                // heightだけが指定されているいる
+                pm.scale_y = parseInt(pm.height) / pm.koma_height;
+                pm.scale_x = pm.scale_y;
+            } else if (pm.width && pm.height) {
+                // widthとheightが指定されている
+                pm.scale_x = parseInt(pm.width) / pm.koma_width;
+                pm.scale_y = parseInt(pm.height) / pm.koma_height;
+            }
+            // スケーリング
+            pm.image_width = parseInt(pm.image_width * pm.scale_x);
+            pm.image_height = parseInt(pm.image_height * pm.scale_x);
+            pm.koma_width = parseInt(pm.koma_width * pm.scale_x);
+            pm.koma_height = parseInt(pm.koma_height * pm.scale_x);
+            this.kag.stat.glyph_pm = $.extend({}, pm);
+            this.kag.ftag.nextOrder();
+        });
     },
 };
 

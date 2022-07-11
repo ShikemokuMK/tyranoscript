@@ -11,8 +11,9 @@ tyrano.plugin.kag = {
     save_key_val: "", //セーブデータ用のキー
 
     cache_html: {},
-
     cache_scenario: {},
+
+    event_listener_map: {},
 
     //セーブ時に保存する属性ホワイトリスト
     array_white_attr: [
@@ -162,8 +163,8 @@ tyrano.plugin.kag = {
 
         set_text_span: false, //メッセージ中のspanを新しく作成するときに真にする
         current_scenario: "first.ks", //シナリオファイルを指定する
-        is_skip: {},
-        is_auto: {},
+        is_skip: false,
+        is_auto: false,
         current_bgm: "", //現在再生中のBGM
         current_bgm_vol: "", //現在再生中のBGMボリューム
         current_bgm_html5: "false", //現在再生中のhtml5パラメータ
@@ -225,6 +226,7 @@ tyrano.plugin.kag = {
             italic: "",
             effect: "",
             effect_speed: "0.2s",
+            edge_method: "shadow",
         },
 
         //qr系の設定
@@ -250,6 +252,7 @@ tyrano.plugin.kag = {
             shadow: "",
             effect: "",
             effect_speed: "",
+            edge_method: "shadow",
         },
 
         //ふきだしで使用するパラメータ郡
@@ -333,6 +336,9 @@ tyrano.plugin.kag = {
             max_log_count: 200, //最大ログ数。200を超えると削除されていく
             charas: {}, //キャラ一覧
         },
+
+        message_config: {},
+        word_nobreak_list: [],
 
         title: "", //ゲームのタイトル
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
@@ -849,11 +855,19 @@ tyrano.plugin.kag = {
         that.tmp.angle = $.getAngle();
         that.tmp.largerWidth = $.getLargeScreenWidth();
 
-        //スマホの場合は、実施。 PCの場合でも画面を一致させる処理→すべての画面フィットさせる仕様に変更
-        //       if($.userenv() !="pc"){
+        // TYRANO.kag.baseでtyrano.baseを参照できるように
+        this.base = this.tyrano.base;
+
+        // 現在のゲーム画面のスケーリング情報を格納
+        this.tmp.scale_info = {
+            scale_x: 1,
+            scale_y: 1,
+            margin_top: 0,
+            margin_left: 0,
+        };
+
         // ゲーム画面フィットを即実行する
         this.tyrano.base._fitBaseSize(that.config.scWidth, that.config.scHeight, 0);
-        //スマホの場合、傾いた時に再計算させる
 
         //繰り返し実行用の関数
         var timerId = null;
@@ -950,7 +964,7 @@ tyrano.plugin.kag = {
         //        }
 
         // この時点ですでにloadが発火済みの場合がありえる！（Electronの場合は基本的に発火済み）
-        // その場合は手動でloadをトリガーすることで上記イベントハンドラを実行する
+        // その場合は手動でloadをトリガーすることで上記イベントリスナを実行する
         if (window.isLoaded === true) {
             $(window).trigger("load");
         }
@@ -1593,11 +1607,7 @@ tyrano.plugin.kag = {
 
         //縦書きと横書きで処理が別れる
         if (jtext.find("p").length == 0) {
-            if (this.stat.vertical == "true") {
-                jtext.append($("<p class='vertical_text'></p>"));
-            } else {
-                jtext.append($("<p class=''></p>"));
-            }
+            this.setNewParagraph(jtext);
         }
 
         if (jtext.find("p").find(".current_span").length > 0) {
@@ -1610,6 +1620,14 @@ tyrano.plugin.kag = {
         jtext.find("p").append(j_span); //縦書きの場合、ここに追加されてないかも
 
         return j_span;
+    },
+
+    setNewParagraph: function (j_inner) {
+        if (this.stat.vertical == "true") {
+            j_inner.append("<p class='vertical_text'></p>");
+        } else {
+            j_inner.append("<p class=''></p>");
+        }
     },
 
     checkMessage: function (jtext) {
@@ -1636,29 +1654,40 @@ tyrano.plugin.kag = {
 
         var ext = $.getExt(src);
 
-        if (ext == "mp3" || ext == "ogg" || ext == "m4a") {
-            // 相対パスの場合"./"を補完
-            if (src.indexOf("http://") !== 0 && src.indexOf("https://") !== 0 && src.indexOf("./") !== 0) {
+        const is_http = $.isHTTP(src);
+        const is_inline_data = src.substring(0, 5) === "data:";
+
+        // 相対パスの場合は"./"を補完
+        if (!is_http && !is_inline_data) {
+            const c1 = src.charAt(0);
+            const c2 = src.substring(0, 2);
+            if (c1 === "/") {
+                // "/data/sound/foo.mp3"
+                src = "." + src;
+            } else if (c2 !== "./") {
+                // "data/sound/foo.mp3"
                 src = "./" + src;
             }
+        }
 
-            var howl_opt = {
+        if (ext == "wav" || ext == "mp3" || ext == "ogg" || ext == "m4a") {
+            // 音声ファイルプリロード
+            let obj;
+            const howl_opt = {
                 src: src,
                 preload: true,
                 onload: () => {
-                    if (callbk) callbk();
+                    if (callbk) callbk(obj);
                 },
                 onloaderror: () => {
                     //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
                     if (callbk) callbk(obj);
                 },
             };
-
-            let obj = new Howl(howl_opt);
+            obj = new Howl(howl_opt);
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
-            //動画ファイルプリロード
+            // 動画ファイルプリロード
             $("<video />")
-                .attr("src", src)
                 .on("loadeddata", function (e) {
                     callbk && callbk();
                 })
@@ -1667,10 +1696,11 @@ tyrano.plugin.kag = {
                         "動画ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/video/file.mp4",
                     );
                     callbk && callbk();
-                });
+                })
+                .attr("src", src);
         } else {
+            // 画像ファイルプリロード
             $("<img />")
-                .attr("src", src)
                 .on("load", function (e) {
                     if (callbk) callbk(this);
                 })
@@ -1680,36 +1710,37 @@ tyrano.plugin.kag = {
                     that.kag.error(
                         "画像ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png",
                     );
-
                     if (callbk) callbk();
-                });
+                })
+                .attr("src", src);
         }
     },
 
     //配列の先読み
     preloadAll: function (storage, callbk) {
-        var that = this;
-        //配列で指定された場合
-        if (typeof storage == "object" && storage.length >= 0) {
+        const that = this;
+        if (Array.isArray(storage)) {
+            // 配列で指定された場合
+
+            // 空の配列が渡された…だと…
             if (storage.length == 0) {
-                callbk();
+                if (callbk) callbk();
                 return;
             }
 
-            var sum = 0;
+            let sum = 0;
 
-            for (var i = 0; i < storage.length; i++) {
-                that.kag.preload(storage[i], function () {
+            for (let i = 0; i < storage.length; i++) {
+                that.kag.preload(storage[i], () => {
                     sum++;
-                    if (storage.length == sum) {
-                        callbk();
+                    if (sum === storage.length) {
+                        if (callbk) callbk();
                     }
                 });
             }
         } else {
-            this.kag.preload(pm.storage, function () {
-                callbk();
-            });
+            // 配列じゃなかった場合
+            this.kag.preload(storage, callbk);
         }
     },
 
@@ -1791,6 +1822,312 @@ tyrano.plugin.kag = {
             console.log(obj);
         }
     },
+
+    /**
+     * オートモード状態を設定する (現在の状態からの変更がない場合は無視)
+     * @param {boolean} bool オートモードにするかどうか
+     */
+    setAuto: function (bool) {
+        if (this.stat.is_auto === bool) {
+            return;
+        }
+        if (bool) {
+            this.trigger("autostart");
+        } else {
+            this.trigger("autostop");
+        }
+        this.stat.is_auto = bool;
+    },
+
+    /**
+     * スキップモード状態を設定する (現在の状態からの変更がない場合は無視)
+     * @param {boolean} スキップモードにするかどうか
+     */
+    setSkip: function (bool) {
+        if (this.stat.is_skip === bool) {
+            return;
+        }
+        if (bool) {
+            this.trigger("skipstart");
+        } else {
+            this.trigger("skipstop");
+        }
+        this.stat.is_skip = bool;
+    },
+
+    /**
+     * イベントを指定してイベントリスナ(コールバック)を呼び出す
+     * コールバックに引数を渡すこともできる
+     * コールバック内の this には kag が格納される
+     * @param {string} event_name リスナを呼び出すイベント名
+     * @param  {Object} [event_obj] リスナのコールバックに引数として渡すオブジェクト nameプロパティにはイベント名がセットされる
+     */
+    trigger: function (event_name, event_obj = {}) {
+        event_obj.name = event_name;
+        const map = this.event_listener_map;
+        if (map[event_name] === undefined || map[event_name].length === 0) {
+            return;
+        }
+        for (const listener of map[event_name]) {
+            if (typeof listener.callback === "function") {
+                listener.callback.call(this, event_obj);
+            }
+        }
+    },
+
+    /**
+     * イベントリスナを登録する
+     * @param {string} event_names 登録するイベント名 半角スペース区切りで複数イベントに対して一気に登録できる
+     *   イベント名のあとにドット区切りで名前空間を指定できる(複数可能) あとから特定の名前空間のリスナだけを削除できる
+     *   例) "resize load.ABC save.hoge.fuga"
+     * @param {function} callback コールバック
+     */
+    bind: function (event_names, callback) {
+        // 例) "resize load.ABC save.hoge.fuga"
+        const map = this.event_listener_map;
+        const event_name_hash = event_names.split(" ");
+        for (const event_name of event_name_hash) {
+            // 半角スペースで刻んだ各イベント文字列について
+            // 例) "save.hoge.fuga"
+            const dot_hash = event_name.split("."); // ["save", "hoge", "fuga"]
+            const event = dot_hash[0]; // "save"
+            const namespaces = dot_hash.slice(1); // ["hoge", "fuga"]
+            if (event !== "") {
+                if (map[event] === undefined) {
+                    map[event] = [];
+                }
+                map[event].push({
+                    callback: callback,
+                    namespaces: namespaces,
+                });
+            }
+        }
+    },
+
+    /**
+     * イベントリスナを削除する
+     * @param {*} event_names リスナを削除するイベント名
+     *   半角スペース区切りで複数イベントを指定可能 それぞれのイベントリスナを一括で削除できる
+     *   ドット区切りで名前空間を複数指定可能 指定したすべての名前空間を持つリスナだけを削除できる
+     *   いきなりドットで書き始めることで削除対象のリスナを"名前空間だけ"で指定することも可能
+     */
+    unbind: function (event_names) {
+        const map = this.event_listener_map;
+        const event_name_hash = event_names.split(" ");
+        for (const event_name of event_name_hash) {
+            // 半角スペースで刻んだ各イベント文字列について
+            const dot_hash = event_name.split(".");
+            const event = dot_hash[0];
+            const del_namespaces = dot_hash.slice(1);
+            if (event && (map[event] === undefined || map[event].length === 0)) {
+                // そのイベントに登録されているイベントリスナがない場合
+                // なにもしなくていい
+            } else if (del_namespaces.length === 0) {
+                // 削除対象の名前空間が指定されていない場合
+                // そのイベントのリスナすべてを消去する
+                if (event !== "") {
+                    delete map[event];
+                }
+            } else {
+                // 名前空間が指定されている場合は登録されている各コールバックを個別に見て選別していく
+                // イベント名が空欄で名前空間だけが指定されている場合はすべてのイベントを処理対象とする
+                let event_list;
+                if (event === "") {
+                    event_list = Object.keys(map);
+                } else {
+                    event_list = [event];
+                }
+                for (const _event of event_list) {
+                    // 各イベントについて
+                    const new_listeners = [];
+                    for (const listener of map[_event]) {
+                        // このイベントに登録されている各リスナについて
+                        // このリスナは生き残るべきだろうか？
+                        let should_keep = false;
+                        // 削除対象名前空間は複数でありうる！その場合はAND指定
+                        // AND指定、つまり、削除対象名前空間を"すべて"持つリスナだけを削除したいので
+                        // 削除対象名前空間のうちのひとつでも保有しないものがあるリスナは生き残り確定
+                        for (const name of del_namespaces) {
+                            if (!listener.namespaces.includes(name)) {
+                                should_keep = true;
+                                break;
+                            }
+                        }
+                        // 生き残り確定のリスナは新しいリスナリストに追加する
+                        if (should_keep) {
+                            new_listeners.push(listener);
+                        }
+                    }
+                    map[_event] = new_listeners;
+                }
+            }
+        }
+    },
+
+    /**
+     * @typedef {Object} Tag タグのロジック定義
+     * @property {Object} pm タグのパラメータの初期値 これにユーザーの指定パラメータがマージされたものがstartに渡される
+     * @property {Array} vital 必須パラメータ名の配列
+     * @property {function} start タグの処理ロジック このなかで this.kag.ftag.nextOrder() しないと次のタグに進まない
+     * @property {Object} kag TYRANO.kagへの参照
+     */
+    /**
+     * タグのロジック定義への参照を取得する
+     * @param {string} tag_name
+     * @returns {Tag}
+     */
+    getTag: function (tag_name = "") {
+        return this.ftag.master_tag[tag_name];
+    },
+
+    /**
+     * 発言者の名前欄を意味する<p>要素のjQueryオブジェクトを返す
+     * そもそも[chara_config]タグによる chara_ptext の設定が済んでいない場合は空のjQueryオブジェクトを返す
+     * @returns {jQuery}
+     */
+    getCharaNameArea: function () {
+        return this.stat.chara_ptext ? $("." + this.stat.chara_ptext) : $();
+    },
+
+    /**
+     * 発言者の名前を返す
+     * 発言者がいない場合は空の文字列を返す
+     * @returns {string}
+     */
+    getCharaName: function () {
+        let chara_name = "";
+        if (this.stat.chara_ptext != "") {
+            // 発言者エリアを取得
+            const j_chara_name = this.getCharaNameArea();
+            if (!j_chara_name.hasClass("multiple-text")) {
+                // ふつうはこれでよい
+                chara_name = $.isNull(j_chara_name.html());
+            } else {
+                // 個別縁取りが施されている場合
+                // この場合はそのままhtml()するとエラいことになる！
+                // span
+                //   span.stroke あ
+                //   span.fill   あ
+                // span
+                //   span.stroke か
+                //   span.fill   か
+                // span
+                //   span.stroke ね
+                //   span.fill   ね
+                // こんな構造になっているから
+                chara_name = j_chara_name.find(".fill").text();
+            }
+        }
+        return chara_name;
+    },
+
+    /**
+     * キャラクターのjQueryオブジェクトを返す
+     * @returns {jQuery}
+     */
+    getCharaElement: function (chara_name) {
+        let selector = ".tyrano_chara";
+        if (chara_name) {
+            selector += "." + chara_name;
+        }
+        return $("#tyrano_base").find(selector);
+    },
+
+    /**
+     * 発言していない人用のスタイルを当てる
+     * @param {jQuery} j_chara
+     */
+    setNotSpeakerStyle: function (j_chara) {
+        const filter = this.stat.apply_filter_str;
+        j_chara.setFilterCSS(filter);
+    },
+
+    /**
+     * 発言者用のスタイルを当てる
+     * @param {jQuery} j_chara
+     */
+    setSpeakerStyle: function (j_chara) {
+        // 発言していない人はフィルターなし
+        const filter = "";
+        j_chara.setFilterCSS(filter);
+    },
+
+    /**
+     * ティラノスクリプトの[keyframe]-[frame]-[endkeyframe]で定義されたキーフレームアニメーションを
+     * Web Animation APIで使用できるキーフレーム情報に変換する
+     * @param {string} name [keyframe]タグに指定したname
+     * @returns {Object[] | null} キーフレーム情報
+     */
+    parseKeyframesForWebAnimationAPI: function (name) {
+        if (!(this.stat.map_keyframe[name] && this.stat.map_keyframe[name].frames)) {
+            return null;
+        }
+        const frames = this.stat.map_keyframe[name].frames;
+        const keyframes = [];
+        for (const percentage_str in frames) {
+            const percentage_int = parseInt(percentage_str);
+            const offset = percentage_int / 100;
+            const frame = frames[percentage_str];
+            const this_keyframe = {};
+            // transform
+            const transform_strs = [];
+            for (const _key in frame.trans) {
+                let key = _key;
+                let value = frame.trans[_key];
+                if (_key === "x" || _key === "y" || _key === "z") {
+                    key = "translate" + _key.toUpperCase();
+                    value = value + "px";
+                }
+                transform_strs.push(`${key}(${value})`);
+            }
+            if (transform_strs.length > 0) {
+                this_keyframe["transform"] = transform_strs.join(" ");
+            }
+            // transform以外のスタイル
+            for (const _key in frame.styles) {
+                if (_key === "_tag") {
+                    continue;
+                }
+                const key = $.parseCamelCaseCSS(_key);
+                this_keyframe[key] = $.convertColor(frame.styles[_key]);
+            }
+            // 進行度(0～1の小数点数)
+            this_keyframe.offset = offset;
+            keyframes.push(this_keyframe);
+        }
+        return keyframes;
+    },
+
+    /**
+     * div#hidden_area　を取得する
+     * @return {jQuery}
+     */
+    getHiddenArea() {
+        // プロパティに代入済みならそれを即返す
+        if (this.__j_hiden_area) {
+            return this.__j_hiden_area;
+        }
+
+        // プロパティに代入されていない場合とりあえずサーチしてみる 見つかったらプロパティに代入して返す
+        let j_hidden_area = $("#hidden_area");
+        if (j_hidden_area.length > 0) {
+            this.__j_hiden_area = j_hidden_area;
+            return j_hidden_area;
+        }
+
+        // なければ新しく作ろう
+        j_hidden_area = $('<div id="hidden_area" />').appendTo("body").css({
+            position: "fixed",
+            left: "200%",
+            top: "200%",
+            opacity: "0",
+        });
+
+        this.__j_hiden_area = j_hidden_area;
+        return j_hidden_area;
+    },
+
+    __j_hiden_area: null,
 
     test: function () {},
 };

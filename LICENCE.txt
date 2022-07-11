@@ -1,7 +1,7 @@
-TyranoScript ｜ティラノスクリプト
+TyranoScript | ティラノスクリプト
 
-Copyright (c) 2018 STRIKEWORKS @Shikemokumk
-http://strikeworks.jp
+Copyright (c) 2022 STRIKEWORKS @Shikemokumk
+https://strikeworks.jp
 
 ■利用規約■
 ティラノスクリプトは無料でご利用いただけます。
@@ -22,20 +22,19 @@ http://strikeworks.jp
 ----------------
 
 TyranoScript
-Copyright (c) 2012-2019 STRIKEWORKS / Shikemokumk
-http://tyrano.jp
+Copyright (c) 2012-2022 STRIKEWORKS / Shikemokumk
+https://tyrano.jp
 
 ----------------
-animate.css -http://daneden.me/animate
+animate.css - https://daneden.me/animate
 Version - 3.5.1
-Licensed under the MIT license - http://opensource.org/licenses/MIT
+Licensed under the MIT license - https://opensource.org/licenses/MIT
 
 Copyright (c) 2016 Daniel Eden
 
 ----------------
-html2canvas 0.5.0-alpha1 <http://html2canvas.hertzen.com>
-Copyright (c) 2015 Niklas von Hertzen
-
+html2canvas 1.4.1 <https://html2canvas.hertzen.com>
+Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
 Released under MIT License
 
 ----------------
@@ -43,7 +42,7 @@ jQuery v3.6.0 | (c) JS Foundation and other contributors | jquery.org/license
 
 ----------------
 jQuery UI - v1.10.3 - 2013-05-03
-http://jqueryui.com
+https://jqueryui.com
 Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.mouse.js, jquery.ui.draggable.js, jquery.ui.droppable.js, jquery.ui.resizable.js, jquery.ui.selectable.js, jquery.ui.sortable.js, jquery.ui.effect.js, jquery.ui.accordion.js, jquery.ui.autocomplete.js, jquery.ui.button.js, jquery.ui.datepicker.js, jquery.ui.dialog.js, jquery.ui.effect-blind.js, jquery.ui.effect-bounce.js, jquery.ui.effect-clip.js, jquery.ui.effect-drop.js, jquery.ui.effect-explode.js, jquery.ui.effect-fade.js, jquery.ui.effect-fold.js, jquery.ui.effect-highlight.js, jquery.ui.effect-pulsate.js, jquery.ui.effect-scale.js, jquery.ui.effect-shake.js, jquery.ui.effect-slide.js, jquery.ui.effect-transfer.js, jquery.ui.menu.js, jquery.ui.position.js, jquery.ui.progressbar.js, jquery.ui.slider.js, jquery.ui.spinner.js, jquery.ui.tabs.js, jquery.ui.tooltip.js
 Copyright 2013 jQuery Foundation and other contributors; Licensed MIT
 
@@ -58,20 +57,20 @@ https://twitter.com/shikemokumk
  @fileOverview TouchSwipe - jQuery Plugin
  @version 1.6.18
 
- @author Matt Bryson http://www.github.com/mattbryson
+ @author Matt Bryson https://www.github.com/mattbryson
  @see https://github.com/mattbryson/TouchSwipe-Jquery-Plugin
- @see http://labs.rampinteractive.co.uk/touchSwipe/
- @see http://plugins.jquery.com/project/touchSwipe
+ @see https://labs.rampinteractive.co.uk/touchSwipe/
+ @see https://plugins.jquery.com/project/touchSwipe
  @license
  Copyright (c) 2010-2015 Matt Bryson
  Dual licensed under the MIT or GPL Version 2 licenses.
 
 ----------------
-JsRender v1.0.0-beta: http://github.com/BorisMoore/jsrender and http://jsviews.com/jsviews
+JsRender v1.0.0-beta: https://github.com/BorisMoore/jsrender and https://jsviews.com/jsviews
 
 ----------------
 textillate.js
-http://jschr.github.com/textillate
+https://jschr.github.com/textillate
 MIT licensed
 
 Copyright (C) 2012-2013 Jordan Schroter
@@ -80,7 +79,7 @@ Copyright (C) 2012-2013 Jordan Schroter
 Remodal - v1.1.1
 Responsive, lightweight, fast, synchronized with CSS animations, fully cust
 omizable modal window plugin with declarative configuration and hash tracking.
-http://vodkabears.github.io/remodal/
+https://vodkabears.github.io/remodal/
 
 Made by Ilya Makarov
 Under MIT License

@@ -446,6 +446,347 @@ body{
 
 
 
+/*------　カギカッコフロートのための設定 -------*/
+.message_inner > p > span {
+    position: relative;
+}
+
+/*------　text-stroke による縁取りの設定 -------*/
+/* ★縁取りテキスト1文字を構成する要素ツリー
+/* span.char.text-stroke
+/*   span.dummy あ  … ダミー。透明。absolute。レンダリング領域を広げる役割。
+/*   span.stroke あ … 縁取り。absolute。複数個でありうる。
+/*   span.text あ   … テキスト本体。absolute。
+/*   span.dummy あ  … ダミー。透明。relative。縁取りとテキスト本体が absolute なせいで widht, height を構成しないので
+/*                    かわりにこれで width, height を構成する。*/
+p .char.text-stroke {
+    opacity: 1;
+    display: inline-block;
+    position: relative;
+    z-index: auto;
+    /* z-index に auto でも 0 でもない値がセットされている場合は
+    /* 新しいスタックコンテキストが作成されるため、重なり順の違いが出る仕様がある
+    /* ここに z-index: 10; を指定すると縁取り部分がひとつ前の文字にかぶさるようになる
+    /* http://honttoni.blog74.fc2.com/blog-entry-340.html */
+    /*
+    z-index: 10;
+    /**/
+}
+
+p .char.text-stroke.visible .entity {
+    opacity: 1;
+}
+
+p .char.text-stroke span {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    display: inline-block;
+    opacity: 0;
+}
+
+p .char.text-stroke .stroke {
+    z-index: 100;
+    transform: translateZ(0);
+}
+
+p .char.text-stroke .fill {
+    z-index: 1000;
+    transform: translateZ(0);
+    height: 100%;
+}
+
+/*------　text-shadow による個別縁取りの設定 -------*/
+/* ★縁取りテキスト1文字を構成する要素ツリー
+/* span.char.text-shadow
+/*   span.stroke あ … 縁取り。absolute。複数個でありうる。
+/*   span.text あ   … テキスト本体。absolute。
+/*   span.dummy あ  … ダミー。透明。relative。縁取りとテキスト本体が absolute なせいで widht, height を構成しないので
+/*                    かわりにこれで width, height を構成する。*/
+p .char.text-shadow {
+    opacity: 1;
+    display: inline-block;
+    position: relative;
+    z-index: auto;
+}
+
+p .char.text-shadow.visible .entity {
+    opacity: 1;
+}
+
+p .char.text-shadow span {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    display: inline-block;
+    opacity: 0;
+}
+
+p .char.text-shadow .stroke {
+    z-index: auto;
+    transform: translateZ(0);
+}
+
+p .char.text-shadow .fill {
+    z-index: 1000;
+    transform: translateZ(0);
+    height: 100%;
+}
 
 
+/*------　クリック待ちグリフの全般設定 -------*/
+div.img_next {
+    padding: 0;
+    margin-left: 3px;
+    display: inline-block;
+    vertical-align: baseline;
+}
 
+/*------ 図形 ------*/
+/*-- 三角 --*/
+.img_next_v_triangle {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background: white;
+    clip-path: polygon(0 20%, 100% 20%, 50% 100%);
+}
+.img_next_triangle {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background: white;
+    clip-path: polygon(50% 20%, 100% 100%, 0% 100%);
+}
+
+/*-- 丸 --*/
+.img_next_circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-block;
+    background: white;
+    background: rgb(206, 231, 245);
+}
+
+/*-- 四角 --*/
+.img_next_rectangle {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background: white;
+}
+
+/*-- ひし型 --*/
+.img_next_diamond {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background: white;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/*-- 星 --*/
+.img_next_star {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background: white;
+    clip-path: polygon(50% 5%, 61% 40%, 98% 40%, 68% 62%, 79% 96%, 50% 75%, 21% 96%, 32% 62%, 2% 40%, 39% 40%);
+}
+
+/*------ アニメーション設定 ------*/
+/*-- 瞬間的な点滅 --*/
+.img_next_flash_momentary {
+    animation-name: img_next_flash_momentary;
+    animation-delay: 1000ms;
+    animation-duration: 1800ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(1);
+    opacity: 0;
+}
+
+@keyframes img_next_flash_momentary {
+    from {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+/*-- 滑らかな点滅 --*/
+.img_next_flash {
+    animation-name: img_next_flash;
+    animation-duration: 1800ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    opacity: 0;
+}
+
+@keyframes img_next_flash {
+    from {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/*-- 回転 --*/
+.img_next_rotate_bounce {
+    animation-name: img_next_rotate_bounce;
+    animation-duration: 3200ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes img_next_rotate_bounce {
+    from {  
+        transform: translateY(0px) rotateZ(0deg) scale(1);
+    }
+    12.5% {
+        transform: translateY(-4px) rotateZ(45deg) scale(0.8);
+    }
+    25% {
+        transform: translateY(0px) rotateZ(90deg) scale(1);
+    }
+    37.5% {
+        transform: translateY(-4px) rotateZ(135deg) scale(0.8);
+    }
+    50% {
+        transform: translateY(0px) rotateZ(180deg) scale(1);
+    }
+    62.5% {
+        transform: translateY(-4px) rotateZ(225deg) scale(0.8);
+    }
+    75% {
+        transform: translateY(0px) rotateZ(270deg) scale(1);
+    }
+    87.5% {
+        transform: translateY(-4px) rotateZ(315deg) scale(0.8);
+    }
+    to {
+        transform: translateY(0px) rotateZ(360deg) scale(1);
+    }
+}
+
+/*-- Y軸を中心にスピン --*/
+.img_next_spin_y {
+    animation-name: img_next_spin_y;
+    animation-duration: 3200ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes img_next_spin_y {
+    from {
+        transform: rotateY(0deg);
+    }
+    50% {
+        transform: rotateY(180deg);
+    }
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+/*-- Y軸を中心にスピン --*/
+.img_next_spin_x {
+    animation-name: img_next_spin_x;
+    animation-duration: 3200ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes img_next_spin_x {
+    from {
+        transform: rotateX(0deg);
+    }
+    50% {
+        transform: rotateX(180deg);
+    }
+    to {
+        transform: rotateX(360deg);
+    }
+}
+
+/*-- Z軸を中心にスピン --*/
+.img_next_spin_z {
+    animation-name: img_next_spin_z;
+    animation-duration: 3200ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes img_next_spin_z {
+    from {
+        transform: rotateZ(0deg);
+    }
+    50% {
+        transform: rotateZ(180deg);
+    }
+    to {
+        transform: rotateZ(360deg);
+    }
+}
+
+/*-- シンプルなバウンド --*/
+.img_next_bounce {
+    animation-name: img_next_bounce;
+    animation-duration: 500ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0, 0, 0.4, 1);
+    animation-direction: alternate;
+}
+
+@keyframes img_next_bounce {
+    from {
+        transform: translateY(0px)
+    }
+    100% {
+        transform: translateY(-12px)
+    }
+}
+
+/*-- たわむバウンド --*/
+.img_next_soft_bounce {
+    animation-name: img_next_soft_bounce;
+    animation-duration: 500ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0, 0, 0.4, 1);
+    animation-direction: alternate;
+}
+
+@keyframes img_next_soft_bounce {
+    from {
+        transform: translateY(0px) scaleY(0.8) scaleX(1.2);
+    }
+    25% {
+        transform: translateY(-2px) scaleY(1) scaleX(1);
+    }
+    100% {
+        transform: translateY(-12px);
+    }
+}
+
+/*-- 拡縮 --*/
+.img_next_zoom {
+    animation-name: img_next_zoom;
+    animation-duration: 500ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    animation-direction: alternate;
+}
+
+@keyframes img_next_zoom {
+    from {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.2);
+    }
+}

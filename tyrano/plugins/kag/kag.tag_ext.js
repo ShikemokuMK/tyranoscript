@@ -692,7 +692,7 @@ tyrano.plugin.kag.tag.skipstart = {
 
         this.kag.readyAudio();
 
-        this.kag.stat.is_skip = true;
+        this.kag.setSkip(true);
         this.kag.ftag.nextOrder();
     },
 };
@@ -720,7 +720,7 @@ tyrano.plugin.kag.tag.skipstop = {
     pm: {},
 
     start: function (pm) {
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
         this.kag.ftag.nextOrder();
     },
 };
@@ -757,7 +757,7 @@ tyrano.plugin.kag.tag.autostart = {
         this.kag.readyAudio();
 
         //[p][l] の処理に、オート判定が入ってます
-        this.kag.stat.is_auto = true;
+        this.kag.setAuto(true);
         this.kag.ftag.nextOrder();
     },
 };
@@ -787,7 +787,7 @@ tyrano.plugin.kag.tag.autostop = {
     },
 
     start: function (pm) {
-        this.kag.stat.is_auto = false;
+        this.kag.setAuto(false);
         this.kag.stat.is_wait_auto = false;
 
         //↓他から直接呼ばれた時に、２重に実行されるため、コメントにしているが
@@ -1284,9 +1284,14 @@ tyrano.plugin.kag.tag.kanim = {
     start: function (pm) {
         var that = this;
 
-        var anim = this.kag.stat.map_keyframe[pm.keyframe];
+        // アニメーション対象を取得、見つからなければ早期リターン
+        const j_targets = $.findAnimTargets(pm);
+        if (j_targets.length === 0) {
+            this.kag.ftag.nextOrder();
+            return;
+        }
 
-        var class_name = "." + pm.name;
+        const anim = $.extend({}, this.kag.stat.map_keyframe[pm.keyframe]);
 
         anim.config = pm;
 
@@ -1298,39 +1303,48 @@ tyrano.plugin.kag.tag.kanim = {
             pm.delay = parseInt(pm.delay) + "ms";
         }
 
-        //アニメーション完了したら、
-        anim.complete = function () {
-            that.kag.popAnimStack();
-        };
+        // 無限ループではない場合にのみアニメスタックを有効にする
+        const should_push_anim_stack = pm.count !== "infinite";
 
-        if (pm.name != "") {
-            delete pm.name;
-            delete pm.keyframe;
+        delete pm.name;
+        delete pm.keyframe;
+        delete pm.layer;
 
-            $(class_name).each(function () {
+        j_targets.each(function () {
+            const j_this = $(this);
+
+            // アニメオブジェクトをクローン
+            const this_anim = $.extend({}, anim);
+
+            // "この要素"専用の complete メソッドを取り付ける
+            this_anim.complete = () => {
+                if (should_push_anim_stack && this.anim_stack_exists) {
+                    this.anim_stack_exists = false;
+                    that.kag.popAnimStack();
+                }
+            };
+
+            // アニメスタックが有効の場合はぶち込んでおく
+            // Element の should_push_anim_stack プロパティで管理してみよう
+            if (should_push_anim_stack && !this.anim_stack_exists) {
+                this.anim_stack_exists = true;
                 that.kag.pushAnimStack();
-                $(this).a3d(anim);
-            });
-        } else if (pm.layer != "") {
-            var layer_name = pm.layer + "_fore";
-
-            //フリーレイヤに対して実施
-            if (pm.layer == "free") {
-                layer_name = "layer_free";
             }
-            delete pm.name;
-            delete pm.keyframe;
-            delete pm.layer;
 
-            //レイヤ指定の場合、その配下にある要素全てに対して、実施
-            var target_array = $("." + layer_name).children();
-
-            target_array.each(function () {
-                that.kag.pushAnimStack();
-
-                $(this).a3d(anim);
+            // 要素が削除されたときにcompleteを呼ぶ
+            j_this.on("remove", () => {
+                this_anim.complete();
             });
-        }
+
+            // アニメーションを開始
+            j_this.a3d(this_anim);
+        });
+
+        // 不意の要素削除のテスト
+        // setTimeout(() => {
+        //     console.warn("suddenly remove!");
+        //     j_targets.remove();
+        // }, 300);
 
         this.kag.ftag.nextOrder();
     },
@@ -1364,25 +1378,25 @@ tyrano.plugin.kag.tag.stop_kanim = {
     },
 
     start: function (pm) {
-        var that = this;
+        const that = this;
 
-        if (pm.name != "") {
-            $("." + pm.name).css({
-                "animation-name": "",
-                "animation-play-state": "",
-                "animation-iteration-count": "",
-                "animation-fill-mode": "",
-                "animation-timing-function": "",
-                "transform": "",
-            });
-        } else if (pm.layer != "") {
-            var layer_name = pm.layer + "_fore";
-            //フリーレイヤに対して実施
-            if (pm.layer == "free") {
-                layer_name = "layer_free";
+        // アニメーション対象を取得、見つからなければ早期リターン
+        const j_targets = $.findAnimTargets(pm);
+        if (j_targets.length === 0) {
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        j_targets.each(function () {
+            const j_this = $(this);
+
+            // アニメスタックが入っているならポップしておく
+            if (this.anim_stack_exists) {
+                this.anim_stack_exists = false;
+                that.kag.popAnimStack();
             }
 
-            $("." + layer_name).css({
+            j_this.css({
                 "animation-name": "",
                 "animation-play-state": "",
                 "animation-iteration-count": "",
@@ -1390,7 +1404,461 @@ tyrano.plugin.kag.tag.stop_kanim = {
                 "animation-timing-function": "",
                 "transform": "",
             });
+        });
+
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[xanim]
+
+:group
+アニメーション関連
+
+:title
+汎用アニメーションの実行
+
+:exp
+V515以降で使用可能。
+
+`[anim]`と`[kanim]`の機能を併せ持つ、汎用的なアニメーション実行タグです。
+
+事前に`[keyframe]`タグで定義したキーフレームアニメーションを`keyframe`パラメータに指定して実行することもできますし、`[anim]`タグのように変化対象のパラメータを直接指定することもできます。
+
+
+
+:sample
+;キーフレームアニメーションを無限ループで適用
+[keyframe name="yoko"]
+[frame p="0%" x="0"]
+[frame p="100%" x="100"]
+[endkeyframe]
+[xanim name="akane" keyframe="yoko" count="infinite" time="1000" direction="alternate" easing="linear"]
+
+;2秒かけて500px右に移動 デフォルトではアニメーションの完了は待たずに次に進むよ
+[xanim name="akane" x="500" time="2000"]
+
+:param
+name       = アニメーションさせる画像やテキストの`name`を指定します。,
+layer      = `name`を指定せずに`layer`を指定することで、そのレイヤに存在するすべての要素をアニメーションさせることができます。,
+keyframe   = 適用するキーフレームアニメーションの`name`を指定します。,
+time       = アニメーション時間をミリ秒で指定します。,
+easing     = `[anim]`タグに指定できるキーワードと`[kanim]`に指定できるキーワードがすべて使用可能です。,
+count      =  再生回数を指定できます。`infinite`を指定することで無限ループさせることもできます。,
+delay      =  開始までの時間を指定できます。初期値は`0`、つまり遅延なしです。,
+direction  =  アニメーションを複数回ループさせる場合に、偶数回目のアニメーションを逆再生にするかを設定できます。偶数回目を逆再生にする場合は`alternate`を指定します。,
+mode       =  アニメーションの最後のフレームの状態（位置、回転など）をアニメーション終了後も維持するかを設定できます。`forwards`(デフォルト)で維持。`none`を指定すると、アニメーション再生前の状態に戻ります。,
+svg        = svgファイルを指定できます。svgファイルは`image`フォルダに配置します。これを指定すると、svgファイル内で定義された<path>に沿ってアニメーションさせることができます。,
+svg_x      = svgファイルを指定したとき、X座標を<path>に沿わせるかどうか。`true`または`false`で指定します。,
+svg_y      = svgファイルを指定したとき、Y座標を<path>に沿わせるかどうか。`true`または`false`で指定します。,
+svg_rotate = svgファイルを指定したとき、角度を<path>に沿わせるかどうか。`true`または`false`で指定します。,
+wait       = アニメーションの完了を待つかどうか。`true`または`false`で指定します。,
+他         = この他、`[anim]`タグに指定できるパラメータや、各種CSSプロパティをアニメーション対象にすることができます。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.xanim = {
+    pm: {
+        name: "",
+        layer: "",
+        keyframe: "",
+        easing: "ease",
+        count: "1",
+        delay: "0",
+        direction: "normal",
+        mode: "forwards",
+        reset: "true",
+        time: "",
+        svg: "",
+        svg_x: "true",
+        svg_y: "true",
+        svg_rotate: "false",
+        next: "true",
+        wait: "false",
+    },
+
+    start: function (pm) {
+        // <svg>を使わない場合は_startに投げて早期リターン
+        if (!pm.svg) {
+            this._start(pm);
+            return;
         }
+
+        // <svg>を使うようだ
+
+        // ロードした<svg>を格納する不可視エリア
+        // (DOM要素としてちゃんとappendしないとanimejsで動作しなかった)
+        const j_hidden_area = this.kag.getHiddenArea();
+
+        // ロードした<svg>の情報を保存しておく領域
+        if (!this.kag.stat.hidden_svg_list) {
+            this.kag.stat.hidden_svg_list = [];
+        }
+
+        // <svg>のjQueryオブジェクト
+        let j_svg;
+
+        // <svg>のコンテンツを直接文字列で指定できるようにしてみる
+        // if (pm.svg.charAt(0) === "<") {
+        //     const this_tag_id = `${this.kag.stat.current_scenario}_line_${parseInt(this.kag.stat.current_line) + 1}`;
+        //     j_svg = $(pm.svg).attr("id", this_tag_id).appendTo(j_hidden_area);
+        //     this.kag.stat.hidden_svg_list[this_tag_id] = pm.svg;
+        //     this._start(pm, j_svg);
+        //     return;
+        // }
+
+        // <svg>のパスを補完
+        const path = $.parseStorage(pm.svg, "image");
+
+        // すでに存在しているならそれをゲット
+        j_svg = document.getElementById(path);
+        if (j_svg) {
+            this._start(pm, $(j_svg));
+            return;
+        }
+
+        // 存在していないならプリロードしよう
+        $.get(path, (xml) => {
+            j_svg = $(xml).find("svg").attr("id", path).appendTo(j_hidden_area);
+            this.kag.stat.hidden_svg_list.push(path);
+            this._start(pm, j_svg);
+        });
+    },
+
+    _start: function (_pm, j_svg) {
+        const that = this;
+        const pm = $.extend({}, _pm);
+
+        const should_wait = pm.wait !== "false" && pm.count !== "infinite";
+        const should_next = pm.next !== "false";
+
+        // 次のタグに進む
+        let is_next_done = false;
+        const next = () => {
+            if (is_next_done) {
+                return;
+            }
+            is_next_done = true;
+            if (should_next) this.kag.ftag.nextOrder();
+        };
+
+        // アニメーション対象を取得、見つからなければ早期リターン
+        const j_targets = $.findAnimTargets(pm);
+        if (j_targets.length === 0) {
+            next();
+            return;
+        }
+
+        const duration = parseInt(pm.time) || 1000;
+        const delay = parseInt(pm.delay) || 0;
+        const direction = pm.direction;
+        const loop = pm.count === "infinite" ? true : parseInt(pm.count) || 1;
+        const mode = pm.mode;
+
+        //
+        // イージング
+        //
+
+        let easing = pm.easing;
+
+        // jquery.a3d.js時代のeasingパラメータのフォールバック
+        // https://developer.mozilla.org/ja/docs/Web/CSS/easing-function
+        const oldOptions = {
+            "ease": "cubicBezier(0.25, 0.1, 0.25, 1.0)",
+            "ease-in": "cubicBezier(0.42, 0.0, 1.0, 1.0)",
+            "ease-out": "cubicBezier(0.42, 0.0, 0.58, 1.0)",
+            "ease-in-out": "cubicBezier(0.0, 0.0, 0.58, 1.0)",
+            "swing": "easeOutQuad",
+            "jswing": "easeOutQuad",
+            "def": "easeOutQuad",
+        };
+        if (oldOptions[easing]) {
+            easing = oldOptions[easing];
+        }
+        easing = easing.replace("cubic-bezier", "cubicBezier");
+
+        //
+        // キーフレーム情報を決定
+        //
+
+        // アニメーション定義を取得
+        let keyframes_css_names = [];
+        const keyframes = [];
+        if (pm.keyframe) {
+            const anim = this.kag.stat.map_keyframe[pm.keyframe];
+            if (!anim) {
+                this.kag.error('Keyframe animation "' + pm.keyframe + '" is not defined.');
+                next();
+                return;
+            }
+            let previous_time = 0;
+            for (const key in anim.frames) {
+                const frame = anim.frames[key];
+                const percentage = parseInt(key);
+                if (isNaN(percentage)) {
+                    this.kag.error('Frame percentage "' + key + '" is not valid.\n' + 'Valid examples) "0%", "30%", "100%"');
+                } else {
+                    // ひとつ前のキーフレームからこのキーフレームまでの時間を計算したい
+                    const time = (duration * percentage) / 100;
+                    const time_of_section = time - previous_time;
+                    previous_time = time;
+
+                    // キーフレーム情報
+                    // 時間、transformプロパティ、CSSプロパティの情報を持つ
+                    const keyframe = $.extend({ duration: time_of_section }, frame.styles);
+                    delete keyframe._tag;
+
+                    // さらにキーフレーム定義をマージしたいのだが
+                    // このときx, y, zについてはtranslateX, translateY, translateZに変換する必要がある
+                    for (const _key in frame.trans) {
+                        const key = _key.replace(/^(x|y|z)$/, function (v) {
+                            return "translate" + v.toUpperCase();
+                        });
+                        const val = frame.trans[_key];
+                        keyframe[key] = val;
+                    }
+
+                    // アニメーション操作対象となるCSSのプロパティ名を記録
+                    keyframes_css_names = Object.keys(frame.styles);
+                    if (Object.keys(frame.trans).length > 0) {
+                        keyframes_css_names.push("transform");
+                    }
+
+                    keyframes.push(keyframe);
+                }
+            }
+
+            if (keyframes.length === 0) {
+                this.kag.error("有効なキーフレームが定義されていません");
+                next();
+                return;
+            }
+        }
+
+        //
+        // 直接CSSプロパティを指定してアニメーションさせることもできる
+        //
+
+        const css_in_pm = {};
+        for (const _key in pm) {
+            if (!(_key in this.pm) && _key !== "_tag") {
+                const key = _key.replace(/^(x|y|z)$/, function (v) {
+                    return "translate" + v.toUpperCase();
+                });
+                css_in_pm[key] = pm[_key];
+            }
+        }
+
+        // いくつかのプロパティはティラノ標準に合わせよう
+        if (pm.opacity) pm.opacity = $.convertOpacity(pm.opacity);
+        if (pm.color) pm.color = $.convertColor(pm.color);
+        if (pm["background-color"]) pm["background-color"] = $.convertColor(pm["background-color"]);
+
+        // アニメーションを実行
+        j_targets.each(function () {
+            const j_this = $(this);
+
+            // アニメーションを実行する前のCSSプロパティを保存しておく
+            const initial_keyframes_css = {};
+            if (keyframes_css_names && mode === "none") {
+                keyframes_css_names.forEach(function (prop) {
+                    initial_keyframes_css[prop] = j_this.css(prop);
+                });
+            }
+
+            // アニメーションを実行する前にCSSプロパティをリセットする
+            if (keyframes_css_names && pm.reset === "true") {
+                keyframes_css_names.forEach(function (prop) {
+                    j_this.css(prop, "");
+                });
+            }
+
+            // セーブデータロード時にこのアニメーションを復元すべきか
+            const should_restore = loop === true;
+
+            // 復元すべき要素に付けるクラス名
+            const class_for_restore = "set-xanim-restore";
+
+            // anime()の戻り値
+            let anime_state;
+
+            // anime()のオプション
+            const anime_opt = {
+                targets: this,
+                duration: duration,
+                complete: () => {
+                    if (keyframes_css_names && mode === "none") {
+                        j_this.css(initial_keyframes_css);
+                    }
+                    // アニメ―ションスタックをpop
+                    if (loop !== true) {
+                        that.kag.popAnimStack();
+                    }
+                    if (should_restore) {
+                        j_this.removeClass(class_for_restore);
+                    }
+                    if (this.anime_state_set) {
+                        const is_succeeded = this.anime_state_set.delete(anime_state);
+                        //console.warn(is_succeeded);
+                    }
+                    if (should_wait) next();
+                },
+                easing: easing,
+                delay: delay,
+                direction: direction,
+                loop: loop,
+            };
+
+            // キーフレームを使うならオプションにセットしよう
+            if (keyframes.length > 0) {
+                anime_opt.keyframes = keyframes;
+            }
+
+            // CSS直接指定があるならオプションにセット
+            for (const key in css_in_pm) {
+                anime_opt[key] = css_in_pm[key];
+            }
+
+            // 要素が削除されたときにアニメーションを強制的に完了させる
+            j_this.on("remove", () => {
+                // Setを操作
+                if (this.anime_state_set) {
+                    for (const anime_state of this.anime_state_set) {
+                        if (!anime_state.completed) {
+                            anime_state.pause();
+                            anime_state.complete();
+                        }
+                    }
+                }
+            });
+
+            // アニメ―ションスタックをpush
+            if (loop !== true) {
+                that.kag.pushAnimStack();
+            }
+
+            // <svg>を使用する場合
+            if (j_svg) {
+                const path_elm = j_svg.find("path").get(0);
+                const path = anime.path(path_elm);
+                if (pm.svg_x === "true") {
+                    anime_opt.translateX = path("x");
+                }
+                if (pm.svg_y === "true") {
+                    anime_opt.translateY = path("y");
+                }
+                if (pm.svg_rotate === "true") {
+                    anime_opt.rotateZ = path("angle");
+                }
+                // transform をいじくり回す
+                keyframes_css_names.push("transform");
+            }
+
+            if (should_restore) {
+                // ループアニメーションの場合はロード時に復元する必要アリ
+                j_this.addClass(class_for_restore);
+
+                // パラメータを記憶
+                j_this.attr("data-event-pm", JSON.stringify(_pm));
+
+                // アニメーション適用前のスタイルを記憶
+                // [xanim]でいじくり回されることが予想されるプロパティすべて
+                const initial_css_map = {};
+                for (const name of keyframes_css_names) {
+                    initial_css_map[name] = j_this.css(name);
+                }
+                for (const name in css_in_pm) {
+                    initial_css_map[name] = j_this.css(name);
+                }
+                j_this.attr("data-effect", JSON.stringify(initial_css_map));
+
+                //console.warn({ pm, keyframes_css_names, css_in_pm, initial_css_map });
+            }
+
+            // ここでアニメーションを実行
+            anime_state = anime(anime_opt);
+
+            // Setを操作
+            if (!this.anime_state_set) {
+                this.anime_state_set = new Set();
+            }
+            this.anime_state_set.add(anime_state);
+
+            // console.warn(anime_opt);
+            // console.warn(anime_state);
+        });
+
+        // 不意の要素削除のテスト
+        // setTimeout(() => {
+        //     console.warn("suddenly remove!");
+        //     j_targets.remove();
+        // }, 300);
+
+        if (!should_wait) {
+            next();
+        }
+    },
+};
+
+/*
+#[stop_xanim]
+
+:group
+アニメーション関連
+
+:title
+[xanim]の停止
+
+:exp
+V515以降で使用可能。
+[xanim]で開始したアニメーションを停止します。
+
+:sample
+
+:param
+name  = アニメーションを停止する画像やテキストの`name`を指定します。,
+layer = `name`を指定せずに`layer`を指定することで、そのレイヤに存在するすべての要素のアニメーションを停止できます。,
+complete = `true`を指定すると、当初アニメーションするはずだった地点まで一瞬で移動させます。`false`の場合はその場で止まります。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.stop_xanim = {
+    pm: {
+        name: "",
+        layer: "",
+        complete: "false",
+    },
+
+    start: function (pm) {
+        const that = this;
+
+        // アニメーション対象を取得、見つからなければ早期リターン
+        const j_targets = $.findAnimTargets(pm);
+        if (j_targets.length === 0) {
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        j_targets.each(function () {
+            const j_this = $(this);
+
+            // Setを操作
+            if (this.anime_state_set) {
+                for (const anime_state of this.anime_state_set) {
+                    if (!anime_state.completed) {
+                        if (pm.complete === "true") {
+                            anime_state.seek(anime_state.duration);
+                        }
+                        anime_state.pause();
+                        anime_state.complete();
+                        // console.warn(this.anime_state_set);
+                    }
+                }
+            }
+        });
 
         this.kag.ftag.nextOrder();
     },
@@ -1461,87 +1929,86 @@ tyrano.plugin.kag.tag.chara_ptext = {
     },
 
     start: function (pm) {
-        var that = this;
         this.kag.layer.hideEventLayer();
+        const j_chara_name = this.kag.getCharaNameArea();
+
+        //
+        // 発言者名
+        //
 
         if (pm.name == "") {
-            $("." + this.kag.stat.chara_ptext).html("");
+            // 誰も話していない
+            j_chara_name.updatePText("");
 
-            //全員の明度を下げる。誰も話していないから
-            //明度設定が有効な場合
+            // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
             if (this.kag.stat.chara_talk_focus != "none") {
-                $("#tyrano_base").find(".tyrano_chara").css({
-                    "-webkit-filter": this.kag.stat.apply_filter_str,
-                    "-ms-filter": this.kag.stat.apply_filter_str,
-                    "-moz-filter": this.kag.stat.apply_filter_str,
-                });
+                this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
             }
         } else {
-            //日本語から逆変換することも可能とする
+            // 誰かが話している
+
+            // 日本語で指定されていた場合はIDに直す
+            // 例) "あかね" → "akane"
             if (this.kag.stat.jcharas[pm.name]) {
                 pm.name = this.kag.stat.jcharas[pm.name];
             }
 
-            var cpm = this.kag.stat.charas[pm.name];
-
+            // キャラクター定義を取得
+            const cpm = this.kag.stat.charas[pm.name];
             if (cpm) {
-                //キャラクター名出力
-                $("." + this.kag.stat.chara_ptext).html(cpm.jname);
+                // キャラクターが取得できた場合
 
-                //色指定がある場合は、その色を指定する。
+                // キャラクター名出力
+                j_chara_name.updatePText(cpm.jname);
+
+                // 色指定がある場合は、その色を指定する。
                 if (cpm.color != "") {
-                    $("." + this.kag.stat.chara_ptext).css("color", $.convertColor(cpm.color));
+                    j_chara_name.css("color", $.convertColor(cpm.color));
                 }
 
-                //明度設定が有効な場合
+                const j_chara_speaker = this.kag.getCharaElement(pm.name);
+
+                // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当ててから
+                // 発言者にのみ発言者用のスタイルを当てる
                 if (this.kag.stat.chara_talk_focus != "none") {
-                    $("#tyrano_base").find(".tyrano_chara").css({
-                        "-webkit-filter": this.kag.stat.apply_filter_str,
-                        "-ms-filter": this.kag.stat.apply_filter_str,
-                        "-moz-filter": this.kag.stat.apply_filter_str,
-                    });
-
-                    $("#tyrano_base")
-                        .find("." + pm.name + ".tyrano_chara")
-                        .css({
-                            "-webkit-filter": "brightness(100%) blur(0px)",
-                            "-ms-filter": "brightness(100%) blur(0px)",
-                            "-moz-filter": "brightness(100%) blur(0px)",
-                        });
+                    this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
+                    this.kag.setSpeakerStyle(j_chara_speaker);
                 }
 
-                //指定したキャラクターでアニメーション設定があった場合
-                if (this.kag.stat.chara_talk_anim != "none") {
-                    var chara_obj = $("#tyrano_base").find("." + pm.name + ".tyrano_chara");
-                    if (chara_obj.get(0)) {
-                        this.animChara(chara_obj, this.kag.stat.chara_talk_anim, pm.name);
-
-                        if (pm.face != "") {
-                            //即表情変更、アニメーション中になるから
-                            this.kag.ftag.startTag("chara_mod", {
-                                name: pm.name,
-                                face: pm.face,
-                                time: "0",
-                            });
-                        }
+                // 発言時アニメーション機能が有効な場合
+                if (this.kag.stat.chara_talk_anim != "none" && j_chara_speaker.get(0)) {
+                    let timeout = 0;
+                    if (pm.face != "") {
+                        // 表情の指定があれば一瞬で変更する！このあとアニメーションになるから
+                        this.kag.ftag.startTag("chara_mod", {
+                            name: pm.name,
+                            face: pm.face,
+                            next: "false",
+                            time: "0",
+                        });
+                        // [chara_mod]は非同期処理(プリロードを挟む)なのでタイムアウトを付ける
+                        timeout = 10;
                     }
+                    // アニメ―ションを再生
+                    $.setTimeout(() => {
+                        this.animChara(j_chara_speaker, this.kag.stat.chara_talk_anim, pm.name);
+                    }, timeout);
                 }
             } else {
-                //存在しない場合はそのまま表示できる
-                $("." + this.kag.stat.chara_ptext).html(pm.name);
+                // キャラクター定義が存在しない場合は指定ワードをそのまま表示
+                j_chara_name.updatePText(pm.name);
 
-                //存在しない場合は全員の明度を下げる。
+                // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
                 if (this.kag.stat.chara_talk_focus != "none") {
-                    $("#tyrano_base").find(".tyrano_chara").css({
-                        "-webkit-filter": this.kag.stat.apply_filter_str,
-                        "-ms-filter": this.kag.stat.apply_filter_str,
-                        "-moz-filter": this.kag.stat.apply_filter_str,
-                    });
+                    this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
                 }
             }
         }
 
-        //ボイス設定が有効な場合
+        //
+        // ボイス設定
+        //
+
         if (this.kag.stat.vostart == true) {
             //キャラクターのボイス設定がある場合
 
@@ -1565,32 +2032,19 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
         this.kag.stat.f_chara_ptext = "true";
 
-        //表情の変更もあわせてできる
-        if (pm.face != "") {
-            if (!this.kag.stat.charas[pm.name]["map_face"][pm.face]) {
-                this.kag.error(
-                    "指定されたキャラクター「" +
-                        pm.name +
-                        "」もしくはface:「" +
-                        pm.face +
-                        "」は定義されていません。もう一度確認をお願いします",
-                );
-                return;
-            }
+        //
+        // 表情の変更もあわせてできる
+        //
 
-            var storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
-
-            //chara_mod タグで実装するように調整
-            if (this.kag.stat.chara_talk_anim == "none") {
-                this.kag.ftag.startTag("chara_mod", {
-                    name: pm.name,
-                    face: pm.face,
-                });
-            }
-
-            //$("."+pm.name).attr("src",storage_url);
+        this.kag.layer.showEventLayer();
+        if (pm.face != "" && this.kag.stat.chara_talk_anim == "none") {
+            // ※発言時アニメーション機能が有効な場合はすでに上のほうで表情変更済み
+            // [chara_mod]に丸投げする！ nextOrder もこれに任せる
+            this.kag.ftag.startTag("chara_mod", {
+                name: pm.name,
+                face: pm.face,
+            });
         } else {
-            this.kag.layer.showEventLayer();
             this.kag.ftag.nextOrder();
         }
     },
@@ -2548,6 +3002,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         time: "",
         cross: "true",
         wait: "true",
+        next: "true",
     },
 
     start: function (pm) {
@@ -2586,7 +3041,9 @@ tyrano.plugin.kag.tag.chara_mod = {
             this.kag.stat.charas[pm.name]["storage"] = storage_url;
             this.kag.stat.charas[pm.name]["reflect"] = pm.reflect;
             this.kag.layer.showEventLayer();
-            this.kag.ftag.nextOrder();
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
             return;
         }
 
@@ -2622,7 +3079,9 @@ tyrano.plugin.kag.tag.chara_mod = {
         //storageが指定されていない場合は終わり
         if (storage_url == "") {
             that.kag.layer.showEventLayer();
-            this.kag.ftag.nextOrder();
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
             return;
         }
 
@@ -2660,7 +3119,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
                             if (pm.wait == "true") {
                                 that.kag.layer.showEventLayer();
-                                that.kag.ftag.nextOrder();
+                                if (pm.next !== "false") {
+                                    that.kag.ftag.nextOrder();
+                                }
                             }
                         });
                     } else {
@@ -2668,7 +3129,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
                         if (pm.wait == "true") {
                             that.kag.layer.showEventLayer();
-                            that.kag.ftag.nextOrder();
+                            if (pm.next !== "false") {
+                                that.kag.ftag.nextOrder();
+                            }
                         }
                     }
                 });
@@ -2685,7 +3148,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
                 if (pm.wait == "true") {
                     that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
+                    if (pm.next !== "false") {
+                        that.kag.ftag.nextOrder();
+                    }
                 }
             }
 
@@ -2694,7 +3159,9 @@ tyrano.plugin.kag.tag.chara_mod = {
 
             if (pm.wait == "false") {
                 that.kag.layer.showEventLayer();
-                that.kag.ftag.nextOrder();
+                if (pm.next !== "false") {
+                    that.kag.ftag.nextOrder();
+                }
             }
         });
     },
@@ -3348,20 +3815,8 @@ tyrano.plugin.kag.tag.filter = {
         blur: "",
     },
 
-    start: function (pm) {
-        var filter_str = "";
-
-        var j_obj = {};
-
-        if (pm.layer == "all") {
-            j_obj = $(".layer_camera");
-        } else {
-            j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
-        }
-
-        if (pm.name != "") {
-            j_obj = j_obj.find("." + pm.name);
-        }
+    buildFilterPropertyValue: function (pm) {
+        let filter_str = "";
 
         if (pm.grayscale != "") {
             filter_str += "grayscale(" + pm.grayscale + "%) ";
@@ -3399,25 +3854,27 @@ tyrano.plugin.kag.tag.filter = {
             filter_str += "blur(" + pm.blur + "px) ";
         }
 
-        j_obj.css({
-            "-webkit-filter": filter_str,
-            "-ms-filter": filter_str,
-            "-moz-filter": filter_str,
-        });
+        return filter_str;
+    },
+
+    start: function (pm) {
+        var j_obj = {};
+
+        if (pm.layer == "all") {
+            j_obj = $(".layer_camera");
+        } else {
+            j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+        }
+
+        if (pm.name != "") {
+            j_obj = j_obj.find("." + pm.name);
+        }
+
+        const filter_str = this.buildFilterPropertyValue(pm);
+
+        j_obj.setFilterCSS(filter_str);
 
         j_obj.addClass("tyrano_filter_effect");
-
-        /*
-        grayscale:"",
-        sepia:"",
-        saturate:"",
-        hue:"",
-        invert:"",
-        opacity:"",
-        brightness:"",
-        contrast:"",
-        blur:""
-        */
 
         this.kag.ftag.nextOrder();
     },
@@ -3484,6 +3941,103 @@ tyrano.plugin.kag.tag.free_filter = {
         });
 
         j_obj.removeClass("tyrano_filter_effect");
+
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[position_filter]
+
+:group
+レイヤ関連
+
+:title
+メッセージウィンドウ裏にフィルター効果
+
+:exp
+メッセージウィンドウの裏側にフィルター効果をかけることができます。
+これによって、たとえばメッセージウィンドウをすりガラスのように見せることができます。
+
+:sample
+フィルターをかける[p]
+[position_filter blur="5"]
+すりガラスのような効果[p]
+[position_filter invert="100"]
+色調反転[p]
+[position_filter grayscale="100"]
+グレースケールに[p]
+
+:param
+layer      = 対象とするメッセージレイヤを指定します。,
+page       = !!,
+remove     = `true`または`false`。`true`を指定すると、フィルターを除去する処理を行います。,
+grayscale  = `0`(デフォルト)～`100`を指定することで、画像の表示をグレースケールに変換できます。,
+sepia      = `0`(デフォルト)～`100`を指定することで、画像の表示をセピア調に変換できます。,
+saturate   = `0`～`100`(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。,
+hue        = `0`(デフォルト)～`360`を指定することで、画像の表示の色相を変更できます。,
+invert     = `0`(デフォルト)～`100`を指定することで、画像の表示の階調を反転させることができます。,
+opacity    = `0`～`100`(デフォルト)を指定することで、画像の表示の透過度を変更できます。,
+brightness = `100`(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。`0`で真っ暗に、`100`以上の数値でより明るくなります。,
+contrast   = `0`～`100`(デフォルト)を指定することで、画像の表示のコントラストを変更できます。,
+blur       = `0`(デフォルト)～`任意の値`を指定することで、画像の表示をぼかすことができます。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.position_filter = {
+    vital: [],
+
+    pm: {
+        layer: "message0",
+        page: "fore",
+        remove: "false",
+        grayscale: "",
+        sepia: "",
+        saturate: "",
+        hue: "",
+        invert: "",
+        opacity: "",
+        brightness: "",
+        contrast: "",
+        blur: "",
+    },
+
+    start: function (pm) {
+        // メッセージレイヤとアウター
+        const j_message_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+        const j_message_outer = j_message_layer.find(".message_outer");
+
+        // 古いフィルターは捨てる
+        j_message_layer.find(".message_filter").remove();
+
+        // remove="true"のときは単に削除するだけ
+        if (pm.remove === "true") {
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        // アウターのクローンを作成する クラスは変更しておく message_outer → message_filter
+        const j_message_outer_clone = j_message_outer.clone();
+        j_message_outer_clone.removeClass("message_outer").addClass("message_filter");
+
+        // フィルターをかけたいだけなので背景設定はすべて取り除く
+        // フィルターを薄くしないために opacity は確定で 1
+        j_message_outer_clone.css({
+            "opacity": "1",
+            "background-image": "none",
+            "background-color": "transparent",
+        });
+
+        // pm から backdrop-filter に設定する値を組み立てて突っ込む
+        const filter_str = this.kag.ftag.master_tag.filter.buildFilterPropertyValue(pm);
+        j_message_outer_clone.css({
+            "-webkit-backdrop-filter": filter_str,
+            "backdrop-filter": filter_str,
+        });
+
+        // アウターの前に挿入するのがいいだろう
+        j_message_outer_clone.insertBefore(j_message_outer);
 
         this.kag.ftag.nextOrder();
     },

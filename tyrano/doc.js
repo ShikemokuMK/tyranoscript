@@ -135,6 +135,9 @@ var PARAM_EXP = {
                                 if (flag_param != "param" && flag_param != "title") {
                                     line_str += "\n";
                                 }
+                                if (flag_param === "param") {
+                                    line_str += "φ";
+                                }
                                 tmp_str += line_str;
                             }
 
@@ -165,7 +168,13 @@ var PARAM_EXP = {
                         var tag = map_doc[tag_name];
                         tag.array_param = [];
 
-                        var array_param = tag.param.split(",");
+                        var array_param = tag.param.split(",φ");
+                        array_param = array_param.map((item) => {
+                            return item.replace(/φ/g, "");
+                        });
+                        if (array_param.length && array_param[array_param.length - 1] === "") {
+                            array_param.pop();
+                        }
 
                         for (var k = 0; k < array_param.length; k++) {
                             var tmp_array = array_param[k].split("=");
@@ -390,7 +399,13 @@ var PARAM_EXP = {
                 '<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>解説</th><th>初期値</th></tr></thead>' +
                 "<tbody>";
 
-            var array_param = obj.param.split(",");
+            var array_param = obj.param.split(",φ");
+            array_param = array_param.map((item) => {
+                return item.replace(/φ/g, "");
+            });
+            if (array_param.length && array_param[array_param.length - 1] === "") {
+                array_param.pop();
+            }
 
             //console.log("==== array_param  =====");
             //console.log(array_param);

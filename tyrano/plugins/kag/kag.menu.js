@@ -18,8 +18,8 @@ tyrano.plugin.kag.menu = {
 
         var that = this;
 
-        this.kag.stat.is_skip = false;
-        this.kag.stat.is_auto = false;
+        this.kag.setSkip(false);
+        this.kag.setAuto(false);
         this.kag.stat.is_auto_wait = false;
 
         var layer_menu = this.kag.layer.getMenuLayer();
@@ -46,7 +46,7 @@ tyrano.plugin.kag.menu = {
                         $(".button_menu").show();
                     }
                     //nextOrder にして、
-                    that.kag.stat.is_skip = true;
+                    that.kag.setSkip(true);
 
                     ///処理待ち状態の時は、実行してはいけない
                     if (that.kag.layer.layer_event.css("display") == "none") {
@@ -133,7 +133,7 @@ tyrano.plugin.kag.menu = {
 
         var that = this;
 
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
 
         var array_save = that.getSaveData();
         var array = array_save.data;
@@ -324,6 +324,9 @@ tyrano.plugin.kag.menu = {
 
     //セーブ状態のスナップを保存します。
     snapSave: function (title, call_back, flag_thumb) {
+        // savestart イベントを発火
+        this.kag.trigger("savestart");
+
         var that = this;
 
         //画面のキャプチャも取るよ
@@ -358,7 +361,9 @@ tyrano.plugin.kag.menu = {
         }
 
         if (flag_thumb == "false") {
-            //サムネデータを保存しない
+            //
+            // サムネイルデータを作成しない場合
+            //
             var img_code = "";
             var data = {};
 
@@ -378,11 +383,20 @@ tyrano.plugin.kag.menu = {
 
             if (call_back) {
                 call_back();
+
+                // savecomplete イベントを発火
+                this.kag.trigger("savecomplete");
             }
         } else {
+            //
+            //
+            //
             $("#tyrano_base").find(".layer_blend_mode").css("display", "none");
 
             setTimeout(function () {
+                //
+                // キャプチャ完了時コールバック
+                //
                 var completeImage = function (img_code) {
                     var data = {};
 
@@ -403,10 +417,17 @@ tyrano.plugin.kag.menu = {
 
                     if (call_back) {
                         call_back();
+
+                        // savecomplete イベントを発火
+                        that.kag.trigger("savecomplete");
                     }
                 };
 
                 if (that.kag.stat.save_img != "") {
+                    //
+                    // サムネイルに使う画像が[save_img]タグで直接指定されている場合
+                    //
+
                     var img = new Image();
                     img.src = _stat.save_img;
                     img.onload = function () {
@@ -422,6 +443,10 @@ tyrano.plugin.kag.menu = {
                         completeImage(img_code);
                     };
                 } else {
+                    //
+                    // html2canvas.jsでゲーム画面のキャプチャを実行する場合
+                    //
+
                     //ビデオをキャプチャするための仕組み
                     let canvas = document.createElement("canvas"); // declare a canvas element in your html
                     let ctx = canvas.getContext("2d");
@@ -491,14 +516,25 @@ tyrano.plugin.kag.menu = {
                         scale: 1,
                         height: that.kag.config.scHeight,
                         width: that.kag.config.scWidth,
+                        logging: that.kag.config["debugMenu.visible"] === "true",
                     };
 
                     html2canvas(tmp_base.get(0), opt).then(function (canvas) {
                         $("#tyrano_base").find(".layer_blend_mode").css("display", "");
                         $("#tyrano_base").find(".tmp_video_canvas").css("backgroundImage", "");
 
-                        // canvas is the final rendered <canvas> element
-                        //console.log(canvas);
+                        // キャプチャした画像をDOMに追加してクオリティチェック
+                        // コメントトグル:  ⌘ + /  または  Ctrl + /
+                        // $("body").css({
+                        //     overflow: "scroll",
+                        // });
+                        // $(canvas)
+                        //     .css({
+                        //         position: "absolute",
+                        //         top: $.getViewPort().height,
+                        //     })
+                        //     .appendTo("body");
+                        // console.log(canvas)
                         var img_code = that.createImgCode(canvas);
 
                         completeImage(img_code);
@@ -549,7 +585,7 @@ tyrano.plugin.kag.menu = {
     displayLoad: function (cb) {
         var that = this;
 
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
 
         var array_save = that.getSaveData();
         var array = array_save.data;
@@ -641,6 +677,11 @@ tyrano.plugin.kag.menu = {
     },
 
     loadGameData: function (data, options) {
+        const that = this;
+
+        // loadstart イベントを発火
+        this.kag.trigger("loadstart");
+
         var auto_next = "no";
 
         //普通のロードの場合
@@ -666,8 +707,11 @@ tyrano.plugin.kag.menu = {
         }
 
         //layerの復元
-        console.log(data.layer);
+        //console.log(data.layer);
         this.kag.layer.setLayerHtml(data.layer);
+
+        // グラデーションテキストの復元
+        $(".gradient-text").restoreGradientText();
 
         //バックログの初期化
         //awakegame考慮もれ。一旦戻す
@@ -925,6 +969,106 @@ tyrano.plugin.kag.menu = {
             event_tag.setEvent(j_elm, pm);
         });
 
+        // 一時変数(tf)は消す
+        // ※ this.kag.tmp に影響はない
+        this.kag.clearTmpVariable();
+
+        // 復元完了
+        // make.ksを通過してからもとのシナリオファイル＋タグインデックスに戻る処理
+        const next = () => {
+            // loadcomplete イベントを発火
+            this.kag.trigger("loadcomplete");
+
+            // make.ks を挿入する
+            const insert = {
+                name: "call",
+                pm: {
+                    storage: "make.ks",
+                    auto_next: auto_next,
+                },
+                val: "",
+            };
+
+            this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
+        };
+
+        // make.ks に行く前にプリロードをする必要があるものはこの配列にぶち込んでいく
+        const preload_targets = [];
+
+        // [xanim]用に読み込んだ<svg>の復元
+        if (this.kag.stat.hidden_svg_list) {
+            const j_hidden_area = this.kag.getHiddenArea();
+            for (const item of this.kag.stat.hidden_svg_list) {
+                switch (typeof item) {
+                    case "string":
+                        const file_path = item;
+                        // すでに存在しているならスキップ
+                        if (document.getElementById(file_path)) {
+                            // $("#" + item) だとjQueryがセレクタの構文エラーを吐いてくるので pure javascript を使う
+                            continue;
+                        }
+                        // 存在していない！
+                        preload_targets.push((callback) => {
+                            $.get(file_path, (xml) => {
+                                $(xml).find("svg").attr("id", file_path).appendTo(j_hidden_area);
+                                callback();
+                            });
+                        });
+                        break;
+                }
+            }
+        }
+
+        // [xanim]の無限ループアニメーションの復元
+        const restoreXanim = () => {
+            // [xanim]の復元対象
+            $(".set-xanim-restore").each(function () {
+                const j_this = $(this);
+                const pm = JSON.parse(j_this.attr("data-event-pm"));
+                const initial_css_map = JSON.parse(j_this.attr("data-effect"));
+                j_this.css(initial_css_map);
+                pm.delay = "0";
+                pm.next = "false";
+                that.kag.getTag("xanim").start(pm);
+            });
+        };
+
+        // アニメーションスタックはゼロにしておくべきだろう
+        this.kag.tmp.num_anim = 0;
+
+        // プリロードが必要ないなら即実行
+        if (preload_targets.length === 0) {
+            restoreXanim();
+            next();
+            return;
+        }
+
+        // あと何個プリロードする必要があるか
+        // プリロードが完了するたびにデクリメント、これが0になったらプリロード完了
+        let preload_targets_count_left = preload_targets.length;
+
+        // プリロード1個完了処理
+        const complete_preload_one = () => {
+            preload_targets_count_left -= 1;
+            if (preload_targets_count_left === 0) {
+                // console.warn("complete preload!");
+                restoreXanim();
+                next();
+            }
+        };
+
+        // プリロード開始
+        for (const item of preload_targets) {
+            switch (typeof item) {
+                case "function":
+                    item(complete_preload_one);
+                    break;
+                case "string":
+                    this.kag.preload(item, complete_preload_one);
+                    break;
+            }
+        }
+
         //ジャンプ
         //data.stat.current_scenario;
         //data.current_order_index;
@@ -934,24 +1078,10 @@ tyrano.plugin.kag.menu = {
         //auto_next 一旦makeを経由するときに、auto_nextを考えておく
         //alert(auto_next);
 
-        var insert = {
-            name: "call",
-            pm: {
-                storage: "make.ks",
-                auto_next: auto_next,
-            },
-            val: "",
-        };
-
         //auto_next = "yes";
 
         //make.ks を廃止したい
         //var insert =undefined;
-
-        //添付変数は消す。
-        this.kag.clearTmpVariable();
-
-        this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
     },
 
     //メニュー画面に指定のJクエリオブジェクト追加
@@ -1076,7 +1206,7 @@ tyrano.plugin.kag.menu = {
     //バックログ画面表示
     displayLog: function () {
         var that = this;
-        this.kag.stat.is_skip = false;
+        this.kag.setSkip(false);
 
         var j_save = $("<div></div>");
 

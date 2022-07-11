@@ -38,7 +38,7 @@ tyrano.plugin.kag.layer = {
 
             //スキップ中にクリックされたら元に戻す
             if(that.kag.stat.is_skip == true){
-                that.kag.stat.is_skip = false;
+                that.kag.setSkip(false)
             }
 
             //オート中でクリックされた場合。オート停止
@@ -191,6 +191,16 @@ tyrano.plugin.kag.layer = {
 
         //fixレイヤも
         this.showFixLayer();
+    },
+
+    showLayer: function (j_layer) {
+        j_layer.css("display", "");
+        j_layer.attr("l_visible", "true");
+    },
+
+    hideLayer: function (j_layer) {
+        j_layer.css("display", "none");
+        j_layer.attr("l_visible", "false");
     },
 
     showFixLayer: function () {
@@ -493,6 +503,14 @@ tyrano.plugin.kag.layer = {
     },
 
     hideEventLayer: function () {
+        // 安定化対応
+        //
+        // * is_stop        (弱いストップ) アニメーションやトランジションの最中に有効
+        // * is_strong_stop (強いストップ) [s]や[wait]で有効
+        //
+        // * 弱いストップが有効なときはイベントレイヤをクリックしても反応しなくなる。
+        //   ただし、外部から直接 nextOrder が呼び出されたときは次のタグに進行する。
+        // * 強いストップが有効なときは外部から呼び出された nextOrder にすら反応しなくなる！
         this.kag.stat.is_stop = true;
         this.layer_event.hide();
     },
