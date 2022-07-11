@@ -677,6 +677,8 @@ tyrano.plugin.kag.menu = {
     },
 
     loadGameData: function (data, options) {
+        const that = this;
+
         // loadstart イベントを発火
         this.kag.trigger("loadstart");
 
@@ -967,6 +969,106 @@ tyrano.plugin.kag.menu = {
             event_tag.setEvent(j_elm, pm);
         });
 
+        // 一時変数(tf)は消す
+        // ※ this.kag.tmp に影響はない
+        this.kag.clearTmpVariable();
+
+        // 復元完了
+        // make.ksを通過してからもとのシナリオファイル＋タグインデックスに戻る処理
+        const next = () => {
+            // loadcomplete イベントを発火
+            this.kag.trigger("loadcomplete");
+
+            // make.ks を挿入する
+            const insert = {
+                name: "call",
+                pm: {
+                    storage: "make.ks",
+                    auto_next: auto_next,
+                },
+                val: "",
+            };
+
+            this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
+        };
+
+        // make.ks に行く前にプリロードをする必要があるものはこの配列にぶち込んでいく
+        const preload_targets = [];
+
+        // [xanim]用に読み込んだ<svg>の復元
+        if (this.kag.stat.hidden_svg_list) {
+            const j_hidden_area = this.kag.getHiddenArea();
+            for (const item of this.kag.stat.hidden_svg_list) {
+                switch (typeof item) {
+                    case "string":
+                        const file_path = item;
+                        // すでに存在しているならスキップ
+                        if (document.getElementById(file_path)) {
+                            // $("#" + item) だとjQueryがセレクタの構文エラーを吐いてくるので pure javascript を使う
+                            continue;
+                        }
+                        // 存在していない！
+                        preload_targets.push((callback) => {
+                            $.get(file_path, (xml) => {
+                                $(xml).find("svg").attr("id", file_path).appendTo(j_hidden_area);
+                                callback();
+                            });
+                        });
+                        break;
+                }
+            }
+        }
+
+        // [xanim]の無限ループアニメーションの復元
+        const restoreXanim = () => {
+            // [xanim]の復元対象
+            $(".set-xanim-restore").each(function () {
+                const j_this = $(this);
+                const pm = JSON.parse(j_this.attr("data-event-pm"));
+                const initial_css_map = JSON.parse(j_this.attr("data-effect"));
+                j_this.css(initial_css_map);
+                pm.delay = "0";
+                pm.next = "false";
+                that.kag.getTag("xanim").start(pm);
+            });
+        };
+
+        // アニメーションスタックはゼロにしておくべきだろう
+        this.kag.tmp.num_anim = 0;
+
+        // プリロードが必要ないなら即実行
+        if (preload_targets.length === 0) {
+            restoreXanim();
+            next();
+            return;
+        }
+
+        // あと何個プリロードする必要があるか
+        // プリロードが完了するたびにデクリメント、これが0になったらプリロード完了
+        let preload_targets_count_left = preload_targets.length;
+
+        // プリロード1個完了処理
+        const complete_preload_one = () => {
+            preload_targets_count_left -= 1;
+            if (preload_targets_count_left === 0) {
+                // console.warn("complete preload!");
+                restoreXanim();
+                next();
+            }
+        };
+
+        // プリロード開始
+        for (const item of preload_targets) {
+            switch (typeof item) {
+                case "function":
+                    item(complete_preload_one);
+                    break;
+                case "string":
+                    this.kag.preload(item, complete_preload_one);
+                    break;
+            }
+        }
+
         //ジャンプ
         //data.stat.current_scenario;
         //data.current_order_index;
@@ -976,27 +1078,10 @@ tyrano.plugin.kag.menu = {
         //auto_next 一旦makeを経由するときに、auto_nextを考えておく
         //alert(auto_next);
 
-        var insert = {
-            name: "call",
-            pm: {
-                storage: "make.ks",
-                auto_next: auto_next,
-            },
-            val: "",
-        };
-
         //auto_next = "yes";
 
         //make.ks を廃止したい
         //var insert =undefined;
-
-        //添付変数は消す。
-        this.kag.clearTmpVariable();
-
-        // loadcomplete イベントを発火
-        this.kag.trigger("loadcomplete");
-
-        this.kag.ftag.nextOrderWithIndex(data.current_order_index, data.stat.current_scenario, true, insert, "yes");
     },
 
     //メニュー画面に指定のJクエリオブジェクト追加

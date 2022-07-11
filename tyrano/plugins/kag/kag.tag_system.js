@@ -142,7 +142,7 @@ tyrano.plugin.kag.tag.clearsysvar = {
 :sample
 
 :param
-stack = `call`、`if`、`macro`のいずれかを指定できます。特定のスタックのみ削除できます。省略すると、全てのスタックを削除します。
+stack = `call`、`if`、`macro`のいずれかを指定できます。特定のスタックのみ削除できます。省略すると、全てのスタックを削除します。<br>V515以降：`anim`を指定できます。`anim`を指定した場合、現在実行中のアニメーション数を強制的にゼロにして、`[wa]`で確実に次のタグに進むようにできます。なお、`stack`パラメータを省略した場合はこの操作は行われません。
 
 #[end]
 */
@@ -159,6 +159,8 @@ tyrano.plugin.kag.tag.clearstack = {
                 call: [],
                 macro: [],
             };
+        } else if (pm.stack === "anim") {
+            this.kag.tmp.num_anim = 0;
         } else {
             this.kag.stat.stack[pm.stack] = [];
         }
