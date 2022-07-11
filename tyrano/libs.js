@@ -1923,6 +1923,24 @@
         // マッチし続ける限り再帰する
         return $.parseCamelCaseCSS(str.replace(match[0], match[0].charAt(1).toUpperCase()));
     };
+
+    $.findAnimTargets = function (pm = {}) {
+        // アニメーション対象
+        let j_target = null;
+
+        if (pm.name) {
+            // nameパラメータが指定されている場合
+            j_target = $("." + pm.name);
+        } else if (pm.layer) {
+            // nameパラメータは指定されていないがlayerパラメータが指定されている場合
+            // 対象レイヤのクラス名を取得 (例) "layer_free", "0_fore", "1_fore"
+            const layer_name = pm.layer == "free" ? "layer_free" : pm.layer + "_fore";
+            // レイヤ内の子要素をすべて対象に取る
+            j_target = $("." + layer_name).children();
+        }
+
+        return j_target || $();
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {

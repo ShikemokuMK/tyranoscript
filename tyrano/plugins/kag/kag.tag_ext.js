@@ -1510,7 +1510,7 @@ tyrano.plugin.kag.tag.xanim = {
         // }
 
         // <svg>のパスを補完
-        const path = "./data/image/" + pm.svg;
+        const path = $.parseStorage(pm.svg, "image");
 
         // すでに存在しているならそれをゲット
         j_svg = document.getElementById(path);
