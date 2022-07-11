@@ -1654,8 +1654,11 @@ tyrano.plugin.kag = {
 
         var ext = $.getExt(src);
 
+        const is_http = $.isHTTP(src);
+        const is_inline_data = src.substring(0, 5) === "data:";
+
         // 相対パスの場合は"./"を補完
-        if (!$.isHTTP(src)) {
+        if (!is_http && !is_inline_data) {
             const c1 = src.charAt(0);
             const c2 = src.substring(0, 2);
             if (c1 === "/") {
