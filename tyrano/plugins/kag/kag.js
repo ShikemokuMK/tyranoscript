@@ -1706,28 +1706,29 @@ tyrano.plugin.kag = {
 
     //配列の先読み
     preloadAll: function (storage, callbk) {
-        var that = this;
-        //配列で指定された場合
-        if (typeof storage == "object" && storage.length >= 0) {
+        const that = this;
+        if (Array.isArray(storage)) {
+            // 配列で指定された場合
+
+            // 空の配列が渡された…だと…
             if (storage.length == 0) {
-                callbk();
+                if (callbk) callbk();
                 return;
             }
 
-            var sum = 0;
+            let sum = 0;
 
-            for (var i = 0; i < storage.length; i++) {
-                that.kag.preload(storage[i], function () {
+            for (let i = 0; i < storage.length; i++) {
+                that.kag.preload(storage[i], () => {
                     sum++;
-                    if (storage.length == sum) {
-                        callbk();
+                    if (sum === storage.length) {
+                        if (callbk) callbk();
                     }
                 });
             }
         } else {
-            this.kag.preload(pm.storage, function () {
-                callbk();
-            });
+            // 配列じゃなかった場合
+            this.kag.preload(storage, callbk);
         }
     },
 
@@ -2038,6 +2039,36 @@ tyrano.plugin.kag = {
         const filter = "";
         j_chara.setFilterCSS(filter);
     },
+
+    /**
+     * div#hidden_area　を取得する
+     */
+    getHiddenArea() {
+        // プロパティに代入済みならそれを即返す
+        if (this.__j_hiden_area) {
+            return this.__j_hiden_area;
+        }
+
+        // プロパティに代入されていない場合とりあえずサーチしてみる 見つかったらプロパティに代入して返す
+        let j_hidden_area = $("#hidden_area");
+        if (j_hidden_area.length > 0) {
+            this.__j_hiden_area = j_hidden_area;
+            return j_hidden_area;
+        }
+
+        // なければ新しく作ろう
+        j_hidden_area = $('<div id="hidden_area" />').appendTo("body").css({
+            position: "fixed",
+            left: "200%",
+            top: "200%",
+            opacity: "0",
+        });
+
+        this.__j_hiden_area = j_hidden_area;
+        return j_hidden_area;
+    },
+
+    __j_hiden_area: null,
 
     test: function () {},
 };
