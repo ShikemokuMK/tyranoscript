@@ -1662,7 +1662,9 @@
         });
     };
 
-    // グラデーションのプリセット
+    /**
+     * CSSグラデーションのプリセット
+     */
     $.gradientPresetMap = {
         dark: "linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 41%, rgba(126,126,126,1) 100%)",
         light: "linear-gradient(0deg, rgba(193,245,239,1) 0%, rgba(255,255,255,1) 34%, rgba(255,255,255,1) 100%)",
@@ -1760,7 +1762,7 @@
      */
     $.fn.setStyleMap = function (map) {
         const len = this.length;
-        if (this.length === 0) {
+        if (len === 0) {
             return this;
         }
         for (let i = 0; i < len; i++) {
@@ -1782,7 +1784,7 @@
      */
     $.fn.setStyle = function (key, value) {
         const len = this.length;
-        if (this.length === 0) {
+        if (len === 0) {
             return this;
         }
         for (let i = 0; i < len; i++) {
@@ -1790,6 +1792,136 @@
             elm.style.setProperty(key, value);
         }
         return this;
+    };
+
+    /**
+     * ティラノスクリプトの[kanim]に渡されたパラメータを用いて
+     * 任意のDOM要素にWeb Animation APIによるキーフレームアニメーションを適用する
+     * @param {Object} pm
+     * @return {jQuery}
+     */
+    $.fn.animateWithTyranoKeyframes = function (pm) {
+        const len = this.length;
+        if (len === 0) {
+            return this;
+        }
+        const keyframes = TYRANO.kag.parseKeyframesForWebAnimationAPI(pm.keyframe);
+        if (!keyframes) {
+            return this;
+        }
+        for (let i = 0; i < len; i++) {
+            this[i].animate(keyframes, {
+                delay: parseInt(pm.delay) || 0,
+                direction: pm.direction || "normal",
+                duration: parseInt(pm.time) || 1000,
+                easing: pm.easing || "linear",
+                iterations: pm.count === "infinite" ? Infinity : parseInt(pm.count) || Infinity,
+                fill: pm.mode || "forwards",
+            });
+        }
+        return this;
+    };
+
+    /**
+     * dataフォルダに入っていることが想定されるフォルダ名("scenario", "image"など)を格納した配列
+     */
+    const data_folder_names = ["scenario", "image", "fgimage", "bgimage", "video", "sound", "bgm", "others", "others/plugin"];
+
+    /**
+     * タグのstorageパラメータに指定された値を実際に使えるパスに直す
+     * @param {string} storage "foo.png"
+     * @param {string} dir_name "fgimage"
+     * @returns {string}
+     * @example
+     * $.parseStorage("foo.png", "fgimage");
+     * // "./data/fgimage/foo.png"
+     * $.parseStorage("https://tyrano.jp/foo.png", "fgimage");
+     * // "https://tyrano.jp/foo.png"
+     * $.parseStorage("foo.png", "tyrano/images/system");
+     * // "./tyrano/images/system/foo.png"
+     * $.parseStorage("foo.png", "data/fgimage");
+     * // "./data/fgimage/foo.png"
+     * $.parseStorage("../image/foo.png", "data/fgimage");
+     * // "./data/fgimage/../image/foo.png"
+     */
+    $.parseStorage = function (storage, dir_name = "") {
+        // "http"で始まっているならそのまま返す
+        if ($.isHTTP(storage)) {
+            return storage;
+        }
+        // フォルダパスを特定
+        let dir_path;
+        if (!dir_name) {
+            dir_path = ".";
+        } else if (dir_name && data_folder_names.includes(dir_name)) {
+            // dataフォルダに入っているフォルダ名が指定されている場合は自動的に"./data/"を足す
+            // たとえば"scenario"を"./data/scenario"に変換する
+            dir_path = `./data/${dir_name}`;
+        } else {
+            dir_path = dir_name;
+            // 末尾の"/"は消す
+            if (dir_path.slice(-1) === "/") {
+                dir_path = dir_path.substring(0, dir_path.length - 1);
+            }
+            // 先頭が"./"から始まることを保証する
+            const c = dir_path.charAt(0);
+            if (c === "/") {
+                dir_path = "." + dir_path;
+            } else if (c !== ".") {
+                dir_path = "./" + dir_path;
+            }
+        }
+        // storageの先頭の"./"は消していい
+        if (storage.substring(0, 2) === "./") {
+            storage = storage.substring(2);
+        }
+        // フォルダパス / ファイル名
+        const path = `${dir_path}/${storage}`;
+        // 連続する"/"は消して返す
+        return path.replace(/\/+/g, "/");
+    };
+
+    /**
+     * "300", "0.3s", "300ms" などでありうる文字列を
+     * animation-duration にセットできる値に変換する
+     * @param {string} str
+     * @returns
+     */
+    $.convertDuration = function (str, default_value = "0s") {
+        if (typeof str !== "string" || str === "") {
+            return default_value;
+        }
+        if (str.includes("s")) {
+            return str;
+        }
+        return str + "ms";
+    };
+
+    /**
+     * スネークケース(ハイフン区切り)のCSSのプロパティ名を
+     * キャメルケースに変換して返す
+     * @param {string} str
+     * @returns {string}
+     * @example
+     * $.parseCamelCaseCSS("-webkit-text-stroke");
+     * // "webkitTextStroke"
+     */
+    $.parseCamelCaseCSS = function (str) {
+        if (typeof str !== "string") {
+            return "";
+        }
+        // 先頭のハイフンはただ消去するだけでいい
+        if (str.charAt(0) === "-") {
+            str = str.substring(1);
+        }
+        // ハイフン＋なんらかの小文字アルファベットのマッチ
+        const match = str.match(/\-[a-z]/);
+        // マッチしなくなったら完成
+        if (!match) {
+            return str;
+        }
+        // マッチし続ける限り再帰する
+        return $.parseCamelCaseCSS(str.replace(match[0], match[0].charAt(1).toUpperCase()));
     };
 })(jQuery);
 

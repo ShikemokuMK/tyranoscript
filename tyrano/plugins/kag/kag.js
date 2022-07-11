@@ -1654,29 +1654,37 @@ tyrano.plugin.kag = {
 
         var ext = $.getExt(src);
 
-        if (ext == "mp3" || ext == "ogg" || ext == "m4a") {
-            // 相対パスの場合"./"を補完
-            if (src.indexOf("http://") !== 0 && src.indexOf("https://") !== 0 && src.indexOf("./") !== 0) {
+        // 相対パスの場合は"./"を補完
+        if (!$.isHTTP(src)) {
+            const c1 = src.charAt(0);
+            const c2 = src.substring(0, 2);
+            if (c1 === "/") {
+                // "/data/sound/foo.mp3"
+                src = "." + src;
+            } else if (c2 !== "./") {
+                // "data/sound/foo.mp3"
                 src = "./" + src;
             }
+        }
 
-            var howl_opt = {
+        if (ext == "wav" || ext == "mp3" || ext == "ogg" || ext == "m4a") {
+            // 音声ファイルプリロード
+            let obj;
+            const howl_opt = {
                 src: src,
                 preload: true,
                 onload: () => {
-                    if (callbk) callbk();
+                    if (callbk) callbk(obj);
                 },
                 onloaderror: () => {
                     //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
                     if (callbk) callbk(obj);
                 },
             };
-
-            let obj = new Howl(howl_opt);
+            obj = new Howl(howl_opt);
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
-            //動画ファイルプリロード
+            // 動画ファイルプリロード
             $("<video />")
-                .attr("src", src)
                 .on("loadeddata", function (e) {
                     callbk && callbk();
                 })
@@ -1685,10 +1693,11 @@ tyrano.plugin.kag = {
                         "動画ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/video/file.mp4",
                     );
                     callbk && callbk();
-                });
+                })
+                .attr("src", src);
         } else {
+            // 画像ファイルプリロード
             $("<img />")
-                .attr("src", src)
                 .on("load", function (e) {
                     if (callbk) callbk(this);
                 })
@@ -1698,9 +1707,9 @@ tyrano.plugin.kag = {
                     that.kag.error(
                         "画像ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png",
                     );
-
                     if (callbk) callbk();
-                });
+                })
+                .attr("src", src);
         }
     },
 
@@ -2037,6 +2046,52 @@ tyrano.plugin.kag = {
         // 発言していない人はフィルターなし
         const filter = "";
         j_chara.setFilterCSS(filter);
+    },
+
+    /**
+     * ティラノスクリプトの[keyframe]-[frame]-[endkeyframe]で定義されたキーフレームアニメーションを
+     * Web Animation APIで使用できるキーフレーム情報に変換する
+     * @param {string} name [keyframe]タグに指定したname
+     * @returns {Object[] | null} キーフレーム情報
+     */
+    parseKeyframesForWebAnimationAPI: function (name) {
+        if (!(this.stat.map_keyframe[name] && this.stat.map_keyframe[name].frames)) {
+            return null;
+        }
+        const frames = this.stat.map_keyframe[name].frames;
+        const keyframes = [];
+        for (const percentage_str in frames) {
+            const percentage_int = parseInt(percentage_str);
+            const offset = percentage_int / 100;
+            const frame = frames[percentage_str];
+            const this_keyframe = {};
+            // transform
+            const transform_strs = [];
+            for (const _key in frame.trans) {
+                let key = _key;
+                let value = frame.trans[_key];
+                if (_key === "x" || _key === "y" || _key === "z") {
+                    key = "translate" + _key.toUpperCase();
+                    value = value + "px";
+                }
+                transform_strs.push(`${key}(${value})`);
+            }
+            if (transform_strs.length > 0) {
+                this_keyframe["transform"] = transform_strs.join(" ");
+            }
+            // transform以外のスタイル
+            for (const _key in frame.styles) {
+                if (_key === "_tag") {
+                    continue;
+                }
+                const key = $.parseCamelCaseCSS(_key);
+                this_keyframe[key] = $.convertColor(frame.styles[_key]);
+            }
+            // 進行度(0～1の小数点数)
+            this_keyframe.offset = offset;
+            keyframes.push(this_keyframe);
+        }
+        return keyframes;
     },
 
     test: function () {},

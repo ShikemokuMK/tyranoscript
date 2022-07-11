@@ -45,21 +45,175 @@ tyrano.plugin.kag.ftag = {
         }
     },
 
-    //次へボタンを隠します
+    /**
+     * クリック待ちグリフを削除または隠蔽する
+     */
     hideNextImg: function () {
         $(".img_next").remove();
         $(".glyph_image").hide();
     },
 
+    /**
+     * クリック待ちグリフを表示する
+     */
     showNextImg: function () {
-        //グリフが指定されている場合はこちらを適用
+        // メッセージウィンドウ内グリフか、画面上固定グリフか
         if (this.kag.stat.flag_glyph == "false") {
+            // メッセージウィンドウ内グリフの場合
             $(".img_next").remove();
-            var jtext = this.kag.getMessageInnerLayer();
-            jtext.find("p").append("<img class='img_next' src='./tyrano/images/system/" + this.kag.stat.path_glyph + "' />");
+            const j_glyph = this.createNextImg();
+            this.kag.getMessageInnerLayer().find("p").append(j_glyph);
         } else {
+            // 画面上固定グリフの場合
+            // [glyph]タグの時点ですでに要素として追加済みなので表示状態を操作するだけでよい
             $(".glyph_image").show();
         }
+    },
+
+    /**
+     * 現在の設定に基づいてクリック待ちグリフのjQueryオブジェクトを作成して返す
+     * @returns {jQuery} クリック待ちグリフの<img>または<div>を含むjQueryオブジェクト
+     */
+    createNextImg: function () {
+        // 参照
+        const stat = this.kag.stat;
+        const pm = stat.glyph_pm || {};
+
+        // クラスの配列
+        const class_names = [];
+
+        // クラス追加：固定グリフかどうかでクラス名が違う
+        if (stat.flag_glyph === "false") {
+            class_names.push("img_next");
+        } else {
+            class_names.push("glyph_image");
+        }
+
+        // jQueryオブジェクトを生成
+        let j_glyph;
+        let img_src;
+        switch (pm.type) {
+            // 画像パス指定
+            default:
+            case "image":
+                img_src = $.parseStorage(stat.path_glyph, "tyrano/images/system");
+                j_glyph = $(`<img src="${img_src}">`);
+                // 横幅と高さ
+                if (pm.width) {
+                    j_glyph.setStyle("width", pm.width + "px");
+                }
+                if (pm.height) {
+                    j_glyph.setStyle("height", pm.height + "px");
+                }
+                break;
+            // innerHTML直接指定
+            case "html":
+                j_glyph = $(`<div>${pm.html}</div>`);
+                // 横幅と高さ
+                // 横幅だけが指定されている場合は横幅を高さに流用する
+                if (pm.width) {
+                    j_glyph.setStyle("width", pm.width + "px");
+                }
+                if (pm.height) {
+                    j_glyph.setStyle("height", pm.height + "px");
+                } else if (pm.width) {
+                    j_glyph.setStyle("height", pm.width + "px");
+                }
+                break;
+            // 図形指定
+            case "figure":
+                // クラス追加：図形
+                if (pm.figure) {
+                    class_names.push("img_next_" + pm.figure);
+                }
+                j_glyph = $(`<div></div>`);
+                // 色
+                if (pm.color) {
+                    j_glyph.setStyle("background-color", $.convertColor(pm.color));
+                }
+                // 横幅と高さ
+                // 横幅だけが指定されている場合は横幅を高さに流用する
+                if (pm.width) {
+                    j_glyph.setStyle("width", pm.width + "px");
+                }
+                if (pm.height) {
+                    j_glyph.setStyle("height", pm.height + "px");
+                } else if (pm.width) {
+                    j_glyph.setStyle("height", pm.width + "px");
+                }
+                break;
+            // コマアニメ
+            case "koma_anim":
+                img_src = $.parseStorage(pm.koma_anim, "tyrano/images/system");
+                j_glyph = $(`<div></div>`);
+                const j_koma_anim = $(`<div></div>`);
+                j_koma_anim.setStyleMap({
+                    "display": "inline-block",
+                    "vertical-align": "sub",
+                    "background-color": "transparent",
+                    "background-image": `url(${img_src})`,
+                    "background-repeat": "no-repeat",
+                    "background-position": "0px 0px",
+                    "background-size": `${pm.image_width}px ${pm.image_height}px`,
+                    "width": `${pm.koma_width}px`,
+                    "height": `${pm.koma_height}px`,
+                });
+                j_koma_anim.get(0).animate(
+                    {
+                        backgroundPositionX: ["0px", `-${pm.image_width}px`],
+                    },
+                    {
+                        delay: 0,
+                        direction: "normal",
+                        duration: parseInt(pm.koma_anim_time) || 1000,
+                        easing: `steps(${pm.koma_count}, end)`,
+                        iterations: Infinity,
+                        fill: pm.mode || "forwards",
+                    },
+                );
+                j_glyph.append(j_koma_anim);
+                break;
+        }
+
+        if (pm.keyframe) {
+            // ティラノタグで定義したキーフレームアニメーションを使う場合
+            j_glyph.animateWithTyranoKeyframes(pm);
+        } else if (pm.anim) {
+            // プリセットのアニメーションを使用する場合
+            // クラス追加
+            class_names.push("img_next_" + pm.anim);
+            if (pm.time) {
+                j_glyph.setStyle("animation-duration", $.convertDuration(pm.time));
+            }
+            if (pm.delay) {
+                j_glyph.setStyle("animation-delay", $.convertDuration(pm.delay));
+            }
+            if (pm.count) {
+                j_glyph.setStyle("animation-iteration-count", pm.count);
+            }
+            if (pm.mode) {
+                j_glyph.setStyle("animation-fill-mode", pm.mode);
+            }
+            if (pm.easing) {
+                j_glyph.setStyle("animation-timing-function", pm.easing);
+            }
+            if (pm.direction) {
+                j_glyph.setStyle("animation-direction", pm.direction);
+            }
+        }
+
+        // マージン設定がある場合
+        if (pm.marginl) {
+            j_glyph.setStyle("margin-left", pm.marginl + "px");
+        }
+        if (pm.marginb) {
+            j_glyph.setStyle("margin-bottom", pm.marginb + "px");
+        }
+
+        // 貯めこんだクラス名をここでセット
+        j_glyph.attr("class", class_names.join(" "));
+
+        return j_glyph;
     },
 
     //次の命令を実行する
@@ -5971,19 +6125,105 @@ tyrano.plugin.kag.tag.clickable = {
 システム操作
 
 :title
-クリック待ち画像の設定
+クリック待ちグリフの設定
 
 :exp
-クリック待ち画像の位置や画像ファイルを変更できます。
+クリック待ちグリフ（`[l]`や`[p]`でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。
+
+使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。画像を用意しなくても、丸や三角などの簡易な図形を使用できます。アニメーションを既定のものから選んだり、自分で`[keyframe]`タグで定義したキーフレームアニメーションを適用したり、各コマが横並びで連結された画像を指定することでコマアニメを定義することもできます。位置や画像ファイルを変更できます。
+
+クリック待ちグリフのコンテンツには以下のパターンがあります。
+①画像を使用する（`line`パラメータを指定する）※gif動画もOK
+②図形を使用する（`figure`パラメータを指定する）
+③コマアニメーションを指定する（`koma_anim`パラメータを指定する）
+④HTMLを直接指定する（`html`パラメータを指定する）※上級者向け
+
+画像ではなく図形を選んでクリック待ちグリフを作ることができます。図形には色を自由に指定できます。
+
+アニメーションをプリセットから選んで適用したり、自分で`[keyframe]`タグで定義したキーフレームアニメーションを適用したりできます。
+
+※クリック待ちグリフの設定は`[glyph]`タグを通過するたびに（指定しなかったパラメータも含めて）初期化されます。`[position]`や`[font]`のように複数タグに分割して定義することはできませんのでご注意ください。
 
 :sample
-[glyph  fix=true left=200 top=100]
+[glyph]
+デフォルトのクリック待ちグリフ（gif動画）[p]
+
+[glyph fix="true" left="640" top="600"]
+画面下中央に固定表示[p]
+
+[glyph figure="rectangle" anim="bounce" width="5" color="0xCEE7F5" marginl="15"]
+デフォルトのクリック待ちグリフを図形＋アニメーションで再現[p]
+
+[glyph figure="v_triangle" anim="flash_momentary" delay="200"]
+瞬間的に点滅する下向き三角[p]
+
+[glyph figure="diamond" anim="flash"]
+滑らかに点滅するひし形[p]
+
+[glyph figure="circle" anim="soft_bounce" marginl="10"]
+やわらかく弾む円[p]
+
+[glyph figure="rectangle" anim="rotate_bounce"]
+ぐるぐるしながらバウンドする四角[p]
+
+[glyph figure="star" anim="spin_y" color="yellow"]
+Y軸スピンする星[p]
+
+[glyph figure="star" anim="spin_x" color="yellow"]
+X軸スピンする星[p]
+
+[glyph figure="star" anim="spin_z" color="yellow"]
+Z軸スピンする星[p]
+
+[glyph figure="star" anim="zoom" color="yellow"]
+拡縮する星[p]
+
+[glyph koma_anim="stepanim.jpg" koma_count="4" width="28"]
+コマアニメ[p]
+
+[glyph html='<span style="color: white; font-size: 20px;">🥺</span>']
+HTMLを直接指定[p]
+
+[keyframe name="yoko"]
+[frame p="0%" x="0"]
+[frame p="50%" x="10"]
+[frame p="100%" x="0"]
+[endkeyframe]
+[glyph line="nextpage.gif" easing="linear" keyframe="yoko"]
+自分で定義したキーフレームアニメーションを適用[p]
 
 :param
-line = クリック待ちの表示画像を指定できます。画像ファイルは`tyrano/images/system`フォルダ（`nextpage.gif`があるフォルダ）に配置します。,
-fix  = `true`を指定すると、クリック待ち画像がテキスト末端ではなくゲーム画面上の固定された位置に表示されます。,
-left = クリック画像を表示する横の位置を指定します。（`fix`属性を`true`にした場合に有効）,
-top  = クリック画像を表示する縦の位置を指定します。（`fix`属性を`true`にした場合に有効）
+line = グリフに使用する画像を指定できます。画像ファイルは`tyrano/images/system`フォルダ（`nextpage.gif`があるフォルダ）に配置します。,
+fix  = `true`を指定すると、グリフがメッセージの末尾ではなくゲーム画面上の固定位置に表示されます。,
+left = グリフを表示する横の位置を指定します。（`fix`属性を`true`にした場合に有効）,
+top  = グリフを表示する縦の位置を指定します。（`fix`属性を`true`にした場合に有効）,
+
+width   = グリフの横幅をpx単位で指定できます。,
+height  = グリフの高さをpx単位で指定できます。,
+anim    = グリフに適用するアニメーションを以下のキーワードから指定できます。<br>`flash_momentary`(瞬間的な点滅)<br>`flash`(滑らかな点滅)<br>`spin_x`(X軸を中心に回転)<br>`spin_y`(Y軸を中心に回転)<br>`spin_z`(Z軸を中心に回転)<br>`bounce`(バウンド)<br>`rotate_bounce`(回転しながらバウンド)<br>`soft_bounce`(ぽよんと弾むバウンド)<br>`zoom`(拡縮),
+time    = グリフに適用するアニメーションの時間をミリ秒単位で指定します。,
+figure  = グリフに使用する図形を以下のキーワードから指定できます。<br>`circle`(円)<br>`triangle`(三角形)<br>`v_triangle`(下向き三角形)<br>`rectangle`(四角形)<br>`diamond`(ひし形)<br>`start`(星),
+color   = グリフに図形を使用する場合に、図形の色を指定できます。,
+html    = グリフに含めるHTMLを直接指定できます。（上級者向け）,
+marginl = グリフの左側の余白をpx単位で指定できます。グリフを右側にずらしたいときはこれを指定してください。,
+
+keyframe   = 適用するキーフレームアニメーションの`name`を指定します。`anim`と併用することはできません。,
+easing     = アニメーションの変化パターンを指定できます。以下のキーワードが指定できます。<br>
+`ease`(開始時点と終了時点を滑らかに再生する)<br>
+`linear`(一定の間隔で再生する)<br>
+`ease-in`(開始時点をゆっくり再生する)<br>
+`ease-out`(終了時点をゆっくり再生する)<br>
+`ease-in-out`(開始時点と終了時点をゆっくり再生する)<br>
+この他に`cubic-bezier`関数を使って独自のイージングを指定することも可能です。,
+count      =  再生回数を指定できます。`infinite`を指定することで無限ループさせることもできます。,
+delay      =  開始までの時間を指定できます。初期値は`0`、つまり遅延なしです。,
+direction  =  アニメーションを複数回ループさせる場合に、偶数回目のアニメーションを逆再生にするかを設定できます。偶数回目を逆再生にする場合は`alternate`を指定します。,
+mode       =  アニメーションの最後のフレームの状態（位置、回転など）をアニメーション終了後も維持するかを設定できます。`forwards`(デフォルト)で維持。`none`を指定すると、アニメーション再生前の状態に戻ります。,
+
+koma_anim      = グリフに使用するコマアニメの画像を指定できます。画像ファイルは`tyrano/images/system`フォルダに配置します。<br><br>コマアニメに使用する画像は「すべてのコマが横並びで連結されたひとつの画像ファイル」である必要があります。,
+koma_count     = コマアニメを使用する場合、画像に含まれるコマ数を指定します。これを指定した場合、`koma_width`を省略できます。,
+koma_width     = コマアニメを使用する場合、1コマあたりの横幅をpx単位で指定します。これを指定した場合、`koma_count`を省略できます。,
+koma_anim_time = コマアニメが1周するまでの時間をミリ秒単位で指定します。
 
 :demo
 1,kaisetsu/02_decotext
@@ -5994,40 +6234,131 @@ top  = クリック画像を表示する縦の位置を指定します。（`fix
 //指定した位置にグラフィックボタンを配置する
 tyrano.plugin.kag.tag.glyph = {
     pm: {
+        // 基本
         line: "nextpage.gif",
         layer: "message0",
         fix: "false",
-        left: 0,
-        top: 0,
+        left: "0",
+        top: "0",
+
+        // 拡張
+        width: "",
+        height: "",
+        anim: "",
+        time: "",
+        figure: "",
+        color: "0xFFFFFF",
+        html: "",
+        marginl: "3",
+        marginb: "0",
+
+        // クリック待ちグリフに[keyframe]タグで定義した
+        // キーフレームアニメーションを適用したい場合のパラメータ
+        keyframe: "",
+        easing: "",
+        count: "",
+        delay: "",
+        derection: "",
+        mode: "",
+
+        // 各コマを連結して1枚の画像にしたパラパラ漫画アニメーションを使用したい場合のパラメータ
+        koma_anim: "",
+        koma_count: "",
+        koma_width: "",
+        koma_anim_time: "1000",
     },
 
-    //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
-    //cmで抹消しよう
     start: function (pm) {
         var that = this;
 
+        // 固定グリフは削除
         $(".glyph_image").remove();
 
-        if (pm.fix == "true") {
-            var j_layer = this.kag.layer.getLayer(pm.layer);
-
-            var j_next = $("<img class='glyph_image' />");
-            j_next.attr("src", "./tyrano/images/system/" + pm.line);
-            j_next.css("position", "absolute");
-            j_next.css("z-index", 9998);
-            j_next.css("top", pm.top + "px");
-            j_next.css("left", pm.left + "px");
-            j_next.css("display", "none");
-
-            j_layer.append(j_next);
-
-            this.kag.stat.flag_glyph = "true";
+        // グリフタイプを決定
+        if (pm.figure) {
+            pm.type = "figure";
+        } else if (pm.html) {
+            pm.type = "html";
+        } else if (pm.koma_anim) {
+            pm.type = "koma_anim";
         } else {
-            this.kag.stat.flag_glyph = "false";
-            this.kag.stat.path_glyph = pm.line;
+            pm.type = "image";
         }
 
-        this.kag.ftag.nextOrder();
+        // キーフレームが設定されている場合はanimを無視
+        if (pm.keyframe) {
+            pm.anim = "";
+        }
+
+        // 画像パスを格納
+        this.kag.stat.path_glyph = pm.line;
+
+        // 画面上固定タイプか、メッセージ末尾タイプか
+        if (pm.fix == "true") {
+            // 画面上固定タイプ
+            this.kag.stat.flag_glyph = "true";
+            // もう作っておいて非表示で画面上に配置しちゃおう
+            const j_next = this.kag.ftag.createNextImg();
+            j_next.setStyleMap({
+                "position": "absolute",
+                "z-index": "9998",
+                "top": pm.top + "px",
+                "left": pm.left + "px",
+                "display": "none",
+            });
+            this.kag.layer.getLayer(pm.layer).append(j_next);
+        } else {
+            // メッセージ末尾タイプ
+            this.kag.stat.flag_glyph = "false";
+        }
+
+        // コマアニメを使用しない場合は早期リターン
+        if (!pm.koma_anim) {
+            this.kag.stat.glyph_pm = $.extend({}, pm);
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        // コマアニメを使用する場合
+        // 画像幅を取得したいのでプリロードする
+        this.kag.preload($.parseStorage(pm.koma_anim, "tyrano/images/system"), (img) => {
+            pm.image_width = img.naturalWidth;
+            pm.image_height = img.naturalHeight;
+            pm.koma_height = pm.image_height;
+            // コマ数が指定されている場合、コマ数からコマ幅を計算
+            if (pm.koma_count) {
+                pm.koma_count = parseInt(pm.koma_count);
+                pm.koma_width = Math.round(pm.image_width / pm.koma_count);
+            }
+            // コマ幅が指定されている場合、コマ幅からコマ数を計算
+            if (pm.koma_width) {
+                pm.koma_width = parseInt(pm.koma_width);
+                pm.koma_count = Math.round(pm.image_width / pm.koma_width);
+            }
+            // 画像幅あるいは高さの指定がある場合はスケーリングする必要がある
+            pm.scale_x = 1;
+            pm.scale_y = 1;
+            if (pm.width && !pm.height) {
+                // widthだけが指定されている
+                pm.scale_x = parseInt(pm.width) / pm.koma_width;
+                pm.scale_y = pm.scale_x;
+            } else if (!pm.width && pm.height) {
+                // heightだけが指定されているいる
+                pm.scale_y = parseInt(pm.height) / pm.koma_height;
+                pm.scale_x = pm.scale_y;
+            } else if (pm.width && pm.height) {
+                // widthとheightが指定されている
+                pm.scale_x = parseInt(pm.width) / pm.koma_width;
+                pm.scale_y = parseInt(pm.height) / pm.koma_height;
+            }
+            // スケーリング
+            pm.image_width = parseInt(pm.image_width * pm.scale_x);
+            pm.image_height = parseInt(pm.image_height * pm.scale_x);
+            pm.koma_width = parseInt(pm.koma_width * pm.scale_x);
+            pm.koma_height = parseInt(pm.koma_height * pm.scale_x);
+            this.kag.stat.glyph_pm = $.extend({}, pm);
+            this.kag.ftag.nextOrder();
+        });
     },
 };
 
