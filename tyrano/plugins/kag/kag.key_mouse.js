@@ -107,6 +107,9 @@ tyrano.plugin.kag.key_mouse = {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
+            // ティラノイベント"keydown"を発火
+            that.kag.trigger("keydown", e);
+
             if (that.kag.stat.enable_keyconfig == true) {
                 if (that.is_keydown == true) {
                     if (__tyrano_key_config.system_key_event == "true") {
@@ -296,6 +299,9 @@ tyrano.plugin.kag.key_mouse = {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
+            // ティラノイベント"click:event"を発火
+            that.kag.trigger("click:event", e);
+
             if (that.is_swipe) {
                 that.is_swipe = false;
                 return false;
@@ -327,6 +333,8 @@ tyrano.plugin.kag.key_mouse = {
             }
 
             that.kag.ftag.hideNextImg();
+            // ティラノイベント"click:next"を発火
+            that.kag.trigger("click:next", e);
             that.kag.ftag.nextOrder();
         });
     },

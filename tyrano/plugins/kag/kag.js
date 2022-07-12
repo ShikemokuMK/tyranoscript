@@ -594,6 +594,9 @@ tyrano.plugin.kag = {
     //システム変数を保存する
     saveSystemVariable: function () {
         $.setStorage(this.kag.config.projectID + "_sf", this.variable.sf, this.kag.config.configSave);
+
+        // ティラノイベント"storage:sf"を発火
+        this.kag.trigger("storage:sf");
     },
 
     //すべての変数クリア
@@ -856,8 +859,11 @@ tyrano.plugin.kag = {
         that.tmp.angle = $.getAngle();
         that.tmp.largerWidth = $.getLargeScreenWidth();
 
-        // TYRANO.kag.baseでtyrano.baseを参照できるように
+        // kag.baseでbaseを参照できるように
         this.base = this.tyrano.base;
+
+        // base.kagでkagを参照できるように
+        this.base.kag = this;
 
         // 現在のゲーム画面のスケーリング情報を格納
         this.tmp.scale_info = {
@@ -962,13 +968,33 @@ tyrano.plugin.kag = {
                 that.tyrano.base.fitBaseSize(that.config.scWidth, that.config.scHeight);
             }
         });
-        //        }
 
         // この時点ですでにloadが発火済みの場合がありえる！（Electronの場合は基本的に発火済み）
         // その場合は手動でloadをトリガーすることで上記イベントリスナを実行する
         if (window.isLoaded === true) {
             $(window).trigger("load");
         }
+
+        // フルスクリーン状態の変動を検知
+        $("body").on("fullscreenchange", (e) => {
+            // いまフルスクリーンか？
+            // フルスクリーンならフルスクリーン要素が取得できる (truthy)
+            // フルスクリーンじゃないならnullが返ってくる (falsy)
+            const is_full_screen =
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement ||
+                document.fullScreenElement ||
+                false;
+
+            if (is_full_screen) {
+                // ティラノイベント"fullscreen:start"を発火
+                this.kag.trigger("fullscreen:start", e);
+            } else {
+                // ティラノイベント"fullscreen:stop"を発火
+                this.kag.trigger("fullscreen:stop", e);
+            }
+        });
 
         this.layer.addLayer("base");
 
@@ -1354,14 +1380,20 @@ tyrano.plugin.kag = {
 
     //スマホブラウザ向け、音楽再生設定
     readyAudio: function () {
-        this.tmp.ready_audio = true;
+        if (this.tmp.ready_audio) {
+            return;
+        }
 
+        this.tmp.ready_audio = true;
         if ($.isNeedClickAudio()) {
             var audio_obj = new Howl({
                 src: "./tyrano/audio/silent.mp3",
                 volume: 0.1,
+                onplay: () => {
+                    // ティラノイベント"readyaudio"を発火
+                    this.kag.trigger("readyaudio");
+                },
             });
-
             audio_obj.play();
         }
     },
@@ -1766,7 +1798,7 @@ tyrano.plugin.kag = {
             }
         }
         if (next_chara_ptext_pm) {
-            // 一応エンティティ置換しておく(基本的に #hoge 表記だと思うので)
+            // 一応エンティティ置換しておく(基本的に #hoge 表記であろうからほぼ不要とは思うが)
             next_chara_ptext_pm = this.kag.ftag.convertEntity(next_chara_ptext_pm);
             const next_chara_name = next_chara_ptext_pm.name;
             const next_chara_voconfig = this.kag.stat.map_vo.vochara[next_chara_name];
@@ -1868,9 +1900,11 @@ tyrano.plugin.kag = {
             return;
         }
         if (bool) {
-            this.trigger("autostart");
+            // ティラノイベント"auto:start"を発火
+            this.trigger("auto:start");
         } else {
-            this.trigger("autostop");
+            // ティラノイベント"auto:stop"を発火
+            this.trigger("auto:stop");
         }
         this.stat.is_auto = bool;
     },
@@ -1884,11 +1918,49 @@ tyrano.plugin.kag = {
             return;
         }
         if (bool) {
-            this.trigger("skipstart");
+            // ティラノイベント"skip:start"を発火
+            this.trigger("skip:start");
         } else {
-            this.trigger("skipstop");
+            // ティラノイベント"skip:stop"を発火
+            this.trigger("skip:stop");
         }
         this.stat.is_skip = bool;
+    },
+
+    /**
+     * ロガー
+     * @param {string} event_name
+     * @param  {Object} event_obj
+     */
+    logTrigger: function (event_name, event_obj) {
+        let color = "orange";
+        const hash = event_name.split(":");
+        switch (hash[0]) {
+            case "tag":
+                color = "limegreen";
+                break;
+            case "storage":
+                color = "yellow";
+                break;
+            case "click":
+                color = "cyan";
+                break;
+        }
+        const bgcolor = "#000";
+        console.log("%c" + event_name, `padding: 4px 6px; border-radius: 4px; background: ${bgcolor}; color: ${color};`);
+        console.log(event_obj);
+    },
+
+    /**
+     * イベントログが有効かどうか
+     */
+    is_event_logging_enabled: false,
+
+    /**
+     * イベントログを有効にする
+     */
+    enableEventLogging: function () {
+        this.is_event_logging_enabled = true;
     },
 
     /**
@@ -1900,30 +1972,63 @@ tyrano.plugin.kag = {
      */
     trigger: function (event_name, event_obj = {}) {
         event_obj.name = event_name;
+        if (this.is_event_logging_enabled) this.logTrigger(event_name, event_obj);
         const map = this.event_listener_map;
         if (map[event_name] === undefined || map[event_name].length === 0) {
             return;
         }
+        let exists_once = false;
+        const unbind_target_ids = [];
         for (const listener of map[event_name]) {
+            let callback_return_value;
             if (typeof listener.callback === "function") {
-                listener.callback.call(this, event_obj);
+                callback_return_value = listener.callback.call(this, event_obj);
             }
+            if (listener.once) {
+                exists_once = true;
+                unbind_target_ids.push(listener.id);
+            }
+            if (callback_return_value === false) {
+                break;
+            }
+        }
+        if (exists_once) {
+            const new_listeners = [];
+            for (const listener of map[event_name]) {
+                if (!unbind_target_ids.includes(listener.id)) {
+                    new_listeners.push(listener);
+                }
+            }
+            map[event_name] = new_listeners;
         }
     },
 
+    /**
+     * イベントリスナのカウンタ
+     */
+    event_listener_count: 0,
+
+    /**
+     * @typedef {Object} ListenerOption
+     * @property {boolean} once イベントリスナを1回実行したら削除すべきかどうか
+     * @property {number} priority 優先度。これが高いほうから順に実行される。デフォルトは0
+     */
     /**
      * イベントリスナを登録する
      * @param {string} event_names 登録するイベント名 半角スペース区切りで複数イベントに対して一気に登録できる
      *   イベント名のあとにドット区切りで名前空間を指定できる(複数可能) あとから特定の名前空間のリスナだけを削除できる
      *   例) "resize load.ABC save.hoge.fuga"
-     * @param {function} callback コールバック
+     * @param {function} callback コールバック 第1引数にはeventオブジェクトが格納される
+     *   コールバック内で return false するとイベントリスナの呼び出しを中断する
+     *   それ以降のイベントリスナは呼び出されない(onceの削除もされない)
+     * @param {ListenerOption} options
      */
-    bind: function (event_names, callback) {
+    on: function (event_names, callback, options = {}) {
         // 例) "resize load.ABC save.hoge.fuga"
         const map = this.event_listener_map;
         const event_name_hash = event_names.split(" ");
+        // 半角スペースで刻んだ各イベント文字列について
         for (const event_name of event_name_hash) {
-            // 半角スペースで刻んだ各イベント文字列について
             // 例) "save.hoge.fuga"
             const dot_hash = event_name.split("."); // ["save", "hoge", "fuga"]
             const event = dot_hash[0]; // "save"
@@ -1932,11 +2037,42 @@ tyrano.plugin.kag = {
                 if (map[event] === undefined) {
                     map[event] = [];
                 }
-                map[event].push({
+                const listener = {
+                    id: this.event_listener_count,
                     callback: callback,
                     namespaces: namespaces,
-                });
+                    once: !!options.once,
+                    priority: options.priority || 0,
+                };
+                map[event].push(listener);
+                this.event_listener_count += 1;
+                this.sortEventLisneners(event);
             }
+        }
+    },
+    /**
+     * on メソッドのラッパー
+     * once オプションを true で上書きしたうえで on メソッドに投げる
+     * @param {string} event_names
+     * @param {function} callback
+     * @param {ListenerOption} options
+     */
+    once: function (event_names, callback, options = {}) {
+        options.once = true;
+        this.on(event_names, callback, options);
+    },
+
+    sortEventLisneners: function (evnet_name) {
+        const listeners = this.event_listener_map[evnet_name];
+        if (Array.isArray(listeners)) {
+            listeners.sort((a, b) => {
+                if (a.priority > b.priority) {
+                    return -1;
+                } else if (a.priority < b.priority) {
+                    return 1;
+                }
+                return a.id < b.id ? -1 : 1;
+            });
         }
     },
 
@@ -1947,7 +2083,7 @@ tyrano.plugin.kag = {
      *   ドット区切りで名前空間を複数指定可能 指定したすべての名前空間を持つリスナだけを削除できる
      *   いきなりドットで書き始めることで削除対象のリスナを"名前空間だけ"で指定することも可能
      */
-    unbind: function (event_names) {
+    off: function (event_names) {
         const map = this.event_listener_map;
         const event_name_hash = event_names.split(" ");
         for (const event_name of event_name_hash) {

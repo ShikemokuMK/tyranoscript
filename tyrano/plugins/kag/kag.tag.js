@@ -338,15 +338,19 @@ tyrano.plugin.kag.ftag = {
                 this.kag.error(err_str);
             } else {
                 tag.pm["_tag"] = tag.name;
+                // ティラノイベント"tag:<tagName>"を発火
+                this.kag.trigger(`tag:${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: false });
                 this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
             }
         } else if (this.kag.stat.map_macro[tag.name]) {
             // マクロの場合
+            // ティラノイベント"tag:<tagName>"を発火
+            this.kag.trigger(`tag:${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: true });
 
             // マクロスタックを取得してみる
             var stack = TYRANO.kag.getStack("macro");
             if (stack) {
-                // マクロスタックが取得できたなら（つまり、マクロの中でマクロが呼ばれたなら）
+                // マクロスタックが取得できたということはすでにここはマクロの内部だ
                 // 現時点でのmpに復元できるように最新のマクロスタックを書き変えておく必要がある
                 stack.pm = $.extend({}, this.kag.stat.mp);
             }
@@ -551,6 +555,9 @@ tyrano.plugin.kag.ftag = {
             pm = {};
         }
 
+        // ティラノイベント"tag:<tagName>"を発火
+        this.kag.trigger(`tag:${name}`, { target: pm, is_next_order: false, is_macro: false });
+
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
     },
@@ -723,6 +730,9 @@ tyrano.plugin.kag.tag.text = {
             this.buildHTML(pm);
             return;
         }
+
+        // ティラノイベント"tag:text:message"を発火
+        this.kag.trigger("tag:text:message", { target: pm });
 
         // メッセージレイヤのアウターとインナーを取得
         // div.messageX_fore
@@ -4108,6 +4118,9 @@ tyrano.plugin.kag.tag.link = {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
+            // ティラノイベント"click:tag:link"を発火
+            that.kag.trigger("click:tag:link", e);
+
             that.kag.stat.display_link = false;
 
             //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
@@ -5536,6 +5549,9 @@ tyrano.plugin.kag.tag.button = {
                 // ブラウザの音声の再生制限を解除
                 if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
+                // ティラノイベント"click:tag:button"を発火
+                that.kag.trigger("click:tag:button", event);
+
                 if (_pm.clickimg != "") {
                     //クリック画像が設定されているなら画像を変える
                     var click_img_url = parse_img_url(_pm.clickimg);
@@ -5914,6 +5930,9 @@ tyrano.plugin.kag.tag.glink = {
                 // ブラウザの音声の再生制限を解除
                 if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
+                // ティラノイベント"click:tag:glink"を発火
+                that.kag.trigger("click:tag:glink", e);
+
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
                     that.kag.ftag.startTag("playse", {
@@ -6112,9 +6131,12 @@ tyrano.plugin.kag.tag.clickable = {
                 });
             }
 
-            j_button.click(function () {
+            j_button.click(function (e) {
                 // ブラウザの音声の再生制限を解除
                 if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
+                // ティラノイベント"click:tag:clickable"を発火
+                that.kag.trigger("click:tag:clickable", e);
 
                 //Sタグに到達していないとクリッカブルが有効にならない
 

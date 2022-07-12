@@ -159,6 +159,9 @@ tyrano.base = {
                     margin_top: margin_top,
                     margin_left: margin_left,
                 });
+
+                // ティラノイベント"resize"を発火
+                that.kag.trigger("resize", { target: j_tyrano_base, scale_info: that.tyrano.kag.tmp.scale_info });
             }, timeout);
         } else if (screen_ratio == "fit") {
             // 縦横比を維持しない場合
@@ -169,6 +172,9 @@ tyrano.base = {
                     scale_x: width_f,
                     scale_y: height_f,
                 });
+
+                // ティラノイベント"resize"を発火
+                that.kag.trigger("resize", { target: j_tyrano_base, scale_info: that.tyrano.kag.tmp.scale_info });
             }, timeout);
         } else {
             // スクリーンサイズ固定
