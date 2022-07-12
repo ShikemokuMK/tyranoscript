@@ -765,6 +765,7 @@ tyrano.plugin.kag.menu = {
                     /*fadein:"true",*/
                     /*time:2000,*/
                     stop: "true",
+                    can_ignore: "false",
                 };
 
                 //ボリュームが設定されいる場合
@@ -776,10 +777,11 @@ tyrano.plugin.kag.menu = {
             }
 
             //効果音再生
-            for (key in this.kag.stat.current_se) {
+            for (const key in this.kag.stat.current_se) {
                 var pm_obj = this.kag.stat.current_se[key];
+                pm_obj.can_ignore = "false";
                 pm_obj["stop"] = "true";
-                this.kag.ftag.startTag("playse", pm_obj);
+                this.kag.ftag.startTag("playbgm", pm_obj);
             }
         }
 

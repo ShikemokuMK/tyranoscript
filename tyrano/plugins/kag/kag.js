@@ -79,8 +79,6 @@ tyrano.plugin.kag = {
         is_bgm_play: false, //BGMがプレイ中か否か
         is_bgm_play_wait: false, //BGMの完了を待っているか否か。
 
-        is_audio_stopping: false, //BGMがフェードアウト中かどうか。
-
         loading_make_ref: false,
 
         wait_id: "", //waitをキャンセルするために使います。
@@ -797,6 +795,9 @@ tyrano.plugin.kag = {
         }
 
         button_menu_obj.click(function () {
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
             that.menu.showMenu();
         });
 
@@ -1672,19 +1673,19 @@ tyrano.plugin.kag = {
 
         if (ext == "wav" || ext == "mp3" || ext == "ogg" || ext == "m4a") {
             // 音声ファイルプリロード
-            let obj;
+            let audio_obj;
             const howl_opt = {
                 src: src,
                 preload: true,
                 onload: () => {
-                    if (callbk) callbk(obj);
+                    if (callbk) callbk(audio_obj);
                 },
                 onloaderror: () => {
                     //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
-                    if (callbk) callbk(obj);
+                    if (callbk) callbk(audio_obj);
                 },
             };
-            obj = new Howl(howl_opt);
+            audio_obj = new Howl(howl_opt);
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
             // 動画ファイルプリロード
             $("<video />")
@@ -1741,6 +1742,41 @@ tyrano.plugin.kag = {
         } else {
             // 配列じゃなかった場合
             this.kag.preload(storage, callbk);
+        }
+    },
+
+    /**
+     * 現在のインデックスから次に現れる[chara_ptext]をサーチして
+     * その[chara_ptext]で自動再生されるボイスをプリロードする処理
+     * ※生の[chara_ptext]で記述されている必要がある。マクロ内部に隠蔽されている場合はサーチ不可
+     */
+    preloadNextVoice: function () {
+        const array_tag = this.kag.ftag.array_tag;
+        const max_search_tag_coung = 20; // どれくらい深く探索するか 20もあれば充分でしょう
+        const end_index = Math.min(array_tag.length, this.kag.ftag.current_order_index + max_search_tag_coung);
+        const search_target_tag = "chara_ptext";
+        let i = this.kag.ftag.current_order_index + 1;
+        let next_chara_ptext_pm = null;
+        for (; i < end_index; i++) {
+            const tag = array_tag[i];
+            // [chara_ptext]が見つかったらクローンして脱出
+            if (tag.name === search_target_tag) {
+                next_chara_ptext_pm = $.extend({}, tag.pm);
+                break;
+            }
+        }
+        if (next_chara_ptext_pm) {
+            // 一応エンティティ置換しておく(基本的に #hoge 表記だと思うので)
+            next_chara_ptext_pm = this.kag.ftag.convertEntity(next_chara_ptext_pm);
+            const next_chara_name = next_chara_ptext_pm.name;
+            const next_chara_voconfig = this.kag.stat.map_vo.vochara[next_chara_name];
+            if (next_chara_voconfig) {
+                const next_voice_storage = $.replaceAll(next_chara_voconfig.vostorage, "{number}", next_chara_voconfig.number);
+                const next_voice_storage_path = $.parseStorage(next_voice_storage, "sound");
+                this.kag.preload(next_voice_storage_path, () => {
+                    // console.warn(`loaded ${next_voice_storage_path}`);
+                });
+            }
         }
     },
 
@@ -2128,6 +2164,44 @@ tyrano.plugin.kag = {
     },
 
     __j_hiden_area: null,
+
+    /**
+     * 再生中のHowlオブジェクトの音量を変更する
+     * @param {Howler} audio_obj
+     * @param {{ tag: number | undefined; config: number | undefined; }} volume_options
+     */
+    changeHowlVolume: function (audio_obj, options = {}) {
+        // 音声再生タグに指定されていたvolumeを思い出せ…！ 忘れてたら1だったことにしろ…！
+        let tag_volume = audio_obj.tag_volume !== undefined ? audio_obj.tag_volume : 1;
+
+        // 音声再生タグが実行された時点のコンフィグ音量を思い出せ…！ 忘れてたら1だったことにしろ…！
+        let config_volume = audio_obj.config_volume !== undefined ? audio_obj.config_volume : 1;
+
+        // タグ音量を変更する場合
+        if (options.tag !== undefined) {
+            tag_volume = options.tag;
+        }
+
+        // コンフィグ音量を変更する場合
+        if (options.config !== undefined) {
+            config_volume = options.config;
+        }
+
+        // 改めて掛け算しよう
+        const new_howl_volume = tag_volume * config_volume;
+
+        // フェード処理するかどうかで場合分け
+        if (options.time && parseInt(options.time) !== 0) {
+            const duration = Math.max(100, parseInt(options.time));
+            audio_obj.fade(audio_obj.volume(), new_howl_volume, duration);
+        } else {
+            audio_obj.volume(new_howl_volume);
+        }
+
+        // 記憶改変！
+        audio_obj.tag_volume = tag_volume;
+        audio_obj.config_volume = config_volume;
+    },
 
     test: function () {},
 };

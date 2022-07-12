@@ -689,9 +689,6 @@ tyrano.plugin.kag.tag.skipstart = {
         if (this.kag.stat.is_skip == true || this.kag.stat.is_adding_text) {
             return false;
         }
-
-        this.kag.readyAudio();
-
         this.kag.setSkip(true);
         this.kag.ftag.nextOrder();
     },
@@ -2013,11 +2010,10 @@ tyrano.plugin.kag.tag.chara_ptext = {
             //キャラクターのボイス設定がある場合
 
             if (this.kag.stat.map_vo["vochara"][pm.name]) {
-                var vochara = this.kag.stat.map_vo["vochara"][pm.name];
+                const vochara = this.kag.stat.map_vo["vochara"][pm.name];
+                const playsefile = $.replaceAll(vochara.vostorage, "{number}", vochara.number);
 
-                var playsefile = $.replaceAll(vochara.vostorage, "{number}", vochara.number);
-
-                var se_pm = {
+                const se_pm = {
                     loop: "false",
                     storage: playsefile,
                     stop: "true",
@@ -2026,7 +2022,12 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
                 this.kag.ftag.startTag("playse", se_pm);
 
-                this.kag.stat.map_vo["vochara"][pm.name]["number"] = parseInt(vochara.number) + 1;
+                vochara.number++;
+
+                // 次のボイスのプリロード
+                if (this.kag.stat.voconfig_preload) {
+                    this.kag.preloadNextVoice();
+                }
             }
         }
 

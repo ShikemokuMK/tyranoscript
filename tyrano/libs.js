@@ -1941,6 +1941,20 @@
 
         return j_target || $();
     };
+
+    /**
+     * volumeパラメータの値を実際にhowler.jsで利用可能な値に直す
+     * "0"～"100" の文字列を 0.0～1.0 の数値に変換する
+     * @param {string} vol_str parseInt()で数値に変換可能な文字列 (例) "0", "50", "100"
+     * @returns {number} 0以上1以下の数値
+     */
+    $.parseVolume = function (vol_str) {
+        const vol_int = typeof vol_str === "string" ? parseInt(vol_str) : vol_str;
+        if (isNaN(vol_int)) {
+            return 1;
+        }
+        return Math.max(0, Math.min(1, vol_str / 100));
+    };
 })(jQuery);
 
 jQuery.fn.outerHTML = function (s) {

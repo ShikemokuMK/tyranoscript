@@ -984,7 +984,13 @@ tyrano.plugin.kag.tag.text = {
      * @param {string} message_str 読み上げる文字列
      */
     speechMessage: function (message_str) {
-        speechSynthesis.speak(new SpeechSynthesisUtterance(message_str));
+        const utterance = new SpeechSynthesisUtterance(message_str);
+        if (this.kag.tmp.speak_on_volume) utterance.volume = this.kag.tmp.speak_on_volume;
+        if (this.kag.tmp.speak_on_pitch) utterance.pitch = this.kag.tmp.speak_on_pitch;
+        if (this.kag.tmp.speak_on_rate) utterance.rate = this.kag.tmp.speak_on_rate;
+        if (this.kag.tmp.speak_on_utterance && this.kag.tmp.speak_on_cancel) speechSynthesis.cancel(this.kag.tmp.speak_on_utterance);
+        speechSynthesis.speak(utterance);
+        this.kag.tmp.speak_on_utterance = utterance;
     },
 
     /**
@@ -4099,6 +4105,9 @@ tyrano.plugin.kag.tag.link = {
         var that = TYRANO;
 
         j_span.bind("click touchstart", function (e) {
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
             that.kag.stat.display_link = false;
 
             //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
@@ -5524,6 +5533,9 @@ tyrano.plugin.kag.tag.button = {
 
             //クリックが確定したとき
             j_button.click(function (event) {
+                // ブラウザの音声の再生制限を解除
+                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
                 if (_pm.clickimg != "") {
                     //クリック画像が設定されているなら画像を変える
                     var click_img_url = parse_img_url(_pm.clickimg);
@@ -5899,6 +5911,9 @@ tyrano.plugin.kag.tag.glink = {
             var button_clicked = false;
 
             j_button.click(function (e) {
+                // ブラウザの音声の再生制限を解除
+                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
                 //クリックされた時に音が指定されていたら
                 if (_pm.clickse != "") {
                     that.kag.ftag.startTag("playse", {
@@ -6098,6 +6113,9 @@ tyrano.plugin.kag.tag.clickable = {
             }
 
             j_button.click(function () {
+                // ブラウザの音声の再生制限を解除
+                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
                 //Sタグに到達していないとクリッカブルが有効にならない
 
                 var is_s = (function (obj) {
