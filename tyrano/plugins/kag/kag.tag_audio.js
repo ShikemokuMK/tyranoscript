@@ -170,10 +170,11 @@ tyrano.plugin.kag.tag.playbgm = {
             seconds_str = colon_hash[colon_hash.length - 1];
         }
 
+        // 小数点が存在するならミリ秒として解釈する
         const dot_hash = seconds_str.split(".");
         if (dot_hash[1]) {
             seconds_str = dot_hash[0];
-            milli_seconds_str = dot_hash[1];
+            milli_seconds_str = dot_hash[1].padEnd(3, "0").substring(0, 3);
         }
 
         const hours_ms = (parseInt(hours_str) || 0) * 1000 * 60 * 60;
