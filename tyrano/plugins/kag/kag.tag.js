@@ -1691,7 +1691,7 @@ tyrano.plugin.kag.tag.text = {
      */
     finishAddingChars: function () {
         this.kag.stat.is_adding_text = false;
-        if (this.kag.stat.is_stop != "true" && !this.kag.stat.is_hide_message) {
+        if (!this.kag.stat.is_hide_message) {
             this.kag.ftag.nextOrder();
         }
     },
@@ -1737,18 +1737,15 @@ tyrano.plugin.kag.tag.text = {
         // - [nowait]中である
         // - 1文字あたりの表示時間が 3 ミリ秒以下である
         if (this.kag.stat.is_skip === true || this.kag.stat.is_nowait || ch_speed <= 3) {
-            // ストップ中じゃなければ
-            if (this.kag.stat.is_stop != "true") {
-                // 全文字表示
-                this.makeAllCharsVisible(j_char_span_children);
-                // スキップ時間のタイムアウトを設ける
-                $.setTimeout(() => {
-                    // メッセージウィンドウが隠れていなければ次のタグへ
-                    if (!this.kag.stat.is_hide_message) {
-                        this.kag.ftag.nextOrder();
-                    }
-                }, parseInt(this.kag.config.skipSpeed));
-            }
+            // 全文字表示
+            this.makeAllCharsVisible(j_char_span_children);
+            // スキップ時間のタイムアウトを設ける
+            $.setTimeout(() => {
+                // メッセージウィンドウが隠れていなければ次のタグへ
+                if (!this.kag.stat.is_hide_message) {
+                    this.kag.ftag.nextOrder();
+                }
+            }, parseInt(this.kag.config.skipSpeed));
             return;
         }
 
