@@ -186,8 +186,6 @@ tyrano.plugin.kag.tag.playbgm = {
     },
 
     play: function (pm) {
-        this.kag.layer.hideEventLayer();
-
         // 再生しようとしているのはSEか？(BGMではなく)
         const is_se = pm.target === "se";
 
@@ -210,6 +208,10 @@ tyrano.plugin.kag.tag.playbgm = {
 
         // 次のタグに進むべきか
         const should_next_order = pm.stop === "false";
+
+        if (should_next_order) {
+            this.kag.layer.hideEventLayer();
+        }
 
         // 音声タイプ "bgm" or "sound"
         let sound_type = is_se ? "sound" : "bgm";
@@ -925,8 +927,6 @@ tyrano.plugin.kag.tag.playse = {
     },
 
     start: function (pm) {
-        this.kag.layer.hideEventLayer();
-
         if (pm.clear == "true") {
             this.kag.ftag.startTag("stopbgm", {
                 target: "se",
