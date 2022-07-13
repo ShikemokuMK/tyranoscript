@@ -1963,7 +1963,8 @@ tyrano.plugin.kag.tag.awakegame = {
     vital: [],
 
     pm: {
-        variable_over: "true",
+        variable_over: "true", // f変数を引き継ぐか
+        sound_opt_over: "true", // stat の map_se_volume, map_bgm_volume を引き継ぐか
         bgm_over: "true",
     },
 
@@ -1980,6 +1981,11 @@ tyrano.plugin.kag.tag.awakegame = {
             //f変数を継承する
             if (pm.variable_over == "true") {
                 sleep_data.stat.f = this.kag.stat.f;
+            }
+
+            if (pm.sound_opt_over === "true") {
+                sleep_data.stat.map_se_volume = this.kag.stat.map_se_volume;
+                sleep_data.stat.map_bgm_volume = this.kag.stat.map_bgm_volume;
             }
 
             var options = {

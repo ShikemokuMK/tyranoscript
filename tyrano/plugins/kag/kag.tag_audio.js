@@ -22,7 +22,8 @@ storage     = !!audio,
 loop        = !!,
 sprite_time = !!,
 volume      = !!,
-html5       = !!
+html5       = !!,
+restart     = この`[playbgm]`で再生しようとしたBGMがすでに再生されていた場合の処理を設定できます。`true`なら最初から再生し直し、`false`なら無視となります。
 
 #[end]
 */
@@ -48,265 +49,456 @@ tyrano.plugin.kag.tag.playbgm = {
         stop: "false", //trueの場合自動的に次の命令へ移動しない。ロード対策
     },
 
+    waitClick: function (pm) {
+        // イベントレイヤを隠してクリックを待つ
+        this.kag.layer.hideEventLayer();
+        $(".tyrano_base").on("click.bgm", () => {
+            this.kag.readyAudio();
+            this.play(pm);
+            $(".tyrano_base").off("click.bgm");
+        });
+    },
+
     start: function (pm) {
-        var that = this;
+        // 次のタグに進むべきか
+        // シナリオファイルに書かれた[playse][playbgm]などの場合は当然次のタグに進む必要があるが
+        // ボタンのクリック効果音を鳴らす場合などにJSでタグ実行関数を直接叩く場合があり(例は以下)、その場合には次のタグに進めない
+        // (TYRANO.kag.ftag.startTag("playse", { storage: "foo.mp3", stop: "true" }); // JSでタグを直接実行
+        // この変数は is_tag_in_scenario と読み替えてもいい
+        const should_next_order = pm.stop === "false";
 
-        if (pm.target == "bgm" && that.kag.stat.play_bgm == false) {
-            that.kag.ftag.nextOrder();
+        //
+        // 音声ファイルの再生を一時的に無視する仕組み(現在未使用)
+        //
+
+        // BGMの再生が無効でこれがBGMなら無視
+        if (pm.target == "bgm" && this.kag.stat.play_bgm === false) {
+            if (should_next_order) this.kag.ftag.nextOrder();
             return;
         }
 
-        if (pm.target == "se" && that.kag.stat.play_se == false) {
-            that.kag.ftag.nextOrder();
+        // SEの再生が無効でこれがSEなら無視
+        if (pm.target == "se" && this.kag.stat.play_se === false) {
+            if (should_next_order) this.kag.ftag.nextOrder();
             return;
         }
 
-        //スマホアプリの場合
-        if ($.userenv() != "pc") {
-            this.kag.layer.hideEventLayer();
+        //
+        // 音声の再生制限が解除されていない場合に、
+        // いま実行しようとしているこの[playbgm]を無視していいかどうか
+        //
 
-            if (this.kag.stat.is_skip == true && pm.target == "se") {
-                if (pm.stop == "false") {
-                    that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
-                }
+        // 無視しちゃダメに決まってんだろ！
+        let can_ignore_in_no_ready = false;
+        // でもシナリオから呼ばれた[playbgm]じゃなくてJSで直接実行されたような[playbgm]は無視していいんじゃ？
+        if (!should_next_order) {
+            can_ignore_in_no_ready = true;
+            // ただしセーブデータロード時の復元の[playbgm]は絶対に無視してはいけない！
+            // ゲーム起動直後に[autoload]を実行して音声再生制限解除前にロードするケースを想定
+            if (pm.can_ignore === "false") {
+                // console.warn("can't ignore audio");
+                can_ignore_in_no_ready = false;
+            }
+        }
+
+        //
+        // PCかスマホかで分岐
+        //
+
+        if ($.userenv() === "pc") {
+            // PC環境
+            if (this.kag.tmp.ready_audio) {
+                // オーディオ再生制限解除済みなら再生
+                this.play(pm);
             } else {
-                //スマホからのアクセスで ready audio 出来ていない場合は、クリックを挟む
-                if (this.kag.tmp.ready_audio == false) {
-                    $(".tyrano_base").on("click.bgm", function () {
-                        that.kag.readyAudio();
-                        that.kag.tmp.ready_audio = true;
-                        that.play(pm);
-                        $(".tyrano_base").off("click.bgm");
-                    });
-                } else {
-                    that.play(pm);
-                }
+                // 未解除の場合
+                // 無視できないやつならクリックを待つ
+                if (!can_ignore_in_no_ready) this.waitClick(pm);
             }
         } else {
-            if (this.kag.tmp.ready_audio == false) {
-                $(".tyrano_base").on("click.bgm", function () {
-                    that.kag.readyAudio();
-                    that.kag.tmp.ready_audio = true;
-                    that.play(pm);
-                    $(".tyrano_base").off("click.bgm");
-                });
+            // スマホ・タブレット環境
+            if (this.kag.stat.is_skip && pm.target === "se") {
+                // スキップ中のSEは無視して次にタグに進む(スマホの通信制限に配慮)
+                if (should_next_order) this.kag.ftag.nextOrder();
+            } else if (this.kag.tmp.ready_audio) {
+                // オーディオ再生制限解除済みなら再生
+                this.play(pm);
             } else {
-                that.play(pm);
+                // 未解除の場合
+                // 無視できないやつならクリックを待つ
+                if (!can_ignore_in_no_ready) this.waitClick(pm);
             }
         }
     },
 
+    /**
+     * 時刻を指定した文字列をミリ秒単位の数値に変換する
+     * "100"      →     100 (コロンがひとつも含まれない文字列はミリ秒直接指定と解釈)
+     * "1:00"     →   60000 (分:秒)
+     * "1:00:00"  → 3600000 (時:分:秒)
+     * "0:0.999"  →     999 (小数点以下でミリ秒を指定できる)
+     * @param {string} _str
+     * @returns {number}
+     */
+    parseMilliSeconds: function (_str) {
+        const str = $.trim(_str);
+
+        // 登場するコロンを数える
+        const colon_count = (str.match(/\:/g) || []).length;
+
+        // コロンを含まないならミリ秒が直接指定されているのだと解釈する
+        if (colon_count === 0) {
+            return parseInt(str);
+        }
+
+        let hours_str = "0";
+        let minutes_str = "0";
+        let seconds_str = "0";
+        let milli_seconds_str = "0";
+
+        // コロンで刻む
+        const colon_hash = str.split(":");
+
+        if (colon_count === 1) {
+            // "59:59.999"
+            minutes_str = colon_hash[0];
+            seconds_str = colon_hash[1];
+        } else {
+            // "99:59:59.999"
+            hours_str = colon_hash[colon_hash.length - 3];
+            minutes_str = colon_hash[colon_hash.length - 2];
+            seconds_str = colon_hash[colon_hash.length - 1];
+        }
+
+        const dot_hash = seconds_str.split(".");
+        if (dot_hash[1]) {
+            seconds_str = dot_hash[0];
+            milli_seconds_str = dot_hash[1];
+        }
+
+        const hours_ms = (parseInt(hours_str) || 0) * 1000 * 60 * 60;
+        const minutes_ms = (parseInt(minutes_str) || 0) * 1000 * 60;
+        const seconds_ms = (parseInt(seconds_str) || 0) * 1000;
+        const milli_seconds_ms = parseInt(milli_seconds_str) || 0;
+
+        return hours_ms + minutes_ms + seconds_ms + milli_seconds_ms;
+    },
+
     play: function (pm) {
-        var that = this;
+        this.kag.layer.hideEventLayer();
 
-        var target = "bgm";
+        // 再生しようとしているのはSEか？(BGMではなく)
+        const is_se = pm.target === "se";
 
-        if (pm.target == "se") {
-            target = "sound";
-            this.kag.tmp.is_se_play = true;
+        // 再生スロット (例) "0", "1", "2", ...
+        const buf = pm.buf;
 
-            //指定されたbufがボイス用に予約されてるか否か
-            if (this.kag.stat.map_vo["vobuf"][pm.buf]) {
-                this.kag.tmp.is_vo_play = true;
-            }
+        // これはボイスか？([voconfig]でボイス用に予約されていたbufがいままさに指定されているか？)
+        const is_voice = !!this.kag.stat.map_vo.vobuf[buf];
 
-            //ループ効果音の設定
+        // ループするか？
+        const is_loop = pm.loop === "true";
 
-            if (!this.kag.stat.current_se) {
-                this.kag.stat.current_se = {};
-            }
+        // フェードインすべきかどうか
+        let is_fadein = pm.fadein === "true";
 
-            if (pm.stop == "false") {
-                if (pm.loop == "true") {
-                    this.kag.stat.current_se[pm.buf] = pm;
-                } else {
-                    if (this.kag.stat.current_se[pm.buf]) {
-                        delete this.kag.stat.current_se[pm.buf];
-                    }
-                }
-            }
-        } else {
-            this.kag.tmp.is_audio_stopping = false;
-            this.kag.tmp.is_bgm_play = true;
+        // スキップ中はフェードインしない！
+        if (this.kag.stat.is_skip || parseInt(pm.time) === 0) {
+            is_fadein = false;
         }
 
-        var volume = 1;
+        // 次のタグに進むべきか
+        const should_next_order = pm.stop === "false";
 
-        if (pm.volume !== "") {
-            volume = parseFloat(parseInt(pm.volume) / 100);
+        // 音声タイプ "bgm" or "sound"
+        let sound_type = is_se ? "sound" : "bgm";
+
+        // オートモード時にボイス再生終了から何ミリ秒待ってから次のタグに進むか
+        let timeout_after_voice_in_automode = 500;
+        if (this.kag.stat.voconfig_waittime !== undefined) {
+            timeout_after_voice_in_automode = parseInt(this.kag.stat.voconfig_waittime);
         }
 
-        var ratio = 1;
-
-        //デフォルトで指定される値を設定
-        if (target === "bgm") {
-            if (typeof this.kag.config.defaultBgmVolume == "undefined") {
-                ratio = 1;
-            } else {
-                ratio = parseFloat(parseInt(this.kag.config.defaultBgmVolume) / 100);
+        // nextOrder を発行する共通関数
+        const next = () => {
+            if (should_next_order) {
+                this.kag.layer.showEventLayer();
+                this.kag.ftag.nextOrder();
             }
+        };
 
-            //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
-            if (typeof this.kag.stat.map_bgm_volume[pm.buf] != "undefined") {
-                ratio = parseFloat(parseInt(this.kag.stat.map_bgm_volume[pm.buf]) / 100);
-            }
-        } else {
-            if (typeof this.kag.config.defaultSeVolume == "undefined") {
-                ratio = 1;
-            } else {
-                ratio = parseFloat(parseInt(this.kag.config.defaultSeVolume) / 100);
-            }
+        //
+        // storage の解釈
+        //
 
-            //bufが指定されていて、かつ、デフォルトボリュームが指定されている場合は
-            if (typeof this.kag.stat.map_se_volume[pm.buf] != "undefined") {
-                ratio = parseFloat(parseInt(this.kag.stat.map_se_volume[pm.buf]) / 100);
-            }
-        }
-
-        volume *= ratio;
-
-        var storage_url = "";
-
-        var browser = $.getBrowser();
-        var storage = pm.storage;
-
-        //ogg m4a を推奨するための対応 ogg を m4a に切り替え
-        //mp3 が有効になっている場合は無視する
-        if (this.kag.config.mediaFormatDefault != "mp3") {
-            if (browser == "msie" || browser == "safari" || browser == "edge") {
+        // IE, Edge, Safari では拡張子の ogg を m4a に切り替える
+        // ただし mp3 が有効になっている場合は無視する
+        let storage = pm.storage;
+        const browser = $.getBrowser(); // 使用ブラウザ
+        if (this.kag.config.mediaFormatDefault !== "mp3") {
+            if (browser === "msie" || browser === "safari" || browser === "edge") {
                 storage = $.replaceAll(storage, ".ogg", ".m4a");
             }
         }
 
-        if ($.isHTTP(pm.storage)) {
-            storage_url = storage;
-        } else {
-            if (storage != "") {
-                storage_url = "./data/" + target + "/" + storage;
-            } else {
-                storage_url = "";
+        storage = $.parseStorage(storage, sound_type);
+
+        //
+        // ボリュームの決定
+        //
+
+        // タグに指定されているボリューム
+        let tag_volume = 1;
+        if (pm.volume !== "") {
+            tag_volume = $.parseVolume(pm.volume);
+        }
+
+        // さらにコンフィグで設定した音量比を掛け算する必要がある
+        let config_volume = 1;
+
+        switch (sound_type) {
+            // BGMの場合
+            case "bgm":
+                config_volume = $.parseVolume(this.kag.config.defaultBgmVolume);
+                // このbufの個別BGM音量が存在する場合はそれで上書き
+                if (this.kag.stat.map_bgm_volume[buf]) {
+                    config_volume = $.parseVolume(this.kag.stat.map_bgm_volume[buf]);
+                }
+                break;
+
+            // SEの場合
+            case "sound":
+                config_volume = $.parseVolume(this.kag.config.defaultSeVolume);
+                // このbufの個別SE音量が存在する場合はそれで上書き
+                if (this.kag.stat.map_bgm_volume[buf]) {
+                    config_volume = $.parseVolume(this.kag.stat.map_se_volume[buf]);
+                }
+                break;
+        }
+
+        // タグ音量とコンフィグ音量を掛け算してボリューム完成！
+        const howl_volume = tag_volume * config_volume;
+
+        // Howlに最初に設定する音量 フェードインの場合はゼロスタート
+        let initial_howl_volume = is_fadein ? 0 : howl_volume;
+
+        //
+        // いま再生中のBGMをまた再生しようとしていないか？
+        //
+
+        if (sound_type === "bgm" && this.kag.tmp.map_bgm[buf]) {
+            const old_audio_obj = this.kag.tmp.map_bgm[buf];
+            // もうこれ再生してるってば！
+            if (storage === old_audio_obj._src) {
+                // 再･再生は必要か？ オプションを確認していこう 基本はtrue
+                let need_restart = true;
+                if (this.kag.stat.bgmopt_samebgm_restart !== undefined) {
+                    need_restart = this.kag.stat.bgmopt_samebgm_restart;
+                }
+                if (pm.restart === "false") {
+                    need_restart = false;
+                }
+                if (!need_restart) {
+                    // 再･再生は必要ないらしい
+                    // 一応音量も見とくか
+                    if (tag_volume === old_audio_obj.tag_volume) {
+                        // 音量まで一緒じゃねーか！
+                    } else {
+                        // 音量は違うらしいぞ！なら変える必要がある
+                        // console.warn("change current volume only");
+                        const time = is_fadein ? parseInt(pm.time) : 0;
+                        this.kag.ftag.startTag("bgmopt", {
+                            tag_volume: pm.volume,
+                            next: "false",
+                            time: time,
+                        });
+                    }
+                    next();
+                    return;
+                }
             }
         }
 
-        //音楽再生
-        var audio_obj = null;
+        //
+        // プロパティの操作
+        //
+
+        switch (sound_type) {
+            // BGMの場合
+            case "bgm":
+                // BGM再生中！
+                this.kag.tmp.is_bgm_play = true;
+                break;
+
+            // SEの場合
+            case "sound":
+                // SE再生中！
+                this.kag.tmp.is_se_play = true;
+
+                // ボイス再生中！
+                if (is_voice) {
+                    this.kag.tmp.is_vo_play = true;
+                }
+                break;
+        }
+
+        //
+        // Howlオプション
+        //
+
+        // Howlオブジェクト格納用
+        let audio_obj;
 
         var howl_opt = {
-            src: storage_url,
-            volume: volume,
-            onend: (e) => {
-                //this.j_btnPreviewBgm.parent().removeClass("soundOn");
-            },
+            loop: is_loop,
+            src: storage,
+            volume: initial_howl_volume,
             // ボイスの読み込みに失敗したとき
             onloaderror: (_, e) => {
                 console.error(e);
-                that.kag.layer.showEventLayer();
-                if (pm.stop == "false") {
-                    that.kag.ftag.nextOrder();
-                }
+                next();
             },
         };
 
-        //HTML5 audioを強制する
-        if (pm.html5 == "true") {
-            howl_opt["html5"] = true;
+        // Web Audio API ではなく HTML5 <audio> による再生を行う場合
+        if (pm.html5 === "true") {
+            howl_opt.html5 = true;
         }
 
-        //スプライトが指定されている場合
-        if (pm.sprite_time != "") {
-            let array_sprite = pm.sprite_time.split("-");
-            let sprite_from = parseInt($.trim(array_sprite[0]));
-            let sprite_to = parseInt($.trim(array_sprite[1]));
-            let duration = sprite_to - sprite_from;
-
-            howl_opt["sprite"] = {
-                sprite_default: [sprite_from, duration, $.toBoolean(pm.loop)],
-            };
+        // スプライト(再生区間)が指定されている場合
+        let sprite_name;
+        if (pm.sprite_time) {
+            // "6000-10000" → 6秒時点～10秒時点を再生するように設定
+            const array_sprite = pm.sprite_time.split("-");
+            const sprite_from = this.parseMilliSeconds(array_sprite[0]);
+            const sprite_to = this.parseMilliSeconds(array_sprite[1]);
+            const duration = sprite_to - sprite_from;
+            const sprite = {};
+            sprite_name = "default_sprite";
+            sprite[sprite_name] = [sprite_from, duration, is_loop];
+            howl_opt.sprite = sprite;
         }
 
+        // Howlオブジェクトを生成
+        // まだ再生はされてないよ
         audio_obj = new Howl(howl_opt);
 
-        if (pm.loop == "true") {
-            audio_obj.loop(true);
-        } else {
-            audio_obj.loop(false);
+        // このときのタグ音量とコンフィグ音量はそれぞれ記憶しておく [bgmopt effect="true"]対策
+        audio_obj.tag_volume = tag_volume;
+        audio_obj.config_volume = config_volume;
+
+        //
+        // 同一bufの旧オーディオの停止および破棄, 参照の格納, セーブデータロード時復元のための記憶
+        //
+
+        switch (sound_type) {
+            // BGMの場合
+            case "bgm":
+                // このbufで再生中のオーディオがある場合は破棄！キャッシュから削除される
+                if (this.kag.tmp.map_bgm[buf]) {
+                    this.kag.tmp.map_bgm[buf].pause();
+                    this.kag.tmp.map_bgm[buf].unload();
+                }
+                // 参照を格納
+                this.kag.tmp.map_bgm[buf] = audio_obj;
+                // セーブデータロード時に復元できるように記憶しておく
+                this.kag.stat.current_bgm = pm.storage;
+                this.kag.stat.current_bgm_vol = pm.volume;
+                this.kag.stat.current_bgm_html5 = pm.html5;
+                break;
+
+            // SEの場合
+            case "sound":
+                // このbufで再生中のオーディオがある場合は破棄！キャッシュから削除される
+                if (this.kag.tmp.map_se[buf]) {
+                    this.kag.tmp.map_se[buf].pause();
+                    this.kag.tmp.map_se[buf].unload();
+                }
+                // 参照を格納
+                this.kag.tmp.map_se[buf] = audio_obj;
+                // ループSEの記憶領域確保
+                if (!this.kag.stat.current_se) {
+                    this.kag.stat.current_se = {};
+                }
+                if (is_loop) {
+                    // ループSEの場合はセーブデータロード時に復元できるように記憶しておく
+                    this.kag.stat.current_se[buf] = $.extend({}, pm);
+                } else {
+                    // ループSEでないなら[buf]プロパティ自体を削除
+                    delete this.kag.stat.current_se[buf];
+                }
+                break;
         }
 
-        if (target === "bgm") {
-            if (this.kag.tmp.map_bgm[pm.buf]) {
-                this.kag.tmp.map_bgm[pm.buf].unload();
-            }
+        //
+        // イベントリスナの登録
+        //
 
-            this.kag.tmp.map_bgm[pm.buf] = audio_obj;
-            that.kag.stat.current_bgm = storage;
-            that.kag.stat.current_bgm_vol = pm.volume;
-            that.kag.stat.current_bgm_html5 = pm.html5;
-        } else {
-            //効果音の時はバッファ指定
-            //すでにバッファが存在するなら、それを消す。
-            if (this.kag.tmp.map_se[pm.buf]) {
-                this.kag.tmp.map_se[pm.buf].pause();
-                this.kag.tmp.map_se[pm.buf].unload();
-                delete this.kag.tmp.map_se[pm.buf];
+        // 再生開始時イベントリスナ
+        // フェードインとnextOrder
+        audio_obj.once("play", () => {
+            if (is_fadein) {
+                audio_obj.fade(0, howl_volume, parseInt(pm.time));
             }
-
-            this.kag.tmp.map_se[pm.buf] = audio_obj;
-        }
-
-        audio_obj.once("play", function () {
-            that.kag.layer.showEventLayer();
-            if (pm.stop == "false") {
-                that.kag.ftag.nextOrder();
-            }
+            next();
         });
 
-        if (pm.sprite_time !== "") {
-            audio_obj.play("sprite_default");
-        } else {
-            audio_obj.play();
-        }
-
-        if (pm.fadein == "true") {
-            audio_obj.fade(0, volume, parseInt(pm.time));
-        }
-
-        //再生が完了した時
-        if (pm.loop != "true") {
-            audio_obj.on("end", function (e) {
-                if (pm.target == "se") {
-                    that.kag.tmp.is_se_play = false;
-                    // いま再生し終わったこの音声がボイスである場合、すなわち、
-                    // このスロットが[voconfig]によってボイス用に設定されている場合にだけボイス再生中フラグを折る
-                    if (that.kag.stat.map_vo.vobuf[pm.buf]) {
-                        that.kag.tmp.is_vo_play = false;
-                    }
-
-                    // 状態によってはここで nextOrder を呼び出す
-                    if (that.kag.tmp.is_se_play_wait == true) {
-                        // [wse]に到達してSEの再生終了を待っている状態
-                        that.kag.tmp.is_se_play_wait = false;
-                        that.kag.ftag.nextOrder();
-                    } else if (that.kag.tmp.is_vo_play_wait == true) {
-                        // オートモード中に[l]や[p]に到達してボイスの再生終了を待っている状態
-                        // この音声がボイスである場合にのみ実行
-                        if (that.kag.stat.map_vo.vobuf[pm.buf]) {
-                            that.kag.tmp.is_vo_play_wait = false;
-                            setTimeout(function () {
-                                that.kag.ftag.nextOrder();
-                            }, 500);
+        // ループしない場合のみ再生終了時イベントリスナを登録
+        // プロパティの操作および特定状況での nextOrder
+        if (!is_loop) {
+            audio_obj.on("end", (e) => {
+                switch (sound_type) {
+                    // BGMの場合
+                    case "bgm":
+                        // いまBGM再生してないよ！
+                        this.kag.tmp.is_bgm_play = false;
+                        // [wbgm]に到達してBGMの再生終了を待っている状態だったら nextOrder
+                        if (this.kag.tmp.is_bgm_play_wait == true) {
+                            this.kag.tmp.is_bgm_play_wait = false;
+                            this.kag.ftag.nextOrder();
                         }
-                    }
-                } else if (pm.target == "bgm") {
-                    that.kag.tmp.is_bgm_play = false;
+                        break;
 
-                    if (that.kag.tmp.is_bgm_play_wait == true) {
-                        that.kag.tmp.is_bgm_play_wait = false;
-                        that.kag.ftag.nextOrder();
-                    }
+                    // SEの場合
+                    case "sound":
+                        // SE再生してないよ！
+                        this.kag.tmp.is_se_play = false;
+
+                        // ボイス再生してないよ！
+                        if (is_voice) {
+                            this.kag.tmp.is_vo_play = false;
+                        }
+
+                        // 状態次第で nextOrder
+                        if (this.kag.tmp.is_se_play_wait == true) {
+                            // [wse]に到達してSEの再生終了を待っている状態だったら nextOrder
+                            this.kag.tmp.is_se_play_wait = false;
+                            this.kag.ftag.nextOrder();
+                        } else if (this.kag.tmp.is_vo_play_wait == true) {
+                            // オートモード中に[l]や[p]に到達してボイスの再生終了を待っている状態だったら
+                            // この音声がボイスである場合にのみ nextOrder
+                            if (is_voice) {
+                                this.kag.tmp.is_vo_play_wait = false;
+                                $.setTimeout(() => {
+                                    this.kag.ftag.nextOrder();
+                                }, timeout_after_voice_in_automode);
+                            }
+                        }
+                        break;
                 }
             });
         }
+
+        // フェードイン完了
+        audio_obj.once("fade", () => {
+            // console.warn("fadein complete!");
+        });
+
+        //
+        // 再生開始
+        //
+
+        audio_obj.play(sprite_name);
     },
 
     /*
@@ -422,74 +614,91 @@ tyrano.plugin.kag.tag.stopbgm = {
     start: function (pm) {
         var that = this;
 
-        var target_map = null;
+        // nextOrder を発行するかどうか
+        const should_next_order = pm.stop === "false";
+
+        // Howlオブジェクト格納マップ
+        let target_map = null;
+
+        // フェードアウトするかどうか
+        let is_fadeout = pm.fadeout === "true";
+
+        // スキップ中はフェードインしない！
+        if (this.kag.stat.is_skip || parseInt(pm.time) === 0) {
+            is_fadeout = false;
+        }
+
+        //
+        // プロパティの操作
+        //
 
         if (pm.target == "bgm") {
             target_map = this.kag.tmp.map_bgm;
-            that.kag.tmp.is_bgm_play = false;
-            that.kag.tmp.is_bgm_play_wait = false;
+            this.kag.tmp.is_bgm_play = false;
+            this.kag.tmp.is_bgm_play_wait = false;
+            if (should_next_order) {
+                this.kag.stat.current_bgm = "";
+                this.kag.stat.current_bgm_vol = "";
+            }
         } else {
             target_map = this.kag.tmp.map_se;
-
-            that.kag.tmp.is_vo_play = false;
-
-            that.kag.tmp.is_se_play = false;
-            that.kag.tmp.is_se_play_wait = false;
-
-            if (!this.kag.stat.current_se) {
-                this.kag.stat.current_se = {};
-            }
-
-            if (pm.stop == "false") {
-                if (this.kag.stat.current_se[pm.buf]) {
-                    delete this.kag.stat.current_se[pm.buf];
-                }
+            this.kag.tmp.is_vo_play = false;
+            this.kag.tmp.is_se_play = false;
+            this.kag.tmp.is_se_play_wait = false;
+            if (this.kag.stat.current_se && this.kag.stat.current_se[pm.buf]) {
+                delete this.kag.stat.current_se[pm.buf];
             }
         }
 
-        var browser = $.getBrowser();
+        //
+        // Howlオブジェクトを操作して実際に音を止める
+        //
 
-        for (key in target_map) {
-            // pm.buf_allが"true"の場合はpm.bufを見ずにすべてのスロットの効果音を止める
-            // [playse ... clear="true"]の内部で[stopbgm]が呼び出されたときはpm.buf_allに"true"が入っている
-            if (pm.buf_all === "true" || key == pm.buf) {
-                (function () {
-                    var _key = key;
+        // Howlオブジェクトが格納されているマップ(連想配列)を洗っていく
+        for (const key in target_map) {
+            // これは操作対象か？ keyがpm.bufに一致するなら操作対象
+            // あるいは pm.buf_all="true" が指定されているなら問答無用で操作対象([playse ... clear="true"]用の隠しパラメータ)
+            const is_this_target = String(key) === String(pm.buf) || pm.buf_all === "true";
 
-                    var _audio_obj = null;
+            // 操作対象じゃないならスルー
+            if (!is_this_target) {
+                continue;
+            }
 
-                    if (pm.target === "bgm") {
-                        _audio_obj = target_map[_key];
+            // Howlオブジェクトの参照を取得
+            const audio_obj = target_map[key];
 
-                        //ロード画面の場合、再生中の音楽はそのまま、直後にロードするから
-                        if (pm.stop == "false") {
-                            that.kag.stat.current_bgm = "";
-                            that.kag.stat.current_bgm_vol = "";
+            // Howlオブジェクトが取れなければスルー
+            if (!audio_obj) {
+                continue;
+            }
+
+            if (!is_fadeout || !audio_obj.playing()) {
+                // フェードアウトしない場合, あるいはもう止まってる場合
+                // 単純に停止メソッドを呼ぶ
+                audio_obj.stop();
+            } else {
+                // フェードアウトする場合
+                // フェードアウト完了イベントリスナを登録する関数
+                const bind_fade_complete_listener = () => {
+                    audio_obj.once("fade", () => {
+                        if (audio_obj.volume() !== 0) {
+                            // フェードが完了したのに音量がゼロじゃない…だと…
+                            // フェードイン完了時のfadeイベントと干渉してしまったので登録し直す
+                            bind_fade_complete_listener();
+                            return;
                         }
-                    } else {
-                        _audio_obj = target_map[_key];
-                    }
-
-                    //フェードアウトしながら再生停止
-                    if (pm.fadeout == "true") {
-                        _audio_obj.fade(_audio_obj.volume(), 0, parseInt(pm.time));
-
-                        //fadeが完了した際にvolumeが0だったらstopを行う処理を追加
-                        if (_audio_obj.playing()) {
-                            _audio_obj.once("fade", () => {
-                                if (_audio_obj.volume() === 0) {
-                                    _audio_obj.stop();
-                                }
-                            });
-                        }
-                    } else {
-                        _audio_obj.stop();
-                    }
-                })();
+                        // console.warn("fadeout complete!");
+                        audio_obj.stop();
+                        audio_obj.unload();
+                    });
+                };
+                bind_fade_complete_listener();
+                audio_obj.fade(audio_obj.volume(), 0, parseInt(pm.time));
             }
         }
 
-        if (pm.stop == "false") {
+        if (should_next_order) {
             this.kag.ftag.nextOrder();
         }
     },
@@ -524,7 +733,7 @@ html5       = !!
 */
 
 tyrano.plugin.kag.tag.fadeinbgm = {
-    vital: ["storage", "time"],
+    vital: ["storage"],
 
     pm: {
         loop: "true",
@@ -536,9 +745,11 @@ tyrano.plugin.kag.tag.fadeinbgm = {
     },
 
     start: function (pm) {
+        // 動作安定化のためにpm.timeの最低値として100を保証
         if (parseInt(pm.time) <= 100) {
             pm.time = 100;
         }
+
         this.kag.ftag.startTag("playbgm", pm);
     },
 };
@@ -576,6 +787,11 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
     },
 
     start: function (pm) {
+        // 動作安定化のためにpm.timeの最低値として100を保証
+        if (parseInt(pm.time) <= 100) {
+            pm.time = 100;
+        }
+
         this.kag.ftag.startTag("stopbgm", pm);
     },
 };
@@ -587,12 +803,15 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
 オーディオ関連
 
 :title
-【非推奨】BGMのクロスフェード（入れ替え）
+BGMのクロスフェード（入れ替え）
 
 :exp
 【非推奨】BGMを入れ替えます。音楽が交差して切り替わる演出に使用できます。
 
 一部環境（Firefox、Safari等）において対応していません。その場合、`[playbgm]`の動作となります。
+
+<b>V515以降：</b>非推奨の機能となっていましたが、使えるようになりました。
+
 
 :sample
 [xchgbgm storage=new.mp3 loop=true time=3000]
@@ -606,7 +825,7 @@ time    = クロスフェードを行なっている時間をミリ秒で指定�
 */
 
 tyrano.plugin.kag.tag.xchgbgm = {
-    vital: ["storage", "time"],
+    vital: ["storage"],
 
     pm: {
         loop: "true",
@@ -614,10 +833,47 @@ tyrano.plugin.kag.tag.xchgbgm = {
         fadein: "true",
         fadeout: "true",
         time: 2000,
+        buf: "0",
     },
 
     start: function (pm) {
-        this.kag.ftag.startTag("stopbgm", pm);
+        // スキップ中はフェード処理しない！
+        if (this.kag.stat.is_skip || parseInt(pm.time) === 0) {
+            pm.time = "0";
+            pm.fadein = "false";
+            this.kag.ftag.startTag("playbgm", pm);
+            return;
+        }
+
+        // 動作安定化のためにpm.timeの最低値として100を保証
+        if (parseInt(pm.time) <= 100) {
+            pm.time = 100;
+        }
+
+        // このbufで再生中のBGMがある場合
+        let audio_obj;
+        if ((audio_obj = this.kag.tmp.map_bgm[pm.buf]) && audio_obj.playing()) {
+            // フェードアウト完了イベントリスナを登録する関数
+            const bind_fade_complete_listener = () => {
+                audio_obj.once("fade", () => {
+                    if (audio_obj.volume() !== 0) {
+                        // フェードが完了したのに音量がゼロじゃない…だと…
+                        // フェードイン完了時のfadeイベントと干渉してしまったので登録し直す
+                        bind_fade_complete_listener();
+                        return;
+                    }
+                    // console.warn("fadeout complete!");
+                    audio_obj.stop();
+                    audio_obj.unload();
+                });
+            };
+            bind_fade_complete_listener();
+            audio_obj.fade(audio_obj.volume(), 0, parseInt(pm.time));
+
+            // このあとの[playbgm]で操作されないように参照を消しておく
+            delete this.kag.tmp.map_bgm[pm.buf];
+        }
+
         this.kag.ftag.startTag("playbgm", pm);
     },
 };
@@ -759,6 +1015,7 @@ tyrano.plugin.kag.tag.fadeinse = {
     },
 
     start: function (pm) {
+        // 動作安定化のためにpm.timeの最低値として100を保証
         if (parseInt(pm.time) <= 100) {
             pm.time = 100;
         }
@@ -799,6 +1056,11 @@ tyrano.plugin.kag.tag.fadeoutse = {
     },
 
     start: function (pm) {
+        // 動作安定化のためにpm.timeの最低値として100を保証
+        if (parseInt(pm.time) <= 100) {
+            pm.time = 100;
+        }
+
         this.kag.ftag.startTag("stopbgm", pm);
     },
 };
@@ -817,59 +1079,101 @@ BGMの設定を変更できます。
 
 プレイヤーがスマホブラウザから閲覧している場合は端末の制限により音量が変更できませんので注意してください。
 
+「`buf`パラメータが指定されていない`[bgmopt]`タグ」を通過した時点で、`buf`ごとの音量設定が初期化される仕様です。`[bgmopt]`に`buf`を指定するかしないかは、ゲームプロジェクトで統一するようにしましょう。
+
+
 :sample
 [bgmopt volume=50 ]
 
 :param
-volume = BGMの音量を`0`〜`100`で指定できます。,
-effect = 現在再生中のBGMに即反映するかどうか。`true`または`false`で指定します。,
-buf    = 設定を変更するスロットを指定できます。省略すると、すべてのスロットが対象になります。
+volume          = BGMのコンフィグ音量を`0`〜`100`で指定できます。,
+buf             = 設定を変更するスロットを指定できます。省略すると、全スロット共通の音量が設定されます。,
+effect          = コンフィグ音量の変更を現在再生中のBGMに即反映するかどうか。`true`または`false`で指定します。,
+time            = 音量の変更を即反映する場合のフェード時間をミリ秒単位で指定できます。,
+tag_volume      = `0`〜`100`を指定して、現在再生中のBGMのタグ音量を変更できます。タグ音量とは`[playbgm]`タグに指定されていた音量のことです。この機能はたとえば、もともと`[playbgm volume="50"]`で再生され始めたBGMの音量を、`[playbgm volume="100"]`で再生されていた場合の音量に修正したい、というケースで使用可能です。これを指定しただけではコンフィグ音量は変更されません。これを指定すると、`effect`が強制的に`true`になります。,
+samebgm_restart = `[playbgm]`タグで再生しようとしたBGMがすでに再生中だった場合の処理を設定できます。`true`なら最初から再生し直し、`false`ならスルー。,
 
 #[end]
 */
 
 tyrano.plugin.kag.tag.bgmopt = {
     pm: {
-        volume: "100",
+        volume: "",
         effect: "true",
         buf: "",
+        tag_volume: "",
+        next: "true",
+        time: "",
+        samebgm_restart: "",
     },
 
     start: function (pm) {
-        //再生中のBGMに変更を加える
-        var map_bgm = this.kag.tmp.map_bgm;
+        // タグ音量とコンフィグ音量
+        let tag_volume;
+        let config_volume;
 
-        //バッファが設定されている場合
-        if (pm.buf != "") {
-            this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
+        // スロットが指定されているかどうかで場合分け
+        if (pm.buf) {
+            // スロットが指定されている場合
+            if (pm.volume) this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
+            config_volume = this.kag.stat.map_bgm_volume[pm.buf];
         } else {
-            this.kag.stat.map_bgm_volume = {};
-            this.kag.config.defaultBgmVolume = pm.volume;
+            // スロットが指定されていない場合は個別設定を初期化してから代入
+            if (pm.volume) {
+                this.kag.stat.map_bgm_volume = {};
+                this.kag.config.defaultBgmVolume = pm.volume;
+            }
+            config_volume = this.kag.config.defaultBgmVolume;
         }
 
-        //すぐに反映 スマホアプリの場合はすぐに変更はできない
-        if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
-            var new_volume = parseFloat(parseInt(pm.volume) / 100);
+        // コンフィグ音量がここで確定
+        config_volume = $.parseVolume(config_volume);
 
-            if (pm.buf == "") {
-                for (key in map_bgm) {
-                    if (map_bgm[key]) {
-                        map_bgm[key].volume(new_volume);
-                    }
-                }
+        // タグ音量を変更する場合
+        // [playbgm volume="50"]で再生され始めたBGMを、[playbgm volume="100"]で再生されていた場合の音量に変更する、みたいな処理
+        if (pm.tag_volume !== "") {
+            tag_volume = $.parseVolume(pm.tag_volume);
+            pm.effect = "true";
+            // ロード復元用のプロパティの更新も忘れない
+            this.kag.stat.current_bgm_vol = pm.tag_volume;
+        }
+
+        // すぐに反映(スマホアプリの場合は不可)
+        const target_map = this.kag.tmp.map_bgm;
+        if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
+            // 音量変更用のオプション
+            const options = {
+                config: config_volume,
+                tag: tag_volume,
+                time: pm.time,
+            };
+            // スロットが指定されているかどうかで場合分け
+            if (pm.buf) {
+                // スロット指定ありの場合は該当するオーディオにのみ適用
+                const audio_obj = target_map[pm.buf];
+                if (audio_obj) this.kag.changeHowlVolume(audio_obj, options);
             } else {
-                if (map_bgm[pm.buf]) {
-                    map_bgm[pm.buf].volume(new_volume);
+                // スロット指定なしの場合は再生中のすべてのオーディオに適用
+                for (const key in target_map) {
+                    const audio_obj = target_map[key];
+                    if (audio_obj) this.kag.changeHowlVolume(audio_obj, options);
                 }
             }
         }
 
-        //this.kag.ftag.nextOrder();
+        if (pm.samebgm_restart) {
+            this.kag.stat.bgmopt_samebgm_restart = pm.samebgm_restart === "true";
+        }
 
-        //この中でnextOrderしてる
-        this.kag.ftag.startTag("eval", {
-            exp: "sf._system_config_bgm_volume = " + pm.volume,
-        });
+        // システム変数の変更とセーブ(sfのデータは[eval]実行時点でセーブされる)
+        if (pm.volume) {
+            this.kag.ftag.startTag("eval", {
+                exp: "sf._system_config_bgm_volume = " + pm.volume,
+                next: pm.next,
+            });
+        } else {
+            if (pm.next !== "false") this.kag.ftag.nextOrder();
+        }
     },
 };
 
@@ -887,59 +1191,104 @@ SEの設定を変更できます。
 
 プレイヤーがスマホブラウザから閲覧している場合は端末の制限により音量が変更できませんので注意してください。
 
+「`buf`パラメータが指定されていない`[seopt]`タグ」を通過した時点で、`buf`ごとの音量設定が初期化される仕様です。`[seopt]`に`buf`を指定するかしないかは、ゲームプロジェクトで統一するようにしましょう。
+
 :sample
 [seopt volume=50 ]
 
 :param
-volume = 効果音の音量を`0`〜`100`で指定できます。,
-effect = 現在再生中の効果音に即反映するかどうか。`true`または`false`で指定します。,
-buf    = 設定を変更するスロットを指定できます。省略すると、すべてのスロットが対象になります。
+volume          = SEのコンフィグ音量を`0`〜`100`で指定できます。,
+buf             = 設定を変更するスロットを指定できます。省略すると、全スロット共通の音量が設定されます。,
+effect          = コンフィグ音量の変更を現在再生中のSEに即反映するかどうか。`true`または`false`で指定します。,
+time            = 音量の変更を即反映する場合のフェード時間をミリ秒単位で指定できます。,
+tag_volume      = `0`〜`100`を指定して、現在再生中のSEのタグ音量を変更できます。タグ音量とは`[playse]`タグに指定されていた音量のことです。この機能はたとえば、もともと`[playse volume="50"]`で再生され始めたSEの音量を、`[playse volume="100"]`で再生されていた場合の音量に修正したい、というケースで使用可能です。これを指定しただけではコンフィグ音量は変更されません。これを指定すると、`effect`が強制的に`true`になります。,
+
 
 #[end]
 */
 
 tyrano.plugin.kag.tag.seopt = {
     pm: {
-        volume: "100",
+        volume: "",
         effect: "true",
         buf: "",
+        tag_volume: "",
+        next: "true",
     },
 
     start: function (pm) {
-        //再生中のBGMに変更を加える
-        var map_se = this.kag.tmp.map_se;
+        // タグ音量とコンフィグ音量
+        let tag_volume;
+        let config_volume;
 
-        //バッファが設定されている場合
-        if (pm.buf != "") {
-            this.kag.stat.map_se_volume[pm.buf] = pm.volume;
+        // スロットが指定されているかどうかで場合分け
+        if (pm.buf) {
+            // スロットが指定されている場合
+            if (pm.volume) this.kag.stat.map_se_volume[pm.buf] = pm.volume;
+            config_volume = this.kag.stat.map_se_volume[pm.buf];
         } else {
-            this.kag.stat.map_se_volume = {};
-            this.kag.config.defaultSeVolume = pm.volume;
+            // スロットが指定されていない場合は個別設定を初期化してから代入
+            if (pm.volume) {
+                this.kag.stat.map_se_volume = {};
+                this.kag.config.defaultSeVolume = pm.volume;
+            }
+            config_volume = this.kag.config.defaultSeVolume;
         }
 
-        //すぐに反映
-        if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
-            var new_volume = parseFloat(parseInt(pm.volume) / 100);
+        // コンフィグ音量がここで確定
+        config_volume = $.parseVolume(config_volume);
 
-            if (pm.buf == "") {
-                for (key in map_se) {
-                    if (map_se[key]) {
-                        map_se[key].volume(new_volume);
+        // タグ音量を変更する場合
+        // [playbgm volume="50"]で再生され始めたBGMを、[playbgm volume="100"]で再生されていた場合の音量に変更する、みたいな処理
+        if (pm.tag_volume !== "") {
+            tag_volume = $.parseVolume(pm.tag_volume);
+            pm.effect = "true";
+        }
+
+        // すぐに反映(スマホアプリの場合は不可)
+        const target_map = this.kag.tmp.map_se;
+        if (pm.effect == "true" && this.kag.define.FLAG_APRI == false) {
+            // 音量変更用のオプション
+            const options = {
+                config: config_volume,
+                tag: tag_volume,
+                time: pm.time,
+            };
+            // スロットが指定されているかどうかで場合分け
+            if (pm.buf) {
+                // スロット指定ありの場合は該当するオーディオにのみ適用
+                const audio_obj = target_map[pm.buf];
+                if (audio_obj) {
+                    this.kag.changeHowlVolume(audio_obj, options);
+                    // ロード復元用のプロパティの更新も忘れない
+                    if (this.kag.stat.current_se[pm.buf]) {
+                        this.kag.stat.current_se[pm.buf].volume = pm.tag_volume;
                     }
                 }
             } else {
-                if (map_se[pm.buf]) {
-                    map_se[pm.buf].volume(new_volume);
+                // スロット指定なしの場合は再生中のすべてのオーディオに適用
+                for (const key in target_map) {
+                    const audio_obj = target_map[key];
+                    if (audio_obj) {
+                        this.kag.changeHowlVolume(audio_obj, options);
+                        // ロード復元用のプロパティの更新も忘れない
+                        if (this.kag.stat.current_se[key]) {
+                            this.kag.stat.current_se[key].volume = pm.tag_volume;
+                        }
+                    }
                 }
             }
         }
 
-        //この中でnextOrderしてる
-        this.kag.ftag.startTag("eval", {
-            exp: "sf._system_config_se_volume = " + pm.volume,
-        });
-
-        //this.kag.ftag.nextOrder();
+        // システム変数の変更とセーブ(sfのデータは[eval]実行時点でセーブされる)
+        if (pm.volume) {
+            this.kag.ftag.startTag("eval", {
+                exp: "sf._system_config_se_volume = " + pm.volume,
+                next: pm.next,
+            });
+        } else {
+            if (pm.next !== "false") this.kag.ftag.nextOrder();
+        }
     },
 };
 
@@ -1056,7 +1405,8 @@ tyrano.plugin.kag.tag.wse = {
 sebuf     = ボイスで使用する`[playse]`の`buf`を指定します。,
 name      = ボイスを再生するキャラクター名を指定します。`[chara_new]`タグの`name`。,
 vostorage = 音声ファイルとして使用するファイル名のテンプレートを指定します。`{number}`の部分には、再生されることに+1された数値が入っていきます。,
-number    = `vostorage`の`{number}`に当てはめる数値の初期値。
+number    = `vostorage`の`{number}`に当てはめる数値の初期値。,
+waittime  = オートモードにおいて、ボイスを再生し終わってから次のメッセージに進むまでに何ミリ秒待つか。
 
 :demo
 2,kaisetsu/19_voconfig
@@ -1070,6 +1420,8 @@ tyrano.plugin.kag.tag.voconfig = {
         name: "",
         vostorage: "",
         number: "",
+        waittime: "",
+        preload: "",
     },
     start: function (pm) {
         var map_vo = this.kag.stat.map_vo;
@@ -1093,11 +1445,21 @@ tyrano.plugin.kag.tag.voconfig = {
                 vochara["vostorage"] = pm.vostorage;
             }
 
-            if (pm.number != "") {
+            if (pm.number !== "") {
                 vochara["number"] = pm.number;
             }
 
             this.kag.stat.map_vo["vochara"][pm.name] = vochara;
+        }
+
+        // オートモード時にボイス再生終了から何ミリ秒待つか
+        if (pm.waittime) {
+            this.kag.stat.voconfig_waittime = parseInt(pm.waittime);
+        }
+
+        // ボイス再生時に次のボイスを自動でプリロードするかどうか
+        if (pm.preload) {
+            this.kag.stat.voconfig_preload = pm.preload === "true";
         }
 
         this.kag.ftag.nextOrder();
@@ -1131,6 +1493,12 @@ tyrano.plugin.kag.tag.vostart = {
     pm: {},
     start: function () {
         this.kag.stat.vostart = true;
+
+        // 次のボイスのプリロード
+        if (this.kag.stat.voconfig_preload) {
+            this.kag.preloadNextVoice();
+        }
+
         this.kag.ftag.nextOrder();
     },
 };
@@ -1182,6 +1550,10 @@ tyrano.plugin.kag.tag.vostop = {
 [speak_on]
 
 :param
+volume = 音量を`0`～`100`で指定します。,
+pitch  = 声の高さを`100`を基準とする比率で指定します。指定した数値が大きいほど声が高くなります。,
+rate   = 声の速度を`100`を基準とする比率で指定します。指定した数値が大きいほど早口になります。,
+cancel = テキスト読み上げ中に次のテキスト読み上げが差し込まれた場合の動作を指定できます。`true`を指定すると読み上げを中断して新しいテキストを読み上げます。`false`を指定すると中断は行わず、読み上げが完了次第次のテキストを読み上げるようになります。,
 
 #[end]
 */
@@ -1190,17 +1562,37 @@ tyrano.plugin.kag.tag.speak_on = {
     vital: [],
 
     pm: {
-        volume: "",
+        volume: "100",
+        pitch: "100",
+        rate: "100",
+        cancel: "false",
     },
 
     start: function (pm) {
         var that = this;
 
-        if ("speechSynthesis" in window) {
-            that.kag.stat.play_speak = true;
-        } else {
+        if (!("speechSynthesis" in window)) {
             console.error("*error:この環境は[speak_on]の読み上げ機能に対応していません");
+            this.kag.ftag.nextOrder();
+            return;
         }
+
+        that.kag.stat.play_speak = true;
+        if (pm.volume) {
+            this.kag.tmp.speak_on_volume = parseInt(pm.volume) / 100;
+        }
+        if (pm.pitch) {
+            this.kag.tmp.speak_on_pitch = parseInt(pm.pitch) / 100;
+        }
+        if (pm.rate) {
+            this.kag.tmp.speak_on_rate = parseInt(pm.rate) / 100;
+        }
+        if (pm.cancel) {
+            this.kag.tmp.speak_on_cancel = pm.cancel === "true";
+        }
+
+        const voices = window.speechSynthesis.getVoices();
+        console.warn(voices);
 
         this.kag.ftag.nextOrder();
     },

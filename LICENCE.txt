@@ -85,12 +85,19 @@ Made by Ilya Makarov
 Under MIT License
 
 ----------------
-howler.js v2.1.2
+
+howler.js v2.2.3
 howlerjs.com
 
-(c) 2013-2019, James Simpson of GoldFire Studios
+(c) 2013-2021, James Simpson of GoldFire Studios
 goldfirestudios.com
 
 MIT License
+
+----------------
+anime.js v3.2.1
+animejs.com
+(c) 2020 Julian Garnier
+Released under the MIT license
 
 ----------------

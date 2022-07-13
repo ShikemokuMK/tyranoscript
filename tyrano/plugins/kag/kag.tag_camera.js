@@ -62,10 +62,10 @@ tyrano.plugin.kag.tag.camera = {
     pm: {
         time: 1000,
 
-        from_x: "0",
-        from_y: "0",
-        from_zoom: "1",
-        from_rotate: "0",
+        from_x: "",
+        from_y: "",
+        from_zoom: "",
+        from_rotate: "",
 
         x: "",
         y: "",
@@ -107,12 +107,22 @@ tyrano.plugin.kag.tag.camera = {
         if (pm.zoom != "") to_camera.scale = pm.zoom;
         if (pm.rotate != "") to_camera.rotate = pm.rotate + "deg";
 
-        if (pm.from_x != "0" || pm.from_y != "0" || pm.from_zoom != "1" || pm.from_rotate != "0") {
+        if (pm.from_x !== "" || pm.from_y !== "" || pm.from_zoom !== "" || pm.from_rotate !== "") {
+            const from_info = {
+                x: "0",
+                y: "0",
+                scale: "1",
+                rotate: "0",
+            };
+            if (pm.from_x !== "") from_info.x = pm.from_x;
+            if (pm.from_y !== "") from_info.y = pm.from_y;
+            if (pm.from_zoom !== "") from_info.scale = pm.from_zoom;
+            if (pm.from_rotate !== "") from_info.rotate = pm.from_rotate;
             this.kag.stat.current_camera[pm.layer] = {
-                x: parseInt(pm.from_x) * -1 + "px",
-                y: parseInt(pm.from_y) * 1 + "px",
-                scale: pm.from_zoom,
-                rotate: pm.from_rotate + "deg",
+                x: parseInt(from_info.x) * -1 + "px",
+                y: parseInt(from_info.y) * 1 + "px",
+                scale: from_info.scale,
+                rotate: from_info.rotate + "deg",
             };
         }
 

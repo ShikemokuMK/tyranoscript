@@ -254,6 +254,9 @@ tyrano.plugin.kag.menu = {
                 array_save.data[num] = data;
                 $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
+                // ティラノイベント"storage:save"を発火
+                that.kag.trigger("storage:save");
+
                 if (typeof cb == "function") {
                     //終わったタイミングでコールバックを返す
                     cb(data);
@@ -264,6 +267,9 @@ tyrano.plugin.kag.menu = {
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
             array_save.data[num] = data;
             $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
+
+            // ティラノイベント"storage:save"を発火
+            that.kag.trigger("storage:save");
 
             if (typeof cb == "function") {
                 //終わったタイミングでコールバックを返す
@@ -281,6 +287,9 @@ tyrano.plugin.kag.menu = {
             var data = that.snap;
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
             $.setStorage(that.kag.config.projectID + "_tyrano_quick_save", data, that.kag.config.configSave);
+
+            // ティラノイベント"storage:quicksave"を発火
+            that.kag.trigger("storage:quicksave");
 
             var layer_menu = that.kag.layer.getMenuLayer();
             layer_menu.hide();
@@ -305,6 +314,9 @@ tyrano.plugin.kag.menu = {
         data.save_date = $.getNowDate() + "　" + $.getNowTime();
         $.setStorage(this.kag.config.projectID + "_tyrano_auto_save", data, this.kag.config.configSave);
 
+        // ティラノイベント"storage:autosave"を発火
+        this.kag.trigger("storage:autosave");
+
         var layer_menu = this.kag.layer.getMenuLayer();
         layer_menu.hide();
     },
@@ -324,8 +336,8 @@ tyrano.plugin.kag.menu = {
 
     //セーブ状態のスナップを保存します。
     snapSave: function (title, call_back, flag_thumb) {
-        // savestart イベントを発火
-        this.kag.trigger("savestart");
+        // ティラノイベント"snapsave:start"を発火
+        this.kag.trigger("snapsave:start");
 
         var that = this;
 
@@ -384,8 +396,8 @@ tyrano.plugin.kag.menu = {
             if (call_back) {
                 call_back();
 
-                // savecomplete イベントを発火
-                this.kag.trigger("savecomplete");
+                // ティラノイベント"snapsave:complete"を発火
+                that.kag.trigger("snapsave:complete");
             }
         } else {
             //
@@ -418,8 +430,8 @@ tyrano.plugin.kag.menu = {
                     if (call_back) {
                         call_back();
 
-                        // savecomplete イベントを発火
-                        that.kag.trigger("savecomplete");
+                        // ティラノイベント"snapsave:complete"を発火
+                        that.kag.trigger("snapsave:complete");
                     }
                 };
 
@@ -679,8 +691,8 @@ tyrano.plugin.kag.menu = {
     loadGameData: function (data, options) {
         const that = this;
 
-        // loadstart イベントを発火
-        this.kag.trigger("loadstart");
+        // ティラノイベント"load:start"を発火
+        this.kag.trigger("load:start");
 
         var auto_next = "no";
 
@@ -765,6 +777,7 @@ tyrano.plugin.kag.menu = {
                     /*fadein:"true",*/
                     /*time:2000,*/
                     stop: "true",
+                    can_ignore: "false",
                 };
 
                 //ボリュームが設定されいる場合
@@ -776,10 +789,11 @@ tyrano.plugin.kag.menu = {
             }
 
             //効果音再生
-            for (key in this.kag.stat.current_se) {
+            for (const key in this.kag.stat.current_se) {
                 var pm_obj = this.kag.stat.current_se[key];
+                pm_obj.can_ignore = "false";
                 pm_obj["stop"] = "true";
-                this.kag.ftag.startTag("playse", pm_obj);
+                this.kag.ftag.startTag("playbgm", pm_obj);
             }
         }
 
@@ -976,8 +990,8 @@ tyrano.plugin.kag.menu = {
         // 復元完了
         // make.ksを通過してからもとのシナリオファイル＋タグインデックスに戻る処理
         const next = () => {
-            // loadcomplete イベントを発火
-            this.kag.trigger("loadcomplete");
+            // ティラノイベント"load:complete"を発火
+            this.kag.trigger("load:complete");
 
             // make.ks を挿入する
             const insert = {
@@ -1170,6 +1184,9 @@ tyrano.plugin.kag.menu = {
 
                 //セーブ上書き
                 $.setStorage(this.kag.config.projectID + "_tyrano_data", save_obj, this.kag.config.configSave);
+
+                // ティラノイベント"storage:save"を発火
+                this.kag.trigger("storage:save");
             }
 
             return save_obj;
@@ -1287,41 +1304,47 @@ tyrano.plugin.kag.menu = {
                 win.enterFullscreen();
             }
         } else {
-            var isFullScreen =
+            // いまフルスクリーンか？
+            // フルスクリーンならフルスクリーン要素が取得できる (truthy)
+            // フルスクリーンじゃないならnullが返ってくる (falsy)
+            const is_full_screen =
                 document.webkitFullscreenElement ||
                 document.mozFullScreenElement ||
                 document.msFullscreenElement ||
                 document.fullScreenElement ||
                 false;
-            var isEnableFullScreen =
+
+            // フルスクリーンにする機構が存在するか？
+            const can_full_screen =
                 document.fullscreenEnabled ||
                 document.webkitFullscreenEnabled ||
                 document.mozFullScreenEnabled ||
                 document.msFullscreenEnabled ||
                 false;
-            var elem = document.body;
 
-            if (isEnableFullScreen) {
+            const elem = document.body;
+
+            if (can_full_screen) {
                 if (elem.requestFullscreen) {
-                    if (isFullScreen) {
+                    if (is_full_screen) {
                         document.exitFullscreen();
                     } else {
                         elem.requestFullscreen();
                     }
                 } else if (elem.webkitRequestFullscreen) {
-                    if (isFullScreen) {
+                    if (is_full_screen) {
                         document.webkitExitFullscreen();
                     } else {
                         elem.webkitRequestFullscreen();
                     }
                 } else if (elem.mozRequestFullScreen) {
-                    if (isFullScreen) {
+                    if (is_full_screen) {
                         document.mozCancelFullScreen();
                     } else {
                         elem.mozRequestFullScreen();
                     }
                 } else if (elem.msRequestFullscreen) {
-                    if (isFullScreen) {
+                    if (is_full_screen) {
                         document.msExitFullscreen();
                     } else {
                         elem.msRequestFullscreen();

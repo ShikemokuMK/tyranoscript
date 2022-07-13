@@ -104,6 +104,12 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         $(document).keydown(function (e) {
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
+            // ティラノイベント"keydown"を発火
+            that.kag.trigger("keydown", e);
+
             if (that.kag.stat.enable_keyconfig == true) {
                 if (that.is_keydown == true) {
                     if (__tyrano_key_config.system_key_event == "true") {
@@ -290,20 +296,11 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         layer_obj_click.click(function (e) {
-            if (that.kag.tmp.ready_audio == false) {
-                if ($.isNeedClickAudio()) {
-                    that.kag.readyAudio();
-                    that.kag.tmp.ready_audio = true;
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
-                    if (that.kag.stat.is_adding_text == true) {
-                        that.kag.stat.is_click_text = true;
-                        return false;
-                    }
-                    that.kag.ftag.hideNextImg();
-                    that.kag.ftag.nextOrder();
-                    return false;
-                }
-            }
+            // ティラノイベント"click:event"を発火
+            that.kag.trigger("click:event", e);
 
             if (that.is_swipe) {
                 that.is_swipe = false;
@@ -336,6 +333,8 @@ tyrano.plugin.kag.key_mouse = {
             }
 
             that.kag.ftag.hideNextImg();
+            // ティラノイベント"click:next"を発火
+            that.kag.trigger("click:next", e);
             that.kag.ftag.nextOrder();
         });
     },

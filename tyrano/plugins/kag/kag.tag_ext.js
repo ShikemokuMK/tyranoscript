@@ -689,9 +689,6 @@ tyrano.plugin.kag.tag.skipstart = {
         if (this.kag.stat.is_skip == true || this.kag.stat.is_adding_text) {
             return false;
         }
-
-        this.kag.readyAudio();
-
         this.kag.setSkip(true);
         this.kag.ftag.nextOrder();
     },
@@ -2013,11 +2010,10 @@ tyrano.plugin.kag.tag.chara_ptext = {
             //キャラクターのボイス設定がある場合
 
             if (this.kag.stat.map_vo["vochara"][pm.name]) {
-                var vochara = this.kag.stat.map_vo["vochara"][pm.name];
+                const vochara = this.kag.stat.map_vo["vochara"][pm.name];
+                const playsefile = $.replaceAll(vochara.vostorage, "{number}", vochara.number);
 
-                var playsefile = $.replaceAll(vochara.vostorage, "{number}", vochara.number);
-
-                var se_pm = {
+                const se_pm = {
                     loop: "false",
                     storage: playsefile,
                     stop: "true",
@@ -2026,7 +2022,12 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
                 this.kag.ftag.startTag("playse", se_pm);
 
-                this.kag.stat.map_vo["vochara"][pm.name]["number"] = parseInt(vochara.number) + 1;
+                vochara.number++;
+
+                // 次のボイスのプリロード
+                if (this.kag.stat.voconfig_preload) {
+                    this.kag.preloadNextVoice();
+                }
             }
         }
 
@@ -2311,8 +2312,8 @@ tyrano.plugin.kag.tag.chara_show = {
         page: "fore",
         layer: "0", //レイヤーデフォルトは０に追加
         wait: "true", //アニメーションの終了を待ちます
-        left: "0", //chara_config でauto になっている場合は、自動的に決まります。指定されている場合はこちらを優先します。
-        top: "0",
+        left: "", //chara_config でauto になっている場合は、自動的に決まります。指定されている場合はこちらを優先します。
+        top: "",
         width: "",
         height: "",
         zindex: "1",
@@ -2515,9 +2516,9 @@ tyrano.plugin.kag.tag.chara_show = {
             //キャラのサイズを設定する必要がある。
 
             //立ち位置を自動的に設定する場合
-            if (that.kag.stat.chara_pos_mode == "true" && pm.left == "0") {
+            if (that.kag.stat.chara_pos_mode == "true" && pm.left === "") {
                 //立ち位置自動調整
-                if (pm.top != "0") {
+                if (pm.top !== "") {
                     j_chara_root.css("top", parseInt(pm.top));
                 } else {
                     j_chara_root.css("bottom", 0);

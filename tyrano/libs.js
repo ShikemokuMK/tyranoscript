@@ -1825,7 +1825,7 @@
     /**
      * dataフォルダに入っていることが想定されるフォルダ名("scenario", "image"など)を格納した配列
      */
-    const data_folder_names = ["scenario", "image", "fgimage", "bgimage", "video", "sound", "bgm", "others", "others/plugin"];
+    const data_folder_names = ["scenario", "image", "fgimage", "bgimage", "video", "sound", "bgm", "others"];
 
     /**
      * タグのstorageパラメータに指定された値を実際に使えるパスに直す
@@ -1853,7 +1853,7 @@
         let dir_path;
         if (!dir_name) {
             dir_path = ".";
-        } else if (dir_name && data_folder_names.includes(dir_name)) {
+        } else if (dir_name && data_folder_names.includes(dir_name.split("/").shift())) {
             // dataフォルダに入っているフォルダ名が指定されている場合は自動的に"./data/"を足す
             // たとえば"scenario"を"./data/scenario"に変換する
             dir_path = `./data/${dir_name}`;
@@ -1940,6 +1940,20 @@
         }
 
         return j_target || $();
+    };
+
+    /**
+     * volumeパラメータの値を実際にhowler.jsで利用可能な値に直す
+     * "0"～"100" の文字列を 0.0～1.0 の数値に変換する
+     * @param {string} vol_str parseInt()で数値に変換可能な文字列 (例) "0", "50", "100"
+     * @returns {number} 0以上1以下の数値
+     */
+    $.parseVolume = function (vol_str) {
+        const vol_int = typeof vol_str === "string" ? parseInt(vol_str) : vol_str;
+        if (isNaN(vol_int)) {
+            return 1;
+        }
+        return Math.max(0, Math.min(1, vol_str / 100));
     };
 })(jQuery);
 
