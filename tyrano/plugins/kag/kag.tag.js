@@ -77,7 +77,9 @@ tyrano.plugin.kag.ftag = {
     createNextImg: function () {
         // 参照
         const stat = this.kag.stat;
-        const pm = stat.glyph_pm || {};
+        const pm = stat.glyph_pm || {
+            folder: "tyrano/images/system",
+        };
 
         // クラスの配列
         const class_names = [];
@@ -96,7 +98,7 @@ tyrano.plugin.kag.ftag = {
             // 画像パス指定
             default:
             case "image":
-                img_src = $.parseStorage(stat.path_glyph, pm.folder);
+                img_src = $.parseStorage(stat.path_glyph || "nextpage.gif", pm.folder);
                 j_glyph = $(`<img src="${img_src}">`);
                 // 横幅と高さ
                 if (pm.width) {
