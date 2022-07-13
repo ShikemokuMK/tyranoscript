@@ -1690,8 +1690,26 @@ tyrano.plugin.kag.tag.text = {
      * 文字の追加を終えて次のタグに進む
      */
     finishAddingChars: function () {
+        // もう追加しおわった
         this.kag.stat.is_adding_text = false;
-        if (!this.kag.stat.is_hide_message) {
+
+        // いまメッセージウィンドウがユーザー操作によって非表示にされているかどうか
+        if (this.kag.stat.is_hide_message) {
+            // メッセージの表示途中でユーザーが右クリックしてメッセージウィンドウを消しおった！
+            // 次のタグ ([text]か[l]か[p]か[font]か…etc) には進ませない
+            // 次にユーザーがメッセージウィンドウを表示したときに一度だけ nextOrder を走らせる
+            this.kag.once(
+                "messagewindow:show",
+                () => {
+                    this.kag.ftag.nextOrder();
+                },
+                {
+                    is_temp: true, // これはセーブデータロード時に削除すべきリスナ
+                    is_system: true, // これはシステムが利用するリスナ
+                },
+            );
+        } else {
+            // ふつうにメッセージウィンドウが表示されている
             this.kag.ftag.nextOrder();
         }
     },

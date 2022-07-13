@@ -694,6 +694,9 @@ tyrano.plugin.kag.menu = {
         // ティラノイベント"load:start"を発火
         this.kag.trigger("load:start");
 
+        // 一時リスナをすべて消去
+        this.kag.offTempListeners();
+
         var auto_next = "no";
 
         //普通のロードの場合
