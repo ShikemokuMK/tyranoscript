@@ -96,7 +96,7 @@ tyrano.plugin.kag.ftag = {
             // 画像パス指定
             default:
             case "image":
-                img_src = $.parseStorage(stat.path_glyph, "tyrano/images/system");
+                img_src = $.parseStorage(stat.path_glyph, pm.folder);
                 j_glyph = $(`<img src="${img_src}">`);
                 // 横幅と高さ
                 if (pm.width) {
@@ -144,7 +144,7 @@ tyrano.plugin.kag.ftag = {
                 break;
             // コマアニメ
             case "koma_anim":
-                img_src = $.parseStorage(pm.koma_anim, "tyrano/images/system");
+                img_src = $.parseStorage(pm.koma_anim, pm.folder);
                 j_glyph = $(`<div></div>`);
                 const j_koma_anim = $(`<div></div>`);
                 j_koma_anim.setStyleMap({
@@ -212,6 +212,11 @@ tyrano.plugin.kag.ftag = {
 
         // 貯めこんだクラス名をここでセット
         j_glyph.attr("class", class_names.join(" "));
+
+        // nameパラメータが指定されている場合はそれも追加
+        if (pm.name) {
+            $.setName(j_glyph, pm.name);
+        }
 
         return j_glyph;
     },
@@ -6171,17 +6176,15 @@ tyrano.plugin.kag.tag.clickable = {
 クリック待ちグリフの設定
 
 :exp
-クリック待ちグリフ（`[l]`や`[p]`でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。
-
-使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。画像を用意しなくても、丸や三角などの簡易な図形を使用できます。アニメーションを既定のものから選んだり、自分で`[keyframe]`タグで定義したキーフレームアニメーションを適用したり、各コマが横並びで連結された画像を指定することでコマアニメを定義することもできます。位置や画像ファイルを変更できます。
+クリック待ちグリフ（`[l]`や`[p]`でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。
 
 クリック待ちグリフのコンテンツには以下のパターンがあります。
-①画像を使用する（`line`パラメータを指定する）※gif動画もOK
-②図形を使用する（`figure`パラメータを指定する）
-③コマアニメーションを指定する（`koma_anim`パラメータを指定する）
-④HTMLを直接指定する（`html`パラメータを指定する）※上級者向け
+①画像ファイル（`line`パラメータを指定する）※GIFやWebPもOK
+②図形（`figure`パラメータを指定する）
+③コマアニメ（`koma_anim`パラメータを指定する）
+④HTMLを直接指定（`html`パラメータを指定する）※上級者向け
 
-画像ではなく図形を選んでクリック待ちグリフを作ることができます。図形には色を自由に指定できます。
+画像ではなく図形をプリセットから選んでクリック待ちグリフを作ることができます。図形には色を自由に指定できます。
 
 アニメーションをプリセットから選んで適用したり、自分で`[keyframe]`タグで定義したキーフレームアニメーションを適用したりできます。
 
@@ -6236,19 +6239,22 @@ HTMLを直接指定[p]
 自分で定義したキーフレームアニメーションを適用[p]
 
 :param
-line = グリフに使用する画像を指定できます。画像ファイルは`tyrano/images/system`フォルダ（`nextpage.gif`があるフォルダ）に配置します。,
+line = グリフに使用する画像を指定できます。画像ファイルは、デフォルトでは`tyrano/images/system`フォルダ（`nextpage.gif`があるフォルダ）から探されます。`folder`パラメータで変更可。,
 fix  = `true`を指定すると、グリフがメッセージの末尾ではなくゲーム画面上の固定位置に表示されます。,
 left = グリフを表示する横の位置を指定します。（`fix`属性を`true`にした場合に有効）,
 top  = グリフを表示する縦の位置を指定します。（`fix`属性を`true`にした場合に有効）,
 
+folder  = グリフの画像を探すフォルダを指定できます。,
 width   = グリフの横幅をpx単位で指定できます。,
 height  = グリフの高さをpx単位で指定できます。,
+marginl = グリフの左側の余白をpx単位で指定できます。,
+marginb = グリフの下側の余白をpx単位で指定できます。,
 anim    = グリフに適用するアニメーションを以下のキーワードから指定できます。<br>`flash_momentary`(瞬間的な点滅)<br>`flash`(滑らかな点滅)<br>`spin_x`(X軸を中心に回転)<br>`spin_y`(Y軸を中心に回転)<br>`spin_z`(Z軸を中心に回転)<br>`bounce`(バウンド)<br>`rotate_bounce`(回転しながらバウンド)<br>`soft_bounce`(ぽよんと弾むバウンド)<br>`zoom`(拡縮),
 time    = グリフに適用するアニメーションの時間をミリ秒単位で指定します。,
 figure  = グリフに使用する図形を以下のキーワードから指定できます。<br>`circle`(円)<br>`triangle`(三角形)<br>`v_triangle`(下向き三角形)<br>`rectangle`(四角形)<br>`diamond`(ひし形)<br>`start`(星),
 color   = グリフに図形を使用する場合に、図形の色を指定できます。,
-html    = グリフに含めるHTMLを直接指定できます。（上級者向け）,
-marginl = グリフの左側の余白をpx単位で指定できます。グリフを右側にずらしたいときはこれを指定してください。,
+name    = グリフに付けるクラス名を指定できます。（上級者向け）,
+html    = グリフのコンテンツとしてHTMLを直接指定できます。（上級者向け）,
 
 keyframe   = 適用するキーフレームアニメーションの`name`を指定します。`anim`と併用することはできません。,
 easing     = アニメーションの変化パターンを指定できます。以下のキーワードが指定できます。<br>
@@ -6263,7 +6269,7 @@ delay      =  開始までの時間を指定できます。初期値は`0`、つ
 direction  =  アニメーションを複数回ループさせる場合に、偶数回目のアニメーションを逆再生にするかを設定できます。偶数回目を逆再生にする場合は`alternate`を指定します。,
 mode       =  アニメーションの最後のフレームの状態（位置、回転など）をアニメーション終了後も維持するかを設定できます。`forwards`(デフォルト)で維持。`none`を指定すると、アニメーション再生前の状態に戻ります。,
 
-koma_anim      = グリフに使用するコマアニメの画像を指定できます。画像ファイルは`tyrano/images/system`フォルダに配置します。<br><br>コマアニメに使用する画像は「すべてのコマが横並びで連結されたひとつの画像ファイル」である必要があります。,
+koma_anim      = グリフに使用するコマアニメの画像を指定できます。コマアニメに使用する画像は「すべてのコマが横並びで連結されたひとつの画像ファイル」である必要があります。,
 koma_count     = コマアニメを使用する場合、画像に含まれるコマ数を指定します。これを指定した場合、`koma_width`を省略できます。,
 koma_width     = コマアニメを使用する場合、1コマあたりの横幅をpx単位で指定します。これを指定した場合、`koma_count`を省略できます。,
 koma_anim_time = コマアニメが1周するまでの時間をミリ秒単位で指定します。
@@ -6285,6 +6291,8 @@ tyrano.plugin.kag.tag.glyph = {
         top: "0",
 
         // 拡張
+        name: "",
+        folder: "tyrano/images/system",
         width: "",
         height: "",
         anim: "",
@@ -6333,8 +6341,9 @@ tyrano.plugin.kag.tag.glyph = {
             pm.anim = "";
         }
 
-        // 画像パスを格納
+        // 情報を格納
         this.kag.stat.path_glyph = pm.line;
+        this.kag.stat.glyph_pm = $.extend({}, pm);
 
         // 画面上固定タイプか、メッセージ末尾タイプか
         if (pm.fix == "true") {
@@ -6357,14 +6366,17 @@ tyrano.plugin.kag.tag.glyph = {
 
         // コマアニメを使用しない場合は早期リターン
         if (!pm.koma_anim) {
-            this.kag.stat.glyph_pm = $.extend({}, pm);
             this.kag.ftag.nextOrder();
             return;
         }
 
         // コマアニメを使用する場合
         // 画像幅を取得したいのでプリロードする
-        this.kag.preload($.parseStorage(pm.koma_anim, "tyrano/images/system"), (img) => {
+        this.kag.preload($.parseStorage(pm.koma_anim, pm.folder), (img) => {
+            if (!img) {
+                this.kag.ftag.nextOrder();
+                return;
+            }
             pm.image_width = img.naturalWidth;
             pm.image_height = img.naturalHeight;
             pm.koma_height = pm.image_height;
