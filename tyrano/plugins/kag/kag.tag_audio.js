@@ -1351,6 +1351,121 @@ tyrano.plugin.kag.tag.seopt = {
 };
 
 /*
+#[changevol]
+
+:group
+オーディオ関連
+
+:title
+再生中のオーディオの音量変更
+
+:exp
+現在再生中のオーディオの音量を変更できます。
+
+`[playbgm]`や`[playse]`などでオーディオを再生し始めるときと同様に、次の計算式で最終的な音量が決定されます。
+
+`[changevol]`に指定した音量(%) × `[bgmopt]`や`[seopt]`で設定したコンフィグ音量(%)
+
+プレイヤーがスマホブラウザから閲覧している場合は端末の制限により音量が変更できませんので注意してください。
+
+:sample
+[bgmopt volume="30"]Config: 30[l][r]
+[playbgm volume="40" storage="music.ogg"]Audio: 40[l][r]
+[changevol volume="100"]Audio: 40→100[l][r]
+[changevol volume="15" time="1000"]Audio: 100→15[l][r]
+[bgmopt volume="100" effect="true"]Config: 30→100[l][r]
+[changevol volume="100"]Audio: 15→100[l][r]
+
+:param
+target = BGMの音量を変更する場合は"bgm"、SEの音量を変更する場合は"se"と指定します。,
+volume = 音量を`0`〜`100`で指定します。,
+buf    = 設定を変更するスロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+time   = フェード時間をミリ秒単位で指定できます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.changevol = {
+    pm: {
+        target: "bgm",
+        volume: "",
+        buf: "",
+        time: "",
+        next: "true",
+    },
+
+    obtainTargets: function (target, buf) {
+        const target_map = target === "bgm" ? this.kag.tmp.map_bgm : this.kag.tmp.map_se;
+        const target_dict = {};
+        if (buf) {
+            const audio_obj = target_map[buf];
+            if (audio_obj) {
+                target_dict[buf] = audio_obj;
+            }
+        } else {
+            for (const key in target_map) {
+                const audio_obj = target_map[key];
+                if (audio_obj) {
+                    target_dict[key] = audio_obj;
+                }
+            }
+        }
+        return target_dict;
+    },
+
+    start: function (pm) {
+        // next="false"でないときだけ次に進む
+        const next = () => {
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
+        };
+
+        // volumeパラメータが指定されてないならやることない
+        // スマホアプリの場合も不可、早期リターン
+        if (pm.volume === "" || this.kag.define.FLAG_APRI) {
+            next();
+            return;
+        }
+
+        // タグ音量 0.0～1.0
+        const tag_volume = $.parseVolume(pm.volume);
+
+        // 操作したいのはBGMですか
+        const is_bgm = pm.target === "bgm";
+
+        // BGMならここでロード復元用のプロパティを更新しておく
+        if (is_bgm) {
+            this.kag.stat.current_bgm_vol = pm.volume;
+        }
+
+        const volume_map = is_bgm ? this.kag.stat.map_bgm_volume : this.kag.stat.map_se_volume;
+        const default_volume = is_bgm ? this.kag.config.defaultBgmVolume : this.kag.config.defaultSeVolume;
+
+        // 操作対象のオーディオについて
+        const target_dict = this.obtainTargets(pm.target, pm.buf);
+        for (const buf in target_dict) {
+            const audio_obj = target_dict[buf];
+            let config_volume = volume_map[buf] ? volume_map[buf] : default_volume;
+            config_volume = $.parseVolume(config_volume);
+
+            this.kag.changeHowlVolume(audio_obj, {
+                config: config_volume,
+                tag: tag_volume,
+                time: pm.time,
+            });
+
+            // ループSEのロード復元用のプロパティの更新
+            if (!is_bgm && this.kag.stat.current_se[buf]) {
+                this.kag.stat.current_se[buf].volume = pm.volume;
+            }
+        }
+
+        next();
+    },
+};
+
+/*
 #[wbgm]
 
 :group

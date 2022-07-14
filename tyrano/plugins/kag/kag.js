@@ -2416,7 +2416,7 @@ tyrano.plugin.kag = {
 
     /**
      * 再生中のHowlオブジェクトの音量を変更する
-     * @param {Howler} audio_obj
+     * @param {Howl} audio_obj
      * @param {{ tag: number | undefined; config: number | undefined; }} volume_options
      */
     changeHowlVolume: function (audio_obj, options = {}) {
