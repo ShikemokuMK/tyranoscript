@@ -113,6 +113,8 @@ tyrano.plugin.kag = {
             models: {},
             evt: {},
         },
+
+        preload_audio_map: {},
     },
 
     //逐次変化するKAGシステムの動作に必要な状況変化ファイル
@@ -1393,6 +1395,9 @@ tyrano.plugin.kag = {
                     // ティラノイベント"readyaudio"を発火
                     this.kag.trigger("readyaudio");
                 },
+                onend: () => {
+                    audio_obj.unload();
+                },
             });
             audio_obj.play();
         }
@@ -1682,7 +1687,7 @@ tyrano.plugin.kag = {
     },
 
     //画像のプリロード オンの場合は、ロードが完了するまで次へ行かない
-    preload: function (src, callbk) {
+    preload: function (src, callbk, options = {}) {
         var that = this;
 
         var ext = $.getExt(src);
@@ -1704,20 +1709,61 @@ tyrano.plugin.kag = {
         }
 
         if (ext == "wav" || ext == "mp3" || ext == "ogg" || ext == "m4a") {
-            // 音声ファイルプリロード
-            let audio_obj;
-            const howl_opt = {
+            // 音声ファイルの場合
+
+            // プリロード済みのHowlマップをチェック
+            const preloaded_audio = this.kag.tmp.preload_audio_map[src];
+            if (preloaded_audio) {
+                // プリロードしたことがある場合、ステータスを確認
+                switch (preloaded_audio.state()) {
+                    case "unload":
+                        // アンロードで残っていることは基本的にはないが…
+                        delete this.kag.tmp.preload_audio_map[src];
+                        break;
+                    case "loading":
+                        // ロード中の場合はロードイベントリスナを追加
+                        preloaded_audio.once("load", () => {
+                            if (callbk) callbk(preloaded_audio);
+                        });
+                        return;
+                    case "loaded":
+                        // ロード済みなら即コールバック
+                        if (callbk) callbk(preloaded_audio);
+                        return;
+                }
+            }
+
+            // ここに到達したということは新しくロードする必要がある
+            // とりあえずHowlオブジェクトを作る
+            const audio_obj = new Howl({
                 src: src,
-                preload: true,
-                onload: () => {
-                    if (callbk) callbk(audio_obj);
-                },
-                onloaderror: () => {
-                    //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
-                    if (callbk) callbk(audio_obj);
-                },
-            };
-            audio_obj = new Howl(howl_opt);
+                preload: false,
+            });
+
+            // プリロード済みHowlマップに格納
+            this.kag.tmp.preload_audio_map[src] = audio_obj;
+
+            // ロードに成功したとき
+            audio_obj.once("load", () => {
+                if (callbk) callbk(audio_obj);
+            });
+
+            // ロードに失敗したとき
+            audio_obj.once("load", () => {
+                audio_obj.unload();
+                //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
+                if (callbk) callbk(audio_obj);
+                delete this.kag.tmp.preload_audio_map[src];
+            });
+
+            // このHowlは[preload]でプリロードしたものですよという目印
+            audio_obj.__preload = true;
+
+            // プリロードデータを使い捨てにするかどうか
+            audio_obj.__single_use = options.single_use !== undefined ? options.single_use : true;
+
+            // ロード開始
+            audio_obj.load();
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
             // 動画ファイルプリロード
             $("<video />")
@@ -2368,10 +2414,10 @@ tyrano.plugin.kag = {
      */
     changeHowlVolume: function (audio_obj, options = {}) {
         // 音声再生タグに指定されていたvolumeを思い出せ…！ 忘れてたら1だったことにしろ…！
-        let tag_volume = audio_obj.tag_volume !== undefined ? audio_obj.tag_volume : 1;
+        let tag_volume = audio_obj.__tag_volume !== undefined ? audio_obj.__tag_volume : 1;
 
         // 音声再生タグが実行された時点のコンフィグ音量を思い出せ…！ 忘れてたら1だったことにしろ…！
-        let config_volume = audio_obj.config_volume !== undefined ? audio_obj.config_volume : 1;
+        let config_volume = audio_obj.__config_volume !== undefined ? audio_obj.__config_volume : 1;
 
         // タグ音量を変更する場合
         if (options.tag !== undefined) {
@@ -2395,8 +2441,8 @@ tyrano.plugin.kag = {
         }
 
         // 記憶改変！
-        audio_obj.tag_volume = tag_volume;
-        audio_obj.config_volume = config_volume;
+        audio_obj.__tag_volume = tag_volume;
+        audio_obj.__config_volume = config_volume;
     },
 
     test: function () {},

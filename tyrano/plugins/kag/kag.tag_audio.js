@@ -304,7 +304,7 @@ tyrano.plugin.kag.tag.playbgm = {
                 if (!need_restart) {
                     // 再･再生は必要ないらしい
                     // 一応音量も見とくか
-                    if (tag_volume === old_audio_obj.tag_volume) {
+                    if (tag_volume === old_audio_obj.__tag_volume) {
                         // 音量まで一緒じゃねーか！
                     } else {
                         // 音量は違うらしいぞ！なら変える必要がある
@@ -353,20 +353,17 @@ tyrano.plugin.kag.tag.playbgm = {
         let audio_obj;
 
         var howl_opt = {
+            preload: false,
             loop: is_loop,
             src: storage,
             volume: initial_howl_volume,
+            html5: pm.html5 === "true",
             // ボイスの読み込みに失敗したとき
             onloaderror: (_, e) => {
                 console.error(e);
                 next();
             },
         };
-
-        // Web Audio API ではなく HTML5 <audio> による再生を行う場合
-        if (pm.html5 === "true") {
-            howl_opt.html5 = true;
-        }
 
         // スプライト(再生区間)が指定されている場合
         let sprite_name;
@@ -383,12 +380,12 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         // Howlオブジェクトを生成
-        // まだ再生はされてないよ
+        // まだロードも再生もされないよ
         audio_obj = new Howl(howl_opt);
 
         // このときのタグ音量とコンフィグ音量はそれぞれ記憶しておく [bgmopt effect="true"]対策
-        audio_obj.tag_volume = tag_volume;
-        audio_obj.config_volume = config_volume;
+        audio_obj.__tag_volume = tag_volume;
+        audio_obj.__config_volume = config_volume;
 
         //
         // 同一bufの旧オーディオの停止および破棄, 参照の格納, セーブデータロード時復元のための記憶
@@ -399,7 +396,7 @@ tyrano.plugin.kag.tag.playbgm = {
             case "bgm":
                 // このbufで再生中のオーディオがある場合は破棄！キャッシュから削除される
                 if (this.kag.tmp.map_bgm[buf]) {
-                    this.kag.tmp.map_bgm[buf].pause();
+                    this.kag.tmp.map_bgm[buf].stop();
                     this.kag.tmp.map_bgm[buf].unload();
                 }
                 // 参照を格納
@@ -414,7 +411,7 @@ tyrano.plugin.kag.tag.playbgm = {
             case "sound":
                 // このbufで再生中のオーディオがある場合は破棄！キャッシュから削除される
                 if (this.kag.tmp.map_se[buf]) {
-                    this.kag.tmp.map_se[buf].pause();
+                    this.kag.tmp.map_se[buf].stop();
                     this.kag.tmp.map_se[buf].unload();
                 }
                 // 参照を格納
@@ -437,19 +434,40 @@ tyrano.plugin.kag.tag.playbgm = {
         // イベントリスナの登録
         //
 
-        // 再生開始時イベントリスナ
-        // フェードインとnextOrder
+        // プリロードデータを使い捨てにする場合はここに格納
+        let preloaded_audio_del;
+
+        // ロード完了時
+        audio_obj.once("load", () => {
+            // 使い捨てキャッシュの削除
+            if (preloaded_audio_del) {
+                preloaded_audio_del.unload();
+                delete this.kag.tmp.preload_audio_map[storage];
+            }
+            // 再生開始
+            audio_obj.play(sprite_name);
+        });
+
+        // 再生開始時
         audio_obj.once("play", () => {
+            // フェードイン開始
             if (is_fadein) {
                 audio_obj.fade(0, howl_volume, parseInt(pm.time));
             }
+            // nextOrder
             next();
         });
 
-        // ループしない場合のみ再生終了時イベントリスナを登録
-        // プロパティの操作および特定状況での nextOrder
+        // フェードイン完了時
+        audio_obj.once("fade", () => {
+            // console.warn("fadein complete!");
+        });
+
+        // ループしない場合のみ
         if (!is_loop) {
-            audio_obj.on("end", (e) => {
+            // 再生終了時
+            audio_obj.once("end", (e) => {
+                // プロパティの操作と、特定状況でのnextOrder
                 switch (sound_type) {
                     // BGMの場合
                     case "bgm":
@@ -492,16 +510,54 @@ tyrano.plugin.kag.tag.playbgm = {
             });
         }
 
-        // フェードイン完了
-        audio_obj.once("fade", () => {
-            // console.warn("fadein complete!");
-        });
-
         //
-        // 再生開始
+        // プリロード済みのHowlマップをチェック
         //
 
-        audio_obj.play(sprite_name);
+        // プリロードしたことがあってHTML5オプションが一致する場合はそれを使って早期リターン
+        const preloaded_audio = this.kag.tmp.preload_audio_map[storage];
+        if (preloaded_audio && preloaded_audio._html5 === howl_opt.html5) {
+            switch (preloaded_audio.state()) {
+                case "loaded":
+                    // プリロードが完了している場合はふつうにロード開始
+                    // (Howler.js内の処理でキャッシュが使われる)
+
+                    // プリロードオーディオが使い捨ての場合は記憶しておく
+                    if (preloaded_audio.__single_use) {
+                        preloaded_audio_del = preloaded_audio;
+                    }
+
+                    audio_obj.load();
+                    break;
+
+                case "unload":
+                    // アンロードで残っていることは基本的にはないが…
+                    // プロパティから削除しよう
+                    delete this.kag.tmp.preload_audio_map[storage];
+                    audio_obj.load();
+                    break;
+
+                case "loading":
+                    // プリロード側のデータがロード中の場合、ここでふつうにload()を開始すると
+                    // Howler.js内でキャッシュが使われずに二重ロードが発生して望ましくない
+                    // プリロード側のデータのロード完了時に改めてload()を呼ぶようにする
+
+                    // プリロードオーディオが使い捨ての場合は記憶しておく
+                    if (preloaded_audio.__single_use) {
+                        preloaded_audio_del = preloaded_audio;
+                    }
+
+                    preloaded_audio.once("load", () => {
+                        audio_obj.load();
+                    });
+                    break;
+            }
+            return;
+        }
+
+        // プリロードの痕跡はない
+        // ふつうにロード
+        audio_obj.load();
     },
 
     /*
@@ -680,6 +736,7 @@ tyrano.plugin.kag.tag.stopbgm = {
                 // フェードアウトしない場合, あるいはもう止まってる場合
                 // 単純に停止メソッドを呼ぶ
                 audio_obj.stop();
+                audio_obj.unload();
             } else {
                 // フェードアウトする場合
                 // フェードアウト完了イベントリスナを登録する関数
