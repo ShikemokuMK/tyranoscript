@@ -33,7 +33,7 @@ tyrano.base = {
         var that = this;
         setTimeout(function () {
             that._fitBaseSize(width, height);
-        }, 100);
+        }, 300);
     },
 
     /**
