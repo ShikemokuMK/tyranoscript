@@ -694,6 +694,9 @@ tyrano.plugin.kag.menu = {
         // ティラノイベント"load:start"を発火
         this.kag.trigger("load:start");
 
+        // 一時リスナをすべて消去
+        this.kag.offTempListeners();
+
         var auto_next = "no";
 
         //普通のロードの場合
@@ -718,8 +721,34 @@ tyrano.plugin.kag.menu = {
             }
         }
 
-        //layerの復元
-        //console.log(data.layer);
+        // BGMを引き継がないタイプのロード(通常のロード)の場合、
+        // いま再生されているすべてのBGMとSEを止める
+        if (options.bgm_over == "false") {
+            // 全BGM停止
+            var map_bgm = this.kag.tmp.map_bgm;
+            for (var key in map_bgm) {
+                this.kag.ftag.startTag("stopbgm", {
+                    stop: "true",
+                    buf: key,
+                });
+            }
+
+            // 全SE停止
+            var map_se = this.kag.tmp.map_se;
+            for (var key in map_se) {
+                if (map_se[key]) {
+                    this.kag.ftag.startTag("stopse", {
+                        stop: "true",
+                        buf: key,
+                    });
+                }
+            }
+        }
+
+        //
+        // レイヤー構造(DOM)の復元
+        //
+
         this.kag.layer.setLayerHtml(data.layer);
 
         // グラデーションテキストの復元
@@ -729,7 +758,10 @@ tyrano.plugin.kag.menu = {
         //awakegame考慮もれ。一旦戻す
         //this.kag.variable.tf.system.backlog = [];
 
-        //ステータスの設定、ディープに設定する
+        //
+        // ステータスの更新
+        //
+
         this.kag.stat = data.stat;
 
         //ステータスがストロングストップの場合
@@ -743,30 +775,11 @@ tyrano.plugin.kag.menu = {
         //タイトルの復元
         this.kag.setTitle(this.kag.stat.title);
 
-        //一旦音楽と効果音は全て止めないと
-
-        //BGMを引き継ぐかどうか。
+        // BGMを引き継がないタイプのロード(通常のロード)の場合、
+        // さっきすべてのBGMとSEを止めてしまったから、
+        // 現在のステータスに記憶されているBGMとループSEを改めて再生する
         if (options.bgm_over == "false") {
-            //全BGMを一旦止める
-            var map_se = this.kag.tmp.map_se;
-            for (var key in map_se) {
-                if (map_se[key]) {
-                    this.kag.ftag.startTag("stopse", {
-                        stop: "true",
-                        buf: key,
-                    });
-                }
-            }
-
-            var map_bgm = this.kag.tmp.map_bgm;
-            for (var key in map_bgm) {
-                this.kag.ftag.startTag("stopbgm", {
-                    stop: "true",
-                    buf: key,
-                });
-            }
-
-            //音楽再生
+            // BGM
             if (this.kag.stat.current_bgm != "") {
                 var mstorage = this.kag.stat.current_bgm;
 
@@ -774,8 +787,6 @@ tyrano.plugin.kag.menu = {
                     loop: "true",
                     storage: mstorage,
                     html5: this.kag.stat.current_bgm_html5,
-                    /*fadein:"true",*/
-                    /*time:2000,*/
                     stop: "true",
                     can_ignore: "false",
                 };
@@ -788,7 +799,7 @@ tyrano.plugin.kag.menu = {
                 this.kag.ftag.startTag("playbgm", pm);
             }
 
-            //効果音再生
+            // ループSE
             for (const key in this.kag.stat.current_se) {
                 var pm_obj = this.kag.stat.current_se[key];
                 pm_obj.can_ignore = "false";

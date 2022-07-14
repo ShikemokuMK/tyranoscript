@@ -113,6 +113,8 @@ tyrano.plugin.kag = {
             models: {},
             evt: {},
         },
+
+        preload_audio_map: {},
     },
 
     //逐次変化するKAGシステムの動作に必要な状況変化ファイル
@@ -1393,6 +1395,9 @@ tyrano.plugin.kag = {
                     // ティラノイベント"readyaudio"を発火
                     this.kag.trigger("readyaudio");
                 },
+                onend: () => {
+                    audio_obj.unload();
+                },
             });
             audio_obj.play();
         }
@@ -1682,7 +1687,7 @@ tyrano.plugin.kag = {
     },
 
     //画像のプリロード オンの場合は、ロードが完了するまで次へ行かない
-    preload: function (src, callbk) {
+    preload: function (src, callbk, options = {}) {
         var that = this;
 
         var ext = $.getExt(src);
@@ -1704,20 +1709,68 @@ tyrano.plugin.kag = {
         }
 
         if (ext == "wav" || ext == "mp3" || ext == "ogg" || ext == "m4a") {
-            // 音声ファイルプリロード
-            let audio_obj;
-            const howl_opt = {
+            // 音声ファイルの場合
+
+            // プリロード済みのHowlマップをチェック
+            const preloaded_audio = this.kag.tmp.preload_audio_map[src];
+            if (preloaded_audio) {
+                // プリロードしたことがある場合、ステータスを確認
+                switch (preloaded_audio.state()) {
+                    case "unload":
+                        // アンロードで残っていることは基本的にはないが…
+                        delete this.kag.tmp.preload_audio_map[src];
+                        break;
+                    case "loading":
+                        // ロード中の場合はロードイベントリスナを追加
+                        preloaded_audio.once("load", () => {
+                            if (callbk) callbk(preloaded_audio);
+                        });
+                        return;
+                    case "loaded":
+                        // ロード済みなら即コールバック
+                        if (callbk) callbk(preloaded_audio);
+                        return;
+                }
+            }
+
+            // ここに到達したということは新しくロードする必要がある
+            // とりあえずHowlオブジェクトを作る
+            const audio_obj = new Howl({
                 src: src,
-                preload: true,
-                onload: () => {
-                    if (callbk) callbk(audio_obj);
-                },
-                onloaderror: () => {
-                    //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
-                    if (callbk) callbk(audio_obj);
-                },
-            };
-            audio_obj = new Howl(howl_opt);
+                preload: false,
+            });
+
+            // プリロード済みHowlマップに格納
+            this.kag.tmp.preload_audio_map[src] = audio_obj;
+
+            // ロードに成功したとき
+            audio_obj.once("load", () => {
+                if (callbk) callbk(audio_obj);
+            });
+
+            // ロードに失敗したとき
+            audio_obj.once("loaderror", () => {
+                audio_obj.unload();
+                //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
+                if (callbk) callbk(audio_obj);
+                delete this.kag.tmp.preload_audio_map[src];
+            });
+
+            // このHowlは[preload]でプリロードしたものですよという目印
+            audio_obj.__preload = true;
+
+            // プリロードデータを使い捨てにするかどうか
+            audio_obj.__single_use = options.single_use !== undefined ? options.single_use : true;
+
+            // 名前をつけられる
+            const name = options.name || "";
+            const names = name.split(",").map((item) => {
+                return item.trim();
+            });
+            audio_obj.__names = names;
+
+            // ロード開始
+            audio_obj.load();
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
             // 動画ファイルプリロード
             $("<video />")
@@ -1964,6 +2017,21 @@ tyrano.plugin.kag = {
     },
 
     /**
+     * イベントリスナの数をログに出す
+     */
+    logEventLisnenerCount: function () {
+        let str = "現在登録されているイベントリスナ\n";
+        const map = this.event_listener_map;
+        for (const event in map) {
+            if (map[event]) {
+                str += `${event}: ${map[event].length}件\n`;
+            }
+        }
+        str += "%o";
+        console.log(str, map);
+    },
+
+    /**
      * イベントを指定してイベントリスナ(コールバック)を呼び出す
      * コールバックに引数を渡すこともできる
      * コールバック内の this には kag が格納される
@@ -1977,14 +2045,20 @@ tyrano.plugin.kag = {
         if (map[event_name] === undefined || map[event_name].length === 0) {
             return;
         }
+
+        // onceリスナが存在するか
         let exists_once = false;
+
+        // 削除対象のリスナのID格納
         const unbind_target_ids = [];
+
         for (const listener of map[event_name]) {
             let callback_return_value;
             if (typeof listener.callback === "function") {
                 callback_return_value = listener.callback.call(this, event_obj);
             }
-            if (listener.once) {
+            // このリスナがonceリスナなら記憶しておく
+            if (listener.is_once) {
                 exists_once = true;
                 unbind_target_ids.push(listener.id);
             }
@@ -1992,6 +2066,8 @@ tyrano.plugin.kag = {
                 break;
             }
         }
+
+        // onceリスナを除いた生き残りをメンバーとする配列を新しく作って代入
         if (exists_once) {
             const new_listeners = [];
             for (const listener of map[event_name]) {
@@ -2000,6 +2076,7 @@ tyrano.plugin.kag = {
                 }
             }
             map[event_name] = new_listeners;
+            if (this.is_event_logging_enabled) this.logEventLisnenerCount();
         }
     },
 
@@ -2009,11 +2086,6 @@ tyrano.plugin.kag = {
     event_listener_count: 0,
 
     /**
-     * @typedef {Object} ListenerOption
-     * @property {boolean} once イベントリスナを1回実行したら削除すべきかどうか
-     * @property {number} priority 優先度。これが高いほうから順に実行される。デフォルトは0
-     */
-    /**
      * イベントリスナを登録する
      * @param {string} event_names 登録するイベント名 半角スペース区切りで複数イベントに対して一気に登録できる
      *   イベント名のあとにドット区切りで名前空間を指定できる(複数可能) あとから特定の名前空間のリスナだけを削除できる
@@ -2021,7 +2093,11 @@ tyrano.plugin.kag = {
      * @param {function} callback コールバック 第1引数にはeventオブジェクトが格納される
      *   コールバック内で return false するとイベントリスナの呼び出しを中断する
      *   それ以降のイベントリスナは呼び出されない(onceの削除もされない)
-     * @param {ListenerOption} options
+     * @param {Object} options
+     * @param {boolean} options.is_once イベントリスナを1回実行したら削除すべきならtrue
+     * @param {boolean} options.is_system (ユーザーが独自に追加したのではなく)システムが利用しているリスナならtrue
+     * @param {boolean} options.is_temp セーブデータロード時に削除すべきならtrue
+     * @param {number} options.priority　優先度。これが「高い」ほうから順に実行される。デフォルトは0
      */
     on: function (event_names, callback, options = {}) {
         // 例) "resize load.ABC save.hoge.fuga"
@@ -2041,27 +2117,36 @@ tyrano.plugin.kag = {
                     id: this.event_listener_count,
                     callback: callback,
                     namespaces: namespaces,
-                    once: !!options.once,
                     priority: options.priority || 0,
+                    is_once: !!options.is_once || false,
+                    is_system: options.is_system || false,
+                    is_temp: options.is_temp || false,
                 };
                 map[event].push(listener);
                 this.event_listener_count += 1;
                 this.sortEventLisneners(event);
             }
         }
+        if (this.is_event_logging_enabled) this.logEventLisnenerCount();
     },
     /**
      * on メソッドのラッパー
-     * once オプションを true で上書きしたうえで on メソッドに投げる
+     * is_once オプションを true で上書きしたうえで on メソッドに投げる
      * @param {string} event_names
      * @param {function} callback
      * @param {ListenerOption} options
      */
     once: function (event_names, callback, options = {}) {
-        options.once = true;
+        options.is_once = true;
         this.on(event_names, callback, options);
     },
 
+    /**
+     * イベントリスナをソートする
+     * - priority (優先度)が高いほうが先頭
+     * - priority が同じ場合は、先に登録されたほうが先頭
+     * @param {string} evnet_name
+     */
     sortEventLisneners: function (evnet_name) {
         const listeners = this.event_listener_map[evnet_name];
         if (Array.isArray(listeners)) {
@@ -2082,8 +2167,10 @@ tyrano.plugin.kag = {
      *   半角スペース区切りで複数イベントを指定可能 それぞれのイベントリスナを一括で削除できる
      *   ドット区切りで名前空間を複数指定可能 指定したすべての名前空間を持つリスナだけを削除できる
      *   いきなりドットで書き始めることで削除対象のリスナを"名前空間だけ"で指定することも可能
+     * @param {Object} options
+     * @param {boolean} options.off_system システムリスナを除去するかどうか
      */
-    off: function (event_names) {
+    off: function (event_names, options = {}) {
         const map = this.event_listener_map;
         const event_name_hash = event_names.split(" ");
         for (const event_name of event_name_hash) {
@@ -2094,14 +2181,10 @@ tyrano.plugin.kag = {
             if (event && (map[event] === undefined || map[event].length === 0)) {
                 // そのイベントに登録されているイベントリスナがない場合
                 // なにもしなくていい
-            } else if (del_namespaces.length === 0) {
-                // 削除対象の名前空間が指定されていない場合
-                // そのイベントのリスナすべてを消去する
-                if (event !== "") {
-                    delete map[event];
-                }
             } else {
-                // 名前空間が指定されている場合は登録されている各コールバックを個別に見て選別していく
+                // そのイベントに登録されているイベントリスナがある場合
+                // イベントリスナを順繰りに見て選別していく
+
                 // イベント名が空欄で名前空間だけが指定されている場合はすべてのイベントを処理対象とする
                 let event_list;
                 if (event === "") {
@@ -2109,22 +2192,36 @@ tyrano.plugin.kag = {
                 } else {
                     event_list = [event];
                 }
+
+                // 各イベントについて
                 for (const _event of event_list) {
-                    // 各イベントについて
+                    // 生き残りリスナたち
                     const new_listeners = [];
+                    // このイベントに登録されている各リスナについて
                     for (const listener of map[_event]) {
-                        // このイベントに登録されている各リスナについて
                         // このリスナは生き残るべきだろうか？
+                        // デフォルトはfalse(生き残るべきでない)として、生き残るものを選別していく
                         let should_keep = false;
-                        // 削除対象名前空間は複数でありうる！その場合はAND指定
-                        // AND指定、つまり、削除対象名前空間を"すべて"持つリスナだけを削除したいので
+
+                        // 削除対象名前空間は複数でありうる！その場合はAND指定と解釈する
+                        // AND指定、つまり、削除対象名前空間を"すべて"持つリスナだけを削除したい
                         // 削除対象名前空間のうちのひとつでも保有しないものがあるリスナは生き残り確定
-                        for (const name of del_namespaces) {
-                            if (!listener.namespaces.includes(name)) {
+                        for (const this_del_namespace of del_namespaces) {
+                            if (!listener.namespaces.includes(this_del_namespace)) {
                                 should_keep = true;
                                 break;
                             }
                         }
+
+                        // システムリスナの場合、基本生き残り確定だが、
+                        if (listener.is_system) {
+                            should_keep = true;
+                            // システムリスナすら除去するオプションが指定されているようならやっぱり殺す
+                            if (options.off_system) {
+                                should_keep = false;
+                            }
+                        }
+
                         // 生き残り確定のリスナは新しいリスナリストに追加する
                         if (should_keep) {
                             new_listeners.push(listener);
@@ -2134,6 +2231,22 @@ tyrano.plugin.kag = {
                 }
             }
         }
+        if (this.is_event_logging_enabled) this.logEventLisnenerCount();
+    },
+
+    /**
+     * 一時リスナをすべて削除する
+     */
+    offTempListeners: function () {
+        const map = this.event_listener_map;
+        for (const event in map) {
+            if (map[event]) {
+                map[event] = map[event].filter((listener) => {
+                    return !listener.is_temp;
+                });
+            }
+        }
+        if (this.is_event_logging_enabled) this.logEventLisnenerCount();
     },
 
     /**
@@ -2303,15 +2416,15 @@ tyrano.plugin.kag = {
 
     /**
      * 再生中のHowlオブジェクトの音量を変更する
-     * @param {Howler} audio_obj
+     * @param {Howl} audio_obj
      * @param {{ tag: number | undefined; config: number | undefined; }} volume_options
      */
     changeHowlVolume: function (audio_obj, options = {}) {
         // 音声再生タグに指定されていたvolumeを思い出せ…！ 忘れてたら1だったことにしろ…！
-        let tag_volume = audio_obj.tag_volume !== undefined ? audio_obj.tag_volume : 1;
+        let tag_volume = audio_obj.__tag_volume !== undefined ? audio_obj.__tag_volume : 1;
 
         // 音声再生タグが実行された時点のコンフィグ音量を思い出せ…！ 忘れてたら1だったことにしろ…！
-        let config_volume = audio_obj.config_volume !== undefined ? audio_obj.config_volume : 1;
+        let config_volume = audio_obj.__config_volume !== undefined ? audio_obj.__config_volume : 1;
 
         // タグ音量を変更する場合
         if (options.tag !== undefined) {
@@ -2335,8 +2448,8 @@ tyrano.plugin.kag = {
         }
 
         // 記憶改変！
-        audio_obj.tag_volume = tag_volume;
-        audio_obj.config_volume = config_volume;
+        audio_obj.__tag_volume = tag_volume;
+        audio_obj.__config_volume = config_volume;
     },
 
     test: function () {},

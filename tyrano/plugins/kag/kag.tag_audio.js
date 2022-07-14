@@ -170,10 +170,11 @@ tyrano.plugin.kag.tag.playbgm = {
             seconds_str = colon_hash[colon_hash.length - 1];
         }
 
+        // 小数点が存在するならミリ秒として解釈する
         const dot_hash = seconds_str.split(".");
         if (dot_hash[1]) {
             seconds_str = dot_hash[0];
-            milli_seconds_str = dot_hash[1];
+            milli_seconds_str = dot_hash[1].padEnd(3, "0").substring(0, 3);
         }
 
         const hours_ms = (parseInt(hours_str) || 0) * 1000 * 60 * 60;
@@ -185,8 +186,6 @@ tyrano.plugin.kag.tag.playbgm = {
     },
 
     play: function (pm) {
-        this.kag.layer.hideEventLayer();
-
         // 再生しようとしているのはSEか？(BGMではなく)
         const is_se = pm.target === "se";
 
@@ -209,6 +208,10 @@ tyrano.plugin.kag.tag.playbgm = {
 
         // 次のタグに進むべきか
         const should_next_order = pm.stop === "false";
+
+        if (should_next_order) {
+            this.kag.layer.hideEventLayer();
+        }
 
         // 音声タイプ "bgm" or "sound"
         let sound_type = is_se ? "sound" : "bgm";
@@ -301,7 +304,7 @@ tyrano.plugin.kag.tag.playbgm = {
                 if (!need_restart) {
                     // 再･再生は必要ないらしい
                     // 一応音量も見とくか
-                    if (tag_volume === old_audio_obj.tag_volume) {
+                    if (tag_volume === old_audio_obj.__tag_volume) {
                         // 音量まで一緒じゃねーか！
                     } else {
                         // 音量は違うらしいぞ！なら変える必要がある
@@ -350,20 +353,17 @@ tyrano.plugin.kag.tag.playbgm = {
         let audio_obj;
 
         var howl_opt = {
+            preload: false,
             loop: is_loop,
             src: storage,
             volume: initial_howl_volume,
+            html5: pm.html5 === "true",
             // ボイスの読み込みに失敗したとき
             onloaderror: (_, e) => {
                 console.error(e);
                 next();
             },
         };
-
-        // Web Audio API ではなく HTML5 <audio> による再生を行う場合
-        if (pm.html5 === "true") {
-            howl_opt.html5 = true;
-        }
 
         // スプライト(再生区間)が指定されている場合
         let sprite_name;
@@ -380,12 +380,12 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         // Howlオブジェクトを生成
-        // まだ再生はされてないよ
+        // まだロードも再生もされないよ
         audio_obj = new Howl(howl_opt);
 
         // このときのタグ音量とコンフィグ音量はそれぞれ記憶しておく [bgmopt effect="true"]対策
-        audio_obj.tag_volume = tag_volume;
-        audio_obj.config_volume = config_volume;
+        audio_obj.__tag_volume = tag_volume;
+        audio_obj.__config_volume = config_volume;
 
         //
         // 同一bufの旧オーディオの停止および破棄, 参照の格納, セーブデータロード時復元のための記憶
@@ -396,7 +396,7 @@ tyrano.plugin.kag.tag.playbgm = {
             case "bgm":
                 // このbufで再生中のオーディオがある場合は破棄！キャッシュから削除される
                 if (this.kag.tmp.map_bgm[buf]) {
-                    this.kag.tmp.map_bgm[buf].pause();
+                    this.kag.tmp.map_bgm[buf].stop();
                     this.kag.tmp.map_bgm[buf].unload();
                 }
                 // 参照を格納
@@ -411,7 +411,7 @@ tyrano.plugin.kag.tag.playbgm = {
             case "sound":
                 // このbufで再生中のオーディオがある場合は破棄！キャッシュから削除される
                 if (this.kag.tmp.map_se[buf]) {
-                    this.kag.tmp.map_se[buf].pause();
+                    this.kag.tmp.map_se[buf].stop();
                     this.kag.tmp.map_se[buf].unload();
                 }
                 // 参照を格納
@@ -434,19 +434,40 @@ tyrano.plugin.kag.tag.playbgm = {
         // イベントリスナの登録
         //
 
-        // 再生開始時イベントリスナ
-        // フェードインとnextOrder
+        // プリロードデータを使い捨てにする場合はここに格納
+        let preloaded_audio_del;
+
+        // ロード完了時
+        audio_obj.once("load", () => {
+            // 使い捨てキャッシュの削除
+            if (preloaded_audio_del) {
+                preloaded_audio_del.unload();
+                delete this.kag.tmp.preload_audio_map[storage];
+            }
+            // 再生開始
+            audio_obj.play(sprite_name);
+        });
+
+        // 再生開始時
         audio_obj.once("play", () => {
+            // フェードイン開始
             if (is_fadein) {
                 audio_obj.fade(0, howl_volume, parseInt(pm.time));
             }
+            // nextOrder
             next();
         });
 
-        // ループしない場合のみ再生終了時イベントリスナを登録
-        // プロパティの操作および特定状況での nextOrder
+        // フェードイン完了時
+        audio_obj.once("fade", () => {
+            // console.warn("fadein complete!");
+        });
+
+        // ループしない場合のみ
         if (!is_loop) {
-            audio_obj.on("end", (e) => {
+            // 再生終了時
+            audio_obj.once("end", (e) => {
+                // プロパティの操作と、特定状況でのnextOrder
                 switch (sound_type) {
                     // BGMの場合
                     case "bgm":
@@ -489,16 +510,54 @@ tyrano.plugin.kag.tag.playbgm = {
             });
         }
 
-        // フェードイン完了
-        audio_obj.once("fade", () => {
-            // console.warn("fadein complete!");
-        });
-
         //
-        // 再生開始
+        // プリロード済みのHowlマップをチェック
         //
 
-        audio_obj.play(sprite_name);
+        // プリロードしたことがあってHTML5オプションが一致する場合はそれを使って早期リターン
+        const preloaded_audio = this.kag.tmp.preload_audio_map[storage];
+        if (preloaded_audio && preloaded_audio._html5 === howl_opt.html5) {
+            switch (preloaded_audio.state()) {
+                case "loaded":
+                    // プリロードが完了している場合はふつうにロード開始
+                    // (Howler.js内の処理でキャッシュが使われる)
+
+                    // プリロードオーディオが使い捨ての場合は記憶しておく
+                    if (preloaded_audio.__single_use) {
+                        preloaded_audio_del = preloaded_audio;
+                    }
+
+                    audio_obj.load();
+                    break;
+
+                case "unload":
+                    // アンロードで残っていることは基本的にはないが…
+                    // プロパティから削除しよう
+                    delete this.kag.tmp.preload_audio_map[storage];
+                    audio_obj.load();
+                    break;
+
+                case "loading":
+                    // プリロード側のデータがロード中の場合、ここでふつうにload()を開始すると
+                    // Howler.js内でキャッシュが使われずに二重ロードが発生して望ましくない
+                    // プリロード側のデータのロード完了時に改めてload()を呼ぶようにする
+
+                    // プリロードオーディオが使い捨ての場合は記憶しておく
+                    if (preloaded_audio.__single_use) {
+                        preloaded_audio_del = preloaded_audio;
+                    }
+
+                    preloaded_audio.once("load", () => {
+                        audio_obj.load();
+                    });
+                    break;
+            }
+            return;
+        }
+
+        // プリロードの痕跡はない
+        // ふつうにロード
+        audio_obj.load();
     },
 
     /*
@@ -677,6 +736,7 @@ tyrano.plugin.kag.tag.stopbgm = {
                 // フェードアウトしない場合, あるいはもう止まってる場合
                 // 単純に停止メソッドを呼ぶ
                 audio_obj.stop();
+                audio_obj.unload();
             } else {
                 // フェードアウトする場合
                 // フェードアウト完了イベントリスナを登録する関数
@@ -924,8 +984,6 @@ tyrano.plugin.kag.tag.playse = {
     },
 
     start: function (pm) {
-        this.kag.layer.hideEventLayer();
-
         if (pm.clear == "true") {
             this.kag.ftag.startTag("stopbgm", {
                 target: "se",
@@ -1289,6 +1347,277 @@ tyrano.plugin.kag.tag.seopt = {
         } else {
             if (pm.next !== "false") this.kag.ftag.nextOrder();
         }
+    },
+};
+
+/*
+#[changevol]
+
+:group
+オーディオ関連
+
+:title
+再生中のオーディオの音量変更
+
+:exp
+現在再生中のオーディオの音量を変更できます。
+
+`[playbgm]`や`[playse]`などでオーディオを再生し始めるときと同様に、次の計算式で最終的な音量が決定されます。
+
+`[changevol]`に指定した音量(%) × `[bgmopt]`や`[seopt]`で設定したコンフィグ音量(%)
+
+プレイヤーがスマホブラウザから閲覧している場合は端末の制限により音量が変更できませんので注意してください。
+
+:sample
+[bgmopt volume="30"]Config: 30[l][r]
+[playbgm volume="40" storage="music.ogg"]Audio: 40[l][r]
+[changevol volume="100"]Audio: 40→100[l][r]
+[changevol volume="15" time="1000"]Audio: 100→15[l][r]
+[bgmopt volume="100" effect="true"]Config: 30→100[l][r]
+[changevol volume="100"]Audio: 15→100[l][r]
+
+:param
+target = BGMの音量を変更する場合は"bgm"、SEの音量を変更する場合は"se"と指定します。,
+volume = 音量を`0`〜`100`で指定します。,
+buf    = 設定を変更するスロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+time   = フェード時間をミリ秒単位で指定できます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.changevol = {
+    pm: {
+        target: "bgm",
+        volume: "",
+        buf: "",
+        time: "",
+        next: "true",
+    },
+
+    obtainTargets: function (target, buf) {
+        const target_map = target === "bgm" ? this.kag.tmp.map_bgm : this.kag.tmp.map_se;
+        const target_dict = {};
+        if (buf) {
+            const audio_obj = target_map[buf];
+            if (audio_obj) {
+                target_dict[buf] = audio_obj;
+            }
+        } else {
+            for (const key in target_map) {
+                const audio_obj = target_map[key];
+                if (audio_obj) {
+                    target_dict[key] = audio_obj;
+                }
+            }
+        }
+        return target_dict;
+    },
+
+    start: function (pm) {
+        // next="false"でないときだけ次に進む
+        const next = () => {
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
+        };
+
+        // volumeパラメータが指定されてないならやることない
+        // スマホアプリの場合も不可、早期リターン
+        if (pm.volume === "" || this.kag.define.FLAG_APRI) {
+            next();
+            return;
+        }
+
+        // タグ音量 0.0～1.0
+        const tag_volume = $.parseVolume(pm.volume);
+
+        // 操作したいのはBGMですか
+        const is_bgm = pm.target === "bgm";
+
+        // BGMならここでロード復元用のプロパティを更新しておく
+        if (is_bgm) {
+            this.kag.stat.current_bgm_vol = pm.volume;
+        }
+
+        const volume_map = is_bgm ? this.kag.stat.map_bgm_volume : this.kag.stat.map_se_volume;
+        const default_volume = is_bgm ? this.kag.config.defaultBgmVolume : this.kag.config.defaultSeVolume;
+
+        // 操作対象のオーディオについて
+        const target_dict = this.obtainTargets(pm.target, pm.buf);
+        for (const buf in target_dict) {
+            const audio_obj = target_dict[buf];
+            let config_volume = volume_map[buf] ? volume_map[buf] : default_volume;
+            config_volume = $.parseVolume(config_volume);
+
+            this.kag.changeHowlVolume(audio_obj, {
+                config: config_volume,
+                tag: tag_volume,
+                time: pm.time,
+            });
+
+            // ループSEのロード復元用のプロパティの更新
+            if (!is_bgm && this.kag.stat.current_se[buf]) {
+                this.kag.stat.current_se[buf].volume = pm.volume;
+            }
+        }
+
+        next();
+    },
+};
+
+/*
+#[pausebgm]
+
+:group
+オーディオ関連
+
+:title
+再生中のBGMの一時停止
+
+:exp
+現在再生中のBGMを一時停止できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.pausebgm = {
+    pm: {
+        target: "bgm",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        // next="false"でないときだけ次に進む
+        const next = () => {
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
+        };
+
+        // 操作対象のオーディオについて
+        const target_dict = this.kag.getTag("changevol").obtainTargets(pm.target, pm.buf);
+        for (const buf in target_dict) {
+            const audio_obj = target_dict[buf];
+            audio_obj.pause();
+        }
+
+        next();
+    },
+};
+
+/*
+#[resumebgm]
+
+:group
+オーディオ関連
+
+:title
+一時停止中のオーディオの再開
+
+:exp
+一時停止中のオーディオを再開できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.resumebgm = {
+    pm: {
+        target: "bgm",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        // next="false"でないときだけ次に進む
+        const next = () => {
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
+        };
+
+        // 操作対象のオーディオについて
+        const target_dict = this.kag.getTag("changevol").obtainTargets(pm.target, pm.buf);
+        for (const buf in target_dict) {
+            const audio_obj = target_dict[buf];
+            audio_obj.play();
+        }
+
+        next();
+    },
+};
+
+/*
+#[pausese]
+
+:group
+オーディオ関連
+
+:title
+再生中のSEの一時停止
+
+:exp
+現在再生中のSEを一時停止できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.pausese = {
+    pm: {
+        target: "se",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        this.kag.getTag("pausebgm").start(pm);
+    },
+};
+
+/*
+#[resumese]
+
+:group
+オーディオ関連
+
+:title
+一時停止中のSEの再開
+
+:exp
+一時停止中のSEを再開できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.resumese = {
+    pm: {
+        target: "se",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        this.kag.getTag("resumebgm").start(pm);
     },
 };
 

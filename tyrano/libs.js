@@ -1828,57 +1828,64 @@
     const data_folder_names = ["scenario", "image", "fgimage", "bgimage", "video", "sound", "bgm", "others"];
 
     /**
-     * タグのstorageパラメータに指定された値を実際に使えるパスに直す
+     * タグのstorageパラメータに指定された値をフルパスに直す
+     * - "http" から始まる場合はそのまま返す。
+     * - そうでない場合、戻り値が "./" で始まることを保証する。
+     * - 同等のパスが一意に定まるパスで表されることを保証する。
+     * - そのために "../" を除去する。
+     * - "../" を許可してしまうと、同等のパスを無限のパターンで表せてしまうため、
+     *   たとえばパスをキーにした連想配列でキャッシュ管理をしている場合に
+     *   キャッシュが機能しないケースが出てきてしまう。
      * @param {string} storage "foo.png"
-     * @param {string} dir_name "fgimage"
+     * @param {string} folder "image"
      * @returns {string}
      * @example
-     * $.parseStorage("foo.png", "fgimage");
-     * // "./data/fgimage/foo.png"
-     * $.parseStorage("https://tyrano.jp/foo.png", "fgimage");
+     * $.parseStorage("foo.png", "image");
+     * // "./data/image/foo.png"
+     * $.parseStorage("https://tyrano.jp/foo.png", "image");
      * // "https://tyrano.jp/foo.png"
-     * $.parseStorage("foo.png", "tyrano/images/system");
-     * // "./tyrano/images/system/foo.png"
-     * $.parseStorage("foo.png", "data/fgimage");
+     * $.parseStorage("nextpage.gif", "tyrano/images/system");
+     * // "./tyrano/images/system/nextpage.gif"
+     * $.parseStorage("foo.png", "data/image");
+     * // "./data/image/foo.png"
+     * $.parseStorage("../fgimage/foo.png", "image");
      * // "./data/fgimage/foo.png"
-     * $.parseStorage("../image/foo.png", "data/fgimage");
-     * // "./data/fgimage/../image/foo.png"
      */
-    $.parseStorage = function (storage, dir_name = "") {
+    $.parseStorage = function (storage, folder = "") {
         // "http"で始まっているならそのまま返す
         if ($.isHTTP(storage)) {
             return storage;
         }
+
         // フォルダパスを特定
-        let dir_path;
-        if (!dir_name) {
-            dir_path = ".";
-        } else if (dir_name && data_folder_names.includes(dir_name.split("/").shift())) {
-            // dataフォルダに入っているフォルダ名が指定されている場合は自動的に"./data/"を足す
-            // たとえば"scenario"を"./data/scenario"に変換する
-            dir_path = `./data/${dir_name}`;
-        } else {
-            dir_path = dir_name;
-            // 末尾の"/"は消す
-            if (dir_path.slice(-1) === "/") {
-                dir_path = dir_path.substring(0, dir_path.length - 1);
-            }
-            // 先頭が"./"から始まることを保証する
-            const c = dir_path.charAt(0);
-            if (c === "/") {
-                dir_path = "." + dir_path;
-            } else if (c !== ".") {
-                dir_path = "./" + dir_path;
-            }
+        if (folder && data_folder_names.includes(folder.split("/").shift())) {
+            // dataフォルダに入っているフォルダ名が指定されている場合は自動的に"data/"を足す
+            // たとえば"scenario"を"data/scenario"に変換する
+            folder = `data/${folder}`;
         }
-        // storageの先頭の"./"は消していい
-        if (storage.substring(0, 2) === "./") {
-            storage = storage.substring(2);
-        }
-        // フォルダパス / ファイル名
-        const path = `${dir_path}/${storage}`;
-        // 連続する"/"は消して返す
-        return path.replace(/\/+/g, "/");
+
+        // / フォルダパス / ファイル名
+        let full_path = `/${folder}/${storage}`;
+
+        // "//" や "/./" は "/" に直す
+        full_path = full_path.replace(/\/\.?\/+/g, "/");
+
+        const path_hash = [];
+
+        full_path.split("/").forEach((item) => {
+            if (item === "" || item === ".") {
+                return;
+            }
+            if (item === "..") {
+                path_hash.pop();
+                return;
+            }
+            path_hash.push(item);
+        });
+
+        full_path = "./" + path_hash.join("/");
+
+        return full_path;
     };
 
     /**
