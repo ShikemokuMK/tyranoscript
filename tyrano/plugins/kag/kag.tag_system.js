@@ -1615,11 +1615,14 @@ tyrano.plugin.kag.tag.edit = {
 システム操作
 
 :title
-画像ファイルの事前読み込み
+素材ファイルの事前読み込み
 
 :exp
 `[preload]`タグを使用することで、素材ファイル（画像や音楽）を事前に読み込むことができます。
 実際に素材を使用する際に表示がスムーズになります。
+
+V515以降：プリロードした音声ファイルは一度再生した時点で破棄される仕様になりました（メモリを圧迫しないようにするため）。
+システム効果音やBGMなど、繰り返し使うことが予想される音声ファイルをプリロードするときは`single_use="false"`を指定することを検討してください。
 
 :sample
 
@@ -1640,7 +1643,9 @@ f.preload_images = [
 
 :param
 storage = プリロードするファイルをフルパスで指定します。JavaScriptの配列を指定することもできます。,
-wait    = `true`を指定すると、すべての読み込みが完了するまでゲームを停止します。`true`にする場合は画面に「Now Loading」などと表示しておき、素材のロード中であることをプレイヤーに知らせるべきでしょう。
+wait    = `true`を指定すると、すべての読み込みが完了するまでゲームを停止します。`true`にする場合は画面に「Now Loading」などと表示しておき、素材のロード中であることをプレイヤーに知らせるべきでしょう。,
+single_use = 音声ファイルを読み込む場合にのみ意味を持つパラメータです。`true`(デフォルト)を指定するとプリロードデータが使い捨てとなり、[playbgm]などでプリロードデータを一度使用した時点でプリロードデータが破棄されます（メモリを圧迫しないようにするため）。一度使ったあともプリロードデータを保持したい場合は`false`を指定してください。`false`を指定した場合であっても`[unload]`タグを使うことでプリロードデータを明示的に破棄できます。,
+name       = 音声ファイルを読み込む場合にのみ意味を持つパラメータです。たとえば"bgm"、"se"、"section1"などのグループ名を付けておくことで、あとで`[unload]`タグでデータを破棄する際に対象をまとめて指定できます。カンマ区切りで複数指定可。,
 
 #[end]
 */
@@ -1652,6 +1657,8 @@ tyrano.plugin.kag.tag.preload = {
     pm: {
         storage: "",
         wait: "false",
+        single_use: "true",
+        name: "",
     },
 
     start: function (pm) {
@@ -1663,21 +1670,31 @@ tyrano.plugin.kag.tag.preload = {
 
         var storage = pm.storage;
 
+        // プリロードオプション
+        const preload_option = {
+            single_use: pm.single_use === "true",
+            name: pm.name || "",
+        };
+
         //配列で指定された場合
         if (typeof storage == "object" && storage.length > 0) {
             var sum = 0;
 
             for (var i = 0; i < storage.length; i++) {
-                that.kag.preload(storage[i], function () {
-                    sum++;
-                    if (storage.length == sum) {
-                        //すべてのプリロードが完了
-                        if (pm.wait == "true") {
-                            that.kag.layer.showEventLayer();
-                            that.kag.ftag.nextOrder();
+                that.kag.preload(
+                    storage[i],
+                    function () {
+                        sum++;
+                        if (storage.length == sum) {
+                            //すべてのプリロードが完了
+                            if (pm.wait == "true") {
+                                that.kag.layer.showEventLayer();
+                                that.kag.ftag.nextOrder();
+                            }
                         }
-                    }
-                });
+                    },
+                    preload_option,
+                );
             }
 
             if (pm.wait == "false") {
@@ -1685,18 +1702,88 @@ tyrano.plugin.kag.tag.preload = {
                 that.kag.ftag.nextOrder();
             }
         } else {
-            this.kag.preload(pm.storage, function () {
-                if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
-                    that.kag.ftag.nextOrder();
-                }
-            });
+            this.kag.preload(
+                pm.storage,
+                function () {
+                    if (pm.wait == "true") {
+                        that.kag.layer.showEventLayer();
+                        that.kag.ftag.nextOrder();
+                    }
+                },
+                preload_option,
+            );
 
             if (pm.wait == "false") {
                 that.kag.layer.showEventLayer();
                 that.kag.ftag.nextOrder();
             }
         }
+    },
+};
+
+/*
+#[unload]
+
+:group
+システム操作
+
+:title
+音声プリロードデータの破棄
+
+:exp
+`[preload]`タグに`single_use="false"`を指定したうえで多数の音声ファイルをプリロードしていると、音声プリロードデータがメモリを圧迫して動作に悪影響を及ぼすことがあります。
+
+`[unload]`タグを使うことで、音声プリロードデータを明示的に破棄できます。`storage``name``all_sound`のいずれかのパラメータを指定してください。
+
+:sample
+
+:param
+storage   = 破棄する音声プリロードデータの場所。`[preload]`に指定していたものを指定します。,
+name      = `[preload]`に指定した`name`を使って対象をまとめて指定できます。,
+all_sound = `true`を指定すると、すべての音声プリロードデータを破棄します。,
+
+#[end]
+*/
+
+//画像ファイルの事前読み込み
+tyrano.plugin.kag.tag.unload = {
+    pm: {
+        storage: "",
+        name: "",
+        all_sound: "false",
+    },
+
+    start: function (pm) {
+        var that = this;
+
+        if (pm.all_sound === "true") {
+            for (const key in this.kag.tmp.preload_audio_map) {
+                const audio_obj = this.kag.tmp.preload_audio_map[key];
+                if (audio_obj) {
+                    audio_obj.unload();
+                    delete this.kag.tmp.preload_audio_map[key];
+                }
+            }
+        } else if (pm.name) {
+            for (const key in this.kag.tmp.preload_audio_map) {
+                const audio_obj = this.kag.tmp.preload_audio_map[key];
+                if (audio_obj) {
+                    if (audio_obj.__names.includes(pm.name)) {
+                        audio_obj.unload();
+                        delete this.kag.tmp.preload_audio_map[key];
+                    }
+                }
+            }
+        } else if (pm.storage) {
+            const key = $.parseStorage(pm.storage);
+            const audio_obj = this.kag.tmp.preload_audio_map[key];
+            if (audio_obj) {
+                audio_obj.unload();
+                delete this.kag.tmp.preload_audio_map[key];
+            }
+        }
+
+        this.kag.ftag.nextOrder();
     },
 };
 

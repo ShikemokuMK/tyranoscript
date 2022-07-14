@@ -1749,7 +1749,7 @@ tyrano.plugin.kag = {
             });
 
             // ロードに失敗したとき
-            audio_obj.once("load", () => {
+            audio_obj.once("loaderror", () => {
                 audio_obj.unload();
                 //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
                 if (callbk) callbk(audio_obj);
@@ -1761,6 +1761,13 @@ tyrano.plugin.kag = {
 
             // プリロードデータを使い捨てにするかどうか
             audio_obj.__single_use = options.single_use !== undefined ? options.single_use : true;
+
+            // 名前をつけられる
+            const name = options.name || "";
+            const names = name.split(",").map((item) => {
+                return item.trim();
+            });
+            audio_obj.__names = names;
 
             // ロード開始
             audio_obj.load();
