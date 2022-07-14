@@ -1466,6 +1466,162 @@ tyrano.plugin.kag.tag.changevol = {
 };
 
 /*
+#[pausebgm]
+
+:group
+オーディオ関連
+
+:title
+再生中のBGMの一時停止
+
+:exp
+現在再生中のBGMを一時停止できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.pausebgm = {
+    pm: {
+        target: "bgm",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        // next="false"でないときだけ次に進む
+        const next = () => {
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
+        };
+
+        // 操作対象のオーディオについて
+        const target_dict = this.kag.getTag("changevol").obtainTargets(pm.target, pm.buf);
+        for (const buf in target_dict) {
+            const audio_obj = target_dict[buf];
+            audio_obj.pause();
+        }
+
+        next();
+    },
+};
+
+/*
+#[resumebgm]
+
+:group
+オーディオ関連
+
+:title
+一時停止中のオーディオの再開
+
+:exp
+一時停止中のオーディオを再開できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.resumebgm = {
+    pm: {
+        target: "bgm",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        // next="false"でないときだけ次に進む
+        const next = () => {
+            if (pm.next !== "false") {
+                this.kag.ftag.nextOrder();
+            }
+        };
+
+        // 操作対象のオーディオについて
+        const target_dict = this.kag.getTag("changevol").obtainTargets(pm.target, pm.buf);
+        for (const buf in target_dict) {
+            const audio_obj = target_dict[buf];
+            audio_obj.play();
+        }
+
+        next();
+    },
+};
+
+/*
+#[pausese]
+
+:group
+オーディオ関連
+
+:title
+再生中のSEの一時停止
+
+:exp
+現在再生中のSEを一時停止できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.pausese = {
+    pm: {
+        target: "se",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        this.kag.getTag("pausebgm").start(pm);
+    },
+};
+
+/*
+#[resumese]
+
+:group
+オーディオ関連
+
+:title
+一時停止中のSEの再開
+
+:exp
+一時停止中のSEを再開できます。
+
+:sample
+
+:param
+buf    = スロットを指定できます。省略すると、全スロットの音声に対して処理が実行されます。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.resumese = {
+    pm: {
+        target: "se",
+        buf: "",
+        next: "true",
+    },
+
+    start: function (pm) {
+        this.kag.getTag("resumebgm").start(pm);
+    },
+};
+
+/*
 #[wbgm]
 
 :group
