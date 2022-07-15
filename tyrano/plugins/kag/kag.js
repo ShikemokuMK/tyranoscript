@@ -873,6 +873,10 @@ tyrano.plugin.kag = {
             scale_y: 1,
             margin_top: 0,
             margin_left: 0,
+            game_width: 1280,
+            game_height: 720,
+            view_width: 1920,
+            height_hegiht: 1080,
         };
 
         // ゲーム画面フィットを即実行する

@@ -4233,6 +4233,203 @@ tyrano.plugin.kag.tag.s = {
     start: function () {
         this.kag.stat.is_strong_stop = true;
         this.kag.layer.hideEventLayer();
+
+        // [glink]自動配置が有効な場合はここで表示する
+        if (this.kag.stat.glink_config && this.kag.stat.glink_config.auto_place === "true") {
+            this.showGLinks();
+        }
+    },
+
+    /**
+     * [glink]の自動配置を行う
+     */
+    showGLinks: function () {
+        const j_layer = this.kag.layer.getFreeLayer();
+        const j_glinks = j_layer.find(".glink_button_auto_place");
+
+        // [glink]がないならなにもしない
+        if (j_glinks.length === 0) {
+            return;
+        }
+
+        // [glink_config]で設定したコンフィグを取得
+        const glink_config = this.kag.getTag("glink_config").getConfig();
+
+        // [glink]にスタイルを当てていく
+        j_glinks.setStyleMap({
+            position: "relative",
+            left: "auto",
+            top: "auto",
+            margin: `${glink_config.margin}px`,
+        });
+
+        if (glink_config.padding_y !== "default") {
+            j_glinks.setStyleMap({
+                "padding-top": `${glink_config.padding_y}px`,
+                "padding-bottom": `${glink_config.padding_y}px`,
+            });
+        }
+
+        if (glink_config.padding_x !== "default") {
+            j_glinks.setStyleMap({
+                "padding-left": `${glink_config.padding_x}px`,
+                "padding-right": `${glink_config.padding_x}px`,
+            });
+        }
+
+        // 非表示にしていたので改めて表示
+        j_glinks.show();
+
+        //
+        // ラッパーに当てるスタイル
+        //
+
+        // 横揃え
+        let horizontal_align = glink_config.horizontal;
+        if (horizontal_align === "left") horizontal_align = "start";
+        if (horizontal_align === "right") horizontal_align = "end";
+
+        // 縦揃え
+        let vertical_align = glink_config.vertical;
+        if (vertical_align === "top") vertical_align = "start";
+        if (vertical_align === "bottom") vertical_align = "end";
+
+        const wrapper_style = {
+            "position": "absolute",
+            "display": "flex",
+            "flex-direction": "column",
+            "align-items": horizontal_align,
+            "justify-content": vertical_align,
+        };
+
+        // ラッパーの領域（left, top, width, height)
+        let area_nums;
+        if (glink_config.place_area === "auto") {
+            $.extend(wrapper_style, this.calcFlexPosition(glink_config));
+        } else if (glink_config.place_area === "cover") {
+            $.extend(wrapper_style, {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: "100%",
+            });
+        } else {
+            area_nums = glink_config.place_area.split(",").map((item) => {
+                return $.trim(item);
+            });
+            $.extend(wrapper_style, {
+                left: `${area_nums[0]}px`,
+                top: `${area_nums[1]}px`,
+                width: `${area_nums[2]}px`,
+                height: `${area_nums[3]}px`,
+            });
+        }
+
+        // [glink]の横幅を『もっとも長い[glink]の幅』に揃える場合
+        if (glink_config.width === "auto") {
+            $.extend(wrapper_style, {
+                "align-items": "stretch",
+                "width": "max-content",
+                "left": "0",
+                "right": "0",
+                "margin": "0 auto",
+            });
+            if (horizontal_align === "start") {
+                $.extend(wrapper_style, {
+                    left: "0",
+                    right: "auto",
+                    margin: "0",
+                });
+            }
+            if (horizontal_align === "end") {
+                $.extend(wrapper_style, {
+                    left: "auto",
+                    right: "0",
+                    margin: "0",
+                });
+            }
+            if (area_nums) {
+                const gw = this.kag.tmp.scale_info.game_width;
+                const gh = this.kag.tmp.scale_info.game_height;
+                $.extend(wrapper_style, {
+                    "padding-left": `${area_nums[0]}px`,
+                    "padding-top": `${area_nums[1]}px`,
+                    "padding-right": `${gw - area_nums[0] - area_nums[2]}px`,
+                    "padding-bottom": `${gh - area_nums[1] - area_nums[3]}px`,
+                });
+            }
+        }
+
+        // flexなラッパーを作って[glink]はこっちにぶち込む
+        const j_wrapper = $("<div />").setStyleMap(wrapper_style);
+
+        j_glinks.appendTo(j_wrapper);
+
+        // flexなラッパーをフリーレイヤにぶち込む
+        if (glink_config.show_time === "0") {
+            j_wrapper.appendTo(j_layer);
+        } else {
+            j_wrapper.setStyleMap({
+                "pointer-events": "none",
+                "opacity": "0",
+            });
+            j_wrapper.appendTo(j_layer);
+            const anim = j_wrapper.get(0).animate([{ opacity: "0" }, { opacity: "1" }], {
+                duration: Math.max(100, parseInt(glink_config.show_time)),
+                easing: "linear",
+                fill: "forwards",
+            });
+            anim.onfinish = () => {
+                j_wrapper.setStyleMap({
+                    "pointer-events": "auto",
+                });
+            };
+        }
+    },
+
+    /**
+     * [glink]の自動配置をおこなう際の領域（flexなラッパーに設定するleft, top, width, height）を計算する
+     * @param {Object} glink_config
+     * @returns {Object}
+     */
+    calcFlexPosition: function (glink_config) {
+        const j_message_layer = this.kag.layer.getLayer(this.kag.stat.current_layer, this.kag.stat.current_page);
+        const j_message_outer = j_message_layer.find(".message_outer");
+        const gh = this.kag.tmp.scale_info.game_height;
+        const gh_half = gh / 2;
+        const top = parseInt(j_message_outer.css("top")) || 0;
+        const height = parseInt(j_message_outer.css("height")) || gh;
+        const bottom = top + height;
+
+        // メッセージウィンドウの縦幅が画面の8割以上を占めているなら画面全体を基準にしたほうがいいだろう
+        const blank_rate = height / gh;
+        if (blank_rate > 0.8) {
+            return {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: "100%",
+            };
+        }
+        const blank_upper = top; // メッセージウィンドウの上側余白
+        const blank_lower = gh - bottom; // メッセージウィンドウの下側余白
+        if (blank_upper > blank_lower) {
+            // 上のほうがスペースが空いている場合
+            return {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: `${top}px`,
+            };
+        } else {
+            // 下のほうがスペースが空いている場合
+            return {
+                left: "0",
+                top: `${bottom}px`,
+                width: "100%",
+                height: `${gh - bottom}px`,
+            };
+        }
     },
 };
 
@@ -5766,6 +5963,99 @@ tyrano.plugin.kag.tag.button = {
 };
 
 /*
+#[glink_config]
+
+:group
+ラベル・ジャンプ操作
+
+:title
+グラフィカルリンクの設定
+
+:exp
+V515以降で使用可能。
+`[glink]`（グラフィカルリンク）の自動配置の設定を行なえます。
+
+自動配置を有効にした場合、`[s]`タグに到達した時点で初めて`[glink]`が描画されます。
+
+:sample
+[glink_config auto_place="true" show_time="300"]
+[position left="160" top="500" width="1000" height="200" visible="true"]
+[position margint="45" marginl="50" marginr="70" marginb="60"]
+ティラノスクリプトに興味ある？[l]
+[glink  color="btn_13_red" text="はい。興味あります"  target="*selectinterest"]
+[glink  color="btn_13_red" text="興味あります！"  target="*selectinterest"]
+[glink  color="btn_13_red" text="どちらかと言うと興味あり"  target="*selectinterest"]
+[s]
+
+*selectinterest
+ホント！？うれしいなー[p]
+
+:param
+auto_place       = `[glink]`の自動配置を有効にするかどうか。`true`を指定すると、xとyが指定されていない`[glink]`を対象とする自動配置を有効にします。,
+auto_place_force = `true`を指定すると、xとyが指定されている`[glink]`も強制的に自動配置の対象にします。,
+margin           = (自動配置が有効の場合)`[glink]`の外側に付ける余白を数値(px)で指定します。,
+padding_x        = (自動配置が有効の場合)`[glink]`の内側に付ける横余白を数値(px)で指定します。`default`を指定すると調整を行いません。,
+padding_y        = (自動配置が有効の場合)`[glink]`の内側に付ける縦余白を数値(px)で指定します。`default`を指定すると調整を行いません。,
+width            = (自動配置が有効の場合)`[glink]`の横幅を『一番横幅の大きい`[glink]`の横幅』に揃える場合は`auto`と指定します。`default`を指定すると調整を行いません。,
+vertical         = (自動配置が有効の場合)縦方向の揃え方を`top`(上揃え)、`center`(中央揃え)、`bottom`(下揃え)のいずれかで指定します。,
+horizontal       = (自動配置が有効の場合)横方向の揃え方を`left`(左揃え)、`center`(中央揃え)、`right`(右揃え)のいずれかで指定します。,
+place_area       = (自動配置が有効の場合)揃え方の基準となる領域の設定です。`auto`を指定すると、メッセージウィンドウを考慮して自動で領域を調整します。`cover`だと画面全体を基準にします。領域の位置とサイズを直接指定したい場合は`100,100,1000,1000`のようにカンマ区切りで数値を4つ指定してください。そうすると、順にleft, top, width, heightとして解釈されます。,
+show_time        = (自動配置が有効の場合)数値をミリ秒単位で`[glink]`をフェードインさせることができます。フェード中はクリック不可。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.glink_config = {
+    pm: {},
+
+    default_glink_config: {
+        auto_place: "true",
+        auto_place_force: "false",
+        margin: "20",
+        padding_y: "default",
+        padding_x: "default",
+        width: "auto",
+        vertical: "center",
+        horizontal: "center",
+        place_area: "auto",
+        show_time: "0",
+        select_anim: "",
+        select_anim_time: "",
+        select_anim_delay: "",
+        noselect_anim: "",
+        noselect_anim_time: "",
+        noselect_anim_delay: "",
+    },
+
+    getConfig: function (name) {
+        if (!this.kag.stat.glink_config) {
+            this.kag.stat.glink_config = $.extend({}, this.default_glink_config);
+        }
+        if (name) {
+            return this.kag.stat.glink_config[name];
+        } else {
+            return this.kag.stat.glink_config;
+        }
+    },
+
+    //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
+    //cmで抹消しよう
+    start: function (pm) {
+        if (!this.kag.stat.glink_config) {
+            this.kag.stat.glink_config = $.extend({}, this.default_glink_config);
+        }
+        for (const key in pm) {
+            if (key !== "_tag") {
+                if (pm[key]) {
+                    this.kag.stat.glink_config[key] = pm[key];
+                }
+            }
+        }
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
 #[glink]
 
 :group
@@ -5816,9 +6106,12 @@ clickse    = ボタンをクリックした時に再生される効果音を設�
 enterse    = ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください,
 leavese    = ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください。,
 cm         = <p>ボタンクリック後に`[cm]`を実行するかどうか。`[glink]`は通常、ボタンクリック後に自動的に`[cm]`が実行されますが、`false`を指定するとこの`[cm]`を実行しません。</p><p>プレイヤー入力などの決定を`[glink]`で行いたい場合は`false`を指定しておき、`[commit]`後に手動で`[cm]`を実行してボタンや入力ボックスを消してください。</p>,
+exp        = ボタンがクリックされた時に実行されるJSを指定できます。,
+preexp     = タグが実行された時点で、この属性に指定した値が変数`preexp`に格納されます。そしてボタンがクリックされた時に`exp`内で`preexp`という変数が利用できるようになります。,
+bold       = 太字にする場合は`true`を指定します。,
 opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0`で完全に透明です。,
-exp       = ボタンがクリックされた時に実行されるJSを指定できます。,
-preexp    = タグが実行された時点で、この属性に指定した値が変数`preexp`に格納されます。そしてボタンがクリックされた時に`exp`内で`preexp`という変数が利用できるようになります。
+edge       = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
+shadow     = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。,
 
 :demo
 1,kaisetsu/14_select
@@ -5848,6 +6141,7 @@ tyrano.plugin.kag.tag.glink = {
         enterse: "",
         leavese: "",
         face: "",
+        bold: "",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -5878,6 +6172,16 @@ tyrano.plugin.kag.tag.glink = {
 
         if (pm.opacity != "") {
             j_button.css("opacity", $.convertOpacity(pm.opacity));
+        }
+
+        if (pm.bold === "true") {
+            j_button.css("font-weight", "bold");
+        }
+
+        if (pm.edge) {
+            j_button.css("text-shadow", $.generateTextShadowStrokeCSS(pm.edge));
+        } else if (pm.shadow) {
+            j_button.css("text-shadow", "2px 2px 2px " + $.convertColor(pm.shadow));
         }
 
         //graphic 背景画像を指定できます。
@@ -5927,6 +6231,14 @@ tyrano.plugin.kag.tag.glink = {
             pm: pm,
         });
         this.setEvent(j_button, pm);
+
+        // 自動配置が有効な場合は非表示にしておく
+        const glink_config = this.kag.getTag("glink_config").getConfig();
+        let is_auto_place = glink_config.auto_place_force === "true";
+        if (is_auto_place || (glink_config.auto_place === "true" && pm.x === "auto" && !pm.y)) {
+            j_button.addClass("glink_button_auto_place");
+            j_button.hide();
+        }
 
         target_layer.append(j_button);
         target_layer.show();

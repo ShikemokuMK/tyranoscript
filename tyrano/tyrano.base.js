@@ -158,6 +158,10 @@ tyrano.base = {
                     scale_y: scale_f,
                     margin_top: margin_top,
                     margin_left: margin_left,
+                    game_width: parseInt(width),
+                    game_height: parseInt(height),
+                    view_width: view_width,
+                    view_height: view_height,
                 });
 
                 // ティラノイベント"resize"を発火
@@ -171,12 +175,28 @@ tyrano.base = {
                 $.extend(that.tyrano.kag.tmp.scale_info, {
                     scale_x: width_f,
                     scale_y: height_f,
+                    margin_top: 0,
+                    margin_left: 0,
+                    game_width: parseInt(width),
+                    game_height: parseInt(height),
+                    view_width: view_width,
+                    view_height: view_height,
                 });
 
                 // ティラノイベント"resize"を発火
                 that.kag.trigger("resize", { target: j_tyrano_base, scale_info: that.tyrano.kag.tmp.scale_info });
             }, timeout);
         } else {
+            $.extend(that.tyrano.kag.tmp.scale_info, {
+                scale_x: 1,
+                scale_y: 1,
+                margin_top: 0,
+                margin_left: 0,
+                game_width: parseInt(width),
+                game_height: parseInt(height),
+                view_width: view_width,
+                view_height: view_height,
+            });
             // スクリーンサイズ固定
         }
     },
