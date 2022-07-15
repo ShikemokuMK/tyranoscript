@@ -5203,6 +5203,7 @@ tyrano.plugin.kag.tag.resetfont = {
     },
 
     start: function (pm) {
+        this.kag.setMessageCurrentSpan();
         this.kag.stat.font = $.extend(true, {}, this.kag.stat.default_font);
         if (pm.next !== "false") this.kag.ftag.nextOrder();
     },
