@@ -2452,6 +2452,19 @@ tyrano.plugin.kag = {
         audio_obj.__config_volume = config_volume;
     },
 
+    /**
+     * ボタンクリックSEなどシステム系の効果音を鳴らすための関数
+     * nextOrder を呼ばない
+     * @param {string} storage
+     */
+    playSound: function (storage, buf) {
+        this.kag.ftag.startTag("playse", {
+            storage: storage,
+            buf: buf,
+            stop: "true",
+        });
+    },
+
     test: function () {},
 };
 

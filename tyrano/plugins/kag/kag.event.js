@@ -20,4 +20,18 @@ tyrano.plugin.kag.event = {
         //パラメータを格納してみてはどうか？
         j_obj.attr("data-event-pm", JSON.stringify(obj.pm));
     },
+
+    /**
+     * 受け取ったjQueryオブジェクトのイベントを削除
+     * ロードで復元されないようにする
+     * @param {jQuery} j_obj
+     */
+    removeEventElement: function (j_obj) {
+        j_obj
+            .removeClass("event-setting-element")
+            .removeAttr("data-event-target")
+            .removeAttr("data-event-storage")
+            .removeAttr("data-event-tag")
+            .removeAttr("data-event-pm");
+    },
 };

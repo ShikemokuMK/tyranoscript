@@ -2140,6 +2140,8 @@ tyrano.plugin.kag.tag.l = {
                 }
             }, auto_speed);
         }
+
+        this.kag.layer.showEventLayer();
     },
 };
 
@@ -2203,6 +2205,8 @@ tyrano.plugin.kag.tag.p = {
                 }
             }, auto_speed);
         }
+
+        this.kag.layer.showEventLayer();
     },
 };
 
@@ -2420,7 +2424,11 @@ tyrano.plugin.kag.tag.er = {
 
 //画面クリア
 tyrano.plugin.kag.tag.cm = {
-    start: function () {
+    pm: {
+        next: "true",
+    },
+
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
         //フォントのリセット
         //カレントレイヤだけじゃなくて、全てもメッセージレイヤを消去する必要がある
@@ -2436,7 +2444,7 @@ tyrano.plugin.kag.tag.cm = {
         //フリーレイヤ消去
         this.kag.layer.getFreeLayer().html("").hide();
 
-        this.kag.ftag.startTag("resetfont");
+        this.kag.ftag.startTag("resetfont", pm);
     },
 };
 
@@ -4993,11 +5001,13 @@ tyrano.plugin.kag.tag.endnowait = {
 tyrano.plugin.kag.tag.resetfont = {
     log_join: "true",
 
-    start: function () {
-        var j_span = this.kag.setMessageCurrentSpan();
+    pm: {
+        next: "true",
+    },
 
+    start: function (pm) {
         this.kag.stat.font = $.extend(true, {}, this.kag.stat.default_font);
-        this.kag.ftag.nextOrder();
+        if (pm.next !== "false") this.kag.ftag.nextOrder();
     },
 };
 
@@ -5507,266 +5517,251 @@ tyrano.plugin.kag.tag.button = {
     },
 
     setEvent: function (j_button, pm) {
-        var that = TYRANO;
+        const that = this;
 
-        (function () {
-            var _target = pm.target;
-            var _storage = pm.storage;
-            var _pm = pm;
+        // クリックされたか
+        let button_clicked = false;
 
-            var preexp = that.kag.embScript(pm.preexp);
-            var button_clicked = false;
+        // 固定ボタンか ([clearfix]するまで永続するボタンか)
+        const is_fix_button = pm.fix === "true";
 
-            var parse_img_url = function (src) {
-                if ($.isHTTP(src)) {
-                    return src;
-                } else {
-                    return "./data/" + _pm.folder + "/" + src;
-                }
-            };
+        // ロールボタンか (セーブやロードなどを行なうためのボタンか)
+        const is_role_button = !!pm.role;
 
-            j_button.hover(
-                //マウスが乗った時
-                function () {
-                    //音を鳴らす
-                    if (_pm.enterse != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.enterse,
-                            stop: true,
-                        });
-                    }
-                    //画像を変更する
-                    if (_pm.enterimg != "") {
-                        var enter_img_url = parse_img_url(_pm.enterimg);
-                        $(this).attr("src", enter_img_url);
-                    }
-                },
-                //マウスが外れた時
-                function () {
-                    //音を鳴らす
-                    if (_pm.leavese != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.leavese,
-                            stop: true,
-                        });
-                    }
-                    //画像を元に戻す
-                    if (_pm.enterimg != "") {
-                        var initial_img_url = parse_img_url(_pm.graphic);
-                        $(this).attr("src", initial_img_url);
-                    }
-                },
-            );
+        // コールボタンか (サブルーチンをコールするボタンか)
+        const is_call_button = !is_role_button && is_fix_button;
 
-            //マウスを押したとき
-            j_button.on("mousedown touchstart", function (event) {
-                if (_pm.activeimg != "") {
-                    var active_img_url = parse_img_url(_pm.activeimg);
-                    j_button.attr("src", active_img_url);
-                }
-            });
+        // 選択肢ボタンか ([cm]で消えるボタンか)
+        const is_jump_button = !is_role_button && !is_fix_button;
 
-            //クリックが確定したとき
-            j_button.click(function (event) {
-                // ブラウザの音声の再生制限を解除
-                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+        // セーブに関連する機能を持ったロールボタンか
+        const is_save_button = pm.role == "save" || pm.role == "menu" || pm.role == "quicksave" || pm.role == "sleepgame";
 
-                // ティラノイベント"click:tag:button"を発火
-                that.kag.trigger("click:tag:button", event);
+        // [call]スタックが存在するか
+        const exists_call_stack = !!that.kag.getStack("call");
 
-                if (_pm.clickimg != "") {
-                    //クリック画像が設定されているなら画像を変える
-                    var click_img_url = parse_img_url(_pm.clickimg);
-                    j_button.attr("src", click_img_url);
-                } else if (_pm.activeimg != "") {
-                    //クリック画像は設定されていないが、アクティブ画像が設定されている場合
-                    //いままさにアクティブ画像になっているはずなので、もとに戻す
-                    var initial_img_url = parse_img_url(_pm.graphic);
-                    $(this).attr("src", initial_img_url);
-                }
+        //
+        // ホバーイベント
+        //
 
-                //fix指定のボタンは、繰り返し実行できるようにする
-                if (button_clicked == true && _pm.fix == "false") {
-                    return false;
-                }
+        j_button.hover(
+            // マウスカーソルが乗った時
+            () => {
+                if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
+                if (!is_fix_button && button_clicked) return false;
+                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.enterimg, pm.folder));
+                if (pm.enterse) this.kag.playSound(pm.enterse);
+            },
+            // マウスカーソルが外れた時
+            () => {
+                if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
+                if (!is_fix_button && button_clicked) return false;
+                if (pm.leavese) this.kag.playSound(pm.leavese);
+                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
+            },
+        );
 
-                //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
-                if (that.kag.stat.is_strong_stop != true && _pm.fix == "false") {
-                    return false;
-                }
+        //
+        // 押下イベント
+        //
 
+        j_button.on("mousedown touchstart", () => {
+            if (!this.kag.stat.is_strong_stop) return false;
+            if (button_clicked) return false;
+            if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
+        });
+
+        //
+        // クリックイベント
+        //
+
+        j_button.click((e) => {
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
+            //
+            //　無効な場合を検知
+            //
+
+            // [s]または[wait]に到達していないときの非固定ボタンは無効
+            if (!this.kag.stat.is_strong_stop && !is_fix_button) return false;
+
+            // 1度クリックした非固定ボタンも無効
+            if (button_clicked && !is_fix_button) return false;
+
+            // クリックできる状態じゃないなら無効
+            if (!that.kag.stat.is_strong_stop && that.kag.layer.layer_event.css("display") === "none") return false;
+
+            // セーブスナップを取ろうとしたもののアニメーション中やトランジション中なら無効
+            if (pm.savesnap === "true" && that.kag.stat.is_stop) return false;
+
+            // セーブしようとしたものの[text]中や[wait]中であれば無効
+            if (is_save_button && (that.kag.stat.is_adding_text || that.kag.stat.is_wait)) return false;
+
+            // [sleepgame]しようとしたものの現在すでに[sleepgame]中なら無効
+            if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
+
+            // [call]しようとしたもののすでに[call]スタックが溜まっているなら無効
+            if (is_call_button && exists_call_stack) {
+                that.kag.log("callスタックが残っている場合、fixボタンは反応しません");
+                that.kag.log(that.kag.getStack("call"));
+                return false;
+            }
+
+            //
+            // クリックが有効だった場合の処理
+            //
+
+            // 非固定ボタンの場合クリック済みであるフラグを立てよう
+            if (!is_fix_button) {
+                // ボタンクリック済み
                 button_clicked = true;
 
-                if (_pm.exp != "") {
-                    //スクリプト実行
-                    that.kag.embScript(_pm.exp, preexp);
-                }
+                // 他の[button]を即座に無効にするためにストロングストップを切っておこう
+                this.kag.stat.is_strong_stop = false;
 
-                if (_pm.savesnap == "true") {
-                    //セーブスナップを取る場合、アニメーション中やトランジションはNG
-                    if (that.kag.stat.is_stop == true) {
-                        return false;
-                    }
+                // 念のためフリーレイヤ内のボタンのイベントをすべて解除しておこう
+                this.kag.layer.cancelAllFreeLayerButtonsEvents();
 
-                    //ここは、現在のセーブ用のメッセージを取得しよう
-                    that.kag.menu.snapSave(that.kag.stat.current_save_str);
-                }
+                // クリックされたというクラスを付ける！これを指定したアニメーションが可能
+                j_button.addClass("clicked_button");
+            }
 
-                //画面効果中は実行できないようにする
-                if (that.kag.layer.layer_event.css("display") == "none" && that.kag.stat.is_strong_stop != true) {
-                    return false;
-                }
+            // クリック画像が設定されているなら画像を変える
+            if (pm.clickimg != "") {
+                j_button.attr("src", $.parseStorage(pm.clickimg, pm.folder));
+            } else if (pm.activeimg != "") {
+                // クリック画像は設定されていないが、アクティブ画像が設定されている場合
+                // いままさにアクティブ画像になっているはずなので、もとに戻す
+                j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
+            }
 
-                //roleが設定されている場合は対応する処理を実行
-                //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
-                if (_pm.role != "") {
-                    //roleがクリックされたら、skip停止
+            // クリック効果音を鳴らす
+            if (pm.clickse) this.kag.playSound(pm.clickse);
+
+            // JSの実行
+            if (pm.exp) this.kag.embScript(pm.exp, this.kag.embScript(pm.preexp));
+
+            // セーブスナップの取得
+            if (pm.savesnap === "true") that.kag.menu.snapSave(that.kag.stat.current_save_str);
+
+            //
+            // [jump]ボタン
+            //
+
+            if (is_jump_button) {
+                // ティラノイベント"click:tag:button"を発火
+                that.kag.trigger("click:tag:button", e);
+
+                // [jump]を実行
+                that.kag.ftag.startTag("jump", pm);
+
+                // スキップの継続設定
+                if (that.kag.stat.skip_link === "true") {
+                    e.stopPropagation();
+                } else {
                     that.kag.setSkip(false);
-
-                    //オートは停止
-                    if (_pm.role != "auto") {
-                        that.kag.ftag.startTag("autostop", { next: "false" });
-                    }
-
-                    //文字が流れているときは、セーブ出来ないようにする。
-                    if (_pm.role == "save" || _pm.role == "menu" || _pm.role == "quicksave" || _pm.role == "sleepgame") {
-                        //テキストが流れているときとwait中は実行しない
-                        if (that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true) {
-                            return false;
-                        }
-                    }
-
-                    switch (_pm.role) {
-                        case "save":
-                            that.kag.menu.displaySave();
-                            break;
-
-                        case "load":
-                            that.kag.menu.displayLoad();
-                            break;
-
-                        case "window":
-                            that.kag.layer.hideMessageLayers();
-                            break;
-                        case "title":
-                            that.kag.backTitle();
-                            break;
-
-                        case "menu":
-                            that.kag.menu.showMenu();
-                            break;
-                        case "skip":
-                            that.kag.ftag.startTag("skipstart", {});
-                            break;
-                        case "backlog":
-                            that.kag.menu.displayLog();
-                            break;
-                        case "fullscreen":
-                            that.kag.menu.screenFull();
-                            break;
-                        case "quicksave":
-                            that.kag.menu.setQuickSave();
-                            break;
-                        case "quickload":
-                            that.kag.menu.loadQuickSave();
-                            break;
-                        case "auto":
-                            if (that.kag.stat.is_auto == true) {
-                                that.kag.ftag.startTag("autostop", {
-                                    next: "false",
-                                });
-                            } else {
-                                that.kag.ftag.startTag("autostart", {});
-                            }
-                            break;
-
-                        case "sleepgame":
-                            //押されたオブジェクトのマウスオーバーをsleepgame前に解除
-                            j_button.trigger("mouseout");
-
-                            if (that.kag.tmp.sleep_game != null) {
-                                return false;
-                            }
-
-                            //ready
-                            that.kag.tmp.sleep_game = {};
-
-                            _pm.next = false;
-
-                            that.kag.ftag.startTag("sleepgame", _pm);
-                            break;
-                    }
-
-                    //クリックされた時に音が指定されていたら
-                    if (_pm.clickse != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.clickse,
-                            stop: true,
-                        });
-                    }
-
-                    //バグリングさせない
-                    event.stopPropagation();
-
-                    //ジャンプは行わない
-                    return false;
                 }
 
-                //クリックされた時に音が指定されていたら
-                if (_pm.clickse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        storage: _pm.clickse,
-                        stop: true,
-                    });
+                return false;
+            }
+
+            //
+            // [call]ボタン
+            //
+
+            if (is_call_button) {
+                // ティラノイベント"click:tag:button:call"を発火
+                that.kag.trigger("click:tag:button:call", e);
+
+                // [call]を実行
+                that.kag.ftag.startTag("call", {
+                    storage: pm.storage,
+                    target: pm.target,
+                    auto_next: that.kag.stat.is_strong_stop ? "stop" : pm.auto_next,
+                });
+
+                // スキップの継続設定
+                if (that.kag.stat.skip_link === "true") {
+                    e.stopPropagation();
+                } else {
+                    that.kag.setSkip(false);
                 }
 
-                that.kag.layer.showEventLayer();
+                return false;
+            }
 
-                //fixレイヤの場合はcallでスタックが積まれる
-                if (_pm.role == "" && _pm.fix == "true") {
-                    //コールスタックが帰ってきてない場合は、実行しないようにする必要がある
-                    //fixの場合はコールスタックに残る。
-                    var stack_pm = that.kag.getStack("call"); //最新のコールスタックを取得
+            //
+            // ロールボタン
+            //
 
-                    if (stack_pm == null) {
-                        //callを実行する
-                        //fixから遷移した場合はリターン時にnextorderしない
-                        //strong_stopの場合は反応しない
-                        //今がstrong_stopかどうかは時々刻々と変化するので、毎回新しくチェックする必要がある
-                        //_pmはpmの参照コピーであるため、_pm.auto_nextを直接書き換えるわけにはいかない
-                        var _auto_next = _pm.auto_next;
-                        if (that.kag.stat.is_strong_stop == true) {
-                            _auto_next = "stop";
+            if (is_role_button) {
+                // ティラノイベント"click:tag:button:role"を発火
+                that.kag.trigger("click:tag:button:role", e);
+
+                // スキップを停止
+                that.kag.setSkip(false);
+
+                // オートモードも(これがオートモードボタンでなければ)停止
+                if (pm.role !== "auto") {
+                    that.kag.ftag.startTag("autostop", { next: "false" });
+                }
+
+                switch (pm.role) {
+                    case "save":
+                        that.kag.menu.displaySave();
+                        break;
+                    case "load":
+                        that.kag.menu.displayLoad();
+                        break;
+                    case "window":
+                        that.kag.layer.hideMessageLayers();
+                        break;
+                    case "title":
+                        that.kag.backTitle();
+                        break;
+                    case "menu":
+                        that.kag.menu.showMenu();
+                        break;
+                    case "skip":
+                        that.kag.ftag.startTag("skipstart", {});
+                        break;
+                    case "backlog":
+                        that.kag.menu.displayLog();
+                        break;
+                    case "fullscreen":
+                        that.kag.menu.screenFull();
+                        break;
+                    case "quicksave":
+                        // mouseleave をトリガーしておく。ホバー時のボタン画像で保存されないように
+                        j_button.trigger("mouseleave");
+                        that.kag.menu.setQuickSave();
+                        break;
+                    case "quickload":
+                        that.kag.menu.loadQuickSave();
+                        break;
+                    case "auto":
+                        if (that.kag.stat.is_auto) {
+                            that.kag.ftag.startTag("autostop", { next: "false" });
                         } else {
-                            //パラメータ初期値が入るようになる
-                            //_auto_next = "yes";
+                            that.kag.ftag.startTag("autostart", {});
                         }
-
-                        that.kag.ftag.startTag("call", {
-                            storage: _storage,
-                            target: _target,
-                            auto_next: _auto_next,
-                        });
-                    } else {
-                        //スタックで残された
-                        that.kag.log("callスタックが残っている場合、fixボタンは反応しません");
-                        that.kag.log(stack_pm);
-
-                        return false;
-                    }
-                } else {
-                    //jumpを実行する
-                    that.kag.ftag.startTag("jump", _pm);
+                        break;
+                    case "sleepgame":
+                        // mouseleave をトリガーしておく。ホバー時のボタン画像で保存されないように
+                        j_button.trigger("mouseleave");
+                        that.kag.tmp.sleep_game = {};
+                        pm.next = false;
+                        that.kag.ftag.startTag("sleepgame", pm);
+                        break;
                 }
 
-                //選択肢の後、スキップを継続するか否か
-                if (that.kag.stat.skip_link == "true") {
-                    event.stopPropagation();
-                } else {
-                    that.kag.setSkip(false);
-                }
-            });
-        })();
+                // バブリングさせない
+                e.stopPropagation();
+
+                return false;
+            }
+        });
     },
 };
 
@@ -5939,89 +5934,89 @@ tyrano.plugin.kag.tag.glink = {
     },
 
     setEvent: function (j_button, pm) {
-        var that = TYRANO;
+        let button_clicked = false;
 
-        (function () {
-            var _target = pm.target;
-            var _storage = pm.storage;
-            var _pm = pm;
-            var preexp = that.kag.embScript(pm.preexp);
-            var button_clicked = false;
+        //
+        // ホバーイベント
+        //
 
-            j_button.click(function (e) {
-                // ブラウザの音声の再生制限を解除
-                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+        j_button.hover(
+            () => {
+                // マウスが乗ったとき
+                if (!this.kag.stat.is_strong_stop) return false;
+                if (button_clicked) return false;
+                if (pm.enterimg) j_button.css("background-image", "url(./data/image/" + pm.enterimg + ")");
+                if (pm.enterse) this.kag.playSound(pm.enterse);
+            },
+            () => {
+                // マウスが離れたとき
+                if (!this.kag.stat.is_strong_stop) return false;
+                if (button_clicked) return false;
+                if (pm.enterimg) j_button.css("background-image", "url(./data/image/" + pm.graphic + ")");
+                if (pm.leavese) this.kag.playSound(pm.leavese);
+            },
+        );
 
-                // ティラノイベント"click:tag:glink"を発火
-                that.kag.trigger("click:tag:glink", e);
+        //
+        // クリックイベント
+        //
 
-                //クリックされた時に音が指定されていたら
-                if (_pm.clickse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        storage: _pm.clickse,
-                        stop: true,
-                    });
-                }
+        j_button.click((e) => {
+            // ブラウザの音声の再生制限を解除
+            if (!this.kag.tmp.ready_audio) this.kag.readyAudio();
 
-                //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
-                if (that.kag.stat.is_strong_stop != true) {
-                    return false;
-                }
+            //
+            // 無効な場合を検知
+            //
 
-                button_clicked = true;
+            // [s]または[wait]に到達していないときは無効
+            if (!this.kag.stat.is_strong_stop) return false;
 
-                if (_pm.exp != "") {
-                    //スクリプト実行
-                    that.kag.embScript(_pm.exp, preexp);
-                }
+            // 1度クリックしたボタンも無効
+            if (button_clicked) return false;
 
-                that.kag.layer.showEventLayer();
+            //
+            // クリックが有効だったときの処理
+            //
 
-                if (pm.cm == "true") {
-                    that.kag.ftag.startTag("cm", {});
-                }
+            // ボタンクリック済み
+            button_clicked = true;
 
-                //コールを実行する
-                that.kag.ftag.startTag("jump", _pm);
+            // 他の[glink]を即座に無効にするためにストロングストップを切っておこう
+            this.kag.stat.is_strong_stop = false;
 
-                //選択肢の後、スキップを継続するか否か
-                if (that.kag.stat.skip_link == "true") {
-                    e.stopPropagation();
-                } else {
-                    that.kag.setSkip(false);
-                }
-            });
+            // 画像変更
+            if (pm.clickimg) j_button.css("background-image", "url(./data/image/" + pm.clickimg + ")");
 
-            j_button.hover(
-                function () {
-                    if (_pm.enterimg != "") {
-                        var enterimg_url = "./data/image/" + _pm.enterimg;
-                        j_button.css("background-image", "url(" + enterimg_url + ")");
-                    }
+            // ティラノイベント"click:tag:glink"を発火
+            this.kag.trigger("click:tag:glink", e);
 
-                    //マウスが乗った時
-                    if (_pm.enterse != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.enterse,
-                            stop: true,
-                        });
-                    }
-                },
-                function () {
-                    if (_pm.enterimg != "") {
-                        var img_url = "./data/image/" + _pm.graphic;
-                        j_button.css("background-image", "url(" + img_url + ")");
-                    }
-                    //マウスが乗った時
-                    if (_pm.leavese != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.leavese,
-                            stop: true,
-                        });
-                    }
-                },
-            );
-        })();
+            // クリック効果音を鳴らす
+            if (pm.clickse) this.kag.playSound(pm.clickse);
+
+            // JSの実行
+            if (pm.exp) this.kag.embScript(pm.exp, this.kag.embScript(pm.preexp));
+
+            // [cm]の実行
+            if (pm.cm === "true") {
+                this.kag.ftag.startTag("cm", { next: "false" });
+            } else {
+                // [cm]を実行しない場合は念のためイベントをすべて解除しておこう
+                this.kag.layer.cancelAllFreeLayerButtonsEvents();
+                // クリックされたというクラスを付ける！これを指定したアニメーションが可能
+                j_button.addClass("clicked_button");
+            }
+
+            // [jump]の実行
+            this.kag.ftag.startTag("jump", pm);
+
+            // 選択肢の後、スキップを継続するか否か
+            if (this.kag.stat.skip_link === "true") {
+                e.stopPropagation();
+            } else {
+                this.kag.setSkip(false);
+            }
+        });
     },
 };
 
@@ -6136,50 +6131,54 @@ tyrano.plugin.kag.tag.clickable = {
     },
 
     setEvent: function (j_button, pm) {
-        var that = TYRANO;
+        //
+        // ホバーイベント
+        //
 
-        (function () {
-            var _target = pm.target;
-            var _storage = pm.storage;
-            var _pm = pm;
+        if (pm.mouseopacity) {
+            j_button.hover(
+                () => {
+                    j_button.css("opacity", $.convertOpacity(pm.mouseopacity));
+                },
+                () => {
+                    j_button.css("opacity", $.convertOpacity(pm.opacity));
+                },
+            );
+        }
 
-            if (_pm.mouseopacity != "") {
-                j_button.bind("mouseover", function () {
-                    j_button.css("opacity", $.convertOpacity(_pm.mouseopacity));
-                });
+        j_button.click((e) => {
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
-                j_button.bind("mouseout", function () {
-                    j_button.css("opacity", $.convertOpacity(_pm.opacity));
-                });
-            }
+            //
+            //　無効な場合を検知
+            //
 
-            j_button.click(function (e) {
-                // ブラウザの音声の再生制限を解除
-                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+            // [s]または[wait]に到達していないときは無効
+            if (!this.kag.stat.is_strong_stop) return false;
 
-                // ティラノイベント"click:tag:clickable"を発火
-                that.kag.trigger("click:tag:clickable", e);
+            // 1度クリックしたボタンも無効
+            if (button_clicked) return false;
+            ("");
+            //
+            // クリックが有効だったときの処理
+            //
 
-                //Sタグに到達していないとクリッカブルが有効にならない
+            // ボタンクリック済み
+            button_clicked = true;
 
-                var is_s = (function (obj) {
-                    if (obj.kag.stat.is_strong_stop != true) {
-                        return false;
-                    }
+            // 他の[clickable]を即座に無効にするためにストロングストップを切る
+            this.kag.stat.is_strong_stop = false;
 
-                    return true;
-                })(that);
+            // ティラノイベント"click:tag:clickable"を発火
+            that.kag.trigger("click:tag:clickable", e);
 
-                if (is_s == false) {
-                    return false;
-                }
+            // [cm]の実行
+            this.kag.ftag.startTag("cm", { next: "false" });
 
-                that.kag.ftag.startTag("cm", {});
-                //コールを実行する
-                that.kag.layer.showEventLayer();
-                that.kag.ftag.startTag("jump", _pm);
-            });
-        })();
+            // [jump]の実行
+            this.kag.ftag.startTag("jump", pm);
+        });
     },
 };
 
