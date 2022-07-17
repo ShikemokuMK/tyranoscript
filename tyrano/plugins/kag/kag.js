@@ -285,6 +285,8 @@ tyrano.plugin.kag = {
         chara_anim: "true", //キャラクター追加時、位置が変わる場合にアニメーションで表示するか否か
         pos_change_time: "600", //キャラクター自動配置のスピード
 
+        chara_last_zoom_name: "", //最後にズーム処理したキャラクターの名前
+
         chara_talk_focus: "none",
         chara_brightness_value: "60",
         chara_blur_value: "2",
@@ -292,6 +294,7 @@ tyrano.plugin.kag = {
         chara_talk_anim: "none", //キャラクターが話す時にアニメーションするかどうか
         chara_talk_anim_time: 230,
         chara_talk_anim_value: 30,
+        chara_talk_anim_zoom_rate: 1.2,
 
         apply_filter_str: "",
 

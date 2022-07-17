@@ -1941,6 +1941,11 @@ tyrano.plugin.kag.tag.chara_ptext = {
             if (this.kag.stat.chara_talk_focus != "none") {
                 this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
             }
+
+            //ズームの場合は最後にズームされたキャラをもとに戻す
+            if (this.kag.stat.chara_talk_anim == "zoom") {
+                this.zoomChara("", this.kag.stat.chara_talk_anim_zoom_rate);
+            }
         } else {
             // 誰かが話している
 
@@ -1987,8 +1992,13 @@ tyrano.plugin.kag.tag.chara_ptext = {
                         timeout = 10;
                     }
                     // アニメ―ションを再生
+
                     $.setTimeout(() => {
-                        this.animChara(j_chara_speaker, this.kag.stat.chara_talk_anim, pm.name);
+                        if (this.kag.stat.chara_talk_anim == "zoom") {
+                            this.zoomChara(pm.name, this.kag.stat.chara_talk_anim_zoom_rate);
+                        } else {
+                            this.animChara(j_chara_speaker, this.kag.stat.chara_talk_anim, pm.name);
+                        }
                     }, timeout);
                 }
             } else {
@@ -1998,6 +2008,11 @@ tyrano.plugin.kag.tag.chara_ptext = {
                 // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
                 if (this.kag.stat.chara_talk_focus != "none") {
                     this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
+                }
+
+                //ズームの場合は最後にズームされたキャラをもとに戻す
+                if (this.kag.stat.chara_talk_anim == "zoom") {
+                    this.zoomChara("", this.kag.stat.chara_talk_anim_zoom_rate);
                 }
             }
         }
@@ -2083,6 +2098,64 @@ tyrano.plugin.kag.tag.chara_ptext = {
             });
         });
     },
+
+    //キャラクターのズームアニメーション設定
+    zoomChara: function (name, zoom_rate) {
+        //すでにズームされている対象だった場合はズームしない。
+
+        if (this.kag.stat.chara_last_zoom_name == name) {
+            return;
+        }
+
+        var anim_time = this.kag.stat.chara_talk_anim_time;
+
+        if (this.kag.stat.chara_last_zoom_name != "") {
+            let j_chara_last_zoom = this.kag.getCharaElement(this.kag.stat.chara_last_zoom_name);
+
+            j_chara_last_zoom.css("margin", 0);
+            j_chara_last_zoom.stop(true, true).animate(
+                {
+                    margin: zoom_rate - 1,
+                },
+                {
+                    duration: anim_time,
+                    easing: "easeOutQuad",
+                    step: function (now, fx) {
+                        //console.log(now);
+                        j_chara_last_zoom.css("transform", "scale(" + (zoom_rate - now) + ")");
+                    },
+                    complete: function () {
+                        //console.log("finish");
+                        j_chara_last_zoom.css("transform", "");
+                    },
+                },
+            );
+        }
+
+        //ズーム対象のキャラクターを格納。
+        this.kag.stat.chara_last_zoom_name = name;
+
+        if (name != "") {
+            let chara_obj = this.kag.getCharaElement(name);
+            chara_obj.css("margin", 0);
+            chara_obj.stop(true, true).animate(
+                {
+                    margin: zoom_rate - 1,
+                },
+                {
+                    duration: anim_time,
+                    easing: "easeOutQuad",
+                    step: function (now, fx) {
+                        //console.log(now);
+                        chara_obj.css("transform", "scale(" + (1 + now) + ")");
+                    },
+                    complete: function () {
+                        //console.log("finish");
+                    },
+                },
+            );
+        }
+    },
 };
 
 /*
@@ -2109,9 +2182,10 @@ pos_change_time  = キャラクターの位置を自動で調整する際のア�
 talk_focus       = 現在話しているキャラクターの立ち絵を目立たせる演出を有効にするための設定です。以下のキーワードが指定できます。`brightness`(明度)、`blur`(ぼかし)、`none`(無効)<br>現在誰が話しているかの指定は`[chara_ptext]`タグもしくはその省略表記である`#akane`のような記述で行います。,
 brightness_value = `talk_focus=brightness`の場合の、話していないキャラクターの明度を`0`〜`100`で指定します。デフォルトは`60`。つまり、話していないキャラクターをちょっと暗くします。,
 blur_value       = `talk_focus=blur`の場合の、話していないキャラクターのぼかし度合を数値で指定します。デフォルトは`2`。数値が大きくなるほど強くぼけるようになります。,
-talk_anim        = キャラクターが話し始めるときに、キャラクターの立ち絵にピョンと跳ねるようなアニメーション演出を自動で加えることができる設定です。以下のキーワードが指定できます。`up`（上に跳ねる）、`down`(下に沈む)、`none`(無効),
+talk_anim        = キャラクターが話し始めるときに、キャラクターの立ち絵にピョンと跳ねるようなアニメーション演出を自動で加えることができる設定です。以下のキーワードが指定できます。`up`（上に跳ねる）、`down`(下に沈む)、`zoom`（拡大）、`none`(無効),
 talk_anim_time   = `talk_anim`が有効な場合の、アニメーション時間をミリ秒で指定できます。,
 talk_anim_value  = `talk_anim`が有効な場合の、キャラクターの移動量を指定できます。（ピクセル）,
+talk_anim_zoom_rate  = `talk_anim`で`zoom`を使用している場合の拡大率を指定します。デフォルトは1.2,
 effect           = キャラクターが位置を入れ替わる際のエフェクト（動き方）を指定できます。指定できるキーワードは次のとおりです。
 `jswing``def``easeInQuad``easeOutQuad``easeInOutQuad``easeInCubic``easeOutCubic``easeInOutCubic``easeInQuart``easeOutQuart``easeInOutQuart``easeInQuint``easeOutQuint``easeInOutQuint``easeInSine``easeOutSine``easeInOutSine``easeInExpo``easeOutExpo``easeInOutExpo``easeInCirc``easeOutCirc``easeInOutCirc``easeInElastic``easeOutElastic``easeInOutElastic``easeInBack``easeOutBack``easeInOutBack``easeInBounce``easeOutBounce``easeInOutBounce`
 
@@ -2136,6 +2210,7 @@ tyrano.plugin.kag.tag.chara_config = {
         talk_anim: "",
         talk_anim_time: "",
         talk_anim_value: "",
+        talk_anim_zoom_rate: "",
     },
 
     start: function (pm) {
@@ -2154,6 +2229,7 @@ tyrano.plugin.kag.tag.chara_config = {
         if (pm.talk_anim != "") this.kag.stat.chara_talk_anim = pm.talk_anim;
         if (pm.talk_anim_time != "") this.kag.stat.chara_talk_anim_time = parseInt(pm.talk_anim_time);
         if (pm.talk_anim_value != "") this.kag.stat.chara_talk_anim_value = parseInt(pm.talk_anim_value);
+        if (pm.talk_anim_zoom_rate != "") this.kag.stat.chara_talk_anim_zoom_rate = parseFloat(pm.talk_anim_zoom_rate);
 
         //フォーカス設定
         if (pm.talk_focus != "") {
