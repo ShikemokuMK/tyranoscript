@@ -225,6 +225,13 @@ tyrano.plugin.kag.ftag = {
 
     //次の命令を実行する
     nextOrder: function () {
+        
+        //nextOrderの割り込みが発生している場合
+		if(typeof this.kag.tmp.cut_nextorder =="function"){
+			this.kag.tmp.cut_nextorder();
+			return false;
+		}
+		
         //基本非表示にする。
         this.kag.layer.layer_event.hide();
 
@@ -557,10 +564,16 @@ tyrano.plugin.kag.ftag = {
     },
 
     //タグを指定して直接実行
-    startTag: function (name, pm) {
+    startTag : function(name, pm, cb) {
+        
         if (typeof pm == "undefined") {
             pm = {};
         }
+        
+        //コールバックがある場合はnextOrderの書き換え
+		if(typeof cb=="function"){
+			this.kag.tmp.cut_nextorder = cb;
+		}
 
         // ティラノイベント"tag:<tagName>"を発火
         this.kag.trigger(`tag:${name}`, { target: pm, is_next_order: false, is_macro: false });
@@ -568,6 +581,35 @@ tyrano.plugin.kag.ftag = {
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
     },
+    
+    //タグをnextorderの順番で使用する
+    startTags:function(array_tag,cb){
+		
+		var that = this;
+		let i = 0;
+		
+		let post_tag = ()=>{
+			
+			let tobj = array_tag[i];
+			
+			that.startTag(tobj.tag,tobj.pm,function(){
+				
+				TYRANO.kag.tmp.cut_nextorder = null;
+				i++;
+					
+				if(array_tag.length==i){
+					cb();
+				}else{
+					post_tag();
+				}
+				
+			});
+			
+		}
+			
+		post_tag();
+		
+	},
 
     //indexを指定して、その命令を実行
     //シナリオファイルが異なる場合

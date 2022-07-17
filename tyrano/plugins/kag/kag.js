@@ -80,6 +80,8 @@ tyrano.plugin.kag = {
         is_bgm_play_wait: false, //BGMの完了を待っているか否か。
 
         loading_make_ref: false,
+        
+        cut_nextorder:null, 
 
         wait_id: "", //waitをキャンセルするために使います。
 
@@ -97,6 +99,8 @@ tyrano.plugin.kag = {
                 is_load: false,
                 canvas_show: false,
                 start_event: true,
+                
+                animation_loop:true,
 
                 scene_pm: {}, //シーン情報の設定
                 init_pm: {}, //初期設定のpm
@@ -108,6 +112,41 @@ tyrano.plugin.kag = {
                     enable: -1,
                     mode: 0,
                 },
+                
+                fps:{
+					
+					active:false,
+					
+					movementSpeed:100,
+					rotateSpeed:0.5,
+					
+					tmpMoveBuffer:0,
+					tmpRotateBuffer:0,
+					
+					offMoveBufferF:false,
+					offMoveBufferB:false,
+					offRotateBufferL:false,
+					offRotateBufferR:false,
+					
+					is_colid:false,
+					
+					moveForward:false,
+					moveBackward:false,
+					rotateLeft:false,
+					rotateRight:false,
+               
+                    memory_pos:{x:0,y:0,z:0},
+					
+                    ground: "",
+                    is_fps_studio:false,
+					
+					isJoy:false,
+					camera_pos_y:40,
+					
+					move_trans_control:false,
+					
+				}
+                
             },
 
             models: {},
