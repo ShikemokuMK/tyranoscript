@@ -502,12 +502,17 @@ tyrano.plugin.kag.layer = {
         }
     },
 
-    //全面のイベントレイヤを削除する
+    /**
+     * イベントレイヤの表示と is_stop=false
+     */
     showEventLayer: function () {
         this.kag.stat.is_stop = false;
         this.layer_event.show();
     },
 
+    /**
+     * イベントレイヤの非表示と is_stop=true
+     */
     hideEventLayer: function () {
         // 安定化対応
         //
@@ -519,6 +524,17 @@ tyrano.plugin.kag.layer = {
         // * 強いストップが有効なときは外部から呼び出された nextOrder にすら反応しなくなる！
         this.kag.stat.is_stop = true;
         this.layer_event.hide();
+    },
+
+    /**
+     * フリーレイヤ内のすべてのボタンのイベントリスナを取り除いて
+     * ただの抜け殻にする
+     */
+    cancelAllFreeLayerButtonsEvents: function () {
+        const that = this;
+        const j_buttons = this.layer_free.find(".event-setting-element");
+        this.kag.event.removeEventElement(j_buttons);
+        j_buttons.off("click mouseenter mouseleave mousedown touchstart");
     },
 
     //backlayの逆 トランスの後に実施する
