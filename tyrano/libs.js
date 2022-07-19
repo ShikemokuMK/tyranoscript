@@ -1795,6 +1795,78 @@
     };
 
     /**
+     * 要素に直接指定されているスタイルの値を取得する
+     * なにも指定されていない場合は空の文字列が帰る
+     * ※ .css()とは違う。.css()は.getComputedStyle()がベースになっている。
+     * 　 .css()は、要素自体には何のスタイルも指定されていない場合でも、読み込まれているCSSを考慮して
+     * 　 最終的にどのようなスタイルが当たるのかを判断し、さらに長さのプロパティをpxに変換して返す仕様がある。
+     * ※ ここで定義している.getStyle()は単純に『この要素に直接』指定されているスタイルを返す。
+     * @param {string | string[]} prop
+     * @return {string}
+     */
+    $.fn.getStyle = function (prop) {
+        if (this[0]) {
+            if (typeof prop === "string") {
+                return this[0].style.getPropertyValue(prop);
+            } else {
+                const style_map = {};
+                prop.forEach((this_prop) => {
+                    style_map[this_prop] = this[0].style.getPropertyValue(this_prop);
+                });
+                return style_map;
+            }
+        }
+        return "";
+    };
+
+    /**
+     * 渡されたjQueryコレクション内のすべての要素について横幅を調査し、
+     * その調査で得られたもっとも大きい横幅をすべての要素のwidthプロパティにpx単位で適用する
+     * box-sizingも考慮する
+     * @returns {jQuery}
+     */
+    $.fn.alignMaxWidth = function () {
+        return this.alignMaxWidthOrHeight("width", "left", "right");
+    };
+    $.fn.alignMaxHeight = function () {
+        return this.alignMaxWidthOrHeight("height", "top", "bottom");
+    };
+    $.fn.alignMaxWidthOrHeight = function (_width, _left, _right) {
+        const len = this.length;
+        if (len === 0) {
+            return this;
+        }
+        let max_width = -1;
+        let j_max_elm;
+        this.each((i, elm) => {
+            const j_elm = $(elm);
+            // border-box にしておく → 横幅を統一的に解釈するため
+            // display: block にしておく → 表示状態でないと横幅が取得できないため
+            j_elm.setStyle("box-sizing", "border-box").show();
+            const computed_style = j_elm.css([
+                "box-sizing",
+                `padding-${_left}`,
+                `padding-${_right}`,
+                `border-${_left}-width`,
+                `border-${_right}-width`,
+            ]);
+            const padding_sum =
+                parseFloat(computed_style[`padding-${_left}`]) +
+                parseFloat(computed_style[`padding-${_right}`]) +
+                parseFloat(computed_style[`border-${_left}-width`]) +
+                parseFloat(computed_style[`border-${_right}-width`]);
+            const client_width = j_elm[_width]() + padding_sum;
+            if (client_width > max_width) {
+                max_width = client_width;
+                j_max_elm = j_elm;
+            }
+        });
+        const width = j_max_elm.getStyle("width");
+        this.setStyle(_width, `${max_width}px`);
+        return this;
+    };
+
+    /**
      * ティラノスクリプトの[kanim]に渡されたパラメータを用いて
      * 任意のDOM要素にWeb Animation APIによるキーフレームアニメーションを適用する
      * @param {Object} pm
@@ -1810,7 +1882,7 @@
             return this;
         }
         for (let i = 0; i < len; i++) {
-            this[i].animate(keyframes, {
+            const anim = this[i].animate(keyframes, {
                 delay: parseInt(pm.delay) || 0,
                 direction: pm.direction || "normal",
                 duration: parseInt(pm.time) || 1000,
@@ -1818,6 +1890,11 @@
                 iterations: pm.count === "infinite" ? Infinity : parseInt(pm.count) || Infinity,
                 fill: pm.mode || "forwards",
             });
+            anim.onfinish = () => {
+                if (pm.onend) {
+                    pm.onend(anim);
+                }
+            };
         }
         return this;
     };
