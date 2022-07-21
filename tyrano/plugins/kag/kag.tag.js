@@ -574,7 +574,7 @@ tyrano.plugin.kag.ftag = {
         }
 
         // ティラノイベント"tag:<tagName>"を発火
-        this.kag.trigger(`tag:${name}`, { target: pm, is_next_order: false, is_macro: false });
+        TYRANO.kag.trigger(`tag:${name}`, { target: pm, is_next_order: false, is_macro: false });
 
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
