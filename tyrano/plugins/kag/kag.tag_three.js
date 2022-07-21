@@ -1,66 +1,66 @@
 $.makeHash = function (num) {
-  // 生成する文字列の長さ
-  var l = num;
-  // 生成する文字列に含める文字セット
-  var c = "abcdefghijklmnopqrstuvwxyz0123456789";
-  var cl = c.length;
-  var r = "";
-  for (var i = 0; i < l; i++) {
-    r += c[Math.floor(Math.random() * cl)];
-  }
+    // 生成する文字列の長さ
+    var l = num;
+    // 生成する文字列に含める文字セット
+    var c = "abcdefghijklmnopqrstuvwxyz0123456789";
+    var cl = c.length;
+    var r = "";
+    for (var i = 0; i < l; i++) {
+        r += c[Math.floor(Math.random() * cl)];
+    }
 
-  return r;
+    return r;
 };
 
 $.three_pos = function (str) {
-  var obj = {};
-  arr_obj = str.split(",");
+    var obj = {};
+    arr_obj = str.split(",");
 
-  if (arr_obj.length == 1) {
-    obj.x = parseFloat(arr_obj[0]);
-    obj.y = parseFloat(arr_obj[0]);
-    obj.z = parseFloat(arr_obj[0]);
-  } else {
-    obj.x = parseFloat(arr_obj[0]);
-    obj.y = parseFloat(arr_obj[1]);
-    obj.z = parseFloat(arr_obj[2]);
-  }
+    if (arr_obj.length == 1) {
+        obj.x = parseFloat(arr_obj[0]);
+        obj.y = parseFloat(arr_obj[0]);
+        obj.z = parseFloat(arr_obj[0]);
+    } else {
+        obj.x = parseFloat(arr_obj[0]);
+        obj.y = parseFloat(arr_obj[1]);
+        obj.z = parseFloat(arr_obj[2]);
+    }
 
-  return obj;
+    return obj;
 };
 
 $.setVector = function (model) {
-  var vector = {};
+    var vector = {};
 
-  vector["pos"] = {
-    x: model.position.x,
-    y: model.position.y,
-    z: model.position.z,
-  };
-  vector["rot"] = {
-    x: model.rotation.x,
-    y: model.rotation.y,
-    z: model.rotation.z,
-  };
-  vector["scale"] = { x: model.scale.x, y: model.scale.y, z: model.scale.z };
+    vector["pos"] = {
+        x: model.position.x,
+        y: model.position.y,
+        z: model.position.z,
+    };
+    vector["rot"] = {
+        x: model.rotation.x,
+        y: model.rotation.y,
+        z: model.rotation.z,
+    };
+    vector["scale"] = { x: model.scale.x, y: model.scale.y, z: model.scale.z };
 
-  return vector;
+    return vector;
 };
 
 $.orgFloor = function (value, base) {
-  return Math.floor(value * base) / base;
+    return Math.floor(value * base) / base;
 };
 
 $.checkThreeModel = function (name) {
-  //console.log(name);
-  //console.log(TYRANO.kag.tmp.three.models);
+    //console.log(name);
+    //console.log(TYRANO.kag.tmp.three.models);
 
-  if (TYRANO.kag.tmp.three.models[name]) {
-    return true;
-  } else {
-    console.log("model「" + name + "」は未定義です。宣言してください。");
-    return false;
-  }
+    if (TYRANO.kag.tmp.three.models[name]) {
+        return true;
+    } else {
+        console.log("model「" + name + "」は未定義です。宣言してください。");
+        return false;
+    }
 };
 
 /*
@@ -70,26 +70,26 @@ $.getAngle = function(){
 let disp = 0;
 
 switch(window.orientation) {
-	case 0:
-	 disp += 0;
-	 break;
+case 0:
+disp += 0;
+break;
 
-	case -90:
-	 disp = 1;
-	 break;
+case -90:
+disp = 1;
+break;
 
-	case 90:
-	 disp = 2;
-	 break;
+case 90:
+disp = 2;
+break;
 
-	case 180:
-	 disp = 3;
-	 break;
+case 180:
+disp = 3;
+break;
 
 }
 
 return disp;
-	
+
 }
 */
 
@@ -125,895 +125,874 @@ debug_option=自分のいるポジション座標を画面に表示するか否�
 */
 
 tyrano.plugin.kag.tag["3d_init"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    layer: "0",
-    page: "fore",
-    camera: "Perspective",
-    near: "1",
-    far: "5000",
+    pm: {
+        layer: "0",
+        page: "fore",
+        camera: "Perspective",
+        near: "1",
+        far: "5000",
 
-    ambient_light: "1",
-    directional_light: "0",
+        ambient_light: "1",
+        directional_light: "0",
 
-    antialias: "true", //アンチエイリアスの有効、無効化。
+        antialias: "true", //アンチエイリアスの有効、無効化。
 
-    studio: "false", //"studio"が指定されている場合は、開発ツール用の動きをする
+        studio: "false", //"studio"が指定されている場合は、開発ツール用の動きをする
 
-    fps30: "false", //フレームレートを半分にする
-    stats: "false", // fpsステータスの表示設定
-    background: "true", //バックグラウンドでの動作
+        fps30: "false", //フレームレートを半分にする
+        stats: "false", // fpsステータスの表示設定
+        background: "true", //バックグラウンドでの動作
 
-    debug_pos: "true", // camera,xx,xx
+        debug_pos: "true", // camera,xx,xx
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  clock: {},
+    clock: {},
 
-  start: function (pm) {
-    var that = this;
+    start: function (pm) {
+        var that = this;
 
-    var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
+        var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
 
-    this.clock = new THREE.Clock();
+        this.clock = new THREE.Clock();
 
-    //すでにthreelayerが存在する場合は無視する
-    if ($(".three_canvas").length > 0) {
-      //２重登録
-      this.kag.ftag.nextOrder();
-      return;
-    }
+        //すでにthreelayerが存在する場合は無視する
+        if ($(".three_canvas").length > 0) {
+            //２重登録
+            this.kag.ftag.nextOrder();
+            return;
+        }
 
-    //3Dモデル用のシーンを挿入する。
-    var j_canvas = $("<canvas id='three' class='three_canvas'></canvas>");
+        //3Dモデル用のシーンを挿入する。
+        var j_canvas = $("<canvas id='three' class='three_canvas'></canvas>");
 
-    var sc_width = parseInt(this.kag.config.scWidth);
-    var sc_height = parseInt(this.kag.config.scHeight);
+        var sc_width = parseInt(this.kag.config.scWidth);
+        var sc_height = parseInt(this.kag.config.scHeight);
 
-    j_canvas.css({
-      position: "absolute",
-      width: sc_width,
-      height: sc_height,
-    });
+        j_canvas.css({
+            position: "absolute",
+            width: sc_width,
+            height: sc_height,
+        });
 
-    target_layer.append(j_canvas);
+        target_layer.append(j_canvas);
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas: document.querySelector("#three"),
-      alpha: true,
-      antialias: $.toBoolean(pm.antialias),
-      preserveDrawingBuffer: true,
-    });
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector("#three"),
+            alpha: true,
+            antialias: $.toBoolean(pm.antialias),
+            preserveDrawingBuffer: true,
+        });
 
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(sc_width, sc_height);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(sc_width, sc_height);
 
-    // シーンを作成
-    const scene = new THREE.Scene();
+        // シーンを作成
+        const scene = new THREE.Scene();
 
-    //カメラの種類
-    const camera_mode = pm.camera + "Camera";
+        //カメラの種類
+        const camera_mode = pm.camera + "Camera";
 
-    // カメラを作成 Perspective or Orthographic
-    const camera = new THREE[camera_mode](
-      45,
-      sc_width / sc_height,
-      parseFloat(pm.near),
-      parseFloat(pm.far)
-    );
+        // カメラを作成 Perspective or Orthographic
+        const camera = new THREE[camera_mode](45, sc_width / sc_height, parseFloat(pm.near), parseFloat(pm.far));
 
-    camera.rotation.order = "YXZ";
+        camera.rotation.order = "YXZ";
 
-    camera.position.set(0, 0, +1000);
+        camera.position.set(0, 0, +1000);
 
-    this.kag.tmp.three.models["camera"] = new ThreeModel(
-      { name: "camera", model: camera, mixer: null, gltf: null, pm: pm },
-      three
-    );
+        this.kag.tmp.three.models["camera"] = new ThreeModel({ name: "camera", model: camera, mixer: null, gltf: null, pm: pm }, three);
 
-    //ray の調整
-    // camera に Raycaster を作成して下方向に ray を向ける
-    var ray = new THREE.Raycaster(camera.position, new THREE.Vector3(0, -1, 0));
-    this.kag.tmp.three.ray = ray;
+        //ray の調整
+        // camera に Raycaster を作成して下方向に ray を向ける
+        var ray = new THREE.Raycaster(camera.position, new THREE.Vector3(0, -1, 0));
+        this.kag.tmp.three.ray = ray;
 
-    //アウトライン設定用
-    /*
-	const composer = new THREE.EffectComposer(renderer);
-	const renderPass = new THREE.RenderPass( scene, camera );
-	composer.addPass(renderPass);
-	const outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
-	
-	outlinePass.edgeStrength = Number(5);
-	outlinePass.visibleEdgeColor.set("#FFFF00");
-	
-	composer.addPass(outlinePass);
-	outlinePass.selectedObjects = [];
-	*/
-    ////////
+        //アウトライン設定用
+        /*
+const composer = new THREE.EffectComposer(renderer);
+const renderPass = new THREE.RenderPass( scene, camera );
+composer.addPass(renderPass);
+const outlinePass = new THREE.OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
 
-    //指定のレイヤは表示状態に移行。
-    target_layer.show();
+outlinePass.edgeStrength = Number(5);
+outlinePass.visibleEdgeColor.set("#FFFF00");
 
-    //環境光
-    const light_amb = new THREE.AmbientLight(
-      0xffffff,
-      parseFloat(pm.ambient_light)
-    );
-    scene.add(light_amb);
+composer.addPass(outlinePass);
+outlinePass.selectedObjects = [];
+*/
+        ////////
 
-    //並行方向からの光
-    //const light = new THREE.DirectionalLight(0xffffff, parseFloat(pm.directional_light));
-    //scene.add(light);
+        //指定のレイヤは表示状態に移行。
+        target_layer.show();
 
-    //オーディオリスナー
-    const listener = new THREE.AudioListener();
-    camera.add(listener);
+        //環境光
+        const light_amb = new THREE.AmbientLight(0xffffff, parseFloat(pm.ambient_light));
+        scene.add(light_amb);
 
-    if (pm.studio == "true") {
-      this.kag.tmp.three.stat.fps.is_fps_studio = true;
-    }
+        //並行方向からの光
+        //const light = new THREE.DirectionalLight(0xffffff, parseFloat(pm.directional_light));
+        //scene.add(light);
 
-    //デバッグ周り
-    if (pm.debug_pos == "true") {
-      let j_btn_get_pos = $(
-        '<input class="btn_get_pos" type="button" value="カメラポジション" />'
-      );
-      j_btn_get_pos.on("click", (e) => {
+        //オーディオリスナー
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+
+        if (pm.studio == "true") {
+            this.kag.tmp.three.stat.fps.is_fps_studio = true;
+        }
+
+        //デバッグ周り
+        if (pm.debug_pos == "true") {
+            let j_btn_get_pos = $('<input class="btn_get_pos" type="button" value="カメラポジション" />');
+            j_btn_get_pos.on("click", (e) => {
+                var three = this.kag.tmp.three;
+                var camera = three.camera;
+
+                let str =
+                    "position:" +
+                    camera.position.x +
+                    "," +
+                    camera.position.y +
+                    "," +
+                    camera.position.z +
+                    "/rotation:" +
+                    camera.rotation.x +
+                    "," +
+                    camera.rotation.y +
+                    "," +
+                    camera.rotation.z;
+
+                alert(str);
+            });
+
+            $("#debug_studio_area").append(j_btn_get_pos);
+        }
+
+        this.kag.tmp.three.stat.is_load = true;
+        this.kag.tmp.three.stat.canvas_show = true;
+        this.kag.tmp.three.stat.init_pm = pm;
+
+        this.kag.tmp.three.camera = camera;
+        this.kag.tmp.three.scene = scene;
+        this.kag.tmp.three.renderer = renderer;
+        this.kag.tmp.three.light_amb = light_amb;
+
+        /*
+this.kag.tmp.three.composer = composer;
+this.kag.tmp.three.outlinePass = outlinePass;
+*/
+
+        this.kag.tmp.three.audio_listener = listener;
+
+        this.kag.tmp.three.groups = {};
+        this.kag.tmp.three.groups["default"] = [];
+
+        this.kag.tmp.three.target_layer = target_layer;
+        this.kag.tmp.three.j_canvas = j_canvas;
+
         var three = this.kag.tmp.three;
+
+        var t = Math.random();
+
+        let cnt_frame = false;
+        let fps30 = false;
+        let fps_stats = false;
+
+        if (pm.fps30 == "true") {
+            fps30 = true;
+        }
+
+        if (pm.stats == "true") {
+            var stats = new Stats();
+            stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+            document.body.appendChild(stats.dom);
+            three.stats = stats;
+            fps_stats = true;
+        }
+
+        tick();
+
+        //毎フレーム時に実行されるループイベントです
+        function tick() {
+            if (three.stat.animation_loop == false) {
+                return;
+            }
+
+            if (fps30 == true) {
+                if (cnt_frame == true) {
+                    cnt_frame = false;
+                    var req_id = requestAnimationFrame(tick);
+                    return;
+                }
+
+                cnt_frame = true;
+            }
+
+            if (fps_stats == true) {
+                three.stats.begin();
+            }
+
+            if (three.orbit_controls) {
+                three.orbit_controls.update();
+            }
+
+            that.updateFrame();
+
+            renderer.render(scene, camera); // レンダリング
+
+            //composer.render();
+
+            if (fps_stats == true) {
+                three.stats.end();
+            }
+
+            var req_id = requestAnimationFrame(tick);
+
+            if (three.stat.is_load == false) {
+                window.cancelAnimationFrame(req_id);
+            }
+        }
+
+        if (pm.background == "false") {
+            //バックグランドに移動したときの動き
+            window.addEventListener(
+                "focus",
+                () => {
+                    three.stat.animation_loop = false;
+
+                    setTimeout(() => {
+                        three.stat.animation_loop = true;
+                        requestAnimationFrame(tick);
+                    }, 100);
+                },
+                false,
+            );
+
+            window.addEventListener(
+                "blur",
+                () => {
+                    three.stat.animation_loop = false;
+                },
+                false,
+            );
+
+            window.addEventListener("visibilitychange", () => {
+                if (document.visibilityState == "hidden") {
+                    three.stat.animation_loop = false;
+                } else {
+                    three.stat.animation_loop = true;
+
+                    requestAnimationFrame(tick);
+                }
+            });
+        }
+
+        //イベント検知用の処理
+        this.initEvent(this.kag.tmp.three);
+
+        if (pm.next == "true") {
+            this.kag.ftag.nextOrder();
+        }
+    },
+
+    initEvent: function (three) {
+        var that = this;
+
+        var renderer = three.renderer;
+        var target_layer = three.target_layer;
+        var j_canvas = three.j_canvas;
         var camera = three.camera;
+        var scene = three.scene;
 
-        let str =
-          "position:" +
-          camera.position.x +
-          "," +
-          camera.position.y +
-          "," +
-          camera.position.z +
-          "/rotation:" +
-          camera.rotation.x +
-          "," +
-          camera.rotation.y +
-          "," +
-          camera.rotation.z;
-
-        alert(str);
-      });
-
-      $("#debug_studio_area").append(j_btn_get_pos);
-    }
-
-    this.kag.tmp.three.stat.is_load = true;
-    this.kag.tmp.three.stat.canvas_show = true;
-    this.kag.tmp.three.stat.init_pm = pm;
-
-    this.kag.tmp.three.camera = camera;
-    this.kag.tmp.three.scene = scene;
-    this.kag.tmp.three.renderer = renderer;
-    this.kag.tmp.three.light_amb = light_amb;
-
-    /*
-	this.kag.tmp.three.composer = composer;
-	this.kag.tmp.three.outlinePass = outlinePass;
-	*/
-
-    this.kag.tmp.three.audio_listener = listener;
-
-    this.kag.tmp.three.groups = {};
-    this.kag.tmp.three.groups["default"] = [];
-
-    this.kag.tmp.three.target_layer = target_layer;
-    this.kag.tmp.three.j_canvas = j_canvas;
-
-    var three = this.kag.tmp.three;
-
-    var t = Math.random();
-
-    let cnt_frame = false;
-    let fps30 = false;
-    let fps_stats = false;
-
-    if (pm.fps30 == "true") {
-      fps30 = true;
-    }
-
-    if (pm.stats == "true") {
-      var stats = new Stats();
-      stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-      document.body.appendChild(stats.dom);
-      three.stats = stats;
-      fps_stats = true;
-    }
-
-    tick();
-
-    //毎フレーム時に実行されるループイベントです
-    function tick() {
-      if (three.stat.animation_loop == false) {
-        return;
-      }
-
-      if (fps30 == true) {
-        if (cnt_frame == true) {
-          cnt_frame = false;
-          var req_id = requestAnimationFrame(tick);
-          return;
-        }
-
-        cnt_frame = true;
-      }
-
-      if (fps_stats == true) {
-        three.stats.begin();
-      }
-
-      if (three.orbit_controls) {
-        three.orbit_controls.update();
-      }
-
-      that.updateFrame();
-
-      renderer.render(scene, camera); // レンダリング
-
-      //composer.render();
-
-      if (fps_stats == true) {
-        three.stats.end();
-      }
-
-      var req_id = requestAnimationFrame(tick);
-
-      if (three.stat.is_load == false) {
-        window.cancelAnimationFrame(req_id);
-      }
-    }
-
-    if (pm.background == "false") {
-      //バックグランドに移動したときの動き
-      window.addEventListener(
-        "focus",
-        () => {
-          three.stat.animation_loop = false;
-
-          setTimeout(() => {
-            three.stat.animation_loop = true;
-            requestAnimationFrame(tick);
-          }, 100);
-        },
-        false
-      );
-
-      window.addEventListener(
-        "blur",
-        () => {
-          three.stat.animation_loop = false;
-        },
-        false
-      );
-
-      window.addEventListener("visibilitychange", () => {
-        if (document.visibilityState == "hidden") {
-          three.stat.animation_loop = false;
-        } else {
-          three.stat.animation_loop = true;
-
-          requestAnimationFrame(tick);
-        }
-      });
-    }
-
-    //イベント検知用の処理
-    this.initEvent(this.kag.tmp.three);
-
-    if (pm.next == "true") {
-      this.kag.ftag.nextOrder();
-    }
-  },
-
-  initEvent: function (three) {
-    var that = this;
-
-    var renderer = three.renderer;
-    var target_layer = three.target_layer;
-    var j_canvas = three.j_canvas;
-    var camera = three.camera;
-    var scene = three.scene;
-
-    //カーソルが重なったときの判定
-    j_canvas.on("mousemove", function (event, data) {
-      if (typeof data != "undefined") {
-        event = data;
-      }
-
-      var x = event.clientX;
-      var y = event.clientY;
-
-      // マウスクリック位置を正規化
-      var mouse = new THREE.Vector2();
-      mouse.x = (x / window.innerWidth) * 2 - 1;
-      mouse.y = -(y / window.innerHeight) * 2 + 1;
-
-      // Raycasterインスタンス作成
-      var raycaster = new THREE.Raycaster();
-
-      // 取得したX、Y座標でrayの位置を更新
-      raycaster.setFromCamera(mouse, camera);
-
-      // オブジェクトの取得
-      var intersects = raycaster.intersectObjects(scene.children, true);
-      var name = "";
-
-      var distance = -1;
-
-      if (intersects.length > 0) {
-        for (key in intersects) {
-          if (typeof intersects[key].object.userData["name"] != "undefined") {
-            name = intersects[key].object.userData["name"];
-            distance = intersects[key].distance;
-            break;
-          }
-        }
-
-        if (that.kag.stat.is_strong_stop == true) {
-          if (three.evt[name]) {
-            if (three.stat.start_event == false) {
-              return;
+        //カーソルが重なったときの判定
+        j_canvas.on("mousemove", function (event, data) {
+            if (typeof data != "undefined") {
+                event = data;
             }
 
-            //床が定義されていて、今いる場所がその上の場合、発動する
-            //console.log(three.evt[name]);
-            if (three.evt[name]["ground"] != "") {
-              //console.log(three.stat.fps.ground);
+            var x = event.clientX;
+            var y = event.clientY;
 
-              if (three.evt[name]["ground"] != three.stat.fps.ground) {
-                return;
-              }
+            // マウスクリック位置を正規化
+            var mouse = new THREE.Vector2();
+            mouse.x = (x / window.innerWidth) * 2 - 1;
+            mouse.y = -(y / window.innerHeight) * 2 + 1;
+
+            // Raycasterインスタンス作成
+            var raycaster = new THREE.Raycaster();
+
+            // 取得したX、Y座標でrayの位置を更新
+            raycaster.setFromCamera(mouse, camera);
+
+            // オブジェクトの取得
+            var intersects = raycaster.intersectObjects(scene.children, true);
+            var name = "";
+
+            var distance = -1;
+
+            if (intersects.length > 0) {
+                for (key in intersects) {
+                    if (typeof intersects[key].object.userData["name"] != "undefined") {
+                        name = intersects[key].object.userData["name"];
+                        distance = intersects[key].distance;
+                        break;
+                    }
+                }
+
+                if (that.kag.stat.is_strong_stop == true) {
+                    if (three.evt[name]) {
+                        if (three.stat.start_event == false) {
+                            return;
+                        }
+
+                        //床が定義されていて、今いる場所がその上の場合、発動する
+                        //console.log(three.evt[name]);
+                        if (three.evt[name]["ground"] != "") {
+                            //console.log(three.stat.fps.ground);
+
+                            if (three.evt[name]["ground"] != three.stat.fps.ground) {
+                                return;
+                            }
+                        }
+
+                        let mode = three.evt[name]["mode"];
+                        if (mode != "click") {
+                            return;
+                        }
+
+                        //距離が指定されている場合
+                        if (three.evt[name]["distance"] != "") {
+                            let pm_distance = parseFloat(three.evt[name]["distance"]);
+
+                            if (pm_distance < distance) {
+                                return;
+                            }
+                        }
+
+                        //カーソルを変更する。
+                        $("body").css("cursor", "pointer");
+
+                        return;
+                    }
+                } else {
+                    //console.log("none");
+                }
+
+                $("body").css("cursor", "default");
+            }
+        });
+
+        j_canvas.on("click", function (event, data) {
+            console.log("click");
+
+            if (typeof data != "undefined") {
+                event = data;
             }
 
-            let mode = three.evt[name]["mode"];
-            if (mode != "click") {
-              return;
+            var x = event.clientX;
+            var y = event.clientY;
+
+            // マウスクリック位置を正規化
+            var mouse = new THREE.Vector2();
+            mouse.x = (x / window.innerWidth) * 2 - 1;
+            mouse.y = -(y / window.innerHeight) * 2 + 1;
+
+            // Raycasterインスタンス作成
+            var raycaster = new THREE.Raycaster();
+
+            // 取得したX、Y座標でrayの位置を更新
+            raycaster.setFromCamera(mouse, camera);
+
+            // オブジェクトの取得
+            var intersects = raycaster.intersectObjects(scene.children, true);
+            var name = "";
+
+            var distance = -1;
+
+            console.log(intersects);
+
+            if (intersects.length > 0) {
+                for (key in intersects) {
+                    if (typeof intersects[key].object.userData["name"] != "undefined") {
+                        name = intersects[key].object.userData["name"];
+                        distance = intersects[key].distance;
+                        break;
+                    }
+                }
+
+                //カメラを選択できるぞ。
+                /*
+if (name == "") {
+if ($(".area_three_debug_object").get(0)) {
+TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
+}
+return;
+}
+*/
+
+                if (three.stat.fps.is_fps_studio == true) {
+                    //カメラを移動させたあとの場合は、反応させない
+                    if (three.stat.start_event == false) {
+                        return;
+                    }
+
+                    if (name == "") {
+                        return;
+                    }
+
+                    console.log("select!");
+                    console.log(name);
+
+                    //nameが選択されたことを上位階層に通知
+                    var model_obj = that.kag.tmp.three.models[name];
+
+                    //選択されないオブジェクトの場合はリターンする
+                    if (typeof model_obj.pm["_selectable"] != "undefined") {
+                        if (model_obj.pm["_selectable"] == "false") {
+                            /*
+if ($(".area_three_debug_object").get(0)) {
+TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
+}
+*/
+
+                            return;
+                        }
+                    }
+
+                    TYRANO.kag.studio.selectObject(name, model_obj);
+
+                    return;
+                }
+
+                if (that.kag.stat.is_strong_stop == true) {
+                    if (three.evt[name]) {
+                        if (three.stat.start_event == false) {
+                            return;
+                        }
+
+                        //床が定義されていて、今いる場所がその上の場合、発動する
+                        //console.log(three.evt[name]);
+                        if (three.evt[name]["ground"] != "") {
+                            //console.log(three.stat.fps.ground);
+
+                            if (three.evt[name]["ground"] != three.stat.fps.ground) {
+                                return;
+                            }
+                        }
+
+                        let mode = three.evt[name]["mode"];
+                        if (mode != "click") {
+                            return;
+                        }
+
+                        //距離が指定されている場合
+                        if (three.evt[name]["distance"] != "") {
+                            let pm_distance = parseFloat(three.evt[name]["distance"]);
+
+                            if (pm_distance < distance) {
+                                return;
+                            }
+                        }
+
+                        let type = three.evt[name]["type"];
+
+                        if (type == "jump") {
+                            that.kag.layer.showEventLayer();
+                            that.kag.ftag.startTag("jump", three.evt[name]);
+                            return;
+                        } else if (type == "eval") {
+                            eval(three.evt[name]["exp"]);
+                            return;
+                        }
+                    }
+                } else {
+                    //console.log("none");
+                }
             }
 
-            //距離が指定されている場合
-            if (three.evt[name]["distance"] != "") {
-              let pm_distance = parseFloat(three.evt[name]["distance"]);
-
-              if (pm_distance < distance) {
-                return;
-              }
+            //オブジェクトがデバッグ中で、何もないところが選択されたら
+            //カメラの移動に切り替える
+            //デバッグ中かつ、
+            if (name == "" || intersects.length == 0) {
+                if ($(".area_three_debug_object").get(0)) {
+                    TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
+                }
             }
+        });
+    },
 
-            //カーソルを変更する。
-            $("body").css("cursor", "pointer");
+    checkJoyStick: function (fps) {
+        let joy = fps.joy;
 
+        if (typeof window.app == "undefined" || typeof joy == "undefined") {
             return;
-          }
+        }
+
+        let dir = joy.GetDir();
+
+        if (dir == "N" || dir == "NE" || dir == "NW") {
+            fps.moveForward = true;
+            app.startWalk();
         } else {
-          //console.log("none");
+            fps.moveForward = false;
         }
 
-        $("body").css("cursor", "default");
-      }
-    });
-
-    j_canvas.on("click", function (event, data) {
-      console.log("click");
-
-      if (typeof data != "undefined") {
-        event = data;
-      }
-
-      var x = event.clientX;
-      var y = event.clientY;
-
-      // マウスクリック位置を正規化
-      var mouse = new THREE.Vector2();
-      mouse.x = (x / window.innerWidth) * 2 - 1;
-      mouse.y = -(y / window.innerHeight) * 2 + 1;
-
-      // Raycasterインスタンス作成
-      var raycaster = new THREE.Raycaster();
-
-      // 取得したX、Y座標でrayの位置を更新
-      raycaster.setFromCamera(mouse, camera);
-
-      // オブジェクトの取得
-      var intersects = raycaster.intersectObjects(scene.children, true);
-      var name = "";
-
-      var distance = -1;
-
-      console.log(intersects);
-
-      if (intersects.length > 0) {
-        for (key in intersects) {
-          if (typeof intersects[key].object.userData["name"] != "undefined") {
-            name = intersects[key].object.userData["name"];
-            distance = intersects[key].distance;
-            break;
-          }
-        }
-
-        //カメラを選択できるぞ。
-        /*
-			if (name == "") {
-				if ($(".area_three_debug_object").get(0)) {
-					TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
-				}
-				return;
-			}
-			*/
-
-        if (three.stat.fps.is_fps_studio == true) {
-          //カメラを移動させたあとの場合は、反応させない
-          if (three.stat.start_event == false) {
-            return;
-          }
-
-          if (name == "") {
-            return;
-          }
-
-          console.log("select!");
-          console.log(name);
-
-          //nameが選択されたことを上位階層に通知
-          var model_obj = that.kag.tmp.three.models[name];
-
-          //選択されないオブジェクトの場合はリターンする
-          if (typeof model_obj.pm["_selectable"] != "undefined") {
-            if (model_obj.pm["_selectable"] == "false") {
-              /*
-						if ($(".area_three_debug_object").get(0)) {
-							TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
-						}
-						*/
-
-              return;
-            }
-          }
-
-          TYRANO.kag.studio.selectObject(name, model_obj);
-
-          return;
-        }
-
-        if (that.kag.stat.is_strong_stop == true) {
-          if (three.evt[name]) {
-            if (three.stat.start_event == false) {
-              return;
-            }
-
-            //床が定義されていて、今いる場所がその上の場合、発動する
-            //console.log(three.evt[name]);
-            if (three.evt[name]["ground"] != "") {
-              //console.log(three.stat.fps.ground);
-
-              if (three.evt[name]["ground"] != three.stat.fps.ground) {
-                return;
-              }
-            }
-
-            let mode = three.evt[name]["mode"];
-            if (mode != "click") {
-              return;
-            }
-
-            //距離が指定されている場合
-            if (three.evt[name]["distance"] != "") {
-              let pm_distance = parseFloat(three.evt[name]["distance"]);
-
-              if (pm_distance < distance) {
-                return;
-              }
-            }
-
-            let type = three.evt[name]["type"];
-
-            if (type == "jump") {
-              that.kag.layer.showEventLayer();
-              that.kag.ftag.startTag("jump", three.evt[name]);
-              return;
-            } else if (type == "eval") {
-              eval(three.evt[name]["exp"]);
-              return;
-            }
-          }
+        if (dir == "S" || dir == "SE" || dir == "SW") {
+            fps.moveBackward = true;
         } else {
-          //console.log("none");
+            fps.moveBackward = false;
         }
-      }
 
-      //オブジェクトがデバッグ中で、何もないところが選択されたら
-      //カメラの移動に切り替える
-      //デバッグ中かつ、
-      if (name == "" || intersects.length == 0) {
-        if ($(".area_three_debug_object").get(0)) {
-          TYRANO.kag.studio.selectCamera(
-            "camera",
-            that.kag.tmp.three.models["camera"]
-          );
+        if (dir == "NW" || dir == "W" || dir == "SW") {
+            fps.rotateLeft = true;
+        } else {
+            fps.rotateLeft = false;
         }
-      }
-    });
-  },
 
-  checkJoyStick: function (fps) {
-    let joy = fps.joy;
-
-    if (typeof window.app == "undefined" || typeof joy == "undefined") {
-      return;
-    }
-
-    let dir = joy.GetDir();
-
-    if (dir == "N" || dir == "NE" || dir == "NW") {
-      fps.moveForward = true;
-      app.startWalk();
-    } else {
-      fps.moveForward = false;
-    }
-
-    if (dir == "S" || dir == "SE" || dir == "SW") {
-      fps.moveBackward = true;
-    } else {
-      fps.moveBackward = false;
-    }
-
-    if (dir == "NW" || dir == "W" || dir == "SW") {
-      fps.rotateLeft = true;
-    } else {
-      fps.rotateLeft = false;
-    }
-
-    if (dir == "NE" || dir == "E" || dir == "SE") {
-      fps.rotateRight = true;
-    } else {
-      fps.rotateRight = false;
-    }
-
-    if (
-      fps.moveForward ||
-      fps.moveBackward ||
-      fps.rotateLeft ||
-      fps.rotateRight
-    ) {
-      app.startWalk();
-    } else {
-      app.stopWalk();
-    }
-  },
-
-  updateFrame: function () {
-    var three = this.kag.tmp.three;
-    let fps = three.stat.fps;
-    let that = this;
-
-    if (fps.isJoy) {
-      this.checkJoyStick(fps);
-    }
-
-    //対応が必要なフレーム処理をここで実施する。
-
-    var camera = three.camera;
-    var models = three.models;
-
-    var delta = this.clock.getDelta();
-
-    for (key in models) {
-      if (models[key].mixer) {
-        models[key].update(delta);
-      }
-    }
-
-    //フレームアップデートのタイミングでジャイロ反映
-    if (three.stat.gyro.mode == 1) {
-      camera.rotation.x = three.stat.gyro.x;
-      camera.rotation.y = three.stat.gyro.y;
-    } else if (three.stat.gyro.mode == 2) {
-      camera.position.x = three.stat.gyro.x;
-      camera.position.y = three.stat.gyro.y;
-    }
-
-    var actualMoveSpeed = delta * fps.movementSpeed;
-    var actualRotateSpeed = delta * fps.rotateSpeed;
-
-    //0.03 回転速度
-    var speed_rot = 0.03;
-
-    //FPSの動作設定
-    if (fps.active == true) {
-      var _camera = camera;
-      var _hitMargin = 0.5;
-      var _hitteHeightOfset = 0;
-      var _frontMoveEnabled = true;
-      var _backMoveEnabled = true;
-      var _leftMoveEnabled = true;
-      var _rightMoveEnabled = true;
-
-      var _stop_move = false;
-
-      /*
-		var hitter = new THREE.Vector3(_camera.position.x, _camera.position.y + 10, _camera.position.z);
-		
-		var vector = new THREE.Vector3( 0, 0, - 1 );
-		vector.applyQuaternion(camera.quaternion);
-		*/
-
-      var collision_event_name = "";
-
-      var dir_zf = new THREE.Vector3(0, 0, 1);
-      var ray_zf = new THREE.Raycaster();
-      ray_zf.setFromCamera(dir_zf, camera);
-
-      /*
-		var ray_zf = new THREE.Raycaster(hitter, dir_zf);
-		
-		console.log("wwwwwwwwwww");
-		console.log(three.groups);
-		ray_zf.setFromCamera( mouse, camera );
-		
-		*/
-
-      var objs_zf = ray_zf.intersectObjects(three.groups["default"], true);
-
-      //console.log(objs_zf);
-
-      if (objs_zf.length > 0) {
-        //console.log("F:",objs_zf[0].object.userData.name);
-        if (objs_zf[0].distance < 10 + actualMoveSpeed * 3) {
-          //stop();
-          console.log("zf");
-          camera.position.z += 1;
-
-          _stop_move = true;
-
-          //let angle = vector.angleTo(objs_zf[0].object.position);
-
-          //前方判定でぶつかったとき
-          //if(angle < 1 ){
-
-          collision_event_name = objs_zf[0].object.name;
-
-          //さらに後ろに下げる。
-          //camera.position.z +=15;
-
-          //}
+        if (dir == "NE" || dir == "E" || dir == "SE") {
+            fps.rotateRight = true;
+        } else {
+            fps.rotateRight = false;
         }
-      }
 
-      // 後方向アタリ判定
-      var dir_zb = new THREE.Vector3(0, 0, 1);
-      dir_zb.applyQuaternion(camera.quaternion);
-
-      var ray_zb = new THREE.Raycaster(camera.position, dir_zb);
-      var objs_zb = ray_zb.intersectObjects(three.groups["default"], true);
-
-      if (objs_zb.length > 0) {
-        //console.log("B:",objs_zb[0]);
-        if (objs_zb[0].distance < 10 + actualMoveSpeed * 3) {
-          console.log("zb");
-          console.log(objs_zb[0]);
-
-          //stop();
-          camera.position.z -= 1;
-          _stop_move = true;
-
-          //let angle = vector.angleTo(objs_zb[0].object.position);
-          //前方判定でぶつかったとき
-          //if(angle < 1 ){
-
-          collision_event_name = objs_zb[0].object.name;
-
-          /*
-					console.log(objs_zb[0].object.name);
-					console.log(camera.rotation.y);
-					*/
-          //}
+        if (fps.moveForward || fps.moveBackward || fps.rotateLeft || fps.rotateRight) {
+            app.startWalk();
+        } else {
+            app.stopWalk();
         }
-      }
+    },
 
-      // 左方向アタリ判定
-      var dir_xl = new THREE.Vector3(-1, 0, 0);
+    updateFrame: function () {
+        var three = this.kag.tmp.three;
+        let fps = three.stat.fps;
+        let that = this;
 
-      //var ray_xl = new THREE.Raycaster(hitter, dir_xl);
-
-      var ray_xl = new THREE.Raycaster();
-      ray_xl.setFromCamera(dir_xl, camera);
-
-      var objs_xl = ray_xl.intersectObjects(three.groups["default"], true);
-
-      if (objs_xl.length > 0) {
-        //console.log("L:",objs_xl[0].distance);
-        if (objs_xl[0].distance < 10 + actualMoveSpeed * 3) {
-          console.log("xl");
-
-          camera.position.x += 1;
-          _stop_move = true;
-
-          //let angle = vector.angleTo(objs_xl[0].object.position);
-          //if(angle < 1 ){
-
-          collision_event_name = objs_xl[0].object.name;
-
-          //}
+        if (fps.isJoy) {
+            this.checkJoyStick(fps);
         }
-      }
 
-      // 右方向アタリ判定
-      var dir_xr = new THREE.Vector3(1, 0, 0);
+        //対応が必要なフレーム処理をここで実施する。
 
-      //var ray_xr = new THREE.Raycaster(hitter, dir_xr);
+        var camera = three.camera;
+        var models = three.models;
 
-      var ray_xr = new THREE.Raycaster();
-      ray_xr.setFromCamera(dir_xr, camera);
+        var delta = this.clock.getDelta();
 
-      var objs_xr = ray_xr.intersectObjects(three.groups["default"], true);
-
-      if (objs_xr.length > 0) {
-        //console.log("R:",objs_xr[0].distance);
-        if (objs_xr[0].distance < 10 + actualMoveSpeed * 3) {
-          console.log("xr");
-
-          camera.position.x -= 1;
-          _stop_move = true;
-
-          var vector = new THREE.Vector3(0, 0, -1);
-          vector.applyQuaternion(camera.quaternion);
-          let angle = vector.angleTo(objs_xr[0].object.position);
-
-          //前方判定でぶつかったとき
-          //if(angle < 1 ){
-
-          collision_event_name = objs_xr[0].object.name;
-
-          //}
-        }
-      }
-
-      //コリジョンイベント判定
-      if (collision_event_name != "") {
-        if (three.evt[collision_event_name]) {
-          let evt_pm = three.evt[collision_event_name];
-
-          if (evt_pm["mode"] == "collision") {
-            let type = evt_pm["type"];
-
-            //前に進んでるときだけ反応させる。
-            if (fps.moveForward == true) {
-              //後ろへの移動幅を大きめに。コリジョンのときは
-              camera.position.z += 10;
-
-              if (type == "jump") {
-                that.kag.layer.showEventLayer();
-                that.kag.ftag.startTag("jump", evt_pm);
-                return;
-              } else if (type == "eval") {
-                eval(evt_pm["exp"]);
-                return;
-              }
+        for (key in models) {
+            if (models[key].mixer) {
+                models[key].update(delta);
             }
-          }
-        }
-      }
-
-      if (_stop_move == true) {
-        fps.tmpMoveBuffer = 0;
-
-        camera.position.x = fps.memory_pos.x;
-        camera.position.y = fps.memory_pos.y;
-        camera.position.z = fps.memory_pos.z;
-
-        return;
-      } else {
-        fps.memory_pos.x = camera.position.x;
-        fps.memory_pos.y = camera.position.y;
-        fps.memory_pos.z = camera.position.z;
-      }
-
-      var ray = new THREE.Raycaster();
-      ray.setFromCamera(new THREE.Vector3(0, 0, 0), camera);
-      const intersects = ray.intersectObjects(three.groups["default"], true);
-
-      if (intersects.length > 0) {
-        var name = intersects[0].object.userData["name"];
-
-        var dist = intersects[0].distance;
-
-        /*
-				// 例）衝突対象オブジェクトとの距離が 0 になった場合
-				if( dist <= 6 )
-				{
-					
-					//移動処理しない。
-					if(fps.moveForward){
-						camera.translateZ( +10 );
-				}else if(fps.moveBackward){
-					camera.translateZ( -10 );
-				}
-				
-				fps.offMoveBufferF=false;
-				fps.offMoveBufferB=false;
-				
-					console.log(dist);
-					
-					return true;
-				}
-				*/
-      }
-
-      //下向け
-      /*
-		var ray2 = new THREE.Raycaster(camera.position, new THREE.Vector3(0, -1, 0));
-		const intersects2 = ray2.intersectObjects(three.groups["default"],true);
-		*/
-
-      var ray2 = new THREE.Raycaster();
-      ray2.setFromCamera(new THREE.Vector3(0, -1, 0), camera);
-
-      const intersects2 = ray2.intersectObjects(three.groups["default"], true);
-
-      if (intersects2.length > 0) {
-        var name = intersects2[0].object.userData["name"];
-
-        //特定オブジェクトの上にいないと、発火させない処理。
-        fps.ground = name;
-      }
-
-      if (fps.moveForward || fps.moveBackward) {
-      } else {
-        fps.offMoveBufferF = false;
-        fps.offMoveBufferB = false;
-      }
-
-      if (fps.rotateLeft || fps.rotateRight) {
-      } else {
-        fps.offRotateBufferL = false;
-        fps.offRotateBufferR = false;
-      }
-
-      if (fps.rotateLeft || fps.offRotateBufferL) {
-        if (fps.moveForward) {
-          camera.translateX(-1.5);
-          actualMoveSpeed = actualMoveSpeed / 1.6;
-        } else if (fps.moveBackward) {
-          camera.translateX(-1.5);
-          actualMoveSpeed = actualMoveSpeed / 1.6;
-        } else {
-          camera.translateX(-1.5);
         }
 
-        //camera.rotation.y += actualRotateSpeed;
-      }
-
-      if (fps.rotateRight || fps.offRotateBufferR) {
-        if (fps.moveForward) {
-          camera.translateX(+1.5);
-          actualMoveSpeed = actualMoveSpeed / 1.6;
-        } else if (fps.moveBackward) {
-          camera.translateX(+1.5);
-          actualMoveSpeed = actualMoveSpeed / 1.6;
-        } else {
-          camera.translateX(+1.5);
+        //フレームアップデートのタイミングでジャイロ反映
+        if (three.stat.gyro.mode == 1) {
+            camera.rotation.x = three.stat.gyro.x;
+            camera.rotation.y = three.stat.gyro.y;
+        } else if (three.stat.gyro.mode == 2) {
+            camera.position.x = three.stat.gyro.x;
+            camera.position.y = three.stat.gyro.y;
         }
 
-        //camera.rotation.y -= actualRotateSpeed;
-      }
+        var actualMoveSpeed = delta * fps.movementSpeed;
+        var actualRotateSpeed = delta * fps.rotateSpeed;
 
-      if (fps.moveForward || fps.offMoveBufferF) {
-        camera.translateZ(-actualMoveSpeed);
-      }
+        //0.03 回転速度
+        var speed_rot = 0.03;
 
-      if (fps.moveBackward || fps.offMoveBufferB) {
-        camera.translateZ(actualMoveSpeed);
-      }
+        //FPSの動作設定
+        if (fps.active == true) {
+            var _camera = camera;
+            var _hitMargin = 0.5;
+            var _hitteHeightOfset = 0;
+            var _frontMoveEnabled = true;
+            var _backMoveEnabled = true;
+            var _leftMoveEnabled = true;
+            var _rightMoveEnabled = true;
 
-      //視点の高さ。固定
-      camera.position.y = fps.camera_pos_y;
-    }
-  },
+            var _stop_move = false;
+
+            /*
+var hitter = new THREE.Vector3(_camera.position.x, _camera.position.y + 10, _camera.position.z);
+
+var vector = new THREE.Vector3( 0, 0, - 1 );
+vector.applyQuaternion(camera.quaternion);
+*/
+
+            var collision_event_name = "";
+
+            var dir_zf = new THREE.Vector3(0, 0, 1);
+            var ray_zf = new THREE.Raycaster();
+            ray_zf.setFromCamera(dir_zf, camera);
+
+            /*
+var ray_zf = new THREE.Raycaster(hitter, dir_zf);
+
+console.log("wwwwwwwwwww");
+console.log(three.groups);
+ray_zf.setFromCamera( mouse, camera );
+
+*/
+
+            var objs_zf = ray_zf.intersectObjects(three.groups["default"], true);
+
+            //console.log(objs_zf);
+
+            if (objs_zf.length > 0) {
+                //console.log("F:",objs_zf[0].object.userData.name);
+                if (objs_zf[0].distance < 10 + actualMoveSpeed * 3) {
+                    //stop();
+                    console.log("zf");
+                    camera.position.z += 1;
+
+                    _stop_move = true;
+
+                    //let angle = vector.angleTo(objs_zf[0].object.position);
+
+                    //前方判定でぶつかったとき
+                    //if(angle < 1 ){
+
+                    collision_event_name = objs_zf[0].object.name;
+
+                    //さらに後ろに下げる。
+                    //camera.position.z +=15;
+
+                    //}
+                }
+            }
+
+            // 後方向アタリ判定
+            var dir_zb = new THREE.Vector3(0, 0, 1);
+            dir_zb.applyQuaternion(camera.quaternion);
+
+            var ray_zb = new THREE.Raycaster(camera.position, dir_zb);
+            var objs_zb = ray_zb.intersectObjects(three.groups["default"], true);
+
+            if (objs_zb.length > 0) {
+                //console.log("B:",objs_zb[0]);
+                if (objs_zb[0].distance < 10 + actualMoveSpeed * 3) {
+                    console.log("zb");
+                    console.log(objs_zb[0]);
+
+                    //stop();
+                    camera.position.z -= 1;
+                    _stop_move = true;
+
+                    //let angle = vector.angleTo(objs_zb[0].object.position);
+                    //前方判定でぶつかったとき
+                    //if(angle < 1 ){
+
+                    collision_event_name = objs_zb[0].object.name;
+
+                    /*
+console.log(objs_zb[0].object.name);
+console.log(camera.rotation.y);
+*/
+                    //}
+                }
+            }
+
+            // 左方向アタリ判定
+            var dir_xl = new THREE.Vector3(-1, 0, 0);
+
+            //var ray_xl = new THREE.Raycaster(hitter, dir_xl);
+
+            var ray_xl = new THREE.Raycaster();
+            ray_xl.setFromCamera(dir_xl, camera);
+
+            var objs_xl = ray_xl.intersectObjects(three.groups["default"], true);
+
+            if (objs_xl.length > 0) {
+                //console.log("L:",objs_xl[0].distance);
+                if (objs_xl[0].distance < 10 + actualMoveSpeed * 3) {
+                    console.log("xl");
+
+                    camera.position.x += 1;
+                    _stop_move = true;
+
+                    //let angle = vector.angleTo(objs_xl[0].object.position);
+                    //if(angle < 1 ){
+
+                    collision_event_name = objs_xl[0].object.name;
+
+                    //}
+                }
+            }
+
+            // 右方向アタリ判定
+            var dir_xr = new THREE.Vector3(1, 0, 0);
+
+            //var ray_xr = new THREE.Raycaster(hitter, dir_xr);
+
+            var ray_xr = new THREE.Raycaster();
+            ray_xr.setFromCamera(dir_xr, camera);
+
+            var objs_xr = ray_xr.intersectObjects(three.groups["default"], true);
+
+            if (objs_xr.length > 0) {
+                //console.log("R:",objs_xr[0].distance);
+                if (objs_xr[0].distance < 10 + actualMoveSpeed * 3) {
+                    console.log("xr");
+
+                    camera.position.x -= 1;
+                    _stop_move = true;
+
+                    var vector = new THREE.Vector3(0, 0, -1);
+                    vector.applyQuaternion(camera.quaternion);
+                    let angle = vector.angleTo(objs_xr[0].object.position);
+
+                    //前方判定でぶつかったとき
+                    //if(angle < 1 ){
+
+                    collision_event_name = objs_xr[0].object.name;
+
+                    //}
+                }
+            }
+
+            //コリジョンイベント判定
+            if (collision_event_name != "") {
+                if (three.evt[collision_event_name]) {
+                    let evt_pm = three.evt[collision_event_name];
+
+                    if (evt_pm["mode"] == "collision") {
+                        let type = evt_pm["type"];
+
+                        //前に進んでるときだけ反応させる。
+                        if (fps.moveForward == true) {
+                            //後ろへの移動幅を大きめに。コリジョンのときは
+                            camera.position.z += 10;
+
+                            if (type == "jump") {
+                                that.kag.layer.showEventLayer();
+                                that.kag.ftag.startTag("jump", evt_pm);
+                                return;
+                            } else if (type == "eval") {
+                                eval(evt_pm["exp"]);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (_stop_move == true) {
+                fps.tmpMoveBuffer = 0;
+
+                camera.position.x = fps.memory_pos.x;
+                camera.position.y = fps.memory_pos.y;
+                camera.position.z = fps.memory_pos.z;
+
+                return;
+            } else {
+                fps.memory_pos.x = camera.position.x;
+                fps.memory_pos.y = camera.position.y;
+                fps.memory_pos.z = camera.position.z;
+            }
+
+            var ray = new THREE.Raycaster();
+            ray.setFromCamera(new THREE.Vector3(0, 0, 0), camera);
+            const intersects = ray.intersectObjects(three.groups["default"], true);
+
+            if (intersects.length > 0) {
+                var name = intersects[0].object.userData["name"];
+
+                var dist = intersects[0].distance;
+
+                /*
+// 例）衝突対象オブジェクトとの距離が 0 になった場合
+if( dist <= 6 )
+{
+
+//移動処理しない。
+if(fps.moveForward){
+camera.translateZ( +10 );
+}else if(fps.moveBackward){
+camera.translateZ( -10 );
+}
+
+fps.offMoveBufferF=false;
+fps.offMoveBufferB=false;
+
+console.log(dist);
+
+return true;
+}
+*/
+            }
+
+            //下向け
+            /*
+var ray2 = new THREE.Raycaster(camera.position, new THREE.Vector3(0, -1, 0));
+const intersects2 = ray2.intersectObjects(three.groups["default"],true);
+*/
+
+            var ray2 = new THREE.Raycaster();
+            ray2.setFromCamera(new THREE.Vector3(0, -1, 0), camera);
+
+            const intersects2 = ray2.intersectObjects(three.groups["default"], true);
+
+            if (intersects2.length > 0) {
+                var name = intersects2[0].object.userData["name"];
+
+                //特定オブジェクトの上にいないと、発火させない処理。
+                fps.ground = name;
+            }
+
+            if (fps.moveForward || fps.moveBackward) {
+            } else {
+                fps.offMoveBufferF = false;
+                fps.offMoveBufferB = false;
+            }
+
+            if (fps.rotateLeft || fps.rotateRight) {
+            } else {
+                fps.offRotateBufferL = false;
+                fps.offRotateBufferR = false;
+            }
+
+            if (fps.rotateLeft || fps.offRotateBufferL) {
+                if (fps.moveForward) {
+                    camera.translateX(-1.5);
+                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                } else if (fps.moveBackward) {
+                    camera.translateX(-1.5);
+                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                } else {
+                    camera.translateX(-1.5);
+                }
+
+                //camera.rotation.y += actualRotateSpeed;
+            }
+
+            if (fps.rotateRight || fps.offRotateBufferR) {
+                if (fps.moveForward) {
+                    camera.translateX(+1.5);
+                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                } else if (fps.moveBackward) {
+                    camera.translateX(+1.5);
+                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                } else {
+                    camera.translateX(+1.5);
+                }
+
+                //camera.rotation.y -= actualRotateSpeed;
+            }
+
+            if (fps.moveForward || fps.offMoveBufferF) {
+                camera.translateZ(-actualMoveSpeed);
+            }
+
+            if (fps.moveBackward || fps.offMoveBufferB) {
+                camera.translateZ(actualMoveSpeed);
+            }
+
+            //視点の高さ。固定
+            camera.position.y = fps.camera_pos_y;
+        }
+    },
 };
 
 /*
@@ -1037,7 +1016,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
 
 :param
 name=3Dオブジェクトの名前です。この名前をつかって表示・非表示などの制御を行います。,
-storage=3Dファイルを指定します。gltf obj 形式に対応します。ファイルはothers/3d/modelフォルダに配置してください。,
+storage=3Dファイルを指定します。gltf obj json 形式に対応します。ファイルはothers/3d/modelフォルダに配置してください。,
 pos=3Dオブジェクトを配置する座標を指定します。半角のカンマで区切ってxyz座標を表します。 ,
 rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
 scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
@@ -1052,142 +1031,196 @@ folder=ファイルの配置フォルダを変更できます。
 */
 
 tyrano.plugin.kag.tag["3d_model_new"] = {
-  vital: ["name", "storage"],
+    vital: ["name", "storage"],
 
-  pm: {
-    name: "",
-    storage: "",
+    pm: {
+        name: "",
+        storage: "",
 
-    pos: "0",
-    rot: "0",
-    scale: "100",
-    tonemap: "true",
-    motion: "",
-    next: "true",
-    folder: "",
-  },
+        pos: "0",
+        rot: "0",
+        scale: "100",
+        tonemap: "true",
+        motion: "",
+        next: "true",
+        folder: "",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    var folder = "";
+        var folder = "";
 
-    if (pm.folder != "") {
-      folder = pm.folder;
-    } else {
-      folder = "others/3d/model";
-    }
-
-    var ext = $.getExt(pm.storage);
-
-    if (ext == "gltf" || ext == "glb") {
-      var storage_url = "./data/" + folder + "/" + pm.storage;
-
-      var loader = new THREE.GLTFLoader();
-      loader.load(storage_url, (data) => {
-        var gltf = data;
-        var model = gltf.scene;
-
-        let pos = $.three_pos(pm.pos);
-        let scale = $.three_pos(pm.scale);
-        let rot = $.three_pos(pm.rot);
-
-        //モデルのサイズ。
-        model.position.set(pos.x, pos.y, pos.z);
-        model.scale.set(scale.x, scale.y, scale.z);
-        model.rotation.set(rot.x, rot.y, rot.z);
-
-        const animations = gltf.animations;
-        let mixer = new THREE.AnimationMixer(model);
-
-        if (animations.length > 0) {
-          let anim = animations[0];
-
-          //モーションが指定されている場合はそれを再生する
-          if (pm.motion != "") {
-            for (var i = 0; i < animations.length; i++) {
-              var name = animations[i].name;
-
-              if (name == pm.motion) {
-                anim = animations[i];
-                break;
-              }
-            }
-          }
-
-          const anime = mixer.clipAction(anim);
-          anime.play();
+        if (pm.folder != "") {
+            folder = pm.folder;
         } else {
-          mixer = undefined;
+            folder = "others/3d/model";
         }
 
-        this.kag.tmp.three.models[pm.name] = new ThreeModel(
-          { name: pm.name, model: model, mixer: mixer, gltf: gltf, pm: pm },
-          three
-        );
+        var ext = $.getExt(pm.storage);
 
-        if (pm.tonemap == "true") {
-          this.kag.tmp.three.models[pm.name].setToneMaped(true);
+        if (ext == "gltf" || ext == "glb") {
+            var storage_url = "./data/" + folder + "/" + pm.storage;
+
+            var loader = new THREE.GLTFLoader();
+            loader.load(storage_url, (data) => {
+                var gltf = data;
+                var model = gltf.scene;
+
+                let pos = $.three_pos(pm.pos);
+                let scale = $.three_pos(pm.scale);
+                let rot = $.three_pos(pm.rot);
+
+                //モデルのサイズ。
+                model.position.set(pos.x, pos.y, pos.z);
+                model.scale.set(scale.x, scale.y, scale.z);
+                model.rotation.set(rot.x, rot.y, rot.z);
+
+                const animations = gltf.animations;
+                let mixer = new THREE.AnimationMixer(model);
+
+                if (animations.length > 0) {
+                    let anim = animations[0];
+
+                    //モーションが指定されている場合はそれを再生する
+                    if (pm.motion != "") {
+                        for (var i = 0; i < animations.length; i++) {
+                            var name = animations[i].name;
+
+                            if (name == pm.motion) {
+                                anim = animations[i];
+                                break;
+                            }
+                        }
+                    }
+
+                    const anime = mixer.clipAction(anim);
+                    anime.play();
+                } else {
+                    mixer = undefined;
+                }
+
+                this.kag.tmp.three.models[pm.name] = new ThreeModel(
+                    { name: pm.name, model: model, mixer: mixer, gltf: gltf, pm: pm },
+                    three,
+                );
+
+                if (pm.tonemap == "true") {
+                    this.kag.tmp.three.models[pm.name].setToneMaped(true);
+                } else {
+                    this.kag.tmp.three.models[pm.name].setToneMaped(false);
+                }
+
+                if (pm.next == "true") {
+                    this.kag.ftag.nextOrder();
+                }
+            });
+        } else if (ext == "obj") {
+            var obj_url = "./data/" + folder + "/" + pm.storage;
+            var mtl_file = obj_url.replace(".obj", ".mtl");
+            var mtl_url = mtl_file;
+
+            var mtlLoader = new THREE.MTLLoader();
+            mtlLoader.load(mtl_url, (materials) => {
+                materials.preload();
+                var objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+
+                materials.toneMaped = false;
+
+                objLoader.load(
+                    obj_url,
+                    (obj) => {
+                        var model = obj;
+                        let pos = $.three_pos(pm.pos);
+                        let scale = $.three_pos(pm.scale);
+                        let rot = $.three_pos(pm.rot);
+
+                        //モデルのサイズ。
+                        model.position.set(pos.x, pos.y, pos.z);
+                        model.scale.set(scale.x, scale.y, scale.z);
+                        model.rotation.set(rot.x, rot.y, rot.z);
+
+                        //three.scene.add(model);
+                        this.kag.tmp.three.models[pm.name] = new ThreeModel({ name: pm.name, model: model, pm: pm }, three);
+
+                        if (pm.tonemap == "true") {
+                            this.kag.tmp.three.models[pm.name].setToneMaped(true);
+                        } else {
+                            this.kag.tmp.three.models[pm.name].setToneMaped(false);
+                        }
+
+                        if (pm.next == "true") {
+                            this.kag.ftag.nextOrder();
+                        }
+                    } /*, onProgress, onError */,
+                );
+            });
+        } else if (ext == "json") {
+            var obj_url = "./data/" + folder + "/" + pm.storage;
+            var objLoader = new THREE.ObjectLoader();
+
+            $.loadText(obj_url, (json) => {
+                console.log("json======");
+                console.log(json);
+
+                //ユーザーデータの取得これをつかって、ティラノ系のイベントを操作できないかしら。
+                const materials = json.materials;
+                for (let i = 0; i < materials.length; i++) {
+                    console.log(materials[i].userData);
+                }
+
+                objLoader.parse(
+                    json,
+
+                    (obj) => {
+                        console.log("wwwwwwwwwwwww");
+                        console.log(obj);
+
+                        var model = obj;
+                        let pos = $.three_pos(pm.pos);
+                        let scale = $.three_pos(pm.scale);
+                        let rot = $.three_pos(pm.rot);
+
+                        //モデルのサイズ。
+                        model.position.set(pos.x, pos.y, pos.z);
+                        model.scale.set(scale.x, scale.y, scale.z);
+                        model.rotation.set(rot.x, rot.y, rot.z);
+
+                        //three.scene.add(model);
+                        this.kag.tmp.three.models[pm.name] = new ThreeModel({ name: pm.name, model: model, pm: pm }, three);
+
+                        /*
+                    if (pm.tonemap == "true") {
+                    this.kag.tmp.three.models[pm.name].setToneMaped(true);
+                    } else {
+                    this.kag.tmp.three.models[pm.name].setToneMaped(false);
+                    }
+                    */
+
+                        if (pm.next == "true") {
+                            this.kag.ftag.nextOrder();
+                        }
+                    },
+
+                    // onProgress callback
+                    (xhr) => {
+                        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+                    },
+
+                    // onError callback
+                    (err) => {
+                        console.error("An error happened");
+                    },
+                );
+            });
         } else {
-          this.kag.tmp.three.models[pm.name].setToneMaped(false);
+            alert("エラー：" + ext + "はサポートしていないファイル形式です");
         }
 
-        if (pm.next == "true") {
-          this.kag.ftag.nextOrder();
-        }
-      });
-    } else if (ext == "obj") {
-      var obj_url = "./data/" + folder + "/" + pm.storage;
-      var mtl_file = obj_url.replace(".obj", ".mtl");
-      var mtl_url = mtl_file;
-
-      var mtlLoader = new THREE.MTLLoader();
-      mtlLoader.load(mtl_url, (materials) => {
-        materials.preload();
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials(materials);
-
-        materials.toneMaped = false;
-
-        objLoader.load(
-          obj_url,
-          (obj) => {
-            var model = obj;
-            let pos = $.three_pos(pm.pos);
-            let scale = $.three_pos(pm.scale);
-            let rot = $.three_pos(pm.rot);
-
-            //モデルのサイズ。
-            model.position.set(pos.x, pos.y, pos.z);
-            model.scale.set(scale.x, scale.y, scale.z);
-            model.rotation.set(rot.x, rot.y, rot.z);
-
-            //three.scene.add(model);
-            this.kag.tmp.three.models[pm.name] = new ThreeModel(
-              { name: pm.name, model: model, pm: pm },
-              three
-            );
-
-            if (pm.tonemap == "true") {
-              this.kag.tmp.three.models[pm.name].setToneMaped(true);
-            } else {
-              this.kag.tmp.three.models[pm.name].setToneMaped(false);
-            }
-
-            if (pm.next == "true") {
-              this.kag.ftag.nextOrder();
-            }
-          } /*, onProgress, onError */
-        );
-      });
-    } else if (ext == "mmd") {
-    } else {
-      alert("エラー：" + ext + "はサポートしていないファイル形式です");
-    }
-
-    //読み込んだシーンが暗いので、明るくする
-    //three.render.gammaOutput = true;
-  },
+        //読み込んだシーンが暗いので、明るくする
+        //three.render.gammaOutput = true;
+    },
 };
 
 /*
@@ -1229,36 +1262,36 @@ tonemap=トーンマッピングが有効な場合、このオブジェクトが
 */
 
 tyrano.plugin.kag.tag["3d_sphere_new"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
+    pm: {
+        name: "",
 
-    type: "SphereGeometry",
+        type: "SphereGeometry",
 
-    texture: "",
-    color: "0x00ff00",
+        texture: "",
+        color: "0x00ff00",
 
-    radius: "300",
-    width: "30",
-    height: "30",
+        radius: "300",
+        width: "30",
+        height: "30",
 
-    side: "front",
+        side: "front",
 
-    scale: "1",
-    pos: "0",
-    rot: "0",
+        scale: "1",
+        pos: "0",
+        rot: "0",
 
-    folder: "",
-  },
+        folder: "",
+    },
 
-  start: function (pm) {
-    pm.arg1 = pm.radius;
-    pm.arg2 = pm.width;
-    pm.arg3 = pm.height;
+    start: function (pm) {
+        pm.arg1 = pm.radius;
+        pm.arg2 = pm.width;
+        pm.arg3 = pm.height;
 
-    this.kag.ftag.startTag("obj_model_new", pm);
-  },
+        this.kag.ftag.startTag("obj_model_new", pm);
+    },
 };
 
 /*
@@ -1294,109 +1327,102 @@ folder=ファイルの配置フォルダを変更できます。
 
 //スプライトを配置する
 tyrano.plugin.kag.tag["3d_sprite_new"] = {
-  vital: ["name", "storage"],
+    vital: ["name", "storage"],
 
-  pm: {
-    name: "",
-    storage: "",
+    pm: {
+        name: "",
+        storage: "",
 
-    scale: "",
-    pos: "0",
-    rot: "0",
-    tonemap: "false",
-    next: "true",
+        scale: "",
+        pos: "0",
+        rot: "0",
+        tonemap: "false",
+        next: "true",
 
-    folder: "",
-  },
+        folder: "",
+    },
 
-  start: function (pm) {
-    var folder = "";
+    start: function (pm) {
+        var folder = "";
 
-    if (pm.folder != "") {
-      folder = pm.folder;
-    } else {
-      folder = "others/3d/sprite";
-    }
-
-    var storage_url = "";
-
-    if ($.isHTTP(pm.storage)) {
-      storage_url = pm.storage;
-    } else {
-      storage_url = "./data/" + folder + "/" + pm.storage;
-    }
-
-    // マテリアルを作成する
-    const material = new THREE.SpriteMaterial({
-      map: new THREE.TextureLoader().load(storage_url),
-      alphaTest: 0.5,
-      transparent: true,
-    });
-
-    if (pm.tonemap == "true") {
-      material.toneMapped = true;
-    } else {
-      material.toneMapped = false;
-    }
-
-    var model = new THREE.Sprite(material);
-
-    $("<img />")
-      .attr("src", storage_url)
-      .on("load", (e) => {
-        var width = $(e.currentTarget).get(0).width;
-        var height = $(e.currentTarget).get(0).height;
-
-        let pos = $.three_pos(pm.pos);
-        let rot = $.three_pos(pm.rot);
-
-        model.position.set(pos.x, pos.y, pos.z);
-        model.rotation.set(rot.x, rot.y, rot.z);
-
-        if (pm.scale == "") {
-          model.scale.set(parseInt(width) * 1, parseInt(height) * 1, 1);
+        if (pm.folder != "") {
+            folder = pm.folder;
         } else {
-          let scale = $.three_pos(pm.scale);
-
-          model.scale.set(scale.x, scale.y, scale.z);
-
-          //ロードからの呼び出しの場合はこちら。
-
-          if (pm._load) {
-            model.scale.set(scale.x, scale.y, scale.z);
-          } else {
-            model.scale.set(
-              parseInt(width) * scale.x,
-              parseInt(height) * scale.y,
-              1
-            );
-          }
+            folder = "others/3d/sprite";
         }
 
-        var three = this.kag.tmp.three;
-        var scene = three.scene;
+        var storage_url = "";
 
-        this.kag.tmp.three.models[pm.name] = new ThreeModel(
-          { name: pm.name, model: model, pm: pm },
-          three
-        );
-
-        if (pm.next == "true") {
-          this.kag.ftag.nextOrder();
+        if ($.isHTTP(pm.storage)) {
+            storage_url = pm.storage;
+        } else {
+            storage_url = "./data/" + folder + "/" + pm.storage;
         }
 
-        if (typeof pm.callback == "function") {
-          pm.callback();
+        // マテリアルを作成する
+        const material = new THREE.SpriteMaterial({
+            map: new THREE.TextureLoader().load(storage_url),
+            alphaTest: 0.5,
+            transparent: true,
+        });
+
+        if (pm.tonemap == "true") {
+            material.toneMapped = true;
+        } else {
+            material.toneMapped = false;
         }
-      })
-      .on("error", (e) => {
-        console.log(e);
-        if (pm.next == "true") {
-          this.kag.ftag.nextOrder();
-        }
-        return false;
-      });
-  },
+
+        var model = new THREE.Sprite(material);
+
+        $("<img />")
+            .attr("src", storage_url)
+            .on("load", (e) => {
+                var width = $(e.currentTarget).get(0).width;
+                var height = $(e.currentTarget).get(0).height;
+
+                let pos = $.three_pos(pm.pos);
+                let rot = $.three_pos(pm.rot);
+
+                model.position.set(pos.x, pos.y, pos.z);
+                model.rotation.set(rot.x, rot.y, rot.z);
+
+                if (pm.scale == "") {
+                    model.scale.set(parseInt(width) * 1, parseInt(height) * 1, 1);
+                } else {
+                    let scale = $.three_pos(pm.scale);
+
+                    model.scale.set(scale.x, scale.y, scale.z);
+
+                    //ロードからの呼び出しの場合はこちら。
+
+                    if (pm._load) {
+                        model.scale.set(scale.x, scale.y, scale.z);
+                    } else {
+                        model.scale.set(parseInt(width) * scale.x, parseInt(height) * scale.y, 1);
+                    }
+                }
+
+                var three = this.kag.tmp.three;
+                var scene = three.scene;
+
+                this.kag.tmp.three.models[pm.name] = new ThreeModel({ name: pm.name, model: model, pm: pm }, three);
+
+                if (pm.next == "true") {
+                    this.kag.ftag.nextOrder();
+                }
+
+                if (typeof pm.callback == "function") {
+                    pm.callback();
+                }
+            })
+            .on("error", (e) => {
+                console.log(e);
+                if (pm.next == "true") {
+                    this.kag.ftag.nextOrder();
+                }
+                return false;
+            });
+    },
 };
 
 /*
@@ -1456,29 +1482,29 @@ mode=click or collision を指定します。fpsの場合にクリックで発�
 */
 
 tyrano.plugin.kag.tag["3d_event"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    type: "jump", //eval →jsの実行。
-    exp: "",
-    storage: "",
-    target: "",
+    pm: {
+        name: "",
+        type: "jump", //eval →jsの実行。
+        exp: "",
+        storage: "",
+        target: "",
 
-    distance: "",
-    ground: "", //fpsのときに、この
+        distance: "",
+        ground: "", //fpsのときに、この
 
-    mode: "click", //click or collision とか fpsの場合は衝突の時のイベント
-  },
+        mode: "click", //click or collision とか fpsの場合は衝突の時のイベント
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    three.stat.start_event = true;
-    three.evt[pm.name] = pm;
+        three.stat.start_event = true;
+        three.evt[pm.name] = pm;
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -1513,19 +1539,19 @@ name=3Dオブジェクトの名前です。イベントを削除する3Dオブ�
 */
 
 tyrano.plugin.kag.tag["3d_event_delete"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-  },
+    pm: {
+        name: "",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    delete three.evt[pm.name];
+        delete three.evt[pm.name];
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -1551,15 +1577,15 @@ tyrano.plugin.kag.tag["3d_event_delete"] = {
 */
 
 tyrano.plugin.kag.tag["3d_event_start"] = {
-  vital: [],
+    vital: [],
 
-  pm: {},
+    pm: {},
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    three.stat.start_event = true;
-    this.kag.ftag.nextOrder();
-  },
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        three.stat.start_event = true;
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -1586,15 +1612,15 @@ tyrano.plugin.kag.tag["3d_event_start"] = {
 
 //イベントを停止する
 tyrano.plugin.kag.tag["3d_event_stop"] = {
-  vital: [],
+    vital: [],
 
-  pm: {},
+    pm: {},
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    three.stat.start_event = false;
-    this.kag.ftag.nextOrder();
-  },
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        three.stat.start_event = false;
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -1639,34 +1665,34 @@ tonemap=トーンマッピングが有効な場合、このオブジェクトが
 */
 
 tyrano.plugin.kag.tag["3d_box_new"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
+    pm: {
+        name: "",
 
-    type: "BoxGeometry",
+        type: "BoxGeometry",
 
-    texture: "", // ,でくくると６面体それぞれにテクスチャを貼ることができる。
-    color: "0x00ff00",
+        texture: "", // ,でくくると６面体それぞれにテクスチャを貼ることができる。
+        color: "0x00ff00",
 
-    width: "1",
-    height: "1",
-    depth: "1",
+        width: "1",
+        height: "1",
+        depth: "1",
 
-    scale: "1",
-    pos: "0",
-    rot: "0",
+        scale: "1",
+        pos: "0",
+        rot: "0",
 
-    folder: "",
-  },
+        folder: "",
+    },
 
-  start: function (pm) {
-    pm.arg1 = pm.width;
-    pm.arg2 = pm.height;
-    pm.arg3 = pm.depth;
+    start: function (pm) {
+        pm.arg1 = pm.width;
+        pm.arg2 = pm.height;
+        pm.arg3 = pm.depth;
 
-    this.kag.ftag.startTag("obj_model_new", pm);
-  },
+        this.kag.ftag.startTag("obj_model_new", pm);
+    },
 };
 
 /*
@@ -1706,688 +1732,665 @@ tonemap=トーンマッピングが有効な場合、このオブジェクトが
 
 //球体をつくる
 tyrano.plugin.kag.tag["3d_image_new"] = {
-  vital: ["name", "width"],
+    vital: ["name", "width"],
 
-  pm: {
-    name: "",
+    pm: {
+        name: "",
 
-    type: "PlaneGeometry",
+        type: "PlaneGeometry",
 
-    texture: "",
-    texture_repeat: "",
+        texture: "",
+        texture_repeat: "",
 
-    width: "",
-    height: "",
+        width: "",
+        height: "",
 
-    width_vertical: "", //イメージが縦長の場合に採用する横幅
+        width_vertical: "", //イメージが縦長の場合に採用する横幅
 
-    width_seg: "1",
-    height_seg: "1",
+        width_seg: "1",
+        height_seg: "1",
 
-    scale: "1",
-    pos: "0",
-    rot: "0",
+        scale: "1",
+        pos: "0",
+        rot: "0",
 
-    doubleside: "false",
-    tonemap: "false",
-  },
+        doubleside: "false",
+        tonemap: "false",
+    },
 
-  start: function (pm) {
-    //heightが省略されている場合は画像のサイズから数値を決める
-    if (pm.height == "") {
-      var texture_url = "";
+    start: function (pm) {
+        //heightが省略されている場合は画像のサイズから数値を決める
+        if (pm.height == "") {
+            var texture_url = "";
 
-      if ($.isHTTP(pm.texture)) {
-        texture_url = pm.texture;
-      } else {
-        texture_url = "./data/others/3d/texture/" + pm.texture;
-      }
-
-      $("<img />")
-        .attr("src", texture_url)
-        .on("load", (e) => {
-          var width = $(e.currentTarget).get(0).width;
-          var height = $(e.currentTarget).get(0).height;
-
-          var tmp = height / width;
-
-          //縦長の画像の場合は、もう一つの横幅を採用できる
-          if (parseInt(width) < parseInt(height)) {
-            if (pm.width_vertical != "") {
-              pm.width = pm.width_vertical;
+            if ($.isHTTP(pm.texture)) {
+                texture_url = pm.texture;
+            } else {
+                texture_url = "./data/others/3d/texture/" + pm.texture;
             }
-          }
 
-          pm.height = parseInt(parseInt(pm.width) * tmp);
+            $("<img />")
+                .attr("src", texture_url)
+                .on("load", (e) => {
+                    var width = $(e.currentTarget).get(0).width;
+                    var height = $(e.currentTarget).get(0).height;
 
-          pm.arg1 = pm.width;
-          pm.arg2 = pm.height;
-          pm.arg3 = pm.width_seg;
-          pm.arg4 = pm.height_seg;
+                    var tmp = height / width;
 
-          this.kag.ftag.startTag("obj_model_new", pm);
-        })
-        .on("error", (e) => {
-          console.log(e);
-          this.kag.ftag.nextOrder();
-          return false;
-        });
-    } else {
-      pm.arg1 = pm.width;
-      pm.arg2 = pm.height;
-      pm.arg3 = pm.width_seg;
-      pm.arg4 = pm.height_seg;
+                    //縦長の画像の場合は、もう一つの横幅を採用できる
+                    if (parseInt(width) < parseInt(height)) {
+                        if (pm.width_vertical != "") {
+                            pm.width = pm.width_vertical;
+                        }
+                    }
 
-      this.kag.ftag.startTag("obj_model_new", pm);
-    }
-  },
+                    pm.height = parseInt(parseInt(pm.width) * tmp);
+
+                    pm.arg1 = pm.width;
+                    pm.arg2 = pm.height;
+                    pm.arg3 = pm.width_seg;
+                    pm.arg4 = pm.height_seg;
+
+                    this.kag.ftag.startTag("obj_model_new", pm);
+                })
+                .on("error", (e) => {
+                    console.log(e);
+                    this.kag.ftag.nextOrder();
+                    return false;
+                });
+        } else {
+            pm.arg1 = pm.width;
+            pm.arg2 = pm.height;
+            pm.arg3 = pm.width_seg;
+            pm.arg4 = pm.height_seg;
+
+            this.kag.ftag.startTag("obj_model_new", pm);
+        }
+    },
 };
 
 //基本図形 直接タグで実行することはない。
 tyrano.plugin.kag.tag["obj_model_new"] = {
-  vital: ["name", "type"],
+    vital: ["name", "type"],
 
-  pm: {
-    name: "",
-    type: "",
+    pm: {
+        name: "",
+        type: "",
 
-    texture: "",
-    texture_repeat: "",
+        texture: "",
+        texture_repeat: "",
 
-    color: "",
+        color: "",
 
-    arg1: 1,
-    arg2: 1,
-    arg3: 1,
-    arg4: 1,
+        arg1: 1,
+        arg2: 1,
+        arg3: 1,
+        arg4: 1,
 
-    update: "false",
+        update: "false",
 
-    scale: "", //100,100,100 //みたいな感じで指定できる。
-    pos: "", // 100,40,50
-    rot: "",
+        scale: "", //100,100,100 //みたいな感じで指定できる。
+        pos: "", // 100,40,50
+        rot: "",
 
-    side: "",
-    doubleside: "false",
-    tonemap: "true",
+        side: "",
+        doubleside: "false",
+        tonemap: "true",
 
-    motion: "",
+        motion: "",
 
-    opacity: "",
+        opacity: "",
 
-    folder: "",
+        folder: "",
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var scene = three.scene;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
 
-    //var storage_url = "./data/" + folder + "/" + pm.storage;
+        //var storage_url = "./data/" + folder + "/" + pm.storage;
 
-    if (pm.arg1 == 0) pm.arg1 = 1;
-    if (pm.arg2 == 0) pm.arg2 = 1;
-    if (pm.arg3 == 0) pm.arg3 = 1;
-    if (pm.arg4 == 0) pm.arg4 = 1;
+        if (pm.arg1 == 0) pm.arg1 = 1;
+        if (pm.arg2 == 0) pm.arg2 = 1;
+        if (pm.arg3 == 0) pm.arg3 = 1;
+        if (pm.arg4 == 0) pm.arg4 = 1;
 
-    const geometry = new THREE[pm.type](
-      parseFloat(pm.arg1),
-      parseFloat(pm.arg2),
-      parseFloat(pm.arg3),
-      parseFloat(pm.arg4)
-    );
+        const geometry = new THREE[pm.type](parseFloat(pm.arg1), parseFloat(pm.arg2), parseFloat(pm.arg3), parseFloat(pm.arg4));
 
-    // 画像を読み込む
-    let material;
+        // 画像を読み込む
+        let material;
 
-    if (pm.texture != "") {
-      //boxで配列の場合は別処理になる
-      if (pm.type == "BoxGeometry" && pm.texture.split(",").length > 1) {
-        var arr_texture = pm.texture.split(",");
-        var arr_material = [];
-        const loader = new THREE.TextureLoader();
+        if (pm.texture != "") {
+            //boxで配列の場合は別処理になる
+            if (pm.type == "BoxGeometry" && pm.texture.split(",").length > 1) {
+                var arr_texture = pm.texture.split(",");
+                var arr_material = [];
+                const loader = new THREE.TextureLoader();
 
-        for (let i = 0; i < arr_texture.length; i++) {
-          if (arr_texture[i] == "") {
-            arr_texture[i] = "_system/green.png";
-          }
+                for (let i = 0; i < arr_texture.length; i++) {
+                    if (arr_texture[i] == "") {
+                        arr_texture[i] = "_system/green.png";
+                    }
 
-          var texture_url = "";
-          if ($.isHTTP(pm.texture)) {
-            texture_url = pm.texture;
-          } else {
-            texture_url = "./data/others/3d/texture/" + arr_texture[i];
-          }
+                    var texture_url = "";
+                    if ($.isHTTP(pm.texture)) {
+                        texture_url = pm.texture;
+                    } else {
+                        texture_url = "./data/others/3d/texture/" + arr_texture[i];
+                    }
 
-          const texture = loader.load(texture_url);
-          arr_material.push(
-            new THREE.MeshBasicMaterial({
-              alphaTest: 0.5,
-              transparent: true,
-              map: texture,
-            })
-          );
-        }
+                    const texture = loader.load(texture_url);
+                    arr_material.push(
+                        new THREE.MeshBasicMaterial({
+                            alphaTest: 0.5,
+                            transparent: true,
+                            map: texture,
+                        }),
+                    );
+                }
 
-        // マテリアルにテクスチャーを設定
-        material = arr_material;
-      } else {
-        var texture_url = "";
-        if ($.isHTTP(pm.texture)) {
-          texture_url = pm.texture;
+                // マテリアルにテクスチャーを設定
+                material = arr_material;
+            } else {
+                var texture_url = "";
+                if ($.isHTTP(pm.texture)) {
+                    texture_url = pm.texture;
+                } else {
+                    texture_url = "./data/others/3d/texture/" + pm.texture;
+                }
+
+                const loader = new THREE.TextureLoader();
+                const texture = loader.load(texture_url);
+
+                texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+                if (pm.texture_repeat != "") {
+                    let array_texture = pm.texture_repeat.split(",");
+                    texture.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
+                }
+
+                // マテリアルにテクスチャーを設定
+                material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    alphaTest: 0.5,
+                    transparent: true,
+                });
+            }
         } else {
-          texture_url = "./data/others/3d/texture/" + pm.texture;
+            material = new THREE.MeshBasicMaterial({
+                color: parseInt(pm.color.toLowerCase()),
+                alphaTest: 0.5,
+                transparent: true,
+            });
         }
 
-        const loader = new THREE.TextureLoader();
-        const texture = loader.load(texture_url);
-
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
-        if (pm.texture_repeat != "") {
-          let array_texture = pm.texture_repeat.split(",");
-          texture.repeat.set(
-            parseInt(array_texture[0]),
-            parseInt(array_texture[1])
-          );
+        if (pm.side != "") {
+            if (pm.side == "front") {
+                material["side"] = THREE.FrontSide;
+            } else if (pm.side == "back") {
+                material["side"] = THREE.BackSide;
+            } else if (pm.side == "double") {
+                material["side"] = THREE.DoubleSide;
+            }
+        } else if (pm.doubleside == "true") {
+            material["side"] = THREE.DoubleSide;
         }
 
-        // マテリアルにテクスチャーを設定
-        material = new THREE.MeshBasicMaterial({
-          map: texture,
-          alphaTest: 0.5,
-          transparent: true,
-        });
-      }
-    } else {
-      material = new THREE.MeshBasicMaterial({
-        color: parseInt(pm.color.toLowerCase()),
-        alphaTest: 0.5,
-        transparent: true,
-      });
-    }
+        if (pm.tonemap == "true") {
+            material.toneMapped = true;
+        } else {
+            material.toneMapped = false;
+        }
 
-    if (pm.side != "") {
-      if (pm.side == "front") {
-        material["side"] = THREE.FrontSide;
-      } else if (pm.side == "back") {
-        material["side"] = THREE.BackSide;
-      } else if (pm.side == "double") {
-        material["side"] = THREE.DoubleSide;
-      }
-    } else if (pm.doubleside == "true") {
-      material["side"] = THREE.DoubleSide;
-    }
+        if (pm.opacity != "") {
+            material.opacity = parseFloat(pm.opacity);
+        }
 
-    if (pm.tonemap == "true") {
-      material.toneMapped = true;
-    } else {
-      material.toneMapped = false;
-    }
+        //すでに存在する名前だった場合はアップデート対応。
 
-    if (pm.opacity != "") {
-      material.opacity = parseFloat(pm.opacity);
-    }
+        // メッシュを作成
+        const model = new THREE.Mesh(geometry, material);
 
-    //すでに存在する名前だった場合はアップデート対応。
+        let pos = $.three_pos(pm.pos);
+        let scale = $.three_pos(pm.scale);
+        let rot = $.three_pos(pm.rot);
 
-    // メッシュを作成
-    const model = new THREE.Mesh(geometry, material);
+        model.position.set(pos.x, pos.y, pos.z);
+        model.scale.set(scale.x, scale.y, scale.z);
+        model.rotation.set(rot.x, rot.y, rot.z);
 
-    let pos = $.three_pos(pm.pos);
-    let scale = $.three_pos(pm.scale);
-    let rot = $.three_pos(pm.rot);
+        // 3D空間にメッシュを追加
+        //scene.add(model);
 
-    model.position.set(pos.x, pos.y, pos.z);
-    model.scale.set(scale.x, scale.y, scale.z);
-    model.rotation.set(rot.x, rot.y, rot.z);
+        this.kag.tmp.three.models[pm.name] = new ThreeModel({ name: pm.name, model: model, pm: pm }, three);
 
-    // 3D空間にメッシュを追加
-    //scene.add(model);
-
-    this.kag.tmp.three.models[pm.name] = new ThreeModel(
-      { name: pm.name, model: model, pm: pm },
-      three
-    );
-
-    if (pm.next == "true") {
-      this.kag.ftag.nextOrder();
-    }
-  },
+        if (pm.next == "true") {
+            this.kag.ftag.nextOrder();
+        }
+    },
 };
 
 //基本図形 直接タグで実行することはない。
 tyrano.plugin.kag.tag["obj_model_mod"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    jname: "",
-    type: "",
+    pm: {
+        name: "",
+        jname: "",
+        type: "",
 
-    texture: "",
-    texture_repeat: "",
-    side: "",
-    doubleside: "",
+        texture: "",
+        texture_repeat: "",
+        side: "",
+        doubleside: "",
 
-    storage: "",
+        storage: "",
 
-    texture_reload: "true", //テクスチャのデータまるごと置き換え
+        texture_reload: "true", //テクスチャのデータまるごと置き換え
 
-    scale: "",
-    pos: "",
-    rot: "",
+        scale: "",
+        pos: "",
+        rot: "",
 
-    width: "",
-    height: "",
-    depth: "",
+        width: "",
+        height: "",
+        depth: "",
 
-    color: "",
+        color: "",
 
-    visible: "",
+        visible: "",
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var scene = three.scene;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
 
-    /*
-	console.log("wwwwwwwwww");
-	console.log(pm);
-			*/
+        /*
+console.log("wwwwwwwwww");
+console.log(pm);
+*/
 
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
-
-    let model = this.kag.tmp.three.models[pm.name];
-
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      model.setPosition(pos.x, pos.y, pos.z);
-    }
-
-    if (pm.scale != "") {
-      let scale = $.three_pos(pm.scale);
-      model.setScale(scale.x, scale.y, scale.z);
-    }
-
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      model.setRotation(rot.x, rot.y, rot.z);
-    }
-
-    if (pm.jname != "") {
-      model.pm.jname = pm.jname;
-    }
-
-    let folder = "texture";
-
-    if (pm.storage != "") {
-      pm.texture = pm.storage;
-      folder = "sprite";
-    }
-
-    if (pm.color != "") {
-      let material = new THREE.MeshBasicMaterial({
-        color: parseInt(pm.color.toLowerCase()),
-        alphaTest: 0.5,
-        transparent: true,
-      });
-      model.model.material = material;
-      model.pm.color = pm.color;
-    }
-
-    if (pm.side != "") {
-      model.pm.side = pm.side;
-
-      if (pm.side == "front") {
-        model.model.material.side = THREE.FrontSide;
-      } else if (pm.side == "back") {
-        model.model.material.side = THREE.BackSide;
-      } else if (pm.side == "double") {
-        model.model.material.side = THREE.DoubleSide;
-      }
-    } else if (pm.doubleside != "") {
-      model.pm.doubleside = pm.doubleside;
-
-      if (pm.doubleside == "true") {
-        model.model.material.side = THREE.DoubleSide;
-      } else {
-        model.model.material.side = THREE.FrontSide;
-      }
-    }
-
-    if (pm.texture != "") {
-      if (model.pm.type == "BoxGeometry" && pm.texture.split(",").length > 1) {
-        var arr_texture = pm.texture.split(",");
-        var arr_material = [];
-        const loader = new THREE.TextureLoader();
-
-        model.pm.texture = pm.texture;
-        model.pm.multi = "true";
-
-        for (let i = 0; i < arr_texture.length; i++) {
-          var texture_url = "";
-          if ($.isHTTP(pm.texture)) {
-            texture_url = pm.texture;
-          } else {
-            texture_url = "./data/others/3d/texture/" + arr_texture[i];
-          }
-
-          const texture = loader.load(texture_url);
-
-          arr_material.push(
-            new THREE.MeshBasicMaterial({
-              map: texture,
-              alphaTest: 0.5,
-              transparent: true,
-            })
-          );
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
         }
 
-        // マテリアルにテクスチャーを設定
-        material = arr_material;
+        let model = this.kag.tmp.three.models[pm.name];
 
-        model.model.material = material;
-      } else {
-        var texture_url = "";
-
-        if ($.isHTTP(pm.texture)) {
-          texture_url = pm.texture;
-        } else {
-          texture_url = "./data/others/3d/" + folder + "/" + pm.texture;
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            model.setPosition(pos.x, pos.y, pos.z);
         }
 
-        model.pm.texture = pm.texture;
-        model.pm.multi = "false";
+        if (pm.scale != "") {
+            let scale = $.three_pos(pm.scale);
+            model.setScale(scale.x, scale.y, scale.z);
+        }
 
-        $("<img />")
-          .attr("src", texture_url)
-          .on("load", (e) => {
-            var width = $(e.currentTarget).get(0).width;
-            var height = $(e.currentTarget).get(0).height;
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            model.setRotation(rot.x, rot.y, rot.z);
+        }
 
-            var tmp = height / width;
+        if (pm.jname != "") {
+            model.pm.jname = pm.jname;
+        }
 
-            var scale_y = parseFloat(model.model.scale.x) * tmp;
+        let folder = "texture";
 
-            const loader = new THREE.TextureLoader();
-            const texture = loader.load(texture_url);
+        if (pm.storage != "") {
+            pm.texture = pm.storage;
+            folder = "sprite";
+        }
 
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
-            if (pm.texture_reload == "false") {
-              //テクスチャのカラーはなくしておく。
-              //model.model.material.color.set(0xffffff);
-
-              //球体はテクスチャのリピートなし
-              if (model.pm._type != "sphere") {
-                if (pm.texture_repeat != "") {
-                  let array_texture = pm.texture_repeat.split(",");
-                  texture.repeat.set(
-                    parseInt(array_texture[0]),
-                    parseInt(array_texture[1])
-                  );
-                } else {
-                  //texture.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
-                  let rx = model.model.material.map.repeat.x;
-                  let ry = model.model.material.map.repeat.y;
-                  texture.repeat.set(parseInt(rx), parseInt(ry));
-                }
-              }
-
-              model.model.material.map = texture;
-            } else {
-              //model.setScale(model.model.scale.x, scale_y, 1);
-
-              let material = new THREE.MeshBasicMaterial({
-                map: texture,
+        if (pm.color != "") {
+            let material = new THREE.MeshBasicMaterial({
+                color: parseInt(pm.color.toLowerCase()),
                 alphaTest: 0.5,
                 transparent: true,
-              });
+            });
+            model.model.material = material;
+            model.pm.color = pm.color;
+        }
 
-              model.model.material = material;
+        if (pm.side != "") {
+            model.pm.side = pm.side;
+
+            if (pm.side == "front") {
+                model.model.material.side = THREE.FrontSide;
+            } else if (pm.side == "back") {
+                model.model.material.side = THREE.BackSide;
+            } else if (pm.side == "double") {
+                model.model.material.side = THREE.DoubleSide;
             }
+        } else if (pm.doubleside != "") {
+            model.pm.doubleside = pm.doubleside;
+
+            if (pm.doubleside == "true") {
+                model.model.material.side = THREE.DoubleSide;
+            } else {
+                model.model.material.side = THREE.FrontSide;
+            }
+        }
+
+        if (pm.texture != "") {
+            if (model.pm.type == "BoxGeometry" && pm.texture.split(",").length > 1) {
+                var arr_texture = pm.texture.split(",");
+                var arr_material = [];
+                const loader = new THREE.TextureLoader();
+
+                model.pm.texture = pm.texture;
+                model.pm.multi = "true";
+
+                for (let i = 0; i < arr_texture.length; i++) {
+                    var texture_url = "";
+                    if ($.isHTTP(pm.texture)) {
+                        texture_url = pm.texture;
+                    } else {
+                        texture_url = "./data/others/3d/texture/" + arr_texture[i];
+                    }
+
+                    const texture = loader.load(texture_url);
+
+                    arr_material.push(
+                        new THREE.MeshBasicMaterial({
+                            map: texture,
+                            alphaTest: 0.5,
+                            transparent: true,
+                        }),
+                    );
+                }
+
+                // マテリアルにテクスチャーを設定
+                material = arr_material;
+
+                model.model.material = material;
+            } else {
+                var texture_url = "";
+
+                if ($.isHTTP(pm.texture)) {
+                    texture_url = pm.texture;
+                } else {
+                    texture_url = "./data/others/3d/" + folder + "/" + pm.texture;
+                }
+
+                model.pm.texture = pm.texture;
+                model.pm.multi = "false";
+
+                $("<img />")
+                    .attr("src", texture_url)
+                    .on("load", (e) => {
+                        var width = $(e.currentTarget).get(0).width;
+                        var height = $(e.currentTarget).get(0).height;
+
+                        var tmp = height / width;
+
+                        var scale_y = parseFloat(model.model.scale.x) * tmp;
+
+                        const loader = new THREE.TextureLoader();
+                        const texture = loader.load(texture_url);
+
+                        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+
+                        if (pm.texture_reload == "false") {
+                            //テクスチャのカラーはなくしておく。
+                            //model.model.material.color.set(0xffffff);
+
+                            //球体はテクスチャのリピートなし
+                            if (model.pm._type != "sphere") {
+                                if (pm.texture_repeat != "") {
+                                    let array_texture = pm.texture_repeat.split(",");
+                                    texture.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
+                                } else {
+                                    //texture.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
+                                    let rx = model.model.material.map.repeat.x;
+                                    let ry = model.model.material.map.repeat.y;
+                                    texture.repeat.set(parseInt(rx), parseInt(ry));
+                                }
+                            }
+
+                            model.model.material.map = texture;
+                        } else {
+                            //model.setScale(model.model.scale.x, scale_y, 1);
+
+                            let material = new THREE.MeshBasicMaterial({
+                                map: texture,
+                                alphaTest: 0.5,
+                                transparent: true,
+                            });
+
+                            model.model.material = material;
+                        }
+
+                        model.needsUpdate();
+
+                        if (pm.next == "true") {
+                            this.kag.ftag.nextOrder();
+                        }
+                    })
+                    .on("error", (e) => {
+                        console.log(e);
+
+                        if (pm.next == "true") {
+                            this.kag.ftag.nextOrder();
+                        }
+
+                        return false;
+                    });
+            }
+        } else if (pm.texture_repeat != "") {
+            model.pm.texture_repeat = pm.texture_repeat;
+
+            let array_texture = pm.texture_repeat.split(",");
+            model.model.material.map.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
 
             model.needsUpdate();
+        }
 
-            if (pm.next == "true") {
-              this.kag.ftag.nextOrder();
-            }
-          })
-          .on("error", (e) => {
-            console.log(e);
+        if (pm.visible != "") {
+            let flag_visible = false;
 
-            if (pm.next == "true") {
-              this.kag.ftag.nextOrder();
+            if (pm.visible == "true") {
+                flag_visible = true;
             }
 
-            return false;
-          });
-      }
-    } else if (pm.texture_repeat != "") {
-      model.pm.texture_repeat = pm.texture_repeat;
-
-      let array_texture = pm.texture_repeat.split(",");
-      model.model.material.map.repeat.set(
-        parseInt(array_texture[0]),
-        parseInt(array_texture[1])
-      );
-
-      model.needsUpdate();
-    }
-
-    if (pm.visible != "") {
-      let flag_visible = false;
-
-      if (pm.visible == "true") {
-        flag_visible = true;
-      }
-
-      model.setVisible(flag_visible);
-    }
-  },
+            model.setVisible(flag_visible);
+        }
+    },
 };
 
 //基本図形 直接タグで実行することはない。
 tyrano.plugin.kag.tag["3d_model_mod"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    type: "",
+    pm: {
+        name: "",
+        type: "",
 
-    scale: "",
-    pos: "",
-    rot: "",
+        scale: "",
+        pos: "",
+        rot: "",
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var scene = three.scene;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
 
-    /*
-	console.log("wwwwwwwwww");
-	console.log(pm);
-			*/
+        /*
+console.log("wwwwwwwwww");
+console.log(pm);
+*/
 
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    let model = this.kag.tmp.three.models[pm.name];
+        let model = this.kag.tmp.three.models[pm.name];
 
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      model.setPosition(pos.x, pos.y, pos.z);
-    }
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            model.setPosition(pos.x, pos.y, pos.z);
+        }
 
-    if (pm.scale != "") {
-      let scale = $.three_pos(pm.scale);
-      model.setScale(scale.x, scale.y, scale.z);
-    }
+        if (pm.scale != "") {
+            let scale = $.three_pos(pm.scale);
+            model.setScale(scale.x, scale.y, scale.z);
+        }
 
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      model.setRotation(rot.x, rot.y, rot.z);
-    }
-  },
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            model.setRotation(rot.x, rot.y, rot.z);
+        }
+    },
 };
 
 //基本図形 直接タグで実行することはない。
 tyrano.plugin.kag.tag["3d_sprite_mod"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    jname: "",
-    type: "",
+    pm: {
+        name: "",
+        jname: "",
+        type: "",
 
-    texture: "",
-    texture_repeat: "",
+        texture: "",
+        texture_repeat: "",
 
-    storage: "",
+        storage: "",
 
-    texture_reload: "true", //テクスチャのデータまるごと置き換え
+        texture_reload: "true", //テクスチャのデータまるごと置き換え
 
-    scale: "",
-    pos: "",
-    rot: "",
+        scale: "",
+        pos: "",
+        rot: "",
 
-    width: "",
-    height: "",
-    depth: "",
+        width: "",
+        height: "",
+        depth: "",
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var scene = three.scene;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
 
-    /*
-	console.log("wwwwwwwwww");
-	console.log(pm);
-			*/
+        /*
+console.log("wwwwwwwwww");
+console.log(pm);
+*/
 
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    let model = this.kag.tmp.three.models[pm.name];
+        let model = this.kag.tmp.three.models[pm.name];
 
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      model.setPosition(pos.x, pos.y, pos.z);
-    }
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            model.setPosition(pos.x, pos.y, pos.z);
+        }
 
-    if (pm.scale != "") {
-      let scale = $.three_pos(pm.scale);
-      model.setScale(scale.x, scale.y, scale.z);
-    }
+        if (pm.scale != "") {
+            let scale = $.three_pos(pm.scale);
+            model.setScale(scale.x, scale.y, scale.z);
+        }
 
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      model.setRotation(rot.x, rot.y, rot.z);
-    }
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            model.setRotation(rot.x, rot.y, rot.z);
+        }
 
-    if (pm.jname != "") {
-      model.pm.jname = pm.jname;
-    }
+        if (pm.jname != "") {
+            model.pm.jname = pm.jname;
+        }
 
-    let folder = "sprite";
+        let folder = "sprite";
 
-    pm.texture = pm.storage;
-    folder = "sprite";
+        pm.texture = pm.storage;
+        folder = "sprite";
 
-    if (pm.texture != "") {
-      var texture_url = "";
+        if (pm.texture != "") {
+            var texture_url = "";
 
-      if ($.isHTTP(pm.texture)) {
-        texture_url = pm.texture;
-      } else {
-        texture_url = "./data/others/3d/" + folder + "/" + pm.texture;
-      }
-
-      model.pm.texture = pm.texture;
-      model.pm.storage = pm.texture;
-
-      $("<img />")
-        .attr("src", texture_url)
-        .on("load", (e) => {
-          var width = $(e.currentTarget).get(0).width;
-          var height = $(e.currentTarget).get(0).height;
-
-          var tmp = height / width;
-
-          var scale_y = parseFloat(model.model.scale.x) * tmp;
-
-          const loader = new THREE.TextureLoader();
-          const texture = loader.load(texture_url);
-
-          if (pm.texture_reload == "false") {
-            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
-            if (pm.texture_repeat != "") {
-              let array_texture = pm.texture_repeat.split(",");
-              texture.repeat.set(
-                parseInt(array_texture[0]),
-                parseInt(array_texture[1])
-              );
+            if ($.isHTTP(pm.texture)) {
+                texture_url = pm.texture;
             } else {
-              //texture.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
-              let rx = model.model.material.map.repeat.x;
-              let ry = model.model.material.map.repeat.y;
-
-              texture.repeat.set(parseInt(rx), parseInt(ry));
+                texture_url = "./data/others/3d/" + folder + "/" + pm.texture;
             }
 
-            model.model.material.map = texture;
-          } else {
-            model.setScale(model.model.scale.x, scale_y, 1);
+            model.pm.texture = pm.texture;
+            model.pm.storage = pm.texture;
 
-            let material = new THREE.SpriteMaterial({
-              map: texture,
-              alphaTest: 0.5,
-              transparent: true,
-            });
+            $("<img />")
+                .attr("src", texture_url)
+                .on("load", (e) => {
+                    var width = $(e.currentTarget).get(0).width;
+                    var height = $(e.currentTarget).get(0).height;
 
-            model.model.material = material;
-          }
+                    var tmp = height / width;
 
-          model.needsUpdate();
+                    var scale_y = parseFloat(model.model.scale.x) * tmp;
 
-          if (pm.next == "true") {
-            this.kag.ftag.nextOrder();
-          }
-        })
-        .on("error", (e) => {
-          console.log(e);
+                    const loader = new THREE.TextureLoader();
+                    const texture = loader.load(texture_url);
 
-          if (pm.next == "true") {
-            this.kag.ftag.nextOrder();
-          }
+                    if (pm.texture_reload == "false") {
+                        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-          return false;
-        });
-    } else if (pm.texture_repeat != "") {
-      model.pm.texture_repeat = pm.texture_repeat;
+                        if (pm.texture_repeat != "") {
+                            let array_texture = pm.texture_repeat.split(",");
+                            texture.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
+                        } else {
+                            //texture.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
+                            let rx = model.model.material.map.repeat.x;
+                            let ry = model.model.material.map.repeat.y;
 
-      let array_texture = pm.texture_repeat.split(",");
-      model.model.material.map.repeat.set(
-        parseInt(array_texture[0]),
-        parseInt(array_texture[1])
-      );
+                            texture.repeat.set(parseInt(rx), parseInt(ry));
+                        }
 
-      model.needsUpdate();
-    }
-  },
+                        model.model.material.map = texture;
+                    } else {
+                        model.setScale(model.model.scale.x, scale_y, 1);
+
+                        let material = new THREE.SpriteMaterial({
+                            map: texture,
+                            alphaTest: 0.5,
+                            transparent: true,
+                        });
+
+                        model.model.material = material;
+                    }
+
+                    model.needsUpdate();
+
+                    if (pm.next == "true") {
+                        this.kag.ftag.nextOrder();
+                    }
+                })
+                .on("error", (e) => {
+                    console.log(e);
+
+                    if (pm.next == "true") {
+                        this.kag.ftag.nextOrder();
+                    }
+
+                    return false;
+                });
+        } else if (pm.texture_repeat != "") {
+            model.pm.texture_repeat = pm.texture_repeat;
+
+            let array_texture = pm.texture_repeat.split(",");
+            model.model.material.map.repeat.set(parseInt(array_texture[0]), parseInt(array_texture[1]));
+
+            model.needsUpdate();
+        }
+    },
 };
 
 /*
@@ -2424,105 +2427,105 @@ visible=true or false を指定。初期状態で非表示状態でシーンに�
 */
 
 tyrano.plugin.kag.tag["3d_show"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    group: "default",
-    time: "500",
+    pm: {
+        name: "",
+        group: "default",
+        time: "500",
 
-    scale: "",
-    pos: "",
-    rot: "",
+        scale: "",
+        pos: "",
+        rot: "",
 
-    force_sprite: "false",
+        force_sprite: "false",
 
-    wait: "true",
+        wait: "true",
 
-    visible: "true",
-  },
+        visible: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
-
-    var model = this.kag.tmp.three.models[pm.name];
-
-    //templateの場合はshowの処理を
-    if (model.pm._type === "template") {
-      var models = this.kag.tmp.three.models;
-      let group_name = model.pm.name;
-
-      //テンプレートの場合は所属しているテンプレートすべてを削除
-      for (let key in models) {
-        var _model = models[key];
-
-        if (_model.pm.group && _model.pm.group == group_name) {
-          _model.show();
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
         }
-      }
-    }
 
-    //グループ追加 fps
-    if (model.model.isSprite) {
-      pm.group = "sprite";
-    } else if (pm.force_sprite == "true") {
-      pm.group = "sprite";
-    }
+        var model = this.kag.tmp.three.models[pm.name];
 
-    if (!three.groups[pm.group]) {
-      three.groups[pm.group] = [];
-    }
+        //templateの場合はshowの処理を
+        if (model.pm._type === "template") {
+            var models = this.kag.tmp.three.models;
+            let group_name = model.pm.name;
 
-    three.groups[pm.group].push(model.model);
+            //テンプレートの場合は所属しているテンプレートすべてを削除
+            for (let key in models) {
+                var _model = models[key];
 
-    //シーン追加
-    model.model.name = pm.name;
-    three.scene.add(model.model);
+                if (_model.pm.group && _model.pm.group == group_name) {
+                    _model.show();
+                }
+            }
+        }
 
-    var options = {
-      duration: parseInt(pm.time),
-    };
+        //グループ追加 fps
+        if (model.model.isSprite) {
+            pm.group = "sprite";
+        } else if (pm.force_sprite == "true") {
+            pm.group = "sprite";
+        }
 
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      model.setPosition(pos.x, pos.y, pos.z);
-    }
+        if (!three.groups[pm.group]) {
+            three.groups[pm.group] = [];
+        }
 
-    if (pm.scale != "") {
-      let scale = $.three_pos(pm.scale);
-      model.setScale(scale.x, scale.y, scale.z);
-    }
+        three.groups[pm.group].push(model.model);
 
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      model.setRotation(rot.x, rot.y, rot.z);
-    }
+        //シーン追加
+        model.model.name = pm.name;
+        three.scene.add(model.model);
 
-    if (pm.visible == "true") {
-      if (pm.time == "0") {
-        console.log(model);
-        model.show();
-        this.kag.ftag.nextOrder();
-      } else {
-        if (pm.wait == "true") {
-          model.fade("in", options, () => {
-            this.kag.ftag.nextOrder();
-          });
+        var options = {
+            duration: parseInt(pm.time),
+        };
+
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            model.setPosition(pos.x, pos.y, pos.z);
+        }
+
+        if (pm.scale != "") {
+            let scale = $.three_pos(pm.scale);
+            model.setScale(scale.x, scale.y, scale.z);
+        }
+
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            model.setRotation(rot.x, rot.y, rot.z);
+        }
+
+        if (pm.visible == "true") {
+            if (pm.time == "0") {
+                console.log(model);
+                model.show();
+                this.kag.ftag.nextOrder();
+            } else {
+                if (pm.wait == "true") {
+                    model.fade("in", options, () => {
+                        this.kag.ftag.nextOrder();
+                    });
+                } else {
+                    model.fade("in", options);
+                    this.kag.ftag.nextOrder();
+                }
+            }
         } else {
-          model.fade("in", options);
-          this.kag.ftag.nextOrder();
+            //非表示状態
+            model.setVisible(false);
+            this.kag.ftag.nextOrder();
         }
-      }
-    } else {
-      //非表示状態
-      model.setVisible(false);
-      this.kag.ftag.nextOrder();
-    }
-  },
+    },
 };
 
 /*
@@ -2556,45 +2559,45 @@ scale=3Dオブジェクトの拡大率を指定します。半角カンマで区
 */
 
 tyrano.plugin.kag.tag["3d_clone"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    time: "500",
+    pm: {
+        name: "",
+        time: "500",
 
-    scale: "",
-    pos: "",
-    rot: "",
-  },
+        scale: "",
+        pos: "",
+        rot: "",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    var model_obj = this.kag.tmp.three.models[pm.name].model.clone();
+        var model_obj = this.kag.tmp.three.models[pm.name].model.clone();
 
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      model_obj.position.set(pos.x, pos.y, pos.z);
-    }
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            model_obj.position.set(pos.x, pos.y, pos.z);
+        }
 
-    if (pm.scale != "") {
-      let scale = $.three_pos(pm.scale);
-      model_obj.scale.set(scale.x, scale.y, scale.z);
-    }
+        if (pm.scale != "") {
+            let scale = $.three_pos(pm.scale);
+            model_obj.scale.set(scale.x, scale.y, scale.z);
+        }
 
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      model_obj.rotation.set(rot.x, rot.y, rot.z);
-    }
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            model_obj.rotation.set(rot.x, rot.y, rot.z);
+        }
 
-    three.scene.add(model_obj);
+        three.scene.add(model_obj);
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -2629,41 +2632,41 @@ wait=退場の完了を待つか否か。デフォルトはtrue。
 */
 
 tyrano.plugin.kag.tag["3d_hide"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    time: "500",
-    next: "true",
-    wait: "true",
-  },
+    pm: {
+        name: "",
+        time: "500",
+        next: "true",
+        wait: "true",
+    },
 
-  start: function (pm) {
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+    start: function (pm) {
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    var three = this.kag.tmp.three;
+        var three = this.kag.tmp.three;
 
-    var options = {
-      duration: parseInt(pm.time),
-    };
+        var options = {
+            duration: parseInt(pm.time),
+        };
 
-    var model = this.kag.tmp.three.models[pm.name];
+        var model = this.kag.tmp.three.models[pm.name];
 
-    if (pm.wait == "true") {
-      model.fade("out", options, (_model) => {
-        this.kag.ftag.nextOrder();
-        three.scene.remove(_model);
-      });
-    } else {
-      model.fade("out", options, (_model) => {
-        three.scene.remove(_model);
-      });
+        if (pm.wait == "true") {
+            model.fade("out", options, (_model) => {
+                this.kag.ftag.nextOrder();
+                three.scene.remove(_model);
+            });
+        } else {
+            model.fade("out", options, (_model) => {
+                three.scene.remove(_model);
+            });
 
-      this.kag.ftag.nextOrder();
-    }
-  },
+            this.kag.ftag.nextOrder();
+        }
+    },
 };
 
 /*
@@ -2690,53 +2693,53 @@ wait=退場の完了を待つか否か。デフォルトはtrue。
 */
 
 tyrano.plugin.kag.tag["3d_hide_all"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    time: "500",
-    wait: "true",
-  },
+    pm: {
+        time: "500",
+        wait: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    var options = {
-      duration: parseInt(pm.time),
-    };
+        var options = {
+            duration: parseInt(pm.time),
+        };
 
-    var models = this.kag.tmp.three.models;
+        var models = this.kag.tmp.three.models;
 
-    var cnt_fade = 0;
-    var fin_fade = 0;
+        var cnt_fade = 0;
+        var fin_fade = 0;
 
-    for (let key in models) {
-      if (key == "camera") continue;
+        for (let key in models) {
+            if (key == "camera") continue;
 
-      cnt_fade++;
+            cnt_fade++;
 
-      if (pm.wait == "true") {
-        models[key].fade("out", options, (_model) => {
-          three.scene.remove(_model);
-          fin_fade++;
+            if (pm.wait == "true") {
+                models[key].fade("out", options, (_model) => {
+                    three.scene.remove(_model);
+                    fin_fade++;
 
-          if (cnt_fade == fin_fade) {
+                    if (cnt_fade == fin_fade) {
+                        this.kag.ftag.nextOrder();
+                    }
+                });
+            } else {
+                models[key].fade("out", options, (_model) => {
+                    three.scene.remove(_model);
+                    fin_fade++;
+                });
+
+                this.kag.ftag.nextOrder();
+            }
+        }
+
+        if (cnt_fade == 0) {
             this.kag.ftag.nextOrder();
-          }
-        });
-      } else {
-        models[key].fade("out", options, (_model) => {
-          three.scene.remove(_model);
-          fin_fade++;
-        });
-
-        this.kag.ftag.nextOrder();
-      }
-    }
-
-    if (cnt_fade == 0) {
-      this.kag.ftag.nextOrder();
-    }
-  },
+        }
+    },
 };
 
 /*
@@ -2774,45 +2777,45 @@ name=3Dオブジェクトの名前です。削除していオブジェクトのn
 */
 
 tyrano.plugin.kag.tag["3d_delete"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-  },
+    pm: {
+        name: "",
+    },
 
-  start: function (pm) {
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
-
-    var three = this.kag.tmp.three;
-    var models = this.kag.tmp.three.models;
-    var model = models[pm.name];
-
-    if (model.model) {
-      three.scene.remove(model.model);
-    }
-
-    //グループの場合は付随するオブジェクトも削除
-    //モデルがグループの場合
-    if (model.pm._type == "template") {
-      let group_name = model.pm.name;
-
-      //テンプレートの場合は所属しているテンプレートすべてを削除
-      for (let key in models) {
-        var _model = models[key];
-
-        if (_model.pm.group && _model.pm.group == group_name) {
-          three.scene.remove(_model.model);
-          delete this.kag.tmp.three.models[key];
+    start: function (pm) {
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
         }
-      }
-    }
 
-    delete this.kag.tmp.three.models[pm.name];
+        var three = this.kag.tmp.three;
+        var models = this.kag.tmp.three.models;
+        var model = models[pm.name];
 
-    this.kag.ftag.nextOrder();
-  },
+        if (model.model) {
+            three.scene.remove(model.model);
+        }
+
+        //グループの場合は付随するオブジェクトも削除
+        //モデルがグループの場合
+        if (model.pm._type == "template") {
+            let group_name = model.pm.name;
+
+            //テンプレートの場合は所属しているテンプレートすべてを削除
+            for (let key in models) {
+                var _model = models[key];
+
+                if (_model.pm.group && _model.pm.group == group_name) {
+                    three.scene.remove(_model.model);
+                    delete this.kag.tmp.three.models[key];
+                }
+            }
+        }
+
+        delete this.kag.tmp.three.models[pm.name];
+
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -2837,26 +2840,26 @@ tyrano.plugin.kag.tag["3d_delete"] = {
 */
 
 tyrano.plugin.kag.tag["3d_delete_all"] = {
-  vital: [],
+    vital: [],
 
-  pm: {},
+    pm: {},
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    var models = this.kag.tmp.three.models;
+        var models = this.kag.tmp.three.models;
 
-    for (let key in models) {
-      if (key == "camera") continue;
+        for (let key in models) {
+            if (key == "camera") continue;
 
-      var model = models[key];
-      three.scene.remove(model.model);
+            var model = models[key];
+            three.scene.remove(model.model);
 
-      delete three.models[key];
-    }
+            delete three.models[key];
+        }
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -2882,20 +2885,20 @@ time=表示にかける時間をミリ秒で指定できます。デフォルト
 */
 
 tyrano.plugin.kag.tag["3d_canvas_show"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    time: "1000",
-  },
+    pm: {
+        time: "1000",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    this.kag.tmp.three.stat.canvas_show = true;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        this.kag.tmp.three.stat.canvas_show = true;
 
-    three.j_canvas.fadeIn(parseInt(pm.time), () => {
-      this.kag.ftag.nextOrder();
-    });
-  },
+        three.j_canvas.fadeIn(parseInt(pm.time), () => {
+            this.kag.ftag.nextOrder();
+        });
+    },
 };
 
 /*
@@ -2921,20 +2924,20 @@ time=表示にかける時間をミリ秒で指定できます。デフォルト
 */
 
 tyrano.plugin.kag.tag["3d_canvas_hide"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    time: "1000",
-  },
+    pm: {
+        time: "1000",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    this.kag.tmp.three.stat.canvas_show = false;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        this.kag.tmp.three.stat.canvas_show = false;
 
-    three.j_canvas.fadeOut(parseInt(pm.time), () => {
-      this.kag.ftag.nextOrder();
-    });
-  },
+        three.j_canvas.fadeOut(parseInt(pm.time), () => {
+            this.kag.ftag.nextOrder();
+        });
+    },
 };
 
 /*
@@ -2959,22 +2962,22 @@ tyrano.plugin.kag.tag["3d_canvas_hide"] = {
 */
 
 tyrano.plugin.kag.tag["3d_close"] = {
-  vital: [],
+    vital: [],
 
-  pm: {},
+    pm: {},
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    three.stat.is_load = false;
-    three.stat.canvas_show = false;
+        three.stat.is_load = false;
+        three.stat.canvas_show = false;
 
-    if (three.j_canvas) {
-      three.j_canvas.remove();
-    }
+        if (three.j_canvas) {
+            three.j_canvas.remove();
+        }
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -3042,93 +3045,93 @@ jswing
 */
 
 tyrano.plugin.kag.tag["3d_anim"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    time: "1000",
-    effect: "linear",
+    pm: {
+        name: "",
+        time: "1000",
+        effect: "linear",
 
-    pos: "",
-    rot: "",
-    scale: "",
-    walk: "false",
+        pos: "",
+        rot: "",
+        scale: "",
+        walk: "false",
 
-    lookat: "",
+        lookat: "",
 
-    callback: "",
+        callback: "",
 
-    wait: "true",
-  },
+        wait: "true",
+    },
 
-  start: function (pm) {
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
-
-    var three = this.kag.tmp.three;
-
-    var options = {
-      duration: parseInt(pm.time),
-      easing: pm.effect,
-      walk: pm.walk,
-    };
-
-    var map_type = {};
-
-    if (pm.pos != "") {
-      if (pm.name == "camera" && pm.lookat != "") {
-        if (three.models[pm.lookat]) {
-          var model = three.models[pm.lookat].model;
-          var pos = { x: 0, y: 0, z: 0 };
-          pos.x = model.position.x;
-          pos.y = model.position.y;
-          pos.z = model.position.z;
-
-          map_type["position"] = pos;
-        } else {
-          //座標を直接し指定
-          map_type["position"] = $.three_pos(pm.lookat);
+    start: function (pm) {
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
         }
-      } else {
-        map_type["position"] = $.three_pos(pm.pos);
-      }
-    }
 
-    if (pm.rot != "") {
-      map_type["rotation"] = $.three_pos(pm.rot);
-    }
+        var three = this.kag.tmp.three;
 
-    if (pm.scale != "") {
-      map_type["scale"] = $.three_pos(pm.scale);
-    }
+        var options = {
+            duration: parseInt(pm.time),
+            easing: pm.effect,
+            walk: pm.walk,
+        };
 
-    var cnt_fin = 0;
-    var cnt_type = Object.keys(map_type).length;
+        var map_type = {};
 
-    for (let key in map_type) {
-      var pos = map_type[key];
-      var type = key;
+        if (pm.pos != "") {
+            if (pm.name == "camera" && pm.lookat != "") {
+                if (three.models[pm.lookat]) {
+                    var model = three.models[pm.lookat].model;
+                    var pos = { x: 0, y: 0, z: 0 };
+                    pos.x = model.position.x;
+                    pos.y = model.position.y;
+                    pos.z = model.position.z;
 
-      this.kag.tmp.three.models[pm.name].toAnim(type, pos, options, () => {
-        cnt_fin++;
+                    map_type["position"] = pos;
+                } else {
+                    //座標を直接し指定
+                    map_type["position"] = $.three_pos(pm.lookat);
+                }
+            } else {
+                map_type["position"] = $.three_pos(pm.pos);
+            }
+        }
 
-        if (cnt_fin >= cnt_type) {
-          if (pm.wait == "true") {
+        if (pm.rot != "") {
+            map_type["rotation"] = $.three_pos(pm.rot);
+        }
+
+        if (pm.scale != "") {
+            map_type["scale"] = $.three_pos(pm.scale);
+        }
+
+        var cnt_fin = 0;
+        var cnt_type = Object.keys(map_type).length;
+
+        for (let key in map_type) {
+            var pos = map_type[key];
+            var type = key;
+
+            this.kag.tmp.three.models[pm.name].toAnim(type, pos, options, () => {
+                cnt_fin++;
+
+                if (cnt_fin >= cnt_type) {
+                    if (pm.wait == "true") {
+                        this.kag.ftag.nextOrder();
+                    }
+
+                    if (typeof pm.callback == "function") {
+                        pm.callback();
+                    }
+                }
+            });
+        }
+
+        if (pm.wait != "true") {
             this.kag.ftag.nextOrder();
-          }
-
-          if (typeof pm.callback == "function") {
-            pm.callback();
-          }
         }
-      });
-    }
-
-    if (pm.wait != "true") {
-      this.kag.ftag.nextOrder();
-    }
-  },
+    },
 };
 
 /*
@@ -3154,24 +3157,24 @@ finish=true or false を指定します。falseを指定するとアニメーシ
 */
 
 tyrano.plugin.kag.tag["3d_anim_stop"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    finish: "true",
-  },
+    pm: {
+        name: "",
+        finish: "true",
+    },
 
-  start: function (pm) {
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+    start: function (pm) {
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    var three = this.kag.tmp.three;
+        var three = this.kag.tmp.three;
 
-    this.kag.tmp.three.models[pm.name].stopAnim(pm.finish);
+        this.kag.tmp.three.models[pm.name].stopAnim(pm.finish);
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -3203,71 +3206,67 @@ light_amb=環境光の強さを指定します。デフォルトは1。例えば
 
 //カメラの設定を変更
 tyrano.plugin.kag.tag["3d_scene"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    tonemap: "",
-    tonemap_value: "0.8",
+    pm: {
+        tonemap: "",
+        tonemap_value: "0.8",
 
-    light_amb: "", // 100,40,50
+        light_amb: "", // 100,40,50
 
-    fog: "", //
-    fog_range: "1,3000",
-    fog_color: "0xFFFFFF",
+        fog: "", //
+        fog_range: "1,3000",
+        fog_color: "0xFFFFFF",
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var scene = three.scene;
-    var camera = three.camera;
-    var renderer = three.renderer;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
+        var camera = three.camera;
+        var renderer = three.renderer;
 
-    if (pm.light_amb != "") {
-      three.stat.scene_pm["light_amb"] = pm.light_amb;
+        if (pm.light_amb != "") {
+            three.stat.scene_pm["light_amb"] = pm.light_amb;
 
-      //オブジェクトに設定を入れる。
-      three.light_amb.intensity = parseFloat(pm.light_amb);
-    }
+            //オブジェクトに設定を入れる。
+            three.light_amb.intensity = parseFloat(pm.light_amb);
+        }
 
-    if (pm.tonemap != "") {
-      three.stat.scene_pm["tonemap"] = pm.tonemap;
+        if (pm.tonemap != "") {
+            three.stat.scene_pm["tonemap"] = pm.tonemap;
 
-      //表示の方法
-      renderer.toneMapping = THREE[pm.tonemap + "ToneMapping"];
-      renderer.toneMappingExposure = parseFloat(pm.tonemap_value);
+            //表示の方法
+            renderer.toneMapping = THREE[pm.tonemap + "ToneMapping"];
+            renderer.toneMappingExposure = parseFloat(pm.tonemap_value);
 
-      //needs update
-      for (let key in three.models) {
-        three.models[key].needsUpdate();
-      }
-    }
+            //needs update
+            for (let key in three.models) {
+                three.models[key].needsUpdate();
+            }
+        }
 
-    if (pm.fog != "") {
-      if (pm.fog == "true") {
-        three.stat.scene_pm["fog"] = pm.fog;
-        three.stat.scene_pm["fog_color"] = pm.fog_color;
-        three.stat.scene_pm["fog_range"] = pm.fog_range;
+        if (pm.fog != "") {
+            if (pm.fog == "true") {
+                three.stat.scene_pm["fog"] = pm.fog;
+                three.stat.scene_pm["fog_color"] = pm.fog_color;
+                three.stat.scene_pm["fog_range"] = pm.fog_range;
 
-        var fog_tmp = pm.fog_range.split(",");
-        scene.fog = new THREE.Fog(
-          parseInt(pm.fog_color),
-          parseFloat(fog_tmp[0]),
-          parseFloat(fog_tmp[1])
-        );
-      } else {
-        three.stat.scene_pm["fog"];
+                var fog_tmp = pm.fog_range.split(",");
+                scene.fog = new THREE.Fog(parseInt(pm.fog_color), parseFloat(fog_tmp[0]), parseFloat(fog_tmp[1]));
+            } else {
+                three.stat.scene_pm["fog"];
 
-        scene.fog.near = 0.1;
-        scene.fog.far = 0;
-      }
-    }
+                scene.fog.near = 0.1;
+                scene.fog.far = 0;
+            }
+        }
 
-    if (pm.next == "true") {
-      this.kag.ftag.nextOrder();
-    }
-  },
+        if (pm.next == "true") {
+            this.kag.ftag.nextOrder();
+        }
+    },
 };
 
 /*
@@ -3298,63 +3297,63 @@ lookat=シーン上の3Dオブジェクトのnameを指定して、そのオブ�
 
 //カメラの設定を変更
 tyrano.plugin.kag.tag["3d_camera"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    pos: "", // 100,40,50
-    rot: "", //
-    lookat: "", //モデル名を設定。どの場所をみるか。 モデル名　か positionを直指定。
+    pm: {
+        pos: "", // 100,40,50
+        rot: "", //
+        lookat: "", //モデル名を設定。どの場所をみるか。 モデル名　か positionを直指定。
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var camera = three.camera;
-    var renderer = three.renderer;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var camera = three.camera;
+        var renderer = three.renderer;
 
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      camera.position.set(pos.x, pos.y, pos.z);
-    }
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            camera.position.set(pos.x, pos.y, pos.z);
+        }
 
-    /*
-			if(pm.scale!=""){
-				let scale = $.three_pos(pm.scale);
-					camera.scale.set(scale.x,scale.y,scale.z);
-	}
-	*/
+        /*
+if(pm.scale!=""){
+let scale = $.three_pos(pm.scale);
+camera.scale.set(scale.x,scale.y,scale.z);
+}
+*/
 
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      camera.rotation.set(rot.x, rot.y, rot.z);
-    }
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            camera.rotation.set(rot.x, rot.y, rot.z);
+        }
 
-    if (pm.lookat != "") {
-      var pos = {
-        x: 0,
-        y: 0,
-        z: 0,
-      };
+        if (pm.lookat != "") {
+            var pos = {
+                x: 0,
+                y: 0,
+                z: 0,
+            };
 
-      if (three.models[pm.lookat]) {
-        var model = TYRANO.kag.tmp.three.models[pm.lookat].model;
+            if (three.models[pm.lookat]) {
+                var model = TYRANO.kag.tmp.three.models[pm.lookat].model;
 
-        pos.x = model.position.x;
-        pos.y = model.position.y;
-        pos.z = model.position.z;
-      } else {
-        //座標を直接し指定
-        pos = $.three_pos(pm.lookat);
-      }
+                pos.x = model.position.x;
+                pos.y = model.position.y;
+                pos.z = model.position.z;
+            } else {
+                //座標を直接し指定
+                pos = $.three_pos(pm.lookat);
+            }
 
-      camera.lookAt(new THREE.Vector3(pos.x, pos.y, pos.z));
-    }
+            camera.lookAt(new THREE.Vector3(pos.x, pos.y, pos.z));
+        }
 
-    if (pm.next == "true") {
-      this.kag.ftag.nextOrder();
-    }
-  },
+        if (pm.next == "true") {
+            this.kag.ftag.nextOrder();
+        }
+    },
 };
 
 /*
@@ -3385,246 +3384,242 @@ mode=position か rotation を指定します。傾きに対してカメラに�
 
 //カメラの設定を変更
 (tyrano.plugin.kag.tag["3d_gyro"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    max_x: "30",
-    max_y: "30",
+    pm: {
+        max_x: "30",
+        max_y: "30",
 
-    mode: "rotation", // rotation or position
+        mode: "rotation", // rotation or position
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var camera = three.camera;
-    var renderer = three.renderer;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var camera = three.camera;
+        var renderer = three.renderer;
 
-    //ジャイロ設定
-    if (true) {
-      const GyroMonitor = (device_type) => {
-        //var first_pos = {x:}
-        var first_beta = 0;
-        var first_gamma = 0;
-        var first_flag = true;
-        var cnt = 0;
+        //ジャイロ設定
+        if (true) {
+            const GyroMonitor = (device_type) => {
+                //var first_pos = {x:}
+                var first_beta = 0;
+                var first_gamma = 0;
+                var first_flag = true;
+                var cnt = 0;
 
-        var max_y = parseFloat(pm.max_y);
-        var max_x = parseFloat(pm.max_x);
+                var max_y = parseFloat(pm.max_y);
+                var max_x = parseFloat(pm.max_x);
 
-        var default_camera_y = camera.rotation.y;
-        var default_camera_x = camera.rotation.x;
+                var default_camera_y = camera.rotation.y;
+                var default_camera_x = camera.rotation.x;
 
-        var default_camera_pos_y = camera.position.y;
-        var default_camera_pos_x = camera.position.x;
+                var default_camera_pos_y = camera.position.y;
+                var default_camera_pos_x = camera.position.x;
 
-        var angle = 0;
+                var angle = 0;
 
-        var frame = parseInt(pm.frame);
+                var frame = parseInt(pm.frame);
 
-        three.stat.gyro.pm = pm;
+                three.stat.gyro.pm = pm;
 
-        const orientEvent = (e) => {
-          //let angle_code = $.getAngle();
-          //console.log(angle);
+                const orientEvent = (e) => {
+                    //let angle_code = $.getAngle();
+                    //console.log(angle);
 
-          if (first_flag == true) {
-            first_flag = false;
-            first_beta = e.beta;
-            first_gamma = e.gamma;
+                    if (first_flag == true) {
+                        first_flag = false;
+                        first_beta = e.beta;
+                        first_gamma = e.gamma;
 
-            angle = this.kag.tmp.angle;
+                        angle = this.kag.tmp.angle;
 
-            if (pm.mode == "rotation") {
-              three.stat.gyro.mode = 1;
-            } else {
-              three.stat.gyro.mode = 2;
-            }
+                        if (pm.mode == "rotation") {
+                            three.stat.gyro.mode = 1;
+                        } else {
+                            three.stat.gyro.mode = 2;
+                        }
 
-            if (angle != 0) {
-              //値の入れ替え
-              [max_x, max_y] = [max_y, max_x];
-            } else {
-              max_x = pm.max_x;
-              max_y = pm.max_y;
-            }
-          }
+                        if (angle != 0) {
+                            //値の入れ替え
+                            [max_x, max_y] = [max_y, max_x];
+                        } else {
+                            max_x = pm.max_x;
+                            max_y = pm.max_y;
+                        }
+                    }
 
-          if (angle != this.kag.tmp.angle) {
-            first_flag = true;
-            return;
-          }
+                    if (angle != this.kag.tmp.angle) {
+                        first_flag = true;
+                        return;
+                    }
 
-          if (angle != 0) {
-            var t_gamma = e.gamma;
+                    if (angle != 0) {
+                        var t_gamma = e.gamma;
 
-            if (angle == -90) {
-              if (t_gamma < 0) {
-                return;
-              }
-            } else if (angle == 90) {
-              if (t_gamma > 0) {
-                return;
-              }
-            }
-          }
+                        if (angle == -90) {
+                            if (t_gamma < 0) {
+                                return;
+                            }
+                        } else if (angle == 90) {
+                            if (t_gamma > 0) {
+                                return;
+                            }
+                        }
+                    }
 
-          var hen_y = first_beta - e.beta;
-          var hen_x = first_gamma - e.gamma;
+                    var hen_y = first_beta - e.beta;
+                    var hen_x = first_gamma - e.gamma;
 
-          if (Math.abs(hen_y) > max_y) {
-            if (hen_y > 0) {
-              hen_y = max_y;
-            } else {
-              hen_y = -1 * max_y;
-            }
-          }
+                    if (Math.abs(hen_y) > max_y) {
+                        if (hen_y > 0) {
+                            hen_y = max_y;
+                        } else {
+                            hen_y = -1 * max_y;
+                        }
+                    }
 
-          if (Math.abs(hen_x) > max_x) {
-            if (hen_x > 0) {
-              hen_x = max_x;
-            } else {
-              hen_x = -1 * max_x;
-            }
-          }
+                    if (Math.abs(hen_x) > max_x) {
+                        if (hen_x > 0) {
+                            hen_x = max_x;
+                        } else {
+                            hen_x = -1 * max_x;
+                        }
+                    }
 
-          //カメラのローテーション
-          var gyro_x = 0;
-          var gyro_y = 0;
+                    //カメラのローテーション
+                    var gyro_x = 0;
+                    var gyro_y = 0;
 
-          if (three.stat.gyro.mode == 1) {
-            //縦持ち
-            if (angle == 0) {
-              gyro_y = default_camera_x - hen_x * (Math.PI / 180);
-              gyro_x = default_camera_y - hen_y * (Math.PI / 180);
-            } else if (angle == -90) {
-              gyro_y = default_camera_y + hen_y * (Math.PI / 180);
-              gyro_x = default_camera_x - hen_x * (Math.PI / 180);
-            } else if (angle == 90) {
-              gyro_y = default_camera_y + hen_y * -1 * (Math.PI / 180);
-              gyro_x = default_camera_x - hen_x * -1 * (Math.PI / 180);
-            }
-          } else if (three.stat.gyro.mode == 2) {
-            //縦持ち
-            if (angle == 0) {
-              //position  変更
-              gyro_x = default_camera_pos_y + hen_x * 10;
-              gyro_y = default_camera_pos_x + hen_y * 10;
-            } else if (angle == -90) {
-              gyro_y = default_camera_pos_y + hen_x * 10;
-              gyro_x = default_camera_pos_x + hen_y * 10;
-            } else if (angle == 90) {
-              //position  変更
-              gyro_y = default_camera_pos_y + hen_x * 10;
-              gyro_x = default_camera_pos_x + hen_y * 10;
-            }
-          }
+                    if (three.stat.gyro.mode == 1) {
+                        //縦持ち
+                        if (angle == 0) {
+                            gyro_y = default_camera_x - hen_x * (Math.PI / 180);
+                            gyro_x = default_camera_y - hen_y * (Math.PI / 180);
+                        } else if (angle == -90) {
+                            gyro_y = default_camera_y + hen_y * (Math.PI / 180);
+                            gyro_x = default_camera_x - hen_x * (Math.PI / 180);
+                        } else if (angle == 90) {
+                            gyro_y = default_camera_y + hen_y * -1 * (Math.PI / 180);
+                            gyro_x = default_camera_x - hen_x * -1 * (Math.PI / 180);
+                        }
+                    } else if (three.stat.gyro.mode == 2) {
+                        //縦持ち
+                        if (angle == 0) {
+                            //position  変更
+                            gyro_x = default_camera_pos_y + hen_x * 10;
+                            gyro_y = default_camera_pos_x + hen_y * 10;
+                        } else if (angle == -90) {
+                            gyro_y = default_camera_pos_y + hen_x * 10;
+                            gyro_x = default_camera_pos_x + hen_y * 10;
+                        } else if (angle == 90) {
+                            //position  変更
+                            gyro_y = default_camera_pos_y + hen_x * 10;
+                            gyro_x = default_camera_pos_x + hen_y * 10;
+                        }
+                    }
 
-          three.stat.gyro.x = gyro_x;
-          three.stat.gyro.y = gyro_y;
-        };
+                    three.stat.gyro.x = gyro_x;
+                    three.stat.gyro.y = gyro_y;
+                };
 
-        var sc_width = parseInt(this.kag.config.scWidth);
-        var sc_height = parseInt(this.kag.config.scHeight);
+                var sc_width = parseInt(this.kag.config.scWidth);
+                var sc_height = parseInt(this.kag.config.scHeight);
 
-        var sc_x = sc_width / 2;
-        var sc_y = sc_height / 2;
+                var sc_x = sc_width / 2;
+                var sc_y = sc_height / 2;
 
-        //PC版のイベントマウス動かします。
-        const mouseMoveEvent = (e) => {
-          //マウスがどう動いたか
-          var x = e.clientX;
-          var y = e.clientY;
+                //PC版のイベントマウス動かします。
+                const mouseMoveEvent = (e) => {
+                    //マウスがどう動いたか
+                    var x = e.clientX;
+                    var y = e.clientY;
 
-          x = x - sc_x;
-          y = (y - sc_y) * -1;
+                    x = x - sc_x;
+                    y = (y - sc_y) * -1;
 
-          //-1 〜 1 の間で進捗を出す。
-          var p_x = x / sc_x;
-          var p_y = y / sc_y;
+                    //-1 〜 1 の間で進捗を出す。
+                    var p_x = x / sc_x;
+                    var p_y = y / sc_y;
 
-          //座標を調整する。
-          var max_x = parseFloat(pm.max_x);
-          var max_y = parseFloat(pm.max_y);
+                    //座標を調整する。
+                    var max_x = parseFloat(pm.max_x);
+                    var max_y = parseFloat(pm.max_y);
 
-          var gyro_x = 0;
-          var gyro_y = 0;
+                    var gyro_x = 0;
+                    var gyro_y = 0;
 
-          if (first_flag == true) {
-            first_flag = false;
+                    if (first_flag == true) {
+                        first_flag = false;
 
-            if (pm.mode == "rotation") {
-              three.stat.gyro.mode = 1;
-            } else {
-              three.stat.gyro.mode = 2;
-            }
-          }
+                        if (pm.mode == "rotation") {
+                            three.stat.gyro.mode = 1;
+                        } else {
+                            three.stat.gyro.mode = 2;
+                        }
+                    }
 
-          //最大値以上になってたら、止める
-          if (three.stat.gyro.mode == 1) {
-            //rotation 変更
-            gyro_x = default_camera_x + max_x * p_x * (Math.PI / 180);
-            gyro_y = default_camera_y - max_y * p_y * (Math.PI / 180);
-          } else if (three.stat.gyro.mode == 2) {
-            //position  変更
-            gyro_y = default_camera_pos_x + max_x * p_x;
-            gyro_x = default_camera_pos_y + max_y * p_y;
-          }
+                    //最大値以上になってたら、止める
+                    if (three.stat.gyro.mode == 1) {
+                        //rotation 変更
+                        gyro_x = default_camera_x + max_x * p_x * (Math.PI / 180);
+                        gyro_y = default_camera_y - max_y * p_y * (Math.PI / 180);
+                    } else if (three.stat.gyro.mode == 2) {
+                        //position  変更
+                        gyro_y = default_camera_pos_x + max_x * p_x;
+                        gyro_x = default_camera_pos_y + max_y * p_y;
+                    }
 
-          three.stat.gyro.x = gyro_y;
-          three.stat.gyro.y = gyro_x;
-        };
+                    three.stat.gyro.x = gyro_y;
+                    three.stat.gyro.y = gyro_x;
+                };
 
-        if (device_type == "pc") {
-          //イベントの登録と削除。マシンの場合
-          $(".tyrano_base")
-            .get(0)
-            .removeEventListener("mousemove", mouseMoveEvent);
-          $(".tyrano_base")
-            .get(0)
-            .addEventListener("mousemove", mouseMoveEvent, true);
-        } else {
-          //スマホの場合
-          window.removeEventListener("deviceorientation", orientEvent);
-          window.addEventListener("deviceorientation", orientEvent, true);
+                if (device_type == "pc") {
+                    //イベントの登録と削除。マシンの場合
+                    $(".tyrano_base").get(0).removeEventListener("mousemove", mouseMoveEvent);
+                    $(".tyrano_base").get(0).addEventListener("mousemove", mouseMoveEvent, true);
+                } else {
+                    //スマホの場合
+                    window.removeEventListener("deviceorientation", orientEvent);
+                    window.addEventListener("deviceorientation", orientEvent, true);
+                }
+            };
+
+            const requestDeviceMotionPermission = () => {
+                //PCと
+                if ($.userenv() != "pc") {
+                    if (DeviceMotionEvent) {
+                        if (typeof DeviceMotionEvent.requestPermission === "function") {
+                            DeviceMotionEvent.requestPermission()
+                                .then((permissionState) => {
+                                    if (permissionState === "granted") {
+                                        GyroMonitor("sp");
+                                    } else {
+                                        // 許可を得られなかった場合の処理
+                                    }
+                                })
+                                .catch(console.error); // https通信でない場合などで許可を取得できなかった場合
+                        } else {
+                            //アンドロイド
+                            GyroMonitor("sp");
+                        }
+                    } else {
+                    }
+                } else {
+                    GyroMonitor("pc");
+                }
+            };
+
+            requestDeviceMotionPermission();
         }
-      };
 
-      const requestDeviceMotionPermission = () => {
-        //PCと
-        if ($.userenv() != "pc") {
-          if (DeviceMotionEvent) {
-            if (typeof DeviceMotionEvent.requestPermission === "function") {
-              DeviceMotionEvent.requestPermission()
-                .then((permissionState) => {
-                  if (permissionState === "granted") {
-                    GyroMonitor("sp");
-                  } else {
-                    // 許可を得られなかった場合の処理
-                  }
-                })
-                .catch(console.error); // https通信でない場合などで許可を取得できなかった場合
-            } else {
-              //アンドロイド
-              GyroMonitor("sp");
-            }
-          } else {
-          }
-        } else {
-          GyroMonitor("pc");
+        if (pm.next == "true") {
+            this.kag.ftag.nextOrder();
         }
-      };
-
-      requestDeviceMotionPermission();
-    }
-
-    if (pm.next == "true") {
-      this.kag.ftag.nextOrder();
-    }
-  },
+    },
 }),
-  /*
+    /*
 #[3d_gyro_stop]
 :group
 3D関連
@@ -3647,28 +3642,28 @@ mode=position か rotation を指定します。傾きに対してカメラに�
 #[end]
 */
 
-  //カメラの設定を変更
-  (tyrano.plugin.kag.tag["3d_gyro_stop"] = {
-    vital: [],
+    //カメラの設定を変更
+    (tyrano.plugin.kag.tag["3d_gyro_stop"] = {
+        vital: [],
 
-    pm: {
-      max_x: "30",
-      max_y: "30",
-      frame: "1",
-      next: "true",
-    },
+        pm: {
+            max_x: "30",
+            max_y: "30",
+            frame: "1",
+            next: "true",
+        },
 
-    start: function (pm) {
-      var three = this.kag.tmp.three;
-      var camera = three.camera;
-      var renderer = three.renderer;
+        start: function (pm) {
+            var three = this.kag.tmp.three;
+            var camera = three.camera;
+            var renderer = three.renderer;
 
-      three.stat.gyro.mode = 0;
+            three.stat.gyro.mode = 0;
 
-      this.kag.ftag.nextOrder();
-    },
-  }),
-  /*
+            this.kag.ftag.nextOrder();
+        },
+    }),
+    /*
 #[3d_debug_camera]
 :group
 3D関連
@@ -3698,360 +3693,325 @@ menu=デバッグのメニューを表示するか否か。falseを指定する�
 #[end]
 */
 
-  (tyrano.plugin.kag.tag["3d_debug_camera"] = {
-    vital: [],
+    (tyrano.plugin.kag.tag["3d_debug_camera"] = {
+        vital: [],
 
-    pm: {
-      name: "camera",
-      button_text: "カメラインスペクタを閉じる",
-      menu: "true",
-      menu_close: "true",
+        pm: {
+            name: "camera",
+            button_text: "カメラインスペクタを閉じる",
+            menu: "true",
+            menu_close: "true",
 
-      rotate: "true", //回転
-      move: "true", //カメラ移動
-    },
+            rotate: "true", //回転
+            move: "true", //カメラ移動
+        },
 
-    start: function (pm) {
-      var three = this.kag.tmp.three;
+        start: function (pm) {
+            var three = this.kag.tmp.three;
 
-      //一番前にもってきて、うごかせるようにする。
-      var j_canvas = three.j_canvas;
-      var target_layer = three.target_layer;
+            //一番前にもってきて、うごかせるようにする。
+            var j_canvas = three.j_canvas;
+            var target_layer = three.target_layer;
 
-      var old_target_layer_zindex = target_layer.css("z-index");
-      var old_canvas_zindex = j_canvas.css("z-index");
+            var old_target_layer_zindex = target_layer.css("z-index");
+            var old_canvas_zindex = j_canvas.css("z-index");
 
-      //j_canvas.css("z-index",9999999);
-      //target_layer.css("z-index",9999999);
+            //j_canvas.css("z-index",9999999);
+            //target_layer.css("z-index",9999999);
 
-      var model_obj = this.kag.tmp.three.models[pm.name];
-      var model = model_obj.model;
+            var model_obj = this.kag.tmp.three.models[pm.name];
+            var model = model_obj.model;
 
-      var renderer = three.renderer;
-      var camera = three.camera;
+            var renderer = three.renderer;
+            var camera = three.camera;
 
-      var sc_width = parseInt(this.kag.config.scWidth);
-      var sc_height = parseInt(this.kag.config.scHeight);
+            var sc_width = parseInt(this.kag.config.scWidth);
+            var sc_height = parseInt(this.kag.config.scHeight);
 
-      // オブジェクトの回転
-      var prevPosition = {};
-      var mousedown = false;
-      var button = 0;
+            // オブジェクトの回転
+            var prevPosition = {};
+            var mousedown = false;
+            var button = 0;
 
-      //オブジェクトの移動
-      var vec = new THREE.Vector3(); // create once and reuse
-      var pos = new THREE.Vector3(); // create once and reuse
+            //オブジェクトの移動
+            var vec = new THREE.Vector3(); // create once and reuse
+            var pos = new THREE.Vector3(); // create once and reuse
 
-      var original_pos = new THREE.Vector3(); // create once and reuse
+            var original_pos = new THREE.Vector3(); // create once and reuse
 
-      var hen_pos = {
-        x: 0,
-        y: 0,
-        z: 0,
-      };
+            var hen_pos = {
+                x: 0,
+                y: 0,
+                z: 0,
+            };
 
-      var original_v = $.setVector(model);
+            var original_v = $.setVector(model);
 
-      var first_client_x = 0;
-      var first_client_y = 0;
+            var first_client_x = 0;
+            var first_client_y = 0;
 
-      var spot_client_x = 0;
-      var spot_client_y = 0;
-      var spot_client_z = 0;
+            var spot_client_x = 0;
+            var spot_client_y = 0;
+            var spot_client_z = 0;
 
-      var first_model_x = 0;
-      var first_model_y = 0;
-      var first_model_z = 0;
+            var first_model_x = 0;
+            var first_model_y = 0;
+            var first_model_z = 0;
 
-      function evt_mousewheel(e) {
-        return false;
+            function evt_mousewheel(e) {
+                return false;
 
-        var delta = e.wheelDelta;
+                var delta = e.wheelDelta;
 
-        if (delta < 0) {
-          model.translateZ(+20);
-        } else {
-          model.translateZ(-20);
-        }
+                if (delta < 0) {
+                    model.translateZ(+20);
+                } else {
+                    model.translateZ(-20);
+                }
 
-        evt_mouseup();
-        e.preventDefault();
-      }
-
-      function evt_mousedown(e) {
-        if (e.button == 0 && pm.rotate == "true") {
-          button = 0;
-
-          first_client_x = e.clientX;
-          first_client_y = e.clientY;
-
-          first_model_x = model.rotation.x;
-          first_model_y = model.rotation.y;
-
-          $(".panel_chat").css("pointer-events", "none");
-        } else if (e.button == 1 && pm.move == "true") {
-          //target.innerHTML = "中ボタンが押されました。";
-          button = 1;
-          first_client_y = e.clientY;
-          first_model_z = model.position.z;
-        } else if (e.button == 2 && pm.move == "true") {
-          button = 2;
-
-          first_client_x = e.clientX;
-          first_client_y = e.clientY;
-
-          first_model_x = model.position.x;
-          first_model_y = model.position.y;
-        } else {
-          mousedown = false;
-          return;
-        }
-
-        mousedown = true;
-      }
-
-      function evt_mousemove(e) {
-        if (three.stat.fps.move_trans_control == true) {
-          return;
-        }
-
-        if (!mousedown) return;
-
-        //視点移動中はマウスイベントを無効にする処理
-        three.stat.start_event = false;
-
-        if (button == 0) {
-          var hen_x = first_client_x - e.clientX;
-          model.rotation.y = first_model_y + hen_x * 0.005;
-
-          var hen_y = first_client_y - e.clientY;
-          model.rotation.x = first_model_x + hen_y * 0.005;
-        } else if (button == 1) {
-          if (spot_client_y != 0) {
-            model.translateZ((spot_client_y - e.clientY) * -1);
-          }
-          spot_client_y = e.clientY;
-
-          //var hen_y = first_client_y - e.clientY;
-          //model.position.z = first_model_z + hen_y;
-        } else if (button == 2) {
-          /*
-			var hen_x = first_client_x - e.clientX;
-					model.position.x = first_model_x + hen_x * 1;
-					
-							var hen_y = first_client_y - e.clientY;
-					model.position.y = first_model_y + hen_y * -1;
-					
-					model.position.x = $.orgFloor(model.position.x, 1);
-							model.position.y = $.orgFloor(model.position.y, 1);
-			
-			*/
-
-          if (spot_client_x != 0) {
-            model.translateX(spot_client_x - e.clientX);
-          }
-          spot_client_x = e.clientX;
-
-          if (spot_client_y != 0) {
-            model.translateY((spot_client_y - e.clientY) * -1);
-          }
-          spot_client_y = e.clientY;
-        }
-      }
-
-      function evt_mouseup(e) {
-        first_client_x = 0;
-        first_client_y = 0;
-
-        if (button == 0) {
-          var str =
-            $.orgFloor(model.rotation.x, 100) +
-            "," +
-            $.orgFloor(model.rotation.y, 100) +
-            "," +
-            model.rotation.z;
-
-          $(".panel_chat").css("pointer-events", "");
-        } else if (button == 2 || button == 1) {
-          spot_client_x = 0;
-          spot_client_y = 0;
-        }
-
-        var msg_pos =
-          model.position.x + "," + model.position.y + "," + model.position.z;
-        var msg_rot =
-          $.orgFloor(model.rotation.x, 100) +
-          "," +
-          $.orgFloor(model.rotation.y, 100) +
-          "," +
-          $.orgFloor(model.rotation.z, 100);
-        var msg_scale =
-          $.orgFloor(model.scale.x, 100) +
-          "," +
-          $.orgFloor(model.scale.y, 100) +
-          "," +
-          $.orgFloor(model.scale.z, 100);
-
-        var msg =
-          'pos="' +
-          msg_pos +
-          '" rot="' +
-          msg_rot +
-          '" scale="' +
-          msg_scale +
-          '" ';
-        j_debug_msg.find("input").val(msg);
-
-        mousedown = false;
-
-        //視点移動中はマウスイベントを無効にする
-        if (three.stat.fps.is_fps_studio == true) {
-          three.stat.start_event = true;
-        }
-
-        setTimeout((e) => {
-          three.stat.start_event = true;
-        }, 500);
-      }
-
-      ///マウスホイール
-      // Check if the device support the touch or not
-      if ("ontouchstart" in document.documentElement) {
-        /*
-		canvas.addEventListener("touchstart", onTouchStart, false);
-		canvas.addEventListener("touchmove", onTouchMove, false);
-		canvas.addEventListener("touchend", onTouchEnd, false);
-		*/
-
-        renderer.domElement.addEventListener(
-          "touchstart",
-          function (e) {
-            evt_mouseup();
-
-            for (let key in e.touches) {
-              let touche = e.touches[key];
-              if (touche.target.id == "three") {
-                touche.button = 0;
-                evt_mousedown(touche);
-                break;
-              }
+                evt_mouseup();
+                e.preventDefault();
             }
-          },
-          false
-        );
 
-        renderer.domElement.addEventListener(
-          "touchend",
-          function (e) {
-            evt_mouseup();
-          },
-          false
-        );
+            function evt_mousedown(e) {
+                if (e.button == 0 && pm.rotate == "true") {
+                    button = 0;
 
-        renderer.domElement.addEventListener(
-          "touchmove",
-          function (e) {
-            for (let key in e.touches) {
-              let touche = e.touches[key];
-              if (touche.target.id == "three") {
-                touche.button = 0;
-                evt_mousemove(touche);
-                break;
-              }
+                    first_client_x = e.clientX;
+                    first_client_y = e.clientY;
+
+                    first_model_x = model.rotation.x;
+                    first_model_y = model.rotation.y;
+
+                    $(".panel_chat").css("pointer-events", "none");
+                } else if (e.button == 1 && pm.move == "true") {
+                    //target.innerHTML = "中ボタンが押されました。";
+                    button = 1;
+                    first_client_y = e.clientY;
+                    first_model_z = model.position.z;
+                } else if (e.button == 2 && pm.move == "true") {
+                    button = 2;
+
+                    first_client_x = e.clientX;
+                    first_client_y = e.clientY;
+
+                    first_model_x = model.position.x;
+                    first_model_y = model.position.y;
+                } else {
+                    mousedown = false;
+                    return;
+                }
+
+                mousedown = true;
             }
-          },
-          false
-        );
-      } else {
-        window.addEventListener("mousewheel", evt_mousewheel, false);
-        window.addEventListener("mousedown", evt_mousedown, false);
-        window.addEventListener("mouseup", evt_mouseup, false);
-        window.addEventListener("mousemove", evt_mousemove, false);
-      }
 
-      //デバッグ終了ボタンを押すと、nextOrderする。
-      //リロードボタンの配置
-      //メッセージエリア非表示。
+            function evt_mousemove(e) {
+                if (three.stat.fps.move_trans_control == true) {
+                    return;
+                }
 
-      var j_close_button = $(
-        "<div class='area_three_debug' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
-          pm.button_text +
-          "</span></button></div>"
-      );
-      j_close_button.draggable({
-        scroll: false,
-        //containment:".tyrano_base",
-        stop: (e, ui) => {},
-      });
+                if (!mousedown) return;
 
-      var j_debug_msg = $(
-        "<div style='padding:5px'><input type='text' style='width:320px' /></div>"
-      );
-      var j_copy_button = $("<input type='button' value='コピー' />");
+                //視点移動中はマウスイベントを無効にする処理
+                three.stat.start_event = false;
 
-      j_copy_button.on("click", (e) => {
-        evt_mouseup();
+                if (button == 0) {
+                    var hen_x = first_client_x - e.clientX;
+                    model.rotation.y = first_model_y + hen_x * 0.005;
 
-        j_debug_msg.find("input").select();
-        // コピー
-        document.execCommand("copy");
-      });
+                    var hen_y = first_client_y - e.clientY;
+                    model.rotation.x = first_model_x + hen_y * 0.005;
+                } else if (button == 1) {
+                    if (spot_client_y != 0) {
+                        model.translateZ((spot_client_y - e.clientY) * -1);
+                    }
+                    spot_client_y = e.clientY;
 
-      var j_reset_button = $("<input type='button' value='リセット' />");
-      j_reset_button.on("click", (e) => {
-        //モデルを最初の位置に戻す
-        //document.execCommand("copy");
-        model.position.set(
-          original_v.pos.x,
-          original_v.pos.y,
-          original_v.pos.z
-        );
-        model.rotation.set(
-          original_v.rot.x,
-          original_v.rot.y,
-          original_v.rot.z
-        );
-        model.scale.set(
-          original_v.scale.x,
-          original_v.scale.y,
-          original_v.scale.z
-        );
-      });
+                    //var hen_y = first_client_y - e.clientY;
+                    //model.position.z = first_model_z + hen_y;
+                } else if (button == 2) {
+                    /*
+var hen_x = first_client_x - e.clientX;
+model.position.x = first_model_x + hen_x * 1;
 
-      j_close_button.find("button").on("click", (e) => {
-        j_close_button.remove();
+var hen_y = first_client_y - e.clientY;
+model.position.y = first_model_y + hen_y * -1;
 
-        j_canvas.css("z-index", old_canvas_zindex);
-        target_layer.css("z-index", old_target_layer_zindex);
+model.position.x = $.orgFloor(model.position.x, 1);
+model.position.y = $.orgFloor(model.position.y, 1);
 
-        renderer.domElement.removeEventListener("mousedown", evt_mousedown);
-        renderer.domElement.removeEventListener("mouseup", evt_mouseup);
-        renderer.domElement.removeEventListener("mousemove", evt_mousemove);
-        renderer.domElement.removeEventListener("mousewheel", evt_mousewheel);
+*/
 
-        this.kag.ftag.nextOrder();
-      });
+                    if (spot_client_x != 0) {
+                        model.translateX(spot_client_x - e.clientX);
+                    }
+                    spot_client_x = e.clientX;
 
-      if (pm.menu == "true") {
-        j_close_button.append("<span style='font-size:10px'>｜</span>");
-        j_close_button.append(j_copy_button);
-        j_close_button.append(j_reset_button);
-        j_close_button.append(j_debug_msg);
-      }
+                    if (spot_client_y != 0) {
+                        model.translateY((spot_client_y - e.clientY) * -1);
+                    }
+                    spot_client_y = e.clientY;
+                }
+            }
 
-      if (pm.menu_close == "false") {
-        this.kag.ftag.nextOrder();
-        j_close_button.hide();
-      }
+            function evt_mouseup(e) {
+                first_client_x = 0;
+                first_client_y = 0;
 
-      if (three.stat.fps.active == true) {
-        three.stat.start_event = true;
-        this.kag.stat.is_strong_stop = true;
-      }
+                if (button == 0) {
+                    var str = $.orgFloor(model.rotation.x, 100) + "," + $.orgFloor(model.rotation.y, 100) + "," + model.rotation.z;
 
-      $("body").append(j_close_button);
-    },
-  });
+                    $(".panel_chat").css("pointer-events", "");
+                } else if (button == 2 || button == 1) {
+                    spot_client_x = 0;
+                    spot_client_y = 0;
+                }
+
+                var msg_pos = model.position.x + "," + model.position.y + "," + model.position.z;
+                var msg_rot =
+                    $.orgFloor(model.rotation.x, 100) + "," + $.orgFloor(model.rotation.y, 100) + "," + $.orgFloor(model.rotation.z, 100);
+                var msg_scale =
+                    $.orgFloor(model.scale.x, 100) + "," + $.orgFloor(model.scale.y, 100) + "," + $.orgFloor(model.scale.z, 100);
+
+                var msg = 'pos="' + msg_pos + '" rot="' + msg_rot + '" scale="' + msg_scale + '" ';
+                j_debug_msg.find("input").val(msg);
+
+                mousedown = false;
+
+                //視点移動中はマウスイベントを無効にする
+                if (three.stat.fps.is_fps_studio == true) {
+                    three.stat.start_event = true;
+                }
+
+                setTimeout((e) => {
+                    three.stat.start_event = true;
+                }, 500);
+            }
+
+            ///マウスホイール
+            // Check if the device support the touch or not
+            if ("ontouchstart" in document.documentElement) {
+                /*
+canvas.addEventListener("touchstart", onTouchStart, false);
+canvas.addEventListener("touchmove", onTouchMove, false);
+canvas.addEventListener("touchend", onTouchEnd, false);
+*/
+
+                renderer.domElement.addEventListener(
+                    "touchstart",
+                    function (e) {
+                        evt_mouseup();
+
+                        for (let key in e.touches) {
+                            let touche = e.touches[key];
+                            if (touche.target.id == "three") {
+                                touche.button = 0;
+                                evt_mousedown(touche);
+                                break;
+                            }
+                        }
+                    },
+                    false,
+                );
+
+                renderer.domElement.addEventListener(
+                    "touchend",
+                    function (e) {
+                        evt_mouseup();
+                    },
+                    false,
+                );
+
+                renderer.domElement.addEventListener(
+                    "touchmove",
+                    function (e) {
+                        for (let key in e.touches) {
+                            let touche = e.touches[key];
+                            if (touche.target.id == "three") {
+                                touche.button = 0;
+                                evt_mousemove(touche);
+                                break;
+                            }
+                        }
+                    },
+                    false,
+                );
+            } else {
+                window.addEventListener("mousewheel", evt_mousewheel, false);
+                window.addEventListener("mousedown", evt_mousedown, false);
+                window.addEventListener("mouseup", evt_mouseup, false);
+                window.addEventListener("mousemove", evt_mousemove, false);
+            }
+
+            //デバッグ終了ボタンを押すと、nextOrderする。
+            //リロードボタンの配置
+            //メッセージエリア非表示。
+
+            var j_close_button = $(
+                "<div class='area_three_debug' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
+                    pm.button_text +
+                    "</span></button></div>",
+            );
+            j_close_button.draggable({
+                scroll: false,
+                //containment:".tyrano_base",
+                stop: (e, ui) => {},
+            });
+
+            var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
+            var j_copy_button = $("<input type='button' value='コピー' />");
+
+            j_copy_button.on("click", (e) => {
+                evt_mouseup();
+
+                j_debug_msg.find("input").select();
+                // コピー
+                document.execCommand("copy");
+            });
+
+            var j_reset_button = $("<input type='button' value='リセット' />");
+            j_reset_button.on("click", (e) => {
+                //モデルを最初の位置に戻す
+                //document.execCommand("copy");
+                model.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z);
+                model.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z);
+                model.scale.set(original_v.scale.x, original_v.scale.y, original_v.scale.z);
+            });
+
+            j_close_button.find("button").on("click", (e) => {
+                j_close_button.remove();
+
+                j_canvas.css("z-index", old_canvas_zindex);
+                target_layer.css("z-index", old_target_layer_zindex);
+
+                renderer.domElement.removeEventListener("mousedown", evt_mousedown);
+                renderer.domElement.removeEventListener("mouseup", evt_mouseup);
+                renderer.domElement.removeEventListener("mousemove", evt_mousemove);
+                renderer.domElement.removeEventListener("mousewheel", evt_mousewheel);
+
+                this.kag.ftag.nextOrder();
+            });
+
+            if (pm.menu == "true") {
+                j_close_button.append("<span style='font-size:10px'>｜</span>");
+                j_close_button.append(j_copy_button);
+                j_close_button.append(j_reset_button);
+                j_close_button.append(j_debug_msg);
+            }
+
+            if (pm.menu_close == "false") {
+                this.kag.ftag.nextOrder();
+                j_close_button.hide();
+            }
+
+            if (three.stat.fps.active == true) {
+                three.stat.start_event = true;
+                this.kag.stat.is_strong_stop = true;
+            }
+
+            $("body").append(j_close_button);
+        },
+    });
 
 /*
 #[3d_motion]
@@ -4084,24 +4044,24 @@ motion=モーション名を指定してください。
 */
 
 tyrano.plugin.kag.tag["3d_motion"] = {
-  vital: ["name", "motion"],
+    vital: ["name", "motion"],
 
-  pm: {
-    name: "",
-    motion: "",
-  },
+    pm: {
+        name: "",
+        motion: "",
+    },
 
-  start: function (pm) {
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+    start: function (pm) {
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    var three = this.kag.tmp.three;
+        var three = this.kag.tmp.three;
 
-    this.kag.tmp.three.models[pm.name].setMotion(pm.motion);
+        this.kag.tmp.three.models[pm.name].setMotion(pm.motion);
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -4141,452 +4101,426 @@ reset=true or false。trueを指定するとデバッグが終わった後、モ
 */
 
 tyrano.plugin.kag.tag["3d_debug"] = {
-  vital: ["name"],
-
-  pm: {
-    name: "",
-    button_text: "閉",
-    menu: "true",
-    overlap: "false",
-    reset: "false",
-    control: "false",
-    orbit: "true",
-  },
-
-  start: function (pm) {
-    var that = this;
-
-    var three = this.kag.tmp.three;
-
-    //一番前にもってきて、うごかせるようにする。
-    var j_canvas = three.j_canvas;
-    var target_layer = three.target_layer;
-
-    var old_target_layer_zindex = target_layer.css("z-index");
-    var old_canvas_zindex = j_canvas.css("z-index");
-
-    /*
-	j_canvas.css("z-index",9999999);
-	target_layer.css("z-index",9999999);
-	*/
-
-    console.log("three wwwwwwwwwwwwww");
-    console.log(pm);
-    console.log(this.kag.tmp.three.models);
-
-    var model_obj = this.kag.tmp.three.models[pm.name];
-
-    console.log(model_obj);
-
-    var model = model_obj.model;
-
-    console.log(model_obj);
-
-    //選択されたらそれを上位に通知 FPSが有効なときだけ
-
-    if (this.kag.tmp.three.stat.fps.is_fps_studio) {
-      TYRANO.kag.studio.selectObject(pm.name, model_obj);
-    }
-
-    var renderer = three.renderer;
-    var camera = three.camera;
-
-    var sc_width = parseInt(this.kag.config.scWidth);
-    var sc_height = parseInt(this.kag.config.scHeight);
-
-    var direction_rot = 0;
-
-    var original_v = $.setVector(model);
-
-    if (pm.orbit == "true" && typeof three.orbit == "undefined") {
-      let orbit = new THREE.OrbitControls(camera, renderer.domElement);
-      orbit.screenSpacePanning = true;
-      orbit.rotateSpeed = 0.7;
-
-      orbit.panSpeed = 2;
-
-      //ズーム操作禁止
-      orbit.enableZoom = true;
-
-      orbit.addEventListener("change", (e) => {
-        three.stat.start_event = false;
-      });
-
-      orbit.addEventListener("end", (e) => {
-        setTimeout((e) => {
-          three.stat.start_event = true;
-        }, 100);
-      });
-
-      three.orbit = orbit;
-
-      //イベント登録
-      /*
-		$("body").on("mousewheel",function(e){
-					
-						
-						var delta = e.originalEvent.deltaY ? -(e.originalEvent.deltaY) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : -(e.originalEvent.detail);
-						if (delta < 0){
-								
-								let direction = new THREE.Vector3;
-
-				let speed = 20.0;
-				three.camera.getWorldDirection(direction);
-				
-				direction.x = direction.x*-1;
-				direction.y = direction.y*-1;
-				direction.z = direction.z*-1;
-				
-				three.camera.position.addScaledVector(direction, speed);
-								
-						} else {
-								
-								let direction = new THREE.Vector3;
-
-				let speed = 20.0;
-				three.camera.getWorldDirection(direction);
-				
-				direction.x = direction.x;
-				direction.y = direction.y;
-				direction.z = direction.z;
-				
-				three.camera.position.addScaledVector(direction, speed);
-								
-						}
-						
-						//return false;
-						
-						
-				});
-		*/
-    }
-
-    //orbit.update();
-
-    let is_move_camera = false;
-
-    let control = new THREE.TransformControls(camera, renderer.domElement);
-    control.size = 1.5;
-
-    control.setTranslationSnap(20);
-    control.setRotationSnap(THREE.MathUtils.degToRad(15));
-    control.setScaleSnap(0.1);
-
-    //control.addEventListener('change', renderer);
-
-    control.addEventListener("dragging-changed", function (event) {
-      if (three.orbit) {
-        three.orbit.enabled = !event.value;
-      }
-
-      three.stat.fps.move_trans_control = event.value;
-
-      console.log(event.value);
-    });
-
-    control.addEventListener("mouseUp", (e, m) => {
-      console.log(e);
-      console.log(m);
-      console.log("mouseup!");
-
-      var msg_pos =
-        $.orgFloor(model.position.x, 100) +
-        "," +
-        $.orgFloor(model.position.y, 100) +
-        "," +
-        $.orgFloor(model.position.z, 100);
-      var msg_rot =
-        $.orgFloor(model.rotation.x, 100) +
-        "," +
-        $.orgFloor(model.rotation.y, 100) +
-        "," +
-        $.orgFloor(model.rotation.z, 100);
-      var msg_scale =
-        $.orgFloor(model.scale.x, 100) +
-        "," +
-        $.orgFloor(model.scale.y, 100) +
-        "," +
-        $.orgFloor(model.scale.z, 100);
-
-      //pmを更新する
-      var _pm = model_obj["pm"];
-      _pm["pos"] = msg_pos;
-      _pm["rot"] = msg_rot;
-      _pm["scale"] = msg_scale;
-      model_obj["pm"] = _pm;
-
-      var msg =
-        'pos="' +
-        msg_pos +
-        '" rot="' +
-        msg_rot +
-        '" scale="' +
-        msg_scale +
-        '" ';
-
-      //上位層に通知
-      var obj = that.kag.tmp.three.models[pm.name];
-
-      if (TYRANO.kag.studio.changeObject) {
-        TYRANO.kag.studio.changeObject(pm.name, obj);
-      }
-
-      setTimeout((e) => {
-        three.stat.start_event = true;
-      }, 100);
-    });
-
-    control.addEventListener("mouseDown", (e) => {
-      console.log(e);
-      console.log("mousedown!");
-
-      //マウス話したときにオブジェクト選択状態にしないため
-      three.stat.start_event = false;
-    });
-
-    //セレクタブルが無効の場合はコントロールなし
-    console.log(model_obj);
-
-    //if(model_obj.pm["_selectable"] != "false" ){
-
-    control.attach(model);
-    three.scene.add(control);
-
-    //}else{
-    //three.scene.add(model);
-    //}
-
-    //window.addEventListener( 'resize', onWindowResize );
-    window.addEventListener("keydown", function (event) {
-      switch (event.keyCode) {
-        case 16: //shift
-          control.setTranslationSnap(null);
-          control.setRotationSnap(null);
-          control.setScaleSnap(null);
-
-          break;
-
-        case 81: // Q
-          control.setSpace(control.space === "local" ? "world" : "local");
-          break;
-
-        case 70: // f
-          console.log("wwwwww");
-          three.orbit.screenSpacePanning = false;
-          break;
-
-        case 71: //g
-          if (three.orbit.screenSpacePanning == true) {
-            three.orbit.screenSpacePanning = false;
-          } else {
-            three.orbit.screenSpacePanning = true;
-          }
-          break;
-
-        case 87: // W
-          control.setMode("translate");
-          break;
-
-        case 69: // E
-          control.setMode("rotate");
-          break;
-
-        case 82: // R
-          control.setMode("scale");
-          break;
-
-        case 67: // C
-          const position = camera.position.clone();
-
-          camera = camera.isPerspectiveCamera ? cameraOrtho : cameraPersp;
-          camera.position.copy(position);
-
-          orbit.object = camera;
-          control.camera = camera;
-
-          camera.lookAt(orbit.target.x, orbit.target.y, orbit.target.z);
-          //onWindowResize();
-          break;
-
-        case 86: // V
-          const randomFoV = Math.random() + 0.1;
-          const randomZoom = Math.random() + 0.1;
-
-          cameraPersp.fov = randomFoV * 160;
-          cameraOrtho.bottom = -randomFoV * 500;
-          cameraOrtho.top = randomFoV * 500;
-
-          cameraPersp.zoom = randomZoom * 5;
-          cameraOrtho.zoom = randomZoom * 5;
-          onWindowResize();
-          break;
-
-        case 187:
-        case 107: // +, =, num+
-          control.setSize(control.size + 0.1);
-          break;
-
-        case 189:
-        case 109: // -, _, num-
-          control.setSize(Math.max(control.size - 0.1, 0.1));
-          break;
-
-        case 88: // X
-          control.showX = !control.showX;
-          break;
-
-        case 89: // Y
-          control.showY = !control.showY;
-          break;
-
-        case 90: // Z
-          control.showZ = !control.showZ;
-          break;
-
-        case 32: // Spacebar
-          control.enabled = !control.enabled;
-          break;
-      }
-    });
-
-    window.addEventListener("keyup", function (event) {
-      switch (event.keyCode) {
-        case 70:
-          three.orbit.screenSpacePanning = true;
-          break;
-
-        case 16:
-          control.setTranslationSnap(20);
-          control.setRotationSnap(THREE.MathUtils.degToRad(15));
-          control.setScaleSnap(0.1);
-
-          break;
-      }
-    });
-
-    /*
-	function onWindowResize() {
-
-		const aspect = window.innerWidth / window.innerHeight;
-
-		cameraPersp.aspect = aspect;
-		cameraPersp.updateProjectionMatrix();
-
-		cameraOrtho.left = cameraOrtho.bottom * aspect;
-		cameraOrtho.right = cameraOrtho.top * aspect;
-		cameraOrtho.updateProjectionMatrix();
-
-		renderer.setSize( window.innerWidth, window.innerHeight );
-
-		render();
-
-	}
-	*/
-
-    var j_close_button = $(
-      "<div class='area_three_debug area_three_debug_object' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
-        pm.button_text +
-        "</span></button></div>"
-    );
-    j_close_button.draggable({
-      scroll: false,
-      //containment:".tyrano_base",
-      stop: (e, ui) => {},
-    });
-
-    //var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
-
-    let j_btn_mode_pos = $("<input type='button' value='位置' />");
-    let j_btn_mode_rot = $("<input type='button' value='回転' />");
-    let j_btn_mode_scale = $("<input type='button' value='スケール' />");
-    let j_btn_camera_reset = $(
-      "<input type='button' value='ズームリセット' />"
-    );
-
-    j_btn_mode_pos.on("click", (e) => {
-      control.setMode("translate");
-    });
-
-    j_btn_mode_rot.on("click", (e) => {
-      control.setMode("rotate");
-    });
-
-    j_btn_mode_scale.on("click", (e) => {
-      control.setMode("scale");
-    });
-
-    j_btn_camera_reset.on("click", (e) => {
-      //three.orbit.saveState();
-      three.orbit.reset();
-
-      //console.log(three.orbit.object.scale=1);
-      //three.orbit.zoom0 = 1;
-      //three.orbit.reset();
-
-      //three.orbit.object.updateProjectionMatrix();
-      //three.orbit.update();
-    });
-
-    var j_copy_button = $("<input type='button' value='コピー' />");
-    j_copy_button.on("click", (e) => {
-      evt_mouseup();
-
-      j_debug_msg.find("input").select();
-      // コピー
-      document.execCommand("copy");
-    });
-
-    var j_reset_button = $("<input type='button' value='リセット' />");
-    j_reset_button.on("click", (e) => {
-      //モデルを最初の位置に戻す
-      //document.execCommand("copy");
-      model.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z);
-      model.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z);
-      model.scale.set(
-        original_v.scale.x,
-        original_v.scale.y,
-        original_v.scale.z
-      );
-    });
-
-    j_close_button.find("button").on("click", (e) => {
-      //j_three_debug_layer.remove();
-      control.detach();
-      control.dispose();
-
-      //orbit.dispose();
-
-      if (pm.reset == "true") {
-        j_reset_button.trigger("click");
-      }
-
-      j_close_button.remove();
-
-      this.kag.ftag.nextOrder();
-    });
-
-    if (pm.menu == "true") {
-      j_close_button.append("<span>｜</span>");
-
-      j_close_button.append(j_btn_mode_pos);
-      j_close_button.append(j_btn_mode_rot);
-      j_close_button.append(j_btn_mode_scale);
-
-      j_close_button.append(j_btn_camera_reset);
-
-      //j_close_button.append(j_copy_button);
-      //j_close_button.append(j_reset_button);
-
-      //j_close_button.append(j_debug_msg);
-    }
-
-    //canvasでオブジェクト以外がクリックされたらリセットする仕組み
-
-    $("body").append(j_close_button);
-
-    //初期値を設定する。
-    //evt_mouseup();
-  },
+    vital: ["name"],
+
+    pm: {
+        name: "",
+        button_text: "閉",
+        menu: "true",
+        overlap: "false",
+        reset: "false",
+        control: "false",
+        orbit: "true",
+    },
+
+    start: function (pm) {
+        var that = this;
+
+        var three = this.kag.tmp.three;
+
+        //一番前にもってきて、うごかせるようにする。
+        var j_canvas = three.j_canvas;
+        var target_layer = three.target_layer;
+
+        var old_target_layer_zindex = target_layer.css("z-index");
+        var old_canvas_zindex = j_canvas.css("z-index");
+
+        /*
+j_canvas.css("z-index",9999999);
+target_layer.css("z-index",9999999);
+*/
+
+        console.log("three wwwwwwwwwwwwww");
+        console.log(pm);
+        console.log(this.kag.tmp.three.models);
+
+        var model_obj = this.kag.tmp.three.models[pm.name];
+
+        console.log(model_obj);
+
+        var model = model_obj.model;
+
+        console.log(model_obj);
+
+        //選択されたらそれを上位に通知 FPSが有効なときだけ
+
+        if (this.kag.tmp.three.stat.fps.is_fps_studio) {
+            TYRANO.kag.studio.selectObject(pm.name, model_obj);
+        }
+
+        var renderer = three.renderer;
+        var camera = three.camera;
+
+        var sc_width = parseInt(this.kag.config.scWidth);
+        var sc_height = parseInt(this.kag.config.scHeight);
+
+        var direction_rot = 0;
+
+        var original_v = $.setVector(model);
+
+        if (pm.orbit == "true" && typeof three.orbit == "undefined") {
+            let orbit = new THREE.OrbitControls(camera, renderer.domElement);
+            orbit.screenSpacePanning = true;
+            orbit.rotateSpeed = 0.7;
+
+            orbit.panSpeed = 2;
+
+            //ズーム操作禁止
+            orbit.enableZoom = true;
+
+            orbit.addEventListener("change", (e) => {
+                three.stat.start_event = false;
+            });
+
+            orbit.addEventListener("end", (e) => {
+                setTimeout((e) => {
+                    three.stat.start_event = true;
+                }, 100);
+            });
+
+            three.orbit = orbit;
+
+            //イベント登録
+            /*
+$("body").on("mousewheel",function(e){
+
+
+var delta = e.originalEvent.deltaY ? -(e.originalEvent.deltaY) : e.originalEvent.wheelDelta ? e.originalEvent.wheelDelta : -(e.originalEvent.detail);
+if (delta < 0){
+
+let direction = new THREE.Vector3;
+
+let speed = 20.0;
+three.camera.getWorldDirection(direction);
+
+direction.x = direction.x*-1;
+direction.y = direction.y*-1;
+direction.z = direction.z*-1;
+
+three.camera.position.addScaledVector(direction, speed);
+
+} else {
+
+let direction = new THREE.Vector3;
+
+let speed = 20.0;
+three.camera.getWorldDirection(direction);
+
+direction.x = direction.x;
+direction.y = direction.y;
+direction.z = direction.z;
+
+three.camera.position.addScaledVector(direction, speed);
+
+}
+
+//return false;
+
+
+});
+*/
+        }
+
+        //orbit.update();
+
+        let is_move_camera = false;
+
+        let control = new THREE.TransformControls(camera, renderer.domElement);
+        control.size = 1.5;
+
+        control.setTranslationSnap(20);
+        control.setRotationSnap(THREE.MathUtils.degToRad(15));
+        control.setScaleSnap(0.1);
+
+        //control.addEventListener('change', renderer);
+
+        control.addEventListener("dragging-changed", function (event) {
+            if (three.orbit) {
+                three.orbit.enabled = !event.value;
+            }
+
+            three.stat.fps.move_trans_control = event.value;
+
+            console.log(event.value);
+        });
+
+        control.addEventListener("mouseUp", (e, m) => {
+            console.log(e);
+            console.log(m);
+            console.log("mouseup!");
+
+            var msg_pos =
+                $.orgFloor(model.position.x, 100) + "," + $.orgFloor(model.position.y, 100) + "," + $.orgFloor(model.position.z, 100);
+            var msg_rot =
+                $.orgFloor(model.rotation.x, 100) + "," + $.orgFloor(model.rotation.y, 100) + "," + $.orgFloor(model.rotation.z, 100);
+            var msg_scale = $.orgFloor(model.scale.x, 100) + "," + $.orgFloor(model.scale.y, 100) + "," + $.orgFloor(model.scale.z, 100);
+
+            //pmを更新する
+            var _pm = model_obj["pm"];
+            _pm["pos"] = msg_pos;
+            _pm["rot"] = msg_rot;
+            _pm["scale"] = msg_scale;
+            model_obj["pm"] = _pm;
+
+            var msg = 'pos="' + msg_pos + '" rot="' + msg_rot + '" scale="' + msg_scale + '" ';
+
+            //上位層に通知
+            var obj = that.kag.tmp.three.models[pm.name];
+
+            if (TYRANO.kag.studio.changeObject) {
+                TYRANO.kag.studio.changeObject(pm.name, obj);
+            }
+
+            setTimeout((e) => {
+                three.stat.start_event = true;
+            }, 100);
+        });
+
+        control.addEventListener("mouseDown", (e) => {
+            console.log(e);
+            console.log("mousedown!");
+
+            //マウス話したときにオブジェクト選択状態にしないため
+            three.stat.start_event = false;
+        });
+
+        //セレクタブルが無効の場合はコントロールなし
+        console.log(model_obj);
+
+        //if(model_obj.pm["_selectable"] != "false" ){
+
+        control.attach(model);
+        three.scene.add(control);
+
+        //}else{
+        //three.scene.add(model);
+        //}
+
+        //window.addEventListener( 'resize', onWindowResize );
+        window.addEventListener("keydown", function (event) {
+            switch (event.keyCode) {
+                case 16: //shift
+                    control.setTranslationSnap(null);
+                    control.setRotationSnap(null);
+                    control.setScaleSnap(null);
+
+                    break;
+
+                case 81: // Q
+                    control.setSpace(control.space === "local" ? "world" : "local");
+                    break;
+
+                case 70: // f
+                    console.log("wwwwww");
+                    three.orbit.screenSpacePanning = false;
+                    break;
+
+                case 71: //g
+                    if (three.orbit.screenSpacePanning == true) {
+                        three.orbit.screenSpacePanning = false;
+                    } else {
+                        three.orbit.screenSpacePanning = true;
+                    }
+                    break;
+
+                case 87: // W
+                    control.setMode("translate");
+                    break;
+
+                case 69: // E
+                    control.setMode("rotate");
+                    break;
+
+                case 82: // R
+                    control.setMode("scale");
+                    break;
+
+                case 67: // C
+                    const position = camera.position.clone();
+
+                    camera = camera.isPerspectiveCamera ? cameraOrtho : cameraPersp;
+                    camera.position.copy(position);
+
+                    orbit.object = camera;
+                    control.camera = camera;
+
+                    camera.lookAt(orbit.target.x, orbit.target.y, orbit.target.z);
+                    //onWindowResize();
+                    break;
+
+                case 86: // V
+                    const randomFoV = Math.random() + 0.1;
+                    const randomZoom = Math.random() + 0.1;
+
+                    cameraPersp.fov = randomFoV * 160;
+                    cameraOrtho.bottom = -randomFoV * 500;
+                    cameraOrtho.top = randomFoV * 500;
+
+                    cameraPersp.zoom = randomZoom * 5;
+                    cameraOrtho.zoom = randomZoom * 5;
+                    onWindowResize();
+                    break;
+
+                case 187:
+                case 107: // +, =, num+
+                    control.setSize(control.size + 0.1);
+                    break;
+
+                case 189:
+                case 109: // -, _, num-
+                    control.setSize(Math.max(control.size - 0.1, 0.1));
+                    break;
+
+                case 88: // X
+                    control.showX = !control.showX;
+                    break;
+
+                case 89: // Y
+                    control.showY = !control.showY;
+                    break;
+
+                case 90: // Z
+                    control.showZ = !control.showZ;
+                    break;
+
+                case 32: // Spacebar
+                    control.enabled = !control.enabled;
+                    break;
+            }
+        });
+
+        window.addEventListener("keyup", function (event) {
+            switch (event.keyCode) {
+                case 70:
+                    three.orbit.screenSpacePanning = true;
+                    break;
+
+                case 16:
+                    control.setTranslationSnap(20);
+                    control.setRotationSnap(THREE.MathUtils.degToRad(15));
+                    control.setScaleSnap(0.1);
+
+                    break;
+            }
+        });
+
+        /*
+function onWindowResize() {
+
+const aspect = window.innerWidth / window.innerHeight;
+
+cameraPersp.aspect = aspect;
+cameraPersp.updateProjectionMatrix();
+
+cameraOrtho.left = cameraOrtho.bottom * aspect;
+cameraOrtho.right = cameraOrtho.top * aspect;
+cameraOrtho.updateProjectionMatrix();
+
+renderer.setSize( window.innerWidth, window.innerHeight );
+
+render();
+
+}
+*/
+
+        var j_close_button = $(
+            "<div class='area_three_debug area_three_debug_object' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
+                pm.button_text +
+                "</span></button></div>",
+        );
+        j_close_button.draggable({
+            scroll: false,
+            //containment:".tyrano_base",
+            stop: (e, ui) => {},
+        });
+
+        //var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
+
+        let j_btn_mode_pos = $("<input type='button' value='位置' />");
+        let j_btn_mode_rot = $("<input type='button' value='回転' />");
+        let j_btn_mode_scale = $("<input type='button' value='スケール' />");
+        let j_btn_camera_reset = $("<input type='button' value='ズームリセット' />");
+
+        j_btn_mode_pos.on("click", (e) => {
+            control.setMode("translate");
+        });
+
+        j_btn_mode_rot.on("click", (e) => {
+            control.setMode("rotate");
+        });
+
+        j_btn_mode_scale.on("click", (e) => {
+            control.setMode("scale");
+        });
+
+        j_btn_camera_reset.on("click", (e) => {
+            //three.orbit.saveState();
+            three.orbit.reset();
+
+            //console.log(three.orbit.object.scale=1);
+            //three.orbit.zoom0 = 1;
+            //three.orbit.reset();
+
+            //three.orbit.object.updateProjectionMatrix();
+            //three.orbit.update();
+        });
+
+        var j_copy_button = $("<input type='button' value='コピー' />");
+        j_copy_button.on("click", (e) => {
+            evt_mouseup();
+
+            j_debug_msg.find("input").select();
+            // コピー
+            document.execCommand("copy");
+        });
+
+        var j_reset_button = $("<input type='button' value='リセット' />");
+        j_reset_button.on("click", (e) => {
+            //モデルを最初の位置に戻す
+            //document.execCommand("copy");
+            model.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z);
+            model.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z);
+            model.scale.set(original_v.scale.x, original_v.scale.y, original_v.scale.z);
+        });
+
+        j_close_button.find("button").on("click", (e) => {
+            //j_three_debug_layer.remove();
+            control.detach();
+            control.dispose();
+
+            //orbit.dispose();
+
+            if (pm.reset == "true") {
+                j_reset_button.trigger("click");
+            }
+
+            j_close_button.remove();
+
+            this.kag.ftag.nextOrder();
+        });
+
+        if (pm.menu == "true") {
+            j_close_button.append("<span>｜</span>");
+
+            j_close_button.append(j_btn_mode_pos);
+            j_close_button.append(j_btn_mode_rot);
+            j_close_button.append(j_btn_mode_scale);
+
+            j_close_button.append(j_btn_camera_reset);
+
+            //j_close_button.append(j_copy_button);
+            //j_close_button.append(j_reset_button);
+
+            //j_close_button.append(j_debug_msg);
+        }
+
+        //canvasでオブジェクト以外がクリックされたらリセットする仕組み
+
+        $("body").append(j_close_button);
+
+        //初期値を設定する。
+        //evt_mouseup();
+    },
 };
 
 /*
@@ -4626,425 +4560,391 @@ reset=true or false。trueを指定するとデバッグが終わった後、モ
 */
 
 tyrano.plugin.kag.tag["3d_debug_bk"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    button_text: "3Dインスペクタを閉じる",
-    menu: "true",
-    overlap: "false",
-    reset: "false",
-  },
+    pm: {
+        name: "",
+        button_text: "3Dインスペクタを閉じる",
+        menu: "true",
+        overlap: "false",
+        reset: "false",
+    },
 
-  start: function (pm) {
-    var that = this;
+    start: function (pm) {
+        var that = this;
 
-    var three = this.kag.tmp.three;
+        var three = this.kag.tmp.three;
 
-    //一番前にもってきて、うごかせるようにする。
-    var j_canvas = three.j_canvas;
-    var target_layer = three.target_layer;
+        //一番前にもってきて、うごかせるようにする。
+        var j_canvas = three.j_canvas;
+        var target_layer = three.target_layer;
 
-    var old_target_layer_zindex = target_layer.css("z-index");
-    var old_canvas_zindex = j_canvas.css("z-index");
-
-    /*
-	j_canvas.css("z-index",9999999);
-	target_layer.css("z-index",9999999);
-	*/
-
-    var model_obj = this.kag.tmp.three.models[pm.name];
-    var model = model_obj.model;
-
-    //選択されたらそれを上位に通知 FPSが有効なときだけ
-
-    if (this.kag.tmp.three.stat.fps.is_fps_studio) {
-      TYRANO.kag.studio.selectObject(pm.name, model_obj);
-    }
-
-    var renderer = three.renderer;
-    var camera = three.camera;
-
-    var sc_width = parseInt(this.kag.config.scWidth);
-    var sc_height = parseInt(this.kag.config.scHeight);
-
-    // オブジェクトの回転
-    var prevPosition = {};
-    var mousedown = false;
-    var button = 0;
-
-    //オブジェクトの移動
-
-    var spot_client_x = 0;
-    var spot_client_y = 0;
-
-    var direction_rot = 0;
-
-    var original_v = $.setVector(model);
-
-    var first_client_x = 0;
-    var first_client_y = 0;
-
-    var first_model_z = 0;
-
-    function evt_mousewheel(e) {
-      return false;
-
-      var delta = e.wheelDelta;
-
-      if (delta < 0) {
-        model.scale.x -= model.scale.x * 0.01;
-        model.scale.y -= model.scale.y * 0.01;
-        model.scale.z -= model.scale.z * 0.01;
-      } else {
-        model.scale.x += model.scale.x * 0.01;
-        model.scale.y += model.scale.y * 0.01;
-        model.scale.z += model.scale.z * 0.01;
-      }
-
-      evt_mouseup();
-
-      e.preventDefault();
-    }
-
-    function evt_mousedown(e) {
-      if (e.button == 0) {
-        first_client_x = e.clientX;
-        first_client_y = e.clientY;
-
-        button = 0;
-      } else if (e.button == 1) {
-        //target.innerHTML = "中ボタンが押されました。";
-        button = 1;
-        first_client_y = e.clientY;
-        first_model_z = model.position.z;
-
-        first_client_y = e.clientY;
-      } else if (e.button == 2) {
-        button = 2;
-
-        first_client_x = e.clientX;
-        first_client_y = e.clientY;
+        var old_target_layer_zindex = target_layer.css("z-index");
+        var old_canvas_zindex = j_canvas.css("z-index");
 
         /*
-							vec.set(
-							( e.clientX / window.innerWidth ) * 2 - 1,
-									- ( e.clientY / window.innerHeight ) * 2 + 1,
-							0.5 );
-							
-							vec.unproject(camera);
-							
-							vec.sub(camera.position).normalize();
-							
-							var distance = 0;
-							
-							if(camera.position.z > 0){
-								distance =  - camera.position.z / vec.z;
-						}else{
-							distance =  camera.position.z / vec.z;
-						}
-						
-							original_pos.copy( camera.position ).add(vec.multiplyScalar( distance));
-							
-							hen_pos.x = model.position.x - original_pos.x;
-							hen_pos.y = model.position.y - original_pos.y;
-							*/
-      }
+j_canvas.css("z-index",9999999);
+target_layer.css("z-index",9999999);
+*/
 
-      mousedown = true;
-      prevPosition = { x: e.clientX, y: e.clientY };
-    }
+        var model_obj = this.kag.tmp.three.models[pm.name];
+        var model = model_obj.model;
 
-    function evt_mousemove(e) {
-      if (!mousedown) return;
+        //選択されたらそれを上位に通知 FPSが有効なときだけ
 
-      j_close_button.hide();
+        if (this.kag.tmp.three.stat.fps.is_fps_studio) {
+            TYRANO.kag.studio.selectObject(pm.name, model_obj);
+        }
 
-      if (button == 0) {
-        moveDistance = {
-          x: prevPosition.x - e.clientX,
-          y: prevPosition.y - e.clientY,
-        };
-        //model.rotation.x += moveDistance.y * 0.01;
-        //model.rotation.y -= moveDistance.x * 0.01;
+        var renderer = three.renderer;
+        var camera = three.camera;
 
-        if (direction_rot == 0) {
-          if (Math.abs(first_client_x - e.clientX) > 5) {
-            direction_rot = 2;
-          } else if (Math.abs(first_client_y - e.clientY) > 5) {
-            direction_rot = 1;
-          }
-        } else {
-          if (direction_rot == 1) {
-            model.rotateX(moveDistance.y * 0.01 * -1);
+        var sc_width = parseInt(this.kag.config.scWidth);
+        var sc_height = parseInt(this.kag.config.scHeight);
 
-            if (Math.abs(moveDistance.x) > Math.abs(moveDistance.y)) {
-              direction_rot = 0;
-              first_client_x = e.clientX;
-              first_client_y = e.clientY;
+        // オブジェクトの回転
+        var prevPosition = {};
+        var mousedown = false;
+        var button = 0;
+
+        //オブジェクトの移動
+
+        var spot_client_x = 0;
+        var spot_client_y = 0;
+
+        var direction_rot = 0;
+
+        var original_v = $.setVector(model);
+
+        var first_client_x = 0;
+        var first_client_y = 0;
+
+        var first_model_z = 0;
+
+        function evt_mousewheel(e) {
+            return false;
+
+            var delta = e.wheelDelta;
+
+            if (delta < 0) {
+                model.scale.x -= model.scale.x * 0.01;
+                model.scale.y -= model.scale.y * 0.01;
+                model.scale.z -= model.scale.z * 0.01;
+            } else {
+                model.scale.x += model.scale.x * 0.01;
+                model.scale.y += model.scale.y * 0.01;
+                model.scale.z += model.scale.z * 0.01;
             }
-          } else {
-            model.rotateY(moveDistance.x * 0.01 * -1);
 
-            if (Math.abs(moveDistance.y) > Math.abs(moveDistance.x)) {
-              direction_rot = 0;
-              first_client_x = e.clientX;
-              first_client_y = e.clientY;
+            evt_mouseup();
+
+            e.preventDefault();
+        }
+
+        function evt_mousedown(e) {
+            if (e.button == 0) {
+                first_client_x = e.clientX;
+                first_client_y = e.clientY;
+
+                button = 0;
+            } else if (e.button == 1) {
+                //target.innerHTML = "中ボタンが押されました。";
+                button = 1;
+                first_client_y = e.clientY;
+                first_model_z = model.position.z;
+
+                first_client_y = e.clientY;
+            } else if (e.button == 2) {
+                button = 2;
+
+                first_client_x = e.clientX;
+                first_client_y = e.clientY;
+
+                /*
+vec.set(
+( e.clientX / window.innerWidth ) * 2 - 1,
+- ( e.clientY / window.innerHeight ) * 2 + 1,
+0.5 );
+
+vec.unproject(camera);
+
+vec.sub(camera.position).normalize();
+
+var distance = 0;
+
+if(camera.position.z > 0){
+distance =  - camera.position.z / vec.z;
+}else{
+distance =  camera.position.z / vec.z;
+}
+
+original_pos.copy( camera.position ).add(vec.multiplyScalar( distance));
+
+hen_pos.x = model.position.x - original_pos.x;
+hen_pos.y = model.position.y - original_pos.y;
+*/
             }
-          }
 
-          prevPosition = { x: e.clientX, y: e.clientY };
-        }
-      } else if (button == 1) {
-        //var hen_y = first_client_y - e.clientY;
-        //model.position.z = first_model_z + hen_y;
-
-        if (spot_client_y != 0) {
-          model.translateZ((spot_client_y - e.clientY) * -1);
+            mousedown = true;
+            prevPosition = { x: e.clientX, y: e.clientY };
         }
 
-        spot_client_y = e.clientY;
-      } else if (button == 2) {
-        if (spot_client_x != 0) {
-          model.translateX((spot_client_x - e.clientX) * -1);
+        function evt_mousemove(e) {
+            if (!mousedown) return;
+
+            j_close_button.hide();
+
+            if (button == 0) {
+                moveDistance = {
+                    x: prevPosition.x - e.clientX,
+                    y: prevPosition.y - e.clientY,
+                };
+                //model.rotation.x += moveDistance.y * 0.01;
+                //model.rotation.y -= moveDistance.x * 0.01;
+
+                if (direction_rot == 0) {
+                    if (Math.abs(first_client_x - e.clientX) > 5) {
+                        direction_rot = 2;
+                    } else if (Math.abs(first_client_y - e.clientY) > 5) {
+                        direction_rot = 1;
+                    }
+                } else {
+                    if (direction_rot == 1) {
+                        model.rotateX(moveDistance.y * 0.01 * -1);
+
+                        if (Math.abs(moveDistance.x) > Math.abs(moveDistance.y)) {
+                            direction_rot = 0;
+                            first_client_x = e.clientX;
+                            first_client_y = e.clientY;
+                        }
+                    } else {
+                        model.rotateY(moveDistance.x * 0.01 * -1);
+
+                        if (Math.abs(moveDistance.y) > Math.abs(moveDistance.x)) {
+                            direction_rot = 0;
+                            first_client_x = e.clientX;
+                            first_client_y = e.clientY;
+                        }
+                    }
+
+                    prevPosition = { x: e.clientX, y: e.clientY };
+                }
+            } else if (button == 1) {
+                //var hen_y = first_client_y - e.clientY;
+                //model.position.z = first_model_z + hen_y;
+
+                if (spot_client_y != 0) {
+                    model.translateZ((spot_client_y - e.clientY) * -1);
+                }
+
+                spot_client_y = e.clientY;
+            } else if (button == 2) {
+                if (spot_client_x != 0) {
+                    model.translateX((spot_client_x - e.clientX) * -1);
+                }
+                spot_client_x = e.clientX;
+
+                if (spot_client_y != 0) {
+                    model.translateY(spot_client_y - e.clientY);
+                }
+
+                spot_client_y = e.clientY;
+
+                /*
+vec.set(
+( e.clientX / window.innerWidth ) * 2 - 1,
+- ( e.clientY / window.innerHeight ) * 2 + 1,
+0.5 );
+
+vec.unproject(camera);
+
+vec.sub(camera.position).normalize();
+
+var distance = 0;
+
+if(camera.position.z > 0){
+distance =  - camera.position.z / vec.z;
+}else{
+distance =  camera.position.z / vec.z;
+}
+
+pos.copy( camera.position ).add(vec.multiplyScalar( distance));
+
+//console.log(hen_pos.x + pos.x);
+//console.log($.orgFloor(hen_pos.x + pos.x,1));
+
+model.position.x = $.orgFloor(hen_pos.x + pos.x,1);
+model.position.y = $.orgFloor(hen_pos.y + pos.y,1);
+
+*/
+            }
         }
-        spot_client_x = e.clientX;
 
-        if (spot_client_y != 0) {
-          model.translateY(spot_client_y - e.clientY);
+        function evt_mouseup(e) {
+            j_close_button.show();
+
+            if (typeof e == "undefined") return false;
+            //クリックした位置が同じ場合は、そのまま渡す
+            if (Math.abs(first_client_x - e.clientX) < 10 && Math.abs(first_client_y - e.clientY) < 10) {
+                that.kag.tmp.three.j_canvas.trigger("click", e);
+
+                first_client_x = 0;
+                first_client_y = 0;
+
+                spot_client_x = 0;
+                spot_client_y = 0;
+                direction_rot = 0;
+
+                mousedown = false;
+
+                return false;
+            }
+
+            first_client_x = 0;
+            first_client_y = 0;
+
+            spot_client_x = 0;
+            spot_client_y = 0;
+            direction_rot = 0;
+
+            if (button == 0) {
+                var str = $.orgFloor(model.rotation.x, 100) + "," + $.orgFloor(model.rotation.y, 100) + "," + model.rotation.z;
+            } else if (button == 2 || button == 1) {
+            }
+
+            var msg_pos =
+                $.orgFloor(model.position.x, 100) + "," + $.orgFloor(model.position.y, 100) + "," + $.orgFloor(model.position.z, 100);
+            var msg_rot =
+                $.orgFloor(model.rotation.x, 100) + "," + $.orgFloor(model.rotation.y, 100) + "," + $.orgFloor(model.rotation.z, 100);
+            var msg_scale = $.orgFloor(model.scale.x, 100) + "," + $.orgFloor(model.scale.y, 100) + "," + $.orgFloor(model.scale.z, 100);
+
+            //pmを更新する
+            var _pm = model_obj["pm"];
+            _pm["pos"] = msg_pos;
+            _pm["rot"] = msg_rot;
+            _pm["scale"] = msg_scale;
+            model_obj["pm"] = _pm;
+
+            var msg = 'pos="' + msg_pos + '" rot="' + msg_rot + '" scale="' + msg_scale + '" ';
+            //j_debug_msg.find("input").val(msg);
+
+            //上位層に通知
+            var obj = that.kag.tmp.three.models[pm.name];
+            TYRANO.kag.studio.changeObject(pm.name, obj);
+
+            mousedown = false;
         }
 
-        spot_client_y = e.clientY;
+        if (pm.overlap == "true") {
+            j_canvas.css("z-index", 9999999);
+            target_layer.css("z-index", 9999999);
+        }
 
-        /*
-							vec.set(
-							( e.clientX / window.innerWidth ) * 2 - 1,
-									- ( e.clientY / window.innerHeight ) * 2 + 1,
-							0.5 );
-							
-							vec.unproject(camera);
-							
-							vec.sub(camera.position).normalize();
-							
-							var distance = 0;
-							
-							if(camera.position.z > 0){
-								distance =  - camera.position.z / vec.z;
-						}else{
-							distance =  camera.position.z / vec.z;
-						}
-							
-							pos.copy( camera.position ).add(vec.multiplyScalar( distance));
-							
-							//console.log(hen_pos.x + pos.x);
-							//console.log($.orgFloor(hen_pos.x + pos.x,1));
-							
-						model.position.x = $.orgFloor(hen_pos.x + pos.x,1);
-						model.position.y = $.orgFloor(hen_pos.y + pos.y,1);
-			
-			*/
-      }
-    }
+        //デバッグ用のレイヤ
+        var j_three_debug_layer = $(
+            "<div class='three_debug_layer' style='width:100%;height:100%;position:absolute;z-index:9999999;'></div>",
+        );
+        $(".tyrano_base").append(j_three_debug_layer);
+        var three_debug_layer = j_three_debug_layer.get(0);
 
-    function evt_mouseup(e) {
-      j_close_button.show();
+        ///マウスホイール
+        three_debug_layer.addEventListener("mousewheel", evt_mousewheel, false);
+        three_debug_layer.addEventListener("mousedown", evt_mousedown, false);
+        three_debug_layer.addEventListener("mouseup", evt_mouseup, false);
+        three_debug_layer.addEventListener("mousemove", evt_mousemove, false);
 
-      if (typeof e == "undefined") return false;
-      //クリックした位置が同じ場合は、そのまま渡す
-      if (
-        Math.abs(first_client_x - e.clientX) < 10 &&
-        Math.abs(first_client_y - e.clientY) < 10
-      ) {
-        that.kag.tmp.three.j_canvas.trigger("click", e);
+        //デバッグ終了ボタンを押すと、nextOrderする。
+        //リロードボタンの配置
+        //メッセージエリア非表示。
 
-        first_client_x = 0;
-        first_client_y = 0;
+        var j_close_button = $(
+            "<div class='area_three_debug area_three_debug_object' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
+                pm.button_text +
+                "</span></button></div>",
+        );
+        j_close_button.draggable({
+            scroll: false,
+            //containment:".tyrano_base",
+            stop: (e, ui) => {},
+        });
 
-        spot_client_x = 0;
-        spot_client_y = 0;
-        direction_rot = 0;
+        var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
+        var j_copy_button = $("<input type='button' value='コピー' />");
 
-        mousedown = false;
+        j_copy_button.on("click", (e) => {
+            evt_mouseup();
 
-        return false;
-      }
+            j_debug_msg.find("input").select();
+            // コピー
+            document.execCommand("copy");
+        });
 
-      first_client_x = 0;
-      first_client_y = 0;
+        var j_reset_button = $("<input type='button' value='リセット' />");
+        j_reset_button.on("click", (e) => {
+            //モデルを最初の位置に戻す
+            //document.execCommand("copy");
+            model.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z);
+            model.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z);
+            model.scale.set(original_v.scale.x, original_v.scale.y, original_v.scale.z);
+        });
 
-      spot_client_x = 0;
-      spot_client_y = 0;
-      direction_rot = 0;
+        j_close_button.find("button").on("click", (e) => {
+            j_three_debug_layer.remove();
 
-      if (button == 0) {
-        var str =
-          $.orgFloor(model.rotation.x, 100) +
-          "," +
-          $.orgFloor(model.rotation.y, 100) +
-          "," +
-          model.rotation.z;
-      } else if (button == 2 || button == 1) {
-      }
+            if (pm.reset == "true") {
+                j_reset_button.trigger("click");
+            }
 
-      var msg_pos =
-        $.orgFloor(model.position.x, 100) +
-        "," +
-        $.orgFloor(model.position.y, 100) +
-        "," +
-        $.orgFloor(model.position.z, 100);
-      var msg_rot =
-        $.orgFloor(model.rotation.x, 100) +
-        "," +
-        $.orgFloor(model.rotation.y, 100) +
-        "," +
-        $.orgFloor(model.rotation.z, 100);
-      var msg_scale =
-        $.orgFloor(model.scale.x, 100) +
-        "," +
-        $.orgFloor(model.scale.y, 100) +
-        "," +
-        $.orgFloor(model.scale.z, 100);
+            j_close_button.remove();
 
-      //pmを更新する
-      var _pm = model_obj["pm"];
-      _pm["pos"] = msg_pos;
-      _pm["rot"] = msg_rot;
-      _pm["scale"] = msg_scale;
-      model_obj["pm"] = _pm;
+            j_canvas.css("z-index", old_canvas_zindex);
+            target_layer.css("z-index", old_target_layer_zindex);
 
-      var msg =
-        'pos="' +
-        msg_pos +
-        '" rot="' +
-        msg_rot +
-        '" scale="' +
-        msg_scale +
-        '" ';
-      //j_debug_msg.find("input").val(msg);
+            three_debug_layer.removeEventListener("mousedown", evt_mousedown);
+            three_debug_layer.removeEventListener("mouseup", evt_mouseup);
+            three_debug_layer.removeEventListener("mousemove", evt_mousemove);
+            three_debug_layer.removeEventListener("mousewheel", evt_mousewheel);
 
-      //上位層に通知
-      var obj = that.kag.tmp.three.models[pm.name];
-      TYRANO.kag.studio.changeObject(pm.name, obj);
+            this.kag.ftag.nextOrder();
+        });
 
-      mousedown = false;
-    }
+        if (pm.menu == "true") {
+            j_close_button.append("<span>｜</span>");
+            j_close_button.append(j_copy_button);
+            j_close_button.append(j_reset_button);
 
-    if (pm.overlap == "true") {
-      j_canvas.css("z-index", 9999999);
-      target_layer.css("z-index", 9999999);
-    }
+            j_close_button.append(j_debug_msg);
+        }
 
-    //デバッグ用のレイヤ
-    var j_three_debug_layer = $(
-      "<div class='three_debug_layer' style='width:100%;height:100%;position:absolute;z-index:9999999;'></div>"
-    );
-    $(".tyrano_base").append(j_three_debug_layer);
-    var three_debug_layer = j_three_debug_layer.get(0);
+        //canvasでオブジェクト以外がクリックされたらリセットする仕組み
 
-    ///マウスホイール
-    three_debug_layer.addEventListener("mousewheel", evt_mousewheel, false);
-    three_debug_layer.addEventListener("mousedown", evt_mousedown, false);
-    three_debug_layer.addEventListener("mouseup", evt_mouseup, false);
-    three_debug_layer.addEventListener("mousemove", evt_mousemove, false);
+        $("body").append(j_close_button);
 
-    //デバッグ終了ボタンを押すと、nextOrderする。
-    //リロードボタンの配置
-    //メッセージエリア非表示。
-
-    var j_close_button = $(
-      "<div class='area_three_debug area_three_debug_object' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
-        pm.button_text +
-        "</span></button></div>"
-    );
-    j_close_button.draggable({
-      scroll: false,
-      //containment:".tyrano_base",
-      stop: (e, ui) => {},
-    });
-
-    var j_debug_msg = $(
-      "<div style='padding:5px'><input type='text' style='width:320px' /></div>"
-    );
-    var j_copy_button = $("<input type='button' value='コピー' />");
-
-    j_copy_button.on("click", (e) => {
-      evt_mouseup();
-
-      j_debug_msg.find("input").select();
-      // コピー
-      document.execCommand("copy");
-    });
-
-    var j_reset_button = $("<input type='button' value='リセット' />");
-    j_reset_button.on("click", (e) => {
-      //モデルを最初の位置に戻す
-      //document.execCommand("copy");
-      model.position.set(original_v.pos.x, original_v.pos.y, original_v.pos.z);
-      model.rotation.set(original_v.rot.x, original_v.rot.y, original_v.rot.z);
-      model.scale.set(
-        original_v.scale.x,
-        original_v.scale.y,
-        original_v.scale.z
-      );
-    });
-
-    j_close_button.find("button").on("click", (e) => {
-      j_three_debug_layer.remove();
-
-      if (pm.reset == "true") {
-        j_reset_button.trigger("click");
-      }
-
-      j_close_button.remove();
-
-      j_canvas.css("z-index", old_canvas_zindex);
-      target_layer.css("z-index", old_target_layer_zindex);
-
-      three_debug_layer.removeEventListener("mousedown", evt_mousedown);
-      three_debug_layer.removeEventListener("mouseup", evt_mouseup);
-      three_debug_layer.removeEventListener("mousemove", evt_mousemove);
-      three_debug_layer.removeEventListener("mousewheel", evt_mousewheel);
-
-      this.kag.ftag.nextOrder();
-    });
-
-    if (pm.menu == "true") {
-      j_close_button.append("<span>｜</span>");
-      j_close_button.append(j_copy_button);
-      j_close_button.append(j_reset_button);
-
-      j_close_button.append(j_debug_msg);
-    }
-
-    //canvasでオブジェクト以外がクリックされたらリセットする仕組み
-
-    $("body").append(j_close_button);
-
-    //初期値を設定する。
-    evt_mouseup();
-  },
+        //初期値を設定する。
+        evt_mouseup();
+    },
 };
 
 tyrano.plugin.kag.tag["fps_control_start"] = {
-  vital: [],
+    vital: [],
 
-  pm: {},
+    pm: {},
 
-  start: function (pm) {
-    TYRANO.kag.tmp.three.stat.fps.active = true;
-    this.kag.ftag.nextOrder();
-  },
+    start: function (pm) {
+        TYRANO.kag.tmp.three.stat.fps.active = true;
+        this.kag.ftag.nextOrder();
+    },
 };
 
 tyrano.plugin.kag.tag["fps_control_stop"] = {
-  vital: [],
+    vital: [],
 
-  pm: {},
+    pm: {},
 
-  start: function (pm) {
-    TYRANO.kag.tmp.three.stat.fps.active = false;
-    this.kag.ftag.nextOrder();
-  },
+    start: function (pm) {
+        TYRANO.kag.tmp.three.stat.fps.active = false;
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -5075,119 +4975,114 @@ FPSコントロールが可能になる。
 */
 
 tyrano.plugin.kag.tag["3d_fps_control"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    joystick: "",
-    camera_pos_y: "", //視点位置
-  },
+    pm: {
+        joystick: "",
+        camera_pos_y: "", //視点位置
+    },
 
-  start: function (pm) {
-    //this.domElement.addEventListener( 'contextmenu', contextmenu, false );
-    //this.domElement.addEventListener( 'mousemove', _onMouseMove, false );
+    start: function (pm) {
+        //this.domElement.addEventListener( 'contextmenu', contextmenu, false );
+        //this.domElement.addEventListener( 'mousemove', _onMouseMove, false );
 
-    var renderer = this.kag.tmp.three.renderer;
+        var renderer = this.kag.tmp.three.renderer;
 
-    //renderer.domElement.addEventListener( 'mousedown', this._onMouseDown, false );
-    //renderer.domElement.addEventListener( 'mouseup', this._onMouseUp, false );
+        //renderer.domElement.addEventListener( 'mousedown', this._onMouseDown, false );
+        //renderer.domElement.addEventListener( 'mouseup', this._onMouseUp, false );
 
-    window.addEventListener("keydown", this._onKeyDown, false);
-    window.addEventListener("keyup", this._onKeyUp, false);
+        window.addEventListener("keydown", this._onKeyDown, false);
+        window.addEventListener("keyup", this._onKeyUp, false);
 
-    if (pm.joystick == "true") {
-      let j_joy = $(
-        '<div id="joyDiv" style="opacity:0.5;position:absolute;width:200px;height:200px;bottom:0px;left:0px;z-index:99"></div>'
-      );
-      $("body").prepend(j_joy);
-      TYRANO.kag.tmp.three.stat.fps.joy = new JoyStick("joyDiv", {
-        internalFillColor: "#DDDDDD",
-        internalStrokeColor: "#DDDDDD",
-        externalStrokeColor: "#DDDDDD",
-      });
+        if (pm.joystick == "true") {
+            let j_joy = $(
+                '<div id="joyDiv" style="opacity:0.5;position:absolute;width:200px;height:200px;bottom:0px;left:0px;z-index:99"></div>',
+            );
+            $("body").prepend(j_joy);
+            TYRANO.kag.tmp.three.stat.fps.joy = new JoyStick("joyDiv", {
+                internalFillColor: "#DDDDDD",
+                internalStrokeColor: "#DDDDDD",
+                externalStrokeColor: "#DDDDDD",
+            });
 
-      TYRANO.kag.tmp.three.stat.fps.isJoy = true;
-    }
+            TYRANO.kag.tmp.three.stat.fps.isJoy = true;
+        }
 
-    if (pm.camera_pos_y != "") {
-      TYRANO.kag.tmp.three.stat.fps.camera_pos_y = parseFloat(pm.camera_pos_y);
-    }
+        if (pm.camera_pos_y != "") {
+            TYRANO.kag.tmp.three.stat.fps.camera_pos_y = parseFloat(pm.camera_pos_y);
+        }
 
-    TYRANO.kag.tmp.three.stat.fps.active = true;
+        TYRANO.kag.tmp.three.stat.fps.active = true;
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 
-  _onKeyDown: function (event) {
-    let fps = TYRANO.kag.tmp.three.stat.fps;
-    let k = event.keyCode;
+    _onKeyDown: function (event) {
+        let fps = TYRANO.kag.tmp.three.stat.fps;
+        let k = event.keyCode;
 
-    if (k == 13) {
-      $(".text_chat").focus();
-    }
+        if (k == 13) {
+            $(".text_chat").focus();
+        }
 
-    if (k == 38 || k == 87) {
-      fps.moveForward = true;
-      fps.offMoveBufferB = false;
-    }
+        if (k == 38 || k == 87) {
+            fps.moveForward = true;
+            fps.offMoveBufferB = false;
+        }
 
-    if (k == 40 || k == 83) {
-      fps.moveBackward = true;
-      fps.offMoveBufferF = false;
-    }
+        if (k == 40 || k == 83) {
+            fps.moveBackward = true;
+            fps.offMoveBufferF = false;
+        }
 
-    if (k == 37 || k == 65) {
-      fps.rotateLeft = true;
-      fps.offRotateBufferR = false;
-    }
+        if (k == 37 || k == 65) {
+            fps.rotateLeft = true;
+            fps.offRotateBufferR = false;
+        }
 
-    if (k == 39 || k == 68) {
-      fps.rotateRight = true;
-      fps.offRotateBufferL = false;
-    }
+        if (k == 39 || k == 68) {
+            fps.rotateRight = true;
+            fps.offRotateBufferL = false;
+        }
 
-    if (fps.active == true) {
-      if (typeof window.app != "undefined") {
-        app.startWalk();
-      }
-    }
-  },
+        if (fps.active == true) {
+            if (typeof window.app != "undefined") {
+                app.startWalk();
+            }
+        }
+    },
 
-  _onKeyUp: function (event) {
-    let fps = TYRANO.kag.tmp.three.stat.fps;
-    let k = event.keyCode;
+    _onKeyUp: function (event) {
+        let fps = TYRANO.kag.tmp.three.stat.fps;
+        let k = event.keyCode;
 
-    if (k == 38 || k == 87) {
-      fps.moveForward = false;
-      fps.offMoveBufferF = true;
-    }
+        if (k == 38 || k == 87) {
+            fps.moveForward = false;
+            fps.offMoveBufferF = true;
+        }
 
-    if (k == 40 || k == 83) {
-      fps.moveBackward = false;
-      fps.offMoveBufferB = true;
-    }
+        if (k == 40 || k == 83) {
+            fps.moveBackward = false;
+            fps.offMoveBufferB = true;
+        }
 
-    if (k == 37 || k == 65) {
-      fps.rotateLeft = false;
-      fps.offRotateBufferL = true;
-    }
+        if (k == 37 || k == 65) {
+            fps.rotateLeft = false;
+            fps.offRotateBufferL = true;
+        }
 
-    if (k == 39 || k == 68) {
-      fps.rotateRight = false;
-      fps.offRotateBufferR = true;
-    }
+        if (k == 39 || k == 68) {
+            fps.rotateRight = false;
+            fps.offRotateBufferR = true;
+        }
 
-    //歩くモーションの停止
-    if (typeof window.app != "undefined") {
-      if (
-        fps.moveForward == false &&
-        fps.moveBackward == false &&
-        fps.rotateLeft == false &&
-        fps.rotateRight == false
-      ) {
-        app.stopWalk();
-      }
-    }
-  },
+        //歩くモーションの停止
+        if (typeof window.app != "undefined") {
+            if (fps.moveForward == false && fps.moveBackward == false && fps.rotateLeft == false && fps.rotateRight == false) {
+                app.stopWalk();
+            }
+        }
+    },
 };
 
 /*
@@ -5217,24 +5112,21 @@ name=新規作成するグループ名を設定します。
 */
 
 tyrano.plugin.kag.tag["3d_new_group"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-  },
+    pm: {
+        name: "",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    const model = new THREE.Group();
-    model.name = pm.name;
-    this.kag.tmp.three.models[pm.name] = new ThreeModel(
-      { name: pm.name, model: model, pm: pm },
-      three
-    );
+        const model = new THREE.Group();
+        model.name = pm.name;
+        this.kag.tmp.three.models[pm.name] = new ThreeModel({ name: pm.name, model: model, pm: pm }, three);
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -5266,66 +5158,66 @@ new_name=ここが指定されている場合、nameのオブジェクトをコ�
 
 //newされたもでるをcloneしてgroupに追加
 tyrano.plugin.kag.tag["3d_add_group"] = {
-  vital: ["name", "group"],
+    vital: ["name", "group"],
 
-  pm: {
-    name: "",
-    new_name: "",
-    scale: "",
-    pos: "",
-    rot: "",
+    pm: {
+        name: "",
+        new_name: "",
+        scale: "",
+        pos: "",
+        rot: "",
 
-    clone: "false",
-  },
+        clone: "false",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
 
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    if ($.checkThreeModel(pm.group) == false) {
-      return;
-    }
+        if ($.checkThreeModel(pm.group) == false) {
+            return;
+        }
 
-    var model_obj;
+        var model_obj;
 
-    if (pm.clone == "true") {
-      model_obj = this.kag.tmp.three.models[pm.name].model.clone();
-    } else {
-      model_obj = this.kag.tmp.three.models[pm.name].model;
-    }
+        if (pm.clone == "true") {
+            model_obj = this.kag.tmp.three.models[pm.name].model.clone();
+        } else {
+            model_obj = this.kag.tmp.three.models[pm.name].model;
+        }
 
-    var group_obj = this.kag.tmp.three.models[pm.group].model;
-    group_obj.name = pm.group;
+        var group_obj = this.kag.tmp.three.models[pm.group].model;
+        group_obj.name = pm.group;
 
-    //新しい名前を設定
-    if (pm.new_name != "") {
-      model_obj.traverse(function (node) {
-        node.userData["name"] = pm.new_name;
-      });
-    }
+        //新しい名前を設定
+        if (pm.new_name != "") {
+            model_obj.traverse(function (node) {
+                node.userData["name"] = pm.new_name;
+            });
+        }
 
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      model_obj.position.set(pos.x, pos.y, pos.z);
-    }
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            model_obj.position.set(pos.x, pos.y, pos.z);
+        }
 
-    if (pm.scale != "") {
-      let scale = $.three_pos(pm.scale);
-      model_obj.scale.set(scale.x, scale.y, scale.z);
-    }
+        if (pm.scale != "") {
+            let scale = $.three_pos(pm.scale);
+            model_obj.scale.set(scale.x, scale.y, scale.z);
+        }
 
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      model_obj.rotation.set(rot.x, rot.y, rot.z);
-    }
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            model_obj.rotation.set(rot.x, rot.y, rot.z);
+        }
 
-    group_obj.add(model_obj);
+        group_obj.add(model_obj);
 
-    this.kag.ftag.nextOrder();
-  },
+        this.kag.ftag.nextOrder();
+    },
 };
 
 /*
@@ -5359,255 +5251,247 @@ sprite=true or falseを指定。trueを指定すると常に正面をむくテ�
 
 //スプライトを配置する
 tyrano.plugin.kag.tag["3d_text_new"] = {
-  vital: ["name", "text"],
+    vital: ["name", "text"],
 
-  pm: {
-    name: "",
-    text: "",
-    size: "42",
-    canvas_width: "1500",
-    canvas_height: "100",
-    color: "",
+    pm: {
+        name: "",
+        text: "",
+        size: "42",
+        canvas_width: "1500",
+        canvas_height: "100",
+        color: "",
 
-    width: "5",
-    height: "5",
+        width: "5",
+        height: "5",
 
-    scale: "0",
-    pos: "0",
-    rot: "0",
-    tonemap: "false",
-    next: "true",
+        scale: "0",
+        pos: "0",
+        rot: "0",
+        tonemap: "false",
+        next: "true",
 
-    sprite: "false", //常に正面を向くタイプ
+        sprite: "false", //常に正面を向くタイプ
 
-    folder: "",
-  },
+        folder: "",
+    },
 
-  start: function (pm) {
-    //const createCanvasForTexture = (canvasWidth, canvasHeight, text, fontSize) => {
-    // 貼り付けるcanvasを作成。
-    const canvasForText = document.createElement("canvas");
-    const ctx = canvasForText.getContext("2d");
-    let canvasWidth = parseInt(pm.canvas_width);
-    let canvasHeight = parseInt(pm.canvas_height);
+    start: function (pm) {
+        //const createCanvasForTexture = (canvasWidth, canvasHeight, text, fontSize) => {
+        // 貼り付けるcanvasを作成。
+        const canvasForText = document.createElement("canvas");
+        const ctx = canvasForText.getContext("2d");
+        let canvasWidth = parseInt(pm.canvas_width);
+        let canvasHeight = parseInt(pm.canvas_height);
 
-    ctx.canvas.width = canvasWidth; // 小さいと文字がぼやける
-    ctx.canvas.height = canvasHeight; // 小さいと文字がぼやける
+        ctx.canvas.width = canvasWidth; // 小さいと文字がぼやける
+        ctx.canvas.height = canvasHeight; // 小さいと文字がぼやける
 
-    // 透過率50%の青背景を描く
-    ctx.fillStyle = "rgba(0, 0, 0, 0)";
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        // 透過率50%の青背景を描く
+        ctx.fillStyle = "rgba(0, 0, 0, 0)";
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    if (pm.color != "") {
-      ctx.fillStyle = $.convertColor(pm.color);
-    } else {
-      ctx.fillStyle = "black";
-    }
+        if (pm.color != "") {
+            ctx.fillStyle = $.convertColor(pm.color);
+        } else {
+            ctx.fillStyle = "black";
+        }
 
-    ctx.font = pm.size + "px sans-serif";
+        ctx.font = pm.size + "px sans-serif";
 
-    ctx.fillText(
-      pm.text,
-      // x方向の余白/2をx方向開始時の始点とすることで、横方向の中央揃えをしている。
-      (canvasWidth - ctx.measureText(pm.text).width) / 2,
-      // y方向のcanvasの中央に文字の高さの半分を加えることで、縦方向の中央揃えをしている。
-      canvasHeight / 2 + ctx.measureText(pm.text).actualBoundingBoxAscent / 2
-    );
+        ctx.fillText(
+            pm.text,
+            // x方向の余白/2をx方向開始時の始点とすることで、横方向の中央揃えをしている。
+            (canvasWidth - ctx.measureText(pm.text).width) / 2,
+            // y方向のcanvasの中央に文字の高さの半分を加えることで、縦方向の中央揃えをしている。
+            canvasHeight / 2 + ctx.measureText(pm.text).actualBoundingBoxAscent / 2,
+        );
 
-    const canvasTexture = new THREE.CanvasTexture(canvasForText);
+        const canvasTexture = new THREE.CanvasTexture(canvasForText);
 
-    let model = null;
+        let model = null;
 
-    if (pm.sprite == "true") {
-      // マテリアルを作成する
-      const material = new THREE.SpriteMaterial({
-        map: canvasTexture,
-        alphaTest: 0.01,
-        transparent: true,
-      });
+        if (pm.sprite == "true") {
+            // マテリアルを作成する
+            const material = new THREE.SpriteMaterial({
+                map: canvasTexture,
+                alphaTest: 0.01,
+                transparent: true,
+            });
 
-      model = new THREE.Sprite(material);
-    } else {
-      const material = new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        map: canvasTexture,
-        transparent: true,
-        alphaTest: 0.5,
-      });
-      const geo = new THREE.PlaneGeometry(
-        parseFloat(pm.width),
-        parseFloat(pm.height),
-        1,
-        1
-      );
+            model = new THREE.Sprite(material);
+        } else {
+            const material = new THREE.MeshBasicMaterial({
+                side: THREE.DoubleSide,
+                map: canvasTexture,
+                transparent: true,
+                alphaTest: 0.5,
+            });
+            const geo = new THREE.PlaneGeometry(parseFloat(pm.width), parseFloat(pm.height), 1, 1);
 
-      model = new THREE.Mesh(geo, material);
-    }
+            model = new THREE.Mesh(geo, material);
+        }
 
-    let pos = $.three_pos(pm.pos);
-    let rot = $.three_pos(pm.rot);
-    let scale = $.three_pos(pm.scale);
+        let pos = $.three_pos(pm.pos);
+        let rot = $.three_pos(pm.rot);
+        let scale = $.three_pos(pm.scale);
 
-    model.position.set(pos.x, pos.y, pos.z);
-    model.rotation.set(rot.x, rot.y, rot.z);
-    model.scale.set(scale.x, scale.y * (canvasHeight / canvasWidth), scale.z);
+        model.position.set(pos.x, pos.y, pos.z);
+        model.rotation.set(rot.x, rot.y, rot.z);
+        model.scale.set(scale.x, scale.y * (canvasHeight / canvasWidth), scale.z);
 
-    var three = TYRANO.kag.tmp.three;
-    var scene = three.scene;
+        var three = TYRANO.kag.tmp.three;
+        var scene = three.scene;
 
-    TYRANO.kag.tmp.three.models[pm.name] = new ThreeModel(
-      { name: pm.name, model: model, pm: pm },
-      three
-    );
+        TYRANO.kag.tmp.three.models[pm.name] = new ThreeModel({ name: pm.name, model: model, pm: pm }, three);
 
-    if (pm.next == "true") {
-      TYRANO.kag.ftag.nextOrder();
-    }
-  },
+        if (pm.next == "true") {
+            TYRANO.kag.ftag.nextOrder();
+        }
+    },
 };
 
 //スプライトを配置する
 tyrano.plugin.kag.tag["3d_text_mod"] = {
-  vital: ["name"],
+    vital: ["name"],
 
-  pm: {
-    name: "",
-    jname: "",
-    text: "",
+    pm: {
+        name: "",
+        jname: "",
+        text: "",
 
-    size: "",
-    canvas_width: "1500",
-    canvas_height: "100",
+        size: "",
+        canvas_width: "1500",
+        canvas_height: "100",
 
-    color: "",
+        color: "",
 
-    scale: "",
-    pos: "",
-    rot: "",
+        scale: "",
+        pos: "",
+        rot: "",
 
-    next: "true",
-  },
+        next: "true",
+    },
 
-  start: function (pm) {
-    var three = this.kag.tmp.three;
-    var scene = three.scene;
+    start: function (pm) {
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
 
-    if ($.checkThreeModel(pm.name) == false) {
-      return;
-    }
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
 
-    let model = this.kag.tmp.three.models[pm.name];
+        let model = this.kag.tmp.three.models[pm.name];
 
-    if (pm.pos != "") {
-      let pos = $.three_pos(pm.pos);
-      model.setPosition(pos.x, pos.y, pos.z);
-    }
+        if (pm.pos != "") {
+            let pos = $.three_pos(pm.pos);
+            model.setPosition(pos.x, pos.y, pos.z);
+        }
 
-    if (pm.scale != "") {
-      let scale = $.three_pos(pm.scale);
-      model.setScale(scale.x, scale.y, scale.z);
-    }
+        if (pm.scale != "") {
+            let scale = $.three_pos(pm.scale);
+            model.setScale(scale.x, scale.y, scale.z);
+        }
 
-    if (pm.rot != "") {
-      let rot = $.three_pos(pm.rot);
-      model.setRotation(rot.x, rot.y, rot.z);
-    }
+        if (pm.rot != "") {
+            let rot = $.three_pos(pm.rot);
+            model.setRotation(rot.x, rot.y, rot.z);
+        }
 
-    if (pm.jname != "") {
-      model.pm.jname = pm.jname;
-    }
+        if (pm.jname != "") {
+            model.pm.jname = pm.jname;
+        }
 
-    /*
-	if(pm.doubleside!=""){
-		
-		if(pm.doubleside=="true"){
-			model.model.material.side = THREE.DoubleSide; 
-		}else{
-			model.model.material.side = THREE.FrontSide; 
-		}
-		
-	}
-	*/
+        /*
+if(pm.doubleside!=""){
 
-    if (pm.size != "") {
-      model.pm.size = pm.size;
-      pm.text = model.pm.text;
-    } else {
-      pm.size = model.pm.size;
-    }
+if(pm.doubleside=="true"){
+model.model.material.side = THREE.DoubleSide; 
+}else{
+model.model.material.side = THREE.FrontSide; 
+}
 
-    //const createCanvasForTexture = (canvasWidth, canvasHeight, text, fontSize) => {
-    // 貼り付けるcanvasを作成。
+}
+*/
 
-    if (pm.color != "" || pm.text != "") {
-      if (pm.color == "") {
-        pm.color = model.pm.color;
-      } else {
-        model.pm.color = pm.color;
-      }
+        if (pm.size != "") {
+            model.pm.size = pm.size;
+            pm.text = model.pm.text;
+        } else {
+            pm.size = model.pm.size;
+        }
 
-      if (pm.text == "") {
-        pm.text = model.pm.text;
-      } else {
-        model.pm.text = pm.text;
-      }
+        //const createCanvasForTexture = (canvasWidth, canvasHeight, text, fontSize) => {
+        // 貼り付けるcanvasを作成。
 
-      const canvasForText = document.createElement("canvas");
-      const ctx = canvasForText.getContext("2d");
-      let canvasWidth = parseInt(pm.canvas_width);
-      let canvasHeight = parseInt(pm.canvas_height);
+        if (pm.color != "" || pm.text != "") {
+            if (pm.color == "") {
+                pm.color = model.pm.color;
+            } else {
+                model.pm.color = pm.color;
+            }
 
-      ctx.canvas.width = canvasWidth; // 小さいと文字がぼやける
-      ctx.canvas.height = canvasHeight; // 小さいと文字がぼやける
+            if (pm.text == "") {
+                pm.text = model.pm.text;
+            } else {
+                model.pm.text = pm.text;
+            }
 
-      // 透過率50%の青背景を描く
-      ctx.fillStyle = "rgba(0, 0, 0, 0)";
-      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            const canvasForText = document.createElement("canvas");
+            const ctx = canvasForText.getContext("2d");
+            let canvasWidth = parseInt(pm.canvas_width);
+            let canvasHeight = parseInt(pm.canvas_height);
 
-      if (pm.color != "") {
-        ctx.fillStyle = $.convertColor(pm.color);
-      } else {
-        ctx.fillStyle = "black";
-      }
+            ctx.canvas.width = canvasWidth; // 小さいと文字がぼやける
+            ctx.canvas.height = canvasHeight; // 小さいと文字がぼやける
 
-      ctx.font = pm.size + "px sans-serif";
+            // 透過率50%の青背景を描く
+            ctx.fillStyle = "rgba(0, 0, 0, 0)";
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-      ctx.fillText(
-        pm.text,
-        // x方向の余白/2をx方向開始時の始点とすることで、横方向の中央揃えをしている。
-        (canvasWidth - ctx.measureText(pm.text).width) / 2,
-        // y方向のcanvasの中央に文字の高さの半分を加えることで、縦方向の中央揃えをしている。
-        canvasHeight / 2 + ctx.measureText(pm.text).actualBoundingBoxAscent / 2
-      );
+            if (pm.color != "") {
+                ctx.fillStyle = $.convertColor(pm.color);
+            } else {
+                ctx.fillStyle = "black";
+            }
 
-      const canvasTexture = new THREE.CanvasTexture(canvasForText);
+            ctx.font = pm.size + "px sans-serif";
 
-      if (model.pm.sprite == "true") {
-        // マテリアルを作成する
-        const material = new THREE.SpriteMaterial({
-          map: canvasTexture,
-          alphaTest: 0.5,
-          transparent: true,
-        });
+            ctx.fillText(
+                pm.text,
+                // x方向の余白/2をx方向開始時の始点とすることで、横方向の中央揃えをしている。
+                (canvasWidth - ctx.measureText(pm.text).width) / 2,
+                // y方向のcanvasの中央に文字の高さの半分を加えることで、縦方向の中央揃えをしている。
+                canvasHeight / 2 + ctx.measureText(pm.text).actualBoundingBoxAscent / 2,
+            );
 
-        model.model.material = material;
-      } else {
-        const material = new THREE.MeshBasicMaterial({
-          side: THREE.DoubleSide,
-          map: canvasTexture,
-          transparent: true,
-          alphaTest: 0.5,
-        });
-        model.model.material = material;
-      }
+            const canvasTexture = new THREE.CanvasTexture(canvasForText);
 
-      model.needsUpdate();
-    }
+            if (model.pm.sprite == "true") {
+                // マテリアルを作成する
+                const material = new THREE.SpriteMaterial({
+                    map: canvasTexture,
+                    alphaTest: 0.5,
+                    transparent: true,
+                });
 
-    if (pm.next == "true") {
-      TYRANO.kag.ftag.nextOrder();
-    }
-  },
+                model.model.material = material;
+            } else {
+                const material = new THREE.MeshBasicMaterial({
+                    side: THREE.DoubleSide,
+                    map: canvasTexture,
+                    transparent: true,
+                    alphaTest: 0.5,
+                });
+                model.model.material = material;
+            }
+
+            model.needsUpdate();
+        }
+
+        if (pm.next == "true") {
+            TYRANO.kag.ftag.nextOrder();
+        }
+    },
 };
 
 /*
@@ -5641,91 +5525,91 @@ sprite=true or falseを指定。trueを指定すると常に正面をむくテ�
 
 //サウンドを再生する
 tyrano.plugin.kag.tag["3d_sound"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    name: "",
-    target_name: "", //オブジェクト。このオブジェクトがある場所で鳴らす。
-    pos: "0,0,0",
-    folder: "",
-    storage: "",
-    loop: "false",
-    volume: "",
-    next: "true",
-  },
+    pm: {
+        name: "",
+        target_name: "", //オブジェクト。このオブジェクトがある場所で鳴らす。
+        pos: "0,0,0",
+        folder: "",
+        storage: "",
+        loop: "false",
+        volume: "",
+        next: "true",
+    },
 
-  start: function (pm) {
-    let three = TYRANO.kag.tmp.three;
+    start: function (pm) {
+        let three = TYRANO.kag.tmp.three;
 
-    var folder = "";
-    if (pm.folder != "") {
-      folder = pm.folder;
-    } else {
-      folder = "others/3d/audio";
-    }
-
-    var storage_url = "";
-    if ($.isHTTP(pm.storage)) {
-      storage_url = pm.storage;
-    } else {
-      storage_url = "./data/" + folder + "/" + pm.storage;
-    }
-
-    // create a global audio source
-    const sound = new THREE.PositionalAudio(three.audio_listener);
-
-    let pos = $.three_pos(pm.pos);
-
-    if (pm.target_name != "") {
-      //$.three_pos("10,10,10");
-      if ($.checkThreeModel(pm.target_name) == false) {
-        return;
-      }
-
-      var model = this.kag.tmp.three.models[pm.target_name].model;
-      pos.x = model.position.x;
-      pos.y = model.position.y;
-      pos.z = model.position.z;
-    }
-
-    //サウンドのポジション
-    sound.position.x = pos.x;
-    sound.position.y = pos.y;
-    sound.position.z = pos.z;
-
-    // load a sound and set it as the Audio object's buffer
-    const audioLoader = new THREE.AudioLoader();
-
-    audioLoader.load(storage_url, function (buffer) {
-      sound.setBuffer(buffer);
-
-      if (pm.loop == "true") {
-        sound.setLoop(true);
-      }
-
-      var volume = 1;
-      if (pm.volume !== "") {
-        volume = parseFloat(parseInt(pm.volume) / 100);
-      }
-
-      sound.setVolume(volume);
-      sound.setRefDistance(20);
-
-      sound.onEnded = function () {
-        if (pm.loop == "false") {
-          three.scene.remove(sound);
+        var folder = "";
+        if (pm.folder != "") {
+            folder = pm.folder;
+        } else {
+            folder = "others/3d/audio";
         }
-      };
 
-      sound.play();
-    });
+        var storage_url = "";
+        if ($.isHTTP(pm.storage)) {
+            storage_url = pm.storage;
+        } else {
+            storage_url = "./data/" + folder + "/" + pm.storage;
+        }
 
-    three.scene.add(sound);
+        // create a global audio source
+        const sound = new THREE.PositionalAudio(three.audio_listener);
 
-    if (pm.next == "true") {
-      TYRANO.kag.ftag.nextOrder();
-    }
-  },
+        let pos = $.three_pos(pm.pos);
+
+        if (pm.target_name != "") {
+            //$.three_pos("10,10,10");
+            if ($.checkThreeModel(pm.target_name) == false) {
+                return;
+            }
+
+            var model = this.kag.tmp.three.models[pm.target_name].model;
+            pos.x = model.position.x;
+            pos.y = model.position.y;
+            pos.z = model.position.z;
+        }
+
+        //サウンドのポジション
+        sound.position.x = pos.x;
+        sound.position.y = pos.y;
+        sound.position.z = pos.z;
+
+        // load a sound and set it as the Audio object's buffer
+        const audioLoader = new THREE.AudioLoader();
+
+        audioLoader.load(storage_url, function (buffer) {
+            sound.setBuffer(buffer);
+
+            if (pm.loop == "true") {
+                sound.setLoop(true);
+            }
+
+            var volume = 1;
+            if (pm.volume !== "") {
+                volume = parseFloat(parseInt(pm.volume) / 100);
+            }
+
+            sound.setVolume(volume);
+            sound.setRefDistance(20);
+
+            sound.onEnded = function () {
+                if (pm.loop == "false") {
+                    three.scene.remove(sound);
+                }
+            };
+
+            sound.play();
+        });
+
+        three.scene.add(sound);
+
+        if (pm.next == "true") {
+            TYRANO.kag.ftag.nextOrder();
+        }
+    },
 };
 
 /*
@@ -5754,31 +5638,31 @@ text=表示するテキスト文字列を指定します,
 
 //サウンドを再生する
 tyrano.plugin.kag.tag["3d_helper"] = {
-  vital: [],
+    vital: [],
 
-  pm: {
-    name: "",
-    grid: "",
-    axes: "",
-    next: "true",
-  },
+    pm: {
+        name: "",
+        grid: "",
+        axes: "",
+        next: "true",
+    },
 
-  start: function (pm) {
-    let three = TYRANO.kag.tmp.three;
+    start: function (pm) {
+        let three = TYRANO.kag.tmp.three;
 
-    let gridHelper = new THREE.GridHelper(4000, 40, 0x888888, 0x444444);
-    gridHelper.position.y = 0;
-    gridHelper.name = "Grid";
-    three.scene.add(gridHelper);
+        let gridHelper = new THREE.GridHelper(4000, 40, 0x888888, 0x444444);
+        gridHelper.position.y = 0;
+        gridHelper.name = "Grid";
+        three.scene.add(gridHelper);
 
-    const axes = new THREE.AxesHelper(500);
-    axes.name = "AxesHelper";
-    three.scene.add(axes);
+        const axes = new THREE.AxesHelper(500);
+        axes.name = "AxesHelper";
+        three.scene.add(axes);
 
-    if (pm.next == "true") {
-      TYRANO.kag.ftag.nextOrder();
-    }
-  },
+        if (pm.next == "true") {
+            TYRANO.kag.ftag.nextOrder();
+        }
+    },
 };
 
 /*
@@ -5837,308 +5721,279 @@ tyrano.plugin.kag.tag["3d_helper"] = {
  * 	autoReturnToCenter {Bool} (optional) - Sets the behavior of the stick, whether or not, it should return to zero position when released (Default value is True and return to zero)
  */
 var JoyStick = function (container, parameters) {
-  parameters = parameters || {};
-  var title =
-      typeof parameters.title === "undefined" ? "joystick" : parameters.title,
-    width = typeof parameters.width === "undefined" ? 0 : parameters.width,
-    height = typeof parameters.height === "undefined" ? 0 : parameters.height,
-    internalFillColor =
-      typeof parameters.internalFillColor === "undefined"
-        ? "#00AA00"
-        : parameters.internalFillColor,
-    internalLineWidth =
-      typeof parameters.internalLineWidth === "undefined"
-        ? 2
-        : parameters.internalLineWidth,
-    internalStrokeColor =
-      typeof parameters.internalStrokeColor === "undefined"
-        ? "#003300"
-        : parameters.internalStrokeColor,
-    externalLineWidth =
-      typeof parameters.externalLineWidth === "undefined"
-        ? 2
-        : parameters.externalLineWidth,
-    externalStrokeColor =
-      typeof parameters.externalStrokeColor === "undefined"
-        ? "#008000"
-        : parameters.externalStrokeColor,
-    autoReturnToCenter =
-      typeof parameters.autoReturnToCenter === "undefined"
-        ? true
-        : parameters.autoReturnToCenter;
+    parameters = parameters || {};
+    var title = typeof parameters.title === "undefined" ? "joystick" : parameters.title,
+        width = typeof parameters.width === "undefined" ? 0 : parameters.width,
+        height = typeof parameters.height === "undefined" ? 0 : parameters.height,
+        internalFillColor = typeof parameters.internalFillColor === "undefined" ? "#00AA00" : parameters.internalFillColor,
+        internalLineWidth = typeof parameters.internalLineWidth === "undefined" ? 2 : parameters.internalLineWidth,
+        internalStrokeColor = typeof parameters.internalStrokeColor === "undefined" ? "#003300" : parameters.internalStrokeColor,
+        externalLineWidth = typeof parameters.externalLineWidth === "undefined" ? 2 : parameters.externalLineWidth,
+        externalStrokeColor = typeof parameters.externalStrokeColor === "undefined" ? "#008000" : parameters.externalStrokeColor,
+        autoReturnToCenter = typeof parameters.autoReturnToCenter === "undefined" ? true : parameters.autoReturnToCenter;
 
-  // Create Canvas element and add it in the Container object
-  var objContainer = document.getElementById(container);
-  var canvas = document.createElement("canvas");
-  canvas.id = title;
-  if (width === 0) {
-    width = objContainer.clientWidth;
-  }
-  if (height === 0) {
-    height = objContainer.clientHeight;
-  }
-  canvas.width = width;
-  canvas.height = height;
-  objContainer.appendChild(canvas);
-  var context = canvas.getContext("2d");
-
-  var pressed = 0; // Bool - 1=Yes - 0=No
-  var circumference = 2 * Math.PI;
-  var internalRadius = (canvas.width - (canvas.width / 2 + 10)) / 2;
-  var maxMoveStick = internalRadius + 5;
-  var externalRadius = internalRadius + 30;
-  var centerX = canvas.width / 2;
-  var centerY = canvas.height / 2;
-  var directionHorizontalLimitPos = canvas.width / 10;
-  var directionHorizontalLimitNeg = directionHorizontalLimitPos * -1;
-  var directionVerticalLimitPos = canvas.height / 10;
-  var directionVerticalLimitNeg = directionVerticalLimitPos * -1;
-  // Used to save current position of stick
-  var movedX = centerX;
-  var movedY = centerY;
-
-  // Check if the device support the touch or not
-  if ("ontouchstart" in document.documentElement) {
-    canvas.addEventListener("touchstart", onTouchStart, false);
-    canvas.addEventListener("touchmove", onTouchMove, false);
-    canvas.addEventListener("touchend", onTouchEnd, false);
-  } else {
-    canvas.addEventListener("mousedown", onMouseDown, false);
-    canvas.addEventListener("mousemove", onMouseMove, false);
-    canvas.addEventListener("mouseup", onMouseUp, false);
-  }
-  // Draw the object
-  drawExternal();
-  drawInternal();
-
-  /******************************************************
-   * Private methods
-   *****************************************************/
-
-  /**
-   * @desc Draw the external circle used as reference position
-   */
-  function drawExternal() {
-    context.beginPath();
-    context.arc(centerX, centerY, externalRadius, 0, circumference, false);
-    context.lineWidth = externalLineWidth;
-    context.strokeStyle = externalStrokeColor;
-    context.stroke();
-  }
-
-  /**
-   * @desc Draw the internal stick in the current position the user have moved it
-   */
-  function drawInternal() {
-    context.beginPath();
-    if (movedX < internalRadius) {
-      movedX = maxMoveStick;
+    // Create Canvas element and add it in the Container object
+    var objContainer = document.getElementById(container);
+    var canvas = document.createElement("canvas");
+    canvas.id = title;
+    if (width === 0) {
+        width = objContainer.clientWidth;
     }
-    if (movedX + internalRadius > canvas.width) {
-      movedX = canvas.width - maxMoveStick;
+    if (height === 0) {
+        height = objContainer.clientHeight;
     }
-    if (movedY < internalRadius) {
-      movedY = maxMoveStick;
-    }
-    if (movedY + internalRadius > canvas.height) {
-      movedY = canvas.height - maxMoveStick;
-    }
-    context.arc(movedX, movedY, internalRadius, 0, circumference, false);
-    // create radial gradient
-    var grd = context.createRadialGradient(
-      centerX,
-      centerY,
-      5,
-      centerX,
-      centerY,
-      200
-    );
-    // Light color
-    grd.addColorStop(0, internalFillColor);
-    // Dark color
-    grd.addColorStop(1, internalStrokeColor);
-    context.fillStyle = grd;
-    context.fill();
-    context.lineWidth = internalLineWidth;
-    context.strokeStyle = internalStrokeColor;
-    context.stroke();
-  }
+    canvas.width = width;
+    canvas.height = height;
+    objContainer.appendChild(canvas);
+    var context = canvas.getContext("2d");
 
-  /**
-   * @desc Events for manage touch
-   */
-  function onTouchStart(event) {
-    pressed = 1;
-  }
+    var pressed = 0; // Bool - 1=Yes - 0=No
+    var circumference = 2 * Math.PI;
+    var internalRadius = (canvas.width - (canvas.width / 2 + 10)) / 2;
+    var maxMoveStick = internalRadius + 5;
+    var externalRadius = internalRadius + 30;
+    var centerX = canvas.width / 2;
+    var centerY = canvas.height / 2;
+    var directionHorizontalLimitPos = canvas.width / 10;
+    var directionHorizontalLimitNeg = directionHorizontalLimitPos * -1;
+    var directionVerticalLimitPos = canvas.height / 10;
+    var directionVerticalLimitNeg = directionVerticalLimitPos * -1;
+    // Used to save current position of stick
+    var movedX = centerX;
+    var movedY = centerY;
 
-  function onTouchMove(event) {
-    // Prevent the browser from doing its default thing (scroll, zoom)
-    event.preventDefault();
-    if (pressed === 1 && event.targetTouches[0].target === canvas) {
-      movedX = event.targetTouches[0].pageX;
-      movedY = event.targetTouches[0].pageY;
-      // Manage offset
-      if (canvas.offsetParent.tagName.toUpperCase() === "BODY") {
-        movedX -= canvas.offsetLeft;
-        movedY -= canvas.offsetTop;
-      } else {
-        movedX -= canvas.offsetParent.offsetLeft;
-        movedY -= canvas.offsetParent.offsetTop;
-      }
-      // Delete canvas
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      // Redraw object
-      drawExternal();
-      drawInternal();
+    // Check if the device support the touch or not
+    if ("ontouchstart" in document.documentElement) {
+        canvas.addEventListener("touchstart", onTouchStart, false);
+        canvas.addEventListener("touchmove", onTouchMove, false);
+        canvas.addEventListener("touchend", onTouchEnd, false);
+    } else {
+        canvas.addEventListener("mousedown", onMouseDown, false);
+        canvas.addEventListener("mousemove", onMouseMove, false);
+        canvas.addEventListener("mouseup", onMouseUp, false);
     }
-  }
-
-  function onTouchEnd(event) {
-    pressed = 0;
-    // If required reset position store variable
-    if (autoReturnToCenter) {
-      movedX = centerX;
-      movedY = centerY;
-    }
-    // Delete canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    // Redraw object
+    // Draw the object
     drawExternal();
     drawInternal();
-    //canvas.unbind('touchmove');
-  }
 
-  /**
-   * @desc Events for manage mouse
-   */
-  function onMouseDown(event) {
-    pressed = 1;
-  }
+    /******************************************************
+     * Private methods
+     *****************************************************/
 
-  function onMouseMove(event) {
-    if (pressed === 1) {
-      movedX = event.pageX;
-      movedY = event.pageY;
-      // Manage offset
-      if (canvas.offsetParent.tagName.toUpperCase() === "BODY") {
-        movedX -= canvas.offsetLeft;
-        movedY -= canvas.offsetTop;
-      } else {
-        movedX -= canvas.offsetParent.offsetLeft;
-        movedY -= canvas.offsetParent.offsetTop;
-      }
-      // Delete canvas
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      // Redraw object
-      drawExternal();
-      drawInternal();
-    }
-  }
-
-  function onMouseUp(event) {
-    pressed = 0;
-    // If required reset position store variable
-    if (autoReturnToCenter) {
-      movedX = centerX;
-      movedY = centerY;
-    }
-    // Delete canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    // Redraw object
-    drawExternal();
-    drawInternal();
-    //canvas.unbind('mousemove');
-  }
-
-  /******************************************************
-   * Public methods
-   *****************************************************/
-
-  /**
-   * @desc The width of canvas
-   * @return Number of pixel width
-   */
-  this.GetWidth = function () {
-    return canvas.width;
-  };
-
-  /**
-   * @desc The height of canvas
-   * @return Number of pixel height
-   */
-  this.GetHeight = function () {
-    return canvas.height;
-  };
-
-  /**
-   * @desc The X position of the cursor relative to the canvas that contains it and to its dimensions
-   * @return Number that indicate relative position
-   */
-  this.GetPosX = function () {
-    return movedX;
-  };
-
-  /**
-   * @desc The Y position of the cursor relative to the canvas that contains it and to its dimensions
-   * @return Number that indicate relative position
-   */
-  this.GetPosY = function () {
-    return movedY;
-  };
-
-  /**
-   * @desc Normalizzed value of X move of stick
-   * @return Integer from -100 to +100
-   */
-  this.GetX = function () {
-    return (100 * ((movedX - centerX) / maxMoveStick)).toFixed();
-  };
-
-  /**
-   * @desc Normalizzed value of Y move of stick
-   * @return Integer from -100 to +100
-   */
-  this.GetY = function () {
-    return (100 * ((movedY - centerY) / maxMoveStick) * -1).toFixed();
-  };
-
-  /**
-   * @desc Get the direction of the cursor as a string that indicates the cardinal points where this is oriented
-   * @return String of cardinal point N, NE, E, SE, S, SW, W, NW and C when it is placed in the center
-   */
-  this.GetDir = function () {
-    var result = "";
-    var orizontal = movedX - centerX;
-    var vertical = movedY - centerY;
-
-    if (
-      vertical >= directionVerticalLimitNeg &&
-      vertical <= directionVerticalLimitPos
-    ) {
-      result = "C";
-    }
-    if (vertical < directionVerticalLimitNeg) {
-      result = "N";
-    }
-    if (vertical > directionVerticalLimitPos) {
-      result = "S";
+    /**
+     * @desc Draw the external circle used as reference position
+     */
+    function drawExternal() {
+        context.beginPath();
+        context.arc(centerX, centerY, externalRadius, 0, circumference, false);
+        context.lineWidth = externalLineWidth;
+        context.strokeStyle = externalStrokeColor;
+        context.stroke();
     }
 
-    if (orizontal < directionHorizontalLimitNeg) {
-      if (result === "C") {
-        result = "W";
-      } else {
-        result += "W";
-      }
-    }
-    if (orizontal > directionHorizontalLimitPos) {
-      if (result === "C") {
-        result = "E";
-      } else {
-        result += "E";
-      }
+    /**
+     * @desc Draw the internal stick in the current position the user have moved it
+     */
+    function drawInternal() {
+        context.beginPath();
+        if (movedX < internalRadius) {
+            movedX = maxMoveStick;
+        }
+        if (movedX + internalRadius > canvas.width) {
+            movedX = canvas.width - maxMoveStick;
+        }
+        if (movedY < internalRadius) {
+            movedY = maxMoveStick;
+        }
+        if (movedY + internalRadius > canvas.height) {
+            movedY = canvas.height - maxMoveStick;
+        }
+        context.arc(movedX, movedY, internalRadius, 0, circumference, false);
+        // create radial gradient
+        var grd = context.createRadialGradient(centerX, centerY, 5, centerX, centerY, 200);
+        // Light color
+        grd.addColorStop(0, internalFillColor);
+        // Dark color
+        grd.addColorStop(1, internalStrokeColor);
+        context.fillStyle = grd;
+        context.fill();
+        context.lineWidth = internalLineWidth;
+        context.strokeStyle = internalStrokeColor;
+        context.stroke();
     }
 
-    return result;
-  };
+    /**
+     * @desc Events for manage touch
+     */
+    function onTouchStart(event) {
+        pressed = 1;
+    }
+
+    function onTouchMove(event) {
+        // Prevent the browser from doing its default thing (scroll, zoom)
+        event.preventDefault();
+        if (pressed === 1 && event.targetTouches[0].target === canvas) {
+            movedX = event.targetTouches[0].pageX;
+            movedY = event.targetTouches[0].pageY;
+            // Manage offset
+            if (canvas.offsetParent.tagName.toUpperCase() === "BODY") {
+                movedX -= canvas.offsetLeft;
+                movedY -= canvas.offsetTop;
+            } else {
+                movedX -= canvas.offsetParent.offsetLeft;
+                movedY -= canvas.offsetParent.offsetTop;
+            }
+            // Delete canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            // Redraw object
+            drawExternal();
+            drawInternal();
+        }
+    }
+
+    function onTouchEnd(event) {
+        pressed = 0;
+        // If required reset position store variable
+        if (autoReturnToCenter) {
+            movedX = centerX;
+            movedY = centerY;
+        }
+        // Delete canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        // Redraw object
+        drawExternal();
+        drawInternal();
+        //canvas.unbind('touchmove');
+    }
+
+    /**
+     * @desc Events for manage mouse
+     */
+    function onMouseDown(event) {
+        pressed = 1;
+    }
+
+    function onMouseMove(event) {
+        if (pressed === 1) {
+            movedX = event.pageX;
+            movedY = event.pageY;
+            // Manage offset
+            if (canvas.offsetParent.tagName.toUpperCase() === "BODY") {
+                movedX -= canvas.offsetLeft;
+                movedY -= canvas.offsetTop;
+            } else {
+                movedX -= canvas.offsetParent.offsetLeft;
+                movedY -= canvas.offsetParent.offsetTop;
+            }
+            // Delete canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            // Redraw object
+            drawExternal();
+            drawInternal();
+        }
+    }
+
+    function onMouseUp(event) {
+        pressed = 0;
+        // If required reset position store variable
+        if (autoReturnToCenter) {
+            movedX = centerX;
+            movedY = centerY;
+        }
+        // Delete canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        // Redraw object
+        drawExternal();
+        drawInternal();
+        //canvas.unbind('mousemove');
+    }
+
+    /******************************************************
+     * Public methods
+     *****************************************************/
+
+    /**
+     * @desc The width of canvas
+     * @return Number of pixel width
+     */
+    this.GetWidth = function () {
+        return canvas.width;
+    };
+
+    /**
+     * @desc The height of canvas
+     * @return Number of pixel height
+     */
+    this.GetHeight = function () {
+        return canvas.height;
+    };
+
+    /**
+     * @desc The X position of the cursor relative to the canvas that contains it and to its dimensions
+     * @return Number that indicate relative position
+     */
+    this.GetPosX = function () {
+        return movedX;
+    };
+
+    /**
+     * @desc The Y position of the cursor relative to the canvas that contains it and to its dimensions
+     * @return Number that indicate relative position
+     */
+    this.GetPosY = function () {
+        return movedY;
+    };
+
+    /**
+     * @desc Normalizzed value of X move of stick
+     * @return Integer from -100 to +100
+     */
+    this.GetX = function () {
+        return (100 * ((movedX - centerX) / maxMoveStick)).toFixed();
+    };
+
+    /**
+     * @desc Normalizzed value of Y move of stick
+     * @return Integer from -100 to +100
+     */
+    this.GetY = function () {
+        return (100 * ((movedY - centerY) / maxMoveStick) * -1).toFixed();
+    };
+
+    /**
+     * @desc Get the direction of the cursor as a string that indicates the cardinal points where this is oriented
+     * @return String of cardinal point N, NE, E, SE, S, SW, W, NW and C when it is placed in the center
+     */
+    this.GetDir = function () {
+        var result = "";
+        var orizontal = movedX - centerX;
+        var vertical = movedY - centerY;
+
+        if (vertical >= directionVerticalLimitNeg && vertical <= directionVerticalLimitPos) {
+            result = "C";
+        }
+        if (vertical < directionVerticalLimitNeg) {
+            result = "N";
+        }
+        if (vertical > directionVerticalLimitPos) {
+            result = "S";
+        }
+
+        if (orizontal < directionHorizontalLimitNeg) {
+            if (result === "C") {
+                result = "W";
+            } else {
+                result += "W";
+            }
+        }
+        if (orizontal > directionHorizontalLimitPos) {
+            if (result === "C") {
+                result = "E";
+            } else {
+                result += "E";
+            }
+        }
+
+        return result;
+    };
 };
