@@ -793,7 +793,7 @@
             } else if (ua.includes("iphone") || ua.includes("ipad")) {
                 return "ios";
             } else if (ua.includes("mac os x")) {
-                return "win";
+                return "mac";
             } else {
                 return "";
             }

@@ -9,3 +9,6 @@ release/
 
 # テスト用
 test/
+
+# ティラノスタジオ
+studio_config.json
