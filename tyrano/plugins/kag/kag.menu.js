@@ -988,10 +988,9 @@ tyrano.plugin.kag.menu = {
         //イベントの復元
         $(".event-setting-element").each(function () {
             var j_elm = $(this);
-            var kind = j_elm.attr("data-event-tag");
+            var tag_name = j_elm.attr("data-event-tag");
             var pm = JSON.parse(j_elm.attr("data-event-pm"));
-            var event_tag = object(tyrano.plugin.kag.tag[kind]);
-            event_tag.setEvent(j_elm, pm);
+            that.kag.getTag(tag_name).setEvent(j_elm, pm);
         });
 
         // 一時変数(tf)は消す

@@ -2140,6 +2140,8 @@ tyrano.plugin.kag.tag.l = {
                 }
             }, auto_speed);
         }
+
+        this.kag.layer.showEventLayer();
     },
 };
 
@@ -2203,6 +2205,8 @@ tyrano.plugin.kag.tag.p = {
                 }
             }, auto_speed);
         }
+
+        this.kag.layer.showEventLayer();
     },
 };
 
@@ -2420,7 +2424,11 @@ tyrano.plugin.kag.tag.er = {
 
 //画面クリア
 tyrano.plugin.kag.tag.cm = {
-    start: function () {
+    pm: {
+        next: "true",
+    },
+
+    start: function (pm) {
         this.kag.ftag.hideNextImg();
         //フォントのリセット
         //カレントレイヤだけじゃなくて、全てもメッセージレイヤを消去する必要がある
@@ -2436,7 +2444,7 @@ tyrano.plugin.kag.tag.cm = {
         //フリーレイヤ消去
         this.kag.layer.getFreeLayer().html("").hide();
 
-        this.kag.ftag.startTag("resetfont");
+        this.kag.ftag.startTag("resetfont", pm);
     },
 };
 
@@ -4225,6 +4233,296 @@ tyrano.plugin.kag.tag.s = {
     start: function () {
         this.kag.stat.is_strong_stop = true;
         this.kag.layer.hideEventLayer();
+
+        // [glink]自動配置が有効な場合はここで表示する
+        if (this.kag.stat.glink_config && this.kag.stat.glink_config.auto_place === "true") {
+            this.showGLinks();
+        }
+    },
+
+    /**
+     * [glink]の自動配置を行う
+     */
+    showGLinks: function () {
+        const j_layer = this.kag.layer.getFreeLayer();
+        const j_glink_collection = j_layer.find(".glink_button_auto_place");
+
+        // [glink]がないならなにもしない
+        if (j_glink_collection.length === 0) {
+            return;
+        }
+
+        // もうクラスは外すべき
+        // ※[s]で止まっているセーブデータを読み込んだ直後に[s]が実行されることがあり
+        // 　もしこのクラスが付いたままだとそこで変なことになる
+        j_glink_collection.removeClass("glink_button_auto_place");
+
+        // [glink_config]で設定したコンフィグを取得
+        const glink_config = this.kag.getTag("glink_config").getConfig();
+
+        //
+        // ボタンにスタイルを当てる
+        //
+        j_glink_collection.setStyleMap({
+            position: "relative",
+            left: "auto",
+            top: "auto",
+            visibility: "hidden",
+        });
+
+        //
+        // ボタンの width を決定する
+        //
+
+        switch (glink_config.width) {
+            case "default":
+                break;
+            case "max":
+                j_glink_collection.alignMaxWidth();
+                break;
+            default:
+                j_glink_collection.css({
+                    "box-sizing": "border-box",
+                    "width": glink_config.width,
+                });
+        }
+
+        //
+        // ボタンの height を決定する
+        //
+
+        switch (glink_config.height) {
+            case "default":
+                break;
+            case "max":
+                j_glink_collection.alignMaxHeight();
+                break;
+            default:
+                j_glink_collection.css({
+                    "box-sizing": "border-box",
+                    "height": glink_config.height,
+                });
+        }
+
+        //
+        // ボタンの margin を決定する
+        //
+
+        if (glink_config.margin_y !== "default") {
+            j_glink_collection.setStyleMap({
+                "margin-top": `${glink_config.margin_y}px`,
+                "margin-bottom": `${glink_config.margin_y}px`,
+            });
+        }
+
+        if (glink_config.margin_x !== "default") {
+            j_glink_collection.setStyleMap({
+                "margin-left": `${glink_config.margin_x}px`,
+                "margin-right": `${glink_config.margin_x}px`,
+            });
+        }
+
+        //
+        // ボタンの padding を決定する
+        //
+
+        if (glink_config.padding_y !== "default") {
+            j_glink_collection.setStyleMap({
+                "padding-top": `${glink_config.padding_y}px`,
+                "padding-bottom": `${glink_config.padding_y}px`,
+            });
+        }
+
+        if (glink_config.padding_x !== "default") {
+            j_glink_collection.setStyleMap({
+                "padding-left": `${glink_config.padding_x}px`,
+                "padding-right": `${glink_config.padding_x}px`,
+            });
+        }
+
+        // 改めて表示
+        j_glink_collection.show();
+
+        //
+        // ラッパーに当てるスタイル
+        //
+
+        const wrapper_style = {
+            "position": "absolute",
+            "display": "flex",
+            "flex-direction": glink_config.direction,
+            "flex-wrap": glink_config.wrap,
+            "align-items": glink_config.horizontal,
+            "justify-content": glink_config.vertical,
+        };
+
+        // ラッパーの領域（left, top, width, height)
+        let area_nums;
+        if (glink_config.place_area === "auto") {
+            $.extend(wrapper_style, this.calcFlexPosition(glink_config));
+        } else if (glink_config.place_area === "cover") {
+            $.extend(wrapper_style, {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: "100%",
+            });
+        } else {
+            area_nums = glink_config.place_area.split(",").map((item) => {
+                return $.trim(item);
+            });
+            $.extend(wrapper_style, {
+                left: `${area_nums[0]}px`,
+                top: `${area_nums[1]}px`,
+                width: `${area_nums[2]}px`,
+                height: `${area_nums[3]}px`,
+            });
+        }
+
+        // flexなラッパーを作る
+        const j_wrapper = $('<div class="glink_auto_place_wrapper" />').setStyleMap(wrapper_style);
+
+        // 全体をずらす
+        if (glink_config.dx !== "0") j_wrapper.css("left", `+=${glink_config.dx}px`);
+        if (glink_config.dy !== "0") j_wrapper.css("top", `+=${glink_config.dy}px`);
+
+        // [glink]たちはこちらのラッパーに移動
+        j_glink_collection.appendTo(j_wrapper);
+
+        // 各ボタンについてアニメーション設定を見ていく
+        let animation_target_count = 0;
+        j_glink_collection.each((i, elm) => {
+            const j_elm = $(elm);
+            // このボタンを出すときに指定されていたパラメータをオブジェクトに復元
+            const _pm = JSON.parse(j_elm.attr("data-event-pm"));
+            // アニメーションが必要か
+            const need_animate =
+                _pm.show_time !== undefined &&
+                parseInt(_pm.show_time) >= 10 &&
+                (_pm.show_keyframe !== "none" || _pm.show_effect !== "none");
+            if (need_animate) {
+                animation_target_count += 1;
+            }
+            // Elementのプロパティに情報を格納 すぐあとで使う
+            elm.__pm = _pm;
+            elm.__need_animate = need_animate;
+        });
+
+        //
+        // フェードインしないならここでラッパーをフリーレイヤにぶち込んで終わり
+        //
+
+        if (animation_target_count === 0 || this.kag.stat.is_skip) {
+            j_glink_collection.setStyle("visibility", "visible");
+            j_wrapper.appendTo(j_layer);
+            return;
+        }
+
+        //
+        // ティラノタグで定義したキーフレームアニメーションを使う場合
+        //
+
+        // アニメーション中はラッパー自体をクリック不可にする
+        j_wrapper.setStyleMap({ "pointer-events": "none" });
+
+        // アニメーション完了要素カウンタ
+        let showed_counter = 0;
+
+        j_glink_collection.each((i, elm) => {
+            const j_elm = $(elm);
+            if (!elm.__need_animate) {
+                j_elm.setStyle("visibility", "visible");
+                return;
+            }
+            const _pm = elm.__pm;
+            const timeout = parseInt(_pm.show_delay) * i;
+            $.setTimeout(() => {
+                j_elm.setStyle("visibility", "visible");
+                if (_pm.show_keyframe && _pm.show_keyframe !== "none") {
+                    j_elm.animateWithTyranoKeyframes({
+                        keyframe: _pm.show_keyframe,
+                        time: _pm.show_time,
+                        easing: _pm.show_easing,
+                        delay: "0",
+                        count: "1",
+                        mode: "",
+                        onend: (anim) => {
+                            anim.cancel();
+                            showed_counter += 1;
+                            if (showed_counter === animation_target_count) {
+                                j_wrapper.setStyleMap({ "pointer-events": "auto" });
+                            }
+                        },
+                    });
+                } else {
+                    j_elm.setStyle("animation-fill-mode", "forwards");
+                    if (_pm.show_time) j_elm.setStyle("animation-duration", $.convertDuration(glink_config.show_time));
+                    if (_pm.show_easing) j_elm.setStyle("animation-timing-function", glink_config.show_easing);
+                    j_elm.on("animationend", (e) => {
+                        if (j_elm.get(0) === e.target) {
+                            j_elm.off("animationend");
+                            j_elm.removeClass(_pm.show_effect);
+                            j_elm.setStyleMap({
+                                "animation-fill-mode": "",
+                                "animation-duration": "",
+                                "animation-timing-function": "",
+                            });
+                            showed_counter += 1;
+                            if (showed_counter === animation_target_count) {
+                                j_wrapper.setStyleMap({ "pointer-events": "auto" });
+                            }
+                        }
+                    });
+                    j_elm.addClass(glink_config.show_effect);
+                }
+            }, timeout);
+        });
+        j_wrapper.appendTo(j_layer);
+    },
+
+    /**
+     * [glink]の自動配置をおこなう際の領域（flexなラッパーに設定するleft, top, width, height）を計算する
+     * @param {Object} glink_config
+     * @returns {Object}
+     */
+    calcFlexPosition: function (glink_config) {
+        const j_message_layer = this.kag.layer.getLayer(this.kag.stat.current_layer, this.kag.stat.current_page);
+        const j_message_outer = j_message_layer.find(".message_outer");
+        const gh = this.kag.tmp.scale_info.game_height;
+        const gh_half = gh / 2;
+        const top = parseInt(j_message_outer.css("top")) || 0;
+        const height = parseInt(j_message_outer.css("height")) || gh;
+        const bottom = top + height;
+
+        // メッセージウィンドウの縦幅が画面の8割以上を占めているなら画面全体を基準にしたほうがいいだろう
+        const blank_rate = height / gh;
+        if (blank_rate > 0.8) {
+            return {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: "100%",
+            };
+        }
+        const blank_upper = top; // メッセージウィンドウの上側余白
+        const blank_lower = gh - bottom; // メッセージウィンドウの下側余白
+        if (blank_upper > blank_lower) {
+            // 上のほうがスペースが空いている場合
+            return {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: `${top}px`,
+            };
+        } else {
+            // 下のほうがスペースが空いている場合
+            return {
+                left: "0",
+                top: `${bottom}px`,
+                width: "100%",
+                height: `${gh - bottom}px`,
+            };
+        }
     },
 };
 
@@ -4993,11 +5291,14 @@ tyrano.plugin.kag.tag.endnowait = {
 tyrano.plugin.kag.tag.resetfont = {
     log_join: "true",
 
-    start: function () {
-        var j_span = this.kag.setMessageCurrentSpan();
+    pm: {
+        next: "true",
+    },
 
+    start: function (pm) {
+        this.kag.setMessageCurrentSpan();
         this.kag.stat.font = $.extend(true, {}, this.kag.stat.default_font);
-        this.kag.ftag.nextOrder();
+        if (pm.next !== "false") this.kag.ftag.nextOrder();
     },
 };
 
@@ -5507,266 +5808,390 @@ tyrano.plugin.kag.tag.button = {
     },
 
     setEvent: function (j_button, pm) {
-        var that = TYRANO;
+        const that = this;
 
-        (function () {
-            var _target = pm.target;
-            var _storage = pm.storage;
-            var _pm = pm;
+        // クリックされたか
+        let button_clicked = false;
 
-            var preexp = that.kag.embScript(pm.preexp);
-            var button_clicked = false;
+        // 固定ボタンか ([clearfix]するまで永続するボタンか)
+        const is_fix_button = pm.fix === "true";
 
-            var parse_img_url = function (src) {
-                if ($.isHTTP(src)) {
-                    return src;
-                } else {
-                    return "./data/" + _pm.folder + "/" + src;
-                }
-            };
+        // ロールボタンか (セーブやロードなどを行なうためのボタンか)
+        const is_role_button = !!pm.role;
 
-            j_button.hover(
-                //マウスが乗った時
-                function () {
-                    //音を鳴らす
-                    if (_pm.enterse != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.enterse,
-                            stop: true,
-                        });
-                    }
-                    //画像を変更する
-                    if (_pm.enterimg != "") {
-                        var enter_img_url = parse_img_url(_pm.enterimg);
-                        $(this).attr("src", enter_img_url);
-                    }
-                },
-                //マウスが外れた時
-                function () {
-                    //音を鳴らす
-                    if (_pm.leavese != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.leavese,
-                            stop: true,
-                        });
-                    }
-                    //画像を元に戻す
-                    if (_pm.enterimg != "") {
-                        var initial_img_url = parse_img_url(_pm.graphic);
-                        $(this).attr("src", initial_img_url);
-                    }
-                },
-            );
+        // コールボタンか (サブルーチンをコールするボタンか)
+        const is_call_button = !is_role_button && is_fix_button;
 
-            //マウスを押したとき
-            j_button.on("mousedown touchstart", function (event) {
-                if (_pm.activeimg != "") {
-                    var active_img_url = parse_img_url(_pm.activeimg);
-                    j_button.attr("src", active_img_url);
-                }
-            });
+        // 選択肢ボタンか ([cm]で消えるボタンか)
+        const is_jump_button = !is_role_button && !is_fix_button;
 
-            //クリックが確定したとき
-            j_button.click(function (event) {
-                // ブラウザの音声の再生制限を解除
-                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+        // セーブに関連する機能を持ったロールボタンか
+        const is_save_button = pm.role == "save" || pm.role == "menu" || pm.role == "quicksave" || pm.role == "sleepgame";
 
-                // ティラノイベント"click:tag:button"を発火
-                that.kag.trigger("click:tag:button", event);
+        // [call]スタックが存在するか
+        const exists_call_stack = !!that.kag.getStack("call");
 
-                if (_pm.clickimg != "") {
-                    //クリック画像が設定されているなら画像を変える
-                    var click_img_url = parse_img_url(_pm.clickimg);
-                    j_button.attr("src", click_img_url);
-                } else if (_pm.activeimg != "") {
-                    //クリック画像は設定されていないが、アクティブ画像が設定されている場合
-                    //いままさにアクティブ画像になっているはずなので、もとに戻す
-                    var initial_img_url = parse_img_url(_pm.graphic);
-                    $(this).attr("src", initial_img_url);
-                }
+        //
+        // ホバーイベント
+        //
 
-                //fix指定のボタンは、繰り返し実行できるようにする
-                if (button_clicked == true && _pm.fix == "false") {
-                    return false;
-                }
+        j_button.hover(
+            // マウスカーソルが乗った時
+            () => {
+                if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
+                if (!is_fix_button && button_clicked) return false;
+                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.enterimg, pm.folder));
+                if (pm.enterse) this.kag.playSound(pm.enterse);
+            },
+            // マウスカーソルが外れた時
+            () => {
+                if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
+                if (!is_fix_button && button_clicked) return false;
+                if (pm.leavese) this.kag.playSound(pm.leavese);
+                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
+            },
+        );
 
-                //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
-                if (that.kag.stat.is_strong_stop != true && _pm.fix == "false") {
-                    return false;
-                }
+        //
+        // 押下イベント
+        //
 
+        j_button.on("mousedown touchstart", () => {
+            if (!this.kag.stat.is_strong_stop) return false;
+            if (button_clicked) return false;
+            if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
+        });
+
+        //
+        // クリックイベント
+        //
+
+        j_button.click((e) => {
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
+            //
+            //　無効な場合を検知
+            //
+
+            // [s]または[wait]に到達していないときの非固定ボタンは無効
+            if (!this.kag.stat.is_strong_stop && !is_fix_button) return false;
+
+            // 1度クリックした非固定ボタンも無効
+            if (button_clicked && !is_fix_button) return false;
+
+            // クリックできる状態じゃないなら無効
+            if (!that.kag.stat.is_strong_stop && that.kag.layer.layer_event.css("display") === "none") return false;
+
+            // セーブスナップを取ろうとしたもののアニメーション中やトランジション中なら無効
+            if (pm.savesnap === "true" && that.kag.stat.is_stop) return false;
+
+            // セーブしようとしたものの[text]中や[wait]中であれば無効
+            if (is_save_button && (that.kag.stat.is_adding_text || that.kag.stat.is_wait)) return false;
+
+            // [sleepgame]しようとしたものの現在すでに[sleepgame]中なら無効
+            if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
+
+            // [call]しようとしたもののすでに[call]スタックが溜まっているなら無効
+            if (is_call_button && exists_call_stack) {
+                that.kag.log("callスタックが残っている場合、fixボタンは反応しません");
+                that.kag.log(that.kag.getStack("call"));
+                return false;
+            }
+
+            //
+            // クリックが有効だった場合の処理
+            //
+
+            // 非固定ボタンの場合クリック済みであるフラグを立てよう
+            if (!is_fix_button) {
+                // ボタンクリック済み
                 button_clicked = true;
 
-                if (_pm.exp != "") {
-                    //スクリプト実行
-                    that.kag.embScript(_pm.exp, preexp);
-                }
+                // 他の[button]を即座に無効にするためにストロングストップを切っておこう
+                this.kag.stat.is_strong_stop = false;
 
-                if (_pm.savesnap == "true") {
-                    //セーブスナップを取る場合、アニメーション中やトランジションはNG
-                    if (that.kag.stat.is_stop == true) {
-                        return false;
-                    }
+                // 念のためフリーレイヤ内のボタンのイベントをすべて解除しておこう
+                this.kag.layer.cancelAllFreeLayerButtonsEvents();
 
-                    //ここは、現在のセーブ用のメッセージを取得しよう
-                    that.kag.menu.snapSave(that.kag.stat.current_save_str);
-                }
+                // クリックされたというクラスを付ける！これを指定したアニメーションが可能
+                j_button.addClass("clicked_button");
+            }
 
-                //画面効果中は実行できないようにする
-                if (that.kag.layer.layer_event.css("display") == "none" && that.kag.stat.is_strong_stop != true) {
-                    return false;
-                }
+            // クリック画像が設定されているなら画像を変える
+            if (pm.clickimg != "") {
+                j_button.attr("src", $.parseStorage(pm.clickimg, pm.folder));
+            } else if (pm.activeimg != "") {
+                // クリック画像は設定されていないが、アクティブ画像が設定されている場合
+                // いままさにアクティブ画像になっているはずなので、もとに戻す
+                j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
+            }
 
-                //roleが設定されている場合は対応する処理を実行
-                //指定できる文字列はsave(セーブ画面を表示します)。load(ロード画面を表示します)。title(タイトル画面に戻ります)。menu(メニュー画面を表示します)。message(メッセージウィンドウを非表示にします)。skip(スキップの実行)
-                if (_pm.role != "") {
-                    //roleがクリックされたら、skip停止
+            // クリック効果音を鳴らす
+            if (pm.clickse) this.kag.playSound(pm.clickse);
+
+            // JSの実行
+            if (pm.exp) this.kag.embScript(pm.exp, this.kag.embScript(pm.preexp));
+
+            // セーブスナップの取得
+            if (pm.savesnap === "true") that.kag.menu.snapSave(that.kag.stat.current_save_str);
+
+            //
+            // [jump]ボタン
+            //
+
+            if (is_jump_button) {
+                // ティラノイベント"click:tag:button"を発火
+                that.kag.trigger("click:tag:button", e);
+
+                // [jump]を実行
+                that.kag.ftag.startTag("jump", pm);
+
+                // スキップの継続設定
+                if (that.kag.stat.skip_link === "true") {
+                    e.stopPropagation();
+                } else {
                     that.kag.setSkip(false);
-
-                    //オートは停止
-                    if (_pm.role != "auto") {
-                        that.kag.ftag.startTag("autostop", { next: "false" });
-                    }
-
-                    //文字が流れているときは、セーブ出来ないようにする。
-                    if (_pm.role == "save" || _pm.role == "menu" || _pm.role == "quicksave" || _pm.role == "sleepgame") {
-                        //テキストが流れているときとwait中は実行しない
-                        if (that.kag.stat.is_adding_text == true || that.kag.stat.is_wait == true) {
-                            return false;
-                        }
-                    }
-
-                    switch (_pm.role) {
-                        case "save":
-                            that.kag.menu.displaySave();
-                            break;
-
-                        case "load":
-                            that.kag.menu.displayLoad();
-                            break;
-
-                        case "window":
-                            that.kag.layer.hideMessageLayers();
-                            break;
-                        case "title":
-                            that.kag.backTitle();
-                            break;
-
-                        case "menu":
-                            that.kag.menu.showMenu();
-                            break;
-                        case "skip":
-                            that.kag.ftag.startTag("skipstart", {});
-                            break;
-                        case "backlog":
-                            that.kag.menu.displayLog();
-                            break;
-                        case "fullscreen":
-                            that.kag.menu.screenFull();
-                            break;
-                        case "quicksave":
-                            that.kag.menu.setQuickSave();
-                            break;
-                        case "quickload":
-                            that.kag.menu.loadQuickSave();
-                            break;
-                        case "auto":
-                            if (that.kag.stat.is_auto == true) {
-                                that.kag.ftag.startTag("autostop", {
-                                    next: "false",
-                                });
-                            } else {
-                                that.kag.ftag.startTag("autostart", {});
-                            }
-                            break;
-
-                        case "sleepgame":
-                            //押されたオブジェクトのマウスオーバーをsleepgame前に解除
-                            j_button.trigger("mouseout");
-
-                            if (that.kag.tmp.sleep_game != null) {
-                                return false;
-                            }
-
-                            //ready
-                            that.kag.tmp.sleep_game = {};
-
-                            _pm.next = false;
-
-                            that.kag.ftag.startTag("sleepgame", _pm);
-                            break;
-                    }
-
-                    //クリックされた時に音が指定されていたら
-                    if (_pm.clickse != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.clickse,
-                            stop: true,
-                        });
-                    }
-
-                    //バグリングさせない
-                    event.stopPropagation();
-
-                    //ジャンプは行わない
-                    return false;
                 }
 
-                //クリックされた時に音が指定されていたら
-                if (_pm.clickse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        storage: _pm.clickse,
-                        stop: true,
-                    });
+                return false;
+            }
+
+            //
+            // [call]ボタン
+            //
+
+            if (is_call_button) {
+                // ティラノイベント"click:tag:button:call"を発火
+                that.kag.trigger("click:tag:button:call", e);
+
+                // [call]を実行
+                that.kag.ftag.startTag("call", {
+                    storage: pm.storage,
+                    target: pm.target,
+                    auto_next: that.kag.stat.is_strong_stop ? "stop" : pm.auto_next,
+                });
+
+                // スキップの継続設定
+                if (that.kag.stat.skip_link === "true") {
+                    e.stopPropagation();
+                } else {
+                    that.kag.setSkip(false);
                 }
 
-                that.kag.layer.showEventLayer();
+                return false;
+            }
 
-                //fixレイヤの場合はcallでスタックが積まれる
-                if (_pm.role == "" && _pm.fix == "true") {
-                    //コールスタックが帰ってきてない場合は、実行しないようにする必要がある
-                    //fixの場合はコールスタックに残る。
-                    var stack_pm = that.kag.getStack("call"); //最新のコールスタックを取得
+            //
+            // ロールボタン
+            //
 
-                    if (stack_pm == null) {
-                        //callを実行する
-                        //fixから遷移した場合はリターン時にnextorderしない
-                        //strong_stopの場合は反応しない
-                        //今がstrong_stopかどうかは時々刻々と変化するので、毎回新しくチェックする必要がある
-                        //_pmはpmの参照コピーであるため、_pm.auto_nextを直接書き換えるわけにはいかない
-                        var _auto_next = _pm.auto_next;
-                        if (that.kag.stat.is_strong_stop == true) {
-                            _auto_next = "stop";
+            if (is_role_button) {
+                // ティラノイベント"click:tag:button:role"を発火
+                that.kag.trigger("click:tag:button:role", e);
+
+                // スキップを停止
+                that.kag.setSkip(false);
+
+                // オートモードも(これがオートモードボタンでなければ)停止
+                if (pm.role !== "auto") {
+                    that.kag.ftag.startTag("autostop", { next: "false" });
+                }
+
+                switch (pm.role) {
+                    case "save":
+                        that.kag.menu.displaySave();
+                        break;
+                    case "load":
+                        that.kag.menu.displayLoad();
+                        break;
+                    case "window":
+                        that.kag.layer.hideMessageLayers();
+                        break;
+                    case "title":
+                        that.kag.backTitle();
+                        break;
+                    case "menu":
+                        that.kag.menu.showMenu();
+                        break;
+                    case "skip":
+                        that.kag.ftag.startTag("skipstart", {});
+                        break;
+                    case "backlog":
+                        that.kag.menu.displayLog();
+                        break;
+                    case "fullscreen":
+                        that.kag.menu.screenFull();
+                        break;
+                    case "quicksave":
+                        // mouseleave をトリガーしておく。ホバー時のボタン画像で保存されないように
+                        j_button.trigger("mouseleave");
+                        that.kag.menu.setQuickSave();
+                        break;
+                    case "quickload":
+                        that.kag.menu.loadQuickSave();
+                        break;
+                    case "auto":
+                        if (that.kag.stat.is_auto) {
+                            that.kag.ftag.startTag("autostop", { next: "false" });
                         } else {
-                            //パラメータ初期値が入るようになる
-                            //_auto_next = "yes";
+                            that.kag.ftag.startTag("autostart", {});
                         }
-
-                        that.kag.ftag.startTag("call", {
-                            storage: _storage,
-                            target: _target,
-                            auto_next: _auto_next,
-                        });
-                    } else {
-                        //スタックで残された
-                        that.kag.log("callスタックが残っている場合、fixボタンは反応しません");
-                        that.kag.log(stack_pm);
-
-                        return false;
-                    }
-                } else {
-                    //jumpを実行する
-                    that.kag.ftag.startTag("jump", _pm);
+                        break;
+                    case "sleepgame":
+                        // mouseleave をトリガーしておく。ホバー時のボタン画像で保存されないように
+                        j_button.trigger("mouseleave");
+                        that.kag.tmp.sleep_game = {};
+                        pm.next = false;
+                        that.kag.ftag.startTag("sleepgame", pm);
+                        break;
                 }
 
-                //選択肢の後、スキップを継続するか否か
-                if (that.kag.stat.skip_link == "true") {
-                    event.stopPropagation();
-                } else {
-                    that.kag.setSkip(false);
+                // バブリングさせない
+                e.stopPropagation();
+
+                return false;
+            }
+        });
+    },
+};
+
+/*
+#[glink_config]
+
+:group
+ラベル・ジャンプ操作
+
+:title
+グラフィカルリンクの設定
+
+:exp
+V515以降で使用可能。
+
+`[glink]`（グラフィカルリンク）の自動配置の設定ができます。自動配置が有効の場合(デフォルトで有効)、xとyがどちらも指定されていない`[glink]`が自動配置の対象となります。自動配置対象の`[glink]`はすぐには表示されず、`[s]`タグに到達した時点で表示されるようになります。
+
+省略したパラメータの設定は変更されません。
+
+:sample
+[glink_config auto_place="true" show_time="300"]
+[position left="160" top="500" width="1000" height="200" visible="true"]
+[position margint="45" marginl="50" marginr="70" marginb="60"]
+ティラノスクリプトに興味ある？[l]
+[glink  color="btn_13_red" text="はい。興味あります"  target="*selectinterest"]
+[glink  color="btn_13_red" text="興味あります！"  target="*selectinterest"]
+[glink  color="btn_13_red" text="どちらかと言うと興味あり"  target="*selectinterest"]
+[s]
+
+*selectinterest
+ホント！？うれしいなー[p]
+
+:param
+auto_place       = `[glink]`の自動配置を有効にするかどうか。`true`を指定すると、xとyが指定されていない`[glink]`を対象とする自動配置を有効にします。`false`で無効。,
+auto_place_force = `true`を指定すると、xとyが指定されている`[glink]`も強制的に自動配置の対象にします。,
+margin_x         = ボタンの外側に付ける横余白を数値(px)で指定します。,
+margin_y         = ボタンの外側に付ける縦余白を数値(px)で指定します。,
+padding_x        = ボタンの内側に付ける横余白を数値(px)で指定します。`default`を指定すると調整を行いません。,
+padding_y        = ボタンの内側に付ける縦余白を数値(px)で指定します。`default`を指定すると調整を行いません。,
+width            = `max`と指定すると、ボタンの横幅を『一番横幅の大きいボタンの横幅』に揃えることができます。数値を直接指定することで共通の横幅を指定することもできます。`default`を指定すると調整を行いません。,
+height           = `max`と指定すると、ボタンの高さを『一番横幅の大きいボタンの高さ』に揃えることができます。数値を直接指定することで共通の高さを指定することもできます。`default`を指定すると調整を行いません。,
+vertical         = ボタンの縦方向の揃え方を`top`(上揃え)、`center`(中央揃え)、`bottom`(下揃え)のいずれかで指定します。,
+horizontal       = ボタンの横方向の揃え方を`left`(左揃え)、`center`(中央揃え)、`right`(右揃え)のいずれかで指定します。,
+place_area       = 揃え方の基準となる領域の位置や大きさを指定できます。`auto`(デフォルト)を指定すると、メッセージウィンドウ考慮して自動で領域を調整します。`cover`だと画面全体を基準にします。領域の位置とサイズを直接指定したい場合は`100,100,1000,1000`のようにカンマ区切りで数値を4つ指定してください。そうすると、順にleft, top, width, heightとして解釈されます。,
+show_time        = 表示アニメーションにかける時間をミリ秒単位で指定します。`0`を指定するとアニメーションを行いません。なお、アニメーション中はクリックすることができません。,
+show_effect      = 表示アニメーションのエフェクトを以下のキーワードから指定できます。<br>`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``lightSpeedIn``rotateIn``rotateInDownLeft``rotateInDownRight``rotateInUpLeft``rotateInUpRight``zoomIn``zoomInDown``zoomInLeft``zoomInRight``zoomInUp``bounceIn``bounceInDown``bounceInLeft``bounceInRight``bounceInUp``rollIn``vanishIn``puffIn`,
+show_keyframe    = 表示アニメーションとして`[keyframe]`タグで定義したキーフレームアニメーションの`name`を指定できます。これを指定した場合、`show_effect`は無視されます。,
+show_delay       = 各ボタンを表示していく際の遅延をミリ秒で指定できます。`0`だとすべてのボタンが同時に表示され、たとえば`100`と指定すると100ミリ秒ごとに1個ずつボタンが表示されます。,
+show_easing      = 表示アニメーションの変化パターンを指定できます。以下のキーワードが指定できます。デフォルトは`linear`。<br>
+`ease`(開始時点と終了時点を滑らかに再生する)<br>
+`linear`(一定の間隔で再生する)<br>
+`ease-in`(開始時点をゆっくり再生する)<br>
+`ease-out`(終了時点をゆっくり再生する)<br>
+`ease-in-out`(開始時点と終了時点をゆっくり再生する)<br>
+この他に`cubic-bezier`関数を使って独自のイージングを指定することも可能です。,
+select_time      = ボタンが選択されたときの退場アニメーションにかける時間をミリ秒単位で指定します。`0`を指定するとアニメーションを行いません。,
+select_effect    = <p>選択時の退場アニメーションのエフェクトを以下のキーワードが指定できます。</p><p>`fadeOut``fadeOutDownBig``fadeOutLeftBig``fadeOutRightBig``fadeOutUpBig``flipOutX``flipOutY``lightSpeedOut``rotateOut``rotateOutDownLeft``rotateOutDownRight``rotateOutUpLeft``rotateOutUpRight``zoomOut``zoomOutDown``zoomOutLeft``zoomOutRight``zoomOutUp``slideOutDown``slideOutLeft``slideOutRight``slideOutUp``bounceOut ``bounceOutDown``bounceOutLeft``bounceOutRight``bounceOutUp`</p>,
+select_keyframe  = 選択時の退場アニメーションとして`[keyframe]`タグで定義したキーフレームアニメーションの`name`を指定できます。これを指定した場合、`select_effect`は無視されます。,
+select_delay     = 選択時の退場アニメーションを開始するまでの遅延をミリ秒単位で指定します。,
+select_easing    = 選択時の退場アニメ―ションのイージングを指定します。,
+reject_time      = ボタンが選択されなかったときの退場アニメーションにかける時間をミリ秒単位で指定します。`0`を指定するとアニメーションを行いません。,
+reject_effect    = <p>非選択時の退場アニメーションのエフェクトを以下のキーワードが指定できます。</p><p>`fadeOut``fadeOutDownBig``fadeOutLeftBig``fadeOutRightBig``fadeOutUpBig``flipOutX``flipOutY``lightSpeedOut``rotateOut``rotateOutDownLeft``rotateOutDownRight``rotateOutUpLeft``rotateOutUpRight``zoomOut``zoomOutDown``zoomOutLeft``zoomOutRight``zoomOutUp``slideOutDown``slideOutLeft``slideOutRight``slideOutUp``bounceOut ``bounceOutDown``bounceOutLeft``bounceOutRight``bounceOutUp`</p>,
+reject_keyframe  = 非選択時の退場アニメーションとして`[keyframe]`タグで定義したキーフレームアニメーションの`name`を指定できます。これを指定した場合、`reject_effect`は無視されます。,
+reject_delay     = 選択時の退場アニメーションを開始するまでの遅延をミリ秒単位で指定します。,
+reject_easing    = 選択時の退場アニメ―ションのイージングを指定します。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.glink_config = {
+    pm: {},
+
+    default_glink_config: {
+        auto_place: "true",
+        auto_place_force: "false",
+        margin_y: "20",
+        margin_x: "0",
+        padding_y: "default",
+        padding_x: "default",
+        direction: "column",
+        wrap: "nowrap",
+        dx: "0",
+        dy: "0",
+        width: "default",
+        vertical: "center",
+        horizontal: "center",
+        place_area: "auto",
+
+        show_time: "0",
+        show_effect: "fadeIn",
+        show_keyframe: "none",
+        show_delay: "0",
+        show_easing: "linear",
+
+        select_time: "0",
+        select_effect: "fadeOutRight",
+        select_keyframe: "none",
+        select_delay: "0",
+        select_easing: "linear",
+
+        reject_time: "0",
+        reject_effect: "fadeOut",
+        reject_keyframe: "none",
+        reject_delay: "0",
+        reject_easing: "linear",
+    },
+
+    getConfig: function (name) {
+        if (!this.kag.stat.glink_config) {
+            this.kag.stat.glink_config = $.extend({}, this.default_glink_config);
+        }
+        if (name) {
+            return this.kag.stat.glink_config[name];
+        } else {
+            return this.kag.stat.glink_config;
+        }
+    },
+
+    start: function (pm) {
+        if (!this.kag.stat.glink_config) {
+            this.kag.stat.glink_config = $.extend({}, this.default_glink_config);
+        }
+
+        // 横揃えの方向
+        if (pm.horizontal === "left") pm.horizontal = "start";
+        if (pm.horizontal === "right") pm.horizontal = "end";
+
+        // 縦揃えの方向
+        if (pm.vertical === "top") pm.vertical = "start";
+        if (pm.vertical === "bottom") pm.vertical = "end";
+
+        for (const key in pm) {
+            if (key !== "_tag") {
+                if (pm[key]) {
+                    this.kag.stat.glink_config[key] = pm[key];
                 }
-            });
-        })();
+            }
+        }
+        this.kag.ftag.nextOrder();
     },
 };
 
@@ -5821,9 +6246,12 @@ clickse    = ボタンをクリックした時に再生される効果音を設�
 enterse    = ボタンの上にマウスカーソルが乗った時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください,
 leavese    = ボタンの上からマウスカーソルが外れた時に再生する効果音を設定できます。効果音ファイルは`sound`フォルダに配置してください。,
 cm         = <p>ボタンクリック後に`[cm]`を実行するかどうか。`[glink]`は通常、ボタンクリック後に自動的に`[cm]`が実行されますが、`false`を指定するとこの`[cm]`を実行しません。</p><p>プレイヤー入力などの決定を`[glink]`で行いたい場合は`false`を指定しておき、`[commit]`後に手動で`[cm]`を実行してボタンや入力ボックスを消してください。</p>,
+exp        = ボタンがクリックされた時に実行されるJSを指定できます。,
+preexp     = タグが実行された時点で、この属性に指定した値が変数`preexp`に格納されます。そしてボタンがクリックされた時に`exp`内で`preexp`という変数が利用できるようになります。,
+bold       = 太字にする場合は`true`を指定します。,
 opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0`で完全に透明です。,
-exp       = ボタンがクリックされた時に実行されるJSを指定できます。,
-preexp    = タグが実行された時点で、この属性に指定した値が変数`preexp`に格納されます。そしてボタンがクリックされた時に`exp`内で`preexp`という変数が利用できるようになります。
+edge       = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
+shadow     = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。,
 
 :demo
 1,kaisetsu/14_select
@@ -5853,6 +6281,7 @@ tyrano.plugin.kag.tag.glink = {
         enterse: "",
         leavese: "",
         face: "",
+        bold: "",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -5883,6 +6312,16 @@ tyrano.plugin.kag.tag.glink = {
 
         if (pm.opacity != "") {
             j_button.css("opacity", $.convertOpacity(pm.opacity));
+        }
+
+        if (pm.bold === "true") {
+            j_button.css("font-weight", "bold");
+        }
+
+        if (pm.edge) {
+            j_button.css("text-shadow", $.generateTextShadowStrokeCSS(pm.edge));
+        } else if (pm.shadow) {
+            j_button.css("text-shadow", "2px 2px 2px " + $.convertColor(pm.shadow));
         }
 
         //graphic 背景画像を指定できます。
@@ -5926,6 +6365,16 @@ tyrano.plugin.kag.tag.glink = {
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
 
+        // アニメーション系のパラメータの glink_config からの上書き
+        const glink_config = this.kag.getTag("glink_config").getConfig();
+        ["show", "select", "reject"].forEach((key_1) => {
+            ["effect", "keyframe", "time", "easing", "delay"].forEach((key_2) => {
+                const key = `${key_1}_${key_2}`;
+                // このパラメータが未指定の場合は glink_config から引っ張ってくる
+                if (!pm[key]) pm[key] = glink_config[key];
+            });
+        });
+
         that.kag.event.addEventElement({
             tag: "glink",
             j_target: j_button, //イベント登録先の
@@ -5933,95 +6382,234 @@ tyrano.plugin.kag.tag.glink = {
         });
         this.setEvent(j_button, pm);
 
+        // 自動配置が有効な場合は非表示にしておく
+        let is_auto_place = glink_config.auto_place_force === "true";
+        if (is_auto_place || (glink_config.auto_place === "true" && pm.x === "auto" && !pm.y)) {
+            j_button.addClass("glink_button_auto_place");
+            j_button.hide();
+        }
+
         target_layer.append(j_button);
         target_layer.show();
         this.kag.ftag.nextOrder();
     },
 
     setEvent: function (j_button, pm) {
-        var that = TYRANO;
+        let button_clicked = false;
 
-        (function () {
-            var _target = pm.target;
-            var _storage = pm.storage;
-            var _pm = pm;
-            var preexp = that.kag.embScript(pm.preexp);
-            var button_clicked = false;
+        //
+        // ホバーイベント
+        //
 
-            j_button.click(function (e) {
-                // ブラウザの音声の再生制限を解除
-                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+        j_button.hover(
+            () => {
+                // マウスが乗ったとき
+                if (!this.kag.stat.is_strong_stop) return false;
+                if (button_clicked) return false;
+                if (pm.enterimg) j_button.css("background-image", "url(./data/image/" + pm.enterimg + ")");
+                if (pm.enterse) this.kag.playSound(pm.enterse);
+            },
+            () => {
+                // マウスが離れたとき
+                if (!this.kag.stat.is_strong_stop) return false;
+                if (button_clicked) return false;
+                if (pm.enterimg) j_button.css("background-image", "url(./data/image/" + pm.graphic + ")");
+                if (pm.leavese) this.kag.playSound(pm.leavese);
+            },
+        );
 
-                // ティラノイベント"click:tag:glink"を発火
-                that.kag.trigger("click:tag:glink", e);
+        //
+        // クリックイベント
+        //
 
-                //クリックされた時に音が指定されていたら
-                if (_pm.clickse != "") {
-                    that.kag.ftag.startTag("playse", {
-                        storage: _pm.clickse,
-                        stop: true,
-                    });
+        j_button.click((e) => {
+            // ブラウザの音声の再生制限を解除
+            if (!this.kag.tmp.ready_audio) this.kag.readyAudio();
+
+            //
+            // 無効な場合を検知
+            //
+
+            // [s]または[wait]に到達していないときは無効
+            if (!this.kag.stat.is_strong_stop) return false;
+
+            // 1度クリックしたボタンも無効
+            if (button_clicked) return false;
+
+            //
+            // クリックが有効だったときの処理
+            //
+
+            // ボタンクリック済み
+            button_clicked = true;
+
+            // 他の[glink]を即座に無効にするためにストロングストップを切っておこう
+            this.kag.stat.is_strong_stop = false;
+
+            // クリックされたというクラスを付ける
+            j_button.addClass("glink_button_clicked");
+
+            // 画像変更
+            if (pm.clickimg) j_button.css("background-image", "url(./data/image/" + pm.clickimg + ")");
+
+            // ティラノイベント"click:tag:glink"を発火
+            this.kag.trigger("click:tag:glink", e);
+
+            // クリック効果音を鳴らす
+            if (pm.clickse) this.kag.playSound(pm.clickse);
+
+            // JSの実行
+            if (pm.exp) this.kag.embScript(pm.exp, this.kag.embScript(pm.preexp));
+
+            // [cm]+[jump]を実行する関数
+            const next = () => {
+                // [cm]を実行するかどうか
+                if (pm.cm === "true") {
+                    // [cm]の実行
+                    this.kag.ftag.startTag("cm", { next: "false" });
+                } else {
+                    // [cm]を実行しない場合はボタンが残り続ける
+                    // 念のため、すべてのボタンのマウス系イベントを解除しておこう
+                    this.kag.layer.cancelAllFreeLayerButtonsEvents();
                 }
 
-                //Sタグに到達していないとクリッカブルが有効にならない fixの時は実行される必要がある
-                if (that.kag.stat.is_strong_stop != true) {
-                    return false;
-                }
+                // [jump]の実行
+                this.kag.ftag.startTag("jump", pm);
 
-                button_clicked = true;
-
-                if (_pm.exp != "") {
-                    //スクリプト実行
-                    that.kag.embScript(_pm.exp, preexp);
-                }
-
-                that.kag.layer.showEventLayer();
-
-                if (pm.cm == "true") {
-                    that.kag.ftag.startTag("cm", {});
-                }
-
-                //コールを実行する
-                that.kag.ftag.startTag("jump", _pm);
-
-                //選択肢の後、スキップを継続するか否か
-                if (that.kag.stat.skip_link == "true") {
+                // 選択肢の後、スキップを継続するか否か
+                if (this.kag.stat.skip_link === "true") {
                     e.stopPropagation();
                 } else {
-                    that.kag.setSkip(false);
+                    this.kag.setSkip(false);
                 }
+            };
+
+            //
+            // アニメーション設定の存在をチェック
+            //
+
+            // アニメーションが必要なボタンの数
+            let animation_target_count = 0;
+
+            // ボタンを全部取得
+            const j_collection = $(".glink_button");
+
+            // 各ボタンについてアニメーション設定を見ていく
+            j_collection.each((i, elm) => {
+                const j_elm = $(elm);
+                // このボタンを出すときに指定されていたパラメータをオブジェクトに復元
+                const _pm = JSON.parse(j_elm.attr("data-event-pm"));
+                // このボタンはクリックされたものか
+                const is_selected = j_elm.hasClass("glink_button_clicked");
+                if (!is_selected) {
+                    j_elm.addClass("glink_button_not_clicked");
+                }
+                // クリックされたかどうかに応じて退場アニメーション設定を取得する
+                const head = is_selected ? "select" : "reject";
+                const hide_options = {};
+                ["time", "easing", "effect", "keyframe", "delay"].forEach((key) => {
+                    hide_options[key] = _pm[`${head}_${key}`];
+                });
+                // アニメーションが必要か
+                const need_animate =
+                    hide_options.time !== undefined &&
+                    parseInt(hide_options.time) >= 10 &&
+                    (hide_options.keyframe !== "none" || hide_options.effect !== "none");
+                if (need_animate) {
+                    animation_target_count += 1;
+                }
+                // Elementのプロパティに情報を格納 すぐあとで使う
+                elm.__hide_options = hide_options;
+                elm.__need_animate = need_animate;
             });
 
-            j_button.hover(
-                function () {
-                    if (_pm.enterimg != "") {
-                        var enterimg_url = "./data/image/" + _pm.enterimg;
-                        j_button.css("background-image", "url(" + enterimg_url + ")");
-                    }
+            // スキップ維持設定
+            const should_keep_skip = this.kag.stat.is_skip && this.kag.stat.skip_link === "true";
 
-                    //マウスが乗った時
-                    if (_pm.enterse != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.enterse,
-                            stop: true,
-                        });
-                    }
-                },
-                function () {
-                    if (_pm.enterimg != "") {
-                        var img_url = "./data/image/" + _pm.graphic;
-                        j_button.css("background-image", "url(" + img_url + ")");
-                    }
-                    //マウスが乗った時
-                    if (_pm.leavese != "") {
-                        that.kag.ftag.startTag("playse", {
-                            storage: _pm.leavese,
-                            stop: true,
-                        });
-                    }
-                },
-            );
-        })();
+            //
+            // アニメーションが必要ない場合
+            //
+
+            // アニメーション対象が存在しない、または、いまスキップ状態でありそれを選択後も継続させる設定である
+            if (animation_target_count === 0 || should_keep_skip) {
+                next();
+                return;
+            }
+
+            //
+            // アニメーションが必要なボタンが少なくともひとつはある場合
+            //
+
+            // 念のためすべてのボタンのマウス系イベントを解除しておこう
+            this.kag.layer.cancelAllFreeLayerButtonsEvents();
+
+            let anim_complete_counter = 0;
+            j_collection.each((i, elm) => {
+                const j_elm = $(elm);
+                if (!elm.__need_animate) {
+                    // アニメーションが必要ないなら即隠蔽
+                    j_elm.setStyle("transition", "none");
+                    j_elm.get(0).offsetHeight; // transition: none; の強制反映
+                    j_elm.setStyle("opacity", "0");
+                    j_elm.setStyle("visibility", "hidden");
+                } else {
+                    // アニメーションを適用
+                    elm.__hide_options.callback = () => {
+                        anim_complete_counter += 1;
+                        if (anim_complete_counter === animation_target_count) {
+                            next();
+                        }
+                    };
+                    this.startAnim(j_elm, elm.__hide_options);
+                }
+            });
+        });
+    },
+
+    startAnim: function (j_collection, options) {
+        // クリック不可にする
+        j_collection.setStyleMap({ "pointer-events": "none" });
+
+        //
+        // ティラノタグで定義したキーフレームアニメーションを使う場合
+        //
+
+        if (options.keyframe && options.keyframe !== "none") {
+            j_collection.each((i, elm) => {
+                const j_elm = $(elm);
+                j_elm.animateWithTyranoKeyframes({
+                    keyframe: options.keyframe,
+                    time: options.time,
+                    delay: options.delay,
+                    count: "1",
+                    mode: "forwards",
+                    easing: options.easing,
+                    onend: () => {
+                        if (options.callback) options.callback();
+                    },
+                });
+            });
+            return;
+        }
+
+        //
+        // プリセットのアニメーションを使用する場合
+        //
+
+        j_collection.each((i, elm) => {
+            const j_elm = $(elm);
+            j_elm.setStyle("animation-fill-mode", "forwards");
+            if (options.time) j_elm.setStyle("animation-duration", $.convertDuration(options.time));
+            if (options.delay) j_elm.setStyle("animation-delay", $.convertDuration(options.delay));
+            if (options.easing) j_elm.setStyle("animation-timing-function", options.easing);
+            j_elm.on("animationend", (e) => {
+                if (j_elm.get(0) === e.target) {
+                    j_elm.off("animationend");
+                    if (options.callback) options.callback();
+                }
+            });
+            j_elm.addClass(options.effect);
+        });
     },
 };
 
@@ -6136,50 +6724,54 @@ tyrano.plugin.kag.tag.clickable = {
     },
 
     setEvent: function (j_button, pm) {
-        var that = TYRANO;
+        //
+        // ホバーイベント
+        //
 
-        (function () {
-            var _target = pm.target;
-            var _storage = pm.storage;
-            var _pm = pm;
+        if (pm.mouseopacity) {
+            j_button.hover(
+                () => {
+                    j_button.css("opacity", $.convertOpacity(pm.mouseopacity));
+                },
+                () => {
+                    j_button.css("opacity", $.convertOpacity(pm.opacity));
+                },
+            );
+        }
 
-            if (_pm.mouseopacity != "") {
-                j_button.bind("mouseover", function () {
-                    j_button.css("opacity", $.convertOpacity(_pm.mouseopacity));
-                });
+        j_button.click((e) => {
+            // ブラウザの音声の再生制限を解除
+            if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
-                j_button.bind("mouseout", function () {
-                    j_button.css("opacity", $.convertOpacity(_pm.opacity));
-                });
-            }
+            //
+            //　無効な場合を検知
+            //
 
-            j_button.click(function (e) {
-                // ブラウザの音声の再生制限を解除
-                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+            // [s]または[wait]に到達していないときは無効
+            if (!this.kag.stat.is_strong_stop) return false;
 
-                // ティラノイベント"click:tag:clickable"を発火
-                that.kag.trigger("click:tag:clickable", e);
+            // 1度クリックしたボタンも無効
+            if (button_clicked) return false;
+            ("");
+            //
+            // クリックが有効だったときの処理
+            //
 
-                //Sタグに到達していないとクリッカブルが有効にならない
+            // ボタンクリック済み
+            button_clicked = true;
 
-                var is_s = (function (obj) {
-                    if (obj.kag.stat.is_strong_stop != true) {
-                        return false;
-                    }
+            // 他の[clickable]を即座に無効にするためにストロングストップを切る
+            this.kag.stat.is_strong_stop = false;
 
-                    return true;
-                })(that);
+            // ティラノイベント"click:tag:clickable"を発火
+            that.kag.trigger("click:tag:clickable", e);
 
-                if (is_s == false) {
-                    return false;
-                }
+            // [cm]の実行
+            this.kag.ftag.startTag("cm", { next: "false" });
 
-                that.kag.ftag.startTag("cm", {});
-                //コールを実行する
-                that.kag.layer.showEventLayer();
-                that.kag.ftag.startTag("jump", _pm);
-            });
-        })();
+            // [jump]の実行
+            this.kag.ftag.startTag("jump", pm);
+        });
     },
 };
 
