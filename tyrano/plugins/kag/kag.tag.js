@@ -6185,8 +6185,8 @@ tyrano.plugin.kag.tag.glink_config = {
         }
 
         // 横揃えの方向
-        if (pm.horizontal === "left") pm.horizontal = "start";
-        if (pm.horizontal === "right") pm.horizontal = "end";
+        if (pm.horizontal === "left") pm.horizontal = "flex-start";
+        if (pm.horizontal === "right") pm.horizontal = "flex-end";
 
         // 縦揃えの方向
         if (pm.vertical === "top") pm.vertical = "start";
