@@ -527,7 +527,7 @@
         }
     };
 
-    ($.isNWJS = function () {
+    $.isNWJS = function () {
         //Electronならfalse
         if ($.isElectron()) {
             return false;
@@ -555,58 +555,61 @@
             //  通常のWebページとして動作している
             return false;
         }
-    }),
-        ($.isNeedClickAudio = function () {
-            //プレイヤーはクリックの必要なし
-            if ($.isTyranoPlayer()) {
-                return false;
-            }
+    };
 
-            //ブラウザやスマホアプリは必要
-            if ($.isElectron() || $.isNWJS()) {
-                return false;
-            }
+    $.isNeedClickAudio = function () {
+        //プレイヤーはクリックの必要なし
+        if ($.isTyranoPlayer()) {
+            return false;
+        }
 
-            return true;
-        });
+        //ブラウザやスマホアプリは必要
+        if ($.isElectron() || $.isNWJS()) {
+            return false;
+        }
 
-    ($.isElectron = function () {
+        return true;
+    };
+
+    $.isElectron = function () {
         if (navigator.userAgent.indexOf("TyranoErectron") != -1) {
             return true;
         } else {
             return false;
         }
-    }),
-        //オブジェクトを引き継ぐ。
-        ($.extendParam = function (pm, target) {
-            var tmp = target;
+    };
 
-            for (key in target) {
-                if (pm[key]) {
-                    if (pm[key] != "") {
-                        target[key] = pm[key];
-                    }
+    //オブジェクトを引き継ぐ。
+    $.extendParam = function (pm, target) {
+        var tmp = target;
+
+        for (key in target) {
+            if (pm[key]) {
+                if (pm[key] != "") {
+                    target[key] = pm[key];
                 }
             }
+        }
 
-            return target;
-        });
+        return target;
+    };
 
-    ($.insertRule = function (css_str) {
+    $.insertRule = function (css_str) {
         var sheet = (function () {
             var style = document.createElement("style");
             document.getElementsByTagName("head")[0].appendChild(style);
             return style.sheet;
         })();
         sheet.insertRule(css_str, 0);
-    }),
-        ($.swfName = function (str) {
-            if (navigator.appName.indexOf("Microsoft") != -1) {
-                return window[str];
-            } else {
-                return document[str];
-            }
-        });
+    };
+
+    $.swfName = function (str) {
+        if (navigator.appName.indexOf("Microsoft") != -1) {
+            return window[str];
+        } else {
+            return document[str];
+        }
+    };
 
     //古いトランス。
     $.trans_old = function (method, j_obj, time, mode, callback) {
