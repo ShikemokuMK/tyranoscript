@@ -978,6 +978,9 @@ tyrano.plugin.kag.menu = {
         //カーソルの復元
         this.kag.getTag("cursor").restore();
 
+        //フォーカスの復元
+        this.kag.restoreFocusable();
+
         //メニューボタンの状態
         if (this.kag.stat.visible_menu_button == true) {
             $(".button_menu").show();

@@ -131,6 +131,14 @@ tyrano.plugin.kag.key_mouse = {
                         //関数の場合
                         that.map_key[keycode]();
                     } else {
+                        // next キーの場合、フォーカス中の要素があればその要素のクリックをトリガーする処理を行って早期リターンする
+                        if (that.map_key[keycode] === "next") {
+                            const j_focus = $(":focus");
+                            if (j_focus.length > 0) {
+                                j_focus.eq(0).trigger("click");
+                                return;
+                            }
+                        }
                         if (that[that.map_key[keycode]]) {
                             that[that.map_key[keycode]]();
                         }
@@ -404,6 +412,145 @@ tyrano.plugin.kag.key_mouse = {
     },
     auto: function () {
         this._role("auto");
+    },
+
+    /**
+     * フォーカス可能な要素群およびフォーカス中の一要素を抽出して
+     * フォーカスを新しく当てる、もしくはフォーカスを前後に移動させる
+     * @param {"next"|"prev"} order
+     */
+    focus_order: function (order = "next") {
+        // キーボードでフォーカス可能な要素を抽出する
+        // 存在しなければ帰る
+        const j_focusable = $("[tabindex=0]");
+        if (j_focusable.length === 0) {
+            return;
+        }
+
+        // j_focusable のうち、いまフォーカスされている要素を抽出
+        // いまフォーカスされている要素がなければ j_focusable の先頭または末尾をフォーカスして帰る
+        const j_focused = j_focusable.filter(":focus");
+        if (j_focused.length === 0) {
+            // next なら先頭を、prev なら末尾をフォーカスする
+            const index = order === "next" ? 0 : j_focusable.length - 1;
+            j_focusable.eq(index).focus().addClass("keyfocus");
+            return;
+        }
+
+        // j_focusable の長さが1以上あり、その中にフォーカス中の要素があることが確定した
+
+        // 何番目だろう？
+        const index = j_focusable.index(j_focused);
+
+        // 次の要素をフォーカス
+        const add = order === "next" ? 1 : -1;
+        const next_index = (index + add) % j_focusable.length;
+        j_focusable.eq(next_index).focus().addClass("keyfocus");
+    },
+
+    focus_next: function () {
+        this.focus_order("next");
+    },
+
+    focus_prev: function () {
+        this.focus_order("prev");
+    },
+
+    /**
+     * フォーカス可能な要素群およびフォーカス中の一要素を抽出して
+     * その要素間の位置関係を考慮したうえで
+     * フォーカスを新しく当てる、もしくはフォーカスを上下左右に移動させる
+     * @param {"up"|"down"|"left"|"right"} dir
+     */
+    focus_dir: function (dir = "down") {
+        // キーボードでフォーカス可能な要素を抽出する
+        // 存在しなければ帰る
+        const j_focusable = $("[tabindex=0]");
+        if (j_focusable.length === 0) {
+            return;
+        }
+
+        //
+        // 位置を調べる
+        //
+
+        // x座標, y座標, jQueryオブジェクト が格納されたオブジェクトの配列
+        const pos_list = [];
+
+        // フォーカスが当たっている要素の情報
+        let focused_pos = null;
+
+        j_focusable.each((i, elm) => {
+            const j_elm = $(elm);
+            const offset = j_elm.offset();
+            const x = offset.left + j_elm.width() / 2;
+            const y = offset.top + j_elm.height() / 2;
+            const pos = { x, y, j_elm };
+            pos_list.push(pos);
+            // フォーカスされている要素の情報はおさえておく
+            if (j_elm.is(":focus")) {
+                focused_pos = pos;
+            }
+        });
+
+        //
+        // pos_list の並べ替え
+        //
+
+        let compare;
+        switch (dir) {
+            default:
+            case "down":
+                // より下にある要素を配列の末尾に
+                compare = (a, b) => a.y < b.y;
+                break;
+            case "up":
+                // より上にある要素を配列の末尾に
+                compare = (a, b) => a.y > b.y;
+                break;
+            case "left":
+                // より左にある要素を配列の末尾に
+                compare = (a, b) => a.x > b.x;
+                break;
+            case "right":
+                // より右にある要素を配列の末尾に
+                compare = (a, b) => a.x < b.x;
+                break;
+        }
+        pos_list.sort((a, b) => {
+            return compare(a, b) ? -1 : 1;
+        });
+
+        // いまフォーカスが当たっている要素がない場合
+        // 下キーなら一番下の要素を、上キーなら一番上の要素を、という感じで
+        // ひとつ選んでフォーカスして帰る
+        if (!focused_pos) {
+            pos_list[pos_list.length - 1].j_elm.focus().addClass("keyfocus");
+            return;
+        }
+
+        // j_focusable の長さが1以上あり、その中にフォーカス中の要素があることが確定した
+
+        // pos_list の次の要素をフォーカスする
+        const index = pos_list.indexOf(focused_pos);
+        const next_index = (index + 1) % pos_list.length;
+        pos_list[next_index].j_elm.focus().addClass("keyfocus");
+    },
+
+    focus_up: function () {
+        this.focus_dir("up");
+    },
+
+    focus_down: function () {
+        this.focus_dir("down");
+    },
+
+    focus_left: function () {
+        this.focus_dir("left");
+    },
+
+    focus_right: function () {
+        this.focus_dir("right");
     },
 
     //役割系のロジック

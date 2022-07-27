@@ -4120,6 +4120,7 @@ tyrano.plugin.kag.tag.link = {
         that.kag.stat.display_link = true;
 
         that.kag.setElmCursor(j_span, "pointer");
+        that.kag.makeFocusable(j_span);
 
         (function () {
             var _target = pm.target;
@@ -5685,7 +5686,8 @@ clickimg  = ボタンをクリックしたあとに切り替える画像ファ�
 enterimg  = ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
 visible   = 最初からボタンを表示するかどうか。`true`で表示、`false`で非表示となります。,
 auto_next = `true`または`false`を指定します。これに`false`が指定してあり、かつ`fix=true`の場合、`[return]`で戻ったときに次のタグに進まなくなります。,
-savesnap  = `true`または`false`で指定します。`true`にすると、このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します。
+savesnap  = `true`または`false`で指定します。`true`にすると、このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します。,
+keyfocus  = キーボード操作によるボタンの選択を許可するかどうか。指定しなかった場合、fixボタンでは選択不可、通常のボタンは選択可となります。,
 :demo
 1,kaisetsu/14_select
 
@@ -5717,6 +5719,7 @@ tyrano.plugin.kag.tag.button = {
         activeimg: "",
         clickimg: "",
         enterimg: "",
+        keyfocus: "",
 
         auto_next: "yes",
 
@@ -5755,6 +5758,12 @@ tyrano.plugin.kag.tag.button = {
         j_button.css("position", "absolute");
         j_button.css("z-index", 99999999);
         that.kag.setElmCursor(j_button, "pointer");
+
+        let is_keyfocus_enabled = pm.fix !== "true"; // fix ボタンは基本的にキーセレクト無効
+        if (pm.keyfocus) is_keyfocus_enabled = pm.keyfocus !== "false"; // keyfocus が指定されている場合はそれで上書き
+        if (is_keyfocus_enabled) {
+            that.kag.makeFocusable(j_button);
+        }
 
         //初期状態で表示か非表示か
         if (pm.visible == "true") {
@@ -6305,6 +6314,7 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("z-index", 99999999);
         j_button.css("font-size", pm.size + "px");
         that.kag.setElmCursor(j_button, "pointer");
+        that.kag.makeFocusable(j_button);
 
         if (pm.font_color != "") {
             j_button.css("color", $.convertColor(pm.font_color));

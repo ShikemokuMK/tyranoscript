@@ -1,106 +1,140 @@
 /*
 Ver4.50以降で有効
-ティラノスクリプトの装置入出力に関する設定を行うファイルです。
+ティラノスクリプトのキーコンフィグの設定を行うファイルです。
+特定のキーボード・マウス・ジェスチャー操作に対して
+ティラノスクリプトのアクション（スキップを開始するなど）を割り当てることができます。
 
+<設定できるアクション>
 
-<設定できるアクション> 
-    save:セーブ画面を開きます
-    load:ロード画面を開きます
-    next:次の文章に移ります。左クリックの操作
-    menu:メニュー画面を表示します。
-    title:タイトルへ戻ります
-    skip:スキップを開始します
-    backlog:バックログを表示します
-    fullscreen:フルスクリーン切り替え
-    qsave:クイックセーブ実行
-    qload:クイックロード実行
-    auto:オートモード開始
-    hidemessage:メッセージ消去
-    関数を指定することもできます。
-    例えば、コンフィグ画面の表示などは、関数の中にsleepgameでコンフィグ画面のシナリオファイルを指定してください
-    function(){
-            //config呼び出し
-            TYRANO.kag.ftag.startTag("sleepgame", {storage:"config.ks"});
+    save        : セーブ画面を開く
+    load        : ロード画面を開く
+    next        : 次のテキストに進む
+    menu        : メニュー画面を開く
+    title       : タイトルに戻る
+    skip        : スキップを開始する
+    backlog     : バックログを開く
+    fullscreen  : フルスクリーンを切り替える
+    qsave       : クイックセーブを実行する
+    qload       : クイックロードを実行する
+    auto        : オートモードを開始する
+    hidemessage : メッセージウィンドウを非表示にする
+    focus_up    : ボタンのフォーカスを上に移動する
+    focus_down  : ボタンのフォーカスを下に移動する
+    focus_left  : ボタンのフォーカスを左に移動する
+    focus_right : ボタンのフォーカスを右に移動する
+    
+    上記キーワードの代わりにJavaScriptの関数を指定することもできます。
+    たとえば「コンフィグ画面の呼び出し」機能を割り当てるためには、次のような関数を指定します。
+    (シナリオファイル名は適宜変更してください)
+    
+    function () {
+        TYRANO.kag.sleepgame({ storage: "config.ks" });
     }
     
-<キーボード指定方法> 
+<キーボード操作の指定方法> 
     
-    キーコードと、そのキーが押されたときのアクションを配置します。
-    キーコードの調べ方は
+    "キーコード"と"そのキーが押されたときのアクション"を配置します。
+    キーコードはキーの種類に対応する特定の数値です。たとえばスペースキーなら"32"といった具合です。
+    キーコードの確認には次のサイトが利用可能です。
     http://shanabrian.com/web/javascript/keycode.php
-    上記サイトで実際にキーを押すことで対応する数字を取得できます。
+    上記サイトで実際にキーを押すことでキーコードを確認できます。
     
-    ノベルゲームでよく利用すると思わえるキーコードを書いておきます。
-    32:space 13:Enter 17:Ctrl 
+    ★使用頻度が高いと思われるキーコードの一覧
+    
+    32 : space
+    13 : Enter
+    91 : Command (Mac)
+    17 : Ctrl (Windows)
+    27 : Escape
+    37 : ←
+    38 : ↑
+    39 : →
+    40 : ↓
+    90 : z
+    88 : x
     
 <マウス操作>
     
-    right:右クリック
-    center:センターボタンをクリック
-    wheel_up:マウスホイールを上に上げたときの動作
-    wheel_down:マウスホイールを下に下げたときの動作
-    
+    right      : 右クリックしたときの動作
+    center     : センターボタン（マウスホイール）をクリックしたときの動作
+    wheel_up   : マウスホイールを上に回したときの動作
+    wheel_down : マウスホイールを下に回したときの動作
 
-<ジェスチャー>
+<ジェスチャー操作>
 
-    スマホやタブレット限定です。フリック操作などに対応して、システムを呼び出すことができます。
-    swipe_up_1 は例えば、画面の上方向にフリックした時の動作を指定できます。
-    この _1 の数字は指の数をしていできます。
+    ★スマホ・タブレット限定
+    フリック操作やホールド操作にキーコンフィグを割り当てることができます。
     
-    なので、１本でのスワイプと２本でのスワイプの動作を分けたい場合にはそれぞれ
-    swipe_up_1 とswipe_up_2 を分けて定義すれば良いということです。
+    swipe_up_1    : 1本の指で画面上方向にフリックしたときの動作
+    swipe_left_1  : 1本の指で画面左方向にフリックしたときの動作
+    swipe_right_1 : 1本の指で画面右方向にフリックしたときの動作
+    swipe_down_1  : 1本の指で画面下方向にフリックしたときの動作
+    hold          : 画面を一定時間タッチし続けたときの動作
     
-    holdは 画面を一定時間タッチし続けたときに発動します。 
+    ★ヒント
+    swipe_up_1 などの _1 は指の数を表しており、
+    たとえば swipe_up_1 なら「1本の指で画面左方向にスワイプしたときの動作」という意味になります。
+    
+    つまり、2本の指でスワイプしたときのアクションを指定したい場合は
+    swipe_up_2 のような名前でアクションを定義すればよいということです。
     
 */
 
 var __tyrano_key_config = {
-
-    //キーボード操作 
-    "key" : {
+    // ブラウザ固有の動作（キーの組み合わせによるショートカットアクション）を許可するか否か
+    // "true" だとブラウザ固有の動作が有効に、"false" だと無効になります。
+    // たとえば Google Chrome には次のようなショートカットアクションが存在しますが、
+    // "system_key_event" が "false" だとこのアクションが無効化されます。
+    //   Ctrl + Shift + I : デベロッパーツールを開く
+    //   Ctrl + Shift + O : ブックマークマネージャを開く
+    "system_key_event" : "false",
     
-        "32" : "hidemessage", //Space
-        "13" : "next", // Enter
-        "91" : "skip", //Command(Mac)  
-        "17" : "skip", //Ctrl (Windows)
-        "67":function(){ // c ボタン
-            //config呼び出し例 コメント化
-            /*
-            if (TYRANO.kag.tmp.sleep_game != null) {
-                return false;
-            }
-            TYRANO.kag.ftag.startTag("sleepgame", {storage:"config.ks"});
-            */
-        }
-        
+    // キーボード操作
+    "key": {
+        "32": "hidemessage", // Space
+        "13": "next",        // Enter
+        "91": "skip",        // Command (Mac)
+        "17": "skip",        // Ctrl (Windows)
+        "37": "focus_left",  // ←
+        "38": "focus_up",    // ↑
+        "39": "focus_right", // →
+        "40": "focus_down",  // ↓
+        "67": function () {  // C
+            // コンフィグを呼び出す例（シナリオファイル名は適宜変更してください）
+            // （コメントアウトしてあります）
+            // TYRANO.kag.sleepgame({ storage: "config.ks" });
+        },
     },
 
-    //マウス操作
-    "mouse" : {
-        "right" : "hidemessage", //右クリックの動作
-        "center": "menu", //センターボタンをクリック
-        "wheel_up" : "backlog", // ホイールをアップした時の動作
-        "wheel_down" : "next" //ホイールをダウンした時の動作
+    // マウス操作
+    "mouse": {
+        "right": "hidemessage", // 右クリック
+        "center": "menu",       // ホイールクリック
+        "wheel_up": "backlog",  // ホイールアップ
+        "wheel_down": "next",   // ホイールダウン
     },
-    
-    //ジェスチャー
-    "gesture" : {
-        "swipe_up_1" : {
-            "action" : "backlog"
-        },
-        "swipe_left_1" : {
-            "action" : "auto"
-        },
-        "swipe_right_1" : {
-            "action" : "menu"
-        },
-        "swipe_down_1" : {
-            "action" : "load"
-        },
-        
-        "hold" : {
-            "action" : "skip",
-        }
-    }
 
-}; 
+    // ジェスチャー操作
+    "gesture": {
+        // 上スワイプ
+        "swipe_up_1": {
+            "action": "backlog",
+        },
+        // 左スワイプ
+        "swipe_left_1": {
+            "action": "auto",
+        },
+        // 右スワイプ
+        "swipe_right_1": {
+            "action": "menu",
+        },
+        // 下スワイプ
+        "swipe_down_1": {
+            "action": "load",
+        },
+        // ホールド
+        "hold": {
+            "action": "skip",
+        },
+    },
+};

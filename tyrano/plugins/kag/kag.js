@@ -1293,6 +1293,23 @@ tyrano.plugin.kag = {
             });
         });
 
+        // キーボードによるボタンフォーカス関連の設定
+        if (this.config["keyFocusOutlineWidth"]) {
+            const width = this.config["keyFocusOutlineWidth"];
+            $.insertRuleToTyranoCSS(`:focus.keyfocus { outline-width: ${width}px}`);
+        }
+        if (this.config["keyFocusOutlineColor"]) {
+            const color = $.convertColor(this.config["keyFocusOutlineColor"]);
+            $.insertRuleToTyranoCSS(`:focus.keyfocus { outline-color: ${color}}`);
+        }
+        if (this.config["keyFocusOutlineStyle"]) {
+            const style = $.convertColor(this.config["keyFocusOutlineStyle"]);
+            $.insertRuleToTyranoCSS(`:focus.keyfocus { outline-style: ${style}}`);
+        }
+        if (this.config["keyFocusWithHoverStyle"] === "true") {
+            this.copyHoverCSSToFocusCSS();
+        }
+
         //ティラノライダーからの通知の場合、発生させる
         //that.rider.complete(this);
 
@@ -2494,6 +2511,136 @@ tyrano.plugin.kag = {
             buf: buf,
             stop: "true",
         });
+    },
+
+    /**
+     * あるjQueryオブジェクト（ボタン類）をキーボードでフォーカス可能にする
+     * @param {jQuery} j_elm
+     */
+    makeFocusable: function (j_elm) {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+
+        j_elm.attr("tabindex", "0");
+        j_elm.addClass("tyrano-focusable");
+        j_elm.on("focusin", () => {
+            if (this.config["keyFocusWithHoverStyle"] === "true") {
+                j_elm.trigger("mouseenter");
+            }
+        });
+        j_elm.on("focusout", () => {
+            if (this.config["keyFocusWithHoverStyle"] === "true") {
+                j_elm.trigger("mouseleave");
+            }
+            j_elm.removeClass("keyfocus");
+        });
+    },
+
+    /**
+     * フォーカスの復元
+     * イベントリスナやホワイトリストに載っていないアトリビュートはセーブ＆ロード時に破壊されるため
+     * 改めて準備する必要がある
+     */
+    restoreFocusable: function () {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+
+        $(".tyrano-focusable").each((i, elm) => {
+            this.makeFocusable($(elm));
+        });
+    },
+
+    /**
+     * ボタンのホバー時のCSSをキーボードによるフォーカス時にも適用するために、
+     * tyrano.css および glink.css に記載されているCSSルールをすべて洗い、
+     * :hover セレクタを対象とするルールをコピーして　:focus.keyfocus セレクタを対象とするルールに書き変え、
+     * スタイルシートの末尾に insertRule する
+     */
+    copyHoverCSSToFocusCSS: function () {
+        // この処理は一度だけでいい
+        if (this.__is_copied_hover_css) {
+            return;
+        }
+        this.__is_copied_hover_css = true;
+
+        try {
+            // tyrano.css の CSSStyleSheet インスタンス
+            const tyrano_stylesheet = $('link[href="./tyrano/tyrano.css"]').get(0).sheet;
+
+            // glink.css の CSSStyleSheet インスタンス
+            let glink_stylesheet;
+
+            // :hover ルールをコピーして :focus.keyfocus ルールに書き変えたうえで追加する関数
+            const hover_to_focus = (rule) => {
+                if (rule.selectorText) {
+                    const new_selector_texts = [];
+                    const hash = rule.selectorText.split(",");
+                    for (const selector of hash) {
+                        if (selector.includes(":hover")) {
+                            new_selector_texts.push(selector.replace(":hover", ":focus.keyfocus"));
+                        }
+                    }
+                    if (new_selector_texts.length) {
+                        const selector_text = new_selector_texts.join(",");
+                        const bracket_index = rule.cssText.indexOf("{");
+                        const style_text = rule.cssText.substring(bracket_index);
+                        const css_text = selector_text + style_text;
+                        tyrano_stylesheet.insertRule(css_text, tyrano_stylesheet.cssRules.length);
+                    }
+                }
+            };
+
+            // tyrano.css について実行
+            for (const rule of tyrano_stylesheet.cssRules) {
+                hover_to_focus(rule);
+                if (rule.href === "./css/glink.css") {
+                    glink_stylesheet = rule.styleSheet;
+                }
+            }
+
+            // glink.css について実行
+            if (glink_stylesheet) {
+                for (const rule of glink_stylesheet.cssRules) {
+                    hover_to_focus(rule);
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    },
+
+    __is_copied_hover_css: false,
+
+    /**
+     * 外部JSから直接[sleepgame]を実行する
+     * ただし[sleepgame]を呼べない状況ではなにもしない
+     * @param {Object} pm
+     * @returns {boolean} [sleepgame]を呼べる状況かどうか
+     */
+    sleepgame: function (pm) {
+        let can_open_config = true;
+
+        // スリープ不可のケースを洗っていく
+
+        // いますでにスリープ中の場合
+        if (this.tmp.sleep_game) can_open_config = false;
+
+        // テキスト追加中の場合
+        if (this.stat.is_adding_text) can_open_config = false;
+
+        // アニメーション中の場合
+        if (this.stat.is_stop) can_open_config = false;
+
+        // 開けるなら開く
+        if (can_open_config) {
+            this.ftag.startTag("sleepgame", pm);
+        }
+
+        return can_open_config;
     },
 
     test: function () {},

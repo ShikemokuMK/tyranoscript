@@ -822,3 +822,30 @@ div.img_next {
     }
 }
 
+/*------　ボタン類のフォーカスのスタイル -------*/
+/* デフォルトのフォーカススタイルはオフにしておく
+ * (ただのマウスダウンでフォーカスが一瞬当たったケースでアウトラインが出ないように) */
+[data-event-tag="button"]:focus,
+[data-event-tag="link"]:focus,
+[data-event-tag="glink"]:focus {
+    outline: none;
+}
+
+/*-- キーボードによってフォーカスが当たったときのスタイル --*/
+:focus.keyfocus {
+    outline-offset: 0px;
+    outline-style: solid;
+    outline-width: 3px;
+    outline-color: black;
+    /* アニメーションも設定できる */
+    /* animation: keyfocus 1000ms infinite alternate linear; */
+}
+
+@keyframes keyfocus {
+    from {
+        outline-color: rgba(0, 0, 0, 1);
+    }
+    100% {
+        outline-color: rgba(0, 0, 0, 0);
+    }
+}

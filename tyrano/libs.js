@@ -603,6 +603,11 @@
         sheet.insertRule(css_str, 0);
     };
 
+    $.insertRuleToTyranoCSS = function (css_str) {
+        const sheet = $('link[href="./tyrano/tyrano.css"]').get(0).sheet;
+        sheet.insertRule(css_str, sheet.cssRules.length);
+    };
+
     $.swfName = function (str) {
         if (navigator.appName.indexOf("Microsoft") != -1) {
             return window[str];
