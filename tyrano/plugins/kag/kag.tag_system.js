@@ -1902,26 +1902,47 @@ tyrano.plugin.kag.tag.commit = {
 また、32x32ピクセルよりも大きな画像をマウスカーソルに設定した場合、画面端にマウスカーソルを移動させたときにカーソル画像がデフォルトに戻ってしまうことがあります。
 
 :sample
+;デフォルトのマウスカーソル画像を変更
 [cursor storage="my_cursor_32x32.png"]
+
+;ボタンの上にマウスカーソルを乗せたときの画像を変更
 [cursor storage="my_cursor_pointer_32x32.png" type="pointer"]
+
+;クリックエフェクトを有効にする
+[cursor click_effect="true"]
+
+;クリックエフェクトの設定変更
+[cursor e_width="200" e_color="0xff0000" e_time="600" e_scale="200" e_blend="normal" e_opacity="100"]
+
+;クリックエフェクトの設定変更(デフォルト設定)
+[cursor e_width="100" e_color="0xffffff" e_time="300" e_scale="120" e_blend="overlay" e_opacity="204"]
 
 :param
 storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。`default`と指定するとデフォルトのカーソルに戻せます。,
 x       = 指定した数値の分だけ、マウスカーソルに設定する画像を左側にずらすことができます。,
 y       = 指定した数値の分だけ、マウスカーソルに設定する画像を上側にずらすことができます。,
 type    = ボタン類にマウスを載せたときのカーソルを変更したい場合、このパラメータに`pointer`を指定します。,
+click_effect = クリックエフェクトを有効にするかどうか。`true`または`false`で指定します。,
+e_width      = クリックエフェクトの横幅をpx単位で指定します。,
+e_opacity    = クリックエフェクトの最初の不透明度を`0～255`で指定します。,
+e_time       = クリックエフェクトの表示時間をミリ秒単位で指定します。,
+e_color      = クリックエフェクトの色を指定します。,
+e_blend      = クリックエフェクトの合成モードを指定します。`[layermode]`タグのmodeパラメータと同じキーワードが指定可能です。`normal`や`overlay`など。,
+e_scale      = クリックエフェクトの拡大率をパーセント単位で指定します。たとえば`200`と指定すると、エフェクトサイズが最終的に200%になるように拡大されていきます。,
 
 #[end]
 */
 
 tyrano.plugin.kag.tag.cursor = {
-    vital: ["storage"],
-
     pm: {
         storage: "",
         x: "0",
         y: "0",
         type: "default",
+        click_effect: "",
+        mousedown_effect: "",
+        touch_effect: "",
+        next: "true",
     },
 
     start: function (pm) {
@@ -1942,7 +1963,80 @@ tyrano.plugin.kag.tag.cursor = {
                 this.overwriteCSS();
             }
         }
-        this.kag.ftag.nextOrder();
+        if (!this.kag.stat.click_effect) {
+            this.kag.stat.click_effect = {};
+        }
+        if (pm.click_effect === "false") {
+            this.kag.stat.click_effect.is_enabled = false;
+            $("body").off("click.cursor_effect");
+            this.kag.off(".cursor_effect", { off_system: true });
+        }
+        if (pm.click_effect === "true") {
+            this.kag.stat.click_effect.is_enabled = true;
+            $("body").off("click.cursor_effect");
+            $("body").on("click.cursor_effect", (e) => {
+                if (e.pageX && e.pageY) {
+                    this.showEffect(e.pageX, e.pageY);
+                }
+            });
+            this.kag.off(".cursor_effect", { off_system: true });
+            this.kag.on(
+                "click:tag:button.cursor_effect click:tag:glink.cursor_effect click:tag:glink.cursor_effect",
+                (e) => {
+                    if (e.pageX && e.pageY) {
+                        this.showEffect(e.pageX, e.pageY);
+                    }
+                },
+                { is_system: true },
+            );
+        }
+        for (const key in pm) {
+            if (key.includes("e_")) {
+                const _key = key.substring(2);
+                this.kag.stat.click_effect[_key] = pm[key];
+            }
+        }
+        if (pm.next !== "false") {
+            this.kag.ftag.nextOrder();
+        }
+    },
+
+    restore: function () {
+        this.kag.ftag.startTag("cursor", {
+            click_effect: String(this.kag.stat.click_effect && this.kag.stat.click_effect.is_enabled),
+            next: "false",
+        });
+        this.overwriteCSS();
+    },
+
+    showEffect: function (x, y) {
+        if (!this.kag.stat.click_effect) {
+            this.kag.stat.click_effect = {};
+        }
+        const base_width = parseInt(this.kag.stat.click_effect.width) || 100;
+        const width = parseInt(base_width * TYRANO.kag.tmp.scale_info.scale_x);
+        const scale = this.kag.stat.click_effect.scale || 120;
+        const color = $.convertColor(this.kag.stat.click_effect.color || "white");
+        const blend = this.kag.stat.click_effect.blend || "overlay";
+        const duration = parseInt(this.kag.stat.click_effect.time) || 300;
+        const opacity = $.convertOpacity(this.kag.stat.click_effect.opacity) || 0.8;
+        const j_effect = $('<div class="tyrano_click_effect">').appendTo("body");
+        j_effect
+            .setStyleMap({
+                "top": `${y}px`,
+                "left": `${x}px`,
+                "width": `${width}px`,
+                "height": `${width}px`,
+                "opacity": opacity,
+                "--scale": `${scale}%`,
+                "mix-blend-mode": blend,
+                "background-color": color,
+                "animation-duration": `${duration}ms`,
+            })
+            .show();
+        setTimeout(() => {
+            j_effect.remove();
+        }, duration);
     },
 
     /**
