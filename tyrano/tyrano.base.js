@@ -138,7 +138,7 @@ tyrano.base = {
                 // ウィンドウがゲーム画面よりも小さい場合はスクロール（動作安定のため）
                 if (parseInt(view_width) < parseInt(width)) {
                     if (scale_f < 1) {
-                        window.scrollTo(width, height);
+                        window.scrollTo(0, 1);
                     }
                 }
 
@@ -171,7 +171,7 @@ tyrano.base = {
             // 縦横比を維持しない場合
             $.setTimeout(function () {
                 j_tyrano_base.css("transform", "scaleX(" + width_f + ") scaleY(" + height_f + ")");
-                window.scrollTo(width, height);
+                window.scrollTo(0, 1);
                 $.extend(that.tyrano.kag.tmp.scale_info, {
                     scale_x: width_f,
                     scale_y: height_f,
