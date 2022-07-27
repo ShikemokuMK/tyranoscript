@@ -1414,11 +1414,22 @@ tyrano.plugin.kag = {
     setCursor: function (cursor) {
         this.stat.current_cursor = cursor;
 
-        if (cursor === "default") {
+        let storage, x, y;
+        if (typeof cursor === "string") {
+            storage = cursor;
+            x = "0";
+            y = "0";
+        } else if (typeof cursor === "object") {
+            storage = cursor.storage;
+            x = cursor.x;
+            y = cursor.y;
+        }
+
+        if (storage === "default") {
             //標準のカーソルをセット
             $("body").css("cursor", "auto");
         } else {
-            $("body").css("cursor", "url(./data/image/" + cursor + "),default");
+            $("body").css("cursor", `url(./data/image/${storage}) ${x} ${y}, default`);
         }
     },
 

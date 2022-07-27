@@ -1898,7 +1898,9 @@ tyrano.plugin.kag.tag.commit = {
 [cursor storage="my_cursor.gif"]
 
 :param
-storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。
+storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。,
+x       = 指定した数値の分だけ、マウスカーソルに設定する画像を左側にずらすことができます。,
+y       = 指定した数値の分だけ、マウスカーソルに設定する画像を上側にずらすことができます。,
 
 #[end]
 */
@@ -1908,11 +1910,12 @@ tyrano.plugin.kag.tag.cursor = {
 
     pm: {
         storage: "default",
+        x: "0",
+        y: "0",
     },
 
     start: function (pm) {
-        //評価された値を代入
-        this.kag.setCursor(pm.storage);
+        this.kag.setCursor(pm);
         this.kag.ftag.nextOrder();
     },
 };
