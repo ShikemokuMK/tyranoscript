@@ -4409,7 +4409,7 @@ tyrano.plugin.kag.tag.s = {
         });
 
         //
-        // フェードインしないならここでラッパーをフリーレイヤにぶち込んで終わり
+        // 表示アニメーションが必要ない場合はここでラッパーをフリーレイヤにぶち込んで終わり
         //
 
         if (animation_target_count === 0 || this.kag.stat.is_skip) {
@@ -4419,7 +4419,7 @@ tyrano.plugin.kag.tag.s = {
         }
 
         //
-        // ティラノタグで定義したキーフレームアニメーションを使う場合
+        // 表示アニメーションが必要な場合
         //
 
         // アニメーション中はラッパー自体をクリック不可にする
@@ -4439,6 +4439,10 @@ tyrano.plugin.kag.tag.s = {
             $.setTimeout(() => {
                 j_elm.setStyle("visibility", "visible");
                 if (_pm.show_keyframe && _pm.show_keyframe !== "none") {
+                    //
+                    // ティラノタグで定義したキーフレームアニメーションを使う場合
+                    //
+
                     j_elm.animateWithTyranoKeyframes({
                         keyframe: _pm.show_keyframe,
                         time: _pm.show_time,
@@ -4455,6 +4459,10 @@ tyrano.plugin.kag.tag.s = {
                         },
                     });
                 } else {
+                    //
+                    // animate.css のプリセットを使う場合
+                    //
+
                     j_elm.setStyle("animation-fill-mode", "forwards");
                     if (_pm.show_time) j_elm.setStyle("animation-duration", $.convertDuration(glink_config.show_time));
                     if (_pm.show_easing) j_elm.setStyle("animation-timing-function", glink_config.show_easing);
@@ -6387,6 +6395,28 @@ tyrano.plugin.kag.tag.glink = {
         if (is_auto_place || (glink_config.auto_place === "true" && pm.x === "auto" && !pm.y)) {
             j_button.addClass("glink_button_auto_place");
             j_button.hide();
+        } else {
+            // <自動配置は無効だが表示アニメ―ションが有効なケース>では単独で表示アニメーションを適用したい
+
+            // 表示アニメーションのオプションを取得
+            const show_options = {};
+            ["time", "easing", "effect", "keyframe", "delay"].forEach((key) => {
+                show_options[key] = pm[`show_${key}`];
+            });
+
+            // 表示アニメーションが必要か
+            const need_animate =
+                show_options.time !== undefined &&
+                parseInt(show_options.time) >= 10 &&
+                (show_options.keyframe !== "none" || show_options.effect !== "none");
+
+            // 表示アニメーションが必要ならこの glink に単独でアニメーションを適用する
+            if (need_animate) {
+                show_options.callback = () => {
+                    j_button.setStyleMap({ "pointer-events": "auto" });
+                };
+                this.startAnim(j_button, show_options);
+            }
         }
 
         target_layer.append(j_button);
