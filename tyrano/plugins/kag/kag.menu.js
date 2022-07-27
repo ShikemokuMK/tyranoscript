@@ -977,6 +977,7 @@ tyrano.plugin.kag.menu = {
 
         //カーソルの復元
         this.kag.setCursor(this.kag.stat.current_cursor);
+        this.kag.getTag("cursor").overwriteCSS();
 
         //メニューボタンの状態
         if (this.kag.stat.visible_menu_button == true) {

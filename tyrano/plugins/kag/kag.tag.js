@@ -4119,7 +4119,7 @@ tyrano.plugin.kag.tag.link = {
 
         that.kag.stat.display_link = true;
 
-        j_span.css("cursor", "pointer");
+        that.kag.setElmCursor(j_span, "pointer");
 
         (function () {
             var _target = pm.target;
@@ -4165,7 +4165,7 @@ tyrano.plugin.kag.tag.link = {
             }
         });
 
-        j_span.css("cursor", "pointer");
+        that.kag.setElmCursor(j_span, "pointer");
     },
 };
 
@@ -5753,8 +5753,8 @@ tyrano.plugin.kag.tag.button = {
         var j_button = $("<img />");
         j_button.attr("src", storage_url);
         j_button.css("position", "absolute");
-        j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
+        that.kag.setElmCursor(j_button, "pointer");
 
         //初期状態で表示か非表示か
         if (pm.visible == "true") {
@@ -6302,9 +6302,9 @@ tyrano.plugin.kag.tag.glink = {
 
         var j_button = $("<div class='glink_button'>" + pm.text + "</div>");
         j_button.css("position", "absolute");
-        j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
         j_button.css("font-size", pm.size + "px");
+        that.kag.setElmCursor(j_button, "pointer");
 
         if (pm.font_color != "") {
             j_button.css("color", $.convertColor(pm.font_color));
@@ -6718,7 +6718,6 @@ tyrano.plugin.kag.tag.clickable = {
 
         var j_button = $("<div />");
         j_button.css("position", "absolute");
-        j_button.css("cursor", "pointer");
         j_button.css("top", this.kag.stat.locate.y + "px");
         j_button.css("left", this.kag.stat.locate.x + "px");
         j_button.css("width", pm.width + "px");
@@ -6726,6 +6725,7 @@ tyrano.plugin.kag.tag.clickable = {
         j_button.css("opacity", $.convertOpacity(pm.opacity));
         j_button.css("background-color", $.convertColor(pm.color));
         j_button.css("border", $.replaceAll(pm.border, ":", " "));
+        that.kag.setElmCursor(j_button, "pointer");
 
         //alert($.replaceAll(pm.border,":"," "));
 

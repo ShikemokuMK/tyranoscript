@@ -1890,17 +1890,26 @@ tyrano.plugin.kag.tag.commit = {
 :exp
 マウスカーソルに画像を設定することができます。画像は`data/image`フォルダに配置してください。使用可能な画像形式は`gif``png``jpg`です。
 
-ゲーム中に何度でも変更することが可能です。ゲームでの標準カーソルを指定したい場合は`data/system/Config.tjs`の`cursorDefault`を変更します。
+ゲーム中に何度でも変更することが可能です。[cursor]タグを通過する前の標準カーソルを指定したい場合は`data/system/Config.tjs`の`cursorDefault`を変更します。
 
 システムの標準カーソルに戻す場合は`default`を指定します。
 
+<b>★ヒント</b>
+マウスカーソル画像の推奨サイズは<b>32x32ピクセル以下</b>です。
+
+ブラウザによって異なるケースがありますが、概ね、マウスカーソルに設定可能な最大の画像サイズは128x128ピクセルです。それより大きい画像をマウスカーソルに設定することはできません。
+
+また、32x32ピクセルよりも大きな画像をマウスカーソルに設定した場合、画面端にマウスカーソルを移動させたときにカーソル画像がデフォルトに戻ってしまうことがあります。
+
 :sample
-[cursor storage="my_cursor.gif"]
+[cursor storage="my_cursor_32x32.png"]
+[cursor storage="my_cursor_pointer_32x32.png" type="pointer"]
 
 :param
-storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。,
+storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。`default`と指定するとデフォルトのカーソルに戻せます。,
 x       = 指定した数値の分だけ、マウスカーソルに設定する画像を左側にずらすことができます。,
 y       = 指定した数値の分だけ、マウスカーソルに設定する画像を上側にずらすことができます。,
+type    = ボタン類にマウスを載せたときのカーソルを変更したい場合、このパラメータに`pointer`を指定します。,
 
 #[end]
 */
@@ -1909,14 +1918,69 @@ tyrano.plugin.kag.tag.cursor = {
     vital: ["storage"],
 
     pm: {
-        storage: "default",
+        storage: "",
         x: "0",
         y: "0",
+        type: "default",
     },
 
     start: function (pm) {
-        this.kag.setCursor(pm);
+        if (pm.storage) {
+            // storage パラメータになにかしらが指定されている場合
+            if (pm.type === "default") {
+                // デフォルトのカーソルを変更したい場合
+                this.kag.setCursor(pm);
+            } else {
+                // デフォルト以外のカーソルを変更したい場合
+                // たとえば pointer のカーソルを変更したい場合
+                // current_cursor_map オブジェクトに情報を格納してから overwriteCSS() を呼ぶ
+                if (!this.kag.stat.current_cursor_map) {
+                    this.kag.stat.current_cursor_map = {};
+                }
+                const css_str = pm.storage === "default" ? pm.type : `url(./data/image/${pm.storage}) ${pm.x} ${pm.y}, ${pm.type}`;
+                this.kag.stat.current_cursor_map[pm.type] = css_str;
+                this.overwriteCSS();
+            }
+        }
         this.kag.ftag.nextOrder();
+    },
+
+    /**
+     * メニューボタンやリモーダルに設定されている cursor: pointer; を
+     * <style>要素を用いてユーザー指定のカーソル画像で上書きするための処理
+     * [cursor]タグで設定を変更した段階、あるいは、セーブデータをロードした段階で呼ぶ
+     */
+    overwriteCSS: function () {
+        // current_cursor_map　が未定義なら必要ない
+        if (!this.kag.stat.current_cursor_map) {
+            return;
+        }
+
+        // pointer の設定が未定義ならやはり必要ない
+        if (!this.kag.stat.current_cursor_map.pointer) {
+            return;
+        }
+
+        // ゲームを起動してからカーソル上書き用の<style>要素をまだ作ったことがないならいま作ろう
+        if (!this.kag.tmp.j_cursor_css) {
+            this.kag.tmp.j_cursor_css = $("<style />");
+            this.kag.tmp.j_cursor_css.appendTo("head");
+        }
+
+        // <style>要素の textContent を作成
+        const pointer_css = this.kag.stat.current_cursor_map.pointer || "pointer";
+        css_text = `
+            .remodal-cancel,
+            .remodal-confirm,
+            .button_menu,
+            .menu_item img,
+            .save_list_item {
+                cursor: ${pointer_css};
+            }
+        `;
+
+        // <style>要素の textContent を更新
+        this.kag.tmp.j_cursor_css.text(css_text);
     },
 };
 

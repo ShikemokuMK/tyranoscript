@@ -1433,6 +1433,19 @@ tyrano.plugin.kag = {
         }
     },
 
+    /**
+     * ある要素にカーソル設定をセットする
+     * @param {jQuery} j_elm
+     * @param {string} type (例) "pointer"
+     */
+    setElmCursor: function (j_elm, type) {
+        if (!this.stat.current_cursor_map) {
+            this.stat.current_cursor_map = {};
+        }
+        const option = this.stat.current_cursor_map[type] || type;
+        j_elm.css("cursor", option);
+    },
+
     //吹き出しのスタイルをアップデートする
     updateFuki: function (chara_name, opt = {}) {
         if (!$(".tyrano_base").find("#tmp_style").get(0)) {
