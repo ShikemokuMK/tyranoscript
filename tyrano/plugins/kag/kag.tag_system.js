@@ -1901,12 +1901,19 @@ tyrano.plugin.kag.tag.commit = {
 
 また、32x32ピクセルよりも大きな画像をマウスカーソルに設定した場合、画面端にマウスカーソルを移動させたときにカーソル画像がデフォルトに戻ってしまうことがあります。
 
+<b>★注意</b>
+開発者ツール（デベロッパーツール）を開いている場合などには、マウスカーソルの自動非表示が利かないことがあります。
+
+
 :sample
 ;デフォルトのマウスカーソル画像を変更
 [cursor storage="my_cursor_32x32.png"]
 
 ;ボタンの上にマウスカーソルを乗せたときの画像を変更
 [cursor storage="my_cursor_pointer_32x32.png" type="pointer"]
+
+;一定時間マウスの操作がなかった場合にマウスカーソルを非表示にする
+[cursor auto_hide="true"]
 
 ;クリックエフェクトを有効にする
 [cursor click_effect="true"]
@@ -1922,6 +1929,7 @@ storage = マウスカーソルに設定する画像ファイルを指定しま�
 x       = 指定した数値の分だけ、マウスカーソルに設定する画像を左側にずらすことができます。,
 y       = 指定した数値の分だけ、マウスカーソルに設定する画像を上側にずらすことができます。,
 type    = ボタン類にマウスを載せたときのカーソルを変更したい場合、このパラメータに`pointer`を指定します。,
+auto_hide    = プレイヤーが一定時間マウス操作をしなかった場合にマウスカーソルを自動で非表示にするための設定です。`true`で自動非表示が有効、`false`で自動非表示が無効（常にマウスカーソル表示）になります。また、`2000`のように数値を指定することで、マウスカーソルの自動非表示を有効にした上でマウスカーソルを非表示にするまでの時間をミリ秒単位で設定できます。,
 click_effect = クリックエフェクトを有効にするかどうか。`true`または`false`で指定します。,
 e_width      = クリックエフェクトの横幅をpx単位で指定します。,
 e_opacity    = クリックエフェクトの最初の不透明度を`0～255`で指定します。,
@@ -1946,14 +1954,14 @@ tyrano.plugin.kag.tag.cursor = {
     },
 
     start: function (pm) {
+        // storage パラメータになにかしらが指定されている場合
         if (pm.storage) {
-            // storage パラメータになにかしらが指定されている場合
+            // なんのカーソルを変更するか
             if (pm.type === "default") {
                 // デフォルトのカーソルを変更したい場合
                 this.kag.setCursor(pm);
             } else {
-                // デフォルト以外のカーソルを変更したい場合
-                // たとえば pointer のカーソルを変更したい場合
+                // デフォルト以外のカーソル（たとえば pointer）を変更したい場合
                 // current_cursor_map オブジェクトに情報を格納してから overwriteCSS() を呼ぶ
                 if (!this.kag.stat.current_cursor_map) {
                     this.kag.stat.current_cursor_map = {};
@@ -1963,58 +1971,144 @@ tyrano.plugin.kag.tag.cursor = {
                 this.overwriteCSS();
             }
         }
+
+        //
+        // カーソルの自動非表示
+        //
+
+        if (pm.auto_hide === "false") {
+            // 自動非表示を無効にする場合
+
+            // ステータスを更新してイベントを取り外す
+            this.kag.stat.cursor_auto_hide = false;
+            $("body").off("mousemove.cursor_auto_hide");
+
+            // この時点でカーソルが非表示になっている可能性があるので表示してやる
+            this.kag.setCursor(this.kag.stat.current_cursor);
+        } else if (pm.auto_hide) {
+            // 自動非表示を有効にする場合
+
+            // ステータスを更新してイベントを取り外す
+            this.kag.stat.cursor_auto_hide = pm.auto_hide;
+            const j_body = $("body").off("mousemove.cursor_auto_hide");
+
+            // マウスカーソルを非表示にする setTimeout の timerId 管理変数
+            this.kag.tmp.cursor_hide_timer = null;
+
+            // タイムアウト
+            const timeout = parseInt(pm.auto_hide) || 3000;
+
+            // いまマウスカーソルが表示されているかどうかのフラグ
+            this.kag.tmp.is_cursor_visible = true;
+
+            // マウスを動かすたびに呼ばれる
+            j_body.on("mousemove.cursor_auto_hide", () => {
+                // マウスを動かしたのでマウスカーソルを表示してあげよう
+                // ただし mousemove のたびに都度 setCursor を呼ぶのは無駄なのでフラグで管理する
+                // フラグが立っていないときだけ setCursor は呼ぶ、呼んだらフラグを立てる
+                if (!this.kag.tmp.is_cursor_visible) {
+                    this.kag.setCursor(this.kag.stat.current_cursor);
+                    this.kag.tmp.is_cursor_visible = true;
+                }
+
+                // timeout ミリ秒後にマウスカーソルを非表示にする予約を改めて取り付ける
+                clearTimeout(this.kag.tmp.cursor_hide_timer);
+                this.kag.tmp.cursor_hide_timer = setTimeout(() => {
+                    // カーソルを非表示にしてフラグを折る
+                    j_body.setStyle("cursor", "none");
+                    this.kag.tmp.is_cursor_visible = false;
+                }, timeout);
+            });
+        }
+
+        //
+        // クリックエフェクト
+        //
+
+        // クリックエフェクトの情報格納領域をステータス上に作成
         if (!this.kag.stat.click_effect) {
             this.kag.stat.click_effect = {};
         }
-        if (pm.click_effect === "false") {
-            this.kag.stat.click_effect.is_enabled = false;
-            $("body").off("click.cursor_effect");
-            this.kag.off(".cursor_effect", { off_system: true });
-        }
-        if (pm.click_effect === "true") {
-            this.kag.stat.click_effect.is_enabled = true;
-            $("body").off("click.cursor_effect");
-            $("body").on("click.cursor_effect", (e) => {
-                if (e.pageX && e.pageY) {
-                    this.showEffect(e.pageX, e.pageY);
+
+        // クリックエフェクトの有効・無効を操作する場合
+        if (pm.click_effect) {
+            // とりあえずクリックイベントリスナを取り外す
+            if (typeof this.kag.tmp.show_effect_callback === "function") {
+                document.body.removeEventListener("click", this.kag.tmp.show_effect_callback, { capture: true });
+            }
+
+            // click_effect ステータスを更新
+            this.kag.stat.click_effect.is_enabled = pm.click_effect === "true";
+
+            // クリックエフェクトを有効にする場合
+            if (this.kag.stat.click_effect.is_enabled) {
+                // クリックイベントリスナを tmp 領域に作成
+                // ※ あとで removeEventListener するときリスナを参照できるようにするため
+                if (typeof this.kag.tmp.show_effect_callback !== "function") {
+                    this.kag.tmp.show_effect_callback = (e) => {
+                        this.showEffect(e);
+                    };
                 }
-            });
-            this.kag.off(".cursor_effect", { off_system: true });
-            this.kag.on(
-                "click:tag:button.cursor_effect click:tag:glink.cursor_effect click:tag:glink.cursor_effect",
-                (e) => {
-                    if (e.pageX && e.pageY) {
-                        this.showEffect(e.pageX, e.pageY);
-                    }
-                },
-                { is_system: true },
-            );
+
+                // クリックイベントリスナを useCapture で取り付ける
+                document.body.addEventListener("click", this.kag.tmp.show_effect_callback, { capture: true });
+            }
         }
+
+        // e_ から始まるパラメータはクリックエフェクト用のパラメータであるため
+        // e_ を取り外した上で click_effect ステータスに保存する
         for (const key in pm) {
             if (key.includes("e_")) {
                 const _key = key.substring(2);
                 this.kag.stat.click_effect[_key] = pm[key];
             }
         }
+
+        //
+        // next="false" が渡されていない限り nextOrder
+        //
+
         if (pm.next !== "false") {
             this.kag.ftag.nextOrder();
         }
     },
 
+    /**
+     * セーブデータロード時のカーソル関連の復元
+     */
     restore: function () {
+        // デフォルトのカーソルを復元する
+        this.kag.setCursor(this.kag.stat.current_cursor);
+
+        // ポインターのカーソルを復元する
+        this.overwriteCSS();
+
+        // カーソルの自動非表示を復元する
+        this.kag.ftag.startTag("cursor", {
+            auto_hide: String(this.kag.stat.cursor_auto_hide || false),
+            next: "false",
+        });
+
+        // クリックエフェクトを復元する
         this.kag.ftag.startTag("cursor", {
             click_effect: String(this.kag.stat.click_effect && this.kag.stat.click_effect.is_enabled),
             next: "false",
         });
-        this.overwriteCSS();
     },
 
-    showEffect: function (x, y) {
+    /**
+     * クリックエフェクトを表示する
+     * @param {Event} e
+     */
+    showEffect: function (e) {
+        if (e.pageX === undefined || e.pageY === undefined) {
+            return;
+        }
         if (!this.kag.stat.click_effect) {
             this.kag.stat.click_effect = {};
         }
         const base_width = parseInt(this.kag.stat.click_effect.width) || 100;
-        const width = parseInt(base_width * TYRANO.kag.tmp.scale_info.scale_x);
+        const width = parseInt(base_width * this.kag.tmp.scale_info.scale_x);
         const scale = this.kag.stat.click_effect.scale || 120;
         const color = $.convertColor(this.kag.stat.click_effect.color || "white");
         const blend = this.kag.stat.click_effect.blend || "overlay";
@@ -2023,8 +2117,8 @@ tyrano.plugin.kag.tag.cursor = {
         const j_effect = $('<div class="tyrano_click_effect">').appendTo("body");
         j_effect
             .setStyleMap({
-                "top": `${y}px`,
-                "left": `${x}px`,
+                "top": `${e.pageY}px`,
+                "left": `${e.pageX}px`,
                 "width": `${width}px`,
                 "height": `${width}px`,
                 "opacity": opacity,
