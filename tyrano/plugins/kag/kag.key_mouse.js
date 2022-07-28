@@ -133,7 +133,7 @@ tyrano.plugin.kag.key_mouse = {
                     } else {
                         // next キーの場合、フォーカス中の要素があればその要素のクリックをトリガーする処理を行って早期リターンする
                         if (that.map_key[keycode] === "next") {
-                            const j_focus = $(":focus");
+                            const j_focus = $(":focus.keyfocus");
                             if (j_focus.length > 0) {
                                 j_focus.eq(0).trigger("click");
                                 return;
@@ -420,16 +420,38 @@ tyrano.plugin.kag.key_mouse = {
      * @param {"next"|"prev"} order
      */
     focus_order: function (order = "next") {
-        // キーボードでフォーカス可能な要素を抽出する
+        // キーボードでフォーカス可能な要素
+        const j_focusable = $("[tabindex]");
+
         // 存在しなければ帰る
-        const j_focusable = $("[tabindex=0]");
         if (j_focusable.length === 0) {
             return;
         }
 
-        // j_focusable のうち、いまフォーカスされている要素を抽出
-        // いまフォーカスされている要素がなければ j_focusable の先頭または末尾をフォーカスして帰る
-        const j_focused = j_focusable.filter(":focus");
+        // j_focusable のうち、いまフォーカスされている要素
+        const j_focused = j_focusable.filter(":focus.keyfocus");
+
+        // j_focusable のうち、いまフォーカスされていない要素（つまり、これからフォーカスする可能性のある要素）
+        const j_unfocused = j_focusable.not(":focus.keyfocus");
+
+        // フォーカス候補が1つもないならおわり
+        // フォーカス候補が1つしかないならそれをフォーカスしておわり
+        if (j_unfocused.length === 0) {
+            return;
+        } else if (j_unfocused.length === 1) {
+            j_unfocused.focus().addClass("keyfocus");
+            return;
+        }
+
+        // ここに到達したということはフォーカス候補が2つ以上あるため
+        // なんらかの優先順位でフォーカス先を決定しなければならない
+
+        //
+        // 新規フォーカス
+        //
+
+        // いまフォーカスされている要素がない場合は新規フォーカスとなる
+        // j_focusable の先頭または末尾をフォーカスして帰る
         if (j_focused.length === 0) {
             // next なら先頭を、prev なら末尾をフォーカスする
             const index = order === "next" ? 0 : j_focusable.length - 1;
@@ -437,14 +459,13 @@ tyrano.plugin.kag.key_mouse = {
             return;
         }
 
-        // j_focusable の長さが1以上あり、その中にフォーカス中の要素があることが確定した
+        //
+        // フォーカスの移動
+        //
 
-        // 何番目だろう？
         const index = j_focusable.index(j_focused);
-
-        // 次の要素をフォーカス
         const add = order === "next" ? 1 : -1;
-        const next_index = (index + add) % j_focusable.length;
+        const next_index = (index + add + j_focusable.length) % j_focusable.length;
         j_focusable.eq(next_index).focus().addClass("keyfocus");
     },
 
@@ -463,12 +484,31 @@ tyrano.plugin.kag.key_mouse = {
      * @param {"up"|"down"|"left"|"right"} dir
      */
     focus_dir: function (dir = "down") {
-        // キーボードでフォーカス可能な要素を抽出する
+        // キーボードでフォーカス可能な要素
+        const j_focusable = $("[tabindex]");
+
         // 存在しなければ帰る
-        const j_focusable = $("[tabindex=0]");
         if (j_focusable.length === 0) {
             return;
         }
+
+        // j_focusable のうち、いまフォーカスされている要素
+        const j_focused = j_focusable.filter(":focus.keyfocus");
+
+        // j_focusable のうち、いまフォーカスされていない要素（つまり、これからフォーカスする可能性のある要素）
+        const j_unfocused = j_focusable.not(":focus.keyfocus");
+
+        // フォーカス候補が1つもないならおわり
+        // フォーカス候補が1つしかないならそれをフォーカスしておわり
+        if (j_unfocused.length === 0) {
+            return;
+        } else if (j_unfocused.length === 1) {
+            j_unfocused.focus().addClass("keyfocus");
+            return;
+        }
+
+        // ここに到達したということはフォーカス候補が2つ以上あるため
+        // なんらかの優先順位でフォーカス先を決定しなければならない
 
         //
         // 位置を調べる
@@ -483,12 +523,22 @@ tyrano.plugin.kag.key_mouse = {
         j_focusable.each((i, elm) => {
             const j_elm = $(elm);
             const offset = j_elm.offset();
-            const x = offset.left + j_elm.width() / 2;
-            const y = offset.top + j_elm.height() / 2;
-            const pos = { x, y, j_elm };
+            const width = j_elm.width();
+            const height = j_elm.height();
+            const left = offset.left;
+            const top = offset.top;
+            const x = left + width / 2;
+            const x1 = x - width / 4;
+            const x2 = x + width / 4;
+            const y = top + height / 2;
+            const y1 = y - height / 4;
+            const y2 = y + height / 4;
+            const right = left + width;
+            const bottom = top + height;
+            const pos = { x, x1, x2, y, y1, y2, left, top, right, bottom, j_elm };
             pos_list.push(pos);
             // フォーカスされている要素の情報はおさえておく
-            if (j_elm.is(":focus")) {
+            if (j_elm.is(":focus.keyfocus")) {
                 focused_pos = pos;
             }
         });
@@ -497,44 +547,191 @@ tyrano.plugin.kag.key_mouse = {
         // pos_list の並べ替え
         //
 
+        // 縦方向かどうか
+        const is_dir_vertical = dir === "up" || dir === "down";
+        // 正の方向かどうか
+        const is_plus = dir === "down" || dir === "right";
+
         let compare;
-        switch (dir) {
+        switch (is_dir_vertical) {
             default:
-            case "down":
+            case true:
                 // より下にある要素を配列の末尾に
-                compare = (a, b) => a.y < b.y;
+                compare = (a, b) => a.top < b.top;
                 break;
-            case "up":
-                // より上にある要素を配列の末尾に
-                compare = (a, b) => a.y > b.y;
-                break;
-            case "left":
-                // より左にある要素を配列の末尾に
-                compare = (a, b) => a.x > b.x;
-                break;
-            case "right":
+            case false:
                 // より右にある要素を配列の末尾に
-                compare = (a, b) => a.x < b.x;
+                compare = (a, b) => a.left < b.left;
                 break;
         }
         pos_list.sort((a, b) => {
             return compare(a, b) ? -1 : 1;
         });
 
-        // いまフォーカスが当たっている要素がない場合
-        // 下キーなら一番下の要素を、上キーなら一番上の要素を、という感じで
-        // ひとつ選んでフォーカスして帰る
+        //
+        // 新規フォーカス
+        //
+
+        // いまフォーカスが当たっている要素がない場合は新規フォーカスとなる
+        // 下キーなら一番下の要素を、上キーなら一番上の要素を、という感じで1つ選んでフォーカスしておわり
         if (!focused_pos) {
-            pos_list[pos_list.length - 1].j_elm.focus().addClass("keyfocus");
+            const index = is_plus ? pos_list.length - 1 : 0;
+            pos_list[index].j_elm.focus().addClass("keyfocus");
             return;
         }
 
-        // j_focusable の長さが1以上あり、その中にフォーカス中の要素があることが確定した
+        //
+        // フォーカス移動
+        //
+
+        // this.focus_dir_column(dir, pos_list, focused_pos);
+        // this.focus_dir_beam(dir, pos_list, focused_pos);
+        this.focus_dir_angle(dir, pos_list, focused_pos);
+    },
+
+    /**
+     * ★上下左右のフォーカス移動の実装パターン①列分割
+     * たとえば dir が up または down の場合、フォーカス可能な要素群を縦何列かで区切ってこの順序で並べた配列を作る。
+     *  |　　／|　　／|
+     *  |　／　|　／　|
+     *  |／　　|／　　↓
+     * down ならば配列の後ろの要素を、up ならば配列の前の要素をフォーカスする。
+     */
+    focus_dir_column: function (dir, pos_list, focused_pos) {
+        // 縦方向かどうか
+        const is_dir_vertical = dir === "up" || dir === "down";
+        // 正の方向かどうか
+        const is_plus = dir === "down" || dir === "right";
+
+        const _width = is_dir_vertical ? "width" : "height";
+        const game_width = this.kag.tmp.scale_info[`game_${_width}`];
+        const hash_num = 10;
+        const hash_width = parseInt(game_width / hash_num);
+        const _x = is_dir_vertical ? "x" : "y";
+
+        const new_pos_column = [];
+        for (let i = 0; i <= hash_num + 1; i++) {
+            new_pos_column[i] = [];
+        }
+        pos_list.forEach((this_pos) => {
+            let index;
+            if (this_pos[_x] < 0) index = 0;
+            else index = Math.min(hash_num + 1, Math.ceil(this_pos[_x] / hash_width));
+            new_pos_column[index].push(this_pos);
+        });
+        new_pos_list = new_pos_column.reduce((prev, item) => {
+            return prev.concat(item);
+        }, []);
+        const index = new_pos_list.indexOf(focused_pos);
+        const add = is_plus ? 1 : -1;
+        const next_index = (index + add + new_pos_list.length) % new_pos_list.length;
+        new_pos_list[next_index].j_elm.focus().addClass("keyfocus");
+    },
+
+    /**
+     * ★上下左右のフォーカス移動の実装パターン②ビームサーチ
+     * たとえば下図において現在フォーカス中の要素が x であるとして、dir が up または　down であるとする。
+     * このとき、まず 100 px幅で上下に存在する要素をサーチして、要素が見つかった場合は up または down に応じてフォーカスを移動する。
+     * 　　←|   |→
+     * 　　←| x |→
+     * 　　←|   |→
+     * 要素が見つからなかった場合は探索幅を 100 px増やしてまた同じことをする。
+     * 以降、要素が見つかるまでこの操作を繰り返す。
+     */
+    focus_dir_beam: function (dir, pos_list, focused_pos) {
+        // 縦方向かどうか
+        const is_dir_vertical = dir === "up" || dir === "down";
+        // 正の方向かどうか
+        const is_plus = dir === "down" || dir === "right";
+
+        // 探索幅
+        let search_width = 100;
+        let searched_pos_list = [];
+
+        while (true) {
+            const _x = is_dir_vertical ? "x" : "y";
+            const _left = is_dir_vertical ? "left" : "top";
+            const _right = is_dir_vertical ? "right" : "bottom";
+            const search_left = focused_pos[_x] - search_width;
+            const search_right = focused_pos[_x] + search_width;
+            searched_pos_list = [];
+            pos_list.forEach((this_pos) => {
+                // 探索幅からはみ出ている要素は無視
+                if (this_pos[_right] < search_left || search_right < this_pos[_left]) {
+                    return;
+                }
+                searched_pos_list.push(this_pos);
+            });
+            if (searched_pos_list.length > 1) {
+                break;
+            }
+            search_width += 100;
+        }
 
         // pos_list の次の要素をフォーカスする
-        const index = pos_list.indexOf(focused_pos);
-        const next_index = (index + 1) % pos_list.length;
-        pos_list[next_index].j_elm.focus().addClass("keyfocus");
+        const index = searched_pos_list.indexOf(focused_pos);
+        const add = is_plus ? 1 : -1;
+        const next_index = (index + add + searched_pos_list.length) % searched_pos_list.length;
+        searched_pos_list[next_index].j_elm.focus().addClass("keyfocus");
+    },
+
+    /**
+     * ★上下左右のフォーカス移動の実装パターン③角度法
+     * いまフォーカス中の要素から他の要素までの角度をそれぞれ計算する。
+     * たとえば dir が up ならば、上 90 度の領域に含まれる要素のうちもっとも近い要素にフォーカスを移動する。
+     * ＼　　／
+     * 　＼／
+     * 　／＼
+     * ／　　＼
+     */
+    focus_dir_angle: function (dir, pos_list, focused_pos) {
+        let candidate_pos_list;
+        const deg_360 = Math.PI * 2;
+        const deg_90 = Math.PI / 2;
+        const deg_45 = Math.PI / 4;
+        const deg_30 = Math.PI / 6;
+        const dir_num = ["right", "up", "left", "down"].indexOf(dir);
+        const dir_rad = dir_num * deg_90;
+        // 90°(45°*2)幅、150°幅(75°*2)の最大計2回探索する
+        // 最初の90°幅の探索で要素が見つかったなら2回目の探索は省略
+        for (let i = 0; i < 2; i++) {
+            candidate_pos_list = [];
+            const search_width = deg_45 + i * deg_30;
+            pos_list.forEach((this_pos) => {
+                if (this_pos === focused_pos) {
+                    return;
+                }
+                const rad0 = (Math.atan2(focused_pos.y - this_pos.y, this_pos.x - focused_pos.x) + deg_360) % deg_360;
+                const rad1 = (Math.atan2(focused_pos.y - this_pos.y1, this_pos.x1 - focused_pos.x) + deg_360) % deg_360;
+                const rad2 = (Math.atan2(focused_pos.y - this_pos.y2, this_pos.x2 - focused_pos.x) + deg_360) % deg_360;
+                const rads = [rad0, rad1, rad2];
+                for (const rad of rads) {
+                    const dif1 = Math.abs(dir_rad - rad);
+                    const dif2 = Math.abs(dir_rad + deg_360 - rad);
+                    const dif = Math.min(dif1, dif2);
+                    if (dif < search_width) {
+                        const d0 = Math.sqrt(Math.pow(this_pos.y - focused_pos.y, 2) + Math.pow(this_pos.x - focused_pos.x, 2));
+                        const d1 = Math.sqrt(Math.pow(this_pos.y1 - focused_pos.y, 2) + Math.pow(this_pos.x1 - focused_pos.x, 2));
+                        const d2 = Math.sqrt(Math.pow(this_pos.y2 - focused_pos.y, 2) + Math.pow(this_pos.x2 - focused_pos.x, 2));
+                        const d = Math.min(d0, d1, d2);
+                        const penalty = 100 * (dif / search_width);
+                        this_pos.distance = d + penalty;
+                        candidate_pos_list.push(this_pos);
+                        break;
+                    }
+                }
+            });
+            if (candidate_pos_list > 0) {
+                break;
+            }
+        }
+        if (candidate_pos_list.length === 0) {
+            return;
+        }
+        candidate_pos_list.sort((a, b) => {
+            return a.distance < b.distance ? -1 : 1;
+        });
+        candidate_pos_list[0].j_elm.focus().addClass("keyfocus");
     },
 
     focus_up: function () {
