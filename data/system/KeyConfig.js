@@ -6,9 +6,9 @@ Ver4.50以降で有効
 
 <設定できるアクション>
 
+    next        : 次のテキストに進む, フォーカス中のボタンをクリックする
     save        : セーブ画面を開く
     load        : ロード画面を開く
-    next        : 次のテキストに進む
     menu        : メニュー画面を開く
     title       : タイトルに戻る
     skip        : スキップを開始する
@@ -87,19 +87,20 @@ var __tyrano_key_config = {
     // "system_key_event" が "false" だとこのアクションが無効化されます。
     //   Ctrl + Shift + I : デベロッパーツールを開く
     //   Ctrl + Shift + O : ブックマークマネージャを開く
-    "system_key_event" : "false",
-    
+    system_key_event: "false",
+
     // キーボード操作
-    "key": {
-        "32": "hidemessage", // Space
-        "13": "next",        // Enter
-        "91": "skip",        // Command (Mac)
-        "17": "skip",        // Ctrl (Windows)
-        "37": "focus_left",  // ←
-        "38": "focus_up",    // ↑
-        "39": "focus_right", // →
-        "40": "focus_down",  // ↓
-        "67": function () {  // C
+    key: {
+        32: "hidemessage", // Space
+        13: "next",        // Enter
+        91: "skip",        // Command (Mac)
+        17: "skip",        // Ctrl (Windows)
+        37: "focus_left",  // ←
+        38: "focus_up",    // ↑
+        39: "focus_right", // →
+        40: "focus_down",  // ↓
+        67: function () {
+            // C
             // コンフィグを呼び出す例（シナリオファイル名は適宜変更してください）
             // （コメントアウトしてあります）
             // TYRANO.kag.sleepgame({ storage: "config.ks" });
@@ -107,34 +108,70 @@ var __tyrano_key_config = {
     },
 
     // マウス操作
-    "mouse": {
-        "right": "hidemessage", // 右クリック
-        "center": "menu",       // ホイールクリック
-        "wheel_up": "backlog",  // ホイールアップ
-        "wheel_down": "next",   // ホイールダウン
+    mouse: {
+        right: "hidemessage", // 右クリック
+        center: "menu",       // ホイールクリック
+        wheel_up: "backlog",  // ホイールアップ
+        wheel_down: "next",   // ホイールダウン
     },
 
     // ジェスチャー操作
-    "gesture": {
+    gesture: {
         // 上スワイプ
-        "swipe_up_1": {
-            "action": "backlog",
+        swipe_up_1: {
+            action: "backlog",
         },
         // 左スワイプ
-        "swipe_left_1": {
-            "action": "auto",
+        swipe_left_1: {
+            action: "auto",
         },
         // 右スワイプ
-        "swipe_right_1": {
-            "action": "menu",
+        swipe_right_1: {
+            action: "menu",
         },
         // 下スワイプ
-        "swipe_down_1": {
-            "action": "load",
+        swipe_down_1: {
+            action: "load",
         },
         // ホールド
-        "hold": {
-            "action": "skip",
+        hold: {
+            action: "skip",
+        },
+    },
+
+    gamepad: {
+        button: {
+            A: "close",
+            B: "next",
+            X: "",
+            Y: "backlog",
+            LB: "",
+            LT: "",
+            RB: "skip",
+            RT: "skip",
+            START: "menu",
+            SELECT: "",
+            HOME: "",
+            LS: "",
+            RS: "",
+            UP: "focus_up",
+            DOWN: "focus_down",
+            LEFT: "focus_left",
+            RIGHT: "focus_right",
+        },
+        stick_digital: {
+            L: {
+                UP: "focus_up",
+                DOWN: "focus_down",
+                LEFT: "focus_left",
+                RIGHT: "focus_right",
+            },
+            R: {
+                UP: "focus_up",
+                DOWN: "focus_down",
+                LEFT: "focus_left",
+                RIGHT: "focus_right",
+            },
         },
     },
 };

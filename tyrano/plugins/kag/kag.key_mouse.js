@@ -92,6 +92,7 @@ tyrano.plugin.kag.key_mouse = {
         this.map_key = this.keyconfig["key"];
         this.map_mouse = this.keyconfig["mouse"];
         this.map_ges = this.keyconfig["gesture"];
+        this.map_pad = this.keyconfig["gamepad"];
 
         // Windowsの場合に限りWindowsキー(KeyCode 91)に割り当てられているロールを破棄する
         // Macの場合は⌘(コマンド)キーにKeyCode 91が割り当てられている
@@ -345,6 +346,92 @@ tyrano.plugin.kag.key_mouse = {
             that.kag.trigger("click:next", e);
             that.kag.ftag.nextOrder();
         });
+
+        //
+        // ページを開いてからゲームパッドの入力を最初に検知した瞬間に発火されるイベントリスナ
+        //
+
+        // ゲームパッド未使用環境でいたずらに処理を増やさないようにするため、
+        // ゲームパッドの入力を一定間隔で検知し続ける関数 getGamepadInputs() はこの中で呼ぶようにする
+        // * たとえPC自体にゲームパッドがつながっていても、ページを開いてから最初にゲームパッドの入力を検知するまでは
+        //   navigator.getGamepads() でゲームパッドの入力状態が取れるようにならない
+        // * ひとつのゲームパッドから入力が入った瞬間に
+        //   そのときPCに接続されているすべてのゲームパッド分の gamepadconnected が発火する
+        // * 一度USBやBluetoothの接続が切れてから再度接続しなおしたときにも発火する
+        $(window).on("gamepadconnected", (e) => {
+            // console.warn(e.gamepad);
+            if (!this.gamepad.gamepad_exests) {
+                this.gamepad.gamepad_exests = true;
+                this.gamepad.getGamepadInputs();
+            }
+        });
+
+        //
+        // ゲームパッドのボタンダウン
+        //
+
+        $(document).on("gamepadpressdown", (e) => {
+            // キーコンフィグ無効化中は即リターン
+            if (!this.kag.stat.enable_keyconfig) return;
+
+            // ティラノイベント"gamepad:pressdown"を発火
+            this.kag.trigger("gamepad:pressdown", e);
+
+            const action = this.map_pad.button[e.detail.button_name] || this.map_pad.button[e.detail.button_index];
+
+            this.doAction(action);
+        });
+
+        //
+        // ゲームパッドのボタンアップ
+        //
+
+        $(document).on("gamepadpressup", (e) => {
+            // キーコンフィグ無効化中は即リターン
+            if (!this.kag.stat.enable_keyconfig) return;
+
+            // ティラノイベント"gamepad:pressup"を発火
+            this.kag.trigger("gamepad:pressup", e);
+
+            const action = this.map_pad.button[e.detail.button_name] || this.map_pad.button[e.detail.button_index];
+
+            if (action === "skip") {
+                this.kag.setSkip(false);
+            }
+        });
+
+        //
+        // ゲームパッドのボタンアップ
+        //
+
+        $(document).on("gamepadstickdigital", (e) => {
+            // キーコンフィグ無効化中は即リターン
+            if (!this.kag.stat.enable_keyconfig) return;
+
+            // ティラノイベント"gamepad:stick:digital"を発火
+            this.kag.trigger("gamepad:stick:digital", e);
+
+            const map = this.map_pad.stick_digital[e.detail.stick_name] || this.map_pad.stick_digital[e.detail.stick_index];
+            if (map) {
+                const action = map[e.detail.direction];
+                console.log(action);
+                this.doAction(action);
+            }
+        });
+    },
+
+    doAction: function (action) {
+        if (typeof action === "function") return action();
+
+        if (action === "next") {
+            const j_focus = $(":focus.keyfocus");
+            if (j_focus.length > 0) {
+                j_focus.eq(0).trigger("click");
+                return;
+            }
+        }
+
+        if (this[action]) this[action]();
     },
 
     next: function () {
@@ -904,6 +991,267 @@ tyrano.plugin.kag.key_mouse = {
         return false;
 
         */
+    },
+
+    gamepad: {
+        keymap_lang: {
+            standard: {
+                buttons: {
+                    0: "A",
+                    1: "B",
+                    2: "X",
+                    3: "Y",
+                    4: "LB",
+                    5: "RB",
+                    6: "LT",
+                    7: "RT",
+                    8: "SELECT",
+                    9: "START",
+                    10: "LS",
+                    11: "RS",
+                    12: "UP",
+                    13: "DOWN",
+                    14: "LEFT",
+                    15: "RIGHT",
+                    16: "HOME",
+                },
+            },
+        },
+
+        // 前回確認時の Gamepad を格納する配列（Gamepad[]）
+        prev_gamepads: [],
+
+        // ゲームパッドが存在するか（true, false）
+        gamepad_exests: false,
+
+        // 最後に使ったゲームパッドのインデックス（0, 1, 2, 3）
+        last_used_gamepad_index: 0,
+
+        // スティックを倒した絶対量（0.0～1.0）をX方向・Y方向で分けて合計した値（0.0～2.0）がこれ以下であれば
+        // スティックの入力を無視する
+        MINIMAM_VALUE_DETECT_AXE: 0.001,
+
+        // スティック入力をデジタルな十字キー入力にパースするとき
+        // スティックを倒した絶対量（0.0～1.0）がこの値以上になった瞬間にデジタル入力をトリガーする
+        MINIMAM_VALUE_DIGITAL_STICK: 0.5,
+
+        // 何ミリ秒ごとにゲームパッドの入力状態を取得するか
+        UPDATE_TIMEOUT: 50,
+
+        /**
+         * ゲームパッドの入力状態のスナップショットを確認する
+         * 前回確認時の Gamepad と照合して「ボタンが押された瞬間」を検知する
+         * イベントの発火なども行う
+         */
+        getGamepadInputs: function () {
+            try {
+                const gamepads = navigator.getGamepads
+                    ? navigator.getGamepads()
+                    : navigator.webkitGetGamepads
+                    ? navigator.webkitGetGamepads()
+                    : null;
+
+                // getGamepads() が利用できない環境（IE以外ではほとんどありえない）は無視
+                // ※ゲームパッドが未接続であっても getGamepads() は [null, null, null, null] を返す
+                if (!gamepads) {
+                    return;
+                }
+
+                // 接続済みのゲームパッドが少なくともひとつ存在するか
+                let gamepad_exists = false;
+
+                // 使用された（入力状態に変化があった）ゲームパッドが少なくともひとつ存在するか
+                let used_gamepad_exists = false;
+
+                //
+                // 各ゲームパッドを確認
+                //
+
+                // Electron 7 では gamepads.forEach はエラーとなる
+                Array.prototype.forEach.call(gamepads, (gamepad, gi) => {
+                    // null は無視
+                    if (!gamepad) {
+                        return;
+                    }
+                    gamepad_exists = true;
+
+                    // 前回の入力状態が取れないなら即リターン
+                    const prev_gamepad = this.prev_gamepads[gi];
+                    if (!prev_gamepad) {
+                        this.prev_gamepads[gi] = gamepad;
+                        return;
+                    }
+
+                    //
+                    // ボタンの入力状態を確認
+                    //
+
+                    // 入力状態に変化があったか
+                    let is_changed_inputs = false;
+                    // 前回のボタン入力
+                    const prev_buttons = prev_gamepad.buttons;
+                    gamepad.buttons.forEach((button, bi) => {
+                        const prev_button = prev_buttons[bi];
+                        // 入力状態に変化があったか
+                        const is_changed = button.pressed !== prev_button.pressed;
+                        // 押された瞬間を検知
+                        if (is_changed) {
+                            let button_name = "";
+                            const lang = this.keymap_lang[gamepad.mapping] || this.keymap_lang.standard;
+                            if (lang) {
+                                button_name = lang.buttons[bi] || "";
+                            }
+                            const event_name = button.pressed ? "gamepadpressdown" : "gamepadpressup";
+                            const event = new CustomEvent(event_name, {
+                                detail: {
+                                    button_index: bi,
+                                    gamepad_index: gi,
+                                    button_name,
+                                    button,
+                                    gamepad,
+                                },
+                            });
+                            document.dispatchEvent(event);
+                        }
+                        if (is_changed) {
+                            is_changed_inputs = is_changed;
+                        }
+                    });
+
+                    //
+                    // スティックの入力を検知
+                    //
+
+                    gamepad.__sticks = [];
+                    const stick_num = gamepad.axes.length / 2;
+                    for (let si = 0; si < stick_num; si++) {
+                        let stick;
+                        const aix = si * 2;
+                        const aiy = si * 2 + 1;
+                        const x = gamepad.axes[aix];
+                        const y = gamepad.axes[aiy];
+                        if (typeof x !== "number" || typeof y !== "number") {
+                            continue;
+                        }
+                        const sum = Math.abs(x) + Math.abs(y);
+                        if (sum < this.MINIMAM_VALUE_DETECT_AXE) {
+                            stick = {
+                                radian: 0,
+                                degree: 0,
+                                distance: 0,
+                                direction: "up",
+                            };
+                        } else {
+                            let radian = Math.atan2(-y, x);
+                            if (radian < 0) radian += Math.PI * 2;
+                            const degree = radian * (180 / Math.PI);
+                            const distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+                            const radian_rotate = radian + Math.PI / 4;
+                            const direction_index = Math.floor((2 * radian_rotate) / Math.PI) % 4;
+                            const direction = ["RIGHT", "UP", "LEFT", "DOWN"][direction_index];
+                            stick = {
+                                radian,
+                                degree,
+                                distance,
+                                direction,
+                            };
+                        }
+                        gamepad.__sticks.push(stick);
+                    }
+
+                    if (prev_gamepad.__sticks) {
+                        gamepad.__sticks.forEach((stick, si) => {
+                            const prev_stick = prev_gamepad.__sticks[si];
+                            const is_over_threshold = stick.distance > this.MINIMAM_VALUE_DIGITAL_STICK;
+                            let should_trigger =
+                                stick.direction !== prev_stick.direction || prev_stick.distance < this.MINIMAM_VALUE_DIGITAL_STICK;
+                            if (is_over_threshold && should_trigger) {
+                                const stick_name = ["L", "R"][si] || "";
+                                const event = new CustomEvent("gamepadstickdigital", {
+                                    detail: {
+                                        stick_name,
+                                        stick_index: si,
+                                        direction: stick.direction,
+                                    },
+                                });
+                                document.dispatchEvent(event);
+                            }
+                        });
+                    }
+
+                    // スティックの入力検知おわり
+
+                    // 入力状態に変化があったならこのゲームパッドを「最後に使われたゲームパッド」に登録する
+                    if (is_changed_inputs) {
+                        this.last_used_gamepad_index = gamepad.index;
+                        used_gamepad_exists = true;
+                    }
+
+                    // 今回の Gamepad を次回使えるように格納
+                    this.prev_gamepads[gi] = gamepad;
+                });
+
+                // ゲームパッドの確認終わり
+                // ゲームパッドが存在する場合にのみ次の入力を取得しにいく
+                if (gamepad_exists) {
+                    setTimeout(() => {
+                        this.getGamepadInputs();
+                    }, this.UPDATE_TIMEOUT);
+                } else {
+                    // ゲームパッドが存在しない場合は入力の取得を打ち切る。フラグも折っておく
+                    this.gamepad_exests = false;
+                }
+            } catch (error) {
+                console.log(error);
+                this.gamepad_exests = false;
+            }
+        },
+
+        /**
+         * 特定の Gamepad を返す
+         * @param {number} [index] ゲームパッドのインデックス（0～3）（省略した場合は最後に入力を検知したゲームパッド）
+         * @returns Gamepad
+         */
+        getGamepad: function (index) {
+            if (index === undefined) {
+                index = this.last_used_gamepad_index;
+            }
+
+            const gamepads = navigator.getGamepads
+                ? navigator.getGamepads()
+                : navigator.webkitGetGamepads
+                ? navigator.webkitGetGamepads()
+                : null;
+
+            if (gamepads) {
+                return gamepads[index];
+            } else {
+                return null;
+            }
+        },
+
+        /**
+         * ゲームパッドを振動させる
+         * @param {Gamepad} [gamepad] 振動させるゲームパッド（省略した場合は最後に入力を検知したゲームパッド）
+         * @param {number} [power=1] 振動の強さ（0.0-1.0）
+         * @param {number} [duration=500] 振動の時間（msec）
+         */
+        vibrate: function (gamepad, power = 1, duration = 500) {
+            if (!gamepad) gamepad = this.getGamepad();
+            const act = gamepad && gamepad.vibrationActuator;
+            if (!act) {
+                return;
+            } else if (act.pulse) {
+                act.pulse(power, duration);
+            } else if (act.playEffect) {
+                act.playEffect(act.type, {
+                    duration: duration,
+                    startDelay: 0,
+                    strongMagnitude: power,
+                    weakMagnitude: power,
+                });
+            }
+        },
     },
 };
 
