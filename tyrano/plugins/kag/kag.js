@@ -2615,34 +2615,6 @@ tyrano.plugin.kag = {
 
     __is_copied_hover_css: false,
 
-    /**
-     * 外部JSから直接[sleepgame]を実行する
-     * ただし[sleepgame]を呼べない状況ではなにもしない
-     * @param {Object} pm
-     * @returns {boolean} [sleepgame]を呼べる状況かどうか
-     */
-    sleepgame: function (pm) {
-        let can_open_config = true;
-
-        // スリープ不可のケースを洗っていく
-
-        // いますでにスリープ中の場合
-        if (this.tmp.sleep_game) can_open_config = false;
-
-        // テキスト追加中の場合
-        if (this.stat.is_adding_text) can_open_config = false;
-
-        // アニメーション中の場合
-        if (this.stat.is_stop) can_open_config = false;
-
-        // 開けるなら開く
-        if (can_open_config) {
-            this.ftag.startTag("sleepgame", pm);
-        }
-
-        return can_open_config;
-    },
-
     test: function () {},
 };
 

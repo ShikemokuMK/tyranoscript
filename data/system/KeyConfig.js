@@ -6,34 +6,53 @@ Ver4.50以降で有効
 
 <設定できるアクション>
 
-    next        : 次のテキストに進む, フォーカス中のボタンをクリックする
+    next        : 次のテキストに進む, フォーカス中のボタンをクリックする（キーボード・ゲームパッドのみ）
+    auto        : オートモードを開始／停止する
+    skip        : スキップモードを開始／停止する
+    holdskip    : キーまたはボタンを押し込んでいる間だけスキップする（キーボード・ゲームパッドのみ）
+    hidemessage : メッセージウィンドウの表示／非表示を切り替える
+    fullscreen  : フルスクリーンを切り替える
     save        : セーブ画面を開く
     load        : ロード画面を開く
     menu        : メニュー画面を開く
     title       : タイトルに戻る
-    skip        : スキップを開始する
     backlog     : バックログを開く
-    fullscreen  : フルスクリーンを切り替える
     qsave       : クイックセーブを実行する
     qload       : クイックロードを実行する
-    auto        : オートモードを開始する
-    hidemessage : メッセージウィンドウを非表示にする
+    focus_next  : ボタンのフォーカスを次に移動する
+    focus_prev  : ボタンのフォーカスを前に移動する
     focus_up    : ボタンのフォーカスを上に移動する
     focus_down  : ボタンのフォーカスを下に移動する
     focus_left  : ボタンのフォーカスを左に移動する
     focus_right : ボタンのフォーカスを右に移動する
+    close       : メニューを閉じる
+    sleepgame   : [sleepgame]を実行する（詳細は後述）
+    
+    ★sleepgameについて
+    
+    キーコンフィグで[sleepgame]を発動することができます。
+    以下のように指定してください。
+    
+    sleepgame storage=config.ks target=start
+    
+    ※ラベル（target=...）は省略してもかまいません。 (例) sleepgame storage=config.ks
+    
+    
+    ★関数の直接指定
     
     上記キーワードの代わりにJavaScriptの関数を指定することもできます。
-    たとえば「コンフィグ画面の呼び出し」機能を割り当てるためには、次のような関数を指定します。
-    (シナリオファイル名は適宜変更してください)
     
-    function () {
-        TYRANO.kag.sleepgame({ storage: "config.ks" });
-    }
+    (指定例) 
+    
+    key: {
+        32: function () {
+            alert("Hello!")
+        },
+        ...
     
 <キーボード操作の指定方法> 
     
-    "キーコード"と"そのキーが押されたときのアクション"を配置します。
+    "キーコード" と "そのキーが押されたときのアクション" を配置します。
     キーコードはキーの種類に対応する特定の数値です。たとえばスペースキーなら"32"といった具合です。
     キーコードの確認には次のサイトが利用可能です。
     http://shanabrian.com/web/javascript/keycode.php
@@ -77,7 +96,86 @@ Ver4.50以降で有効
     
     つまり、2本の指でスワイプしたときのアクションを指定したい場合は
     swipe_up_2 のような名前でアクションを定義すればよいということです。
+
+<ゲームパッド操作>
+
+    ★ボタン
     
+    2通りの設定の仕方があります。どちらで設定してもOKです。設定が混在しても問題ありません。
+    
+    (1) A, LEFT, START などの "ボタンを表すキーワード" と "アクション" を並べる。
+    
+    指定可能なキーワードは、次のとおりです。
+    
+    A      : Aボタン（右側エリアの下ボタン）
+    B      : Bボタン（右側エリアの右ボタン）
+    X      : Xボタン（右側エリアの左ボタン）
+    Y      : Yボタン（右側エリアの上ボタン）
+    LB     : Lバンパー（Lボタン、手前側のもの）
+    LT     : Lトリガー（ZLボタン、奥側のもの）
+    RB     : Rバンパー（Rボタン、手前側のもの）
+    RT     : Rトリガー（ZRボタン、奥側のもの）
+    START  : スタートボタン（中央エリアの右ボタン）
+    SELECT : セレクトボタン（中央エリアの左ボタン）
+    HOME   : ホームボタン（中央エリアの中央ボタン）
+    LS     : Lスティック押し込み
+    RS     : Rスティック押し込み
+    UP     : 十字キーの上入力
+    DOWN   : 十字キーの下入力
+    LEFT   : 十字キーの左入力
+    RIGHT  : 十字キーの右入力
+    
+    ※ゲームパッドのボタン配置が標準的なXboxコントローラーと同一であることを想定しています。
+    ※ニンテンドーのコントローラーとはAとB、XとYの配置が逆であることに注意してください。
+    
+    (指定例)
+    
+    gamepad: {
+        button: {
+            B: "next",
+        },
+        ...
+    
+    
+    (2) 0, 1, 2 などの "ボタンに対応する数値" と "アクション" を並べる。
+    
+    たとえば標準的なXboxコントローラーであれば B = 0、A = 1、という具体に、
+    各ボタンに対応する数値が存在します。
+    その数値を使ってキーコンフィグを定義することもできます。
+    
+    (指定例)
+    
+    gamepad: {
+        button: {
+            1: "next",
+        },
+        ...
+    
+    
+    ★スティックのデジタル入力
+    
+    アナログスティックの操作をデジタルな上下左右入力と解釈し、
+    その上下左右入力に対応するアクションを設定することができます。
+    
+    (指定例)
+    
+    gamepad: {
+        button: {
+            ...
+        },
+        stick_digital: {
+            L: {
+                UP: "focus_up",
+                DOWN: "focus_down",
+                LEFT: "focus_left",
+                RIGHT: "focus_right",
+            },
+            R: {
+                ...
+            },
+        },
+        ...
+
 */
 
 var __tyrano_key_config = {
@@ -91,20 +189,16 @@ var __tyrano_key_config = {
 
     // キーボード操作
     key: {
+        9: "focus_next",   // Tab
         32: "hidemessage", // Space
         13: "next",        // Enter
-        91: "skip",        // Command (Mac)
-        17: "skip",        // Ctrl (Windows)
+        91: "holdskip",    // Command (Mac)
+        17: "holdskip",    // Ctrl (Windows)
         37: "focus_left",  // ←
         38: "focus_up",    // ↑
         39: "focus_right", // →
         40: "focus_down",  // ↓
-        67: function () {
-            // C
-            // コンフィグを呼び出す例（シナリオファイル名は適宜変更してください）
-            // （コメントアウトしてあります）
-            // TYRANO.kag.sleepgame({ storage: "config.ks" });
-        },
+        c: "sleepgame storage=config.ks target=testa",
     },
 
     // マウス操作
@@ -138,20 +232,21 @@ var __tyrano_key_config = {
             action: "skip",
         },
     },
-
+    
+    // ゲームパッド操作
     gamepad: {
         button: {
             A: "close",
             B: "next",
-            X: "",
+            X: "auto",
             Y: "backlog",
-            LB: "",
-            LT: "",
+            LB: "save",
+            LT: "load",
             RB: "skip",
-            RT: "skip",
+            RT: "holdskip",
             START: "menu",
             SELECT: "",
-            HOME: "",
+            HOME: "title",
             LS: "",
             RS: "",
             UP: "focus_up",
