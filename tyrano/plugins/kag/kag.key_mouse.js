@@ -506,6 +506,21 @@ tyrano.plugin.kag.key_mouse = {
         }
     },
 
+    cancel() {
+        const j_focused = this.util.findFocused();
+        if (j_focused.length > 0) {
+            j_focused.blur();
+            return;
+        }
+        if (this.util.isOpenRemodal()) {
+            $(".remodal").find(".remodal-cancel").click();
+        } else if (this.util.isOpenMenu()) {
+            $(".menu_close").click();
+        } else {
+            this.clearSkip();
+        }
+    },
+
     scroll_up() {
         $(".button_arrow_up").click();
     },
@@ -521,6 +536,9 @@ tyrano.plugin.kag.key_mouse = {
         isOpenMenu() {
             return $(".layer_menu").css("display") !== "none";
         },
+        findFocused() {
+            return $(":focus.keyfocus");
+        },
         findFocusable() {
             let j_buttons;
             if (this.isOpenRemodal()) {
@@ -528,7 +546,7 @@ tyrano.plugin.kag.key_mouse = {
             } else if (this.isOpenMenu()) {
                 j_buttons = $(".layer_menu").find("[tabindex].tyrano-focusable");
             } else {
-                j_buttons = $("[tabindex].tyrano-focusable");
+                j_buttons = $("#tyrano_base [tabindex].tyrano-focusable");
             }
             j_buttons = j_buttons.filter(function () {
                 return $(this).css("display") !== "none";

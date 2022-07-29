@@ -28,6 +28,7 @@ Ver4.50以降で有効
     scroll_up   : 上にスクロール
     scroll_down : 下にスクロール
     close       : メニューを閉じる
+    cancel      : フォーカスを外す, 確認ウィンドウをキャンセルする, メニューを閉じる, オートモード・スキップモードを解除する
     sleepgame   : [sleepgame]を実行する（詳細は後述）
     
     
@@ -212,7 +213,7 @@ var __tyrano_key_config = {
     // キーボード操作
     key: {
         9: "focus_next -a",   // Tab
-        27: "menu",           // Escape
+        27: "cancel -a",      // Escape
         32: "hidemessage",    // Space
         13: "next -a",        // Enter
         91: "holdskip",       // Command (Mac)
@@ -258,7 +259,7 @@ var __tyrano_key_config = {
     // ゲームパッド操作
     gamepad: {
         button: {
-            A: "close -a",
+            A: "cancel -a",
             B: "next -a",
             X: "auto",
             Y: "backlog",
