@@ -18,6 +18,7 @@ tyrano.plugin.kag.menu = {
 
         var that = this;
 
+        that.kag.unfocus();
         this.kag.setSkip(false);
         this.kag.setAuto(false);
         this.kag.stat.is_auto_wait = false;
@@ -119,6 +120,7 @@ tyrano.plugin.kag.menu = {
 
         var that = this;
 
+        that.kag.unfocus();
         this.kag.setSkip(false);
 
         var array_save = that.getSaveData();
@@ -550,6 +552,7 @@ tyrano.plugin.kag.menu = {
     displayLoad: function (cb) {
         var that = this;
 
+        this.kag.unfocus();
         this.kag.setSkip(false);
 
         var array_save = that.getSaveData();
@@ -1220,6 +1223,7 @@ tyrano.plugin.kag.menu = {
     //バックログ画面表示
     displayLog: function () {
         var that = this;
+        that.kag.unfocus();
         this.kag.setSkip(false);
 
         var j_save = $("<div></div>");
