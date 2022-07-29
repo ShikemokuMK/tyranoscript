@@ -92,8 +92,8 @@ tyrano.plugin.kag.key_mouse = {
             const action = this.map_key[e.key] || this.map_key[e.keyCode];
             const done = this.doAction(action, true);
 
-            // タブキーのデフォルトの動作を無効化
-            if (done && e.keyCode === 9) {
+            // デフォルトの動作を無効化
+            if (done) {
                 return false;
             }
         });
@@ -360,15 +360,15 @@ tyrano.plugin.kag.key_mouse = {
         // キーコンフィグが有効かどうか
         const config_enabled = this.kag.stat.enable_keyconfig;
 
-        // キーコンフィグが無効な場合はアクションをキャンセルする
-        if (!config_enabled) {
-            return false;
-        }
-
         // action が関数ならそのまま実行する
         if (typeof action === "function") {
-            action();
-            return true;
+            // キーコンフィグが有効なときだけ
+            if (config_enabled) {
+                action();
+                return true;
+            } else {
+                return false;
+            }
         }
 
         // action が関数でも文字列でもないならおわり
@@ -381,6 +381,11 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         const { name, pm } = this.kag.parser.makeTag(action, 0);
+
+        // キーコンフィグが無効かつ -a オプションが指定されていないアクションならば実行しない
+        if (!config_enabled && pm["-a"] === undefined) {
+            return false;
+        }
 
         // "next"アクションならフォーカス中のボタンをクリックする、ただしフラグが有効な場合のみ
         if (name === "next" && do_click_button) {
@@ -440,7 +445,11 @@ tyrano.plugin.kag.key_mouse = {
         this._role("load");
     },
     menu() {
-        this._role("menu");
+        if (this.util.isOpenMenu()) {
+            this.close();
+        } else {
+            this._role("menu");
+        }
     },
     title() {
         this._role("title");

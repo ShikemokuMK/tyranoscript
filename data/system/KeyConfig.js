@@ -30,6 +30,20 @@ Ver4.50以降で有効
     close       : メニューを閉じる
     sleepgame   : [sleepgame]を実行する（詳細は後述）
     
+    
+    ★追加のオプション
+    
+    アクション名のあとに半角スペースを開けて "-a" を付け加えて指定すると、
+    そのアクションは always アクションになります。
+    always アクションは、[stop_keyconfig] でキーコンフィグが無効化されているときでも使用できます。
+    
+    (指定例) 
+    
+    key: {
+        32: "focus_next -a",
+        ...
+    
+    
     ★sleepgameについて
     
     キーコンフィグで[sleepgame]を発動することができます。
@@ -191,17 +205,16 @@ var __tyrano_key_config = {
 
     // キーボード操作
     key: {
-        9: "focus_next",   // Tab
-        27: "close",       // Escape
-        32: "hidemessage", // Space
-        13: "next",        // Enter
-        91: "holdskip",    // Command (Mac)
-        17: "holdskip",    // Ctrl (Windows)
-        37: "focus_left",  // ←
-        38: "focus_up",    // ↑
-        39: "focus_right", // →
-        40: "focus_down",  // ↓
-        c: "sleepgame storage=config.ks target=testa",
+        9: "focus_next -a",   // Tab
+        27: "menu",           // Escape
+        32: "hidemessage",    // Space
+        13: "next -a",        // Enter
+        91: "holdskip",       // Command (Mac)
+        17: "holdskip",       // Ctrl (Windows)
+        37: "focus_next -a",  // ←
+        38: "focus_up -a",    // ↑
+        39: "focus_right -a", // →
+        40: "focus_down -a",  // ↓
     },
 
     // マウス操作
@@ -239,8 +252,8 @@ var __tyrano_key_config = {
     // ゲームパッド操作
     gamepad: {
         button: {
-            A: "close",
-            B: "next",
+            A: "close -a",
+            B: "next -a",
             X: "auto",
             Y: "backlog",
             LB: "save",
@@ -252,17 +265,17 @@ var __tyrano_key_config = {
             HOME: "title",
             LS: "",
             RS: "",
-            UP: "focus_up",
-            DOWN: "focus_down",
-            LEFT: "focus_left",
-            RIGHT: "focus_right",
+            UP: "focus_up -a",
+            DOWN: "focus_down -a",
+            LEFT: "focus_left -a",
+            RIGHT: "focus_right -a",
         },
         stick_digital: {
             L: {
-                UP: "focus_up",
-                DOWN: "focus_down",
-                LEFT: "focus_left",
-                RIGHT: "focus_right",
+                UP: "focus_up -a",
+                DOWN: "focus_down -a",
+                LEFT: "focus_left -a",
+                RIGHT: "focus_right -a",
             },
             R: {
                 UP: "scroll_up",
