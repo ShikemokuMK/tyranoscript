@@ -49,6 +49,11 @@
 *backtitle
 [cm]
 [freeimage layer=1]
+
+[iscript]
+tf.flag_replay = false;
+[endscript]
+
 @jump storage=title.ks
 
 *nextpage
