@@ -574,24 +574,26 @@ tyrano.plugin.kag.menu = {
                 j_save.find(".save_list").css("font-family", that.kag.config.userFace);
 
                 j_save.find(".save_display_area").each(function () {
-                    $(this).click(function (e) {
-                        var num = $(this).attr("data-num");
+                    $(this)
+                        .click(function (e) {
+                            var num = $(this).attr("data-num");
 
-                        //セーブデータが存在しない場合
-                        if (array[num]["save_date"] == "") {
-                            return;
-                        }
+                            //セーブデータが存在しない場合
+                            if (array[num]["save_date"] == "") {
+                                return;
+                            }
 
-                        that.snap = null;
-                        that.loadGame(num);
+                            that.snap = null;
+                            that.loadGame(num);
 
-                        var layer_menu = that.kag.layer.getMenuLayer();
-                        layer_menu.hide();
-                        layer_menu.empty();
-                        if (that.kag.stat.visible_menu_button == true) {
-                            $(".button_menu").show();
-                        }
-                    });
+                            var layer_menu = that.kag.layer.getMenuLayer();
+                            layer_menu.hide();
+                            layer_menu.empty();
+                            if (that.kag.stat.visible_menu_button == true) {
+                                $(".button_menu").show();
+                            }
+                        })
+                        .focusable();
                 });
                 that.setMenuScrollEvents(j_save, { target: ".area_save_list", move: 160 });
                 that.setMenu(j_save, cb);

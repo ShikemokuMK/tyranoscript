@@ -90,7 +90,7 @@ tyrano.plugin.kag.key_mouse = {
 
             this.is_keydown = true;
             const action = this.map_key[e.key] || this.map_key[e.keyCode];
-            const done = this.doAction(action, true);
+            const done = this.doAction(action, e);
 
             // デフォルトの動作を無効化
             if (done) {
@@ -131,7 +131,7 @@ tyrano.plugin.kag.key_mouse = {
                 action = this.map_mouse["right"];
             }
 
-            this.doAction(action, false);
+            this.doAction(action, e);
         });
 
         //
@@ -164,7 +164,7 @@ tyrano.plugin.kag.key_mouse = {
                 action = this.map_mouse["wheel_up"];
             }
 
-            this.doAction(action, false);
+            this.doAction(action, e);
         });
 
         // イベントレイヤ
@@ -184,7 +184,7 @@ tyrano.plugin.kag.key_mouse = {
                     this.is_swipe = true;
                     const action_key = "swipe_" + direction + "_" + fingerCount;
                     const action = this.map_ges[action_key].action;
-                    this.doAction(action, false);
+                    this.doAction(action, event);
                     event.stopPropagation();
                     event.preventDefault();
                     return false;
@@ -197,12 +197,12 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             layer_obj_click
-                .on("touchstart", () => {
+                .on("touchstart", (e) => {
                     // スキップ中にクリックされたら元に戻す
                     this.clearSkip();
                     this.hold_timer_id = setTimeout(() => {
                         const action = this.map_ges.hold.action;
-                        const done = this.doAction(action);
+                        const done = this.doAction(action, e);
                         if (done) {
                             this.is_swipe = true;
                         }
@@ -315,7 +315,7 @@ tyrano.plugin.kag.key_mouse = {
 
             const action = this.map_pad.button[e.detail.button_name] || this.map_pad.button[e.detail.button_index];
 
-            this.doAction(action, true);
+            this.doAction(action, e);
         });
 
         //
@@ -345,7 +345,7 @@ tyrano.plugin.kag.key_mouse = {
 
             if (map) {
                 const action = map[e.detail.direction];
-                this.doAction(action, true);
+                this.doAction(action, e);
             }
         });
     },
@@ -353,10 +353,10 @@ tyrano.plugin.kag.key_mouse = {
     /**
      * アクションを実行する
      * @param {function|string} action アクション名あるいは関数
-     * @param {boolean} do_click_button "next"アクションでフォーカス中のボタンをクリックするかどうか
+     * @param {Event} event イベント
      * @returns {boolean} アクションを実行できたかどうか
      */
-    doAction(action, do_click_button) {
+    doAction(action, event) {
         // キーコンフィグが有効かどうか
         const config_enabled = this.kag.stat.enable_keyconfig;
 
@@ -387,13 +387,23 @@ tyrano.plugin.kag.key_mouse = {
             return false;
         }
 
-        // "next"アクションならフォーカス中のボタンをクリックする、ただしフラグが有効な場合のみ
-        if (name === "next" && do_click_button) {
+        // キー操作, ゲームパッド操作ならば true
+        const is_key_or_gamepad = event.type === "keydown" || event.type === "gamepadpressdown" || event.type === "gamepadstickdigital";
+
+        // "next"アクションならフォーカス中のボタンをクリックする
+        // ただしキー操作かゲームパッド操作のみ
+        if (name === "next" && is_key_or_gamepad) {
             const j_focus = $(":focus.keyfocus");
             if (j_focus.length > 0) {
                 j_focus.eq(0).trigger("click");
                 return true;
             }
+        }
+
+        // ホールド連打かつ -h オプションが指定されていないアクションならば実行しない
+        const is_hold_mash = event.detail && event.detail.is_hold_mash;
+        if (is_hold_mash && pm["-h"] === undefined) {
+            return false;
         }
 
         // アクションを実行
@@ -514,12 +524,15 @@ tyrano.plugin.kag.key_mouse = {
         findFocusable() {
             let j_buttons;
             if (this.isOpenRemodal()) {
-                j_buttons = $(".remodal-wrapper").find("[tabindex]");
+                j_buttons = $(".remodal-wrapper").find("[tabindex].tyrano-focusable");
             } else if (this.isOpenMenu()) {
                 j_buttons = $(".layer_menu").find("[tabindex].tyrano-focusable");
             } else {
                 j_buttons = $("[tabindex].tyrano-focusable");
             }
+            j_buttons = j_buttons.filter(function () {
+                return $(this).css("display") !== "none";
+            });
             if (j_buttons.length <= 1) {
                 return j_buttons;
             }
@@ -1084,6 +1097,9 @@ tyrano.plugin.kag.key_mouse = {
         // 何ミリ秒ごとにゲームパッドの入力状態を取得するか
         UPDATE_TIMEOUT: 50,
 
+        // 押しっぱなしにしたときに何フレームごとに連打をトリガーするか
+        HOLD_MASH_INTERVAL: 1,
+
         /**
          * ゲームパッドの入力状態のスナップショットを確認する
          * 前回確認時の Gamepad と照合して「ボタンが押された瞬間」を検知する
@@ -1137,12 +1153,18 @@ tyrano.plugin.kag.key_mouse = {
                             continue;
                         }
                         const sum = Math.abs(x) + Math.abs(y);
+                        const digital_buttons = [
+                            { pressed: false, hold_frame: 0 },
+                            { pressed: false, hold_frame: 0 },
+                            { pressed: false, hold_frame: 0 },
+                            { pressed: false, hold_frame: 0 },
+                        ];
                         if (sum < this.MINIMAM_VALUE_DETECT_AXE) {
                             stick = {
                                 radian: 0,
                                 degree: 0,
                                 distance: 0,
-                                digital_buttons: [false, false, false, false],
+                                digital_buttons,
                             };
                         } else {
                             let radian = Math.atan2(-y, x);
@@ -1150,11 +1172,10 @@ tyrano.plugin.kag.key_mouse = {
                             const degree = radian * (180 / Math.PI);
                             const distance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
                             const radian_rotate = radian + Math.PI / 4;
-                            const digital_buttons = [false, false, false, false];
                             const digital_button_index = Math.floor((2 * radian_rotate) / Math.PI) % 4;
                             const is_over_threshold = distance > this.MINIMAM_VALUE_DIGITAL_STICK;
                             if (is_over_threshold) {
-                                digital_buttons[digital_button_index] = true;
+                                digital_buttons[digital_button_index].pressed = true;
                             }
                             stick = {
                                 radian,
@@ -1200,9 +1221,32 @@ tyrano.plugin.kag.key_mouse = {
                                     button_index: bi,
                                     gamepad,
                                     gamepad_index: gi,
+                                    is_hold_mash: false,
                                 },
                             });
                             document.dispatchEvent(event);
+                            button.hold_frame = 0;
+                        } else if (button.pressed) {
+                            button.hold_frame = (prev_button.hold_frame || 0) + 1;
+                            if (button.hold_frame % this.HOLD_MASH_INTERVAL === 0) {
+                                let button_name = "";
+                                const lang = this.keymap_lang[gamepad.mapping] || this.keymap_lang.standard;
+                                if (lang) {
+                                    button_name = lang.buttons[bi] || "";
+                                }
+                                const event_name = "gamepadpressdown";
+                                const event = new CustomEvent(event_name, {
+                                    detail: {
+                                        button,
+                                        button_name,
+                                        button_index: bi,
+                                        gamepad,
+                                        gamepad_index: gi,
+                                        is_hold_mash: true,
+                                    },
+                                });
+                                document.dispatchEvent(event);
+                            }
                         }
                         if (is_changed) {
                             is_changed_inputs = is_changed;
@@ -1217,19 +1261,41 @@ tyrano.plugin.kag.key_mouse = {
                         const prev_stick = prev_gamepad.__sticks[si];
                         stick.digital_buttons.forEach((button, bi) => {
                             const prev_button = prev_stick.digital_buttons[bi];
-                            if (button && !prev_button) {
-                                const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
-                                const stick_name = ["L", "R"][si] || "";
-                                const event = new CustomEvent("gamepadstickdigital", {
-                                    detail: {
-                                        direction,
-                                        stick_name,
-                                        stick_index: si,
-                                        gamepad,
-                                        gamepad_index: gi,
-                                    },
-                                });
-                                document.dispatchEvent(event);
+                            if (button.pressed) {
+                                if (prev_button.pressed) {
+                                    button.hold_frame = prev_button.hold_frame + 1;
+                                    if (button.hold_frame % this.HOLD_MASH_INTERVAL === 0) {
+                                        const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
+                                        const stick_name = ["L", "R"][si] || "";
+                                        const event = new CustomEvent("gamepadstickdigital", {
+                                            detail: {
+                                                direction,
+                                                stick_name,
+                                                stick_index: si,
+                                                gamepad,
+                                                gamepad_index: gi,
+                                                is_hold_mash: true,
+                                            },
+                                        });
+                                        document.dispatchEvent(event);
+                                    }
+                                } else {
+                                    const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
+                                    const stick_name = ["L", "R"][si] || "";
+                                    const event = new CustomEvent("gamepadstickdigital", {
+                                        detail: {
+                                            direction,
+                                            stick_name,
+                                            stick_index: si,
+                                            gamepad,
+                                            gamepad_index: gi,
+                                            is_hold_mash: false,
+                                        },
+                                    });
+                                    document.dispatchEvent(event);
+                                }
+                            } else {
+                                button.hold_frame = 0;
                             }
                         });
                     });

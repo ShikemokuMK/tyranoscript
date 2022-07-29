@@ -31,17 +31,25 @@ Ver4.50以降で有効
     sleepgame   : [sleepgame]を実行する（詳細は後述）
     
     
-    ★追加のオプション
+    ★ -a オプション
     
-    アクション名のあとに半角スペースを開けて "-a" を付け加えて指定すると、
+    アクション名のあとに半角スペースを空けて "-a" を付け加えて指定すると、
     そのアクションは always アクションになります。
     always アクションは、[stop_keyconfig] でキーコンフィグが無効化されているときでも使用できます。
     
     (指定例) 
     
-    key: {
-        32: "focus_next -a",
-        ...
+    32: "focus_next -a",
+    
+    
+    ★ -h オプション
+    
+    ゲームパッドのみ有効。-h オプションを付けることで hold アクションとなります。
+    ボタンが長押しされたときに連打として扱い、連続してアクションを実行するようになります。
+    
+    (指定例) 
+    
+    UP: "scroll_up -h",
     
     
     ★sleepgameについて
@@ -60,11 +68,9 @@ Ver4.50以降で有効
     
     (指定例) 
     
-    key: {
-        32: function () {
-            alert("Hello!")
-        },
-        ...
+    32: function () {
+        alert("Hello!")
+    },
     
 <キーボード操作の指定方法> 
     
@@ -278,8 +284,8 @@ var __tyrano_key_config = {
                 RIGHT: "focus_right -a",
             },
             R: {
-                UP: "scroll_up",
-                DOWN: "scroll_down",
+                UP: "scroll_up -h",
+                DOWN: "scroll_down -h",
                 LEFT: "",
                 RIGHT: "",
             },
