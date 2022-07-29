@@ -163,8 +163,8 @@ tyrano.plugin.kag.layer = {
 
         this.kag.stat.is_hide_message = true;
 
-        // ティラノイベント"messagewindow:hide"を発火
-        this.kag.trigger("messagewindow:hide");
+        // ティラノイベント"messagewindow-hide"を発火
+        this.kag.trigger("messagewindow-hide");
 
         var num_message_layer = parseInt(this.kag.config.numMessageLayers);
 
@@ -180,8 +180,8 @@ tyrano.plugin.kag.layer = {
     showMessageLayers: function () {
         this.kag.stat.is_hide_message = false;
 
-        // ティラノイベント"messagewindow:show"を発火
-        this.kag.trigger("messagewindow:show");
+        // ティラノイベント"messagewindow-show"を発火
+        this.kag.trigger("messagewindow-show");
 
         var num_message_layer = parseInt(this.kag.config.numMessageLayers);
 

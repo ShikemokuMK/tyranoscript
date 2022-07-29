@@ -209,8 +209,8 @@ tyrano.plugin.kag.menu = {
                 array_save.data[num] = data;
                 $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
-                // ティラノイベント"storage:save"を発火
-                that.kag.trigger("storage:save");
+                // ティラノイベント"storage-save"を発火
+                that.kag.trigger("storage-save");
 
                 if (typeof cb == "function") {
                     //終わったタイミングでコールバックを返す
@@ -223,8 +223,8 @@ tyrano.plugin.kag.menu = {
             array_save.data[num] = data;
             $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
-            // ティラノイベント"storage:save"を発火
-            that.kag.trigger("storage:save");
+            // ティラノイベント"storage-save"を発火
+            that.kag.trigger("storage-save");
 
             if (typeof cb == "function") {
                 //終わったタイミングでコールバックを返す
@@ -243,8 +243,8 @@ tyrano.plugin.kag.menu = {
             data.save_date = $.getNowDate() + "　" + $.getNowTime();
             $.setStorage(that.kag.config.projectID + "_tyrano_quick_save", data, that.kag.config.configSave);
 
-            // ティラノイベント"storage:quicksave"を発火
-            that.kag.trigger("storage:quicksave");
+            // ティラノイベント"storage-quicksave"を発火
+            that.kag.trigger("storage-quicksave");
 
             var layer_menu = that.kag.layer.getMenuLayer();
             layer_menu.hide();
@@ -269,8 +269,8 @@ tyrano.plugin.kag.menu = {
         data.save_date = $.getNowDate() + "　" + $.getNowTime();
         $.setStorage(this.kag.config.projectID + "_tyrano_auto_save", data, this.kag.config.configSave);
 
-        // ティラノイベント"storage:autosave"を発火
-        this.kag.trigger("storage:autosave");
+        // ティラノイベント"storage-autosave"を発火
+        this.kag.trigger("storage-autosave");
 
         var layer_menu = this.kag.layer.getMenuLayer();
         layer_menu.hide();
@@ -291,8 +291,8 @@ tyrano.plugin.kag.menu = {
 
     //セーブ状態のスナップを保存します。
     snapSave: function (title, call_back, flag_thumb) {
-        // ティラノイベント"snapsave:start"を発火
-        this.kag.trigger("snapsave:start");
+        // ティラノイベント"snapsave-start"を発火
+        this.kag.trigger("snapsave-start");
 
         var that = this;
 
@@ -351,8 +351,8 @@ tyrano.plugin.kag.menu = {
             if (call_back) {
                 call_back();
 
-                // ティラノイベント"snapsave:complete"を発火
-                that.kag.trigger("snapsave:complete");
+                // ティラノイベント"snapsave-complete"を発火
+                that.kag.trigger("snapsave-complete");
             }
         } else {
             //
@@ -385,8 +385,8 @@ tyrano.plugin.kag.menu = {
                     if (call_back) {
                         call_back();
 
-                        // ティラノイベント"snapsave:complete"を発火
-                        that.kag.trigger("snapsave:complete");
+                        // ティラノイベント"snapsave-complete"を発火
+                        that.kag.trigger("snapsave-complete");
                     }
                 };
 
@@ -692,8 +692,8 @@ tyrano.plugin.kag.menu = {
     loadGameData: function (data, options) {
         const that = this;
 
-        // ティラノイベント"load:start"を発火
-        this.kag.trigger("load:start");
+        // ティラノイベント"load-start"を発火
+        this.kag.trigger("load-start");
 
         // 一時リスナをすべて消去
         this.kag.offTempListeners();
@@ -1004,8 +1004,8 @@ tyrano.plugin.kag.menu = {
         // 復元完了
         // make.ksを通過してからもとのシナリオファイル＋タグインデックスに戻る処理
         const next = () => {
-            // ティラノイベント"load:complete"を発火
-            this.kag.trigger("load:complete");
+            // ティラノイベント"load-complete"を発火
+            this.kag.trigger("load-complete");
 
             // make.ks を挿入する
             const insert = {
@@ -1185,8 +1185,8 @@ tyrano.plugin.kag.menu = {
                 //セーブ上書き
                 $.setStorage(this.kag.config.projectID + "_tyrano_data", save_obj, this.kag.config.configSave);
 
-                // ティラノイベント"storage:save"を発火
-                this.kag.trigger("storage:save");
+                // ティラノイベント"storage-save"を発火
+                this.kag.trigger("storage-save");
             }
 
             return save_obj;

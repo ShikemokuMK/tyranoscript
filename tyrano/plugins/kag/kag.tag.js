@@ -345,14 +345,14 @@ tyrano.plugin.kag.ftag = {
                 this.kag.error(err_str);
             } else {
                 tag.pm["_tag"] = tag.name;
-                // ティラノイベント"tag:<tagName>"を発火
-                this.kag.trigger(`tag:${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: false });
+                // ティラノイベント"tag-<tagName>"を発火
+                this.kag.trigger(`tag-${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: false });
                 this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
             }
         } else if (this.kag.stat.map_macro[tag.name]) {
             // マクロの場合
-            // ティラノイベント"tag:<tagName>"を発火
-            this.kag.trigger(`tag:${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: true });
+            // ティラノイベント"tag-<tagName>"を発火
+            this.kag.trigger(`tag-${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: true });
 
             // マクロスタックを取得してみる
             var stack = TYRANO.kag.getStack("macro");
@@ -562,8 +562,8 @@ tyrano.plugin.kag.ftag = {
             pm = {};
         }
 
-        // ティラノイベント"tag:<tagName>"を発火
-        TYRANO.kag.trigger(`tag:${name}`, { target: pm, is_next_order: false, is_macro: false });
+        // ティラノイベント"tag-<tagName>"を発火
+        TYRANO.kag.trigger(`tag-${name}`, { target: pm, is_next_order: false, is_macro: false });
 
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
@@ -738,8 +738,8 @@ tyrano.plugin.kag.tag.text = {
             return;
         }
 
-        // ティラノイベント"tag:text:message"を発火
-        this.kag.trigger("tag:text:message", { target: pm });
+        // ティラノイベント"tag-text-message"を発火
+        this.kag.trigger("tag-text-message", { target: pm });
 
         // メッセージレイヤのアウターとインナーを取得
         // div.messageX_fore
@@ -1699,13 +1699,13 @@ tyrano.plugin.kag.tag.text = {
             // 次のタグ ([text]か[l]か[p]か[font]か…etc) には進ませない
             // 次にユーザーがメッセージウィンドウを表示したときに一度だけ nextOrder を走らせる
             this.kag.once(
-                "messagewindow:show",
+                "messagewindow-show",
                 () => {
                     this.kag.ftag.nextOrder();
                 },
                 {
-                    is_temp: true, // これはセーブデータロード時に削除すべきリスナ
-                    is_system: true, // これはシステムが利用するリスナ
+                    temp: true, // これはセーブデータロード時に削除すべきリスナ
+                    system: true, // これはシステムが利用するリスナ
                 },
             );
         } else {
@@ -4151,8 +4151,8 @@ tyrano.plugin.kag.tag.link = {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
-            // ティラノイベント"click:tag:link"を発火
-            that.kag.trigger("click:tag:link", e);
+            // ティラノイベント"click-tag-link"を発火
+            that.kag.trigger("click-tag-link", e);
 
             that.kag.stat.display_link = false;
 
@@ -5957,8 +5957,8 @@ tyrano.plugin.kag.tag.button = {
             //
 
             if (is_jump_button) {
-                // ティラノイベント"click:tag:button"を発火
-                that.kag.trigger("click:tag:button", e);
+                // ティラノイベント"click-tag-button"を発火
+                that.kag.trigger("click-tag-button", e);
 
                 // [jump]を実行
                 that.kag.ftag.startTag("jump", pm);
@@ -5978,8 +5978,8 @@ tyrano.plugin.kag.tag.button = {
             //
 
             if (is_call_button) {
-                // ティラノイベント"click:tag:button:call"を発火
-                that.kag.trigger("click:tag:button:call", e);
+                // ティラノイベント"click-tag-button-call"を発火
+                that.kag.trigger("click-tag-button-call", e);
 
                 // [call]を実行
                 that.kag.ftag.startTag("call", {
@@ -6003,8 +6003,8 @@ tyrano.plugin.kag.tag.button = {
             //
 
             if (is_role_button) {
-                // ティラノイベント"click:tag:button:role"を発火
-                that.kag.trigger("click:tag:button:role", e);
+                // ティラノイベント"click-tag-button-role"を発火
+                that.kag.trigger("click-tag-button-role", e);
 
                 // スキップを停止
                 that.kag.setSkip(false);
@@ -6493,8 +6493,8 @@ tyrano.plugin.kag.tag.glink = {
             // 画像変更
             if (pm.clickimg) j_button.css("background-image", "url(./data/image/" + pm.clickimg + ")");
 
-            // ティラノイベント"click:tag:glink"を発火
-            this.kag.trigger("click:tag:glink", e);
+            // ティラノイベント"click-tag-glink"を発火
+            this.kag.trigger("click-tag-glink", e);
 
             // クリック効果音を鳴らす
             if (pm.clickse) this.kag.playSound(pm.clickse);
@@ -6804,8 +6804,8 @@ tyrano.plugin.kag.tag.clickable = {
             // 他の[clickable]を即座に無効にするためにストロングストップを切る
             this.kag.stat.is_strong_stop = false;
 
-            // ティラノイベント"click:tag:clickable"を発火
-            that.kag.trigger("click:tag:clickable", e);
+            // ティラノイベント"click-tag-clickable"を発火
+            that.kag.trigger("click-tag-clickable", e);
 
             // [cm]の実行
             this.kag.ftag.startTag("cm", { next: "false" });

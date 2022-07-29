@@ -600,8 +600,8 @@ tyrano.plugin.kag = {
     saveSystemVariable: function () {
         $.setStorage(this.kag.config.projectID + "_sf", this.variable.sf, this.kag.config.configSave);
 
-        // ティラノイベント"storage:sf"を発火
-        this.kag.trigger("storage:sf");
+        // ティラノイベント"storage-sf"を発火
+        this.kag.trigger("storage-sf");
     },
 
     //すべての変数クリア
@@ -997,11 +997,11 @@ tyrano.plugin.kag = {
                 false;
 
             if (is_full_screen) {
-                // ティラノイベント"fullscreen:start"を発火
-                this.kag.trigger("fullscreen:start", e);
+                // ティラノイベント"fullscreen-start"を発火
+                this.kag.trigger("fullscreen-start", e);
             } else {
-                // ティラノイベント"fullscreen:stop"を発火
-                this.kag.trigger("fullscreen:stop", e);
+                // ティラノイベント"fullscreen-stop"を発火
+                this.kag.trigger("fullscreen-stop", e);
             }
         });
 
@@ -2001,11 +2001,11 @@ tyrano.plugin.kag = {
             return;
         }
         if (bool) {
-            // ティラノイベント"auto:start"を発火
-            this.trigger("auto:start");
+            // ティラノイベント"auto-start"を発火
+            this.trigger("auto-start");
         } else {
-            // ティラノイベント"auto:stop"を発火
-            this.trigger("auto:stop");
+            // ティラノイベント"auto-stop"を発火
+            this.trigger("auto-stop");
         }
         this.stat.is_auto = bool;
     },
@@ -2019,11 +2019,11 @@ tyrano.plugin.kag = {
             return;
         }
         if (bool) {
-            // ティラノイベント"skip:start"を発火
-            this.trigger("skip:start");
+            // ティラノイベント"skip-start"を発火
+            this.trigger("skip-start");
         } else {
-            // ティラノイベント"skip:stop"を発火
-            this.trigger("skip:stop");
+            // ティラノイベント"skip-stop"を発火
+            this.trigger("skip-stop");
         }
         this.stat.is_skip = bool;
     },
@@ -2106,7 +2106,7 @@ tyrano.plugin.kag = {
                 callback_return_value = listener.callback.call(this, event_obj);
             }
             // このリスナがonceリスナなら記憶しておく
-            if (listener.is_once) {
+            if (listener.once) {
                 exists_once = true;
                 unbind_target_ids.push(listener.id);
             }
@@ -2142,9 +2142,9 @@ tyrano.plugin.kag = {
      *   コールバック内で return false するとイベントリスナの呼び出しを中断する
      *   それ以降のイベントリスナは呼び出されない(onceの削除もされない)
      * @param {Object} options
-     * @param {boolean} options.is_once イベントリスナを1回実行したら削除すべきならtrue
-     * @param {boolean} options.is_system (ユーザーが独自に追加したのではなく)システムが利用しているリスナならtrue
-     * @param {boolean} options.is_temp セーブデータロード時に削除すべきならtrue
+     * @param {boolean} options.once イベントリスナを1回実行したら削除すべきならtrue
+     * @param {boolean} options.system (ユーザーが独自に追加したのではなく)システムが利用しているリスナならtrue
+     * @param {boolean} options.temp セーブデータロード時に削除すべきならtrue
      * @param {number} options.priority　優先度。これが「高い」ほうから順に実行される。デフォルトは0
      */
     on: function (event_names, callback, options = {}) {
@@ -2155,7 +2155,7 @@ tyrano.plugin.kag = {
         for (const event_name of event_name_hash) {
             // 例) "save.hoge.fuga"
             const dot_hash = event_name.split("."); // ["save", "hoge", "fuga"]
-            const event = dot_hash[0]; // "save"
+            const event = dot_hash[0].replace(/:/g, "-"); // "save"
             const namespaces = dot_hash.slice(1); // ["hoge", "fuga"]
             if (event !== "") {
                 if (map[event] === undefined) {
@@ -2166,9 +2166,9 @@ tyrano.plugin.kag = {
                     callback: callback,
                     namespaces: namespaces,
                     priority: options.priority || 0,
-                    is_once: !!options.is_once || false,
-                    is_system: options.is_system || false,
-                    is_temp: options.is_temp || false,
+                    once: !!options.once || false,
+                    system: options.system || false,
+                    temp: options.temp || false,
                 };
                 map[event].push(listener);
                 this.event_listener_count += 1;
@@ -2179,13 +2179,13 @@ tyrano.plugin.kag = {
     },
     /**
      * on メソッドのラッパー
-     * is_once オプションを true で上書きしたうえで on メソッドに投げる
+     * once オプションを true で上書きしたうえで on メソッドに投げる
      * @param {string} event_names
      * @param {function} callback
      * @param {ListenerOption} options
      */
     once: function (event_names, callback, options = {}) {
-        options.is_once = true;
+        options.once = true;
         this.on(event_names, callback, options);
     },
 
@@ -2216,7 +2216,7 @@ tyrano.plugin.kag = {
      *   ドット区切りで名前空間を複数指定可能 指定したすべての名前空間を持つリスナだけを削除できる
      *   いきなりドットで書き始めることで削除対象のリスナを"名前空間だけ"で指定することも可能
      * @param {Object} options
-     * @param {boolean} options.off_system システムリスナを除去するかどうか
+     * @param {boolean} options.system システムリスナを除去するかどうか
      */
     off: function (event_names, options = {}) {
         const map = this.event_listener_map;
@@ -2262,10 +2262,10 @@ tyrano.plugin.kag = {
                         }
 
                         // システムリスナの場合、基本生き残り確定だが、
-                        if (listener.is_system) {
+                        if (listener.system) {
                             should_keep = true;
                             // システムリスナすら除去するオプションが指定されているようならやっぱり殺す
-                            if (options.off_system) {
+                            if (options.system) {
                                 should_keep = false;
                             }
                         }
@@ -2290,7 +2290,7 @@ tyrano.plugin.kag = {
         for (const event in map) {
             if (map[event]) {
                 map[event] = map[event].filter((listener) => {
-                    return !listener.is_temp;
+                    return !listener.temp;
                 });
             }
         }

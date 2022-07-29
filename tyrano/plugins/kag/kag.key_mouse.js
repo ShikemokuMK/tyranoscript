@@ -233,8 +233,8 @@ tyrano.plugin.kag.key_mouse = {
             // ブラウザの音声の再生制限を解除
             if (!this.kag.tmp.ready_audio) this.kag.readyAudio();
 
-            // ティラノイベント"click:event"を発火
-            this.kag.trigger("click:event", e);
+            // ティラノイベント"click-event"を発火
+            this.kag.trigger("click-event", e);
 
             //
             // 無視するケースを洗い出す
@@ -280,8 +280,8 @@ tyrano.plugin.kag.key_mouse = {
             // クリック待ちグリフは消去
             this.kag.ftag.hideNextImg();
 
-            // ティラノイベント"click:next"を発火
-            this.kag.trigger("click:next", e);
+            // ティラノイベント"click-next"を発火
+            this.kag.trigger("click-next", e);
 
             // 次のタグへ
             this.kag.ftag.nextOrder();
@@ -321,8 +321,8 @@ tyrano.plugin.kag.key_mouse = {
         $(document).on("gamepadpressdown", (e) => {
             // console.warn(e.detail);
 
-            // ティラノイベント"gamepad:pressdown"を発火
-            this.kag.trigger("gamepad:pressdown", e);
+            // ティラノイベント"gamepad-pressdown"を発火
+            this.kag.trigger("gamepad-pressdown", e);
 
             const action = this.map_pad.button[e.detail.button_name] || this.map_pad.button[e.detail.button_index];
 
@@ -334,8 +334,8 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         $(document).on("gamepadpressup", (e) => {
-            // ティラノイベント"gamepad:pressup"を発火
-            this.kag.trigger("gamepad:pressup", e);
+            // ティラノイベント"gamepad-pressup"を発火
+            this.kag.trigger("gamepad-pressup", e);
 
             const action = this.map_pad.button[e.detail.button_name] || this.map_pad.button[e.detail.button_index];
 
@@ -349,8 +349,8 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         $(document).on("gamepadstickdigital", (e) => {
-            // ティラノイベント"gamepad:stick:digital"を発火
-            this.kag.trigger("gamepad:stick:digital", e);
+            // ティラノイベント"gamepad-stick-digital"を発火
+            this.kag.trigger("gamepad-stick-digital", e);
 
             const map = this.map_pad.stick_digital[e.detail.stick_name] || this.map_pad.stick_digital[e.detail.stick_index];
 
