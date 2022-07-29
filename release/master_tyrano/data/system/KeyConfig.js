@@ -25,6 +25,8 @@ Ver4.50以降で有効
     focus_down  : ボタンのフォーカスを下に移動する
     focus_left  : ボタンのフォーカスを左に移動する
     focus_right : ボタンのフォーカスを右に移動する
+    scroll_up   : 上にスクロール
+    scroll_down : 下にスクロール
     close       : メニューを閉じる
     sleepgame   : [sleepgame]を実行する（詳細は後述）
     
@@ -190,6 +192,7 @@ var __tyrano_key_config = {
     // キーボード操作
     key: {
         9: "focus_next",   // Tab
+        27: "close",       // Escape
         32: "hidemessage", // Space
         13: "next",        // Enter
         91: "holdskip",    // Command (Mac)
@@ -262,10 +265,10 @@ var __tyrano_key_config = {
                 RIGHT: "focus_right",
             },
             R: {
-                UP: "focus_up",
-                DOWN: "focus_down",
-                LEFT: "focus_left",
-                RIGHT: "focus_right",
+                UP: "scroll_up",
+                DOWN: "scroll_down",
+                LEFT: "",
+                RIGHT: "",
             },
         },
     },

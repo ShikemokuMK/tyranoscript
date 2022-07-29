@@ -2517,14 +2517,14 @@ tyrano.plugin.kag = {
      * あるjQueryオブジェクト（ボタン類）をキーボードでフォーカス可能にする
      * @param {jQuery} j_elm
      */
-    makeFocusable: function (j_elm) {
+    makeFocusable: function (j_elm, tabindex = 0) {
         // キーフォーカスが無効なら帰る
         if (this.config["useKeyFocus"] === "false") {
             return;
         }
-
-        j_elm.attr("tabindex", "0");
+        j_elm.attr("tabindex", tabindex);
         j_elm.addClass("tyrano-focusable");
+        j_elm.off("focusin focusout");
         j_elm.on("focusin", () => {
             if (this.config["keyFocusWithHoverStyle"] === "true") {
                 j_elm.trigger("mouseenter");
@@ -2536,6 +2536,20 @@ tyrano.plugin.kag = {
             }
             j_elm.removeClass("keyfocus");
         });
+    },
+
+    /**
+     * あるjQueryオブジェクト（ボタン類）をキーボードでフォーカス不可能にする
+     * @param {jQuery} j_elm
+     */
+    makeUnfocusable: function (j_elm, tabindex = 0) {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+        j_elm.removeAttr("tabindex");
+        j_elm.removeClass("tyrano-focusable");
+        j_elm.off("focusin focusout");
     },
 
     /**

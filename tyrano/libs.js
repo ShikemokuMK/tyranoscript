@@ -1087,8 +1087,8 @@
     $.alert = function (str, cb) {
         $(".remodal_title").html(str);
 
-        $(".remodal").find(".remodal-cancel").hide();
-        $(".remodal").find(".remodal-confirm").show();
+        $(".remodal").find(".remodal-cancel").hide().unfocusable();
+        $(".remodal").find(".remodal-confirm").show().focusable();
 
         var inst = $("[data-remodal-id=modal]").remodal();
         inst.open();
@@ -1124,8 +1124,8 @@
     $.confirm = function (str, cb_ok, cb_cancel) {
         $(".remodal_title").html(str);
 
-        $(".remodal").find(".remodal-cancel").show();
-        $(".remodal").find(".remodal-confirm").show();
+        $(".remodal").find(".remodal-cancel").show().focusable();
+        $(".remodal").find(".remodal-confirm").show().focusable();
 
         var inst = $("[data-remodal-id=modal]").remodal();
         inst.open();
@@ -2046,6 +2046,26 @@
             return 1;
         }
         return Math.max(0, Math.min(1, vol_str / 100));
+    };
+
+    /**
+     * フォーカス可能にする
+     * @param {number} tabindex
+     * @return {jQuery}
+     */
+    $.fn.focusable = function (tabindex = 0) {
+        TYRANO.kag.makeFocusable(this, tabindex);
+        return this;
+    };
+
+    /**
+     * フォーカス不可能にする
+     * @param {number} tabindex
+     * @return {jQuery}
+     */
+    $.fn.unfocusable = function (tabindex = 0) {
+        TYRANO.kag.makeUnfocusable(this, tabindex);
+        return this;
     };
 })(jQuery);
 

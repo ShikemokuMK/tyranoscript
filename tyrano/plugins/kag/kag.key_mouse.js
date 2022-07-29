@@ -482,11 +482,33 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     close() {
-        $(".menu_close").click();
+        if (!this.util.isOpenRemodal()) {
+            $(".menu_close").click();
+        }
+    },
+
+    scroll_up() {
+        $(".button_arrow_up").click();
+    },
+
+    scroll_down() {
+        $(".button_arrow_down").click();
     },
 
     util: {
+        isOpenRemodal() {
+            return $(".remodal-wrapper").hasClass("remodal-is-opened");
+        },
+        isOpenMenu() {
+            return $(".layer_menu").css("display") !== "none";
+        },
         findFocusable() {
+            if (this.isOpenRemodal()) {
+                return $(".remodal-wrapper").find("[tabindex]");
+            }
+            if (this.isOpenMenu()) {
+                return $(".layer_menu").find("[tabindex].tyrano-focusable");
+            }
             return $("[tabindex].tyrano-focusable");
         },
         focus(j_elm) {
@@ -534,7 +556,8 @@ tyrano.plugin.kag.key_mouse = {
         // j_focusable の先頭または末尾をフォーカスして帰る
         if (j_focused.length === 0) {
             // next なら先頭を、prev なら末尾をフォーカスする
-            const index = order === "next" ? 0 : j_focusable.length - 1;
+            // const index = order === "next" ? 0 : j_focusable.length - 1;
+            const index = 0;
             this.util.focus(j_focusable.eq(index));
             return;
         }
@@ -655,9 +678,8 @@ tyrano.plugin.kag.key_mouse = {
         // いまフォーカスが当たっている要素がない場合は新規フォーカスとなる
         // 下キーなら一番下の要素を、上キーなら一番上の要素を、という感じで1つ選んでフォーカスしておわり
         if (!focused_pos) {
-            const index = is_plus ? pos_list.length - 1 : 0;
-            console.log(pos_list);
-            console.log(index);
+            // const index = is_plus ? pos_list.length - 1 : 0;
+            const index = 0;
             this.util.focus(pos_list[index].j_elm);
             return;
         }
