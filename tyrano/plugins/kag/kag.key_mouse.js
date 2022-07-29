@@ -287,6 +287,15 @@ tyrano.plugin.kag.key_mouse = {
             this.kag.ftag.nextOrder();
         });
 
+        if (this.kag.config["useGamepad"] === "true") {
+            this.initGamepadEvents();
+        }
+    },
+
+    /**
+     * ゲームパッド系のイベントを初期化する
+     */
+    initGamepadEvents() {
         //
         // ページを開いてからゲームパッドの入力を最初に検知した瞬間に発火されるイベントリスナ
         //
