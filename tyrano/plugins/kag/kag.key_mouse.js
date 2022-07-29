@@ -556,22 +556,18 @@ tyrano.plugin.kag.key_mouse = {
             }
             const arr = [];
             j_buttons.each((i, elm) => {
-                arr.push({
-                    i,
-                    elm,
-                    tabindex: parseInt($(elm).attr("tabindex")) || 0,
-                });
+                elm.__i = i;
+                elm.__tabindex = parseInt($(elm).attr("tabindex")) || 0;
+                arr.push(elm);
             });
             arr.sort((a, b) => {
-                if (a.tabindex < b.tabindex) return -1;
-                else if (a.tabindex > b.tabindex) return 1;
+                if (a.__tabindex < b.__tabindex) return -1;
+                else if (a.__tabindex > b.__tabindex) return 1;
                 else {
-                    return a.i < b.i ? -1 : 1;
+                    return a.__i < b.__i ? -1 : 1;
                 }
             });
-            const j_buttons_sorted = arr.reduce((prev, item) => {
-                return prev.add(item.elm);
-            }, $());
+            const j_buttons_sorted = $(arr);
             return j_buttons_sorted;
         },
         focus(j_elm) {
