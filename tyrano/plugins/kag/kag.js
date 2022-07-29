@@ -2549,7 +2549,7 @@ tyrano.plugin.kag = {
      * あるjQueryオブジェクト（ボタン類）をキーボードでフォーカス不可能にする
      * @param {jQuery} j_elm
      */
-    makeUnfocusable: function (j_elm, tabindex = 0) {
+    makeUnfocusable: function (j_elm) {
         // キーフォーカスが無効なら帰る
         if (this.config["useKeyFocus"] === "false") {
             return;
@@ -2557,6 +2557,18 @@ tyrano.plugin.kag = {
         j_elm.removeAttr("tabindex");
         j_elm.removeClass("tyrano-focusable");
         j_elm.off("focusin focusout");
+    },
+
+    /**
+     * あるjQueryオブジェクトに含まれるすべてのボタン類をフォーカス不可能にする
+     * @param {jQuery} j_elm
+     */
+    makeUnfocusableAll: function (j_elm) {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+        this.makeUnfocusable(j_elm.find("[tabindex]"));
     },
 
     /**

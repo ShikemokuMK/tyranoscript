@@ -75,7 +75,7 @@ tyrano.plugin.kag.menu = {
                             return;
                         }
                         button_clicked = true;
-
+                        that.kag.makeUnfocusableAll(layer_menu);
                         that.displaySave();
                         e.stopPropagation();
                     })
@@ -89,7 +89,7 @@ tyrano.plugin.kag.menu = {
                             return;
                         }
                         button_clicked = true;
-
+                        that.kag.makeUnfocusableAll(layer_menu);
                         that.displayLoad();
                         e.stopPropagation();
                     })

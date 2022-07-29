@@ -319,6 +319,8 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         $(document).on("gamepadpressdown", (e) => {
+            // console.warn(e.detail);
+
             // ティラノイベント"gamepad:pressdown"を発火
             this.kag.trigger("gamepad:pressdown", e);
 
@@ -396,12 +398,17 @@ tyrano.plugin.kag.key_mouse = {
             return false;
         }
 
-        // キー操作, ゲームパッド操作ならば true
-        const is_key_or_gamepad = event.type === "keydown" || event.type === "gamepadpressdown" || event.type === "gamepadstickdigital";
+        // キーボード操作とゲームパッド操作を検知
+        const is_gamepad = event.type.indexOf("gamepad") === 0;
+        const is_keyboard = event.type.indexOf("key") === 0;
 
-        // "next"アクションならフォーカス中のボタンをクリックする
-        // ただしキー操作かゲームパッド操作のみ
-        if (name === "next" && is_key_or_gamepad) {
+        // キーボード操作またはゲームパッド操作の"next"アクションを検知したとき
+        // フォーカス中のボタンがある場合はクリックをトリガーする処理に変更する
+        if (name === "next" && (is_gamepad || is_keyboard)) {
+            // 最後に"next"アクションを実行したゲームパッドを記憶しておく
+            if (is_gamepad) {
+                this.gamepad.last_used_next_gamepad_index = event.detail.gamepad_index;
+            }
             const j_focus = $(":focus.keyfocus");
             if (j_focus.length > 0) {
                 j_focus.eq(0).trigger("click");
@@ -413,6 +420,11 @@ tyrano.plugin.kag.key_mouse = {
         const is_hold_mash = event.detail && event.detail.is_hold_mash;
         if (is_hold_mash && pm["-h"] === undefined) {
             return false;
+        }
+
+        // フォーカス系のロールじゃない場合はフォーカスを外す
+        if (!name.includes("focus")) {
+            this.util.unfocus();
         }
 
         // アクションを実行
@@ -582,6 +594,12 @@ tyrano.plugin.kag.key_mouse = {
         focus(j_elm) {
             j_elm.focus().addClass("keyfocus");
         },
+        unfocus() {
+            $(":focus").blur();
+        },
+        isCloseButton(j_elm) {
+            return j_elm.hasClass("menu_close");
+        },
     },
 
     /**
@@ -625,7 +643,10 @@ tyrano.plugin.kag.key_mouse = {
         if (j_focused.length === 0) {
             // next なら先頭を、prev なら末尾をフォーカスする
             // const index = order === "next" ? 0 : j_focusable.length - 1;
-            const index = 0;
+            let index = 0;
+            if (this.util.isCloseButton(pos_list[index].j_elm)) {
+                index++;
+            }
             this.util.focus(j_focusable.eq(index));
             return;
         }
@@ -747,7 +768,10 @@ tyrano.plugin.kag.key_mouse = {
         // 下キーなら一番下の要素を、上キーなら一番上の要素を、という感じで1つ選んでフォーカスしておわり
         if (!focused_pos) {
             // const index = is_plus ? pos_list.length - 1 : 0;
-            const index = 0;
+            let index = 0;
+            if (this.util.isCloseButton(pos_list[index].j_elm)) {
+                index++;
+            }
             this.util.focus(pos_list[index].j_elm);
             return;
         }
@@ -874,8 +898,8 @@ tyrano.plugin.kag.key_mouse = {
                     return;
                 }
                 const rad0 = (Math.atan2(focused_pos.y - this_pos.y, this_pos.x - focused_pos.x) + deg_360) % deg_360;
-                const rad1 = (Math.atan2(focused_pos.y - this_pos.y1, this_pos.x1 - focused_pos.x) + deg_360) % deg_360;
-                const rad2 = (Math.atan2(focused_pos.y - this_pos.y2, this_pos.x2 - focused_pos.x) + deg_360) % deg_360;
+                const rad1 = (Math.atan2(focused_pos.y - this_pos.y, this_pos.x1 - focused_pos.x1) + deg_360) % deg_360;
+                const rad2 = (Math.atan2(focused_pos.y - this_pos.y, this_pos.x2 - focused_pos.x2) + deg_360) % deg_360;
                 const rads = [rad0, rad1, rad2];
                 for (const rad of rads) {
                     const dif1 = Math.abs(dir_rad - rad);
@@ -1106,8 +1130,11 @@ tyrano.plugin.kag.key_mouse = {
         // ゲームパッドが存在するか（true, false）
         gamepad_exests: false,
 
-        // 最後に使ったゲームパッドのインデックス（0, 1, 2, 3）
-        last_used_gamepad_index: 0,
+        // 最後に入力を検知したゲームパッドのインデックス（0, 1, 2, 3）
+        last_used_gamepad_index: -1,
+
+        // 最後に"next"アクションを実行したゲームパッドのインデックス（0, 1, 2, 3）
+        last_used_next_gamepad_index: -1,
 
         // スティックを倒した絶対量（0.0～1.0）をX方向・Y方向で分けて合計した値（0.0～2.0）がこれ以下であれば
         // スティックの入力を無視する
@@ -1120,8 +1147,11 @@ tyrano.plugin.kag.key_mouse = {
         // 何ミリ秒ごとにゲームパッドの入力状態を取得するか
         UPDATE_TIMEOUT: 50,
 
-        // 押しっぱなしにしたときに何フレームごとに連打をトリガーするか
+        // 長押ししたときに何フレームごとに連打をトリガーするか
         HOLD_MASH_INTERVAL: 1,
+
+        // 長押ししたときに連打をトリガーし始めるまでのフレーム
+        HOLD_MASH_DELAY: 10,
 
         /**
          * ゲームパッドの入力状態のスナップショットを確認する
@@ -1161,10 +1191,10 @@ tyrano.plugin.kag.key_mouse = {
                     gamepad_exists = true;
 
                     //
-                    // スティックの入力を検知
+                    // スティックの入力を検知してデジタル入力に変換
                     //
 
-                    gamepad.__sticks = [];
+                    const sticks = [];
                     const stick_num = gamepad.axes.length / 2;
                     for (let si = 0; si < stick_num; si++) {
                         let stick;
@@ -1176,12 +1206,7 @@ tyrano.plugin.kag.key_mouse = {
                             continue;
                         }
                         const sum = Math.abs(x) + Math.abs(y);
-                        const digital_buttons = [
-                            { pressed: false, hold_frame: 0 },
-                            { pressed: false, hold_frame: 0 },
-                            { pressed: false, hold_frame: 0 },
-                            { pressed: false, hold_frame: 0 },
-                        ];
+                        const digital_buttons = [{ pressed: false }, { pressed: false }, { pressed: false }, { pressed: false }];
                         if (sum < this.MINIMAM_VALUE_DETECT_AXE) {
                             stick = {
                                 radian: 0,
@@ -1207,14 +1232,35 @@ tyrano.plugin.kag.key_mouse = {
                                 digital_buttons,
                             };
                         }
-                        gamepad.__sticks.push(stick);
+                        sticks.push(stick);
                     }
 
-                    // 前回の入力状態が取れないならリターン
-                    const prev_gamepad = this.prev_gamepads[gi];
+                    //
+                    // 前回の入力状態
+                    //
+
+                    let prev_gamepad = this.prev_gamepads[gi];
+
+                    // 前回の入力状態が取れないなら未入力の状態を作成する
                     if (!prev_gamepad) {
-                        this.prev_gamepads[gi] = gamepad;
-                        return;
+                        prev_gamepad = {
+                            buttons: [],
+                            axes: [],
+                            sticks: [],
+                        };
+                        for (const button of gamepad.buttons) {
+                            prev_gamepad.buttons.push({
+                                pressed: false,
+                            });
+                        }
+                        for (const axe of gamepad.axes) {
+                            prev_gamepad.buttons.push(0);
+                        }
+                        for (const stick of sticks) {
+                            prev_gamepad.sticks.push({
+                                digital_buttons: [{ pressed: false }, { pressed: false }, { pressed: false }, { pressed: false }],
+                            });
+                        }
                     }
 
                     //
@@ -1251,7 +1297,8 @@ tyrano.plugin.kag.key_mouse = {
                             button.hold_frame = 0;
                         } else if (button.pressed) {
                             button.hold_frame = (prev_button.hold_frame || 0) + 1;
-                            if (button.hold_frame % this.HOLD_MASH_INTERVAL === 0) {
+                            const hold_frame = button.hold_frame - this.HOLD_MASH_DELAY;
+                            if (hold_frame > 0 && hold_frame % this.HOLD_MASH_INTERVAL === 0) {
                                 let button_name = "";
                                 const lang = this.keymap_lang[gamepad.mapping] || this.keymap_lang.standard;
                                 if (lang) {
@@ -1280,14 +1327,15 @@ tyrano.plugin.kag.key_mouse = {
                     // スティックのデジタル入力
                     //
 
-                    gamepad.__sticks.forEach((stick, si) => {
-                        const prev_stick = prev_gamepad.__sticks[si];
+                    sticks.forEach((stick, si) => {
+                        const prev_stick = prev_gamepad.sticks[si];
                         stick.digital_buttons.forEach((button, bi) => {
                             const prev_button = prev_stick.digital_buttons[bi];
                             if (button.pressed) {
                                 if (prev_button.pressed) {
-                                    button.hold_frame = prev_button.hold_frame + 1;
-                                    if (button.hold_frame % this.HOLD_MASH_INTERVAL === 0) {
+                                    button.hold_frame = (prev_button.hold_frame || 0) + 1;
+                                    const hold_frame = button.hold_frame - this.HOLD_MASH_DELAY;
+                                    if (hold_frame > 0 && hold_frame % this.HOLD_MASH_INTERVAL === 0) {
                                         const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
                                         const stick_name = ["L", "R"][si] || "";
                                         const event = new CustomEvent("gamepadstickdigital", {
@@ -1303,6 +1351,7 @@ tyrano.plugin.kag.key_mouse = {
                                         document.dispatchEvent(event);
                                     }
                                 } else {
+                                    button.hold_frame = 0;
                                     const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
                                     const stick_name = ["L", "R"][si] || "";
                                     const event = new CustomEvent("gamepadstickdigital", {
@@ -1332,6 +1381,7 @@ tyrano.plugin.kag.key_mouse = {
                     }
 
                     // 今回の Gamepad を次回使えるように格納
+                    gamepad.sticks = sticks;
                     this.prev_gamepads[gi] = gamepad;
                 });
 
@@ -1358,7 +1408,9 @@ tyrano.plugin.kag.key_mouse = {
          */
         getGamepad(index) {
             if (index === undefined) {
-                index = this.last_used_gamepad_index;
+                index = this.last_used_next_gamepad_index;
+                if (index < 0) index = this.last_used_gamepad_index;
+                if (index < 0) return null;
             }
 
             const gamepads = navigator.getGamepads
