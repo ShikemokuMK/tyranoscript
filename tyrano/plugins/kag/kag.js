@@ -2516,11 +2516,18 @@ tyrano.plugin.kag = {
     /**
      * あるjQueryオブジェクト（ボタン類）をキーボードでフォーカス可能にする
      * @param {jQuery} j_elm
+     * @param {number|string} tabindex
      */
     makeFocusable: function (j_elm, tabindex = 0) {
         // キーフォーカスが無効なら帰る
         if (this.config["useKeyFocus"] === "false") {
             return;
+        }
+        if (typeof tabindex === "string") {
+            if (tabindex === "false") {
+                return;
+            }
+            tabindex = parseInt(tabindex) || 0;
         }
         j_elm.attr("tabindex", tabindex);
         j_elm.addClass("tyrano-focusable");

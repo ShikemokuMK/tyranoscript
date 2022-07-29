@@ -4095,8 +4095,9 @@ start:function(pm){
 共通ルートです
 
 :param
-storage = !!jump,
-target  = !!jump
+storage  = !!jump,
+target   = !!jump,
+keyfocus = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
 
 :demo
 1,kaisetsu/14_select
@@ -4109,6 +4110,7 @@ tyrano.plugin.kag.tag.link = {
     pm: {
         target: null,
         storage: null,
+        keyfocus: "",
     },
 
     start: function (pm) {
@@ -4120,7 +4122,7 @@ tyrano.plugin.kag.tag.link = {
         that.kag.stat.display_link = true;
 
         that.kag.setElmCursor(j_span, "pointer");
-        that.kag.makeFocusable(j_span);
+        that.kag.makeFocusable(j_span, pm.keyfocus);
 
         (function () {
             var _target = pm.target;
@@ -5687,7 +5689,8 @@ enterimg  = ボタンの上にマウスカーソルが乗った時に切り替�
 visible   = 最初からボタンを表示するかどうか。`true`で表示、`false`で非表示となります。,
 auto_next = `true`または`false`を指定します。これに`false`が指定してあり、かつ`fix=true`の場合、`[return]`で戻ったときに次のタグに進まなくなります。,
 savesnap  = `true`または`false`で指定します。`true`にすると、このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します。,
-keyfocus  = キーボード操作によるボタンの選択を許可するかどうか。指定しなかった場合、fixボタンでは選択不可、通常のボタンは選択可となります。,
+keyfocus = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。`true`で選択できるようになります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。省略した場合、固定ボタンでは選択不可、通常のボタンでは選択可となります。,
+
 :demo
 1,kaisetsu/14_select
 
@@ -5762,7 +5765,7 @@ tyrano.plugin.kag.tag.button = {
         let is_keyfocus_enabled = pm.fix !== "true"; // fix ボタンは基本的にキーセレクト無効
         if (pm.keyfocus) is_keyfocus_enabled = pm.keyfocus !== "false"; // keyfocus が指定されている場合はそれで上書き
         if (is_keyfocus_enabled) {
-            that.kag.makeFocusable(j_button);
+            that.kag.makeFocusable(j_button, pm.keyfocus);
         }
 
         //初期状態で表示か非表示か
@@ -6269,6 +6272,7 @@ bold       = 太字にする場合は`true`を指定します。,
 opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0`で完全に透明です。,
 edge       = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
 shadow     = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。,
+keyfocus   = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
 
 :demo
 1,kaisetsu/14_select
@@ -6299,6 +6303,7 @@ tyrano.plugin.kag.tag.glink = {
         leavese: "",
         face: "",
         bold: "",
+        keyfocus: "",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -6314,7 +6319,7 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("z-index", 99999999);
         j_button.css("font-size", pm.size + "px");
         that.kag.setElmCursor(j_button, "pointer");
-        that.kag.makeFocusable(j_button);
+        that.kag.makeFocusable(j_button, pm.keyfocus);
 
         if (pm.font_color != "") {
             j_button.css("color", $.convertColor(pm.font_color));

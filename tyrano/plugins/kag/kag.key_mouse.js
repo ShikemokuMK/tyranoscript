@@ -512,13 +512,36 @@ tyrano.plugin.kag.key_mouse = {
             return $(".layer_menu").css("display") !== "none";
         },
         findFocusable() {
+            let j_buttons;
             if (this.isOpenRemodal()) {
-                return $(".remodal-wrapper").find("[tabindex]");
+                j_buttons = $(".remodal-wrapper").find("[tabindex]");
+            } else if (this.isOpenMenu()) {
+                j_buttons = $(".layer_menu").find("[tabindex].tyrano-focusable");
+            } else {
+                j_buttons = $("[tabindex].tyrano-focusable");
             }
-            if (this.isOpenMenu()) {
-                return $(".layer_menu").find("[tabindex].tyrano-focusable");
+            if (j_buttons.length <= 1) {
+                return j_buttons;
             }
-            return $("[tabindex].tyrano-focusable");
+            const arr = [];
+            j_buttons.each((i, elm) => {
+                arr.push({
+                    i,
+                    elm,
+                    tabindex: parseInt($(elm).attr("tabindex")) || 0,
+                });
+            });
+            arr.sort((a, b) => {
+                if (a.tabindex < b.tabindex) return -1;
+                else if (a.tabindex > b.tabindex) return 1;
+                else {
+                    return a.i < b.i ? -1 : 1;
+                }
+            });
+            const j_buttons_sorted = arr.reduce((prev, item) => {
+                return prev.add(item.elm);
+            }, $());
+            return j_buttons_sorted;
         },
         focus(j_elm) {
             j_elm.focus().addClass("keyfocus");
