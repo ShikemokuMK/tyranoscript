@@ -915,6 +915,10 @@ tyrano.plugin.kag = {
             scale_y: 1,
             margin_top: 0,
             margin_left: 0,
+            game_width: 1280,
+            game_height: 720,
+            view_width: 1920,
+            height_hegiht: 1080,
         };
 
         // ゲーム画面フィットを即実行する
@@ -2492,6 +2496,19 @@ tyrano.plugin.kag = {
         // 記憶改変！
         audio_obj.__tag_volume = tag_volume;
         audio_obj.__config_volume = config_volume;
+    },
+
+    /**
+     * ボタンクリックSEなどシステム系の効果音を鳴らすための関数
+     * nextOrder を呼ばない
+     * @param {string} storage
+     */
+    playSound: function (storage, buf) {
+        this.kag.ftag.startTag("playse", {
+            storage: storage,
+            buf: buf,
+            stop: "true",
+        });
     },
 
     test: function () {},
