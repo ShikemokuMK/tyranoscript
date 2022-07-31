@@ -1300,18 +1300,18 @@ tyrano.plugin.kag = {
         // キーボードによるボタンフォーカス関連の設定
         if (this.config["keyFocusOutlineWidth"]) {
             const width = this.config["keyFocusOutlineWidth"];
-            $.insertRuleToTyranoCSS(`:focus.keyfocus { outline-width: ${width}px}`);
+            $.insertRuleToTyranoCSS(`:focus.hover { outline-width: ${width}px}`);
         }
         if (this.config["keyFocusOutlineColor"]) {
             const color = $.convertColor(this.config["keyFocusOutlineColor"]);
-            $.insertRuleToTyranoCSS(`:focus.keyfocus { outline-color: ${color}}`);
+            $.insertRuleToTyranoCSS(`:focus.hover { outline-color: ${color}}`);
         }
         if (this.config["keyFocusOutlineStyle"]) {
             const style = $.convertColor(this.config["keyFocusOutlineStyle"]);
-            $.insertRuleToTyranoCSS(`:focus.keyfocus { outline-style: ${style}}`);
+            $.insertRuleToTyranoCSS(`:focus.hover { outline-style: ${style}}`);
         }
         if (this.config["keyFocusWithHoverStyle"] === "true") {
-            this.copyHoverCSSToFocusCSS();
+            $.copyHoverCSSToFocusCSS('link[href="./tyrano/tyrano.css"]');
         }
 
         //ティラノライダーからの通知の場合、発生させる
@@ -2550,7 +2550,7 @@ tyrano.plugin.kag = {
             if (this.config["keyFocusWithHoverStyle"] === "true") {
                 j_elm.trigger("mouseleave");
             }
-            j_elm.removeClass("keyfocus");
+            j_elm.removeClass("hover");
         });
     },
 
@@ -2584,7 +2584,7 @@ tyrano.plugin.kag = {
      * フォーカスを外す
      */
     unfocus: function () {
-        $(":focus").blur();
+        $(":focus").blur().removeClass("hover");
     },
 
     /**
@@ -2602,67 +2602,6 @@ tyrano.plugin.kag = {
             this.makeFocusable($(elm));
         });
     },
-
-    /**
-     * ボタンのホバー時のCSSをキーボードによるフォーカス時にも適用するために、
-     * tyrano.css および glink.css に記載されているCSSルールをすべて洗い、
-     * :hover セレクタを対象とするルールをコピーして　:focus.keyfocus セレクタを対象とするルールに書き変え、
-     * スタイルシートの末尾に insertRule する
-     */
-    copyHoverCSSToFocusCSS: function () {
-        // この処理は一度だけでいい
-        if (this.__is_copied_hover_css) {
-            return;
-        }
-        this.__is_copied_hover_css = true;
-
-        try {
-            // tyrano.css の CSSStyleSheet インスタンス
-            const tyrano_stylesheet = $('link[href="./tyrano/tyrano.css"]').get(0).sheet;
-
-            // glink.css の CSSStyleSheet インスタンス
-            let glink_stylesheet;
-
-            // :hover ルールをコピーして :focus.keyfocus ルールに書き変えたうえで追加する関数
-            const hover_to_focus = (rule) => {
-                if (rule.selectorText) {
-                    const new_selector_texts = [];
-                    const hash = rule.selectorText.split(",");
-                    for (const selector of hash) {
-                        if (selector.includes(":hover")) {
-                            new_selector_texts.push(selector.replace(":hover", ":focus.keyfocus"));
-                        }
-                    }
-                    if (new_selector_texts.length) {
-                        const selector_text = new_selector_texts.join(",");
-                        const bracket_index = rule.cssText.indexOf("{");
-                        const style_text = rule.cssText.substring(bracket_index);
-                        const css_text = selector_text + style_text;
-                        tyrano_stylesheet.insertRule(css_text, tyrano_stylesheet.cssRules.length);
-                    }
-                }
-            };
-
-            // tyrano.css について実行
-            for (const rule of tyrano_stylesheet.cssRules) {
-                hover_to_focus(rule);
-                if (rule.href === "./css/glink.css") {
-                    glink_stylesheet = rule.styleSheet;
-                }
-            }
-
-            // glink.css について実行
-            if (glink_stylesheet) {
-                for (const rule of glink_stylesheet.cssRules) {
-                    hover_to_focus(rule);
-                }
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    },
-
-    __is_copied_hover_css: false,
 
     test: function () {},
 };

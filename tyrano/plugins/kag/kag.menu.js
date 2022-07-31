@@ -819,7 +819,13 @@ tyrano.plugin.kag.menu = {
                     "?" +
                     Math.floor(Math.random() * 10000000) +
                     '">';
-                $("head link:last").after(style);
+                const j_style = $(style);
+                $("head link:last").after(j_style);
+                if (this.kag.config["keyFocusWithHoverStyle"] === "true") {
+                    j_style.on("load", () => {
+                        $.copyHoverCSSToFocusCSS(j_style);
+                    });
+                }
             }
         } else {
             this.kag.stat.cssload = {};

@@ -295,7 +295,7 @@ tyrano.plugin.kag.key_mouse = {
                 this.vmouse.leftdown();
                 return;
             }
-            const j_focus = $(":focus.keyfocus");
+            const j_focus = $(":focus.hover");
             if (j_focus.length > 0) {
                 j_focus.eq(0).trigger("click");
                 return true;
@@ -487,10 +487,10 @@ tyrano.plugin.kag.key_mouse = {
         }
 
         // j_focusable のうち、いまフォーカスされている要素
-        const j_focused = j_focusable.filter(":focus.keyfocus");
+        const j_focused = j_focusable.filter(":focus.hover");
 
         // j_focusable のうち、いまフォーカスされていない要素（つまり、これからフォーカスする可能性のある要素）
-        const j_unfocused = j_focusable.not(":focus.keyfocus");
+        const j_unfocused = j_focusable.not(":focus.hover");
 
         // フォーカス候補が1つもないならおわり
         // フォーカス候補が1つしかないならそれをフォーカスしておわり
@@ -555,10 +555,10 @@ tyrano.plugin.kag.key_mouse = {
         }
 
         // j_focusable のうち、いまフォーカスされている要素
-        const j_focused = j_focusable.filter(":focus.keyfocus");
+        const j_focused = j_focusable.filter(":focus.hover");
 
         // j_focusable のうち、いまフォーカスされていない要素（つまり、これからフォーカスする可能性のある要素）
-        const j_unfocused = j_focusable.not(":focus.keyfocus");
+        const j_unfocused = j_focusable.not(":focus.hover");
 
         // フォーカス候補が1つもないならおわり
         // フォーカス候補が1つしかないならそれをフォーカスしておわり
@@ -600,7 +600,7 @@ tyrano.plugin.kag.key_mouse = {
             const pos = { x, x1, x2, y, y1, y2, left, top, right, bottom, j_elm };
             pos_list.push(pos);
             // フォーカスされている要素の情報はおさえておく
-            if (j_elm.is(":focus.keyfocus")) {
+            if (j_elm.is(":focus.hover")) {
                 focused_pos = pos;
             }
         });
@@ -1031,7 +1031,7 @@ tyrano.plugin.kag.key_mouse = {
          * @returns {jQuery}
          */
         findFocused() {
-            return $(":focus.keyfocus");
+            return $(":focus.hover");
         },
 
         /**
@@ -1075,14 +1075,14 @@ tyrano.plugin.kag.key_mouse = {
          * @param {jQuery} j_elm
          */
         focus(j_elm) {
-            j_elm.focus().addClass("keyfocus");
+            j_elm.focus().addClass("hover");
         },
 
         /**
          * 要素のフォーカスを外す
          */
         unfocus() {
-            $(":focus").blur().removeClass("keyfocus");
+            $(":focus").blur().removeClass("hover");
         },
 
         /**
@@ -1582,6 +1582,7 @@ tyrano.plugin.kag.key_mouse = {
                 //this.j_cursor.css("visibility", "hidden");
                 this.j_cursor.css("opacity", "0");
                 this.j_html.removeClass("vmouse-displayed");
+                this.mouseleaveAll();
             }
         },
 
@@ -1765,6 +1766,16 @@ tyrano.plugin.kag.key_mouse = {
                 next_elm = next_elm.parentElement;
             }
             return arr;
+        },
+
+        /**
+         * mouseleave イベントを発生させて回る
+         */
+        mouseleaveAll() {
+            $(".hover").each((i, elm) => {
+                this.trigger("mouseleave", elm, { bubbles: false });
+                elm.classList.remove("hover");
+            });
         },
 
         /**

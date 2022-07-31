@@ -2068,6 +2068,67 @@
         return this;
     };
 
+    /**
+     * rule のセレクタが :hover や :active であるなら
+     * セレクタを .hover や .active に書き変えたものを複製して stylesheet に追加する
+     * https://developer.mozilla.org/ja/docs/Web/API/CSSStyleSheet
+     * @param {CSSRule} rule
+     * @param {CSSStyleSheet} stylesheet
+     */
+    $.copyHoverRuleToFocusRule = (rule, stylesheet) => {
+        if (rule.selectorText) {
+            const new_selector_texts = [];
+            const hash = rule.selectorText.split(",");
+            for (const selector of hash) {
+                if (selector.includes(":hover")) {
+                    new_selector_texts.push(selector.replace(":hover", ".hover"));
+                }
+                if (selector.includes(":active")) {
+                    new_selector_texts.push(selector.replace(":active", ".active"));
+                }
+            }
+            if (new_selector_texts.length) {
+                const selector_text = new_selector_texts.join(",");
+                const bracket_index = rule.cssText.indexOf("{");
+                const style_text = rule.cssText.substring(bracket_index);
+                const css_text = selector_text + style_text;
+                stylesheet.insertRule(css_text, stylesheet.cssRules.length);
+            }
+        }
+    };
+
+    /**
+     * ボタンのホバー時の CSS をキーボードによるフォーカス時や仮想マウスカーソルによるホバー時にも適用するために、
+     * 渡された <style> 要素に記載されている CSS ルールをすべて洗い出し、
+     * :hover や :active へのルールを .hover や .active へのルールとしてコピーして、
+     * スタイルシートの末尾に insertRule する
+     * @param {jQuery|Element|string} j_style
+     */
+    $.copyHoverCSSToFocusCSS = function (j_style) {
+        try {
+            if (!(j_style instanceof jQuery)) j_style = $(j_style);
+            const stylesheet = j_style.get(0).sheet;
+            const import_map = {};
+            for (const rule of stylesheet.cssRules) {
+                if (rule instanceof CSSImportRule) {
+                    // @import で外部CSSを読み込んでいる場合は記憶しておく
+                    import_map[rule.href] = rule.styleSheet;
+                } else {
+                    $.copyHoverRuleToFocusRule(rule, stylesheet);
+                }
+            }
+            // @import で読み込んだ外部CSSに対しても同じことをする
+            for (const key in import_map) {
+                const imported_stylesheet = import_map[key];
+                for (const rule of imported_stylesheet.cssRules) {
+                    $.copyHoverRuleToFocusRule(rule, stylesheet);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     $.fn.outerHTML = function (s) {
         if (s) {
             this.before(s);
