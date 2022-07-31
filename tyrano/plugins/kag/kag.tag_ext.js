@@ -1220,7 +1220,7 @@ tyrano.plugin.kag.tag.frame = {
         var map_trans = {};
         var map_style = {};
 
-        for (key in pm) {
+        for (let key in pm) {
             if (this.master_trans[key] == "") {
                 map_trans[key] = pm[key];
             } else {
@@ -2460,7 +2460,6 @@ tyrano.plugin.kag.tag.chara_show = {
             }
         } else if (pm.storage != "") {
             if ($.isHTTP(pm.storage)) {
-                folder = "";
                 storage_url = pm.storage;
             } else {
                 storage_url = "./data/fgimage/" + pm.storage;
@@ -2515,7 +2514,7 @@ tyrano.plugin.kag.tag.chara_show = {
             chara_layer = cpm["_layer"];
         }
 
-        for (key in chara_layer) {
+        for (let key in chara_layer) {
             var chara_part = chara_layer[key];
 
             //どれを表示すべきか
@@ -2986,7 +2985,7 @@ tyrano.plugin.kag.tag.chara_hide_all = {
 
         //キャラクターの表情を引き継がない
         if (this.kag.stat.chara_memory == "false") {
-            for (key in this.kag.stat.charas) {
+            for (let key in this.kag.stat.charas) {
                 this.kag.stat.charas[key].storage = this.kag.stat.charas[key]["map_face"]["default"];
             }
         }
@@ -3627,7 +3626,7 @@ tyrano.plugin.kag.tag.chara_part = {
 
         var part_num = 0;
 
-        for (key in pm) {
+        for (let key in pm) {
             if (chara_part[key]) {
                 var part_id = pm[key];
                 if (chara_part[key][part_id]) {
@@ -3663,7 +3662,7 @@ tyrano.plugin.kag.tag.chara_part = {
                 var n = 0;
                 var cnt = 0;
 
-                for (key in map_part) {
+                for (let key in map_part) {
                     (function () {
                         cnt++;
                         var part = map_part[key];
@@ -3706,7 +3705,7 @@ tyrano.plugin.kag.tag.chara_part = {
                     that.kag.ftag.nextOrder();
                 }
             } else {
-                for (key in map_part) {
+                for (let key in map_part) {
                     var part = map_part[key];
                     var j_img = target_obj.find(".part" + "." + key + "");
 
@@ -3785,7 +3784,7 @@ tyrano.plugin.kag.tag.chara_part_reset = {
         };
 
         if (pm.part == "") {
-            for (key in chara_part) {
+            for (let key in chara_part) {
                 new_pm[key] = chara_part[key]["default_part_id"];
             }
         } else {

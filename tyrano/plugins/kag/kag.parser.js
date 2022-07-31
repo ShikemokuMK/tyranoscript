@@ -109,7 +109,7 @@ tyrano.plugin.kag.parser = {
                     line: i,
                     name: "chara_ptext",
                     pm: { name: chara_name, face: chara_face },
-                    val: text,
+                    val: "",
                 };
 
                 array_s.push(text_obj);
@@ -155,8 +155,8 @@ tyrano.plugin.kag.parser = {
             } else if (first_char === "@") {
                 //タグ
                 //残りの部分をごそっと回す
-                var tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
-                var tmpobj = this.makeTag(tag_str, i);
+                const tag_str = line_str.substr(1, line_str.length); // "image split=2 samba = 5"
+                const tmpobj = this.makeTag(tag_str, i);
                 array_s.push(tmpobj);
             } else {
                 //テキストか[]記法のタグ
@@ -168,14 +168,14 @@ tyrano.plugin.kag.parser = {
                 }
 
                 //１文字ずつバラして解析していく
-                var array_char = line_str.split("");
-                var text = ""; // テキスト文字（[iscript][html]内のテキストを含む）
-                var tag_str = ""; // タグ文字 例）ptext x=0 y=0 text="hogehoge[][]'''"
-                var scanning_tag = false; // タグ解析中かどうか
-                var deep_kakko = 0; // [ の深さ
+                let array_char = line_str.split("");
+                let text = ""; // テキスト文字（[iscript][html]内のテキストを含む）
+                let tag_str = ""; // タグ文字 例）ptext x=0 y=0 text="hogehoge[][]'''"
+                let scanning_tag = false; // タグ解析中かどうか
+                let deep_kakko = 0; // [ の深さ
                 //↑exp属性の中で配列[]を使用した場合などに、配列の"]"を閉じタグの"]"として解釈しないようにするために必要
-                var start_quot = ""; // クォートが始まってから終わるまで
-                var flag_escape = false; // エスケープフラグ バックスラッシュでフラグが立つ
+                let start_quot = ""; // クォートが始まってから終わるまで
+                let flag_escape = false; // エスケープフラグ バックスラッシュでフラグが立つ
 
                 for (var j = 0; j < array_char.length; j++) {
                     var c = array_char[j];
@@ -240,7 +240,7 @@ tyrano.plugin.kag.parser = {
                         deep_kakko++;
                         //この時点で格納されているテキストがあれば配列に追加
                         if (text != "") {
-                            var text_obj = {
+                            const text_obj = {
                                 line: i,
                                 name: "text",
                                 pm: { val: text },
@@ -262,7 +262,7 @@ tyrano.plugin.kag.parser = {
                 //1文字ずつ解析していくのが完了した
                 //この時点でテキストがあれば配列に追加
                 if (text != "") {
-                    var text_obj = {
+                    const text_obj = {
                         line: i,
                         name: "text",
                         pm: { val: text },
@@ -476,6 +476,8 @@ tyrano.plugin.kag.parser = {
         switch (obj.name) {
             case "if":
                 this.deep_if++;
+                obj.pm.deep_if = this.deep_if;
+                break;
             case "elsif":
             case "else":
                 obj.pm.deep_if = this.deep_if;

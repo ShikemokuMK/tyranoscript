@@ -2121,7 +2121,7 @@ tyrano.plugin.kag.tag.cursor = {
 
         // <style>要素の textContent を作成
         const pointer_css = this.kag.stat.current_cursor_map.pointer || "pointer";
-        css_text = `
+        const css_text = `
             .remodal-cancel,
             .remodal-confirm,
             .button_menu,

@@ -441,7 +441,7 @@ tyrano.plugin.kag.tag.mask = {
         }
 
         if (pm.graphic != "") {
-            var foler = "";
+            var folder = "";
             if (pm.folder != "") {
                 folder = pm.folder;
             } else {

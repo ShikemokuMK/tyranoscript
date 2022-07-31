@@ -278,10 +278,9 @@ tyrano.plugin.kag.tag.bgcamera = {
                 }
             } else if (url.indexOf("tyrano:") != -1) {
                 if (mode == "all" || mode == "jump") {
-                    var tmp = $.replaceAll(url, "tyrano://", "");
-                    var tmp2 = $.getUrlQuery(tmp);
-
-                    var jump_pm = {};
+                    let tmp = $.replaceAll(url, "tyrano://", "");
+                    let tmp2 = $.getUrlQuery(tmp);
+                    let jump_pm = {};
 
                     if (tmp2["storage"]) {
                         jump_pm["storage"] = tmp2["storage"];
@@ -305,8 +304,7 @@ tyrano.plugin.kag.tag.bgcamera = {
                 //[jump storage="scene1.ks" target="*test" ]
                 if (mode == "all" || mode == "jump") {
                     let obj = this.kag.parser.makeTag(url);
-
-                    var jump_pm = obj.pm;
+                    let jump_pm = obj.pm;
 
                     //QRの反応は止まる
                     this.kag.stat.qr.mode = "off";

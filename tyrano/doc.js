@@ -169,7 +169,7 @@ var PARAM_EXP = {
                     $.putHtml(map_doc, master_tag);
 
                     ////////スタジオ用データ作成
-                    for (var tag_name in map_doc) {
+                    for (const tag_name in map_doc) {
                         var tag = map_doc[tag_name];
                         tag.array_param = [];
 
@@ -287,7 +287,7 @@ var PARAM_EXP = {
         //左側のHTMLを作る
         var ghtml = "";
         var num_index = 0;
-        for (var group_name of group_names) {
+        for (const group_name of group_names) {
             ghtml += '<li class="list-group-item list-toggle">';
             ghtml +=
                 '<a data-toggle="collapse" data-parent="#sidebar-nav-1" href="#nav_' +
@@ -301,7 +301,7 @@ var PARAM_EXP = {
             ghtml += '<ul id="nav_' + num_index + '" class="collapse" aria-expanded="false" style="height: 0px;">';
 
             for (tag_name in tag_map) {
-                var obj = tag_map[tag_name];
+                const obj = tag_map[tag_name];
                 //ghtml +='<div style="padding:2px"><a  href="#'+tag_name+'">['+tag_name+']　<span style="font-style:italic;color:gray">('+obj.title+')</span></a></div>';
                 ghtml += `<li><a href="#${tag_name}">[${tag_name}]　${obj.title}</a></li>`;
             }
@@ -372,15 +372,15 @@ var PARAM_EXP = {
 
         // タグ名のリストを作る（グループ順に準拠する）
         var tag_names = [];
-        for (var group_name of group_names) {
-            var tag_map = group_map[group_name];
+        for (const group_name of group_names) {
+            const tag_map = group_map[group_name];
             tag_names = tag_names.concat(Object.keys(tag_map));
         }
         console.log("===tag_names");
         console.log(tag_names);
 
-        for (var tag_name of tag_names) {
-            var obj = map_doc[tag_name];
+        for (const tag_name of tag_names) {
+            const obj = map_doc[tag_name];
 
             //説明文のパース
             var exp = parseExp(obj.exp);
@@ -497,7 +497,7 @@ var PARAM_EXP = {
         $("#src_html").val("ボタンを押してください");
 
         var js_auto_complete = "";
-        for (var tag_name in master_tag) {
+        for (const tag_name in master_tag) {
             js_auto_complete += '"' + tag_name + '",\n';
         }
         $("#auto_complete_tag").val(js_auto_complete);
@@ -536,7 +536,7 @@ var PARAM_EXP = {
         //インラインコード(`hoge`)を変換
         p = p.replace(/`([^`]+)`/g, ` <span class="code">$1</span> `);
         //URLを検出してリンク化
-        p = p.replace(/(?<!href="|')https?:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+/g, function (url) {
+        p = p.replace(/(?<!href="|')https?:\/\/[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+/g, function (url) {
             return `<a href="${url}">${url}</a>`;
         });
         return p;
@@ -547,7 +547,7 @@ var PARAM_EXP = {
         //トリミング
         str = str.trim();
         //"!!"から始まる場合は定数から取ってくる
-        if (str.match(/^\!\!/)) {
+        if (str.match(/^!!/)) {
             str = str.replace("!!", "");
             const key = param_name + (str ? "/" : "") + str;
             if (PARAM_EXP[key]) {

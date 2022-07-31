@@ -310,8 +310,6 @@ tyrano.plugin.kag.menu = {
         three_save.stat = three.stat;
         three_save.evt = three.evt;
 
-        var three = this.kag.tmp.three;
-
         var save_models = {};
 
         for (var key in models) {
@@ -713,7 +711,7 @@ tyrano.plugin.kag.menu = {
 
         //Live2Dモデルがある場合の後始末
         if (typeof Live2Dcanvas != "undefined") {
-            for (model_id in Live2Dcanvas) {
+            for (let model_id in Live2Dcanvas) {
                 if (Live2Dcanvas[model_id]) {
                     Live2Dcanvas[model_id].check_delete = 2;
                     Live2D.deleteBuffer(Live2Dcanvas[model_id].modelno);
@@ -727,7 +725,7 @@ tyrano.plugin.kag.menu = {
         if (options.bgm_over == "false") {
             // 全BGM停止
             var map_bgm = this.kag.tmp.map_bgm;
-            for (var key in map_bgm) {
+            for (let key in map_bgm) {
                 this.kag.ftag.startTag("stopbgm", {
                     stop: "true",
                     buf: key,
@@ -736,7 +734,7 @@ tyrano.plugin.kag.menu = {
 
             // 全SE停止
             var map_se = this.kag.tmp.map_se;
-            for (var key in map_se) {
+            for (let key in map_se) {
                 if (map_se[key]) {
                     this.kag.ftag.startTag("stopse", {
                         stop: "true",
@@ -812,7 +810,7 @@ tyrano.plugin.kag.menu = {
         //読み込んだCSSがある場合
         $("head").find("._tyrano_cssload_tag").remove();
         if (this.kag.stat.cssload) {
-            for (file in this.kag.stat.cssload) {
+            for (let file in this.kag.stat.cssload) {
                 var style =
                     '<link class="_tyrano_cssload_tag" rel="stylesheet" href="' +
                     $.escapeHTML(file) +
@@ -851,7 +849,7 @@ tyrano.plugin.kag.menu = {
                 "-animation-timing-function": "",
             });
 
-            for (key in this.kag.stat.current_camera) {
+            for (let key in this.kag.stat.current_camera) {
                 var a3d_define = {
                     frames: {
                         "0%": {
@@ -895,17 +893,14 @@ tyrano.plugin.kag.menu = {
 
         //背景動画が設定中なら
         if (this.kag.stat.current_bgmovie["storage"] != "") {
-            var vstorage = this.kag.stat.current_bgmovie["storage"];
-            var volume = this.kag.stat.current_bgmovie["volume"];
-
-            var pm = {
+            const vstorage = this.kag.stat.current_bgmovie["storage"];
+            const volume = this.kag.stat.current_bgmovie["volume"];
+            const pm = {
                 storage: vstorage,
                 volume: volume,
                 stop: "true",
             };
-
             this.kag.tmp.video_playing = false;
-
             this.kag.ftag.startTag("bgmovie", pm);
         }
 
@@ -936,8 +931,8 @@ tyrano.plugin.kag.menu = {
             this.kag.ftag.startTag("3d_scene", scene_pm);
 
             for (var key in models) {
-                var model = models[key];
-                var pm = model.pm;
+                const model = models[key];
+                const pm = model.pm;
 
                 pm["pos"] = model.pos;
                 pm["rot"] = model.rot;
@@ -1034,7 +1029,7 @@ tyrano.plugin.kag.menu = {
             const j_hidden_area = this.kag.getHiddenArea();
             for (const item of this.kag.stat.hidden_svg_list) {
                 switch (typeof item) {
-                    case "string":
+                    case "string": {
                         const file_path = item;
                         // すでに存在しているならスキップ
                         if (document.getElementById(file_path)) {
@@ -1049,6 +1044,7 @@ tyrano.plugin.kag.menu = {
                             });
                         });
                         break;
+                    }
                 }
             }
         }
@@ -1146,10 +1142,10 @@ tyrano.plugin.kag.menu = {
     getSaveData: function () {
         var tmp_array = $.getStorage(this.kag.config.projectID + "_tyrano_data", this.kag.config.configSave);
 
-        var save_obj = $.getStorage(this.kag.config.projectID + "_tyrano_data", this.kag.config.configSave);
+        let save_obj = $.getStorage(this.kag.config.projectID + "_tyrano_data", this.kag.config.configSave);
 
         if (save_obj) {
-            var save_obj = JSON.parse(save_obj);
+            save_obj = JSON.parse(save_obj);
 
             //旧版のセーブデータの場合、バックアップをとった上で変換する
             if (typeof save_obj.version == "undefined") {
@@ -1157,26 +1153,26 @@ tyrano.plugin.kag.menu = {
 
                 var array_data = save_obj.data;
 
-                for (var i = 0; i < array_data.length; i++) {
+                for (let i = 0; i < array_data.length; i++) {
                     array_data[i]["title"] = $(array_data[i]["title"]).text();
 
                     if (typeof array_data[i]["layer"] == "undefined") continue;
 
                     var layer = array_data[i]["layer"];
 
-                    for (key in layer.map_layer_fore) {
+                    for (let key in layer.map_layer_fore) {
                         layer["map_layer_fore"][key] = $.makeSaveJSON($(layer["map_layer_fore"][key]).get(0), this.kag.array_white_attr);
                     }
 
-                    for (key in layer.map_layer_back) {
+                    for (let key in layer.map_layer_back) {
                         layer["map_layer_back"][key] = $.makeSaveJSON($(layer["map_layer_back"][key]).get(0), this.kag.array_white_attr);
                     }
 
-                    for (key in layer.layer_fix) {
+                    for (let key in layer.layer_fix) {
                         layer["map_layer_back"][key] = $.makeSaveJSON($(layer.layer_fix[key]).get(0), this.kag.array_white_attr);
                     }
 
-                    for (key in layer.layer_blend) {
+                    for (let key in layer.layer_blend) {
                         layer["layer_blend"][key] = $.makeSaveJSON($(layer.layer_blend[key]).get(0), this.kag.array_white_attr);
                     }
 
@@ -1208,7 +1204,7 @@ tyrano.plugin.kag.menu = {
             //セーブ数の上限を変更する。
             var save_slot_num = this.kag.config.configSaveSlotNum || 5;
 
-            for (var i = 0; i < save_slot_num; i++) {
+            for (let i = 0; i < save_slot_num; i++) {
                 var json = {};
                 json.title = $.lang("not_saved");
                 // ラストテキスト
@@ -1278,61 +1274,50 @@ tyrano.plugin.kag.menu = {
 
     //画面をフルスクリーンにします
     screenFull: function () {
-        //V5以降は使用しない
-        if (false) {
-            var gui = require("nw.gui");
-            var win = gui.Window.get();
-            if (win.isFullscreen) {
-                win.leaveFullscreen();
-            } else {
-                win.enterFullscreen();
-            }
-        } else {
-            // いまフルスクリーンか？
-            // フルスクリーンならフルスクリーン要素が取得できる (truthy)
-            // フルスクリーンじゃないならnullが返ってくる (falsy)
-            const is_full_screen =
-                document.webkitFullscreenElement ||
-                document.mozFullScreenElement ||
-                document.msFullscreenElement ||
-                document.fullScreenElement ||
-                false;
+        // いまフルスクリーンか？
+        // フルスクリーンならフルスクリーン要素が取得できる (truthy)
+        // フルスクリーンじゃないならnullが返ってくる (falsy)
+        const is_full_screen =
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            document.fullScreenElement ||
+            false;
 
-            // フルスクリーンにする機構が存在するか？
-            const can_full_screen =
-                document.fullscreenEnabled ||
-                document.webkitFullscreenEnabled ||
-                document.mozFullScreenEnabled ||
-                document.msFullscreenEnabled ||
-                false;
+        // フルスクリーンにする機構が存在するか？
+        const can_full_screen =
+            document.fullscreenEnabled ||
+            document.webkitFullscreenEnabled ||
+            document.mozFullScreenEnabled ||
+            document.msFullscreenEnabled ||
+            false;
 
-            const elem = document.body;
+        const elem = document.body;
 
-            if (can_full_screen) {
-                if (elem.requestFullscreen) {
-                    if (is_full_screen) {
-                        document.exitFullscreen();
-                    } else {
-                        elem.requestFullscreen();
-                    }
-                } else if (elem.webkitRequestFullscreen) {
-                    if (is_full_screen) {
-                        document.webkitExitFullscreen();
-                    } else {
-                        elem.webkitRequestFullscreen();
-                    }
-                } else if (elem.mozRequestFullScreen) {
-                    if (is_full_screen) {
-                        document.mozCancelFullScreen();
-                    } else {
-                        elem.mozRequestFullScreen();
-                    }
-                } else if (elem.msRequestFullscreen) {
-                    if (is_full_screen) {
-                        document.msExitFullscreen();
-                    } else {
-                        elem.msRequestFullscreen();
-                    }
+        if (can_full_screen) {
+            if (elem.requestFullscreen) {
+                if (is_full_screen) {
+                    document.exitFullscreen();
+                } else {
+                    elem.requestFullscreen();
+                }
+            } else if (elem.webkitRequestFullscreen) {
+                if (is_full_screen) {
+                    document.webkitExitFullscreen();
+                } else {
+                    elem.webkitRequestFullscreen();
+                }
+            } else if (elem.mozRequestFullScreen) {
+                if (is_full_screen) {
+                    document.mozCancelFullScreen();
+                } else {
+                    elem.mozRequestFullScreen();
+                }
+            } else if (elem.msRequestFullscreen) {
+                if (is_full_screen) {
+                    document.msExitFullscreen();
+                } else {
+                    elem.msRequestFullscreen();
                 }
             }
         }

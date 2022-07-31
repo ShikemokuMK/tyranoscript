@@ -144,7 +144,7 @@ tyrano.plugin.kag.tag.playbgm = {
         const str = $.trim(_str);
 
         // 登場するコロンを数える
-        const colon_count = (str.match(/\:/g) || []).length;
+        const colon_count = (str.match(/:/g) || []).length;
 
         // コロンを含まないならミリ秒が直接指定されているのだと解釈する
         if (colon_count === 0) {

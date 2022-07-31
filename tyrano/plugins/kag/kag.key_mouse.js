@@ -225,11 +225,12 @@ tyrano.plugin.kag.key_mouse = {
                 // 関数ならそのまま実行して終了
                 if (config_enabled) action();
                 return config_enabled;
-            case "string":
+            case "string": {
                 const tag = this.kag.parser.makeTag(action, 0);
                 name = tag.name;
                 pm = tag.pm;
                 break;
+            }
             case "object":
                 name = action.name;
                 pm = action.pm;
@@ -476,7 +477,7 @@ tyrano.plugin.kag.key_mouse = {
             // next なら先頭を、prev なら末尾をフォーカスする
             // const index = order === "next" ? 0 : j_focusable.length - 1;
             let index = 0;
-            if (this.util.isCloseButton(pos_list[index].j_elm)) {
+            if (this.util.isCloseButton(j_focusable.eq(index))) {
                 index++;
             }
             this.util.focus(j_focusable.eq(index));
@@ -647,7 +648,7 @@ tyrano.plugin.kag.key_mouse = {
             else index = Math.min(hash_num + 1, Math.ceil(this_pos[_x] / hash_width));
             new_pos_column[index].push(this_pos);
         });
-        new_pos_list = new_pos_column.reduce((prev, item) => {
+        const new_pos_list = new_pos_column.reduce((prev, item) => {
             return prev.concat(item);
         }, []);
         const index = new_pos_list.indexOf(focused_pos);

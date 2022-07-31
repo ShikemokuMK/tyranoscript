@@ -145,7 +145,7 @@ tyrano.plugin.kag.ftag = {
                 }
                 break;
             // コマアニメ
-            case "koma_anim":
+            case "koma_anim": {
                 img_src = $.parseStorage(pm.koma_anim, pm.folder);
                 j_glyph = $(`<div></div>`);
                 const j_koma_anim = $(`<div></div>`);
@@ -175,6 +175,7 @@ tyrano.plugin.kag.ftag = {
                 );
                 j_glyph.append(j_koma_anim);
                 break;
+            }
         }
 
         if (pm.keyframe) {
@@ -489,7 +490,7 @@ tyrano.plugin.kag.ftag = {
          }
          */
 
-        for (key in pm) {
+        for (let key in pm) {
             var val = pm[key];
 
             var c = "";
@@ -1444,8 +1445,8 @@ tyrano.plugin.kag.tag.text = {
         j_outer_message.css("width", width);
         j_outer_message.css("height", height);
 
-        chara_left = parseInt(chara_obj.css("left"));
-        chara_top = parseInt(chara_obj.css("top"));
+        let chara_left = parseInt(chara_obj.css("left"));
+        let chara_top = parseInt(chara_obj.css("top"));
 
         let fuki_left = chara_fuki["left"];
         let fuki_top = chara_fuki["top"];
@@ -1466,8 +1467,8 @@ tyrano.plugin.kag.tag.text = {
         fuki_left = fuki_left * per_width;
         fuki_top = fuki_top * per_height;
 
-        fuki_left2 = chara_left + fuki_left;
-        fuki_top2 = chara_top + fuki_top;
+        let fuki_left2 = chara_left + fuki_left;
+        let fuki_top2 = chara_top + fuki_top;
 
         let outer_width = parseInt(j_outer_message.css("width"));
         let outer_height = parseInt(j_outer_message.css("height"));
@@ -1554,8 +1555,8 @@ tyrano.plugin.kag.tag.text = {
         }
 
         //吹き出しの大きさを自動調整。
-        width = j_msg_inner.css("width");
-        height = j_msg_inner.css("height");
+        let width = j_msg_inner.css("width");
+        let height = j_msg_inner.css("height");
 
         //20 はアイコンの文
         width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
@@ -3445,7 +3446,7 @@ tyrano.plugin.kag.tag.free = {
                     that.kag.ftag.nextOrder();
                 }
             } else {
-                var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+                let j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
                 j_obj = j_obj.find("." + pm.name);
                 j_obj.remove();
 
@@ -3453,7 +3454,7 @@ tyrano.plugin.kag.tag.free = {
                 that.kag.ftag.nextOrder();
             }
         } else {
-            var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+            let j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
             j_obj = j_obj.find("." + pm.name);
             j_obj.remove();
             //this.kag.layer.getLayer(pm.layer, pm.page).css("background-image", "");
@@ -3917,7 +3918,7 @@ tyrano.plugin.kag.tag.mtext = {
         target_layer.append(tobj);
 
         //bool変換
-        for (key in pm) {
+        for (let key in pm) {
             if (pm[key] == "true") {
                 pm[key] = true;
             } else if (pm[key] == "false") {
@@ -6747,6 +6748,9 @@ tyrano.plugin.kag.tag.clickable = {
     },
 
     setEvent: function (j_button, pm) {
+        const that = this;
+        let button_clicked = false;
+
         //
         // ホバーイベント
         //
@@ -6775,7 +6779,7 @@ tyrano.plugin.kag.tag.clickable = {
 
             // 1度クリックしたボタンも無効
             if (button_clicked) return false;
-            ("");
+
             //
             // クリックが有効だったときの処理
             //
@@ -7131,7 +7135,7 @@ tyrano.plugin.kag.tag.trans = {
         var map_layer_fore = $.cloneObject(this.kag.layer.map_layer_fore);
         var map_layer_back = $.cloneObject(this.kag.layer.map_layer_back);
 
-        for (key in map_layer_fore) {
+        for (let key in map_layer_fore) {
             //指定条件のレイヤのみ実施
             if (pm.children == true || key === pm.layer) {
                 (function () {
@@ -7518,6 +7522,7 @@ tyrano.plugin.kag.tag.layermode = {
             blend_layer.css("opacity", $.convertOpacity(pm.opacity));
         }
 
+        let folder;
         if (pm.folder != "") {
             folder = pm.folder;
         } else {

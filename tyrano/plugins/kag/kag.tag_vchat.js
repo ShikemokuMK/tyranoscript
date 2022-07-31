@@ -94,8 +94,6 @@ tyrano.plugin.kag.tag.vchat_in = {
             /*  "font-family":that.kag.stat.font.face,*/
         });
 
-        var j_area_chat = $("#vchat_base");
-
         j_area_chat.prepend(j_vchat);
 
         //スクロールを一番上にする。

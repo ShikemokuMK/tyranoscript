@@ -527,13 +527,13 @@ tyrano.plugin.kag = {
 
             return;
         } else {
-            var AdmZip = require("adm-zip");
+            const AdmZip = require("adm-zip");
 
             var path = require("path");
             var abspath = path.resolve("./");
 
             // reading archives
-            var zip = new AdmZip(patch_path);
+            const zip = new AdmZip(patch_path);
             zip.extractAllTo(unzip_path + "/update_tmp", true);
 
             //ファイルを上書きしている
@@ -715,14 +715,14 @@ tyrano.plugin.kag = {
                 localStorage.setItem(that.save_key_id, that.save_key_val);
 
                 //セーブデータ上書き
-                var tmp_array = that.menu.getSaveData();
+                let tmp_array = that.menu.getSaveData();
                 //ハッシュを上書き
                 tmp_array["hash"] = that.save_key_val;
                 $.setStorage(that.kag.config.projectID + "_tyrano_data", tmp_array, that.kag.config.configSave);
             }
 
             //ハッシュに差分があったら、警告を表示して上書きするか確認。
-            var tmp_array = that.menu.getSaveData();
+            let tmp_array = that.menu.getSaveData();
 
             if (tmp_array["hash"] != that.save_key_val) {
                 alert($.lang("save_file_violation_1"));
@@ -848,9 +848,9 @@ tyrano.plugin.kag = {
             //absolute指定
             $("#tyrano_base").css("position", "absolute");
 
-            function noScroll(event) {
+            const noScroll = (event) => {
                 event.preventDefault();
-            }
+            };
             // スクロール禁止(SP) vchatのときは例外
             if (this.kag.config["vchat"] != "true") {
                 document.addEventListener("touchmove", noScroll, {
@@ -1048,7 +1048,7 @@ tyrano.plugin.kag = {
 
         var num_message_layer = parseInt(this.config.numMessageLayers);
 
-        for (var i = 1; i < num_message_layer; i++) {
+        for (let i = 1; i < num_message_layer; i++) {
             var message_layer_name = "message" + i;
 
             this.layer.addLayer(message_layer_name);
@@ -1068,7 +1068,7 @@ tyrano.plugin.kag = {
 
         //指定された個数分、Foreレイヤを登録する
         var fore_layer_num = parseInt(this.config.numCharacterLayers);
-        for (var i = 0; i < fore_layer_num; i++) {
+        for (let i = 0; i < fore_layer_num; i++) {
             this.layer.addLayer("" + i);
             this.layer
                 .getLayer("" + i, "fore")
@@ -1171,8 +1171,10 @@ tyrano.plugin.kag = {
         if (this.kag.config["vchatMenuVisible"] && this.kag.config["vchatMenuVisible"] == "true") {
             //コンフィグを表示する。
             setTimeout(function () {
+                let player_back_cnt;
+
                 (function () {
-                    var player_back_cnt = 0;
+                    player_back_cnt = 0;
                     var j_menu_button = $(
                         "<div id='player_menu_button' class='player_menu_area' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white;font-size:2em'><span style='color:#6495ED'>メニュー</span></div>",
                     );
@@ -1526,7 +1528,7 @@ tyrano.plugin.kag = {
             style_text = "top:" + sippo_left + "px;";
         }
 
-        style_text_key = "";
+        let style_text_key = "";
 
         //トップ指定の場合
 
@@ -1935,7 +1937,7 @@ tyrano.plugin.kag = {
 
     //値が空白のものは設定しない
     setStyles: function (j_obj, array_style) {
-        for (key in array_style) {
+        for (let key in array_style) {
             if (typeof array_style[key] != "undefined") {
                 if (array_style[key] === "") {
                 } else {

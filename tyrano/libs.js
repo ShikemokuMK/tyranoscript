@@ -1,13 +1,6 @@
 (function ($) {
     //jquery 拡張
 
-    //アニメーション開始。未実装　キーフレアニメは投入したい
-    $.fn.a2d = function () {
-        return this.each(function (i) {
-            $(this).css("-webkit-animation-play-state", str);
-        });
-    };
-
     $.getBaseURL = function () {
         var str = location.pathname;
         var i = str.lastIndexOf("/");
@@ -73,7 +66,8 @@
     };
 
     $.getViewPort = function () {
-        var width, heiht;
+        let width;
+        let height;
 
         if (self.innerHeight) {
             // all except Explorer
@@ -399,36 +393,11 @@
     };
 
     $.loadText = function (file_path, callback) {
-        /*
-        var httpObj = jQuery.get(file_path + "?" + Math.floor(Math.random() * 1000000), null, function(obj) {
-
-            var order_str = "";
-
-            if (httpObj) {
-                if (httpObj.responseText) {
-                    order_str = httpObj.responseText;
-                } else {
-
-                    order_str = obj;
-
-                }
-            } else {
-
-                order_str = obj;
-
-            }
-
-            callback(order_str);
-            // createOrder
-        });
-
-        */
-
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
             success: function (text) {
-                order_str = text;
+                const order_str = text;
                 callback(order_str);
             },
             error: function () {
@@ -590,7 +559,7 @@
     $.extendParam = function (pm, target) {
         var tmp = target;
 
-        for (key in target) {
+        for (let key in target) {
             if (pm[key]) {
                 if (pm[key] != "") {
                     target[key] = pm[key];
@@ -701,7 +670,7 @@
         if (mode == "hide") {
             j_obj.show();
             method = $.replaceAll(method, "In", "Out");
-            var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            const animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
             j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
@@ -712,7 +681,7 @@
             });
         } else if (mode == "show") {
             j_obj.show();
-            var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            const animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
             j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
@@ -726,7 +695,7 @@
 
     //要素から空白のオブジェクトを削除して返却する
     $.minifyObject = function (obj) {
-        for (key in obj) {
+        for (let key in obj) {
             if (obj[key] == null || obj[key] == "") {
                 delete obj[key];
             }
@@ -887,7 +856,7 @@
                         html = html.substring(index, html.length);
 
                         var replace_index = html.indexOf("/game/data");
-                        tmp_html = html.substring(replace_index + "/game/data".length, html.length);
+                        const tmp_html = html.substring(replace_index + "/game/data".length, html.length);
                         html = "./data" + tmp_html;
                     }
                 }
@@ -972,7 +941,7 @@
         //console.log(path);
 
         if (process.platform == "darwin") {
-            platrofm = "mac";
+            const platrofm = "mac";
             //TyranoStudio-darwin-x64.asar
             if (path.indexOf(".asar") != -1) {
                 path = $.replaceAll(path, "/Contents/Resources/app.asar", "");
@@ -1026,8 +995,6 @@
         try {
             var gv = "null";
             var fs = require("fs");
-            var out_path = "";
-
             var out_path = $.getExePath();
 
             if (process.execPath.indexOf("var/folders") != -1) {
@@ -1188,7 +1155,7 @@
     //オブジェクトの個数をもってきます。1
     $.countObj = function (obj) {
         var num = 0;
-        for (key in obj) {
+        for (let key in obj) {
             num++;
         }
         return num;
@@ -1291,7 +1258,6 @@
             for (var i = 0; i < nodes.length; i++) {
                 if (typeof nodes[i].tag != "undefined" && nodes[i].tag.toLowerCase() == "script") {
                     break;
-                    return false;
                 }
 
                 if (typeof nodes[i].tag == "undefined") {
@@ -1458,7 +1424,7 @@
 
         // 文字列を「カッコの外にあるカンマ」で刻む
         // 色指定自体にカンマが含まれるケース（"rgb(255,255,255)"のような）を考慮しなければならない
-        const edge_str_hash = edge_str.split(/,(?![^\(]*\))/);
+        const edge_str_hash = edge_str.split(/,(?![^(]*\))/);
 
         // 内側から加算していった合計の縁取り太さ（複数縁取りを行う場合に意味を持つ）
         // filter: drop-shadow()方式では不要、text-shadow方式や-webkit-text-stroke方式では必要
@@ -1469,7 +1435,7 @@
             const this_edge_str_trim = $.trim(this_edge_str);
 
             // 先頭の〇〇pxをチェック
-            const width_match = this_edge_str_trim.match(/^[0-9\.]+px /);
+            const width_match = this_edge_str_trim.match(/^[0-9.]+px /);
 
             let width;
             let width_str;
@@ -2014,7 +1980,7 @@
             str = str.substring(1);
         }
         // ハイフン＋なんらかの小文字アルファベットのマッチ
-        const match = str.match(/\-[a-z]/);
+        const match = str.match(/-[a-z]/);
         // マッチしなくなったら完成
         if (!match) {
             return str;
@@ -2241,8 +2207,8 @@
             if (!p) p = d * 0.3;
             if (a < Math.abs(c)) {
                 a = c;
-                var s = p / 4;
-            } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+                s = p / 4;
+            } else s = (p / (2 * Math.PI)) * Math.asin(c / a);
             return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
         },
         easeOutElastic: function (x, t, b, c, d) {
@@ -2254,8 +2220,8 @@
             if (!p) p = d * 0.3;
             if (a < Math.abs(c)) {
                 a = c;
-                var s = p / 4;
-            } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+                s = p / 4;
+            } else s = (p / (2 * Math.PI)) * Math.asin(c / a);
             return a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) + c + b;
         },
         easeInOutElastic: function (x, t, b, c, d) {
@@ -2267,8 +2233,8 @@
             if (!p) p = d * (0.3 * 1.5);
             if (a < Math.abs(c)) {
                 a = c;
-                var s = p / 4;
-            } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
+                s = p / 4;
+            } else s = (p / (2 * Math.PI)) * Math.asin(c / a);
             if (t < 1) return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
             return a * Math.pow(2, -10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) * 0.5 + c + b;
         },
