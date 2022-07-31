@@ -373,7 +373,7 @@ tyrano.plugin.kag.tag.wait_camera = {
 #[mask]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 スクリーンマスク表示
@@ -483,7 +483,7 @@ tyrano.plugin.kag.tag.mask = {
 #[mask_off]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 スクリーンマスク消去

@@ -703,7 +703,7 @@ tyrano.plugin.kag.tag.text = {
     },
 
     /**
-     * メッセージ関連のデフォルトのコンフィグ
+     * メッセージ・テキストのデフォルトのコンフィグ
      */
     default_message_config: {
         ch_speed_in_click: "1",
@@ -719,7 +719,7 @@ tyrano.plugin.kag.tag.text = {
     },
 
     /**
-     * メッセージ関連のコンフィグを取り出す
+     * メッセージ・テキストのコンフィグを取り出す
      * 基本的にstat.message_configから取り出すがそれが不可の場合はdefault_message_configを参照
      * (旧バージョンのセーブデータではstat.message_configが定義されていない点に留意)
      * @param {string} key
@@ -2038,7 +2038,7 @@ tyrano.plugin.kag.tag.label = {
 #[config_record_label]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 既読管理の設定
@@ -2091,7 +2091,7 @@ tyrano.plugin.kag.tag.config_record_label = {
 #[l]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 クリック待ち
@@ -2155,7 +2155,7 @@ tyrano.plugin.kag.tag.l = {
 #[p]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 クリック待ち＋改ページ
@@ -2220,7 +2220,7 @@ tyrano.plugin.kag.tag.p = {
 #[graph]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 インライン画像表示
@@ -2328,7 +2328,7 @@ tyrano.plugin.kag.tag.jump = {
 #[r]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 改行
@@ -2364,7 +2364,7 @@ tyrano.plugin.kag.tag.r = {
 #[er]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤの文字の消去
@@ -2403,7 +2403,7 @@ tyrano.plugin.kag.tag.er = {
 #[cm]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 すべてのメッセージレイヤのクリア
@@ -2458,7 +2458,7 @@ tyrano.plugin.kag.tag.cm = {
 #[ct]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤにのリセット
@@ -2503,7 +2503,7 @@ tyrano.plugin.kag.tag.ct = {
 #[current]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 操作対象のメッセージレイヤの指定
@@ -2555,7 +2555,7 @@ tyrano.plugin.kag.tag.current = {
 #[position]
 
 :group
-レイヤ関連
+メッセージ関連の設定
 
 :title
 メッセージウィンドウの属性変更
@@ -2785,7 +2785,7 @@ tyrano.plugin.kag.tag.position = {
 #[fuki_start]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤをふきだし化する
@@ -2854,7 +2854,7 @@ tyrano.plugin.kag.tag.fuki_start = {
 #[fuki_stop]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤのふきだし化を無効にする
@@ -2906,7 +2906,7 @@ tyrano.plugin.kag.tag.fuki_stop = {
 #[fuki_chara]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 ふきだしのキャラクター登録
@@ -3016,7 +3016,7 @@ tyrano.plugin.kag.tag.fuki_chara = {
 #[image]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 画像を表示
@@ -3253,7 +3253,7 @@ tyrano.plugin.kag.tag.image = {
 #[freeimage]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤのクリア
@@ -3353,7 +3353,7 @@ tyrano.plugin.kag.tag.freelayer = tyrano.plugin.kag.tag.freeimage;
 #[free]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 オブジェクトの解放
@@ -3456,7 +3456,7 @@ tyrano.plugin.kag.tag.free = {
 #[ptext]
 
 :group
-レイヤ関連
+メッセージ・テキスト
 
 :title
 レイヤにテキストを表示
@@ -3744,7 +3744,7 @@ tyrano.plugin.kag.tag.ptext = {
 #[mtext]
 
 :group
-レイヤ関連
+メッセージ・テキスト
 
 :title
 演出テキスト
@@ -3959,7 +3959,7 @@ tyrano.plugin.kag.tag.mtext = {
 #[backlay]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤ情報の表ページから裏ページへのコピー
@@ -4002,7 +4002,7 @@ tyrano.plugin.kag.tag.backlay = {
 #[wt]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 トランジションの終了待ち
@@ -4654,7 +4654,7 @@ tyrano.plugin.kag.tag.wait_cancel = {
 #[hidemessage]
 
 :group
-レイヤ関連
+メッセージ関連の設定
 
 :title
 メッセージレイヤの一時的な非表示
@@ -4688,7 +4688,7 @@ tyrano.plugin.kag.tag.hidemessage = {
 #[quake]
 
 :group
-システム操作
+演出・効果・動画
 
 :title
 画面を揺らす
@@ -4771,7 +4771,7 @@ tyrano.plugin.kag.tag.quake = {
 #[font]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキストスタイルの変更
@@ -4884,7 +4884,7 @@ tyrano.plugin.kag.tag.font = {
 #[deffont]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 デフォルトのテキストスタイル設定
@@ -4987,7 +4987,7 @@ tyrano.plugin.kag.tag.deffont = {
 #[message_config]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 メッセージコンフィグ
@@ -5096,7 +5096,7 @@ tyrano.plugin.kag.tag.message_config = {
 #[delay]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 文字の表示速度の設定
@@ -5137,7 +5137,7 @@ tyrano.plugin.kag.tag.delay = {
 #[resetdelay]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 文字の表示速度をデフォルトに戻す
@@ -5170,7 +5170,7 @@ tyrano.plugin.kag.tag.resetdelay = {
 #[configdelay]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 デフォルトの文字の表示速度の設定
@@ -5214,7 +5214,7 @@ tyrano.plugin.kag.tag.configdelay = {
 #[nowait]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキスト瞬間表示モードの開始
@@ -5223,10 +5223,6 @@ tyrano.plugin.kag.tag.configdelay = {
 テキスト瞬間表示モードを開始します。このモード中は、テキスト全体が一瞬で表示されます。文字が1文字ずつ追加されていく処理（通常の処理）は行われません。
 
 通常のモードに戻すには`[endnowait]`タグを使います。
-
-:sample
-
-:param
 
 #[end]
 */
@@ -5245,7 +5241,7 @@ tyrano.plugin.kag.tag.nowait = {
 #[endnowait]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキスト瞬間表示モードの停止
@@ -5253,10 +5249,6 @@ tyrano.plugin.kag.tag.nowait = {
 :exp
 `[nowait]`によるテキスト瞬間表示モードを停止します。
 テキストの表示速度は`[nowait]`タグを指定する前の状態に戻ります。
-
-:sample
-
-:param
 
 #[end]
 */
@@ -5275,7 +5267,7 @@ tyrano.plugin.kag.tag.endnowait = {
 #[resetfont]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキストスタイルのリセット
@@ -5323,7 +5315,7 @@ tyrano.plugin.kag.tag.resetfont = {
 #[layopt]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤの属性設定
@@ -5421,7 +5413,7 @@ tyrano.plugin.kag.tag.layopt = {
 #[ruby]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 ルビを振る
@@ -5467,7 +5459,7 @@ tyrano.plugin.kag.tag["ruby"] = {
 #[mark]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 テキストマーカー
@@ -5532,7 +5524,7 @@ tyrano.plugin.kag.tag["mark"] = {
 #[endmark]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 テキストマーカー終了
@@ -5571,37 +5563,10 @@ tyrano.plugin.kag.tag["endmark"] = {
 };
 
 /*
-#[cancelskip]
-
-:group
-システム操作
-
-:title
-スキップモード解除
-
-:exp
-スキップモードを解除します。`[skipstop]`と同じ動作。
-プレイヤーがスキップモードを使用していても、`[cancelskip]`タグを通過すると強制的にスキップモードが停止されます。
-
-:sample
-
-:param
-
-#[end]
-*/
-
-tyrano.plugin.kag.tag.cancelskip = {
-    start: function (pm) {
-        this.kag.setSkip(false);
-        this.kag.ftag.nextOrder();
-    },
-};
-
-/*
 #[locate]
 
 :group
-システム操作
+画像・背景・レイヤ操作
 
 :title
 表示位置の指定
@@ -6826,7 +6791,7 @@ tyrano.plugin.kag.tag.clickable = {
 #[glyph]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 クリック待ちグリフの設定
@@ -7091,7 +7056,7 @@ start:function(pm){
 #[trans]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤのトランジション
@@ -7198,7 +7163,7 @@ tyrano.plugin.kag.tag.trans = {
 #[bg]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 背景の切り替え
@@ -7316,7 +7281,7 @@ tyrano.plugin.kag.tag.bg = {
 #[bg2]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 背景の切り替え
@@ -7475,7 +7440,7 @@ tyrano.plugin.kag.tag.bg2 = {
 #[layermode]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 レイヤーモード
@@ -7590,7 +7555,7 @@ tyrano.plugin.kag.tag.layermode = {
 #[layermode_movie]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 レイヤーモード（動画）
@@ -7792,7 +7757,7 @@ tyrano.plugin.kag.tag.layermode_movie = {
 #[free_layermode]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 合成レイヤの消去

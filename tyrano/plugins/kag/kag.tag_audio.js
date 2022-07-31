@@ -2,7 +2,7 @@
 #[playbgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 BGMの再生
@@ -644,7 +644,7 @@ tyrano.plugin.kag.tag.playbgm = {
 #[stopbgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 BGMの停止
@@ -768,7 +768,7 @@ tyrano.plugin.kag.tag.stopbgm = {
 #[fadeinbgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 BGMをフェードイン再生
@@ -818,7 +818,7 @@ tyrano.plugin.kag.tag.fadeinbgm = {
 #[fadeoutbgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 BGMをフェードアウト停止
@@ -860,7 +860,7 @@ tyrano.plugin.kag.tag.fadeoutbgm = {
 #[xchgbgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 BGMのクロスフェード（入れ替え）
@@ -942,7 +942,7 @@ tyrano.plugin.kag.tag.xchgbgm = {
 #[playse]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 効果音の再生
@@ -1000,7 +1000,7 @@ tyrano.plugin.kag.tag.playse = {
 #[stopse]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 効果音の停止
@@ -1035,7 +1035,7 @@ tyrano.plugin.kag.tag.stopse = {
 #[fadeinse]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 効果音のフェードイン
@@ -1086,7 +1086,7 @@ tyrano.plugin.kag.tag.fadeinse = {
 #[fadeoutse]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 効果音のフェードアウト
@@ -1127,7 +1127,7 @@ tyrano.plugin.kag.tag.fadeoutse = {
 #[bgmopt]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 BGM設定
@@ -1239,7 +1239,7 @@ tyrano.plugin.kag.tag.bgmopt = {
 #[seopt]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 SE設定
@@ -1354,7 +1354,7 @@ tyrano.plugin.kag.tag.seopt = {
 #[changevol]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 再生中のオーディオの音量変更
@@ -1469,7 +1469,7 @@ tyrano.plugin.kag.tag.changevol = {
 #[pausebgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 再生中のBGMの一時停止
@@ -1515,7 +1515,7 @@ tyrano.plugin.kag.tag.pausebgm = {
 #[resumebgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 一時停止中のオーディオの再開
@@ -1561,7 +1561,7 @@ tyrano.plugin.kag.tag.resumebgm = {
 #[pausese]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 再生中のSEの一時停止
@@ -1593,7 +1593,7 @@ tyrano.plugin.kag.tag.pausese = {
 #[resumese]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 一時停止中のSEの再開
@@ -1625,7 +1625,7 @@ tyrano.plugin.kag.tag.resumese = {
 #[wbgm]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 BGMの再生完了を待つ
@@ -1663,7 +1663,7 @@ tyrano.plugin.kag.tag.wbgm = {
 #[wse]
 
 :group
-オーディオ関連
+オーディオ
 
 :title
 効果音の再生完了を待つ
@@ -1699,7 +1699,7 @@ tyrano.plugin.kag.tag.wse = {
 #[voconfig]
 
 :group
-オーディオ関連
+ボイス・読み上げ
 
 :title
 ボイスの再生設定
@@ -1799,7 +1799,7 @@ tyrano.plugin.kag.tag.voconfig = {
 #[vostart]
 
 :group
-オーディオ関連
+ボイス・読み上げ
 
 :title
 ボイス自動再生開始
@@ -1836,7 +1836,7 @@ tyrano.plugin.kag.tag.vostart = {
 #[vostop]
 
 :group
-オーディオ関連
+ボイス・読み上げ
 
 :title
 ボイス自動再生停止
@@ -1864,7 +1864,7 @@ tyrano.plugin.kag.tag.vostop = {
 #[speak_on]
 
 :group
-オーディオ関連
+ボイス・読み上げ
 
 :title
 読み上げ機能の有効化
@@ -1931,7 +1931,7 @@ tyrano.plugin.kag.tag.speak_on = {
 #[speak_off]
 
 :group
-オーディオ関連
+ボイス・読み上げ
 
 :title
 読み上げ機能の無効化

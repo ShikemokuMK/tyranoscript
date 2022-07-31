@@ -4,7 +4,7 @@
 #[loadjs]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 外部JavaScriptファイル読み込み
@@ -46,7 +46,7 @@ tyrano.plugin.kag.tag.loadjs = {
 #[movie]
 
 :group
-その他
+演出・効果・動画
 
 :title
 動画の再生
@@ -325,7 +325,7 @@ tyrano.plugin.kag.tag.movie = {
 #[bgmovie]
 
 :group
-その他
+演出・効果・動画
 
 :title
 背景ムービーの再生
@@ -402,7 +402,7 @@ tyrano.plugin.kag.tag.bgmovie = {
 #[wait_bgmovie]
 
 :group
-その他
+演出・効果・動画
 
 :title
 背景ムービーの再生完了を待つ
@@ -441,7 +441,7 @@ tyrano.plugin.kag.tag.wait_bgmovie = {
 #[stop_bgmovie]
 
 :group
-その他
+演出・効果・動画
 
 :title
 背景ムービーの停止
@@ -510,7 +510,7 @@ tyrano.plugin.kag.tag.stop_bgmovie = {
 #[showsave]
 
 :group
-システム操作
+メニュー・HTML表示
 
 :title
 セーブ画面の表示
@@ -544,7 +544,7 @@ tyrano.plugin.kag.tag.showsave = {
 #[showload]
 
 :group
-システム操作
+メニュー・HTML表示
 
 :title
 ロード画面の表示
@@ -575,7 +575,7 @@ tyrano.plugin.kag.tag.showload = {
 #[showmenu]
 
 :group
-システム操作
+メニュー・HTML表示
 
 :title
 メニュー画面の表示
@@ -604,7 +604,7 @@ tyrano.plugin.kag.tag.showmenu = {
 #[showmenubutton]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 メニューボタンの表示
@@ -635,7 +635,7 @@ tyrano.plugin.kag.tag.showmenubutton = {
 #[hidemenubutton]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 メニューボタンの非表示
@@ -666,7 +666,7 @@ tyrano.plugin.kag.tag.hidemenubutton = {
 #[skipstart]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 スキップモード開始
@@ -698,24 +698,40 @@ tyrano.plugin.kag.tag.skipstart = {
 #[skipstop]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 スキップモード停止
 
 :exp
-スキップモードを停止します。`[cancelskip]`と同じ動作。
-
-:sample
-
-:param
+スキップモードを解除します。`[cancelskip]`と同じ動作。
 
 #[end]
 */
 
 tyrano.plugin.kag.tag.skipstop = {
-    pm: {},
+    start: function (pm) {
+        this.kag.setSkip(false);
+        this.kag.ftag.nextOrder();
+    },
+};
 
+/*
+#[cancelskip]
+
+:group
+メッセージ関連の設定
+
+:title
+スキップモード解除
+
+:exp
+スキップモードを解除します。`[skipstop]`と同じ動作。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.cancelskip = {
     start: function (pm) {
         this.kag.setSkip(false);
         this.kag.ftag.nextOrder();
@@ -726,7 +742,7 @@ tyrano.plugin.kag.tag.skipstop = {
 #[autostart]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 オートモード開始
@@ -735,10 +751,6 @@ tyrano.plugin.kag.tag.skipstop = {
 オートモードを開始します。テキストの文字数に応じた時間経過によってクリック待ちを自動的で通過するようになります。
 
 オートモード時の進行速度は`Config.tjs`の`autoSpeed`、もしくは`[autoconfig]`タグを確認してください。
-
-:sample
-
-:param
 
 #[end]
 */
@@ -763,17 +775,13 @@ tyrano.plugin.kag.tag.autostart = {
 #[autostop]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 オートモード停止
 
 :exp
 オートモードを停止します。
-
-:sample
-
-:param
 
 #[end]
 */
@@ -799,15 +807,13 @@ tyrano.plugin.kag.tag.autostop = {
 #[autoconfig]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 オート設定
 
 :exp
 オートモードに関する設定を行います。
-
-:sample
 
 :param
 speed     = オートモード時のスピードをミリ秒で指定してください,
@@ -847,7 +853,7 @@ tyrano.plugin.kag.tag.autoconfig = {
 #[anim]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 アニメーション
@@ -982,7 +988,7 @@ tyrano.plugin.kag.tag.anim = {
 #[wa]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 アニメーション終了待ち
@@ -1014,7 +1020,7 @@ tyrano.plugin.kag.tag.wa = {
 #[stopanim]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 アニメーション強制停止
@@ -1051,7 +1057,7 @@ tyrano.plugin.kag.tag.stopanim = {
 #[keyframe]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 キーフレームアニメーション定義の開始
@@ -1100,7 +1106,7 @@ tyrano.plugin.kag.tag.keyframe = {
 #[endkeyframe]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 キーフレームアニメーション定義の終了
@@ -1128,7 +1134,7 @@ tyrano.plugin.kag.tag.endkeyframe = {
 #[frame]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 キーフレームアニメーション定義
@@ -1235,7 +1241,7 @@ tyrano.plugin.kag.tag.frame = {
 #[kanim]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 キーフレームアニメーションの実行
@@ -1351,7 +1357,7 @@ tyrano.plugin.kag.tag.kanim = {
 #[stop_kanim]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 キーフレームアニメーションの停止
@@ -1411,7 +1417,7 @@ tyrano.plugin.kag.tag.stop_kanim = {
 #[xanim]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 汎用アニメーションの実行
@@ -1803,7 +1809,7 @@ tyrano.plugin.kag.tag.xanim = {
 #[stop_xanim]
 
 :group
-アニメーション関連
+アニメーション
 
 :title
 [xanim]の停止
@@ -3809,7 +3815,7 @@ tyrano.plugin.kag.tag.chara_part_reset = {
 #[showlog]
 
 :group
-システム操作
+メニュー・HTML表示
 
 :title
 バックログの表示
@@ -3838,7 +3844,7 @@ tyrano.plugin.kag.tag.showlog = {
 #[filter]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 フィルター効果演出
@@ -3961,7 +3967,7 @@ tyrano.plugin.kag.tag.filter = {
 #[free_filter]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 フィルター効果消去
@@ -4027,7 +4033,7 @@ tyrano.plugin.kag.tag.free_filter = {
 #[position_filter]
 
 :group
-レイヤ関連
+メッセージ関連の設定
 
 :title
 メッセージウィンドウ裏にフィルター効果
@@ -4124,7 +4130,7 @@ tyrano.plugin.kag.tag.position_filter = {
 #[web]
 
 :group
-その他
+メニュー・HTML表示
 
 :title
 Webサイトを開く

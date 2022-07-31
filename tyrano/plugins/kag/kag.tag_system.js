@@ -2,7 +2,7 @@
 #[eval]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 式の評価
@@ -59,7 +59,7 @@ tyrano.plugin.kag.tag.eval = {
 #[clearvar]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 変数の消去
@@ -97,7 +97,7 @@ tyrano.plugin.kag.tag.clearvar = {
 #[clearsysvar]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 システム変数の全消去
@@ -125,7 +125,7 @@ tyrano.plugin.kag.tag.clearsysvar = {
 #[clearstack]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 スタックの消去
@@ -232,7 +232,7 @@ tyrano.plugin.kag.tag["close"] = {
 #[trace]
 
 :group
-その他
+変数・JS操作・ファイル読込
 
 :title
 コンソールへの値の出力
@@ -275,7 +275,7 @@ tyrano.plugin.kag.tag["trace"] = {
 #[body]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 ゲーム画面外の設定
@@ -372,7 +372,7 @@ tyrano.plugin.kag.tag["body"] = {
 #[title]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 タイトル指定
@@ -416,7 +416,7 @@ tyrano.plugin.kag.tag["title"] = {
 #[iscript]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 JavaScriptの記述
@@ -461,7 +461,7 @@ tyrano.plugin.kag.tag.iscript = {
 #[endscript]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 JavaScriptの終了
@@ -505,7 +505,7 @@ tyrano.plugin.kag.tag.endscript = {
 #[html]
 
 :group
-その他
+メニュー・HTML表示
 
 :title
 HTMLをレイヤ追加
@@ -567,7 +567,7 @@ tyrano.plugin.kag.tag.html = {
 #[endhtml]
 
 :group
-その他
+メニュー・HTML表示
 
 :title
 HTMLの終了
@@ -625,7 +625,7 @@ tyrano.plugin.kag.tag.endhtml = {
 #[emb]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 式評価結果の埋め込み
@@ -683,7 +683,7 @@ tyrano.plugin.kag.tag.emb = {
 #[if]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐
@@ -796,7 +796,7 @@ tyrano.plugin.kag.tag["if"] = {
 #[elsif]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐（複数の条件）
@@ -861,7 +861,7 @@ tyrano.plugin.kag.tag["elsif"] = {
 #[else]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐（条件を満たさなかったとき）
@@ -921,7 +921,7 @@ tyrano.plugin.kag.tag["else"] = {
 #[endif]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐の終了
@@ -951,7 +951,7 @@ tyrano.plugin.kag.tag["endif"] = {
 #[call]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 サブルーチンの呼び出し
@@ -1022,7 +1022,7 @@ tyrano.plugin.kag.tag["call"] = {
 #[return]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 サブルーチンから戻る
@@ -1072,7 +1072,7 @@ tyrano.plugin.kag.tag["return"] = {
 #[macro]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 マクロ定義の開始
@@ -1173,7 +1173,7 @@ tyrano.plugin.kag.tag.macro = {
 #[endmacro]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 マクロ定義の終了
@@ -1231,7 +1231,7 @@ tyrano.plugin.kag.tag.endmacro = {
 #[erasemacro]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 マクロの削除
@@ -1304,7 +1304,7 @@ tyrano.plugin.kag.tag.savesnap = {
 システム操作
 
 :title
-オートセーブ機能
+オートセーブを実行
 
 :exp
 このタグに到達した際、自動的にプレイ状況を保存します。
@@ -1375,7 +1375,7 @@ tyrano.plugin.kag.tag.autosave = {
 システム操作
 
 :title
-オートロード機能
+オートロードを実行
 
 :exp
 `[autosave]`タグで保存されたデータを読み込みます。
@@ -1404,7 +1404,7 @@ tyrano.plugin.kag.tag.autoload = {
 #[ignore]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件によりシナリオを無視
@@ -1453,7 +1453,7 @@ tyrano.plugin.kag.tag.ignore = {
 #[endignore]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 [ignore]の終了
@@ -1478,7 +1478,7 @@ tyrano.plugin.kag.tag.endignore = {
 #[edit]
 
 :group
-入力フォーム関連
+入力フォーム
 
 :title
 テキストボックス
@@ -1614,7 +1614,7 @@ tyrano.plugin.kag.tag.edit = {
 #[preload]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 素材ファイルの事前読み込み
@@ -1727,7 +1727,7 @@ tyrano.plugin.kag.tag.preload = {
 #[unload]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 音声プリロードデータの破棄
@@ -1793,7 +1793,7 @@ tyrano.plugin.kag.tag.unload = {
 #[clearfix]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 fixレイヤーのクリア
@@ -1837,7 +1837,7 @@ tyrano.plugin.kag.tag.clearfix = {
 #[commit]
 
 :group
-入力フォーム関連
+入力フォーム
 
 :title
 フォームの確定
@@ -1884,7 +1884,7 @@ tyrano.plugin.kag.tag.commit = {
 #[cursor]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 マウスカーソルに画像を設定
@@ -2220,7 +2220,7 @@ tyrano.plugin.kag.tag.screen_full = {
 #[sleepgame]
 
 :group
-システム操作
+マクロ・分岐・サブルーチン関連
 
 :title
 ゲームの一時停止
@@ -2287,7 +2287,7 @@ tyrano.plugin.kag.tag.sleepgame = {
 #[awakegame]
 
 :group
-システム操作
+マクロ・分岐・サブルーチン関連
 
 :title
 ゲームの一時停止からの復帰
@@ -2359,7 +2359,7 @@ tyrano.plugin.kag.tag.awakegame = {
 #[breakgame]
 
 :group
-システム操作
+マクロ・分岐・サブルーチン関連
 
 :title
 ゲームの停止データの削除
@@ -2525,7 +2525,7 @@ tyrano.plugin.kag.tag.dialog = {
 #[plugin]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 プラグイン読み込み
@@ -2592,7 +2592,7 @@ tyrano.plugin.kag.tag.plugin = {
 #[sysview]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 システム画面変更
@@ -2641,7 +2641,7 @@ tyrano.plugin.kag.tag.sysview = {
 #[loadcss]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 CSS反映
@@ -2691,7 +2691,7 @@ tyrano.plugin.kag.tag.loadcss = {
 #[save_img]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 セーブデータのサムネイル変更
@@ -2764,7 +2764,7 @@ tyrano.plugin.kag.tag.save_img = {
 #[nolog]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 バックログ記録の一時停止
@@ -2781,8 +2781,6 @@ tyrano.plugin.kag.tag.save_img = {
 ここもログに記録されない[p]
 [endnolog]
 ここから、ログ記録再開[p]
-
-:param
 
 :demo
 2,kaisetsu/07_pushlog
@@ -2806,7 +2804,8 @@ tyrano.plugin.kag.tag.nolog = {
 #[endnolog]
 
 :group
-システム操作
+メッセージ関連の設定
+
 
 :title
 バックログ記録の再開
@@ -2821,8 +2820,6 @@ tyrano.plugin.kag.tag.nolog = {
 ここもログに記録されない[p]
 [endnolog]
 ここから、ログ記録再開[p]
-
-:param
 
 :demo
 2,kaisetsu/07_pushlog
@@ -2846,7 +2843,7 @@ tyrano.plugin.kag.tag.endnolog = {
 #[pushlog]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 バックログにテキスト追加
@@ -3147,7 +3144,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
 #[set_resizecall]
 
 :group
-システム操作
+システム画面・画像変更
 
 :title
 レスポンシブデザイン対応
