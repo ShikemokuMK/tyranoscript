@@ -73,35 +73,46 @@ Ver4.50以降で有効
         alert("Hello!")
     },
     
+    
+    
 <キーボード操作の指定方法> 
     
-    "キーコード" と "そのキーが押されたときのアクション" を配置します。
-    キーコードはキーの種類に対応する特定の数値です。たとえばスペースキーなら"32"といった具合です。
-    キーコードの確認には次のサイトが利用可能です。
-    http://shanabrian.com/web/javascript/keycode.php
-    上記サイトで実際にキーを押すことでキーコードを確認できます。
+    "キータイプ" とそれに対応する "アクション" を次のように配置することでキーコンフィグを設定できます。
     
-    ★使用頻度が高いと思われるキーコードの一覧
+    (指定例)
     
-    32 : space
-    13 : Enter
-    91 : Command (Mac)
-    17 : Ctrl (Windows)
-    27 : Escape
-    37 : ←
-    38 : ↑
-    39 : →
-    40 : ↓
-    90 : z
-    88 : x
+    key: {
+        " "         : "hidemessage",
+        "Enter"     : "next",
+    },
+    
+    "キータイプ" のかわりに "キーコード" を使って定義することもできます。
+    たとえ、次のように指定すれば、上の例とまったく同じ指定をしたことになります。
+    
+    (キーコードを使った指定例)
+    
+    key: {
+        "32" : "hidemessage",
+        "13" : "next",
+    },
+    
+    キータイプやキーコードは次のサイトで実際にキーを押すことで調べることができます。
+    https://ogihara88sai.github.io/display-keydown-event/
+    (上記サイトで表示される key がキータイプ、keyCode がキーコードです)
+
+    
     
 <マウス操作>
     
-    right      : 右クリックしたときの動作
-    center     : センターボタン（マウスホイール）をクリックしたときの動作
-    wheel_up   : マウスホイールを上に回したときの動作
-    wheel_down : マウスホイールを下に回したときの動作
+    right      : マウスの右側のボタンを押したときの動作
+    center     : マウスの中央のボタン（ホイール）を押したときの動作
+    wheel_up   : マウスのホイールを上に回したときの動作
+    wheel_down : マウスのホイールを下に回したときの動作
+    next       : マウスの「進む」ボタンを押したときの動作
+    prev       : マウスの「戻る」ボタンを押したときの動作
 
+    
+    
 <ジェスチャー操作>
 
     ★スマホ・タブレット限定
@@ -120,6 +131,8 @@ Ver4.50以降で有効
     つまり、2本の指でスワイプしたときのアクションを指定したい場合は
     swipe_up_2 のような名前でアクションを定義すればよいということです。
 
+    
+    
 <ゲームパッド操作>
 
     ★ボタン
@@ -183,23 +196,37 @@ Ver4.50以降で有効
     (指定例)
     
     gamepad: {
-        button: {
-            ...
-        },
+        ...
         stick_digital: {
-            L: {
-                UP: "focus_up",
-                DOWN: "focus_down",
-                LEFT: "focus_left",
-                RIGHT: "focus_right",
-            },
-            R: {
-                ...
-            },
+            L_UP: "",
+            L_DOWN: "",
+            L_LEFT: "",
+            L_RIGHT: "",
+            R_UP: "vmouse_wheelup -a -h delay=0",
+            R_DOWN: "vmouse_wheeldown -a -h delay=0",
+            R_LEFT: "",
+            R_RIGHT: "",
         },
         ...
+    
+    ★スティック入力
+    
+    スティック入力に仮想マウスカーソルの操作を割り当てることができます。
+    "vmouse_move" または "vmouse_aim" が指定可能です。
+    
+    vmouse_move : 仮想マウスカーソルを相対移動させます。基本はこちら。
+    vmouse_aim  : スティックの角度・倒し具合に対応する画面上の一点に仮想マウスカーソルを絶対移動させます。
+    
+    (指定例)
+
+    stick: {
+        L: "vmouse_move",
+        R: "",
+    }
 
 */
+
+
 
 var __tyrano_key_config = {
     // ブラウザ固有の動作（キーの組み合わせによるショートカットアクション）を許可するか否か
@@ -212,84 +239,75 @@ var __tyrano_key_config = {
 
     // キーボード操作
     key: {
-        9: "focus_next -a",   // Tab
-        27: "cancel -a",      // Escape
-        32: "hidemessage",    // Space
-        13: "next -a",        // Enter
-        91: "holdskip",       // Command (Mac)
-        17: "holdskip",       // Ctrl (Windows)
-        37: "focus_next -a",  // ←
-        38: "focus_up -a",    // ↑
-        39: "focus_right -a", // →
-        40: "focus_down -a",  // ↓
+        "Tab"        : "focus_next -a",
+        "Escape"     : "cancel -a",
+        " "          : "hidemessage",
+        "Enter"      : "next -a",
+        "Meta"       : "holdskip",
+        "Control"    : "holdskip",
+        "ArrowLeft"  : "focus_left -a",
+        "ArrowUp"    : "focus_up -a",
+        "ArrowRight" : "focus_right -a",
+        "ArrowDown"  : "focus_down -a",
+        "w"          : "vmouse_up -a -h delay=0",
+        "s"          : "vmouse_down -a -h delay=0",
+        "a"          : "vmouse_left -a -h delay=0",
+        "d"          : "vmouse_right -a -h delay=0",
     },
 
     // マウス操作
     mouse: {
-        right: "hidemessage", // 右クリック
-        center: "menu",       // ホイールクリック
-        wheel_up: "backlog",  // ホイールアップ
-        wheel_down: "next",   // ホイールダウン
+        "right"      : "hidemessage",
+        "center"     : "menu",
+        "wheel_up"   : "backlog",
+        "wheel_down" : "next",
+        "prev"       : "",
+        "next"       : "",
     },
 
     // ジェスチャー操作
     gesture: {
-        // 上スワイプ
-        swipe_up_1: {
-            action: "backlog",
-        },
-        // 左スワイプ
-        swipe_left_1: {
-            action: "auto",
-        },
-        // 右スワイプ
-        swipe_right_1: {
-            action: "menu",
-        },
-        // 下スワイプ
-        swipe_down_1: {
-            action: "load",
-        },
-        // ホールド
-        hold: {
-            action: "skip",
-        },
+        "swipe_up_1"    : "backlog",
+        "swipe_left_1"  : "auto",
+        "swipe_right_1" : "menu",
+        "swipe_down_1"  : "load",
+        "hold"          : "skip",
     },
     
     // ゲームパッド操作
     gamepad: {
         button: {
-            A: "cancel -a",
-            B: "next -a",
-            X: "auto",
-            Y: "backlog",
-            LB: "save",
-            LT: "load",
-            RB: "skip",
-            RT: "holdskip",
-            START: "menu",
-            SELECT: "",
-            HOME: "title",
-            LS: "",
-            RS: "",
-            UP: "focus_up -a -h",
-            DOWN: "focus_down -a -h",
-            LEFT: "focus_left -a -h",
-            RIGHT: "focus_right -a -h",
+            A       : "cancel -a",
+            B       : "next -a",
+            X       : "auto",
+            Y       : "backlog",
+            LB      : "save",
+            LT      : "load",
+            RB      : "skip",
+            RT      : "holdskip",
+            START   : "menu",
+            SELECT  : "",
+            HOME    : "title",
+            LS      : "",
+            RS      : "",
+            UP      : "focus_up -a -h",
+            DOWN    : "focus_down -a -h",
+            LEFT    : "focus_left -a -h",
+            RIGHT   : "focus_right -a -h",
         },
         stick_digital: {
-            L_UP: "",
-            L_DOWN: "",
-            L_LEFT: "",
-            L_RIGHT: "",
-            R_UP: "vmouse_wheelup -a -h delay=0",
-            R_DOWN: "vmouse_wheeldown -a -h delay=0",
-            R_LEFT: "",
-            R_RIGHT: "",
+            L_UP    : "",
+            L_DOWN  : "",
+            L_LEFT  : "",
+            L_RIGHT : "",
+            R_UP    : "vmouse_wheelup -a -h delay=0",
+            R_DOWN  : "vmouse_wheeldown -a -h delay=0",
+            R_LEFT  : "",
+            R_RIGHT : "",
         },
         stick: {
-            L: "vmouse_move",
-            R: "",
+            L       : "vmouse_move",
+            R       : "",
         }
     },
 };

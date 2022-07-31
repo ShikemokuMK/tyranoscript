@@ -1,22 +1,6 @@
-/*
- * キーボードとマウス操作を支援するプラグインです.
- * キーボード:
- *     [ENTER]や[SPACE]で、次のメッセージへ.
- *     [ESC]でメッセージウィンドウを消す.
- * マウス:
- *     マウスの右クリックでメニューを表示.
- *     ※メニューが非表示の場合、メッセージウィンドウを消します.
- *
- * This is a plugin to support the operation of keyboard and mouse.
- * Keyboard:
- *     Press [Enter] or the space key to go to the next message.
- *     Press [Ecs] to hide the message window.
- * Mouse:
- *     Right-clicking displays the menu.
- *     Note: When the menu is not displayed, hide the message window.
- *
- *  Special Thanks for Keito
- *
+/**
+ * Supports Mouse, Keyboard, Touch, and Gamepad input.
+ * Special Thanks to Keito.
  */
 tyrano.plugin.kag.key_mouse = {
     // 初期化後に TYRANO.kag が参照できるようになる
@@ -40,6 +24,13 @@ tyrano.plugin.kag.key_mouse = {
     // 定数プロパティ
     HOLD_TIMEOUT: 2000, // この時間(ミリ秒)タッチし続けたときに「ホールド」をトリガーする
     PREVENT_DOUBLE_TOUCH_TIME: 350, // この時間(ミリ秒)より短い時間の連続タップを抑制する
+    VMOUSE_TICK_RATE: 20, // 仮想マウスカーソルのチックレート
+    GAMEPAD_TICK_RATE: 20, // ゲームパッドのチックレート
+    KEYBOARD_TICK_RATE: 20, // キーボードのチックレート
+    HOLD_MASH_DELAY: 1000, // ホールド連打が始まるまでのディレイ
+    HOLD_MASH_INTERVAL: 20, // ホールド連打の間隔
+    DEFAULT_VMOUSE_MOVEMENT: 15, // 仮想マウスカーソル操作量のデフォルト値
+    MOUSE_BUTTON_NAMES: ["", "center", "right", "prev", "next"], // e.button に対応するキーコンフィグマップキー
 
     /**
      * 初期化
@@ -56,110 +47,42 @@ tyrano.plugin.kag.key_mouse = {
         this.map_key = this.keyconfig["key"] || {};
         this.map_mouse = this.keyconfig["mouse"] || {};
         this.map_ges = this.keyconfig["gesture"] || {};
-        this.map_pad = this.keyconfig["gamepad"] || { button: {}, stick_digital: {} };
-
-        // Windowsの場合に限りWindowsキー(KeyCode 91)に割り当てられているロールを破棄する
-        // Macの場合は⌘(コマンド)キーにKeyCode 91が割り当てられている
-        if ($.getOS() === "win") {
-            delete this.map_key["91"];
-        }
+        this.map_pad = this.keyconfig["gamepad"] || { button: {}, stick_digital: {}, stick: {} };
 
         //
-        // keydown キーダウン
+        // マウスダウン
         //
 
-        $(document).keydown((e) => {
-            // ブラウザの音声の再生制限を解除
-            if (!this.kag.tmp.ready_audio) this.kag.readyAudio();
-
-            // ティラノイベント"keydown"を発火
-            this.kag.trigger("keydown", e);
-
-            // すでに別のキーが押されているときはキーコンフィグは反応させない
-            if (this.is_keydown) {
-                if (this.keyconfig.system_key_event === "false") {
-                    // jQuery のイベントリスナ内で false を返すと
-                    // 自動的に event.stopPropagation() および event.preventDefault() が呼び出される
-                    // この event.preventDefault() によってブラウザ固有の動作がキャンセルされる
-                    return false;
-                } else {
-                    // どちらにしろキーコンフィグは無効
-                    return true;
-                }
-            }
-
-            this.is_keydown = true;
-            const action = this.map_key[e.key] || this.map_key[e.keyCode];
+        $(document).on("mousedown", (e) => {
+            this.util.clearSkip();
+            const key = this.MOUSE_BUTTON_NAMES[e.button];
+            const action = key ? this.map_mouse[key] : null;
             const done = this.doAction(action, e);
-
-            // デフォルトの動作を無効化
-            if (done) {
+            if (done || e.button === 1) {
+                // なにかアクションを実行した場合はブラウザ固有の動作を抑制
+                // ホイールクリックの場合も抑制しておかないとマウスカーソルがスクロールモードになってしまう
                 return false;
             }
         });
 
         //
-        // keyup キーアップ
-        //
-
-        $(document).keyup((e) => {
-            this.is_keydown = false;
-
-            const action = this.map_key[e.key] || this.map_key[e.keyCode];
-
-            // いま離したキーに"スキップ"ロールが割り当てられているならスキップ解除
-            // スキップキーを押している(ホールド)間だけスキップできるようにする
-            if (action === "holdskip") {
-                this.kag.setSkip(false);
-            }
-        });
-
-        //
-        // mousedown マウスダウン
-        //
-
-        $(document).on("mousedown", (e) => {
-            this.clearSkip();
-
-            var action = null;
-
-            //中央クリック
-            if (e.which == 2) {
-                action = this.map_mouse["center"];
-            } else if (e.which == 3) {
-                //右クリック
-                action = this.map_mouse["right"];
-            }
-
-            this.doAction(action, e);
-        });
-
-        //
-        // mousewheel マウスホイール
+        // マウスホイール
         //
 
         $(document).on(this.util.getWheelEventType(), (e) => {
-            // メニュー表示中は不可
-            if (!this.canShowMenu()) return;
-
-            // メニュー表示中は無効にする
-            if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
-                return;
-            }
-
-            var delta = e.originalEvent.deltaY
+            const delta = e.originalEvent.deltaY
                 ? -e.originalEvent.deltaY
                 : e.originalEvent.wheelDelta
                 ? e.originalEvent.wheelDelta
                 : -e.originalEvent.detail;
 
-            var action = null;
+            let action = null;
 
             if (delta < 0) {
-                // マウスホイールを下にスクロールしたときの処理を記載
+                // マウスホイールを下にスクロールしたときの処理
                 action = this.map_mouse["wheel_down"];
             } else {
-                // マウスホイールを上にスクロールしたときの処理を記載
+                // マウスホイールを上にスクロールしたときの処理
                 action = this.map_mouse["wheel_up"];
             }
 
@@ -182,7 +105,8 @@ tyrano.plugin.kag.key_mouse = {
                 swipe: (event, direction, distance, duration, fingerCount, fingerData) => {
                     this.is_swipe = true;
                     const action_key = "swipe_" + direction + "_" + fingerCount;
-                    const action = this.map_ges[action_key].action;
+                    let action = this.map_ges[action_key];
+                    if (typeof action === "object" && "action" in action) action = action.action;
                     this.doAction(action, event);
                     event.stopPropagation();
                     event.preventDefault();
@@ -198,9 +122,10 @@ tyrano.plugin.kag.key_mouse = {
             layer_obj_click
                 .on("touchstart", (e) => {
                     // スキップ中にクリックされたら元に戻す
-                    this.clearSkip();
+                    this.util.clearSkip();
                     this.hold_timer_id = setTimeout(() => {
-                        const action = this.map_ges.hold.action;
+                        let action = this.map_ges.hold;
+                        if (typeof action === "object" && "action" in action) action = action.action;
                         const done = this.doAction(action, e);
                         if (done) {
                             this.is_swipe = true;
@@ -287,136 +212,31 @@ tyrano.plugin.kag.key_mouse = {
         });
 
         //
-        // 設定有効時のみゲームパッドのイベント初期化
+        // キーボード初期化
+        //
+
+        this.keyboard.init(this);
+
+        //
+        // ゲームパッド初期化
         //
 
         if (this.kag.config["useGamepad"] === "true") {
-            this.initGamepadEvents();
+            this.gamepad.init(this);
         }
 
         //
-        // バーチャルマウスカーソル
+        // 仮想マウスカーソル初期化
         //
 
         this.vmouse.init(this);
-    },
-
-    /**
-     * ゲームパッド系のイベントを初期化する
-     */
-    initGamepadEvents() {
-        this.gamepad.init(this);
 
         //
-        // ページを開いてからゲームパッドの入力を最初に検知した瞬間に発火されるイベントリスナ
-        //
-        // ゲームパッド未使用環境で処理をいたずらに増やさないようにするため、
-        // getGamepadInputs（ゲームパッドの入力を一定間隔で検知し続けるメソッド）はこの中で呼ぶようにする
-        // * たとえPC自体にゲームパッドがつながっていても、ページを開いてから最初にゲームパッドの入力を検知するまでは
-        //   navigator.getGamepads() でゲームパッドの入力状態が取れるようにならない
-        // * ひとつのゲームパッドから入力が入った瞬間に
-        //   そのときPCに接続されているすべてのゲームパッド分の gamepadconnected が発火する
-        // * 一度USBやBluetoothの接続が切れてから再度接続しなおしたときにも発火する
-        $(window).on("gamepadconnected", (e) => {
-            // console.warn(e.gamepad);
-            if (!this.gamepad.gamepad_exests) {
-                this.gamepad.gamepad_exests = true;
-                this.gamepad.getGamepadInputs();
-            }
-        });
-
-        //
-        // ゲームパッドのボタンダウン
+        // ユーティリティ初期化
         //
 
-        $(document).on("gamepadpressdown", (e) => {
-            // ティラノイベント"gamepad-pressdown"を発火
-            this.kag.trigger("gamepad-pressdown", e);
-
-            let map;
-            if (e.detail.type === this.gamepad.presstype.BUTTON) {
-                map = this.map_pad.button;
-            } else {
-                map = this.map_pad.stick_digital;
-            }
-
-            let action = map[e.detail.button_name];
-            if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
-
-            this.doAction(action, e);
-        });
-
-        //
-        // ゲームパッドのボタンホールド
-        //
-
-        $(document).on("gamepadpresshold", (e) => {
-            // ティラノイベント"gamepad-presshold"を発火
-            this.kag.trigger("gamepad-presshold", e);
-
-            let map;
-            if (e.detail.type === this.gamepad.presstype.BUTTON) {
-                map = this.map_pad.button;
-            } else {
-                map = this.map_pad.stick_digital;
-            }
-
-            let action = map[e.detail.button_name];
-            if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
-
-            if (typeof action === "string") {
-                const tag = this.kag.parser.makeTag(action, 0);
-
-                // ホールドフラグが立っていないなら無視
-                if (tag.pm["-h"] === undefined) return;
-
-                let delay_f = this.gamepad.HOLD_MASH_DELAY;
-                let interval_f = this.gamepad.HOLD_MASH_INTERVAL;
-                if (tag.pm.delay) {
-                    delay_f = Math.ceil(parseInt(tag.pm.delay) / this.gamepad.DELAY_UPDATE);
-                }
-                if (tag.pm.interval) {
-                    interval_f = Math.ceil(parseInt(tag.pm.interval) / this.gamepad.DELAY_UPDATE);
-                }
-
-                let f = e.detail.hold_frame - delay_f;
-                if (f > 0 && f % interval_f === 0) {
-                    this.doAction(tag, e);
-                }
-            }
-        });
-
-        //
-        // ゲームパッドのボタンアップ
-        //
-
-        $(document).on("gamepadpressup", (e) => {
-            // ティラノイベント"gamepad-pressup"を発火
-            this.kag.trigger("gamepad-pressup", e);
-
-            let map;
-            if (e.detail.type === this.gamepad.presstype.BUTTON) {
-                map = this.map_pad.button;
-            } else {
-                map = this.map_pad.stick_digital;
-            }
-
-            let action = map[e.detail.button_name];
-            if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
-
-            if (typeof action === "string") {
-                const { name, pm } = this.kag.parser.makeTag(action, 0);
-                if (name === "holdskip") {
-                    this.kag.setSkip(false);
-                }
-                if (name === "next") {
-                    if (this.vmouse.is_visible) {
-                        this.vmouse.leftup();
-                        return;
-                    }
-                }
-            }
-        });
+        this.util.parent = this;
+        this.util.kag = this.kag;
     },
 
     /**
@@ -491,22 +311,25 @@ tyrano.plugin.kag.key_mouse = {
 
         // アクションを実行
         if (typeof this[name] === "function") {
-            this[name](pm);
-            return true;
+            return this[name](pm);
         }
 
         return false;
     },
 
+    test() {
+        alert("Hello!");
+    },
+
     next() {
-        if (this.kag.key_mouse.canClick()) {
-            this.clearSkip();
+        if (this.util.canClick()) {
+            this.util.clearSkip();
             $(".layer_event_click").trigger("click");
         }
     },
 
     showmenu() {
-        if (this.canShowMenu()) {
+        if (this.util.canShowMenu()) {
             if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
@@ -516,7 +339,7 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     hidemessage() {
-        if (this.canShowMenu()) {
+        if (this.util.canShowMenu()) {
             if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
                 $(".menu_close").click();
             } else {
@@ -534,9 +357,11 @@ tyrano.plugin.kag.key_mouse = {
     save() {
         this._role("save");
     },
+
     load() {
         this._role("load");
     },
+
     menu() {
         if (this.util.isOpenMenu()) {
             this.close();
@@ -544,31 +369,42 @@ tyrano.plugin.kag.key_mouse = {
             this._role("menu");
         }
     },
+
     title() {
         this._role("title");
     },
+
     holdskip() {
-        if (this.canClick()) {
+        if (this.util.canClick()) {
             this._role("skip");
         }
     },
+
     skip() {
-        if (this.canClick()) {
+        if (this.util.canClick()) {
             this._role("skip");
         }
     },
+
     backlog() {
-        this._role("backlog");
+        // メニュー表示中は不可
+        if (!this.util.canShowMenu()) return false;
+        if (this.util.isOpenMenu()) return false;
+        return this._role("backlog");
     },
+
     fullscreen() {
         this._role("fullscreen");
     },
+
     qsave() {
         this._role("quicksave");
     },
+
     qload() {
         this._role("quickload");
     },
+
     auto() {
         this._role("auto");
     },
@@ -577,8 +413,8 @@ tyrano.plugin.kag.key_mouse = {
         // いますでにスリープ中の場合は不可
         if (this.kag.tmp.sleep_game) return;
 
-        // [call]ができない状況なら不可
-        if (!this.canCallScenario()) return;
+        // [jump]ができない状況なら不可
+        if (!this.util.canJumpScenario()) return;
 
         this.kag.ftag.startTag("sleepgame", pm);
     },
@@ -600,7 +436,7 @@ tyrano.plugin.kag.key_mouse = {
         } else if (this.util.isOpenMenu()) {
             $(".menu_close").click();
         } else {
-            this.clearSkip();
+            this.util.clearSkip();
         }
     },
 
@@ -613,6 +449,71 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     util: {
+        parent: null,
+        kag: null,
+
+        /**
+         * イベントレイヤをクリックできる状態なら true を返す
+         * イベントレイヤが表示されていて、かつ、メニューが表示されていない状態
+         * @returns {boolean}
+         */
+        canClick() {
+            if ($(".layer_event_click").css("display") !== "none" && $(".layer_menu").css("display") === "none") {
+                return true;
+            }
+            return false;
+        },
+
+        /**
+         * 画面をクリックしたときにスキップやオートモードを解除するためのメソッド
+         * コンフィグも参照する
+         */
+        clearSkip() {
+            // スキップの解除（[s]で待機している最中は解除しない）
+            if (this.kag.stat.is_skip && !this.kag.stat.is_strong_stop) {
+                this.kag.setSkip(false);
+                return;
+            }
+
+            // オートモードの解除（「クリックでオートモード解除」のコンフィグが有効な場合のみ）
+            if (this.kag.stat.is_auto && this.kag.config.autoClickStop === "true") {
+                this.kag.ftag.startTag("autostop", { next: "false" });
+            }
+        },
+
+        /**
+         * メニューを開ける状況（[text][l][p][s]のいずれかで待機している状態）なら true を返す
+         * [text]待機中、つまり文字が流れている最中も true が返る点に注意
+         * @returns {boolean}
+         */
+        canShowMenu() {
+            // [l][p][text]待機状態でもなければ[s][wait]待機状態でもない場合
+            // なんらかのタグが進行中ということだからメニューは開けない
+            if (this.kag.layer.layer_event.css("display") === "none" && !this.kag.stat.is_strong_stop) {
+                return false;
+            }
+
+            // [wait]中も開けない
+            if (this.kag.stat.is_wait == true) {
+                return false;
+            }
+
+            // あとは開ける
+            // つまり、[l][p][s]どれかで待機している状態なら開ける
+            return true;
+        },
+
+        /**
+         * [call]できる状態かどうかを返す
+         * メニューを開ける状況で、かつ、テキスト追加中などのアクティブな状態ではない場合
+         * @returns {boolean}
+         */
+        canJumpScenario() {
+            const can_show_menu = this.canShowMenu();
+            const is_game_active = this.kag.stat.is_adding_text || this.kag.stat.is_wait;
+            return can_show_menu && !is_game_active;
+        },
+
         /**
          * 有効なホイールイベント名を返す, 環境の違いを吸収する
          * @returns {"wheel" | "mousewheel" | "DOMMouseScroll"}
@@ -830,6 +731,14 @@ tyrano.plugin.kag.key_mouse = {
 
             // ループの初回実行
             scroll_loop();
+        },
+
+        /**
+         * ミリ秒単位のタイムスタンプを返す
+         * @returns {number}
+         */
+        getTime() {
+            return performance.now();
         },
     },
 
@@ -1186,7 +1095,7 @@ tyrano.plugin.kag.key_mouse = {
         }
 
         // [l][p][s]で待機している状態ではロールを実行しない
-        if (!this.canShowMenu()) return;
+        if (!this.util.canShowMenu()) return;
 
         // スキップの解除
         this.kag.setSkip(false);
@@ -1265,82 +1174,24 @@ tyrano.plugin.kag.key_mouse = {
         }
     },
 
-    /**
-     * イベントレイヤをクリックできる状態なら true を返す
-     * イベントレイヤが表示されていて、かつ、メニューが表示されていない状態
-     * @returns {boolean}
-     */
-    canClick() {
-        if ($(".layer_event_click").css("display") !== "none" && $(".layer_menu").css("display") === "none") {
-            return true;
-        }
-        return false;
+    vmouse_up(pm) {
+        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
+        this.vmouse.move(0, -movement, this.keyboard.delay_update);
     },
 
-    /**
-     * 画面をクリックしたときにスキップやオートモードを解除するためのメソッド
-     * コンフィグも参照する
-     */
-    clearSkip() {
-        // スキップの解除（[s]で待機している最中は解除しない）
-        if (this.kag.stat.is_skip && !this.kag.stat.is_strong_stop) {
-            this.kag.setSkip(false);
-            return;
-        }
-
-        // オートモードの解除（「クリックでオートモード解除」のコンフィグが有効な場合のみ）
-        if (this.kag.stat.is_auto && this.kag.config.autoClickStop === "true") {
-            this.kag.ftag.startTag("autostop", { next: "false" });
-        }
+    vmouse_down(pm) {
+        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
+        this.vmouse.move(0, movement, this.keyboard.delay_update);
     },
 
-    /**
-     * メニューを開ける状況（[text][l][p][s]のいずれかで待機している状態）なら true を返す
-     * [text]待機中、つまり文字が流れている最中も true が返る点に注意
-     * @returns {boolean}
-     */
-    canShowMenu() {
-        // [l][p][text]待機状態でもなければ[s][wait]待機状態でもない場合
-        // なんらかのタグが進行中ということだからメニューは開けない
-        if (this.kag.layer.layer_event.css("display") === "none" && !this.kag.stat.is_strong_stop) {
-            return false;
-        }
-
-        // [wait]中も開けない
-        if (this.kag.stat.is_wait == true) {
-            return false;
-        }
-
-        // あとは開ける
-        // つまり、[l][p][s]どれかで待機している状態なら開ける
-        return true;
+    vmouse_left(pm) {
+        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
+        this.vmouse.move(-movement, 0, this.keyboard.delay_update);
     },
 
-    /**
-     * [call]できる状態かどうかを返す
-     * メニューを開ける状況で、かつ、テキスト追加中などのアクティブな状態ではない場合
-     * @returns {boolean}
-     */
-    canCallScenario() {
-        const can_show_menu = this.canShowMenu();
-        const is_game_active = this.kag.stat.is_adding_text || this.kag.stat.is_wait;
-        return can_show_menu && !is_game_active;
-    },
-
-    vmouse_up(movement = 50) {
-        this.vmouse.move(0, -movement);
-    },
-
-    vmouse_down(movement = 50) {
-        this.vmouse.move(0, movement);
-    },
-
-    vmouse_left(movement = 50) {
-        this.vmouse.move(-movement, 0);
-    },
-
-    vmouse_right(movement = 50) {
-        this.vmouse.move(movement, 0);
+    vmouse_right(pm) {
+        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
+        this.vmouse.move(movement, 0, this.keyboard.delay_update);
     },
 
     vmouse_wheelup() {
@@ -1352,7 +1203,203 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     /**
-     * バーチャルマウスカーソル
+     * キーボードマネージャ
+     */
+    keyboard: {
+        parent: null,
+        state_map: {},
+        tick_rate: 0,
+        delay_update: 0,
+
+        /**
+         * 初期化
+         * @param {Object} that TYRANO.kag.key_mouse
+         */
+        init(that) {
+            this.parent = that;
+
+            // チックレートからアップデート間隔を計算
+            this.tick_rate = that.KEYBOARD_TICK_RATE;
+            if (this.tick_rate > 0) {
+                this.delay_update = (1000 / this.tick_rate) | 0;
+            }
+
+            // Windowsキーに割り当てられているロールを破棄する
+            if ($.getOS() === "win") {
+                delete that.map_key["91"];
+                delete that.map_key["Meta"];
+            }
+
+            //
+            // キーダウン
+            //
+
+            $(document).keydown((e) => {
+                const state = this.getKeyState(e.key);
+                if (state.pressing) {
+                    // 長押しによる連続入力は無視する
+                    return that.keyconfig.system_key_event !== "false";
+                } else {
+                    // 新規キーダウン
+                    state.pressing = true;
+                    state.hold_frame = 0;
+                    state.event = e.originalEvent;
+                    if (this.tick_rate > 0) {
+                        clearTimeout(state.timer_id);
+                        state.timer_id = setTimeout(() => {
+                            this.incrementHoldFrame(state);
+                        }, this.delay_update);
+                    }
+                }
+
+                // ブラウザの音声の再生制限を解除
+                if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
+
+                // ティラノイベント"keydown"を発火
+                that.kag.trigger("keydown", e);
+
+                // すでに別のキーが押されているときはキーコンフィグは反応させない
+                if (that.is_keydown) {
+                    if (that.keyconfig.system_key_event === "false") {
+                        // jQuery のイベントリスナ内で false を返すと
+                        // 自動的に event.stopPropagation() および event.preventDefault() が呼び出される
+                        // この event.preventDefault() によってブラウザ固有の動作がキャンセルされる
+                        return false;
+                    } else {
+                        // どちらにしろキーコンフィグは無効
+                        return true;
+                    }
+                }
+
+                const action = this.getAction(e);
+                const done = that.doAction(action, e);
+
+                // デフォルトの動作を無効化
+                if (done) {
+                    return false;
+                }
+
+                if (that.keyconfig.system_key_event === "false") {
+                    return false;
+                }
+            });
+
+            //
+            // キーアップ
+            //
+
+            $(document).keyup((e) => {
+                const state = this.getKeyState(e.key);
+                state.pressing = false;
+                state.hold_frame = 0;
+                clearTimeout(state.timer_id);
+
+                const action = this.getAction(e);
+
+                if (typeof action === "string") {
+                    const { name, pm } = that.kag.parser.makeTag(action, 0);
+                    if (name === "holdskip") {
+                        that.kag.setSkip(false);
+                    }
+                    // いま離したキーに"スキップ"アクションが割り当てられているならスキップ解除
+                    // スキップキーを押している(ホールド)間だけスキップできるようにする
+                    if (action === "holdskip") {
+                        that.kag.setSkip(false);
+                    }
+                    if (name === "next") {
+                        if (that.vmouse.is_visible) {
+                            that.vmouse.leftup();
+                            return;
+                        }
+                    }
+                }
+            });
+
+            //
+            // キーホールド
+            //
+
+            $(document).on("keyhold", (e) => {
+                const state = this.getKeyState(e.key);
+                const action = this.getAction(e);
+                if (typeof action === "string") {
+                    const tag = that.kag.parser.makeTag(action, 0);
+
+                    // ホールドフラグが立っていないなら無視
+                    if (tag.pm["-h"] === undefined) return;
+
+                    // ホールド連打(長押しを一定間隔の連打として解釈する)を判定する
+                    //
+                    //  ホールド連打が始まるまでの間 が delay
+                    //  ┌────┐
+                    // ダッ…………ダダダダダダダダダダダダ！
+                    //          └┘
+                    // 　　　　　　この連打間隔が interval
+                    const delay_ms = tag.pm.delay ? parseInt(tag.pm.delay) : that.HOLD_MASH_DELAY;
+                    const interval_ms = tag.pm.interval ? parseInt(tag.pm.interval) : that.HOLD_MASH_INTERVAL;
+                    const delay_f = Math.ceil(delay_ms / this.delay_update);
+                    const interval_f = Math.ceil(interval_ms / this.delay_update);
+                    const f = state.hold_frame - delay_f;
+                    if (f > 0 && f % interval_f === 0) {
+                        that.doAction(tag, e);
+                    }
+                }
+            });
+        },
+
+        /**
+         * キーボードイベントを受け取って対応するアクションを返す
+         * @param {KeyboradEvent} e
+         * @returns
+         */
+        getAction(e) {
+            return this.parent.map_key[e.key] || this.parent.map_key[e.keyCode];
+        },
+
+        /**
+         * e.key を受け取ってキーボードステートを返す
+         * 存在しなければ初期化もする
+         * @param {string} key KeyboardEvent.key
+         * @returns
+         */
+        getKeyState(key) {
+            let state = this.state_map[key];
+            if (!state) {
+                state = this.state_map[key] = new this.KeyState(key);
+            }
+            return state;
+        },
+
+        /**
+         * キーの入力状態（押されているか、何フレーム長押しされているか等）を管理するクラス
+         * @param {string} key KeyboardEvent.key
+         * @returns {KeyState}
+         */
+        KeyState: function (key) {
+            this.key = key;
+            this.pressing = false;
+            this.hold_frame = 0;
+            this.timer_id = null;
+            this.event = null;
+            return this;
+        },
+
+        /**
+         * 長押しの処理（長押しフレームの増加とカスタムイベント keyhold の発行）
+         * @param {KeyState} state
+         */
+        incrementHoldFrame(state) {
+            state.hold_frame++;
+            const event = new KeyboardEvent("keyhold", state.event);
+            document.dispatchEvent(event);
+            state.timer_id = setTimeout(() => {
+                this.incrementHoldFrame(state);
+            }, this.delay_update);
+        },
+    },
+
+    /**
+     * 仮想マウスカーソルマネージャ
      */
     vmouse: {
         parent: null, // TYRANO.kag.key_mouse
@@ -1379,7 +1426,7 @@ tyrano.plugin.kag.key_mouse = {
         hidden_timer_id: null, // マウスカーソル非表示処理の setTimeout の戻り値管理用
         transition_duration: 50, // 画面上のカーソル移動のトランジション所要時間
         fade_duration: 100, // 画面上のカーソルのフェードイン・アウトの所要時間
-        TICK_RATE: 10, // 1 秒間に何回カーソルの状態をアップデートするか
+        tick_rate: 0, // 1 秒間に何回カーソルの状態をアップデートするか
         delay_update: null, // …という数値から、何ミリ秒に 1 回アップデートすればよいかを計算する
         default_image_map: {
             none: {
@@ -1412,8 +1459,9 @@ tyrano.plugin.kag.key_mouse = {
             this.j_body = $("body");
             this.j_cursor = $('<img id="vmouse" src="./tyrano/images/system/transparent.png" />');
             this.j_body.append(this.j_cursor);
-            if (this.TICK_RATE > 0) {
-                this.delay_update = (1000 / this.TICK_RATE) | 0;
+            this.tick_rate = parent.VMOUSE_TICK_RATE;
+            if (this.tick_rate > 0) {
+                this.delay_update = (1000 / this.tick_rate) | 0;
             }
             $.extend(true, this.image_map, this.default_image_map);
 
@@ -1482,14 +1530,6 @@ tyrano.plugin.kag.key_mouse = {
         },
 
         /**
-         * ミリ秒単位のタイムスタンプを返す
-         * @returns {number}
-         */
-        getTime() {
-            return performance.now();
-        },
-
-        /**
          *　仮想マウスカーソルを表示する
          */
         show() {
@@ -1498,8 +1538,8 @@ tyrano.plugin.kag.key_mouse = {
                 //this.j_cursor.css("visibility", "visible");
                 this.j_cursor.css("opacity", "1");
                 this.j_html.addClass("vmouse-displayed");
-                if (this.TICK_RATE > 0) {
-                    this.delay_update = (1000 / this.TICK_RATE) | 0;
+                if (this.tick_rate > 0) {
+                    this.delay_update = (1000 / this.tick_rate) | 0;
                     this.updateLoop();
                 }
             }
@@ -1611,7 +1651,7 @@ tyrano.plugin.kag.key_mouse = {
 
             // click の場合はダブルクリックかどうかも確認する
             if (event_type === "click") {
-                const time = this.getTime();
+                const time = this.parent.util.getTime();
                 const delay = time - this.previous_click_time;
                 if (delay < this.max_delay_double_click) {
                     elm.dispatchEvent(new MouseEvent("dblclick", event_options));
@@ -1863,6 +1903,7 @@ tyrano.plugin.kag.key_mouse = {
             // ポイント要素とカーソル状態の更新
             this.scanPointElement();
             this.scanState();
+            this.hideWithTimeout();
         },
 
         /**
@@ -2142,9 +2183,6 @@ tyrano.plugin.kag.key_mouse = {
         // スティックを倒した絶対量（0.0～1.0）がこの値以上になった瞬間にデジタル入力をトリガーする
         MINIMAM_VALUE_DIGITAL_STICK: 0.5,
 
-        // 1秒間に何回ゲームパッドの入力状態を取得するか
-        TICK_RATE: 20,
-
         // 何ミリ秒ごとにゲームパッドの入力状態を取得するか(上の値から計算)
         DELAY_UPDATE: null,
 
@@ -2195,10 +2233,117 @@ tyrano.plugin.kag.key_mouse = {
         /**
          * 初期化
          */
-        init(parent) {
-            this.parent = parent;
+        init(that) {
+            this.parent = that;
+            this.TICK_RATE = that.GAMEPAD_TICK_RATE;
             this.DELAY_UPDATE = (1000 / this.TICK_RATE) | 0;
             this.MOVEMENT_VMOUSE_RATIO = (this.MOVEMENT_VMOUSE_PER_SECOND / this.TICK_RATE) | 0;
+
+            //
+            // ページを開いてからゲームパッドの入力を最初に検知した瞬間に発火されるイベントリスナ
+            //
+            // ゲームパッド未使用環境で処理をいたずらに増やさないようにするため、
+            // getGamepadInputs（ゲームパッドの入力を一定間隔で検知し続けるメソッド）はこの中で呼ぶようにする
+            // * たとえPC自体にゲームパッドがつながっていても、ページを開いてから最初にゲームパッドの入力を検知するまでは
+            //   navigator.getGamepads() でゲームパッドの入力状態が取れるようにならない
+            // * ひとつのゲームパッドから入力が入った瞬間に
+            //   そのときPCに接続されているすべてのゲームパッド分の gamepadconnected が発火する
+            // * 一度USBやBluetoothの接続が切れてから再度接続しなおしたときにも発火する
+            $(window).on("gamepadconnected", (e) => {
+                // console.warn(e.gamepad);
+                if (!this.gamepad_exests) {
+                    this.gamepad_exests = true;
+                    this.getGamepadInputs();
+                }
+            });
+
+            //
+            // ゲームパッドのボタンダウン
+            //
+
+            $(document).on("gamepadpressdown", (e) => {
+                // ティラノイベント"gamepad-pressdown"を発火
+                that.kag.trigger("gamepad-pressdown", e);
+
+                let map;
+                if (e.detail.type === this.presstype.BUTTON) {
+                    map = that.map_pad.button;
+                } else {
+                    map = that.map_pad.stick_digital;
+                }
+
+                let action = map[e.detail.button_name];
+                if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
+
+                that.doAction(action, e);
+            });
+
+            //
+            // ゲームパッドのボタンホールド
+            //
+
+            $(document).on("gamepadpresshold", (e) => {
+                // ティラノイベント"gamepad-presshold"を発火
+                that.kag.trigger("gamepad-presshold", e);
+
+                let map;
+                if (e.detail.type === this.presstype.BUTTON) {
+                    map = that.map_pad.button;
+                } else {
+                    map = that.map_pad.stick_digital;
+                }
+
+                let action = map[e.detail.button_name];
+                if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
+
+                if (typeof action === "string") {
+                    const tag = that.kag.parser.makeTag(action, 0);
+
+                    // ホールドフラグが立っていないなら無視
+                    if (tag.pm["-h"] === undefined) return;
+
+                    const delay = tag.pm.delay ? parseInt(tag.pm.delay) : that.HOLD_MASH_DELAY;
+                    const interval = tag.pm.interval ? parseInt(tag.pm.interval) : that.HOLD_MASH_INTERVAL;
+                    const delay_f = Math.ceil(delay / this.DELAY_UPDATE);
+                    const interval_f = Math.ceil(interval / this.DELAY_UPDATE);
+                    const f = state.hold_frame - delay_f;
+                    if (f > 0 && f % interval_f === 0) {
+                        that.doAction(tag, e);
+                    }
+                }
+            });
+
+            //
+            // ゲームパッドのボタンアップ
+            //
+
+            $(document).on("gamepadpressup", (e) => {
+                // ティラノイベント"gamepad-pressup"を発火
+                that.kag.trigger("gamepad-pressup", e);
+
+                let map;
+                if (e.detail.type === this.presstype.BUTTON) {
+                    map = that.map_pad.button;
+                } else {
+                    map = that.map_pad.stick_digital;
+                }
+
+                let action = map[e.detail.button_name];
+                if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
+
+                if (typeof action === "string") {
+                    const { name, pm } = that.kag.parser.makeTag(action, 0);
+                    if (name === "holdskip") {
+                        that.kag.setSkip(false);
+                    }
+                    if (name === "next") {
+                        if (that.vmouse.is_visible) {
+                            that.vmouse.leftup();
+                            return;
+                        }
+                    }
+                }
+            });
         },
 
         /**
