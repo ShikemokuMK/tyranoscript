@@ -14,6 +14,31 @@ window.tyrano_lang = {
         save_file_violation_3: "起動を中止しました。セーブデータを削除してもう一度、起動してください",
         double_start: "すでにゲームは起動済みです。２重起動はできません。",
         reload: "リロード",
+        line: "{ line }行目",
+    },
+
+    error: {
+        undefined_character: "指定されたキャラクター「{ name }」は定義されていません。[chara_new]で定義してください。",
+        undefined_face: "指定されたキャラクター「{ name }」の表情「{ face }」は定義されていません。[chara_face]で定義してください。",
+        undefined_character_parts: "指定されたキャラクター「{ name }」の差分パーツは定義されていません。[chara_layer]で定義してください。",
+        undefined_keyframe: "指定されたキーフレームアニメーション「{ keyframe }」は定義されていません。[keyframe]で定義してください。",
+        undefined_3d_model: "指定された3Dモデル「{ name }」は定義されていません。",
+        preload_failure_sound:
+            "音声ファイル「{ src }」が見つかりません。場所はフルパスで指定されていますか？\n\n(適切な例) ./data/bgm/my_bgm.mp3",
+        preload_failure_image:
+            "画像ファイル「{ src }」が見つかりません。場所はフルパスで指定されていますか？\n\n(適切な例) ./data/image/my_image.png",
+        preload_failure_video:
+            "動画ファイル「{ src }」が見つかりません。場所はフルパスで指定されていますか？\n\n(適切な例) ./data/video/my_video.mp4",
+        invalid_keyframe: "キーフレームが無効な値です。",
+        invalid_keyframe_percentage:
+            'キーフレームに設定されているパーセンテージ「{ percentage }」は無効な値です。"0%"、"30%"のように指定してください。',
+        error_in_iscript: "[iscript]の内部でエラーが発生しました。",
+        missing_endif: "[if]のあとに[elsif][else][endif]のいずれかが見つかりません。または、[if]内のタグの数が多すぎます。",
+        missing_endmacro: "[macro]のあとに[endmacro]が見つかりません。または、[macro]内のタグの数が多すぎます。",
+        missing_endignore: "[ignore]のあとに[endignore]が見つかりません。または、[ignore]内の数が多すぎます。",
+        missing_parameter: "タグ「{ tag }」にパラメーター「{ param }」は必須です。",
+        if_and_endif_do_not_match: "[if]と[endif]の数が一致しません。",
+        unsupported_extensions: "「{ ext }」はサポートしていないファイル形式です。",
     },
 
     novel: {

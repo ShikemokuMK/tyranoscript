@@ -419,6 +419,17 @@ tyrano.plugin.kag.ftag = {
         }
     },
 
+    //指定のタグが現れるまで進み続ける
+    nextOrderWithTagSearch: function (target_tags) {
+        const last_index = this.array_tag.length - 1;
+        for (var i = 0; i < 2000; i++) {
+            if (this.current_order_index >= last_index) break;
+            const done = this.kag.ftag.nextOrderWithTag(target_tags);
+            if (done) return true;
+        }
+        return false;
+    },
+
     //次のタグを実行。ただし、指定のタグの場合のみ
     nextOrderWithTag: function (target_tags) {
         try {
@@ -537,10 +548,10 @@ tyrano.plugin.kag.ftag = {
             if (tag.pm[array_vital[i]]) {
                 //値が入っていなかった場合
                 if (tag.pm[array_vital[i]] == "") {
-                    err_str += "タグ「" + tag.name + "」にパラメーター「" + array_vital[i] + "」は必須です　\n";
+                    err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] }, "error");
                 }
             } else {
-                err_str += "タグ「" + tag.name + "」にパラメーター「" + array_vital[i] + "」は必須です　\n";
+                err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] }, "error");
             }
         }
 
@@ -2998,7 +3009,7 @@ tyrano.plugin.kag.tag.fuki_chara = {
             var cpm = this.kag.stat.charas[pm.name];
 
             if (cpm == null) {
-                this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+                this.kag.error("undefined_character");
                 return;
             }
 

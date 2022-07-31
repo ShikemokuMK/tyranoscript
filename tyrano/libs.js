@@ -488,9 +488,16 @@
         }
     };
 
-    $.lang = function (key) {
-        if (tyrano_lang["word"][key]) {
-            return tyrano_lang["word"][key];
+    $.lang = function (key, replace_map, target = "word") {
+        let string_defined = tyrano_lang[target][key];
+        if (string_defined) {
+            if (replace_map) {
+                for (const replace_key in replace_map) {
+                    const pattern = new RegExp(`\\{\\s*${replace_key}\\s*\\}`, "g");
+                    string_defined = string_defined.replace(pattern, replace_map[replace_key]);
+                }
+            }
+            return string_defined;
         } else {
             return "NOT_DEFINED";
         }

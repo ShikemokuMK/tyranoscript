@@ -283,7 +283,7 @@ tyrano.plugin.kag.parser = {
         };
 
         if (this.deep_if != 0) {
-            this.kag.warning("[if]と[endif]の数が一致しません。");
+            this.kag.error("if_and_endif_do_not_match");
             this.deep_if = 0;
         }
 

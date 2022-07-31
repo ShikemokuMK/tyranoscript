@@ -490,7 +490,7 @@ tyrano.plugin.kag.tag.endscript = {
         try {
             this.kag.evalScript(this.kag.stat.buff_script);
         } catch (err) {
-            that.kag.error("[iscript]に記述されたJavaScript実行時にエラーが発生しました。");
+            that.kag.error("error_in_iscript");
             console.error(err);
         }
         this.kag.stat.buff_script = "";
@@ -770,23 +770,13 @@ tyrano.plugin.kag.tag["if"] = {
             //まだ、if文をぬけられない
             //this.kag.pushStack("if", false);
             this.kag.pushStack("if", { bool: false, deep: pm.deep_if });
-
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    else: "",
-                    elsif: "",
-                    endif: "",
-                });
-
-                if (r == true) {
-                    //alert("処理が見つかった!")
-                    break;
-                    //指定の命令へ処理が写っていることでしょう
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("If文に誤りがあります");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                else: "",
+                elsif: "",
+                endif: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endif");
             }
         }
     },
@@ -837,21 +827,13 @@ tyrano.plugin.kag.tag["elsif"] = {
 
             //条件ミス
         } else {
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    else: "",
-                    elsif: "",
-                    endif: "",
-                });
-
-                if (r == true) {
-                    //alert("処理が見つかった!")
-                    break;
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("If文に誤りがあります");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                else: "",
+                elsif: "",
+                endif: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endif");
             }
         }
     },
@@ -898,20 +880,11 @@ tyrano.plugin.kag.tag["else"] = {
 
             //条件ミス
         } else {
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    endif: "",
-                });
-
-                if (r == true) {
-                    //alert("処理が見つかった!")
-                    break;
-                    //指定の命令へ処理が写っていることでしょう
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("If文に誤りがあります");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                endif: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endif");
             }
         }
     },
@@ -1148,24 +1121,12 @@ tyrano.plugin.kag.tag.macro = {
 
         this.kag.tmp.checking_macro = true;
 
-        //endmacroが出るまで、無視される
-        for (var i = 0; i < 2000; i++) {
-            var r = this.kag.ftag.nextOrderWithTag({
-                endmacro: "",
-            });
-
-            if (r == true) {
-                //alert("endacroが見つかった");
-                break;
-                //指定の命令へ処理が写っていることでしょう
-            }
+        const done = this.kag.ftag.nextOrderWithTagSearch({
+            endmacro: "",
+        });
+        if (!done) {
+            this.kag.error("missing_endmacro");
         }
-
-        if (i > 1900) {
-            this.kag.error("マクロが閉じていません");
-        }
-
-        //this.kag.ftag.nextOrder();
     },
 };
 
@@ -1430,18 +1391,11 @@ tyrano.plugin.kag.tag.ignore = {
 
     start: function (pm) {
         if (this.kag.embScript(pm.exp)) {
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    endignore: "",
-                });
-
-                if (r == true) {
-                    break;
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("ignoreが閉じていません");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                endignore: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endignore");
             }
         } else {
             this.kag.ftag.nextOrder();

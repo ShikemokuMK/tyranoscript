@@ -1825,7 +1825,7 @@ tyrano.plugin.kag = {
             // ロードに失敗したとき
             audio_obj.once("loaderror", () => {
                 audio_obj.unload();
-                //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
+                this.kag.error("preload_failure_sound", { src });
                 if (callbk) callbk(audio_obj);
                 delete this.kag.tmp.preload_audio_map[src];
             });
@@ -1852,9 +1852,7 @@ tyrano.plugin.kag = {
                     callbk && callbk();
                 })
                 .on("error", function (e) {
-                    that.kag.error(
-                        "動画ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/video/file.mp4",
-                    );
+                    that.kag.error("preload_failure_video", { src });
                     callbk && callbk();
                 })
                 .attr("src", src);
@@ -1865,11 +1863,7 @@ tyrano.plugin.kag = {
                     if (callbk) callbk(this);
                 })
                 .on("error", function (e) {
-                    //画像が見つからなかった時のエラー
-                    //that.kag.message(画像ファイル「"+src+"」が見つかりません");
-                    that.kag.error(
-                        "画像ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png",
-                    );
+                    that.kag.error("preload_failure_image", { src });
                     if (callbk) callbk();
                 })
                 .attr("src", src);
@@ -1994,15 +1988,17 @@ tyrano.plugin.kag = {
         }
     },
 
-    error: function (str) {
+    error: function (message, replace_map) {
         if (this.kag.config["debugMenu.visible"] == "true") {
             //Error:first.ks：28行目:まるまるまる
-            var current_storage = this.kag.stat.current_scenario;
-            var line = parseInt(this.kag.stat.current_line) + 1;
-
-            var err = "Error:" + current_storage + ":" + line + "行目:" + str;
-
-            $.error_message(err);
+            const current_storage = this.kag.stat.current_scenario;
+            const line = parseInt(this.kag.stat.current_line) + 1;
+            const line_str = $.lang("line", { line });
+            if (message in tyrano_lang.error) {
+                message = $.lang(message, replace_map, "error");
+            }
+            const error_str = `Error: ${current_storage}:${line_str}\n\n${message}`;
+            $.error_message(error_str);
         }
     },
     //警告表示

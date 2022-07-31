@@ -41,7 +41,7 @@ $.checkThreeModel = function (name) {
     if (TYRANO.kag.tmp.three.models[name]) {
         return true;
     } else {
-        alert("model「" + name + "」は未定義です。宣言してください。");
+        TYRANO.kag.error("undefined_3d_model", { name });
     }
 };
 
@@ -460,7 +460,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
             });
         } else if (ext == "mmd") {
         } else {
-            alert("エラー：" + ext + "はサポートしていないファイル形式です");
+            this.kag.error("unsupported_extensions", { ext });
         }
 
         //読み込んだシーンが暗いので、明るくする

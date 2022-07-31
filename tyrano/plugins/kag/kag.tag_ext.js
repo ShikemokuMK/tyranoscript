@@ -1592,7 +1592,7 @@ tyrano.plugin.kag.tag.xanim = {
         if (pm.keyframe) {
             const anim = this.kag.stat.map_keyframe[pm.keyframe];
             if (!anim) {
-                this.kag.error('Keyframe animation "' + pm.keyframe + '" is not defined.');
+                this.kag.error("undefined_keyframe", pm);
                 next();
                 return;
             }
@@ -1601,7 +1601,7 @@ tyrano.plugin.kag.tag.xanim = {
                 const frame = anim.frames[key];
                 const percentage = parseInt(key);
                 if (isNaN(percentage)) {
-                    this.kag.error('Frame percentage "' + key + '" is not valid.\n' + 'Valid examples) "0%", "30%", "100%"');
+                    this.kag.error("invalid_keyframe_percentage", { percentage: key });
                 } else {
                     // ひとつ前のキーフレームからこのキーフレームまでの時間を計算したい
                     const time = (duration * percentage) / 100;
@@ -1634,7 +1634,7 @@ tyrano.plugin.kag.tag.xanim = {
             }
 
             if (keyframes.length === 0) {
-                this.kag.error("有効なキーフレームが定義されていません");
+                this.kag.error("invalid_keyframe");
                 next();
                 return;
             }
@@ -2414,7 +2414,7 @@ tyrano.plugin.kag.tag.chara_show = {
         var array_storage = [];
 
         if (cpm == null) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            this.kag.error("undefined_character", pm);
             return;
         }
 
@@ -2450,13 +2450,7 @@ tyrano.plugin.kag.tag.chara_show = {
         //表情が指定されている場合はその値を活用する。
         if (pm.face != "") {
             if (!cpm["map_face"][pm.face]) {
-                this.kag.error(
-                    "指定されたキャラクター「" +
-                        pm.name +
-                        "」もしくはface:「" +
-                        pm.face +
-                        "」は定義されていません。もう一度確認をお願いします",
-                );
+                this.kag.error("undefined_face", pm);
                 return;
             }
             storage_url = "./data/fgimage/" + cpm["map_face"][pm.face];
@@ -3096,14 +3090,12 @@ tyrano.plugin.kag.tag.chara_mod = {
         var folder = "./data/fgimage/";
 
         if (pm.face != "") {
+            if (!this.kag.stat.charas[pm.name]) {
+                this.kag.error("undefined_character", pm);
+                return;
+            }
             if (!this.kag.stat.charas[pm.name]["map_face"][pm.face]) {
-                this.kag.error(
-                    "指定されたキャラクター「" +
-                        pm.name +
-                        "」もしくはface:「" +
-                        pm.face +
-                        "」は定義されていません。もう一度確認をお願いします",
-                );
+                this.kag.error("undefined_face", pm);
                 return;
             }
             storage_url = this.kag.stat.charas[pm.name]["map_face"][pm.face];
@@ -3459,7 +3451,7 @@ tyrano.plugin.kag.tag.chara_layer = {
         var cpm = this.kag.stat.charas[pm.name];
 
         if (cpm == null) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            this.kag.error("undefined_character", pm);
             return;
         }
 
@@ -3551,13 +3543,13 @@ tyrano.plugin.kag.tag.chara_layer_mod = {
         var cpm = this.kag.stat.charas[pm.name];
 
         if (cpm == null) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            this.kag.error("undefined_character", pm);
             return;
         }
 
         //レイヤが登録されているかどうか
         if (!cpm["_layer"]) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」の差分パーツは設定されていません。[chara_layer]で定義してください");
+            this.kag.error("undefined_character_parts", pm);
             return;
         }
 
@@ -3618,13 +3610,13 @@ tyrano.plugin.kag.tag.chara_part = {
         var cpm = this.kag.stat.charas[pm.name];
 
         if (cpm == null) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            this.kag.error("undefined_character", pm);
             return;
         }
 
         //レイヤが登録されているかどうか
         if (!cpm["_layer"]) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」の差分パーツは設定されていません。[chara_layer]で定義してください");
+            this.kag.error("undefined_character_parts", pm);
             return;
         }
 
@@ -3775,13 +3767,13 @@ tyrano.plugin.kag.tag.chara_part_reset = {
         var cpm = this.kag.stat.charas[pm.name];
 
         if (cpm == null) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+            this.kag.error("undefined_character");
             return;
         }
 
         //レイヤが登録されているかどうか
         if (!cpm["_layer"]) {
-            this.kag.error("指定されたキャラクター「" + pm.name + "」の差分パーツは設定されていません。[chara_layer]で定義してください");
+            this.kag.error("undefined_character_parts");
             return;
         }
 
