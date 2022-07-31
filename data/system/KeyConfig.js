@@ -131,8 +131,23 @@ Ver4.50以降で有効
     wheel_down : マウスのホイールを下に回したときの動作
     next       : マウスの「進む」ボタンを押したときの動作
     prev       : マウスの「戻る」ボタンを押したときの動作
+    right_swipe_up     : マウスの右側のボタンを押しながら上に動かしたときの動作
+    right_swipe_down   : マウスの右側のボタンを押しながら下に動かしたときの動作
+    right_swipe_left   : マウスの右側のボタンを押しながら左に動かしたときの動作
+    right_swipe_right  : マウスの右側のボタンを押しながら右に動かしたときの動作
+    center_swipe_up    : マウスの中央のボタン（ホイール）を押しながら上に動かしたときの動作
+    center_swipe_down  : マウスの中央のボタン（ホイール）を押しながら下に動かしたときの動作
+    center_swipe_left  : マウスの中央のボタン（ホイール）を押しながら左に動かしたときの動作
+    center_swipe_right : マウスの中央のボタン（ホイール）を押しながら右に動かしたときの動作
+    prev_swipe_up      : マウスの「戻る」ボタンを押しながら上に動かしたときの動作
+    prev_swipe_down    : マウスの「戻る」ボタンを押しながら下に動かしたときの動作
+    prev_swipe_left    : マウスの「戻る」ボタンを押しながら左に動かしたときの動作
+    prev_swipe_right   : マウスの「戻る」ボタンを押しながら右に動かしたときの動作
+    next_swipe_up      : マウスの「進む」ボタンを押しながら上に動かしたときの動作
+    next_swipe_down    : マウスの「進む」ボタンを押しながら下に動かしたときの動作
+    next_swipe_left    : マウスの「進む」ボタンを押しながら左に動かしたときの動作
+    next_swipe_right   : マウスの「進む」ボタンを押しながら右に動かしたときの動作
 
-    
     
 <ジェスチャー操作>
 
@@ -252,30 +267,39 @@ Ver4.50以降で有効
 
 
 var __tyrano_key_config = {
-    // ブラウザ固有の動作（キーの組み合わせによるショートカットアクション）を許可するか否か
-    // "true" だとブラウザ固有の動作が有効に、"false" だと無効になります。
-    // たとえば Google Chrome には次のようなショートカットアクションが存在しますが、
-    // "system_key_event" が "false" だとこのアクションが無効化されます。
-    //   Ctrl + Shift + I : デベロッパーツールを開く
-    //   Ctrl + Shift + O : ブックマークマネージャを開く
+    
+    // 各種キーを押したときのブラウザ固有の動作を許可するか？
+    // "true" で許可、"false" で無効化
     system_key_event: "false",
+    
+    // 補足：たとえば Google Chrome には次のようなショートカットキーが存在しますが、
+    // "system_key_event": "false", だとこれらの動作が無効化されます。
+    //   F12               : デベロッパーツールを開く
+    //   Ctrl  + Shift + I : 　　　　　〃
+    //   Ctrl  + Shift + J : 　　　　　〃
+    //   Ctrl  + U         : ソースを表示する
+    //   Shift + E         : タスクマネージャを開く
+    //   Ctrl  + Shift + O : ブックマークマネージャを開く
+    // ※一部、無効化しきれない動作も存在します。
 
     // キーボード操作
     key: {
-        "Tab"        : "focus_next -a",
-        "Escape"     : "cancel -a",
-        " "          : "hidemessage",
+        
         "Enter"      : "next -a",
+        " "          : "hidemessage",
+        "Escape"     : "cancel -a",
         "Meta"       : "holdskip",
         "Control"    : "holdskip",
-        "ArrowLeft"  : "focus_left -a -h delay=300",
-        "ArrowUp"    : "focus_up -a -h delay=300",
-        "ArrowRight" : "focus_right -a -h delay=300",
-        "ArrowDown"  : "focus_down -a -h delay=300",
+        "m"          : "menu",
         "w"          : "vmouse_up -a -h",
         "s"          : "vmouse_down -a -h",
         "a"          : "vmouse_left -a -h",
         "d"          : "vmouse_right -a -h",
+        "Tab"        : "focus_next -a",
+        "ArrowLeft"  : "focus_left -a -h delay=300",
+        "ArrowUp"    : "focus_up -a -h delay=300",
+        "ArrowRight" : "focus_right -a -h delay=300",
+        "ArrowDown"  : "focus_down -a -h delay=300",
         "1"          : "focus_index -a index=1",
         "2"          : "focus_index -a index=2",
         "3"          : "focus_index -a index=3",
@@ -285,30 +309,53 @@ var __tyrano_key_config = {
         "7"          : "focus_index -a index=7",
         "8"          : "focus_index -a index=8",
         "9"          : "focus_index -a index=9",
+        
     },
 
     // マウス操作
     mouse: {
+        
         "right"      : "hidemessage",
         "center"     : "menu",
         "wheel_up"   : "backlog",
         "wheel_down" : "next",
-        "prev"       : "",
-        "next"       : "",
+        "prev"       : "backlog",
+        "next"       : "holdskip",
+        
+        "right_swipe_up"     : "",
+        "right_swipe_down"   : "",
+        "right_swipe_left"   : "",
+        "right_swipe_right"  : "",
+        "center_swipe_up"    : "",
+        "center_swipe_down"  : "",
+        "center_swipe_left"  : "",
+        "center_swipe_right" : "",
+        "prev_swipe_up"      : "",
+        "prev_swipe_down"    : "",
+        "prev_swipe_left"    : "",
+        "prev_swipe_right"   : "",
+        "next_swipe_up"      : "",
+        "next_swipe_down"    : "",
+        "next_swipe_left"    : "",
+        "next_swipe_right"   : "",
+        
     },
 
     // ジェスチャー操作
     gesture: {
+        
         "swipe_up_1"    : "backlog",
         "swipe_left_1"  : "auto",
         "swipe_right_1" : "menu",
         "swipe_down_1"  : "load",
         "hold"          : "skip",
+    
     },
     
     // ゲームパッド操作
     gamepad: {
         button: {
+        
             A       : "cancel -a",
             B       : "next -a",
             X       : "auto",
@@ -326,8 +373,10 @@ var __tyrano_key_config = {
             DOWN    : "focus_down -a -h delay=300",
             LEFT    : "focus_left -a -h delay=300",
             RIGHT   : "focus_right -a -h delay=300",
+        
         },
         stick_digital: {
+            
             L_UP    : "",
             L_DOWN  : "",
             L_LEFT  : "",
@@ -336,10 +385,13 @@ var __tyrano_key_config = {
             R_DOWN  : "vmouse_wheeldown -a -h",
             R_LEFT  : "",
             R_RIGHT : "",
+            
         },
         stick: {
+            
             L       : "vmouse_move",
             R       : "",
+        
         }
     },
 };

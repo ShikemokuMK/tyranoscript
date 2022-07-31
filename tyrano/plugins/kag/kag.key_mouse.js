@@ -49,50 +49,6 @@ tyrano.plugin.kag.key_mouse = {
         this.map_ges = this.keyconfig["gesture"] || {};
         this.map_pad = this.keyconfig["gamepad"] || { button: {}, stick_digital: {}, stick: {} };
 
-        //
-        // マウスダウン
-        //
-
-        $(document).on("mousedown", (e) => {
-            this.util.clearSkip();
-            const key = this.MOUSE_BUTTON_NAMES[e.button];
-            const action = key ? this.map_mouse[key] : null;
-            const done = this.doAction(action, e);
-            if (done || e.button === 1) {
-                // なにかアクションを実行した場合はブラウザ固有の動作を抑制
-                // ホイールクリックの場合も抑制しておかないとマウスカーソルがスクロールモードになってしまう
-                return false;
-            }
-        });
-
-        $(document).on("mousemove", (e) => {
-            this.vmouse.hide();
-        });
-
-        //
-        // マウスホイール
-        //
-
-        $(document).on(this.util.getWheelEventType(), (e) => {
-            const delta = e.originalEvent.deltaY
-                ? -e.originalEvent.deltaY
-                : e.originalEvent.wheelDelta
-                ? e.originalEvent.wheelDelta
-                : -e.originalEvent.detail;
-
-            let action = null;
-
-            if (delta < 0) {
-                // マウスホイールを下にスクロールしたときの処理
-                action = this.map_mouse["wheel_down"];
-            } else {
-                // マウスホイールを上にスクロールしたときの処理
-                action = this.map_mouse["wheel_up"];
-            }
-
-            this.doAction(action, e);
-        });
-
         // イベントレイヤ
         const layer_obj_click = $(".layer_event_click");
 
@@ -214,6 +170,12 @@ tyrano.plugin.kag.key_mouse = {
             // 次のタグへ
             this.kag.ftag.nextOrder();
         });
+
+        //
+        // マウス初期化
+        //
+
+        this.mouse.init(this);
 
         //
         // キーボード初期化
@@ -1231,6 +1193,197 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     /**
+     * マウスマネージャ
+     */
+    mouse: {
+        parent: null,
+        dirs: ["up", "down", "left", "right"],
+        swiping: false,
+        swiping_button: 0,
+        swiping_done: false,
+        swiping_x: 0,
+        swiping_y: 0,
+        swiping_prev_x: 0,
+        swiping_prev_y: 0,
+        swiping_timer_id: null,
+        delay_swipe_reset: 200,
+        swipe_threshold: 150,
+
+        /**
+         * 初期化
+         * @param {Object} that TYRANO.kag.key_mouse
+         */
+        init(that) {
+            this.parent = that;
+
+            //
+            // マウスダウン
+            //
+
+            $(document).on("mousedown", (e) => {
+                that.util.clearSkip();
+
+                // 左ボタンの押下は無視
+                if (e.button === 0) return;
+
+                // アクションを取得
+                const key = that.MOUSE_BUTTON_NAMES[e.button];
+                const action = key ? that.map_mouse[key] : null;
+
+                // ホールドスキップかどうか
+                let is_holdskip = false;
+                if (typeof action === "string") {
+                    const { name } = that.kag.parser.makeTag(action, 0);
+                    is_holdskip = name === "holdskip";
+                }
+
+                // このマウスボタンにスワイプアクションが設定されている場合
+                // マウスダウン時点でアクションを実行するわけにはいかない
+                if (this.swipeActionExists(key)) {
+                    this.swiping = true;
+                    this.swiping_done = false;
+                    this.swiping_button = key;
+                    this.swiping_x = 0;
+                    this.swiping_y = 0;
+                    this.swiping_prev_x = e.pageX;
+                    this.swiping_prev_y = e.pageY;
+                    // holdskip だけは実行しよう
+                    if (is_holdskip) that.doAction(action, e);
+                    return false;
+                }
+                const done = that.doAction(action, e);
+                if (done || e.button === 1) {
+                    // なにかアクションを実行した場合はブラウザ固有の動作を抑制
+                    // ホイールクリックの場合も抑制しておかないとマウスカーソルがスクロールモードになってしまう
+                    return false;
+                }
+            });
+
+            //
+            // マウスムーブ
+            //
+
+            $(document).on("mousemove", (e) => {
+                if (this.swiping && !this.swiping_done) {
+                    clearTimeout(this.swiping_timer_id);
+                    this.swiping_x += e.pageX - this.swiping_prev_x;
+                    this.swiping_y += e.pageY - this.swiping_prev_y;
+                    const distance = Math.sqrt(Math.pow(this.swiping_x, 2) + Math.pow(this.swiping_y, 2));
+                    if (distance > this.swipe_threshold) {
+                        this.swiping_done = true;
+                        const dir = this.getDir(this.swiping_x, this.swiping_y);
+                        const key = `${this.swiping_button}_swipe_${dir}`;
+                        const action = key ? that.map_mouse[key] : null;
+                        const done = that.doAction(action, e);
+                    } else {
+                        this.swiping_prev_x = e.pageX;
+                        this.swiping_prev_y = e.pageY;
+                        this.swiping_timer_id = setTimeout(() => {
+                            this.swiping_x = 0;
+                            this.swiping_y = 0;
+                        }, this.delay_swipe_reset);
+                    }
+                }
+                that.vmouse.hide();
+            });
+
+            //
+            // マウスアップ
+            // 基本的にここでアクションを実行することはないが、以下の2通りではアクションを実行する
+            // - holdskip アクション（ボタンを押している間だけスキップ）が設定されている場合
+            // - スワイプアクションが存在するボタンを押したときのアクション
+            //
+
+            $(document).on("mouseup", (e) => {
+                // アクションを取得
+                const key = that.MOUSE_BUTTON_NAMES[e.button];
+                const action = key ? that.map_mouse[key] : null;
+
+                // ホールドスキップかどうか
+                let is_holdskip = false;
+                if (typeof action === "string") {
+                    const { name } = that.kag.parser.makeTag(action, 0);
+                    is_holdskip = name === "holdskip";
+                }
+
+                // ホールドスキップ
+                if (is_holdskip) {
+                    clearTimeout(this.swiping_timer_id);
+                    that.kag.setSkip(false);
+                    return false;
+                }
+
+                //
+                if (this.swiping) {
+                    clearTimeout(this.swiping_timer_id);
+                    if (this.swiping_done) {
+                        return false;
+                    } else {
+                        const done = that.doAction(action, e);
+                    }
+                }
+            });
+
+            //
+            // マウスホイール
+            //
+
+            $(document).on(that.util.getWheelEventType(), (e) => {
+                const delta = e.originalEvent.deltaY
+                    ? -e.originalEvent.deltaY
+                    : e.originalEvent.wheelDelta
+                    ? e.originalEvent.wheelDelta
+                    : -e.originalEvent.detail;
+
+                let action = null;
+
+                if (delta < 0) {
+                    // マウスホイールを下にスクロールしたときの処理
+                    action = that.map_mouse["wheel_down"];
+                } else {
+                    // マウスホイールを上にスクロールしたときの処理
+                    action = that.map_mouse["wheel_up"];
+                }
+
+                that.doAction(action, e);
+            });
+        },
+
+        /**
+         * @param {"" | "right" | "center" | "prev" | "next"} key
+         * @returns {boolean}
+         */
+        swipeActionExists(key) {
+            const map = this.parent.map_mouse;
+            for (const dir of this.dirs) {
+                const swipe_key = `${key}_swipe_${dir}`;
+                if (map[swipe_key]) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        /**
+         * @param {number} x
+         * @param {number} y
+         */
+        getDir(x, y) {
+            const x_abs = Math.abs(x);
+            const y_abs = Math.abs(y);
+            if (x > 0) {
+                if (x_abs > y_abs) return "right";
+                else if (y > 0) return "down";
+                else return "up";
+            } else {
+                if (x_abs > y_abs) return "left";
+                else if (y > 0) return "down";
+                else return "up";
+            }
+        },
+    },
+
+    /**
      * キーボードマネージャ
      */
     keyboard: {
@@ -1325,13 +1478,10 @@ tyrano.plugin.kag.key_mouse = {
                 const action = this.getAction(e);
 
                 if (typeof action === "string") {
-                    const { name, pm } = that.kag.parser.makeTag(action, 0);
-                    if (name === "holdskip") {
-                        that.kag.setSkip(false);
-                    }
+                    const { name } = that.kag.parser.makeTag(action, 0);
                     // いま離したキーに"スキップ"アクションが割り当てられているならスキップ解除
                     // スキップキーを押している(ホールド)間だけスキップできるようにする
-                    if (action === "holdskip") {
+                    if (name === "holdskip") {
                         that.kag.setSkip(false);
                     }
                     if (name === "next") {
