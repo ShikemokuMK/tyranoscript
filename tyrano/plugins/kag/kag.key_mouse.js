@@ -27,7 +27,7 @@ tyrano.plugin.kag.key_mouse = {
     VMOUSE_TICK_RATE: 20, // 仮想マウスカーソルのチックレート
     GAMEPAD_TICK_RATE: 20, // ゲームパッドのチックレート
     KEYBOARD_TICK_RATE: 20, // キーボードのチックレート
-    HOLD_MASH_DELAY: 1000, // ホールド連打が始まるまでのディレイ
+    HOLD_MASH_DELAY: 0, // ホールド連打が始まるまでのディレイ
     HOLD_MASH_INTERVAL: 20, // ホールド連打の間隔
     DEFAULT_VMOUSE_MOVEMENT: 15, // 仮想マウスカーソル操作量のデフォルト値
     MOUSE_BUTTON_NAMES: ["", "center", "right", "prev", "next"], // e.button に対応するキーコンフィグマップキー
@@ -63,6 +63,10 @@ tyrano.plugin.kag.key_mouse = {
                 // ホイールクリックの場合も抑制しておかないとマウスカーソルがスクロールモードになってしまう
                 return false;
             }
+        });
+
+        $(document).on("mousemove", (e) => {
+            this.vmouse.hide();
         });
 
         //
@@ -446,6 +450,26 @@ tyrano.plugin.kag.key_mouse = {
 
     scroll_down() {
         $(".button_arrow_down").click();
+    },
+
+    /**
+     * フォーカス可能な要素群のうち特定の番号の要素をフォーカス
+     * @param {number} index フォーカスする番号 1-based
+     * @returns {boolean} アクションを実行できたかどうか
+     */
+    focus_index(pm) {
+        const index = pm.index ? parseInt(pm.index) : 1;
+        this.util.unfocus();
+
+        // キーボードでフォーカス可能な要素を取得, 存在しなければ帰る
+        const j_focusable = this.util.findFocusable();
+        if (j_focusable.length === 0) return false;
+
+        // フォーカスする対象を決定, 存在しなければ帰る
+        const j_target = j_focusable.eq(index - 1);
+        if (!j_target[0]) return false;
+
+        this.util.focus(j_target);
     },
 
     /**
@@ -921,7 +945,8 @@ tyrano.plugin.kag.key_mouse = {
          * @returns {boolean}
          */
         canClick() {
-            if ($(".layer_event_click").css("display") !== "none" && $(".layer_menu").css("display") === "none") {
+            const is_event_layer_displayed = $(".layer_event_click").css("display") !== "none";
+            if (is_event_layer_displayed && !this.isOpenMenu()) {
                 return true;
             }
             return false;
@@ -2189,12 +2214,6 @@ tyrano.plugin.kag.key_mouse = {
         // 何ミリ秒ごとにゲームパッドの入力状態を取得するか(上の値から計算)
         DELAY_UPDATE: null,
 
-        // 長押ししたときに何フレームごとに連打をトリガーするか
-        HOLD_MASH_INTERVAL: 1,
-
-        // 長押ししたときに連打をトリガーし始めるまでのフレーム
-        HOLD_MASH_DELAY: 10,
-
         // 1秒でマウスカーソルを何ピクセル動かせるようにするか
         MOVEMENT_VMOUSE_PER_SECOND: 2000,
 
@@ -2309,7 +2328,7 @@ tyrano.plugin.kag.key_mouse = {
                     const interval = tag.pm.interval ? parseInt(tag.pm.interval) : that.HOLD_MASH_INTERVAL;
                     const delay_f = Math.ceil(delay / this.DELAY_UPDATE);
                     const interval_f = Math.ceil(interval / this.DELAY_UPDATE);
-                    const f = state.hold_frame - delay_f;
+                    const f = e.detail.hold_frame - delay_f;
                     if (f > 0 && f % interval_f === 0) {
                         that.doAction(tag, e);
                     }

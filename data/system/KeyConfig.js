@@ -19,6 +19,7 @@ Ver4.50以降で有効
     backlog     : バックログを開く
     qsave       : クイックセーブを実行する
     qload       : クイックロードを実行する
+    focus_index : 特定の番号のボタンをフォーカスする（index パラメータの指定が必須）
     focus_next  : ボタンのフォーカスを次に移動する
     focus_prev  : ボタンのフォーカスを前に移動する
     focus_up    : ボタンのフォーカスを上に移動する
@@ -45,12 +46,14 @@ Ver4.50以降で有効
     
     ★ -h オプション
     
-    ゲームパッドのみ有効。-h オプションを付けることで hold アクションとなります。
-    ボタンが長押しされたときに連打として扱い、連続してアクションを実行するようになります。
+    キーボードまたはゲームパッドに設定するアクションにのみ有効。
+    -h オプションを付けることで hold アクションとなり、
+    キーまたはボタンの長押しが連打として扱われるようになります（ホールド連打）。
+    さらに delay パラメータを指定することで、ホールド連打が始まるまでの遅延を設定できます。
     
     (指定例) 
     
-    UP: "scroll_up -h",
+    UP: "scroll_up -h delay=300",
     
     
     ★sleepgameについて
@@ -77,7 +80,10 @@ Ver4.50以降で有効
     
 <キーボード操作の指定方法> 
     
-    "キータイプ" とそれに対応する "アクション" を次のように配置することでキーコンフィグを設定できます。
+    ★キータイプによる指定方法
+
+    "キータイプ" とそれに対応する "アクション" を次のように配置することで
+    キーコンフィグを設定できます。
     
     (指定例)
     
@@ -85,6 +91,8 @@ Ver4.50以降で有効
         " "         : "hidemessage",
         "Enter"     : "next",
     },
+    
+    ★キーコードによる指定方法（従来の方法）
     
     "キータイプ" のかわりに "キーコード" を使って定義することもできます。
     たとえ、次のように指定すれば、上の例とまったく同じ指定をしたことになります。
@@ -96,13 +104,26 @@ Ver4.50以降で有効
         "13" : "next",
     },
     
+    ★ヒント
+    
     キータイプやキーコードは次のサイトで実際にキーを押すことで調べることができます。
     https://ogihara88sai.github.io/display-keydown-event/
     (上記サイトで表示される key がキータイプ、keyCode がキーコードです)
 
+    ★キーボード操作専用のアクション
+    
+    vmouse_up    : 仮想マウスカーソルを上に動かします
+    vmouse_down  : 仮想マウスカーソルを下に動かします
+    vmouse_left  : 仮想マウスカーソルを左に動かします
+    vmouse_right : 仮想マウスカーソルを右に動かします
     
     
 <マウス操作>
+    
+    "マウス操作を表すキーワード" とそれに対応する "アクション" を配置することで
+    キーコンフィグを設定できます。
+    
+    ★マウス操作を表すキーワード一覧
     
     right      : マウスの右側のボタンを押したときの動作
     center     : マウスの中央のボタン（ホイール）を押したときの動作
@@ -115,8 +136,9 @@ Ver4.50以降で有効
     
 <ジェスチャー操作>
 
-    ★スマホ・タブレット限定
-    フリック操作やホールド操作にキーコンフィグを割り当てることができます。
+    スマホやタブレットにおけるフリック操作やホールド操作にキーコンフィグを割り当てることができます。
+    
+    ★操作を表すキーワード一覧
     
     swipe_up_1    : 1本の指で画面上方向にフリックしたときの動作
     swipe_left_1  : 1本の指で画面左方向にフリックしたときの動作
@@ -125,6 +147,7 @@ Ver4.50以降で有効
     hold          : 画面を一定時間タッチし続けたときの動作
     
     ★ヒント
+    
     swipe_up_1 などの _1 は指の数を表しており、
     たとえば swipe_up_1 なら「1本の指で画面左方向にスワイプしたときの動作」という意味になります。
     
@@ -141,7 +164,7 @@ Ver4.50以降で有効
     
     (1) A, LEFT, START などの "ボタンを表すキーワード" と "アクション" を並べる。
     
-    指定可能なキーワードは、次のとおりです。
+    "ボタンを表すキーワード" として指定可能なものは以下のとおりです。
     
     A      : Aボタン（右側エリアの下ボタン）
     B      : Bボタン（右側エリアの右ボタン）
@@ -245,14 +268,23 @@ var __tyrano_key_config = {
         "Enter"      : "next -a",
         "Meta"       : "holdskip",
         "Control"    : "holdskip",
-        "ArrowLeft"  : "focus_left -a",
-        "ArrowUp"    : "focus_up -a",
-        "ArrowRight" : "focus_right -a",
-        "ArrowDown"  : "focus_down -a",
-        "w"          : "vmouse_up -a -h delay=0",
-        "s"          : "vmouse_down -a -h delay=0",
-        "a"          : "vmouse_left -a -h delay=0",
-        "d"          : "vmouse_right -a -h delay=0",
+        "ArrowLeft"  : "focus_left -a -h delay=300",
+        "ArrowUp"    : "focus_up -a -h delay=300",
+        "ArrowRight" : "focus_right -a -h delay=300",
+        "ArrowDown"  : "focus_down -a -h delay=300",
+        "w"          : "vmouse_up -a -h",
+        "s"          : "vmouse_down -a -h",
+        "a"          : "vmouse_left -a -h",
+        "d"          : "vmouse_right -a -h",
+        "1"          : "focus_index -a index=1",
+        "2"          : "focus_index -a index=2",
+        "3"          : "focus_index -a index=3",
+        "4"          : "focus_index -a index=4",
+        "5"          : "focus_index -a index=5",
+        "6"          : "focus_index -a index=6",
+        "7"          : "focus_index -a index=7",
+        "8"          : "focus_index -a index=8",
+        "9"          : "focus_index -a index=9",
     },
 
     // マウス操作
@@ -290,18 +322,18 @@ var __tyrano_key_config = {
             HOME    : "title",
             LS      : "",
             RS      : "",
-            UP      : "focus_up -a -h",
-            DOWN    : "focus_down -a -h",
-            LEFT    : "focus_left -a -h",
-            RIGHT   : "focus_right -a -h",
+            UP      : "focus_up -a -h delay=300",
+            DOWN    : "focus_down -a -h delay=300",
+            LEFT    : "focus_left -a -h delay=300",
+            RIGHT   : "focus_right -a -h delay=300",
         },
         stick_digital: {
             L_UP    : "",
             L_DOWN  : "",
             L_LEFT  : "",
             L_RIGHT : "",
-            R_UP    : "vmouse_wheelup -a -h delay=0",
-            R_DOWN  : "vmouse_wheeldown -a -h delay=0",
+            R_UP    : "vmouse_wheelup -a -h",
+            R_DOWN  : "vmouse_wheeldown -a -h",
             R_LEFT  : "",
             R_RIGHT : "",
         },
