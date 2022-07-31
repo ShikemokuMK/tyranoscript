@@ -871,15 +871,19 @@ tyrano.plugin.kag = {
         this.base.kag = this;
 
         // 現在のゲーム画面のスケーリング情報を格納
-        this.tmp.scale_info = {
+        this.tmp.screen_info = {
             scale_x: 1,
             scale_y: 1,
-            margin_top: 0,
-            margin_left: 0,
-            game_width: 1280,
-            game_height: 720,
-            view_width: 1920,
-            height_hegiht: 1080,
+            width: 1280,
+            height: 720,
+            top: 0,
+            bottom: 720,
+            left: 0,
+            right: 1280,
+            original_width: 1280,
+            original_height: 720,
+            viewport_width: 1920,
+            viewport_hegiht: 1080,
         };
 
         // ゲーム画面フィットを即実行する
@@ -1442,12 +1446,17 @@ tyrano.plugin.kag = {
             y = cursor.y;
         }
 
+        let image_url;
+        let css_str;
         if (storage === "default") {
-            //標準のカーソルをセット
-            $("body").css("cursor", "auto");
+            css_str = "auto";
         } else {
-            $("body").css("cursor", `url(./data/image/${storage}) ${x} ${y}, default`);
+            image_url = `./data/image/${storage}`;
+            css_str = `url(${image_url}) ${x} ${y}, default`;
         }
+
+        $("body").css("cursor", css_str);
+        this.kag.key_mouse.vmouse.addImage("default", image_url, x, y);
     },
 
     /**

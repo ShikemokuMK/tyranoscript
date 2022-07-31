@@ -138,8 +138,7 @@ tyrano.plugin.kag.key_mouse = {
         // mousewheel マウスホイール
         //
 
-        const mousewheelevent = "onwheel" in document ? "wheel" : "onmousewheel" in document ? "mousewheel" : "DOMMouseScroll";
-        $(document).on(mousewheelevent, (e) => {
+        $(document).on(this.util.getWheelEventType(), (e) => {
             // メニュー表示中は不可
             if (!this.canShowMenu()) return;
 
@@ -287,15 +286,27 @@ tyrano.plugin.kag.key_mouse = {
             this.kag.ftag.nextOrder();
         });
 
+        //
+        // 設定有効時のみゲームパッドのイベント初期化
+        //
+
         if (this.kag.config["useGamepad"] === "true") {
             this.initGamepadEvents();
         }
+
+        //
+        // バーチャルマウスカーソル
+        //
+
+        this.vmouse.init(this);
     },
 
     /**
      * ゲームパッド系のイベントを初期化する
      */
     initGamepadEvents() {
+        this.gamepad.init(this);
+
         //
         // ページを開いてからゲームパッドの入力を最初に検知した瞬間に発火されるイベントリスナ
         //
@@ -319,14 +330,60 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         $(document).on("gamepadpressdown", (e) => {
-            // console.warn(e.detail);
-
             // ティラノイベント"gamepad-pressdown"を発火
             this.kag.trigger("gamepad-pressdown", e);
 
-            const action = this.map_pad.button[e.detail.button_name] || this.map_pad.button[e.detail.button_index];
+            let map;
+            if (e.detail.type === this.gamepad.presstype.BUTTON) {
+                map = this.map_pad.button;
+            } else {
+                map = this.map_pad.stick_digital;
+            }
+
+            let action = map[e.detail.button_name];
+            if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
 
             this.doAction(action, e);
+        });
+
+        //
+        // ゲームパッドのボタンホールド
+        //
+
+        $(document).on("gamepadpresshold", (e) => {
+            // ティラノイベント"gamepad-presshold"を発火
+            this.kag.trigger("gamepad-presshold", e);
+
+            let map;
+            if (e.detail.type === this.gamepad.presstype.BUTTON) {
+                map = this.map_pad.button;
+            } else {
+                map = this.map_pad.stick_digital;
+            }
+
+            let action = map[e.detail.button_name];
+            if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
+
+            if (typeof action === "string") {
+                const tag = this.kag.parser.makeTag(action, 0);
+
+                // ホールドフラグが立っていないなら無視
+                if (tag.pm["-h"] === undefined) return;
+
+                let delay_f = this.gamepad.HOLD_MASH_DELAY;
+                let interval_f = this.gamepad.HOLD_MASH_INTERVAL;
+                if (tag.pm.delay) {
+                    delay_f = Math.ceil(parseInt(tag.pm.delay) / this.gamepad.DELAY_UPDATE);
+                }
+                if (tag.pm.interval) {
+                    interval_f = Math.ceil(parseInt(tag.pm.interval) / this.gamepad.DELAY_UPDATE);
+                }
+
+                let f = e.detail.hold_frame - delay_f;
+                if (f > 0 && f % interval_f === 0) {
+                    this.doAction(tag, e);
+                }
+            }
         });
 
         //
@@ -337,61 +394,62 @@ tyrano.plugin.kag.key_mouse = {
             // ティラノイベント"gamepad-pressup"を発火
             this.kag.trigger("gamepad-pressup", e);
 
-            const action = this.map_pad.button[e.detail.button_name] || this.map_pad.button[e.detail.button_index];
-
-            if (action === "holdskip") {
-                this.kag.setSkip(false);
+            let map;
+            if (e.detail.type === this.gamepad.presstype.BUTTON) {
+                map = this.map_pad.button;
+            } else {
+                map = this.map_pad.stick_digital;
             }
-        });
 
-        //
-        // ゲームパッドのスティックの上下左右のデジタル入力
-        //
+            let action = map[e.detail.button_name];
+            if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
 
-        $(document).on("gamepadstickdigital", (e) => {
-            // ティラノイベント"gamepad-stick-digital"を発火
-            this.kag.trigger("gamepad-stick-digital", e);
-
-            const map = this.map_pad.stick_digital[e.detail.stick_name] || this.map_pad.stick_digital[e.detail.stick_index];
-
-            if (map) {
-                const action = map[e.detail.direction];
-                this.doAction(action, e);
+            if (typeof action === "string") {
+                const { name, pm } = this.kag.parser.makeTag(action, 0);
+                if (name === "holdskip") {
+                    this.kag.setSkip(false);
+                }
+                if (name === "next") {
+                    if (this.vmouse.is_visible) {
+                        this.vmouse.leftup();
+                        return;
+                    }
+                }
             }
         });
     },
 
     /**
      * アクションを実行する
-     * @param {function|string} action アクション名あるいは関数
-     * @param {Event} event イベント
+     * @param {function|string|Object} action
+     * @param {Event} event
      * @returns {boolean} アクションを実行できたかどうか
      */
     doAction(action, event) {
+        if (!action) return;
+
         // キーコンフィグが有効かどうか
         const config_enabled = this.kag.stat.enable_keyconfig;
 
-        // action が関数ならそのまま実行する
-        if (typeof action === "function") {
-            // キーコンフィグが有効なときだけ
-            if (config_enabled) {
-                action();
-                return true;
-            } else {
-                return false;
-            }
+        // アクション名とパラメータを得る
+        let name;
+        let pm;
+        switch (typeof action) {
+            case "function":
+                // 関数ならそのまま実行して終了
+                if (config_enabled) action();
+                return config_enabled;
+            case "string":
+                const tag = this.kag.parser.makeTag(action, 0);
+                name = tag.name;
+                pm = tag.pm;
+                break;
+            case "object":
+                name = action.name;
+                pm = action.pm;
+                break;
         }
-
-        // action が関数でも文字列でもないならおわり
-        if (typeof action !== "string") {
-            return false;
-        }
-
-        //
-        // 文字列が指定されている
-        //
-
-        const { name, pm } = this.kag.parser.makeTag(action, 0);
+        if (!name) return;
 
         // キーコンフィグが無効かつ -a オプションが指定されていないアクションならば実行しない
         if (!config_enabled && pm["-a"] === undefined) {
@@ -408,6 +466,10 @@ tyrano.plugin.kag.key_mouse = {
             // 最後に"next"アクションを実行したゲームパッドを記憶しておく
             if (is_gamepad) {
                 this.gamepad.last_used_next_gamepad_index = event.detail.gamepad_index;
+            }
+            if (this.vmouse.is_visible) {
+                this.vmouse.leftdown();
+                return;
             }
             const j_focus = $(":focus.keyfocus");
             if (j_focus.length > 0) {
@@ -551,15 +613,42 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     util: {
+        /**
+         * 有効なホイールイベント名を返す, 環境の違いを吸収する
+         * @returns {"wheel" | "mousewheel" | "DOMMouseScroll"}
+         */
+        getWheelEventType() {
+            return "onwheel" in document ? "wheel" : "onmousewheel" in document ? "mousewheel" : "DOMMouseScroll";
+        },
+
+        /**
+         * いまリモーダルウィンドウが開いているかどうかを返す
+         * @returns {boolean}
+         */
         isOpenRemodal() {
             return $(".remodal-wrapper").hasClass("remodal-is-opened");
         },
+
+        /**
+         * いまメニューが開かれているかどうかを返す
+         * @returns {boolean}
+         */
         isOpenMenu() {
             return $(".layer_menu").css("display") !== "none";
         },
+
+        /**
+         * フォーカスされている要素を探して返す
+         * @returns {jQuery}
+         */
         findFocused() {
             return $(":focus.keyfocus");
         },
+
+        /**
+         * フォーカス可能な要素を探して返す
+         * @returns {jQuery}
+         */
         findFocusable() {
             let j_buttons;
             if (this.isOpenRemodal()) {
@@ -591,14 +680,156 @@ tyrano.plugin.kag.key_mouse = {
             const j_buttons_sorted = $(arr);
             return j_buttons_sorted;
         },
+
+        /**
+         * 要素をフォーカスする
+         * @param {jQuery} j_elm
+         */
         focus(j_elm) {
             j_elm.focus().addClass("keyfocus");
         },
+
+        /**
+         * 要素のフォーカスを外す
+         */
         unfocus() {
-            $(":focus").blur();
+            $(":focus").blur().removeClass("keyfocus");
         },
+
+        /**
+         * 受け取った jQuery オブジェクトがメニューのクローズボタンであるかどうかを返す
+         * @param {jQuery} j_elm
+         * @returns {boolean}
+         */
         isCloseButton(j_elm) {
             return j_elm.hasClass("menu_close");
+        },
+
+        /**
+         * 『固定時間』で指定要素をアニメーション付きで縦スクロールする
+         * @param {Element} elm
+         * @param {number} change_in_scroll_top 相対的な縦スクロール量
+         * @param {number} [duration=500] 変化時間(ミリ秒)
+         * @param {string} [easing="easeOutQuint"] イージング
+         */
+        smoothScrollWithFixedDuration(elm, change_in_scroll_top, duration = 500, easing = "easeOutQuint") {
+            // アニメーション前の最初の scrollTop
+            const beginning_scroll_top = elm.scrollTop;
+
+            // イージング名の補正
+            if (easing === "linear") easing = "_linear";
+
+            // すでに駆動しているスクロールアニメーションがあるなら解除
+            if (elm.__scroll) {
+                cancelAnimationFrame(elm.__scroll.timer);
+                delete elm.__scroll;
+            }
+
+            // 要素の __scroll 領域に情報をセット
+            elm.__scroll = {
+                type: "fixed_time",
+                timer: null,
+                beginning_time: null,
+            };
+
+            // アニメーションのループ関数
+            const scroll_loop = (time) => {
+                // アニメーション開始から何ミリ秒が経過したか
+                // フレームベースではなく時間ベースでアニメ―ションを計算することでリフレッシュレートの影響を防ぐ
+                let current_time;
+                if (elm.__scroll.beginning_time === null) {
+                    current_time = 0;
+                    elm.__scroll.beginning_time = time;
+                } else {
+                    current_time = time - elm.__scroll.beginning_time;
+                }
+
+                // アニメーションの終了時刻を迎えたかどうか
+                if (current_time < duration) {
+                    // まだアニメーションの終了予定時刻を迎えていない
+                    // jQuery.easing を借りてイージングを計算, スクロール, 次回の予約
+                    const current_scroll_top = $.easing[easing](null, current_time, beginning_scroll_top, change_in_scroll_top, duration);
+                    elm.scrollTo(0, current_scroll_top);
+                    elm.__scroll.timer = requestAnimationFrame(scroll_loop);
+                } else {
+                    // もうアニメーションの終了予定時刻を迎えた
+                    elm.scrollTo(0, beginning_scroll_top + change_in_scroll_top);
+                    delete elm.__scroll;
+                    return;
+                }
+            };
+
+            // ループの初回実行
+            elm.__scroll.timer = requestAnimationFrame(scroll_loop);
+        },
+
+        /**
+         * 『固定速度』で指定要素をアニメーション付きで縦スクロールする
+         * @param {Element} elm
+         * @param {number} change_in_scroll_top 相対的な縦スクロール量
+         * @param {boolean} afterglow_needs 余韻を付けるかどうか
+         */
+        smoothScrollWithFixedSpeed(elm, change_in_scroll_top, afterglow_needs = true) {
+            // 1 秒間の最大スクロール量(px)
+            const max_volume_per_second = 1000;
+            // 1 フレームの最大スクロール量(px) ※リフレッシュレートも考慮する
+            const max_volume_per_frame = max_volume_per_second / (window.refreshRate || 60);
+            // スクロール量を符号と絶対値に分離
+            const y_sign = Math.sign(change_in_scroll_top);
+            const y_abs = Math.abs(change_in_scroll_top);
+
+            // スクロールアニメーションが駆動中の場合
+            if (elm.__scroll) {
+                if (elm.__scroll.type === "fixed_time" || elm.__scroll.sign !== y_sign) {
+                    // 固定時間スクロール、もしくは逆向き固定速度スクロールが駆動中なら止める
+                    cancelAnimationFrame(elm.__scroll.timer);
+                    delete elm.__scroll;
+                } else {
+                    // 同一方向の固定速度スクロールが駆動中なら「残りスクロール量」を増加させて帰る
+                    elm.__scroll.is_afterglow = false;
+                    elm.__scroll.afterglow = max_volume_per_frame;
+                    elm.__scroll.remaining += y_abs;
+                    return;
+                }
+            }
+
+            // 初期化
+            elm.__scroll = {
+                type: "fixed_speed",
+                timer: null,
+                active: true,
+                sign: y_sign,
+                remaining: y_abs,
+                is_afterglow: false,
+                afterglow: max_volume_per_frame,
+            };
+
+            // ループ関数
+            const scroll_loop = () => {
+                if (!elm.__scroll.is_afterglow) {
+                    const volume = Math.min(elm.__scroll.remaining, max_volume_per_frame);
+                    elm.scrollBy(0, elm.__scroll.sign * volume);
+                    elm.__scroll.remaining -= volume;
+                    if (elm.__scroll.remaining <= 0) {
+                        elm.__scroll.is_afterglow = true;
+                        if (!afterglow_needs) {
+                            delete elm.__scroll;
+                            return;
+                        }
+                    }
+                } else {
+                    elm.scrollBy(0, elm.__scroll.sign * elm.__scroll.afterglow);
+                    elm.__scroll.afterglow *= 0.7;
+                    if (elm.__scroll.afterglow < 0.1) {
+                        delete elm.__scroll;
+                        return;
+                    }
+                }
+                elm.__scroll.timer = requestAnimationFrame(scroll_loop);
+            };
+
+            // ループの初回実行
+            scroll_loop();
         },
     },
 
@@ -800,9 +1031,9 @@ tyrano.plugin.kag.key_mouse = {
         const is_plus = dir === "down" || dir === "right";
 
         const _width = is_dir_vertical ? "width" : "height";
-        const game_width = this.kag.tmp.scale_info[`game_${_width}`];
+        const original_width = this.kag.tmp.screen_info[`original_${_width}`];
         const hash_num = 10;
-        const hash_width = parseInt(game_width / hash_num);
+        const hash_width = parseInt(original_width / hash_num);
         const _x = is_dir_vertical ? "x" : "y";
 
         const new_pos_column = [];
@@ -1096,11 +1327,843 @@ tyrano.plugin.kag.key_mouse = {
         return can_show_menu && !is_game_active;
     },
 
+    vmouse_up(movement = 50) {
+        this.vmouse.move(0, -movement);
+    },
+
+    vmouse_down(movement = 50) {
+        this.vmouse.move(0, movement);
+    },
+
+    vmouse_left(movement = 50) {
+        this.vmouse.move(-movement, 0);
+    },
+
+    vmouse_right(movement = 50) {
+        this.vmouse.move(movement, 0);
+    },
+
+    vmouse_wheelup() {
+        this.vmouse.wheelup();
+    },
+
+    vmouse_wheeldown() {
+        this.vmouse.wheeldown();
+    },
+
+    /**
+     * バーチャルマウスカーソル
+     */
+    vmouse: {
+        parent: null, // TYRANO.kag.key_mouse
+        is_initialized: false, // 初期化済みか
+        j_html: null, // $("html")
+        j_body: null, // $("body")
+        j_cursor: null, // $("<img />") 仮想マウスカーソルの jQuery オブジェクト
+        x: 0, // 仮想マウスカーソルの x 座標
+        y: 0, // 仮想マウスカーソルの y 座標
+        hotspot_x: 0, // 仮想マウスカーソルのホットスポット(マウスカーソルの画像素材のうち"カーソルの座標"として扱う一点)の x 座標
+        hotspot_y: 0, //　仮想マウスカーソルのホットスポットの y 座標
+        state: "none", // 仮想マウスカーソルの状態: たとえば "default", "pointer", "none", ...
+        point_elm: null, // 仮想マウスカーソルが指している最前面の一要素, document.elementFromPoint() で更新する
+        point_tree: [], // 仮想マウスカーソルが指している要素ツリー, <html> まで遡る
+        down_elms: [], // 仮想マウスボタンを押下したときの要素を記憶しておく用, ボタンの種類ごとに分けて記憶するために配列にする
+        is_visible: false, // いまカーソルが表示されているかどうか
+        is_scrolling: false, // いまスクロールボタンを押下している最中か
+        scroll_ratio: 1, // カーソルの移動量と要素のスクロール用の比
+        screen: {}, // ゲーム画面の情報格納, 画面サイズが変わるたびにアップデート
+        previous_click_time: 0, // 前回クリック時のタイムスタンプ, ダブルクリックの判定に使用
+        max_delay_double_click: 500, // 前回クリックからこの時間(msec)以上の間隔が空いたクリックはダブルクリックとみなさない
+        delya_hide_last_move: 3000, // 前回マウス移動時からこの時間(msec)以上の時間が経過するとマウスカーソルを非表示にする
+        is_auto_hidden_enabled: true, // …という機能を有効にするかどうか
+        hidden_timer_id: null, // マウスカーソル非表示処理の setTimeout の戻り値管理用
+        transition_duration: 50, // 画面上のカーソル移動のトランジション所要時間
+        fade_duration: 100, // 画面上のカーソルのフェードイン・アウトの所要時間
+        TICK_RATE: 10, // 1 秒間に何回カーソルの状態をアップデートするか
+        delay_update: null, // …という数値から、何ミリ秒に 1 回アップデートすればよいかを計算する
+        default_image_map: {
+            none: {
+                image_url: "./tyrano/images/system/transparent.png",
+                hotspot_x: 0,
+                hotspot_y: 0,
+            },
+            default: {
+                image_url: "./tyrano/images/system/cursor_default.png",
+                hotspot_x: 0,
+                hotspot_y: 0,
+            },
+            pointer: {
+                image_url: "./tyrano/images/system/cursor_pointer.png",
+                hotspot_x: 0,
+                hotspot_y: 0,
+            },
+        },
+        image_map: {},
+
+        /**
+         * 初期化
+         * @param {Object} parent TYRANO.kag.key_mouse
+         */
+        init(parent) {
+            if (this.is_initialized) return;
+            this.is_initialized = true;
+            this.parent = parent;
+            this.j_html = $("html");
+            this.j_body = $("body");
+            this.j_cursor = $('<img id="vmouse" src="./tyrano/images/system/transparent.png" />');
+            this.j_body.append(this.j_cursor);
+            if (this.TICK_RATE > 0) {
+                this.delay_update = (1000 / this.TICK_RATE) | 0;
+            }
+            $.extend(true, this.image_map, this.default_image_map);
+
+            // 画面リサイズ時に情報を更新する
+            parent.kag.on("resize", () => {
+                const info = parent.kag.tmp.screen_info;
+                const scale_x = info.scale_x;
+                const scale_y = info.scale_y;
+                const x = (info.viewport_width / 2) | 0;
+                const y = (info.viewport_height / 2) | 0;
+                const top = info.top | 0;
+                const bottom = info.bottom | 0;
+                const left = info.left | 0;
+                const right = info.right | 0;
+                const viewport_width = info.viewport_width | 0;
+                const viewport_height = info.viewport_height | 0;
+                const radius = (1.1 * (Math.sqrt(Math.pow(info.width, 2) + Math.pow(info.height, 2)) / 2)) | 0;
+                Object.assign(this.screen, {
+                    scale_x,
+                    scale_y,
+                    x,
+                    y,
+                    top,
+                    bottom,
+                    left,
+                    right,
+                    viewport_width,
+                    viewport_height,
+                    radius,
+                });
+            });
+            parent.kag.once("resize", () => {
+                this.x = this.screen.x;
+                this.y = this.screen.y;
+                this.refreshTransform();
+                // テスト: ぐるぐる回す
+                // let radius = 0;
+                // let radian = 0;
+                // setInterval(() => {
+                //     radius += 1;
+                //     radian += 0.1;
+                //     const dx = radius * Math.cos(radian);
+                //     const dy = radius * Math.sin(radian);
+                //     this.place(this.screen.x + dx, this.screen.y + dy);
+                // }, 16);
+            });
+        },
+
+        /**
+         * カーソル画像を登録する
+         * @param {string} type
+         * @param {string} image_url
+         * @param {number} hotspot_x
+         * @param {number} hotspot_y
+         */
+        addImage(type, image_url, hotspot_x, hotspot_y) {
+            hotspot_x = parseInt(hotspot_x) || 0;
+            hotspot_y = parseInt(hotspot_y) || 0;
+            if (!image_url) {
+                const options = this.default_image_map[type] || this.default_image_map.default;
+                image_url = options.image_url;
+                if (!hotspot_x) hotspot_x = options.hotspot_x;
+                if (!hotspot_y) hotspot_y = options.hotspot_y;
+            }
+            this.image_map[type] = { image_url, hotspot_x, hotspot_y };
+        },
+
+        /**
+         * ミリ秒単位のタイムスタンプを返す
+         * @returns {number}
+         */
+        getTime() {
+            return performance.now();
+        },
+
+        /**
+         *　仮想マウスカーソルを表示する
+         */
+        show() {
+            if (!this.is_visible) {
+                this.is_visible = true;
+                //this.j_cursor.css("visibility", "visible");
+                this.j_cursor.css("opacity", "1");
+                this.j_html.addClass("vmouse-displayed");
+                if (this.TICK_RATE > 0) {
+                    this.delay_update = (1000 / this.TICK_RATE) | 0;
+                    this.updateLoop();
+                }
+            }
+        },
+
+        /**
+         * 仮想マウスカーソルを非表示にする
+         */
+        hide() {
+            if (this.is_visible) {
+                this.is_visible = false;
+                //this.j_cursor.css("visibility", "hidden");
+                this.j_cursor.css("opacity", "0");
+                this.j_html.removeClass("vmouse-displayed");
+            }
+        },
+
+        /**
+         * なんらかのボタンを押しているかどうか
+         */
+        isAnyDown() {
+            for (const item of this.down_elms) {
+                if (item) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        /**
+         * 一定時間後にマウスカーソルを非表示にする処理を予約する
+         * まだ実行されていない前回の予約は破棄される
+         */
+        hideWithTimeout() {
+            clearTimeout(this.hidden_timer_id);
+            this.hidden_timer_id = setTimeout(() => {
+                if (this.isAnyDown()) {
+                    this.hideWithTimeout();
+                } else {
+                    this.hide();
+                }
+            }, this.delya_hide_last_move);
+        },
+
+        /**
+         * 仮想マウスカーソルの状態を更新するループ処理
+         * もし仮想マウスカーソルの位置がまったく変わらなかったとしても
+         * DOMが変遷していくことによって「いま仮想マウスカーソルが指している要素」が変わりうるため
+         * 一定間隔でカーソルの状態を更新していくことが望ましい
+         */
+        updateLoop() {
+            // マウスが非表示になった場合は無効化してループを打ち切る
+            if (!this.is_visible) return;
+
+            // ポイント要素とカーソル状態の更新
+            this.scanPointElement();
+            this.scanState();
+
+            // 次回ループ
+            setTimeout(() => {
+                this.updateLoop();
+            }, this.delay_update);
+        },
+
+        /**
+         * 任意のイベントにマウスイベントを発生させる
+         * - Event, MouseEvent, WheelEvent, などのコンストラクタと dispatchEvent メソッドを活用する
+         * - mouse 系のイベントがトリガーされたときはついでに pointer 系のイベントもトリガーする
+         * - click がトリガーされたときはタイムスタンプを取得しておき前回との差分次第で dblclick をトリガーする
+         * @param {string} event_type 発生させるイベントのタイプ
+         * @param {Element} elm イベントを発生させる要素
+         * @param {Object} options イベント変数に取り付ける情報
+         */
+        trigger(event_type, elm, options = {}) {
+            // elm が未指定ならポイント要素から取ってくる, それでも要素が取れないならおわり
+            if (!elm) elm = this.point_elm;
+            if (!elm) return;
+
+            // 最適なイベントコンストラクタを取得, 取得できなければおわり
+            const AnyConstructor = this.getEventConstructor(event_type);
+            if (!AnyConstructor) return;
+
+            // イベント生成用のオプションを作成
+            // - イベントのバブリング(bubbles)を明示的に有効化する。
+            // - バブリングというのは下図のようにイベントがDOMを遡って伝搬していくこと。
+            //   <body> ←┐ 親要素にもクリックイベント発生
+            //     <div.tyrano_base> ←┐ 親要素にもクリックイベント発生
+            //        <div.layer_click_event> ここでクリックイベント発生
+            // - イベントをキャンセル可能(cancelable)にする。(e.preventDefault()できるようになる)
+            const event_options = Object.assign(
+                {
+                    pageX: this.x,
+                    pageY: this.y,
+                    bubbles: true,
+                    cancelable: true,
+                },
+                options,
+            );
+
+            // イベントを作成して適用
+            elm.dispatchEvent(new AnyConstructor(event_type, event_options));
+
+            // mouse 系のイベントの場合は pointer 系のイベントもついでにトリガーする
+            // (例) mousemove → pointermove
+            if (event_type.includes("mouse") && PointerEvent) {
+                const p_event_type = event_type.replace("mouse", "pointer");
+                elm.dispatchEvent(new PointerEvent(p_event_type, event_options));
+            }
+
+            // click の場合はダブルクリックかどうかも確認する
+            if (event_type === "click") {
+                const time = this.getTime();
+                const delay = time - this.previous_click_time;
+                if (delay < this.max_delay_double_click) {
+                    elm.dispatchEvent(new MouseEvent("dblclick", event_options));
+                }
+                this.previous_click_time = time;
+            }
+
+            // 一定時間後にカーソルを非表示にする
+            if (this.is_auto_hidden_enabled) {
+                this.hideWithTimeout();
+            }
+        },
+
+        /**
+         * あるイベントタイプに対応する最適なイベントコンストラクタを返す
+         * @param {string} event_type
+         * @returns {Event|WheelEvent|MouseEvent}
+         */
+        getEventConstructor(event_type) {
+            let constructor = Event;
+            const lower = event_type.toLowerCase();
+            if (WheelEvent && lower.includes("wheel")) {
+                constructor = WheelEvent;
+            } else if (MouseEvent && (lower.includes("mouse") || lower.includes("click") || lower === "contextmenu")) {
+                constructor = MouseEvent;
+            }
+            return constructor;
+        },
+
+        /**
+         * 仮想マウスカーソルの座標プロパティを変更して実際の見た目も更新する
+         * @param {number} x
+         * @param {number} y
+         */
+        setXY(x, y) {
+            this.x = x;
+            this.y = y;
+            this.refreshTransform();
+        },
+
+        /**
+         * 仮想マウスカーソル座標移動にかけるトランジション時間を変更する
+         * @param {number} duration
+         */
+        setTransitionDuration(duration) {
+            if (typeof duration === "number" && duration !== this.transition_duration) {
+                this.j_cursor.css("transition", `transform ${duration}ms linear, opacity ${this.fade_duration}ms linear`);
+                this.j_cursor.get(0).offsetHeight; // transition-duration の強制同期反映
+                this.transition_duration = duration;
+            }
+        },
+
+        /**
+         * 仮想マウスカーソルの見た目の位置(CSS の transform プロパティ)を更新する
+         */
+        refreshTransform() {
+            this.j_cursor.css({
+                transform: `translateX(${this.x}px) translateY(${this.y}px)`,
+            });
+        },
+
+        /**
+         * 仮想マウスカーソルの hotspot を見た目に適用する
+         */
+        refreshHotspot() {
+            this.j_cursor.css({
+                marginLeft: `${-this.hotspot_x}px`,
+                marginTop: `${-this.hotspot_y}px`,
+            });
+        },
+
+        /**
+         * ある要素の親要素をたどっていき要素ツリーを形成して返す
+         * たとえば [ <div>, <body>, <html> ] を返す
+         * @param {Element} elm
+         * @returns {Element[]}
+         */
+        getElementTree(elm) {
+            const arr = [];
+            let next_elm = elm;
+            while (next_elm) {
+                arr.push(next_elm);
+                next_elm = next_elm.parentElement;
+            }
+            return arr;
+        },
+
+        /**
+         * 現在のポイント要素を新しく読み取る
+         * 単に point_elm プロパティの更新を行うだけでなく、
+         * mouseover, mouseout, mouseenter, mouseleave のトリガーも行う
+         * @returns {Element | null}
+         */
+        scanPointElement() {
+            const new_elm = document.elementFromPoint(this.x, this.y);
+            const old_elm = this.point_elm;
+
+            // ポイント要素の更新がない場合はおわり
+            if (new_elm === old_elm) return new_elm;
+
+            // 要素ツリー
+            const new_tree = this.getElementTree(new_elm);
+            const old_tree = this.point_tree;
+
+            // 先ほどまでの要素ツリーにはなかった要素が新しく登場していたらそれを mouseenter
+            new_tree.forEach((elm) => {
+                if (!old_tree.includes(elm)) {
+                    this.trigger("mouseenter", elm, { bubbles: false });
+                    elm.classList.add("hover");
+                }
+            });
+
+            // 先ほどまでの要素ツリーにあった要素が新しい要素ツリーから消えていればそれを mouseleave
+            old_tree.forEach((elm) => {
+                if (!new_tree.includes(elm)) {
+                    this.trigger("mouseleave", elm, { bubbles: false });
+                    elm.classList.remove("hover");
+                }
+            });
+
+            // 最前面のポイント要素
+            if (old_elm) {
+                this.trigger("mouseout", old_elm);
+            }
+
+            // 新ポイント要素にホバーを入れる処理
+            if (new_elm) {
+                this.trigger("mouseover", new_elm);
+                $(new_elm).addClass("hover");
+            }
+
+            this.point_elm = new_elm;
+            this.point_tree = new_tree;
+
+            return new_elm;
+        },
+
+        /**
+         * 現在の仮想マウスカーソルの画像を変更する
+         * @param {string} new_state 新しいカーソル状態 ("default", "pointer", "none", ...)
+         * @param {boolean} book 予約に留めるかどうか (mousedown 中かどうか)
+         */
+        setState(new_state, book) {
+            // カーソル状態に変化がなければ処理は必要ない
+            if (new_state === this.state) return;
+
+            // 予約に留める場合
+            if (book) {
+                this.book_state = new_state;
+                return;
+            }
+
+            // クラスや画像の更新
+            // this.j_cursor.removeClass(this.state);
+            // this.j_cursor.addClass(new_state);
+            this.refreshImage(new_state);
+            this.state = new_state;
+
+            // 予約は取り消してよい
+            this.book_state = null;
+        },
+
+        /**
+         *　"default", "pointer" などのカーソル状態を受け取り
+         * 仮想マウスカーソルの src 属性を更新する
+         * @param {string} state カーソル状態, "default", "pointer" など
+         */
+        refreshImage(state) {
+            if (state === "none") {
+                this.j_cursor.attr("src", this.default_image_map.none.image_url);
+                return;
+            }
+            let image_url;
+            let hotspot_x;
+            let hotspot_y;
+            if (state.indexOf("url(") === 0) {
+                image_url = state.match(/(?<=url\()[^)]+(?=\))/);
+                if (image_url) {
+                    image_url = image_url[0].replace(/"/g, "").replace(/'/g, "");
+                    let hotspot_str = state.match(/(?<=(url\([^)]+\) +))\d+ +\d+/);
+                    if (hotspot_str) {
+                        const hash = hotspot_str[0].split(" ");
+                        hotspot_x = parseInt(hash[0]);
+                        hotspot_y = parseInt(hash[hash.length - 1]);
+                    } else {
+                        hotspot_x = 0;
+                        hotspot_y = 0;
+                    }
+                }
+            }
+            if (!image_url) {
+                const options = state in this.image_map ? this.image_map[state] : this.image_map.default;
+                image_url = options.image_url;
+                hotspot_x = options.hotspot_x;
+                hotspot_y = options.hotspot_y;
+            }
+            if (this.hotspot_x !== hotspot_x || this.hotspot_y !== hotspot_y) {
+                this.hotspot_x = hotspot_x;
+                this.hotspot_y = hotspot_y;
+                this.refreshHotspot();
+            }
+            this.j_cursor.attr("src", image_url);
+        },
+
+        /**
+         * 現在のカーソル位置からの相対座標を指定して仮想マウスカーソルを動かす
+         * @param {number} x マウスカーソルの x 座標の移動量（右が正）
+         * @param {number} y マウスカーソルの y 座標の移動量（下が正）
+         * @param {number} duration 画面上のマウスカーソルの移動にかけるトランジション時間
+         */
+        move(x, y, duration) {
+            this.place(this.x + x, this.y + y, duration);
+        },
+
+        /**
+         * 仮想マウスカーソルの新しい絶対座標を指定する
+         * @param {number} x マウスカーソルの新しい x 座標（右が正, document の左端が 0）
+         * @param {number} y マウスカーソルの新しい y 座標（下が正, document の上端が 0）
+         * @param {number} duration 画面上のマウスカーソルの移動にかけるトランジション時間
+         */
+        place(_x, _y, duration = 0) {
+            if (!this.screen.viewport_width) return;
+
+            // カーソルを表示
+            this.show();
+
+            // カーソルを画面内に収める
+            // x = Math.max(0, Math.min(this.screen.viewport_width, _x));
+            // y = Math.max(0, Math.min(this.screen.viewport_height, _y));
+            const x = Math.max(this.screen.left, Math.min(this.screen.right, _x));
+            const y = Math.max(this.screen.top, Math.min(this.screen.bottom, _y));
+
+            // y座標の移動量を計算, スクロールボタンをドラッグ中ならスクロール処理をシミュレートする
+            const dy = _y - this.y;
+            if (this.is_scrolling) {
+                // this.down_elms[0].scrollBy(0, (dy * this.scroll_ratio) | 0);
+                this.parent.util.smoothScrollWithFixedDuration(
+                    this.down_elms[0],
+                    (3 * dy * this.scroll_ratio) / this.screen.scale_y,
+                    this.delay_update,
+                    "linear",
+                );
+            }
+
+            // 新しい座標をセット
+            this.setTransitionDuration(duration);
+            this.setXY(x, y);
+
+            // ポイント要素とカーソル状態の更新
+            this.scanPointElement();
+            this.scanState();
+        },
+
+        /**
+         * 仮想マウスカーソルの状態をスキャンする
+         * 仮想マウスカーソルの状態 ＝ 現在のポイント要素の CSS の cursor プロパティの値
+         * ただしマウスダウン中はマウスカーソルの状態変化を起こさない
+         */
+        scanState() {
+            // いまポイントしている要素の CSS の cursor プロパティを取得したいのだが
+            // vmouse-displayed クラスが <html> に付いたままだと CSS が取れないので一時的に外す
+            this.j_html.removeClass("vmouse-displayed");
+            const new_state = this.point_elm ? $(this.point_elm).css("cursor") : "auto";
+            this.j_html.addClass("vmouse-displayed");
+            this.setState(new_state, !!this.down_elms[0]);
+        },
+
+        /**
+         * 仮想マウスのスクロール操作をシミュレートする
+         * @param {number} delta スクロール量 (下が正)
+         * @returns
+         */
+        wheel(delta) {
+            if (!this.scanPointElement()) return;
+
+            this.trigger(this.parent.util.getWheelEventType(), this.point_elm, {
+                deltaY: delta,
+                wheelDelta: -delta,
+                wheelDeltaY: -delta,
+                detail: delta,
+            });
+
+            // ただ wheel イベントを発生させるだけではスクロールは行われないので、手動でスクロールを実行する必要がある
+            let scrollable_elm;
+            for (const elm of this.point_tree) {
+                // offsetWidth : スクロールバーを含む横幅
+                // clientWidth : スクロールバーを含まない横幅
+                // したがって両者の差分を取ることでスクロールバーの横幅が得られるが
+                // インライン要素などでは clientWidth が 0 になる仕様がある点に注意
+                if (elm.clientWidth !== 0 && elm.offsetWidth !== elm.clientWidth) {
+                    scrollable_elm = elm;
+                    break;
+                }
+            }
+            if (scrollable_elm) {
+                // scrollable_elm.scrollBy(0, delta);
+                this.parent.util.smoothScrollWithFixedSpeed(scrollable_elm, delta, true);
+            }
+        },
+
+        /**
+         * 上スクロールをシミュレートする
+         */
+        wheelup() {
+            this.wheel(-100);
+        },
+
+        /**
+         * 下スクロールをシミュレートする
+         */
+        wheeldown() {
+            this.wheel(100);
+        },
+
+        /**
+         * マウスボタンの押下をシミュレートする
+         * @param {0|1|2|3|4} type マウスボタンの種類
+         *   左ボタン, 中央ボタン(ホイール), 右ボタン, 戻るボタン, 進むボタン
+         */
+        anydown(type) {
+            if (!this.scanPointElement()) return;
+
+            // mousedown をトリガーする
+            this.trigger("mousedown", this.point_elm, { button: type });
+
+            // 左ボタン押下の場合はスクロール操作をシミュレートするとともに :active 疑似クラスを再現するために active クラスを取り付ける
+            if (type === 0) {
+                this.simulateScroll();
+                $(this.point_elm).addClass("active");
+            }
+
+            this.down_elms[type] = this.point_elm;
+        },
+
+        /**
+         * 単に mousedown や mouseup をトリガーするだけではスクロールバーの操作が再現できない
+         * 頑張ってスクロール操作を再現する
+         */
+        simulateScroll() {
+            const elm = this.point_elm;
+
+            // インライン要素なら帰る
+            if (elm.clientWidth === 0) return;
+
+            // スクロールバーの横幅を計算, 横幅がゼロすなわちスクロールバーが存在しないなら帰る
+            const scroll_bar_width = elm.offsetWidth - elm.clientWidth;
+            if (scroll_bar_width === 0) return;
+
+            // 要素の左上を角を基準とする仮想カーソルの x 座標を計算, スクロールバーよりも左側にあるなら帰る
+            const rect = elm.getBoundingClientRect();
+            const x = this.x - rect.left;
+            const y = this.y - rect.top;
+            const offset_x = x / this.screen.scale_x;
+            const offset_y = y / this.screen.scale_y;
+            if (offset_x <= elm.clientWidth) return;
+
+            // スクロールバー上に仮想カーソルがあることが確定
+
+            // うおおおお！
+            const max_scroll_top = elm.scrollHeight - elm.offsetHeight;
+            const screen_height_ratio = elm.offsetHeight / elm.scrollHeight;
+            const scroll_top_ratio = elm.scrollTop / max_scroll_top;
+            const scroll_button_height = elm.offsetHeight * screen_height_ratio;
+            const scroll_button_max_top = elm.offsetHeight - scroll_button_height;
+            const scroll_button_top = scroll_button_max_top * scroll_top_ratio;
+            const scroll_button_bottom = scroll_button_top + scroll_button_height;
+            const scroll_ratio = max_scroll_top / scroll_button_max_top;
+            this.scroll_ratio = scroll_ratio;
+
+            // 仮想カーソルはスクロールバー上のどこにあるか
+            if (offset_y < scroll_button_top) {
+                // スクロールボタンよりも上にある
+                const dif = scroll_button_top - offset_y;
+                const dif_ratio = dif / scroll_button_max_top;
+                const should_scroll_coord = (max_scroll_top * dif_ratio) | 0;
+                // elm.scrollBy(0, -should_scroll_coord);
+                this.parent.util.smoothScrollWithFixedDuration(elm, -should_scroll_coord);
+            } else if (offset_y <= scroll_button_bottom) {
+                // スクロールボタン上にカーソルがある場合
+                this.is_scrolling = true;
+            } else {
+                // スクロールボタンよりも下にある;
+                const dif = offset_y - scroll_button_bottom;
+                const dif_ratio = dif / scroll_button_max_top;
+                const should_scroll_coord = (max_scroll_top * dif_ratio) | 0;
+                // elm.scrollBy(0, should_scroll_coord);
+                this.parent.util.smoothScrollWithFixedDuration(elm, should_scroll_coord);
+            }
+        },
+
+        /**
+         * マウスボタンを放す操作をシミュレートする
+         * @param {0|1|2|3|4} type マウスボタンの種類
+         *   左ボタン, 中央ボタン(ホイール), 右ボタン, 戻るボタン, 進むボタン
+         */
+        anyup(type) {
+            if (!this.scanPointElement()) return;
+
+            // mouseup をトリガーする
+            this.trigger("mouseup", this.point_elm, { button: type });
+
+            // 押下を始めたときの要素を確認する
+            const down_elm = this.down_elms[type];
+
+            // 押下要素が存在する場合
+            if (down_elm) {
+                // 左ボタンを放した場合 active クラスを外す
+                if (type === 0) {
+                    $(down_elm).removeClass("active");
+                    this.is_scrolling = false;
+                }
+                // 押下要素と放した要素が同一の場合はクリックが発生
+                if (down_elm === this.point_elm) {
+                    if (type === 0) {
+                        // 左ボタンの場合は click
+                        this.trigger("click", this.point_elm);
+                    } else if (type === 2) {
+                        // 右ボタンの場合は contextmenu
+                        this.trigger("contextmenu", this.point_elm);
+                    }
+                }
+            }
+
+            // マウスダウン中だったせいで変更できなかったカーソル状態の予約が存在する場合はそれを適用する
+            if (type === 0 && this.book_state) {
+                this.setState(this.book_state, false);
+            }
+
+            // 押下要素を忘れる
+            this.down_elms[type] = null;
+        },
+
+        /**
+         * マウスの左ボタン押下をシミュレートする
+         */
+        leftdown() {
+            this.anydown(0);
+        },
+
+        /**
+         * マウスの中央左ボタン(ホイール)押下をシミュレートする
+         */
+        centerdown() {
+            this.anydown(1);
+        },
+
+        /**
+         * マウスの右ボタン押下をシミュレートする
+         */
+        rightdown() {
+            this.anydown(2);
+        },
+
+        /**
+         * マウスの戻るボタン押下をシミュレートする
+         */
+        prevdown() {
+            this.anydown(3);
+        },
+
+        /**
+         * マウスの進むボタン押下をシミュレートする
+         */
+        nextdown() {
+            this.anydown(4);
+        },
+
+        /**
+         * マウスの左ボタンを放す操作をシミュレートする
+         */
+        leftup() {
+            this.anyup(0);
+        },
+
+        /**
+         * マウスの中央左ボタン(ホイール)を放す操作をシミュレートする
+         */
+        centerup() {
+            this.anyup(1);
+        },
+
+        /**
+         * マウスの右ボタンを放す操作をシミュレートする
+         */
+        rightup() {
+            this.anyup(2);
+        },
+
+        /**
+         * マウスの戻るボタンを放す操作をシミュレートする
+         */
+        prevup() {
+            this.anyup(3);
+        },
+
+        /**
+         * マウスの進むボタンを放す操作をシミュレートする
+         */
+        nextup() {
+            this.anyup(4);
+        },
+    },
+
     /**
      * ゲームパッドマネージャ
      */
     gamepad: {
+        // TYRANO.kag.key_mouse
+        parent: null,
+
+        // 前回確認時の Gamepad を格納する配列（Gamepad[]）
+        prev_gamepads: [],
+
+        // ゲームパッドが存在するか（true, false）
+        gamepad_exests: false,
+
+        // 最後に入力を検知したゲームパッドのインデックス（0, 1, 2, 3）
+        last_used_gamepad_index: -1,
+
+        // 最後に"next"アクションを実行したゲームパッドのインデックス（0, 1, 2, 3）
+        last_used_next_gamepad_index: -1,
+
+        // スティックを倒した絶対量（0.0～1.0）をX方向・Y方向で分けて合計した値（0.0～2.0）がこれ以下であれば
+        // スティックの入力を無視する
+        MINIMAM_VALUE_DETECT_AXE: 0.001,
+
+        // スティック入力をデジタルな十字キー入力にパースするとき
+        // スティックを倒した絶対量（0.0～1.0）がこの値以上になった瞬間にデジタル入力をトリガーする
+        MINIMAM_VALUE_DIGITAL_STICK: 0.5,
+
+        // 1秒間に何回ゲームパッドの入力状態を取得するか
+        TICK_RATE: 20,
+
+        // 何ミリ秒ごとにゲームパッドの入力状態を取得するか(上の値から計算)
+        DELAY_UPDATE: null,
+
+        // 長押ししたときに何フレームごとに連打をトリガーするか
+        HOLD_MASH_INTERVAL: 1,
+
+        // 長押ししたときに連打をトリガーし始めるまでのフレーム
+        HOLD_MASH_DELAY: 10,
+
+        // 1秒でマウスカーソルを何ピクセル動かせるようにするか
+        MOVEMENT_VMOUSE_PER_SECOND: 2000,
+
+        // スティックの倒し具合 (0.0～1.0) をカーソルの移動量に変換するレート(上の値から計算)
+        MOVEMENT_VMOUSE_RATIO: null,
+
+        // ボタンマッピング
         keymap_lang: {
+            // 標準的なボタンマッピング
+            // https://w3c.github.io/gamepad/#remapping
             standard: {
                 buttons: {
                     0: "A",
@@ -1124,34 +2187,19 @@ tyrano.plugin.kag.key_mouse = {
             },
         },
 
-        // 前回確認時の Gamepad を格納する配列（Gamepad[]）
-        prev_gamepads: [],
+        presstype: {
+            BUTTON: 0,
+            STICK_DIGITAL: 1,
+        },
 
-        // ゲームパッドが存在するか（true, false）
-        gamepad_exests: false,
-
-        // 最後に入力を検知したゲームパッドのインデックス（0, 1, 2, 3）
-        last_used_gamepad_index: -1,
-
-        // 最後に"next"アクションを実行したゲームパッドのインデックス（0, 1, 2, 3）
-        last_used_next_gamepad_index: -1,
-
-        // スティックを倒した絶対量（0.0～1.0）をX方向・Y方向で分けて合計した値（0.0～2.0）がこれ以下であれば
-        // スティックの入力を無視する
-        MINIMAM_VALUE_DETECT_AXE: 0.001,
-
-        // スティック入力をデジタルな十字キー入力にパースするとき
-        // スティックを倒した絶対量（0.0～1.0）がこの値以上になった瞬間にデジタル入力をトリガーする
-        MINIMAM_VALUE_DIGITAL_STICK: 0.5,
-
-        // 何ミリ秒ごとにゲームパッドの入力状態を取得するか
-        UPDATE_TIMEOUT: 50,
-
-        // 長押ししたときに何フレームごとに連打をトリガーするか
-        HOLD_MASH_INTERVAL: 1,
-
-        // 長押ししたときに連打をトリガーし始めるまでのフレーム
-        HOLD_MASH_DELAY: 10,
+        /**
+         * 初期化
+         */
+        init(parent) {
+            this.parent = parent;
+            this.DELAY_UPDATE = (1000 / this.TICK_RATE) | 0;
+            this.MOVEMENT_VMOUSE_RATIO = (this.MOVEMENT_VMOUSE_PER_SECOND / this.TICK_RATE) | 0;
+        },
 
         /**
          * ゲームパッドの入力状態のスナップショットを確認する
@@ -1207,13 +2255,19 @@ tyrano.plugin.kag.key_mouse = {
                         }
                         const sum = Math.abs(x) + Math.abs(y);
                         const digital_buttons = [{ pressed: false }, { pressed: false }, { pressed: false }, { pressed: false }];
-                        if (sum < this.MINIMAM_VALUE_DETECT_AXE) {
-                            stick = {
+                        const input_exists = sum > this.MINIMAM_VALUE_DETECT_AXE;
+                        stick = {
+                            x,
+                            y,
+                            input_exists,
+                            digital_buttons,
+                        };
+                        if (!input_exists) {
+                            Object.assign(stick, {
                                 radian: 0,
                                 degree: 0,
                                 distance: 0,
-                                digital_buttons,
-                            };
+                            });
                         } else {
                             let radian = Math.atan2(-y, x);
                             if (radian < 0) radian += Math.PI * 2;
@@ -1225,12 +2279,11 @@ tyrano.plugin.kag.key_mouse = {
                             if (is_over_threshold) {
                                 digital_buttons[digital_button_index].pressed = true;
                             }
-                            stick = {
+                            Object.assign(stick, {
                                 radian,
                                 degree,
                                 distance,
-                                digital_buttons,
-                            };
+                            });
                         }
                         sticks.push(stick);
                     }
@@ -1273,50 +2326,38 @@ tyrano.plugin.kag.key_mouse = {
                     const prev_buttons = prev_gamepad.buttons;
                     gamepad.buttons.forEach((button, bi) => {
                         const prev_button = prev_buttons[bi];
+                        let event_type;
                         // 入力状態に変化があったか
                         const is_changed = button.pressed !== prev_button.pressed;
                         // 押された瞬間を検知
                         if (is_changed) {
+                            // ★ボタンが押された瞬間か、離された瞬間だ！
+                            event_type = button.pressed ? "gamepadpressdown" : "gamepadpressup";
+                            button.hold_frame = 0;
+                        } else if (button.pressed) {
+                            // ★ボタンが押しっぱなしだ！
+                            event_type = "gamepadpresshold";
+                            button.hold_frame = (prev_button.hold_frame || 0) + 1;
+                        }
+                        // イベントを発火！
+                        if (event_type) {
                             let button_name = "";
                             const lang = this.keymap_lang[gamepad.mapping] || this.keymap_lang.standard;
                             if (lang) {
                                 button_name = lang.buttons[bi] || "";
                             }
-                            const event_name = button.pressed ? "gamepadpressdown" : "gamepadpressup";
-                            const event = new CustomEvent(event_name, {
+                            const event = new CustomEvent(event_type, {
                                 detail: {
                                     button,
                                     button_name,
                                     button_index: bi,
                                     gamepad,
                                     gamepad_index: gi,
-                                    is_hold_mash: false,
+                                    hold_frame: button.hold_frame,
+                                    type: this.presstype.BUTTON,
                                 },
                             });
                             document.dispatchEvent(event);
-                            button.hold_frame = 0;
-                        } else if (button.pressed) {
-                            button.hold_frame = (prev_button.hold_frame || 0) + 1;
-                            const hold_frame = button.hold_frame - this.HOLD_MASH_DELAY;
-                            if (hold_frame > 0 && hold_frame % this.HOLD_MASH_INTERVAL === 0) {
-                                let button_name = "";
-                                const lang = this.keymap_lang[gamepad.mapping] || this.keymap_lang.standard;
-                                if (lang) {
-                                    button_name = lang.buttons[bi] || "";
-                                }
-                                const event_name = "gamepadpressdown";
-                                const event = new CustomEvent(event_name, {
-                                    detail: {
-                                        button,
-                                        button_name,
-                                        button_index: bi,
-                                        gamepad,
-                                        gamepad_index: gi,
-                                        is_hold_mash: true,
-                                    },
-                                });
-                                document.dispatchEvent(event);
-                            }
                         }
                         if (is_changed) {
                             is_changed_inputs = is_changed;
@@ -1331,48 +2372,75 @@ tyrano.plugin.kag.key_mouse = {
                         const prev_stick = prev_gamepad.sticks[si];
                         stick.digital_buttons.forEach((button, bi) => {
                             const prev_button = prev_stick.digital_buttons[bi];
-                            if (button.pressed) {
-                                if (prev_button.pressed) {
-                                    button.hold_frame = (prev_button.hold_frame || 0) + 1;
-                                    const hold_frame = button.hold_frame - this.HOLD_MASH_DELAY;
-                                    if (hold_frame > 0 && hold_frame % this.HOLD_MASH_INTERVAL === 0) {
-                                        const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
-                                        const stick_name = ["L", "R"][si] || "";
-                                        const event = new CustomEvent("gamepadstickdigital", {
-                                            detail: {
-                                                direction,
-                                                stick_name,
-                                                stick_index: si,
-                                                gamepad,
-                                                gamepad_index: gi,
-                                                is_hold_mash: true,
-                                            },
-                                        });
-                                        document.dispatchEvent(event);
-                                    }
-                                } else {
-                                    button.hold_frame = 0;
-                                    const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
-                                    const stick_name = ["L", "R"][si] || "";
-                                    const event = new CustomEvent("gamepadstickdigital", {
-                                        detail: {
-                                            direction,
-                                            stick_name,
-                                            stick_index: si,
-                                            gamepad,
-                                            gamepad_index: gi,
-                                            is_hold_mash: false,
-                                        },
-                                    });
-                                    document.dispatchEvent(event);
-                                }
-                            } else {
+                            let event_type;
+                            // 入力状態に変化があったか
+                            const is_changed = button.pressed !== prev_button.pressed;
+                            // 押された瞬間を検知
+                            if (is_changed) {
+                                // ★ボタンが押された瞬間か、離された瞬間だ！
+                                event_type = button.pressed ? "gamepadpressdown" : "gamepadpressup";
                                 button.hold_frame = 0;
+                            } else if (button.pressed) {
+                                // ★ボタンが押しっぱなしだ！
+                                event_type = "gamepadpresshold";
+                                button.hold_frame = (prev_button.hold_frame || 0) + 1;
+                            }
+                            // イベントを発火！
+                            if (event_type) {
+                                button.hold_frame = (prev_button.hold_frame || 0) + 1;
+                                const direction = ["RIGHT", "UP", "LEFT", "DOWN"][bi] || "";
+                                const stick_name = ["L", "R"][si] || "UNKNOWN";
+                                const button_name = `${stick_name}_${direction}`;
+                                const event = new CustomEvent(event_type, {
+                                    detail: {
+                                        button,
+                                        button_name,
+                                        button_index: -1,
+                                        gamepad,
+                                        gamepad_index: gi,
+                                        hold_frame: button.hold_frame,
+                                        type: this.presstype.STICK_DIGITAL,
+                                    },
+                                });
+                                document.dispatchEvent(event);
                             }
                         });
                     });
 
-                    // スティックの入力検知おわり
+                    //
+                    // スティックによる仮想マウスの操作
+                    //
+
+                    let vmouse_moved = false;
+                    sticks.forEach((stick, si) => {
+                        const name = ["L", "R"][si] || "UNKNOWN";
+                        const map = this.parent.map_pad.stick || {};
+                        const action = map[name] || map[si] || "";
+                        if (action.indexOf("vmouse_move") === 0 && stick.input_exists) {
+                            const vmouse = this.parent.vmouse;
+                            const ratio_x = (this.MOVEMENT_VMOUSE_RATIO * vmouse.screen.scale_x) | 0;
+                            const ratio_y = (this.MOVEMENT_VMOUSE_RATIO * vmouse.screen.scale_y) | 0;
+                            const x = ratio_x * stick.x;
+                            const y = ratio_y * stick.y;
+                            vmouse.move(x, y, this.DELAY_UPDATE);
+                            vmouse_moved = true;
+                        } else if (action.indexOf("vmouse_aim") === 0 && !vmouse_moved) {
+                            const vmouse = this.parent.vmouse;
+                            if (Math.abs(stick.x) < this.MINIMAM_VALUE_DETECT_AXE) stick.x = 0;
+                            if (Math.abs(stick.y) < this.MINIMAM_VALUE_DETECT_AXE) stick.y = 0;
+                            const x = vmouse.screen.x + vmouse.screen.radius * stick.x;
+                            const y = vmouse.screen.y + vmouse.screen.radius * stick.y;
+                            if (vmouse.x === x && vmouse.y === y) {
+                                vmouse.hideWithTimeout();
+                            } else {
+                                vmouse.place(x, y, this.DELAY_UPDATE);
+                            }
+                        }
+                    });
+
+                    //
+                    // 入力検知ここまで
+                    //
 
                     // 入力状態に変化があったならこのゲームパッドを「最後に使われたゲームパッド」に登録する
                     if (is_changed_inputs) {
@@ -1390,7 +2458,7 @@ tyrano.plugin.kag.key_mouse = {
                 if (gamepad_exists) {
                     setTimeout(() => {
                         this.getGamepadInputs();
-                    }, this.UPDATE_TIMEOUT);
+                    }, this.DELAY_UPDATE);
                 } else {
                     // ゲームパッドが存在しない場合は入力の取得を打ち切る。フラグも折っておく
                     this.gamepad_exests = false;

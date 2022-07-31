@@ -278,18 +278,18 @@ var __tyrano_key_config = {
             RIGHT: "focus_right -a -h",
         },
         stick_digital: {
-            L: {
-                UP: "focus_up -a -h",
-                DOWN: "focus_down -a -h",
-                LEFT: "focus_left -a -h",
-                RIGHT: "focus_right -a -h",
-            },
-            R: {
-                UP: "scroll_up -h",
-                DOWN: "scroll_down -h",
-                LEFT: "",
-                RIGHT: "",
-            },
+            L_UP: "",
+            L_DOWN: "",
+            L_LEFT: "",
+            L_RIGHT: "",
+            R_UP: "vmouse_wheelup -a -h delay=0",
+            R_DOWN: "vmouse_wheeldown -a -h delay=0",
+            R_LEFT: "",
+            R_RIGHT: "",
         },
+        stick: {
+            L: "vmouse_move",
+            R: "",
+        }
     },
 };

@@ -4499,7 +4499,7 @@ tyrano.plugin.kag.tag.s = {
     calcFlexPosition: function (glink_config) {
         const j_message_layer = this.kag.layer.getLayer(this.kag.stat.current_layer, this.kag.stat.current_page);
         const j_message_outer = j_message_layer.find(".message_outer");
-        const gh = this.kag.tmp.scale_info.game_height;
+        const gh = this.kag.tmp.screen_info.original_height;
         const gh_half = gh / 2;
         const top = parseInt(j_message_outer.css("top")) || 0;
         const height = parseInt(j_message_outer.css("height")) || gh;

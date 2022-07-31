@@ -849,3 +849,31 @@ div.img_next {
         outline-color: rgba(0, 0, 0, 0);
     }
 }
+
+/*------　仮想マウスカーソル関連 -------*/
+
+/*-- 仮想マウスカーソル --*/
+#vmouse {
+    margin-left: 0px;
+    margin-top: 0px;
+    transform-origin: left top;
+    position: fixed;
+    display: block;
+    left: 0;
+    top: 0;
+    z-index: 9999999999;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-position: left top;
+    transition: transform 50ms linear, opacity 100ms linear;
+    /* visibility: hidden; */
+    opacity: 0;
+    user-select: none;
+}
+
+/* 仮想マウスカーソルが表示されているとき
+ * 本当のマウスカーソルは非表示にする */
+html.vmouse-displayed,
+html.vmouse-displayed * {
+    cursor: none !important;
+}

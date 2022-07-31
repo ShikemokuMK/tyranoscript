@@ -1966,7 +1966,15 @@ tyrano.plugin.kag.tag.cursor = {
                 if (!this.kag.stat.current_cursor_map) {
                     this.kag.stat.current_cursor_map = {};
                 }
-                const css_str = pm.storage === "default" ? pm.type : `url(./data/image/${pm.storage}) ${pm.x} ${pm.y}, ${pm.type}`;
+                let image_url;
+                let css_str;
+                if (pm.storage === "default") {
+                    css_str = pm.type;
+                } else {
+                    image_url = `./data/image/${pm.storage}`;
+                    css_str = `url(${image_url}) ${pm.x} ${pm.y}, ${pm.type}`;
+                }
+                this.kag.key_mouse.vmouse.addImage(pm.type, image_url, pm.x, pm.y);
                 this.kag.stat.current_cursor_map[pm.type] = css_str;
                 this.overwriteCSS();
             }
@@ -2108,7 +2116,7 @@ tyrano.plugin.kag.tag.cursor = {
             this.kag.stat.click_effect = {};
         }
         const base_width = parseInt(this.kag.stat.click_effect.width) || 100;
-        const width = parseInt(base_width * this.kag.tmp.scale_info.scale_x);
+        const width = parseInt(base_width * this.kag.tmp.screen_info.scale_x);
         const scale = this.kag.stat.click_effect.scale || 120;
         const color = $.convertColor(this.kag.stat.click_effect.color || "white");
         const blend = this.kag.stat.click_effect.blend || "overlay";
