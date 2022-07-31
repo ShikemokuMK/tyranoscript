@@ -399,7 +399,7 @@ var PARAM_EXP = {
                 '<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>解説</th><th>初期値</th></tr></thead>' +
                 "<tbody>";
 
-            var array_param = obj.param.split(",φ");
+            var array_param = obj.param ? obj.param.split(",φ") : [];
             array_param = array_param.map((item) => {
                 return item.replace(/φ/g, "");
             });
@@ -410,9 +410,13 @@ var PARAM_EXP = {
             //console.log("==== array_param  =====");
             //console.log(array_param);
 
+            if (array_param.length === 0) {
+                html += '<tr ><td colspan="4">指定できるパラメータはありません。</td></tr>';
+            }
             for (var k = 0; k < array_param.length; k++) {
                 if (array_param[k] == "") {
                     html += '<tr ><td colspan="4">指定できるパラメータはありません。</td></tr>';
+                    continue;
                 } else {
                     var tmp_array = array_param[k].split("=");
 
@@ -451,7 +455,7 @@ var PARAM_EXP = {
             html += "</tbody></table>";
 
             //サンプルコード
-            if (obj.sample != "") {
+            if (obj.sample) {
                 html +=
                     `<ul class="list-inline posted-info"><li>サンプルコード</li></ul>` +
                     `<pre class="language-tyranoscript"><code>${$.escapeHTML(obj.sample)}</code></pre>`;

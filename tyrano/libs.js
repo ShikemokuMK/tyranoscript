@@ -2298,6 +2298,29 @@
         },
     });
 
+    // いま終了時コンファームが有効かどうか
+    let is_close_confirm_enabled = false;
+
+    /**
+     * タブを閉じようとしたときのコンファームを有効化する
+     */
+    $.enableCloseConfirm = () => {
+        if (is_close_confirm_enabled) return;
+        is_close_confirm_enabled = true;
+        window.onbeforeunload = () => {
+            return true;
+        };
+    };
+
+    /**
+     * タブを閉じようとしたときのコンファームを無効化する
+     */
+    $.disableCloseConfirm = () => {
+        if (!is_close_confirm_enabled) return;
+        is_close_confirm_enabled = false;
+        window.onbeforeunload = null;
+    };
+
     /**
      * 使用ディスプレイのリフレッシュレート(通常は 60)の計測を開始し
      * 計測が完了したらコールバックに結果を渡して実行する

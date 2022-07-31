@@ -215,6 +215,7 @@ tyrano.plugin.kag = {
         path_glyph: "nextpage.gif", //glyph画像ファイル名
 
         current_cursor: "auto", //現在のカーソル指定
+        use_close_confirm: false,
 
         //表示フォント指定
         font: {
@@ -1297,7 +1298,10 @@ tyrano.plugin.kag = {
             });
         });
 
+        //
         // キーボードによるボタンフォーカス関連の設定
+        //
+
         if (this.config["keyFocusOutlineWidth"]) {
             const width = this.config["keyFocusOutlineWidth"];
             $.insertRuleToTyranoCSS(`:focus.hover { outline-width: ${width}px}`);
@@ -1313,6 +1317,19 @@ tyrano.plugin.kag = {
         if (this.config["keyFocusWithHoverStyle"] === "true") {
             $.copyHoverCSSToFocusCSS('link[href="./tyrano/tyrano.css"]');
         }
+
+        //
+        // 終了時の確認ダイアログ
+        //
+
+        // 通常セーブ、クイックセーブ、オートセーブ、ロード時に確認を破壊
+        this.kag.on("storage-save storage-quicksave storage-autosave load-complete", () => {
+            $.disableCloseConfirm();
+        });
+        // nextOrder 時に確認を復元
+        this.kag.on("nextorder", (e) => {
+            if (this.stat.use_close_confirm) $.enableCloseConfirm();
+        });
 
         //ティラノライダーからの通知の場合、発生させる
         //that.rider.complete(this);

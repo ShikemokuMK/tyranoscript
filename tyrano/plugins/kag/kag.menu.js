@@ -1010,8 +1010,8 @@ tyrano.plugin.kag.menu = {
         // 復元完了
         // make.ksを通過してからもとのシナリオファイル＋タグインデックスに戻る処理
         const next = () => {
-            // ティラノイベント"load-complete"を発火
-            this.kag.trigger("load-complete");
+            // ティラノイベント"load-beforemaking"を発火
+            this.kag.trigger("load-beforemaking");
 
             // make.ks を挿入する
             const insert = {

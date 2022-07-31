@@ -1054,6 +1054,8 @@ tyrano.plugin.kag.tag["return"] = {
                 if (this.kag.tmp.loading_make_ref == true) {
                     this.kag.stat.flag_ref_page = true;
                     this.kag.tmp.loading_make_ref = false;
+                    // ティラノイベント"load-complete"を発火
+                    this.kag.trigger("load-complete");
                 }
             }
         }
@@ -3199,6 +3201,70 @@ tyrano.plugin.kag.tag.set_resizecall = {
         //this.kag.tmp.largerWidth = !this.kag.tmp.largerWidth;
         //$(window).trigger("resize");
 
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[closeconfirm_on]
+
+:group
+システム操作
+
+:title
+終了時の確認の有効化
+
+:exp
+このタグを通過してからは、タグが進行する度にゲームが「未保存状態」になります。ゲームが「未保存状態」のときにプレイヤーがゲームを閉じようとすると、確認ダイアログが出ます。
+
+ゲームが「保存状態」になるのはプレイヤーがセーブまたはロードしたときです。
+
+:sample
+
+ここで閉じようとしても終了時の確認はない[p]
+ここで閉じようとしても終了時の確認はない[p]
+[closeconfirm_on]
+ここから未保存状態で閉じようとすると終了時の確認が出る[p]
+ここから未保存状態で閉じようとすると終了時の確認が出る[p]
+[closeconfirm_off]
+ここで閉じようとしても終了時の確認はない[p]
+ここで閉じようとしても終了時の確認はない[p]
+
+:param
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.closeconfirm_on = {
+    pm: {},
+
+    start: function (pm) {
+        this.kag.stat.use_close_confirm = true;
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[closeconfirm_off]
+
+:group
+システム操作
+
+:title
+終了時の確認の無効化
+
+:exp
+このタグを通過すると、ゲームが「未保存状態」のときにプレイヤーがゲームを閉じようとしても確認ダイアログが出なくなります。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.closeconfirm_off = {
+    pm: {},
+
+    start: function (pm) {
+        this.kag.stat.use_close_confirm = false;
+        $.disableCloseConfirm();
         this.kag.ftag.nextOrder();
     },
 };

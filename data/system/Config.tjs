@@ -455,3 +455,5 @@
 
 // ◆ ゲームパッドによる操作を有効にするかどうか
 ;useGamepad = true;
+
+;enableCloseConfirm = true;

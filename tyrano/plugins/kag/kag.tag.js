@@ -245,6 +245,12 @@ tyrano.plugin.kag.ftag = {
 
         this.current_order_index++;
 
+        // ティラノイベント"nextorder"を発火
+        that.kag.trigger("nextorder", {
+            scenario: this.kag.stat.current_scenario,
+            index: this.current_order_index,
+        });
+
         //ファイルの終端に着ている場合は戻す
         if (this.array_tag.length <= this.current_order_index) {
             this.kag.endStorage();
