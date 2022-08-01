@@ -197,7 +197,7 @@
     };
 
     //現在の時刻
-    $.getNowTime = function (format = "hh：mm：ss") {
+    $.getNowTime = function (format = "hh:mm:ss") {
         return $.formatDate(new Date(), format);
     };
 
@@ -458,6 +458,7 @@
     };
 
     $.lang = function (key, replace_map, target = "word") {
+        if (typeof replace_map === "string") target = replace_map;
         let string_defined = tyrano_lang[target][key];
         if (string_defined) {
             if (replace_map) {
@@ -727,6 +728,14 @@
         }
     };
 
+    $.removeStorage = function (key, type) {
+        if (type == "file") {
+            $.removeStorageFile(key);
+        } else {
+            $.removeStorageWeb(key);
+        }
+    };
+
     $.setStorage = function (key, val, type) {
         if (type == "webstorage_compress") {
             $.setStorageCompress(key, val);
@@ -807,6 +816,10 @@
         return gv;
     };
 
+    $.removeStorageWeb = function (key) {
+        localStorage.removeItem(key);
+    };
+
     $.setStorageWeb = function (key, val) {
         val = JSON.stringify(val);
         //localStorage.setItem(key, LZString.compress(escape(val)));
@@ -871,9 +884,9 @@
     };
 
     $.confirmSaveClear = function () {
-        if (confirm("セーブデータが壊れている可能性があります。セーブデータを初期化しますか？")) {
-            alert("初期化");
-            localStorage.clear();
+        if (confirm($.lang("saved_data_is_corrupted", "confirm"))) {
+            alert($.lang("initialized_saved_data", "alert"));
+            TYRANO.kag.removeSaveData();
         }
     };
 
@@ -899,7 +912,7 @@
         } catch (e) {
             console.log("==============");
             console.log(e);
-            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
+            alert($.lang("save_does_not_work", "error"));
             $.confirmSaveClear();
         }
 
@@ -972,6 +985,23 @@
         return path;
     };
 
+    $.removeStorageFile = function (key) {
+        try {
+            const fs = require("fs");
+            let out_path;
+            if (process.execPath.indexOf("var/folders") != -1) {
+                out_path = process.env.HOME + "/_TyranoGameData";
+                if (!fs.existsSync(out_path)) {
+                    fs.mkdirSync(out_path);
+                }
+            } else {
+                out_path = $.getExePath();
+            }
+            const file_path = out_path + "/" + key + ".sav";
+            fs.unlinkSync(file_path);
+        } catch (e) {}
+    };
+
     $.setStorageFile = function (key, val) {
         val = JSON.stringify(val);
         var fs = require("fs");
@@ -1019,7 +1049,7 @@
             }
         } catch (e) {
             console.log(e);
-            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
+            alert($.lang("save_does_not_work", "error"));
             $.confirmSaveClear();
         }
 

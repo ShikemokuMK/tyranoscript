@@ -2,22 +2,32 @@ window.tyrano_lang = {
     word: {
         go_title: "タイトルに戻ります。よろしいですね？",
         exit_game: "ウィンドウを閉じて終了します。よろしいですね？",
-        not_saved: "まだ、保存されているデータがありません",
+        not_saved: "まだ、保存されているデータがありません。",
         tag: "タグ",
-        not_exists: "は存在しません",
-        error: "エラーが発生しました。スクリプトを確認して下さい",
+        not_exists: "は存在しません。",
+        error: "エラーが発生しました。スクリプトを確認して下さい。",
         label: "ラベル",
-        label_double: "は同一シナリオファイル内に重複しています",
-        error_occurred: "エラーが発生しました",
+        label_double: "は同一シナリオファイル内に重複しています。",
+        error_occurred: "エラーが発生しました。",
         save_file_violation_1: "セーブデータの移動を検知しました。信頼できるセーブデータでない場合、絶対に読み込まないでください。",
         save_file_violation_2: "セーブデータを読み込んでゲームを起動してもよろしいですか？",
-        save_file_violation_3: "起動を中止しました。セーブデータを削除してもう一度、起動してください",
-        double_start: "すでにゲームは起動済みです。２重起動はできません。",
+        save_file_violation_3: "起動を中止しました。セーブデータを削除してもう一度、起動してください。",
+        double_start: "すでにゲームは起動済みです。二重起動はできません。",
         reload: "リロード",
         line: "{ line }行目",
     },
 
+    alert: {
+        initialized_saved_data: "セーブデータを初期化しました。",
+    },
+
+    confirm: {
+        initializing_saved_data: "セーブデータを初期化します。よろしいですか？",
+        saved_data_is_corrupted: "セーブデータが壊れている可能性があります。セーブデータを初期化しますか？",
+    },
+
     error: {
+        save_does_not_work: "この環境ではセーブ機能が動作しません。ローカルで実行している場合などに発生します。",
         undefined_tag: "タグ「{ name }」は存在しません。",
         undefined_label: "ラベル「{ name }」は存在しません。",
         undefined_character: "指定されたキャラクター「{ name }」は定義されていません。[chara_new]で定義してください。",

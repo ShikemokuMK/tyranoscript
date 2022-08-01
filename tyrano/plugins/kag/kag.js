@@ -597,6 +597,16 @@ tyrano.plugin.kag = {
         }
     },
 
+    removeSaveData: function () {
+        const project_id = this.kag.config.projectID;
+        const type = this.kag.config.configSave;
+        const suffixes = ["_sf", "_tyrano_data", "_tyrano_quick_save", "_tyrano_auto_save"];
+        for (const suffix of suffixes) {
+            const key = project_id + suffix;
+            $.removeStorage(key, type);
+        }
+    },
+
     //システム変数を保存する
     saveSystemVariable: function () {
         $.setStorage(this.kag.config.projectID + "_sf", this.variable.sf, this.kag.config.configSave);
