@@ -1642,7 +1642,7 @@ tyrano.plugin.kag = {
             //停止中なら
             if (this.kag.stat.is_wait_anim == true) {
                 this.kag.stat.is_wait_anim = false;
-                this.kag.layer.showEventLayer();
+                this.kag.cancelWeakStop();
                 this.kag.ftag.nextOrder();
             }
         }
@@ -1651,7 +1651,7 @@ tyrano.plugin.kag = {
     //シナリオファイルの読み込み
     loadScenario: function (file_name, call_back) {
         var that = this;
-        this.stat.is_strong_stop = true;
+        this.stronglyStop();
 
         this.stat.current_scenario = file_name;
 
@@ -1675,7 +1675,7 @@ tyrano.plugin.kag = {
 
                 //ラベル情報を格納
                 that.stat.map_label = map_label;
-                that.stat.is_strong_stop = false;
+                that.cancelStrongStop();
 
                 call_back(tag_obj);
             }
@@ -1689,7 +1689,7 @@ tyrano.plugin.kag = {
 
                 //ラベル情報を格納
                 that.stat.map_label = map_label;
-                that.stat.is_strong_stop = false;
+                that.cancelStrongStop();
 
                 if (call_back) {
                     call_back(tag_obj);
@@ -2014,14 +2014,19 @@ tyrano.plugin.kag = {
             $.error_message(error_str);
         }
     },
+
     //警告表示
-    warning: function (message, replace_map) {
+    warning: function (message, replace_map, is_alert = true) {
         if (this.kag.config["debugMenu.visible"] == "true") {
             if (message in tyrano_lang.warn) {
                 message = $.lang(message, replace_map, "warn");
             }
             const warning_str = `Warning: ${message}`;
-            $.error_message(warning_str);
+            if (is_alert) {
+                $.error_message(warning_str);
+            } else {
+                console.warn(warning_str);
+            }
         }
     },
 
@@ -2065,6 +2070,35 @@ tyrano.plugin.kag = {
             this.trigger("skip-stop");
         }
         this.stat.is_skip = bool;
+    },
+
+    /**
+     * stat.is_stop に true を入れる
+     *
+     * - is_stop        (弱いストップ) アニメーションやトランジションの最中に有効
+     * - is_strong_stop (強いストップ) [s]や[wait]で有効
+     *
+     * - 弱いストップが有効なときはイベントレイヤをクリックしても反応しなくなる。
+     *   ただし、外部から直接 nextOrder が呼び出されたときは次のタグに進行する。
+     * - 強いストップが有効なときは外部から呼び出された nextOrder にすら反応しなくなる！
+     */
+    weaklyStop: function () {
+        this.stat.is_stop = true;
+    },
+    cancelWeakStop: function () {
+        this.stat.is_stop = false;
+    },
+    stronglyStop: function () {
+        this.stat.is_strong_stop = true;
+    },
+    cancelStrongStop: function () {
+        this.stat.is_strong_stop = false;
+    },
+    waitClick: function (name) {
+        // console.warn(`waitClick: ${name}`);
+        this.layer.showEventLayer();
+        this.cancelStrongStop();
+        this.cancelWeakStop();
     },
 
     /**

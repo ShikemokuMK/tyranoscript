@@ -1621,7 +1621,7 @@ tyrano.plugin.kag.tag.preload = {
         var that = this;
 
         if (pm.wait == "true") {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
         }
 
         var storage = pm.storage;
@@ -1644,7 +1644,7 @@ tyrano.plugin.kag.tag.preload = {
                         if (storage.length == sum) {
                             //すべてのプリロードが完了
                             if (pm.wait == "true") {
-                                that.kag.layer.showEventLayer();
+                                that.kag.cancelWeakStop();
                                 that.kag.ftag.nextOrder();
                             }
                         }
@@ -1654,7 +1654,7 @@ tyrano.plugin.kag.tag.preload = {
             }
 
             if (pm.wait == "false") {
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.nextOrder();
             }
         } else {
@@ -1662,7 +1662,7 @@ tyrano.plugin.kag.tag.preload = {
                 pm.storage,
                 function () {
                     if (pm.wait == "true") {
-                        that.kag.layer.showEventLayer();
+                        that.kag.cancelWeakStop();
                         that.kag.ftag.nextOrder();
                     }
                 },
@@ -1670,7 +1670,7 @@ tyrano.plugin.kag.tag.preload = {
             );
 
             if (pm.wait == "false") {
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.nextOrder();
             }
         }

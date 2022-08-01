@@ -37,7 +37,7 @@ tyrano.plugin.kag.tag.vchat_in = {
     pm: {},
 
     start: function (pm) {
-        this.kag.layer.hideEventLayer();
+        this.kag.weaklyStop();
 
         var that = this;
 
@@ -106,7 +106,7 @@ tyrano.plugin.kag.tag.vchat_in = {
             $("#vchat_base").find(".vchat:eq(-1)").remove();
         }
 
-        this.kag.layer.showEventLayer();
+        this.kag.cancelWeakStop();
 
         return false;
     },

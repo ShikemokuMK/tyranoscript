@@ -267,7 +267,7 @@ tyrano.plugin.kag.tag.bgcamera = {
 
                         //[s]で止まってるときだけ有効
                         if (this.kag.stat.is_strong_stop == true) {
-                            this.kag.layer.showEventLayer();
+                            this.kag.cancelWeakStop();
                             this.kag.ftag.startTag("jump", jump_pm);
                         }
                     } else {
@@ -295,7 +295,7 @@ tyrano.plugin.kag.tag.bgcamera = {
 
                     //[s]で止まってるときだけ有効
                     if (this.kag.stat.is_strong_stop == true) {
-                        this.kag.layer.showEventLayer();
+                        this.kag.cancelWeakStop();
                         this.kag.ftag.startTag("jump", jump_pm);
                     }
                 }
@@ -311,7 +311,7 @@ tyrano.plugin.kag.tag.bgcamera = {
 
                     //[s]で止まってるときだけ有効
                     if (this.kag.stat.is_strong_stop == true) {
-                        this.kag.layer.showEventLayer();
+                        this.kag.cancelWeakStop();
                         this.kag.ftag.startTag("jump", jump_pm);
                     }
                 }

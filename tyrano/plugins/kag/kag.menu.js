@@ -697,13 +697,14 @@ tyrano.plugin.kag.menu = {
     loadGameData: function (data, options) {
         const that = this;
 
+        // ロードを始める前にイベントレイヤを非表示にする
+        this.kag.layer.hideEventLayer();
+
         // ティラノイベント"load-start"を発火
         this.kag.trigger("load-start");
 
         // 一時リスナをすべて消去
         this.kag.offTempListeners();
-
-        var auto_next = "no";
 
         //普通のロードの場合
         if (typeof options == "undefined") {
@@ -712,6 +713,17 @@ tyrano.plugin.kag.menu = {
             options["bgm_over"] = "false";
         }
 
+        /**
+         * make.ks を通過してもとの場所に戻ってきたときに次のタグに進むかどうかを制御する文字列。
+         * 通常はもちろん "no" (進まない) だが、タグを進めるべきケースがいくつかある。
+         *
+         * 1. オートセーブデータをロードした場合
+         * 2. [showmenu] で開いたセーブメニューからセーブしたデータをロードした場合
+         * 3. [wait] 中にセーブしたデータを読み込んだ場合
+         *
+         * 3.は通常ではありえないが、一応考慮。
+         */
+        var auto_next = "no";
         if (options.auto_next) {
             auto_next = options.auto_next;
         }
@@ -773,12 +785,14 @@ tyrano.plugin.kag.menu = {
 
         this.kag.stat = data.stat;
 
-        //ステータスがストロングストップの場合
-        if (this.kag.stat.is_strong_stop == true) {
+        // [s] で止まっているセーブデータを読み込んだ場合はロード後次のタグに進めるべきではない
+        if (this.kag.stat.is_strong_stop) {
             auto_next = "stop";
-        } else {
-            //停止の場合は復活
-            this.kag.stat.is_strong_stop = false;
+        }
+
+        // [wait] で止まっているデータを読み込んだ場合(通常ありえない)はロード後次のタグに進めるべきだ
+        if (this.kag.stat.is_wait) {
+            auto_next = "yes";
         }
 
         //タイトルの復元
@@ -923,7 +937,7 @@ tyrano.plugin.kag.menu = {
         //3Dモデルの復元/////////////////////////////////////////////
         var three = data.three;
         if (three.stat.is_load == true) {
-            this.kag.stat.is_strong_stop = true;
+            this.kag.stronglyStop();
             var init_pm = three.stat.init_pm;
 
             this.kag.ftag.startTag("3d_close", {});
@@ -980,7 +994,7 @@ tyrano.plugin.kag.menu = {
 
             //イベントが再開できるかどうか。
 
-            this.kag.stat.is_strong_stop = false;
+            this.kag.cancelStrongStop();
 
             //},10);
         }
@@ -1008,12 +1022,24 @@ tyrano.plugin.kag.menu = {
             that.kag.getTag(tag_name).setEvent(j_elm, pm);
         });
 
+        //
+        // プロパティの初期化
+        //
+
         // 一時変数(tf)は消す
         // ※ this.kag.tmp に影響はない
         this.kag.clearTmpVariable();
 
-        // 復元完了
+        // ロード直後なのだから、セーブ時の状態がどうであったにせよいまはアニメーションスタック数はゼロであるべき
+        // ウェイト状態やトランス待機状態であるはずもない
+        this.kag.tmp.num_anim = 0;
+        this.kag.stat.is_wait = false;
+        this.kag.stat.is_stop = false;
+
+        //
         // make.ksを通過してからもとのシナリオファイル＋タグインデックスに戻る処理
+        //
+
         const next = () => {
             // ティラノイベント"load-beforemaking"を発火
             this.kag.trigger("load-beforemaking");
@@ -1072,9 +1098,6 @@ tyrano.plugin.kag.menu = {
                 that.kag.getTag("xanim").start(pm);
             });
         };
-
-        // アニメーションスタックはゼロにしておくべきだろう
-        this.kag.tmp.num_anim = 0;
 
         // プリロードが必要ないなら即実行
         if (preload_targets.length === 0) {

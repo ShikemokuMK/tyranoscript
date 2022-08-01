@@ -51,7 +51,7 @@ tyrano.plugin.kag.tag.playbgm = {
 
     waitClick: function (pm) {
         // イベントレイヤを隠してクリックを待つ
-        this.kag.layer.hideEventLayer();
+        this.kag.weaklyStop();
         $(".tyrano_base").on("click.bgm", () => {
             this.kag.readyAudio();
             this.play(pm);
@@ -210,7 +210,7 @@ tyrano.plugin.kag.tag.playbgm = {
         const should_next_order = pm.stop === "false";
 
         if (should_next_order) {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
         }
 
         // 音声タイプ "bgm" or "sound"
@@ -225,7 +225,7 @@ tyrano.plugin.kag.tag.playbgm = {
         // nextOrder を発行する共通関数
         const next = () => {
             if (should_next_order) {
-                this.kag.layer.showEventLayer();
+                this.kag.cancelWeakStop();
                 this.kag.ftag.nextOrder();
             }
         };
@@ -1651,7 +1651,7 @@ tyrano.plugin.kag.tag.wbgm = {
     start: function () {
         //今、音楽再生中なら、
         if (this.kag.tmp.is_bgm_play == true) {
-            //this.kag.layer.hideEventLayer();
+            //this.kag.weaklyStop();
             this.kag.tmp.is_bgm_play_wait = true;
         } else {
             this.kag.ftag.nextOrder();
@@ -1687,7 +1687,7 @@ tyrano.plugin.kag.tag.wse = {
         //今、音楽再生中なら、
 
         if (this.kag.tmp.is_se_play == true) {
-            //this.kag.layer.hideEventLayer();
+            //this.kag.weaklyStop();
             this.kag.tmp.is_se_play_wait = true;
         } else {
             this.kag.ftag.nextOrder();

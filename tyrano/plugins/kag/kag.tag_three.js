@@ -256,7 +256,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
                 var name = intersects[0].object.userData["name"];
                 if (that.kag.stat.is_strong_stop == true) {
                     if (three.evt[name]) {
-                        that.kag.layer.showEventLayer();
+                        that.kag.cancelWeakStop();
                         that.kag.ftag.startTag("jump", three.evt[name]);
                         return;
                     }

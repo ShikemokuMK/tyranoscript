@@ -113,14 +113,14 @@ tyrano.plugin.kag.tag.movie = {
         var that = this;
 
         if ($.userenv() != "pc") {
-            this.kag.layer.showEventLayer();
+            this.kag.cancelWeakStop();
 
             //mp4で再生できる
             //ティラノプレイヤーの場合は、そのまま再生できる。
             if ($.isTyranoPlayer()) {
                 that.playVideo(pm);
             } else {
-                this.kag.layer.showEventLayer();
+                this.kag.cancelWeakStop();
                 //$(".tyrano_base").bind("click.movie", function (e) {
                 that.playVideo(pm);
                 $(".tyrano_base").unbind("click.movie");
@@ -1009,7 +1009,7 @@ tyrano.plugin.kag.tag.wa = {
         //実行中のアニメーションがある場合だけ待つ
         if (this.kag.tmp.num_anim > 0) {
             this.kag.stat.is_wait_anim = true;
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
         } else {
             this.kag.ftag.nextOrder();
         }
@@ -1932,7 +1932,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
     },
 
     start: function (pm) {
-        this.kag.layer.hideEventLayer();
+        this.kag.weaklyStop();
         const j_chara_name = this.kag.getCharaNameArea();
 
         //
@@ -2058,7 +2058,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
         // 表情の変更もあわせてできる
         //
 
-        this.kag.layer.showEventLayer();
+        this.kag.cancelWeakStop();
         if (pm.face != "" && this.kag.stat.chara_talk_anim == "none") {
             // ※発言時アニメーション機能が有効な場合はすでに上のほうで表情変更済み
             // [chara_mod]に丸投げする！ nextOrder もこれに任せる
@@ -2586,7 +2586,7 @@ tyrano.plugin.kag.tag.chara_show = {
             }
 
             var chara_num = 1;
-            that.kag.layer.hideEventLayer();
+            that.kag.weaklyStop();
 
             //キャラのサイズを設定する必要がある。
 
@@ -2636,7 +2636,7 @@ tyrano.plugin.kag.tag.chara_show = {
                                 .fadeTo(parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)), 1, function () {
                                     chara_num--;
                                     if (chara_num == 0) {
-                                        that.kag.layer.showEventLayer();
+                                        that.kag.cancelWeakStop();
                                         if (pm.wait == "true") {
                                             that.kag.ftag.nextOrder();
                                         }
@@ -2653,7 +2653,7 @@ tyrano.plugin.kag.tag.chara_show = {
                             function () {
                                 chara_num--;
                                 if (chara_num == 0) {
-                                    that.kag.layer.showEventLayer();
+                                    that.kag.cancelWeakStop();
                                     if (pm.wait == "true") {
                                         that.kag.ftag.nextOrder();
                                     }
@@ -2717,7 +2717,7 @@ tyrano.plugin.kag.tag.chara_show = {
                     complete: function () {
                         chara_num--;
                         if (chara_num == 0) {
-                            that.kag.layer.showEventLayer();
+                            that.kag.cancelWeakStop();
 
                             if (pm.wait == "true") {
                                 that.kag.ftag.nextOrder();
@@ -2799,7 +2799,7 @@ tyrano.plugin.kag.tag.chara_hide = {
         }
 
         var chara_num = 0;
-        that.kag.layer.hideEventLayer();
+        that.kag.weaklyStop();
 
         //アニメーションでj表示させます
         img_obj.stop(true, true).animate(
@@ -2823,7 +2823,7 @@ tyrano.plugin.kag.tag.chara_hide = {
                         var tmp_base = 0;
 
                         if (chara_cnt == 0) {
-                            that.kag.layer.showEventLayer();
+                            that.kag.cancelWeakStop();
                             if (pm.wait == "true") {
                                 that.kag.ftag.nextOrder();
                             }
@@ -2852,7 +2852,7 @@ tyrano.plugin.kag.tag.chara_hide = {
                                         .fadeTo(parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)), 1, function () {
                                             chara_num--;
                                             if (chara_num == 0) {
-                                                that.kag.layer.showEventLayer();
+                                                that.kag.cancelWeakStop();
                                                 if (pm.wait == "true") {
                                                     that.kag.ftag.nextOrder();
                                                 }
@@ -2869,7 +2869,7 @@ tyrano.plugin.kag.tag.chara_hide = {
                                     function () {
                                         chara_num--;
                                         if (chara_num == 0) {
-                                            that.kag.layer.showEventLayer();
+                                            that.kag.cancelWeakStop();
                                             if (pm.wait == "true") {
                                                 that.kag.ftag.nextOrder();
                                             }
@@ -2883,7 +2883,7 @@ tyrano.plugin.kag.tag.chara_hide = {
                     } else {
                         //実行待の時だけ実施する
                         if (pm.wait == "true") {
-                            that.kag.layer.showEventLayer();
+                            that.kag.cancelWeakStop();
                             that.kag.ftag.nextOrder();
                         }
                     }
@@ -2947,7 +2947,7 @@ tyrano.plugin.kag.tag.chara_hide_all = {
         var img_obj = target_layer.find(".tyrano_chara");
 
         var chara_num = 0;
-        that.kag.layer.hideEventLayer();
+        that.kag.weaklyStop();
         var flag_complete = false;
         //アニメーションでj表示させます
 
@@ -2975,7 +2975,7 @@ tyrano.plugin.kag.tag.chara_hide_all = {
                     if (pm.wait == "true") {
                         if (flag_complete == false) {
                             flag_complete = true;
-                            that.kag.layer.showEventLayer();
+                            that.kag.cancelWeakStop();
                             that.kag.ftag.nextOrder();
                         }
                     }
@@ -2992,7 +2992,7 @@ tyrano.plugin.kag.tag.chara_hide_all = {
 
         //すぐに次の命令を実行
         if (pm.wait != "true") {
-            this.kag.layer.showEventLayer();
+            this.kag.cancelWeakStop();
             this.kag.ftag.nextOrder();
         }
 
@@ -3083,10 +3083,12 @@ tyrano.plugin.kag.tag.chara_mod = {
 
     start: function (pm) {
         var that = this;
-        that.kag.layer.hideEventLayer();
+        that.kag.weaklyStop();
 
         var storage_url = "";
         var folder = "./data/fgimage/";
+        const is_wait = pm.wait !== "false";
+        const is_cross = pm.cross !== "false";
 
         if (pm.face != "") {
             if (!this.kag.stat.charas[pm.name]) {
@@ -3114,7 +3116,7 @@ tyrano.plugin.kag.tag.chara_mod = {
         if ($(".layer_fore").find("." + pm.name).length == 0) {
             this.kag.stat.charas[pm.name]["storage"] = storage_url;
             this.kag.stat.charas[pm.name]["reflect"] = pm.reflect;
-            this.kag.layer.showEventLayer();
+            this.kag.cancelWeakStop();
             if (pm.next !== "false") {
                 this.kag.ftag.nextOrder();
             }
@@ -3152,7 +3154,7 @@ tyrano.plugin.kag.tag.chara_mod = {
 
         //storageが指定されていない場合は終わり
         if (storage_url == "") {
-            that.kag.layer.showEventLayer();
+            that.kag.cancelWeakStop();
             if (pm.next !== "false") {
                 this.kag.ftag.nextOrder();
             }
@@ -3180,19 +3182,19 @@ tyrano.plugin.kag.tag.chara_mod = {
                 j_img.addClass("chara-mod-animation_" + pm.name);
                 j_img.after(j_new_img);
 
-                if (pm.cross == "true") {
+                if (is_cross) {
                     j_img.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)), 0, function () {
                         //alert("完了");
                     });
                 }
 
                 j_new_img.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)), 1, function () {
-                    if (pm.cross == "false") {
+                    if (!is_cross) {
                         j_img.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(chara_time)), 0, function () {
                             j_img.remove();
 
-                            if (pm.wait == "true") {
-                                that.kag.layer.showEventLayer();
+                            if (is_wait) {
+                                that.kag.cancelWeakStop();
                                 if (pm.next !== "false") {
                                     that.kag.ftag.nextOrder();
                                 }
@@ -3201,8 +3203,8 @@ tyrano.plugin.kag.tag.chara_mod = {
                     } else {
                         j_img.remove();
 
-                        if (pm.wait == "true") {
-                            that.kag.layer.showEventLayer();
+                        if (is_wait) {
+                            that.kag.cancelWeakStop();
                             if (pm.next !== "false") {
                                 that.kag.ftag.nextOrder();
                             }
@@ -3220,8 +3222,8 @@ tyrano.plugin.kag.tag.chara_mod = {
                     .find(".chara_img")
                     .attr("src", folder + storage_url);
 
-                if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
+                if (is_wait) {
+                    that.kag.cancelWeakStop();
                     if (pm.next !== "false") {
                         that.kag.ftag.nextOrder();
                     }
@@ -3231,8 +3233,8 @@ tyrano.plugin.kag.tag.chara_mod = {
             //showする前でも、表情が適応されるようにする
             that.kag.stat.charas[pm.name]["storage"] = storage_url;
 
-            if (pm.wait == "false") {
-                that.kag.layer.showEventLayer();
+            if (!is_wait) {
+                that.kag.cancelWeakStop();
                 if (pm.next !== "false") {
                     that.kag.ftag.nextOrder();
                 }

@@ -40,7 +40,7 @@ tyrano.plugin.kag.ftag = {
         //処理停止中なら
         this.kag.stat.is_trans = false;
         if (this.kag.stat.is_stop == true) {
-            this.kag.layer.showEventLayer();
+            this.kag.cancelWeakStop();
             this.nextOrder();
         }
     },
@@ -227,7 +227,7 @@ tyrano.plugin.kag.ftag = {
     //次の命令を実行する
     nextOrder: function () {
         //基本非表示にする。
-        this.kag.layer.layer_event.hide();
+        this.kag.layer.hideEventLayer();
 
         var that = this;
 
@@ -345,7 +345,7 @@ tyrano.plugin.kag.ftag = {
 
             //クリック待ち解除フラグがたってるなら
             if (this.checkCw(tag)) {
-                this.kag.layer.layer_event.show();
+                this.kag.layer.showEventLayer();
             }
 
             if (err_str != "") {
@@ -589,7 +589,7 @@ tyrano.plugin.kag.ftag = {
     //indexを指定して、その命令を実行
     //シナリオファイルが異なる場合
     nextOrderWithLabel: function (label_name, scenario_file) {
-        this.kag.stat.is_strong_stop = false;
+        this.kag.cancelStrongStop();
 
         //Jump ラベル記録が必要な場合に記録しておく
         if (label_name) {
@@ -626,10 +626,10 @@ tyrano.plugin.kag.ftag = {
 
         //シナリオファイルが変わる場合は、全く違う動きをする
         if (scenario_file != this.kag.stat.current_scenario && original_scenario != null) {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
 
             this.kag.loadScenario(scenario_file, function (array_tag) {
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.buildTag(array_tag, label_name);
             });
         } else {
@@ -650,8 +650,8 @@ tyrano.plugin.kag.ftag = {
 
     //次の命令へ移動　index とストレージ名を指定する
     nextOrderWithIndex: function (index, scenario_file, flag, insert, auto_next) {
-        this.kag.stat.is_strong_stop = false;
-        this.kag.layer.showEventLayer();
+        this.kag.cancelStrongStop();
+        this.kag.cancelWeakStop();
 
         var that = this;
 
@@ -664,7 +664,7 @@ tyrano.plugin.kag.ftag = {
 
         //シナリオファイルが変わる場合は、全く違う動きをする
         if (scenario_file != this.kag.stat.current_scenario || flag == true) {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
 
             this.kag.loadScenario(scenario_file, function (tmp_array_tag) {
                 var array_tag = $.extend(true, [], tmp_array_tag);
@@ -672,15 +672,16 @@ tyrano.plugin.kag.ftag = {
                     array_tag.splice(index + 1, 0, insert);
                 }
 
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.buildTagIndex(array_tag, index, auto_next);
             });
         } else {
             //index更新
             this.current_order_index = index;
-
+            let nextorder_called = false;
             if (auto_next == "yes") {
                 this.nextOrder();
+                nextorder_called = true;
             } else if (auto_next == "snap") {
                 //ストロングの場合、すすめないように
                 this.kag.stat.is_strong_stop = this.kag.menu.snap.stat.is_strong_stop;
@@ -688,13 +689,17 @@ tyrano.plugin.kag.ftag = {
                 //スキップフラグが立っている場合は進めてくださいね。
                 if (this.kag.stat.is_skip == true && this.kag.stat.is_strong_stop == false) {
                     this.kag.ftag.nextOrder();
+                    nextorder_called = true;
                 }
             } else if (auto_next == "stop") {
-                //[s]タグで終わった人が登場してきた時
-                //this.kag.stat.is_strong_stop = true;
-                //レイヤイベントレイヤ非表示。
-                //this.current_order_index--;
-                this.kag.ftag.startTag("s", { val: {} });
+                this.kag.ftag.startTag("s");
+            }
+            // イベントレイヤを復活させる処理
+            // - 上で nextOrder が呼ばれたのなら、その nextOrder の中でイベントレイヤを復活させる処理が行われている
+            // - [s] 中ならイベントレイヤを復活させる必要はない
+            // このどちらにも該当しない場合は手動でイベントレイヤを復活させる必要がある
+            if (!nextorder_called && !this.kag.stat.is_strong_stop) {
+                this.kag.layer.showEventLayer();
             }
         }
     },
@@ -703,8 +708,6 @@ tyrano.plugin.kag.ftag = {
 //タグを記述していく
 tyrano.plugin.kag.tag.text = {
     //vital:["val"], //必須のタグ
-
-    cw: true,
 
     //初期値
     pm: {
@@ -1799,6 +1802,10 @@ tyrano.plugin.kag.tag.text = {
         // エフェクト速度
         this.kag.tmp.effect_speed = this.kag.stat.font.effect_speed;
 
+        // 文字表示中にクリックしたときに残りのテキストをマッハ表示する処理を割り込ませたいので
+        // クリックできるようにイベントレイヤを表示しておく必要がある
+        this.kag.waitClick("text");
+
         // 1文字目を追加 あとは関数内で再帰して表示
         this.addOneChar(0, j_char_span_children, j_message_span, j_msg_inner);
     },
@@ -2123,8 +2130,6 @@ tyrano.plugin.kag.tag.config_record_label = {
 
 //[l] クリック待ち
 tyrano.plugin.kag.tag.l = {
-    cw: true,
-
     start: function () {
         var that = this;
 
@@ -2157,7 +2162,9 @@ tyrano.plugin.kag.tag.l = {
             }, auto_speed);
         }
 
-        this.kag.layer.showEventLayer();
+        if (!this.kag.stat.is_skip) {
+            this.kag.waitClick("l");
+        }
     },
 };
 
@@ -2188,8 +2195,6 @@ tyrano.plugin.kag.tag.l = {
 
 //[p] 改ページクリック待ち
 tyrano.plugin.kag.tag.p = {
-    cw: true,
-
     start: function () {
         var that = this;
         //改ページ
@@ -2222,7 +2227,9 @@ tyrano.plugin.kag.tag.p = {
             }, auto_speed);
         }
 
-        this.kag.layer.showEventLayer();
+        if (!this.kag.stat.is_skip) {
+            this.kag.waitClick("p");
+        }
     },
 };
 
@@ -4042,10 +4049,10 @@ tyrano.plugin.kag.tag.backlay = {
 tyrano.plugin.kag.tag.wt = {
     start: function (pm) {
         if (this.kag.stat.is_trans == false) {
-            this.kag.layer.showEventLayer();
+            this.kag.cancelWeakStop();
             this.kag.ftag.nextOrder();
         } else {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
         }
     },
 };
@@ -4053,7 +4060,7 @@ tyrano.plugin.kag.tag.wt = {
 //音楽のフェードインを待つ
 tyrano.plugin.kag.tag.wb = {
     start: function (pm) {
-        this.kag.layer.hideEventLayer();
+        this.kag.weaklyStop();
     },
 };
 
@@ -4174,7 +4181,7 @@ tyrano.plugin.kag.tag.link = {
 
             //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
             TYRANO.kag.ftag.nextOrderWithLabel(_target, _storage);
-            TYRANO.kag.layer.showEventLayer();
+            TYRANO.kag.cancelWeakStop();
 
             //選択肢の後、スキップを継続するか否か
             if (that.kag.stat.skip_link == "true") {
@@ -4250,8 +4257,8 @@ tyrano.plugin.kag.tag.endlink = {
 
 tyrano.plugin.kag.tag.s = {
     start: function () {
-        this.kag.stat.is_strong_stop = true;
-        this.kag.layer.hideEventLayer();
+        this.kag.stronglyStop();
+        this.kag.weaklyStop();
 
         // [glink]自動配置が有効な場合はここで表示する
         if (this.kag.stat.glink_config && this.kag.stat.glink_config.auto_place === "true") {
@@ -4605,14 +4612,14 @@ tyrano.plugin.kag.tag.wait = {
         var that = this;
 
         //クリック無効
-        this.kag.stat.is_strong_stop = true;
+        this.kag.weaklyStop();
+        this.kag.stronglyStop();
         this.kag.stat.is_wait = true;
-        this.kag.layer.hideEventLayer();
 
         that.kag.tmp.wait_id = setTimeout(function () {
-            that.kag.stat.is_strong_stop = false;
+            that.kag.cancelStrongStop();
+            that.kag.cancelWeakStop();
             that.kag.stat.is_wait = false;
-            that.kag.layer.showEventLayer();
             that.kag.ftag.nextOrder();
         }, pm.time);
     },
@@ -4652,9 +4659,9 @@ tyrano.plugin.kag.tag.wait_cancel = {
         //[wait]キャンセル
         clearTimeout(this.kag.tmp.wait_id);
         this.kag.tmp.wait_id = "";
-        this.kag.stat.is_strong_stop = false;
+        this.kag.cancelStrongStop();
         this.kag.stat.is_wait = false;
-        this.kag.layer.showEventLayer();
+        this.kag.cancelWeakStop();
 
         this.kag.ftag.nextOrder();
     },
@@ -4684,13 +4691,11 @@ tyrano.plugin.kag.tag.wait_cancel = {
 tyrano.plugin.kag.tag.hidemessage = {
     start: function () {
         this.kag.stat.is_hide_message = true;
-        //メッセージレイヤを全て削除する //テキスト表示時に復活
+        // メッセージレイヤを隠す
         this.kag.layer.hideMessageLayers();
-
-        //クリックは復活させる
-        this.kag.layer.layer_event.show();
-
-        //this.kag.ftag.nextOrder();
+        // 次にクリックしたときにメッセージウィンドウを復活させる処理を割り込ませたいため
+        // クリックできるようにイベントレイヤを表示しておく必要あり
+        this.kag.layer.showEventLayer("hidemessage");
     },
 };
 
@@ -6130,7 +6135,7 @@ tyrano.plugin.kag.tag.button = {
                 button_clicked = true;
 
                 // 他の[button]を即座に無効にするためにストロングストップを切っておこう
-                this.kag.stat.is_strong_stop = false;
+                this.kag.cancelStrongStop();
 
                 // 念のためフリーレイヤ内のボタンのイベントをすべて解除しておこう
                 this.kag.layer.cancelAllFreeLayerButtonsEvents();
@@ -6690,7 +6695,7 @@ tyrano.plugin.kag.tag.glink = {
             button_clicked = true;
 
             // 他の[glink]を即座に無効にするためにストロングストップを切っておこう
-            this.kag.stat.is_strong_stop = false;
+            this.kag.cancelStrongStop();
 
             // クリックされたというクラスを付ける
             j_button.addClass("glink_button_clicked");
@@ -7010,7 +7015,7 @@ tyrano.plugin.kag.tag.clickable = {
             button_clicked = true;
 
             // 他の[clickable]を即座に無効にするためにストロングストップを切る
-            this.kag.stat.is_strong_stop = false;
+            this.kag.cancelStrongStop();
 
             // ティラノイベント"click-tag-clickable"を発火
             that.kag.trigger("click-tag-clickable", e);
@@ -7478,7 +7483,7 @@ tyrano.plugin.kag.tag.bg = {
             that.kag.layer.updateLayer("base", "fore", j_new_bg);
 
             if (pm.wait == "true") {
-                that.kag.layer.hideEventLayer();
+                that.kag.weaklyStop();
             }
 
             //スキップ中は時間を短くする
@@ -7500,7 +7505,7 @@ tyrano.plugin.kag.tag.bg = {
                 }
 
                 if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
+                    that.kag.cancelWeakStop();
                     that.kag.ftag.nextOrder();
                 }
             });
@@ -7637,7 +7642,7 @@ tyrano.plugin.kag.tag.bg2 = {
             that.kag.layer.updateLayer("base", "fore", j_new_bg);
 
             if (pm.wait == "true") {
-                that.kag.layer.hideEventLayer();
+                that.kag.weaklyStop();
             }
 
             //スキップ中は時間を短くする
@@ -7659,7 +7664,7 @@ tyrano.plugin.kag.tag.bg2 = {
                 }
 
                 if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
+                    that.kag.cancelWeakStop();
                     that.kag.ftag.nextOrder();
                 }
             });

@@ -256,17 +256,32 @@ tyrano.plugin.kag.parser = {
                         }
                     }
                 }
-                //1文字ずつ解析していくのが完了した
-                //この時点でテキストがあれば配列に追加
-                if (text != "") {
-                    const text_obj = {
+                //　1文字ずつ解析していくのが完了した
+                // この時点でタグがあれば配列に追加
+                if (tag_str) {
+                    if (tag_str.slice(-1) === "]") {
+                        const tag_str_fixed = tag_str.slice(0, tag_str.length - 1);
+                        this.kag.warning(
+                            "compensate_missing_quart",
+                            {
+                                before: tag_str,
+                                after: tag_str_fixed,
+                            },
+                            false,
+                        );
+                        tag_str = tag_str_fixed;
+                    }
+                    array_s.push(this.makeTag(tag_str, i));
+                }
+                //　この時点でテキストがあれば配列に追加
+                if (text) {
+                    array_s.push({
                         line: i,
                         name: "text",
                         pm: { val: text },
                         val: text,
                         is_entity_disabled: true,
-                    };
-                    array_s.push(text_obj);
+                    });
                 }
 
                 //console.log(array_char);

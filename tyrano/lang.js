@@ -54,6 +54,8 @@ window.tyrano_lang = {
     },
 
     warn: {
+        compensate_missing_quart:
+            '予期しない "]" を検知しました。パラメータのクォートの数が足りていない可能性があるため、自動的に修正して解釈します。\n\n修正前: { before }\n修正後: { after }',
         duplicate_label:
             "ラベル「{ name }」は同一シナリオファイル内に重複しています。ラベル名は同一シナリオファイル内で重複しないようにしてください。",
     },

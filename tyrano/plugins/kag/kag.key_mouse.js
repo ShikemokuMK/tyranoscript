@@ -908,7 +908,7 @@ tyrano.plugin.kag.key_mouse = {
          * @returns {boolean}
          */
         canClick() {
-            const is_event_layer_displayed = $(".layer_event_click").css("display") !== "none";
+            const is_event_layer_displayed = this.kag.layer.layer_event.css("display") !== "none";
             if (is_event_layer_displayed && !this.isOpenMenu()) {
                 return true;
             }
