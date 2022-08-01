@@ -1278,6 +1278,12 @@ tyrano.plugin.kag.menu = {
                 that.setMenuCloseEvent(layer_menu);
                 that.setMenuScrollEvents(j_menu, { target: ".log_body", move: 60 });
 
+                // スマホのタッチ操作でスクロールできるようにするために touchmove の伝搬を切る
+                // (document まで伝搬するとそこのリスナで e.preventDefault() が呼ばれるため)
+                j_menu.find(".log_body").on("touchmove", (e) => {
+                    e.stopPropagation();
+                });
+
                 var log_str = "";
 
                 var array_log = that.kag.variable.tf.system.backlog;
