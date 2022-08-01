@@ -753,6 +753,9 @@ tyrano.plugin.kag.menu = {
         // グラデーションテキストの復元
         $(".gradient-text").restoreGradientText();
 
+        // 一時要素をすべて削除
+        $(".temp-element").remove();
+
         //バックログの初期化
         //awakegame考慮もれ。一旦戻す
         //this.kag.variable.tf.system.backlog = [];

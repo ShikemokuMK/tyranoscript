@@ -2094,13 +2094,16 @@ tyrano.plugin.kag = {
     logEventLisnenerCount: function () {
         let str = "現在登録されているイベントリスナ\n";
         const map = this.event_listener_map;
+        let sum = 0;
         for (const event in map) {
             if (map[event]) {
                 str += `${event}: ${map[event].length}件\n`;
+                sum += map[event].length;
             }
         }
         str += "%o";
         console.log(str, map);
+        console.log(`合計 ${sum} 個のイベントリスナが登録されています。`);
     },
 
     /**
@@ -2201,6 +2204,7 @@ tyrano.plugin.kag = {
         }
         if (this.is_event_logging_enabled) this.logEventLisnenerCount();
     },
+
     /**
      * on メソッドのラッパー
      * once オプションを true で上書きしたうえで on メソッドに投げる
@@ -2210,6 +2214,17 @@ tyrano.plugin.kag = {
      */
     once: function (event_names, callback, options = {}) {
         options.once = true;
+        this.on(event_names, callback, options);
+    },
+
+    /**
+     * on + off メソッドのラッパー
+     * @param {string} event_names
+     * @param {function} callback
+     * @param {ListenerOption} options
+     */
+    overwrite: function (event_names, callback, options = {}) {
+        this.off(event_names, options);
         this.on(event_names, callback, options);
     },
 

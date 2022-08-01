@@ -4780,6 +4780,230 @@ tyrano.plugin.kag.tag.quake = {
 };
 
 /*
+#[quake2]
+
+:group
+演出・効果・動画
+
+:title
+画面を揺らす
+
+:exp
+指定したミリ秒だけ画面を揺らします。
+
+:sample
+画面を揺らすよ。[l][s]
+
+[quake2 time="1000"]
+
+[cm]揺れたね。[p]
+
+[quake2 time="1000" wait="false"]
+
+揺らしたまま次のタグに進むよ。[p]
+
+[quake2 time="3000" wait="false"]
+
+揺らしたまま次のタグに進んで、揺れの完了を待つよ…[wa]終わったよ。[p]
+
+:param
+time     = 揺れ全体の時間をミリ秒で指定します。,
+hmax     = 揺れの横方向への最大振幅を指定します。,
+vmax     = 揺れの縦方向への最大振幅を指定します。,
+wait     = 揺れの終了を待つかどうか。`true`または`false`で指定します。,
+copybase = `true`を指定した場合、画面が揺れている間、ベースレイヤの背景のコピーが最後面に固定されます。これによって、たとえば画面が上に揺れた瞬間に下側にできる隙間から黒色がのぞくことがなくなります。,
+
+#[end]
+*/
+
+//画面を揺らします
+tyrano.plugin.kag.tag.quake2 = {
+    pm: {
+        time: "1000",
+        hmax: "0",
+        vmax: "200",
+        wait: "true",
+        copybase: "true",
+        skippable: "true",
+    },
+    start: function (pm) {
+        // 前回の揺れが残っているなら終わらせる
+        if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+        // スキップ中でこの揺れがスキップ可能なら無視
+        if (this.kag.stat.is_skip && pm.skippable === "true") return this.kag.ftag.nextOrder();
+
+        const duration = parseInt(pm.time);
+        const j_quake = $("#root_layer_game, #root_layer_system");
+
+        // ベースレイヤのコピー
+        const do_copy = pm.copybase === "true";
+        let j_base_clone;
+        if (do_copy) {
+            j_base_clone = $(".base_fore").clone();
+            j_base_clone.attr("class", "temp-element quake2-element");
+            $("#tyrano_base").prepend(j_base_clone);
+        }
+
+        const vmax = parseInt(pm.vmax);
+        const hmax = parseInt(pm.hmax);
+        const is_wait = pm.wait !== "false";
+        let sign = 1;
+        const ignore_rate = Math.max(1, Math.ceil(refreshRate / 60));
+        let current_frame = 0;
+        const end_frame = ((duration / (1000 / 60)) * ignore_rate) | 0;
+        this.kag.pushAnimStack();
+
+        // 揺れを終わらせる
+        this.kag.tmp.quake2_finish = () => {
+            this.kag.tmp.quake2_finish = false;
+            cancelAnimationFrame(this.kag.tmp.quake2_timer_id);
+            j_quake.setStyle("transform", "");
+            this.kag.popAnimStack();
+            if (do_copy) j_base_clone.remove();
+            if (is_wait) this.kag.ftag.nextOrder();
+        };
+
+        // アニメーションループ
+        const loop = () => {
+            if (current_frame < end_frame) {
+                if (current_frame % ignore_rate === 0) {
+                    sign *= -1;
+                    let v = 0;
+                    let h = 0;
+                    if (vmax > 0) {
+                        v = sign * $.easing.easeOutQuad(null, current_frame, vmax, -vmax, end_frame);
+                    }
+                    if (hmax > 0) {
+                        h = sign * $.easing.easeOutQuad(null, current_frame, hmax, -hmax, end_frame);
+                    }
+                    const css = `translate(${h}px, ${v}px)`;
+                    j_quake.setStyle("transform", css);
+                    j_quake.setStyle("background", "red");
+                }
+                current_frame++;
+                this.kag.tmp.quake2_timer_id = requestAnimationFrame(loop);
+            } else {
+                if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+            }
+        };
+
+        // ロードしたときにこの揺れを終わらせる
+        this.kag.overwrite("load-start.quake2", () => {
+            if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+        });
+
+        // スキップを開始したときにこの揺れを終わらせる
+        this.kag.overwrite("skip-start.quake2", () => {
+            if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+        });
+
+        // アニメーションを開始
+        this.kag.tmp.quake2_timer_id = requestAnimationFrame(loop);
+
+        if (!is_wait) this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[vibrate]
+
+:group
+演出・効果・動画
+
+:title
+スマホ・パッドの振動
+
+:exp
+プレイヤーが使用しているモバイル端末やゲームパッドを振動させることができます。
+
+指定した振動時間が長すぎると振動しなくなることがありますので注意してください。環境にもよりますが、目安として振動時間は5000ミリ秒以下に抑えるとよいでしょう。
+
+:sample
+[vibrate time=1000 power=100]
+1秒振動[p]
+
+[vibrate time="800,200" power="50" count="3"]
+パターン振動を3回繰り返し[p]
+
+[vibrate time="5000" power="50" count="3"]
+途中で振動停止…
+[wait time="1000"]
+[vibrate_stop]
+停止させました。[p]
+
+:param
+time  = 振動させる時間(ミリ秒)。`600,200,1000,200,600`のようにカンマ区切りで複数の数値を指定すると、600ミリ秒振動→200ミリ秒静止→1000ミリ秒静止→…というパターンを指定することができます。,
+power = 振動させる強さ(0～100)。ゲームパッドを振動させるときのみ有効なパラメータです。,
+count = 振動を繰り返す回数。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.vibrate = {
+    pm: {
+        time: "500",
+        power: "100",
+        count: "",
+    },
+    start: function (pm) {
+        let time;
+        const duration = parseInt(pm.time);
+        const power = parseInt(pm.power) / 100;
+        if (pm.time.includes(",")) {
+            time = pm.time.split(",").map((item) => {
+                return parseInt(item);
+            });
+        } else {
+            time = duration;
+        }
+        if (pm.count) {
+            let new_time = [];
+            if (typeof time === "number") {
+                const count = (parseInt(pm.count) || 1) * 2 - 1;
+                for (let i = 0; i < count; i++) {
+                    new_time.push(time);
+                }
+            } else {
+                const count = parseInt(pm.count) || 1;
+                for (let i = 0; i < count; i++) {
+                    new_time = new_time.concat(time.concat());
+                }
+            }
+            time = new_time;
+        }
+        if (this.kag.key_mouse.gamepad.last_used_next_gamepad_index > -1) {
+            this.kag.key_mouse.gamepad.vibrate({ duration: time, power });
+        } else {
+            navigator.vibrate(time);
+        }
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[vibrate_stop]
+
+:group
+演出・効果・動画
+
+:title
+スマホ・パッドの振動停止
+
+:exp
+`[vibrate]`で開始したモバイル端末やゲームパッドの振動を途中で停止することができます。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.vibrate_stop = {
+    start: function (pm) {
+        this.kag.key_mouse.gamepad.vibrate({ duration: 0, power: 0 });
+        navigator.vibrate(0);
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
 #[font]
 
 :group

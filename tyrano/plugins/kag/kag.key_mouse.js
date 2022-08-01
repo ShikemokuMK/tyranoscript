@@ -2823,27 +2823,48 @@ tyrano.plugin.kag.key_mouse = {
             }
         },
 
+        vibrate_timer_id: null,
+
         /**
          * ゲームパッドを振動させる
-         * @param {Gamepad} [gamepad] 振動させるゲームパッド（省略した場合は最後に入力を検知したゲームパッド）
-         * @param {number} [power=1] 振動の強さ（0.0-1.0）
-         * @param {number} [duration=500] 振動の時間（msec）
+         * @param {Object} options
+         * @param {Gamepad} options.gamepad 振動させるゲームパッド（省略した場合は最後に入力を検知したゲームパッド）
+         * @param {number|number[]} options.duration 振動の時間（msec）
+         * @param {number} options.power=1 振動の強さ（0.0-1.0）
          */
-        vibrate(gamepad, power = 1, duration = 500) {
+        vibrate(options = {}) {
             try {
+                if (!options.is_timeout) {
+                    clearTimeout(this.vibrate_timer_id);
+                }
+                let gamepad = options.gamepad;
+                let duration = options.duration !== undefined ? options.duration : 500;
+                let power = options.power !== undefined ? options.power : 1;
+                const is_array = Array.isArray(duration);
+                const this_duration = is_array ? duration[0] : duration;
                 if (!gamepad) gamepad = this.getGamepad();
                 const act = gamepad && gamepad.vibrationActuator;
                 if (!act) {
                     return;
                 } else if (act.pulse) {
-                    act.pulse(power, duration);
+                    act.pulse(power, this_duration);
                 } else if (act.playEffect) {
                     act.playEffect(act.type, {
-                        duration: duration,
+                        duration: this_duration,
                         startDelay: 0,
                         strongMagnitude: power,
-                        weakMagnitude: 0,
+                        weakMagnitude: power,
                     });
+                }
+                if (is_array) {
+                    duration.shift();
+                    if (duration.length <= 1) return;
+                    const stop_duration = duration.shift();
+                    const delay = this_duration + stop_duration;
+                    options.is_timeout = true;
+                    this.vibrate_timer_id = setTimeout(() => {
+                        this.vibrate(options);
+                    }, delay);
                 }
             } catch (error) {
                 console.log(error);
