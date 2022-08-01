@@ -6,6 +6,13 @@ tyrano.plugin.kag.menu = {
 
     init: function () {},
 
+    getDateStr() {
+        const default_format = "yyyy/M/d h:mm:ss";
+        const config = this.kag.config["configSaveDateFormat"];
+        const format = config ? config : default_format;
+        return $.getNowDate(format);
+    },
+
     showMenu: function (call_back) {
         if (this.kag.layer.layer_event.css("display") == "none" && this.kag.stat.is_strong_stop != true) {
             return false;
@@ -205,7 +212,7 @@ tyrano.plugin.kag.menu = {
                  */
 
                 data = that.snap;
-                data.save_date = $.getNowDate() + "　" + $.getNowTime();
+                data.save_date = that.getDateStr();
                 array_save.data[num] = data;
                 $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
@@ -219,7 +226,7 @@ tyrano.plugin.kag.menu = {
             });
         } else {
             data = that.snap;
-            data.save_date = $.getNowDate() + "　" + $.getNowTime();
+            data.save_date = that.getDateStr();
             array_save.data[num] = data;
             $.setStorage(that.kag.config.projectID + "_tyrano_data", array_save, that.kag.config.configSave);
 
@@ -240,7 +247,7 @@ tyrano.plugin.kag.menu = {
 
         that.kag.menu.snapSave(saveTitle, function () {
             var data = that.snap;
-            data.save_date = $.getNowDate() + "　" + $.getNowTime();
+            data.save_date = that.getDateStr();
             $.setStorage(that.kag.config.projectID + "_tyrano_quick_save", data, that.kag.config.configSave);
 
             // ティラノイベント"storage-quicksave"を発火
@@ -266,7 +273,7 @@ tyrano.plugin.kag.menu = {
     //doSaveSnap 自動セーブのデータを保存する
     doSetAutoSave: function () {
         var data = this.snap;
-        data.save_date = $.getNowDate() + "　" + $.getNowTime();
+        data.save_date = this.getDateStr();
         $.setStorage(this.kag.config.projectID + "_tyrano_auto_save", data, this.kag.config.configSave);
 
         // ティラノイベント"storage-autosave"を発火
@@ -337,7 +344,7 @@ tyrano.plugin.kag.menu = {
             data.three = three_save;
             data.current_order_index = _current_order_index;
             //１つ前
-            data.save_date = $.getNowDate() + "　" + $.getNowTime();
+            data.save_date = that.getDateStr();
             data.img_data = img_code;
 
             //レイヤ部分のHTMLを取得
@@ -371,7 +378,7 @@ tyrano.plugin.kag.menu = {
 
                     data.current_order_index = _current_order_index;
                     //１つ前
-                    data.save_date = $.getNowDate() + "　" + $.getNowTime();
+                    data.save_date = that.getDateStr();
                     data.img_data = img_code;
 
                     //レイヤ部分のHTMLを取得
