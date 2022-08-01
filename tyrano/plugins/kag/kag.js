@@ -1992,7 +1992,8 @@ tyrano.plugin.kag = {
 
     error: function (message, replace_map) {
         if (this.kag.config["debugMenu.visible"] == "true") {
-            //Error:first.ks：28行目:まるまるまる
+            // Error: first.ks：28行目
+            // ほにゃららのエラーが発生しました。
             const current_storage = this.kag.stat.current_scenario;
             const line = parseInt(this.kag.stat.current_line) + 1;
             const line_str = $.lang("line", { line });
@@ -2004,9 +2005,13 @@ tyrano.plugin.kag = {
         }
     },
     //警告表示
-    warning: function (str) {
+    warning: function (message, replace_map) {
         if (this.kag.config["debugMenu.visible"] == "true") {
-            alert(str);
+            if (message in tyrano_lang.warn) {
+                message = $.lang(message, replace_map, "warn");
+            }
+            const warning_str = `Warning: ${message}`;
+            $.error_message(warning_str);
         }
     },
 

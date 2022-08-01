@@ -391,8 +391,7 @@ tyrano.plugin.kag.ftag = {
             this.kag.ftag.nextOrderWithIndex(map_obj.index, map_obj.storage);
         } else {
             //実装されていないタグの場合は、もう帰る
-            $.error_message($.lang("tag") + "：[" + tag.name + "]" + $.lang("not_exists"));
-
+            this.kag.error("undefined_tag", tag);
             this.nextOrder();
         }
 
@@ -643,8 +642,7 @@ tyrano.plugin.kag.ftag = {
                 this.current_order_index = label_obj.index;
                 this.nextOrder();
             } else {
-                $.error_message($.lang("label") + "：'" + label_name + "'" + $.lang("not_exists"));
-
+                this.kag.error("undefined_label", { name: label_name });
                 this.nextOrder();
             }
         }

@@ -18,6 +18,8 @@ window.tyrano_lang = {
     },
 
     error: {
+        undefined_tag: "タグ「{ name }」は存在しません。",
+        undefined_label: "ラベル「{ name }」は存在しません。",
         undefined_character: "指定されたキャラクター「{ name }」は定義されていません。[chara_new]で定義してください。",
         undefined_face: "指定されたキャラクター「{ name }」の表情「{ face }」は定義されていません。[chara_face]で定義してください。",
         undefined_character_parts: "指定されたキャラクター「{ name }」の差分パーツは定義されていません。[chara_layer]で定義してください。",
@@ -39,6 +41,11 @@ window.tyrano_lang = {
         missing_parameter: "タグ「{ tag }」にパラメーター「{ param }」は必須です。",
         if_and_endif_do_not_match: "[if]と[endif]の数が一致しません。",
         unsupported_extensions: "「{ ext }」はサポートしていないファイル形式です。",
+    },
+
+    warn: {
+        duplicate_label:
+            "ラベル「{ name }」は同一シナリオファイル内に重複しています。ラベル名は同一シナリオファイル内で重複しないようにしてください。",
     },
 
     novel: {
