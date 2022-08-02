@@ -4494,6 +4494,7 @@ tyrano.plugin.kag.tag.s = {
                     if (_pm.show_easing) j_elm.setStyle("animation-timing-function", glink_config.show_easing);
                     j_elm.on("animationend", (e) => {
                         if (j_elm.get(0) === e.target) {
+                            j_elm.removeClass(glink_config.show_effect);
                             j_elm.off("animationend");
                             j_elm.removeClass(_pm.show_effect);
                             j_elm.setStyleMap({
@@ -6855,6 +6856,7 @@ tyrano.plugin.kag.tag.glink = {
             if (options.easing) j_elm.setStyle("animation-timing-function", options.easing);
             j_elm.on("animationend", (e) => {
                 if (j_elm.get(0) === e.target) {
+                    j_elm.removeClass(options.effect);
                     j_elm.off("animationend");
                     if (options.callback) options.callback();
                 }
