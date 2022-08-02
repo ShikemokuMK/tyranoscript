@@ -2440,19 +2440,10 @@ tyrano.plugin.kag.key_mouse = {
             let hotspot_x;
             let hotspot_y;
             if (state.indexOf("url(") === 0) {
-                image_url = state.match(/(?<=url\()[^)]+(?=\))/);
-                if (image_url) {
-                    image_url = image_url[0].replace(/"/g, "").replace(/'/g, "");
-                    let hotspot_str = state.match(/(?<=(url\([^)]+\) +))\d+ +\d+/);
-                    if (hotspot_str) {
-                        const hash = hotspot_str[0].split(" ");
-                        hotspot_x = parseInt(hash[0]);
-                        hotspot_y = parseInt(hash[hash.length - 1]);
-                    } else {
-                        hotspot_x = 0;
-                        hotspot_y = 0;
-                    }
-                }
+                const cursor_style = this.parseCursorCSS(state);
+                image_url = cursor_style.url;
+                hotspot_x = cursor_style.hotspot_x;
+                hotspot_y = cursor_style.hotspot_y;
             }
             if (!image_url) {
                 const options = state in this.image_map ? this.image_map[state] : this.image_map.default;
@@ -2466,6 +2457,35 @@ tyrano.plugin.kag.key_mouse = {
                 this.refreshHotspot(j_cursor);
             }
             j_cursor.attr("src", image_url);
+        },
+
+        /**
+         * @param {string} css "url(https://sample.com/sample.png) 0 0, pointer" のような
+         * @return {Object}
+         */
+        parseCursorCSS(css) {
+            css = css.trim();
+            let state = "auto";
+            let hotspot_x = 0;
+            let hotspot_y = 0;
+            if (css.includes(",")) {
+                const url_x_y___state = css.split(",");
+                css = url_x_y___state[0].trim();
+                state = url_x_y___state[1].trim();
+            }
+            const url___x_y = css.split(")");
+            const url = url___x_y[0].replace("url(", "").replace(/"/g, "").replace(/'/g, "");
+            if (url___x_y[1]) {
+                const x___y = url___x_y[1].split(" ");
+                hotspot_x = parseInt(x___y[0]);
+                hotspot_x = parseInt(x___y[1]);
+            }
+            return {
+                state,
+                hotspot_x,
+                hotspot_y,
+                url,
+            };
         },
 
         /**

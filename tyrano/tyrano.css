@@ -794,7 +794,7 @@ div.img_next {
 /*------　クリックエフェクト -------*/
 .tyrano_click_effect {
     display: none;
-    position: fixed;
+    position: absolute;
     left: 0;
     top: 0;
     width: 100px;
@@ -807,17 +807,17 @@ div.img_next {
     animation-timing-function: linear;
     animation-fill-mode: forwards;
     transform-origin: center center;
+    transform: translate(-50%, -50%) scale(1);
     pointer-events: none;
     mix-blend-mode: overlay;
-    --scale: 100%;
 }
 
 @keyframes tyrano_click_effect {
     from {
-        transform: translateX(-50%) translateY(-50%) scale(100%);
+        transform: translate(-50%, -50%) scale(1);
     }
     100% {
-        transform: translateX(-50%) translateY(-50%) scale(var(--scale));
+        transform: translate(-50%, -50%) scale(1.2);
         opacity: 0;
     }
 }

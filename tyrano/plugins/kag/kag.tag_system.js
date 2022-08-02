@@ -2021,6 +2021,8 @@ tyrano.plugin.kag.tag.cursor = {
                 // クリックイベントリスナを useCapture で取り付ける
                 document.body.addEventListener(event_type, this.kag.tmp.show_effect_callback, { capture: true });
             }
+
+            this.overwriteCSS();
         }
 
         // e_ から始まるパラメータはクリックエフェクト用のパラメータであるため
@@ -2077,7 +2079,6 @@ tyrano.plugin.kag.tag.cursor = {
         }
         const base_width = parseInt(this.kag.stat.click_effect.width) || 100;
         const width = parseInt(base_width * this.kag.tmp.screen_info.scale_x);
-        const scale = this.kag.stat.click_effect.scale || 120;
         const color = $.convertColor(this.kag.stat.click_effect.color || "white");
         const blend = this.kag.stat.click_effect.blend || "overlay";
         const duration = parseInt(this.kag.stat.click_effect.time) || 300;
@@ -2090,7 +2091,6 @@ tyrano.plugin.kag.tag.cursor = {
                 "width": `${width}px`,
                 "height": `${width}px`,
                 "opacity": opacity,
-                "--scale": `${scale}%`,
                 "mix-blend-mode": blend,
                 "background-color": color,
                 "animation-duration": `${duration}ms`,
@@ -2125,7 +2125,7 @@ tyrano.plugin.kag.tag.cursor = {
 
         // <style>要素の textContent を作成
         const pointer_css = this.kag.stat.current_cursor_map.pointer || "pointer";
-        const css_text = `
+        let css_text = `
             .remodal-cancel,
             .remodal-confirm,
             .button_menu,
@@ -2134,6 +2134,21 @@ tyrano.plugin.kag.tag.cursor = {
                 cursor: ${pointer_css};
             }
         `;
+
+        if (this.kag.stat.click_effect) {
+            const scale = (this.kag.stat.click_effect.scale || 120) / 100;
+            css_text += `
+                @keyframes tyrano_click_effect {
+                    from {
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(${scale});
+                        opacity: 0;
+                    }
+                }
+            `;
+        }
 
         // <style>要素の textContent を更新
         this.kag.tmp.j_cursor_css.text(css_text);

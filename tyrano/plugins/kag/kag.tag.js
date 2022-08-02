@@ -4974,10 +4974,14 @@ tyrano.plugin.kag.tag.vibrate = {
             }
             time = new_time;
         }
-        if (this.kag.key_mouse.gamepad.last_used_next_gamepad_index > -1) {
-            this.kag.key_mouse.gamepad.vibrate({ duration: time, power });
-        } else {
-            navigator.vibrate(time);
+        try {
+            if (this.kag.key_mouse.gamepad.last_used_next_gamepad_index > -1) {
+                this.kag.key_mouse.gamepad.vibrate({ duration: time, power });
+            } else {
+                navigator.vibrate(time);
+            }
+        } catch (e) {
+            console.log(e);
         }
         this.kag.ftag.nextOrder();
     },
