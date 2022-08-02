@@ -1983,6 +1983,8 @@ tyrano.plugin.kag.tag.cursor = {
                     this.kag.tmp.is_cursor_visible = false;
                 }, timeout);
             });
+
+            j_body.trigger("mousemove.cursor_auto_hide");
         }
 
         //
@@ -1996,9 +1998,11 @@ tyrano.plugin.kag.tag.cursor = {
 
         // クリックエフェクトの有効・無効を操作する場合
         if (pm.click_effect) {
+            const event_type = $.userenv() === "pc" ? "click" : "pointerdown";
+
             // とりあえずクリックイベントリスナを取り外す
             if (typeof this.kag.tmp.show_effect_callback === "function") {
-                document.body.removeEventListener("click", this.kag.tmp.show_effect_callback, { capture: true });
+                document.body.removeEventListener(event_type, this.kag.tmp.show_effect_callback, { capture: true });
             }
 
             // click_effect ステータスを更新
@@ -2015,7 +2019,7 @@ tyrano.plugin.kag.tag.cursor = {
                 }
 
                 // クリックイベントリスナを useCapture で取り付ける
-                document.body.addEventListener("click", this.kag.tmp.show_effect_callback, { capture: true });
+                document.body.addEventListener(event_type, this.kag.tmp.show_effect_callback, { capture: true });
             }
         }
 

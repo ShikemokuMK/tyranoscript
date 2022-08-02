@@ -211,32 +211,6 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     /**
-     * キーコンフィグが現在有効か
-     * @returns {boolean}
-     */
-    isKeyConfigEnabled() {
-        return this.kag.stat.enable_keyconfig;
-    },
-
-    /**
-     * ブラウザ固有の動作が有効かどうか
-     * @returns {boolean}
-     */
-    isDefaultActionEnabled(action) {
-        if (action === "default") {
-            return true;
-        } else if (action === "default_debug") {
-            return this.kag.config["debugMenu.visible"] === "true";
-        } else {
-            let option = this.keyconfig.system_key_event;
-            if (option === "debug") {
-                option = this.kag.config["debugMenu.visible"];
-            }
-            return option === true || option === "true";
-        }
-    },
-
-    /**
      * アクションを実行する
      * @param {any} action
      * @param {Event} event
@@ -287,7 +261,7 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     doActionFunction(action_func, event) {
-        if (this.isKeyConfigEnabled()) {
+        if (this.util.isKeyConfigEnabled()) {
             return action_func(event);
         }
         return false;
@@ -316,7 +290,7 @@ tyrano.plugin.kag.key_mouse = {
         if (!name) return false;
 
         // キーコンフィグが無効かつ -a オプションが指定されていないアクションならば実行しない
-        if (!this.isKeyConfigEnabled() && pm["-a"] === undefined) {
+        if (!this.util.isKeyConfigEnabled() && pm["-a"] === undefined) {
             return false;
         }
 
@@ -534,7 +508,7 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     close() {
-        if (!this.util.isRemodalDisplayed()) {
+        if (this.util.isMenuDisplayed()) {
             $(".menu_close").click();
             return true;
         }
@@ -549,13 +523,14 @@ tyrano.plugin.kag.key_mouse = {
         // 仮想マウスが表示されているならマウスダウンをシミュレート
         if (this.vmouse.is_visible) {
             this.vmouse.leftdown();
+            this.vmouse.hideWithTimeout();
             return true;
         }
 
         // フォーカスされているボタンがあるならそれをクリック
         const j_focus = this.util.findFocused();
         if (j_focus.length > 0) {
-            j_focus.eq(0).trigger("click");
+            this.vmouse.trigger("click", j_focus[0]);
             if (pm.is_keyboard) {
                 this.j_focus_cursor.hide();
                 this.vmouse.j_html.removeClass("vmouse-displayed");
@@ -597,6 +572,12 @@ tyrano.plugin.kag.key_mouse = {
         // メニューが表示されているなら消す
         if (this.util.isMenuDisplayed()) {
             $(".menu_close").click();
+            return true;
+        }
+
+        // スキップの解除
+        if (this.kag.stat.is_skip) {
+            this.kag.setSkip(false);
             return true;
         }
 
@@ -938,38 +919,52 @@ tyrano.plugin.kag.key_mouse = {
         const deg_90 = Math.PI / 2;
         const deg_45 = Math.PI / 4;
         const deg_30 = Math.PI / 6;
+        const deg_10 = deg_30 / 3;
         const dir_num = ["right", "up", "left", "down"].indexOf(dir);
         const dir_rad = dir_num * deg_90;
+        const seraches = [deg_10, deg_30, deg_30 + deg_45];
+        const get_radian = (p1, p2, _x = "x") => {
+            let radian = Math.atan2(p2.y - p1.y, p1[_x] - p2[_x]);
+            if (radian < 0) radian += Math.PI * 2;
+            return radian;
+        };
         // 90°(45°*2)幅、150°幅(75°*2)の最大計2回探索する
         // 最初の90°幅の探索で要素が見つかったなら2回目の探索は省略
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 3; i++) {
             candidate_pos_list = [];
-            const search_width = deg_45 + i * deg_30;
+            const search_width = seraches[i];
             pos_list.forEach((this_pos) => {
                 if (this_pos === focused_pos) {
                     return;
                 }
-                const rad0 = (Math.atan2(focused_pos.y - this_pos.y, this_pos.x - focused_pos.x) + deg_360) % deg_360;
-                const rad1 = (Math.atan2(focused_pos.y - this_pos.y, this_pos.x1 - focused_pos.x1) + deg_360) % deg_360;
-                const rad2 = (Math.atan2(focused_pos.y - this_pos.y, this_pos.x2 - focused_pos.x2) + deg_360) % deg_360;
+                const rad0 = get_radian(this_pos, focused_pos);
+                const rad1 = get_radian(this_pos, focused_pos, "left");
+                const rad2 = get_radian(this_pos, focused_pos, "right");
                 const rads = [rad0, rad1, rad2];
+                // const rads = [rad0];
+                let best_score = -Infinity;
                 for (const rad of rads) {
                     const dif1 = Math.abs(dir_rad - rad);
                     const dif2 = Math.abs(dir_rad + deg_360 - rad);
                     const dif = Math.min(dif1, dif2);
                     if (dif < search_width) {
                         const d0 = Math.sqrt(Math.pow(this_pos.y - focused_pos.y, 2) + Math.pow(this_pos.x - focused_pos.x, 2));
-                        const d1 = Math.sqrt(Math.pow(this_pos.y1 - focused_pos.y, 2) + Math.pow(this_pos.x1 - focused_pos.x, 2));
-                        const d2 = Math.sqrt(Math.pow(this_pos.y2 - focused_pos.y, 2) + Math.pow(this_pos.x2 - focused_pos.x, 2));
+                        const d1 = Math.sqrt(Math.pow(this_pos.y - focused_pos.y, 2) + Math.pow(this_pos.x1 - focused_pos.x, 2));
+                        const d2 = Math.sqrt(Math.pow(this_pos.y - focused_pos.y, 2) + Math.pow(this_pos.x2 - focused_pos.x, 2));
                         const d = Math.min(d0, d1, d2);
-                        const penalty = 100 * (dif / search_width);
-                        this_pos.distance = d + penalty;
-                        candidate_pos_list.push(this_pos);
-                        break;
+                        const penalty = 200 * (dif / search_width) * (dif / search_width);
+                        const score = -(d + penalty);
+                        if (score > best_score) {
+                            best_score = score;
+                        }
                     }
                 }
+                if (best_score > -Infinity) {
+                    this_pos.score = best_score;
+                    candidate_pos_list.push(this_pos);
+                }
             });
-            if (candidate_pos_list > 0) {
+            if (candidate_pos_list.length > 0) {
                 break;
             }
         }
@@ -977,7 +972,7 @@ tyrano.plugin.kag.key_mouse = {
             return;
         }
         candidate_pos_list.sort((a, b) => {
-            return a.distance < b.distance ? -1 : 1;
+            return a.score > b.score ? -1 : 1;
         });
         this.util.focus(candidate_pos_list[0].j_elm);
     },
@@ -1481,6 +1476,47 @@ tyrano.plugin.kag.key_mouse = {
         getTime() {
             return performance.now();
         },
+
+        /**
+         * キーコンフィグが現在有効か
+         * @returns {boolean}
+         */
+        isKeyConfigEnabled() {
+            return this.kag.stat.enable_keyconfig;
+        },
+
+        /**
+         * ブラウザ固有の動作が有効かどうか
+         * @returns {boolean}
+         */
+        isDefaultActionEnabled(action, target = "key") {
+            if (action === "default") {
+                return true;
+            } else if (action === "default_debug") {
+                return this.kag.config["debugMenu.visible"] === "true";
+            } else {
+                let option = this.parent.keyconfig[`system_${target}_event`];
+                if (option === "debug") {
+                    option = this.kag.config["debugMenu.visible"];
+                }
+                return option === true || option === "true";
+            }
+        },
+
+        /**
+         * アクションをタグの配列に変換します
+         * @param {string} action
+         * @returns
+         */
+        parseTagArray(action) {
+            if (Array.isArray(action)) action;
+            if (typeof action !== "string") return [action];
+            if (!action.includes(",")) return [this.parent.kag.parser.makeTag(action, 0)];
+            return action.split(",").map((item) => {
+                item = item.trim();
+                return this.parent.kag.parser.makeTag(item, 0);
+            });
+        },
     },
 
     /**
@@ -1508,6 +1544,14 @@ tyrano.plugin.kag.key_mouse = {
             this.parent = that;
 
             //
+            // クリック
+            //
+
+            $(document).on("click", (e) => {
+                that.kag.setSkip(false);
+            });
+
+            //
             // マウスダウン
             //
 
@@ -1523,9 +1567,12 @@ tyrano.plugin.kag.key_mouse = {
 
                 // ホールドスキップかどうか
                 let is_holdskip = false;
-                if (typeof action === "string") {
-                    const { name } = that.kag.parser.makeTag(action, 0);
-                    is_holdskip = name === "holdskip";
+                const tag_array = this.parent.util.parseTagArray(action);
+                for (const tag of tag_array) {
+                    if (tag && tag.name === "holdskip") {
+                        is_holdskip = true;
+                        break;
+                    }
                 }
 
                 // このマウスボタンにスワイプアクションが設定されている場合
@@ -1542,12 +1589,16 @@ tyrano.plugin.kag.key_mouse = {
                     if (is_holdskip) that.doAction(action, e);
                     return false;
                 }
+
                 const done = that.doAction(action, e);
+
+                // なにかアクションを実行した場合はブラウザ固有の動作を抑制
+                // ホイールクリックの場合も抑制しておかないとマウスカーソルがスクロールモードになってしまう
                 if (done || e.button === 1) {
-                    // なにかアクションを実行した場合はブラウザ固有の動作を抑制
-                    // ホイールクリックの場合も抑制しておかないとマウスカーソルがスクロールモードになってしまう
                     return false;
                 }
+
+                return that.util.isDefaultActionEnabled(action, "mouse");
             });
 
             //
@@ -1593,9 +1644,12 @@ tyrano.plugin.kag.key_mouse = {
 
                 // ホールドスキップかどうか
                 let is_holdskip = false;
-                if (typeof action === "string") {
-                    const { name } = that.kag.parser.makeTag(action, 0);
-                    is_holdskip = name === "holdskip";
+                const tag_array = this.parent.util.parseTagArray(action);
+                for (const tag of tag_array) {
+                    if (tag && tag.name === "holdskip") {
+                        is_holdskip = true;
+                        break;
+                    }
                 }
 
                 // ホールドスキップ
@@ -1605,15 +1659,25 @@ tyrano.plugin.kag.key_mouse = {
                     return false;
                 }
 
-                //
+                // スワイプアクションが設定されているマウスボタンである場合
                 if (this.swiping) {
                     clearTimeout(this.swiping_timer_id);
                     if (this.swiping_done) {
+                        // 今回のマウスダウン＋マウスムーブでスワイプアクションを実行済みの場合はなにもしない
                         return false;
                     } else {
+                        // スワイプアクション実行前にマウスボタンを放した場合は通常アクションを実行
                         const done = that.doAction(action, e);
+
+                        // なにかアクションを実行した場合はブラウザ固有の動作を抑制
+                        // ホイールクリックの場合も抑制しておかないとマウスカーソルがスクロールモードになってしまう
+                        if (done || e.button === 1) {
+                            return false;
+                        }
                     }
                 }
+
+                return that.util.isDefaultActionEnabled(action, "mouse");
             });
 
             //
@@ -1747,7 +1811,7 @@ tyrano.plugin.kag.key_mouse = {
                 }
 
                 // コンフィグも見る
-                return that.isDefaultActionEnabled(action);
+                return that.util.isDefaultActionEnabled(action);
             });
 
             //
@@ -1776,14 +1840,12 @@ tyrano.plugin.kag.key_mouse = {
 
                 const action = this.getAction(e);
 
-                if (typeof action === "string") {
-                    const { name } = that.kag.parser.makeTag(action, 0);
-                    // いま離したキーに"スキップ"アクションが割り当てられているならスキップ解除
-                    // スキップキーを押している(ホールド)間だけスキップできるようにする
-                    if (name === "holdskip") {
+                const tag_array = this.parent.util.parseTagArray(action);
+                for (const tag of tag_array) {
+                    if (tag && tag.name === "holdskip") {
                         that.kag.setSkip(false);
                     }
-                    if (name === "ok") {
+                    if (tag && tag.name === "ok") {
                         if (that.vmouse.is_visible) {
                             that.vmouse.leftup();
                             return;
@@ -1812,26 +1874,25 @@ tyrano.plugin.kag.key_mouse = {
             $(document).on("keyhold", (e) => {
                 let state = this.getKeyState(e);
                 const action = this.getAction(e);
-                if (typeof action === "string") {
-                    const tag = that.kag.parser.makeTag(action, 0);
-
-                    // ホールドフラグが立っていないなら無視
-                    if (tag.pm["-h"] === undefined) return;
-
-                    // ホールド連打(長押しを一定間隔の連打として解釈する)を判定する
-                    //
-                    //  ホールド連打が始まるまでの間 が delay
-                    //  ┌────┐
-                    // ダッ…………ダダダダダダダダダダダダ！
-                    //          └┘
-                    // 　　　　　　この連打間隔が interval
-                    const delay_ms = tag.pm.delay ? parseInt(tag.pm.delay) : that.HOLD_MASH_DELAY;
-                    const interval_ms = tag.pm.interval ? parseInt(tag.pm.interval) : that.HOLD_MASH_INTERVAL;
-                    const delay_f = Math.ceil(delay_ms / this.delay_update);
-                    const interval_f = Math.ceil(interval_ms / this.delay_update);
-                    const f = state.hold_frame - delay_f;
-                    if (f > 0 && f % interval_f === 0) {
-                        that.doAction(tag, e);
+                const tag_array = this.parent.util.parseTagArray(action);
+                for (const tag of tag_array) {
+                    if (tag && tag.pm && tag.pm["-h"] !== undefined) {
+                        // ホールド連打(長押しを一定間隔の連打として解釈する)を判定する
+                        //
+                        //  ホールド連打が始まるまでの間 が delay
+                        //  ┌────┐
+                        // ダッ…………ダダダダダダダダダダダダ！
+                        //          └┘
+                        // 　　　　　　この連打間隔が interval
+                        const delay_ms = tag.pm.delay ? parseInt(tag.pm.delay) : that.HOLD_MASH_DELAY;
+                        const interval_ms = tag.pm.interval ? parseInt(tag.pm.interval) : that.HOLD_MASH_INTERVAL;
+                        const delay_f = Math.ceil(delay_ms / this.delay_update);
+                        const interval_f = Math.ceil(interval_ms / this.delay_update);
+                        const f = state.hold_frame - delay_f;
+                        if (f > 0 && f % interval_f === 0) {
+                            that.doAction(tag, e);
+                            return;
+                        }
                     }
                 }
             });
@@ -1934,6 +1995,7 @@ tyrano.plugin.kag.key_mouse = {
         down_elms: [], // 仮想マウスボタンを押下したときの要素を記憶しておく用, ボタンの種類ごとに分けて記憶するために配列にする
         is_visible: false, // いまカーソルが表示されているかどうか
         is_scrolling: false, // いまスクロールボタンを押下している最中か
+        is_pointer: false, // いまポインターカーソルかどうか
         scroll_ratio: 1, // カーソルの移動量と要素のスクロール用の比
         screen: {}, // ゲーム画面の情報格納, 画面サイズが変わるたびにアップデート
         previous_click_time: 0, // 前回クリック時のタイムスタンプ, ダブルクリックの判定に使用
@@ -2116,10 +2178,25 @@ tyrano.plugin.kag.key_mouse = {
             this.scanPointElement();
             this.scanState();
 
+            if (this.is_pointer) {
+                this.hideWithTimeout();
+            }
+
             // 次回ループ
             setTimeout(() => {
                 this.updateLoop();
             }, this.delay_update);
+        },
+
+        /**
+         * @returns {boolean}
+         */
+        isStatePointer(state) {
+            if (state === "pointer") return true;
+            if (state.includes(",")) {
+                if (state.split(",").pop().trim() === "pointer") return true;
+            }
+            return false;
         },
 
         /**
@@ -2341,6 +2418,7 @@ tyrano.plugin.kag.key_mouse = {
             // this.j_cursor.addClass(new_state);
             this.refreshImage(new_state);
             this.state = new_state;
+            this.is_pointer = this.isStatePointer(this.state);
 
             // 予約は取り消してよい
             this.book_state = null;
@@ -2451,7 +2529,10 @@ tyrano.plugin.kag.key_mouse = {
             // いまポイントしている要素の CSS の cursor プロパティを取得したいのだが
             // vmouse-displayed クラスが <html> に付いたままだと CSS が取れないので一時的に外す
             this.j_html.removeClass("vmouse-displayed");
+            const tmp = document.body.style.getPropertyValue("cursor");
+            document.body.style.setProperty("cursor", "");
             const new_state = this.point_elm ? $(this.point_elm).css("cursor") : "auto";
+            document.body.style.setProperty("cursor", tmp);
             this.j_html.addClass("vmouse-displayed");
             this.setState(new_state, !!this.down_elms[0]);
         },
@@ -2826,19 +2907,18 @@ tyrano.plugin.kag.key_mouse = {
                 let action = map[e.detail.button_name];
                 if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
 
-                if (typeof action === "string") {
-                    const tag = that.kag.parser.makeTag(action, 0);
-
-                    // ホールドフラグが立っていないなら無視
-                    if (tag.pm["-h"] === undefined) return;
-
-                    const delay = tag.pm.delay ? parseInt(tag.pm.delay) : that.HOLD_MASH_DELAY;
-                    const interval = tag.pm.interval ? parseInt(tag.pm.interval) : that.HOLD_MASH_INTERVAL;
-                    const delay_f = Math.ceil(delay / this.DELAY_UPDATE);
-                    const interval_f = Math.ceil(interval / this.DELAY_UPDATE);
-                    const f = e.detail.hold_frame - delay_f;
-                    if (f > 0 && f % interval_f === 0) {
-                        that.doAction(tag, e);
+                const tag_array = this.parent.util.parseTagArray(action);
+                for (const tag of tag_array) {
+                    if (tag && tag.pm && tag.pm["-h"] !== undefined) {
+                        const delay = tag.pm.delay ? parseInt(tag.pm.delay) : that.HOLD_MASH_DELAY;
+                        const interval = tag.pm.interval ? parseInt(tag.pm.interval) : that.HOLD_MASH_INTERVAL;
+                        const delay_f = Math.ceil(delay / this.DELAY_UPDATE);
+                        const interval_f = Math.ceil(interval / this.DELAY_UPDATE);
+                        const f = e.detail.hold_frame - delay_f;
+                        if (f > 0 && f % interval_f === 0) {
+                            that.doAction(tag, e);
+                            return;
+                        }
                     }
                 }
             });
@@ -2861,12 +2941,12 @@ tyrano.plugin.kag.key_mouse = {
                 let action = map[e.detail.button_name];
                 if (!action && e.detail.button_index >= 0) action = map[e.detail.button_index];
 
-                if (typeof action === "string") {
-                    const { name, pm } = that.kag.parser.makeTag(action, 0);
-                    if (name === "holdskip") {
+                const tag_array = this.parent.util.parseTagArray(action);
+                for (const tag of tag_array) {
+                    if (tag && tag.name === "holdskip") {
                         that.kag.setSkip(false);
                     }
-                    if (name === "next") {
+                    if (tag && tag.name === "ok") {
                         if (that.vmouse.is_visible) {
                             that.vmouse.leftup();
                             return;

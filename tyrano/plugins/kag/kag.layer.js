@@ -522,6 +522,7 @@ tyrano.plugin.kag.layer = {
         const j_buttons = this.layer_free.find(".event-setting-element");
         this.kag.event.removeEventElement(j_buttons);
         j_buttons.off("click mouseenter mouseleave mousedown touchstart");
+        this.kag.makeUnfocusable(j_buttons);
     },
 
     //backlayの逆 トランスの後に実施する

@@ -484,4 +484,4 @@
 // ◆ ゲーム未保存時にプレイヤーがゲームを閉じようとしたときに警告を出す機能を有効化するかどうか
 // 有効にするなら true を、無効にするなら false を指定します。
 // ここを有効にしたうえで [closeconfirm_on] タグをシナリオに配置してください。
-;enableCloseConfirm = true;
+;useCloseConfirm = true;

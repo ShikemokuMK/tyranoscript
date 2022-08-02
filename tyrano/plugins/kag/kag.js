@@ -1366,7 +1366,7 @@ tyrano.plugin.kag = {
         // 終了時の確認ダイアログ
         //
 
-        if (this.config["enableCloseConfirm" === "true"]) {
+        if (this.config["useCloseConfirm"] === "true") {
             // 通常セーブ、クイックセーブ、オートセーブ、ロード時にコンファームを破壊
             this.kag.on(
                 "storage-save storage-quicksave storage-autosave load-complete",

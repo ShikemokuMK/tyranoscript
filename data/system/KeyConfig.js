@@ -322,6 +322,12 @@ window.__tyrano_key_config = {
     
     // ブラウザのデフォルト動作は無効にしておく
     system_key_event: "false",
+    
+    // ◆ system_mouse_event
+    // マウスの進むボタンや戻るボタンを押したときのページ移動を許可するかどうか
+    // "true"  : 許可する
+    // "false" : 無効化する
+    system_mouse_event: "false",
 
     // キーボード操作
     key: {
@@ -376,7 +382,7 @@ window.__tyrano_key_config = {
         "center"     : "menu",
         "wheel_up"   : "backlog",
         "wheel_down" : "next",
-        "prev"       : "backlog",
+        "prev"       : "title",
         "next"       : "holdskip",
         
         "right_swipe_up"     : "",
