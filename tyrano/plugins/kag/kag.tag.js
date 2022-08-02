@@ -4494,7 +4494,6 @@ tyrano.plugin.kag.tag.s = {
                     if (_pm.show_easing) j_elm.setStyle("animation-timing-function", glink_config.show_easing);
                     j_elm.on("animationend", (e) => {
                         if (j_elm.get(0) === e.target) {
-                            j_elm.removeClass(glink_config.show_effect);
                             j_elm.off("animationend");
                             j_elm.removeClass(_pm.show_effect);
                             j_elm.setStyleMap({
@@ -6812,13 +6811,13 @@ tyrano.plugin.kag.tag.glink = {
                             next();
                         }
                     };
-                    this.startAnim(j_elm, elm.__hide_options);
+                    this.startAnim(j_elm, elm.__hide_options, true);
                 }
             });
         });
     },
 
-    startAnim: function (j_collection, options) {
+    startAnim: function (j_collection, options, do_hide) {
         // クリック不可にする
         j_collection.setStyleMap({ "pointer-events": "none" });
 
@@ -6856,8 +6855,11 @@ tyrano.plugin.kag.tag.glink = {
             if (options.easing) j_elm.setStyle("animation-timing-function", options.easing);
             j_elm.on("animationend", (e) => {
                 if (j_elm.get(0) === e.target) {
-                    j_elm.removeClass(options.effect);
                     j_elm.off("animationend");
+                    j_elm.removeClass(options.effect);
+                    if (do_hide) {
+                        j_elm.addClass("hidden");
+                    }
                     if (options.callback) options.callback();
                 }
             });

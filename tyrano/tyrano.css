@@ -866,10 +866,14 @@ div.img_next {
     transition: none;
 }
 
-
 /* 仮想マウスカーソルが表示されているとき
  * 本当のマウスカーソルは非表示にする */
 html.vmouse-displayed,
 html.vmouse-displayed * {
     cursor: none !important;
+}
+
+.hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
