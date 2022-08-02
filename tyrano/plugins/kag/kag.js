@@ -517,7 +517,7 @@ tyrano.plugin.kag = {
             (async () => {
                 await asar.createPackage(src, dest);
 
-                $.alert("パッチを適応しました。再度、起動してください。", function () {
+                $.alert($.lang("apply_patch_complete"), function () {
                     //パッチの削除。
                     fse.removeSync(_path.resolve(patch_path));
 
@@ -2050,8 +2050,8 @@ tyrano.plugin.kag = {
             const current_storage = this.kag.stat.current_scenario;
             const line = parseInt(this.kag.stat.current_line) + 1;
             const line_str = $.lang("line", { line });
-            if (message in tyrano_lang.error) {
-                message = $.lang(message, replace_map, "error");
+            if (message in tyrano_lang.word) {
+                message = $.lang(message, replace_map);
             }
             const error_str = `Error: ${current_storage}:${line_str}\n\n${message}`;
             $.error_message(error_str);
@@ -2062,8 +2062,8 @@ tyrano.plugin.kag = {
     warning: function (message, replace_map, is_alert = true) {
         if (this.kag.config["debugMenu.visible"] == "true") {
             if (typeof replace_map === "boolean") is_alert = replace_map;
-            if (message in tyrano_lang.warn) {
-                message = $.lang(message, replace_map, "warn");
+            if (message in tyrano_lang.word) {
+                message = $.lang(message, replace_map);
             }
             const warning_str = `Warning: ${message}`;
             if (is_alert) {

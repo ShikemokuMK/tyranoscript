@@ -3013,7 +3013,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
             },
             error: function (e) {
                 console.log(e);
-                alert("file not found:" + pm.url);
+                alert($.lang("patch_not_found", { path: pm.url }));
             },
         });
     },
@@ -3027,14 +3027,15 @@ tyrano.plugin.kag.tag.check_web_patch = {
         }
 
         if (parseFloat(this.kag.variable.sf._patch_version) < parseFloat(obj.version)) {
+            const confirm_message = $.lang("new_patch_found", {
+                version: parseFloat(obj.version),
+                message: obj.message,
+            }).replace(/\n/g, "<br>");
+
             $.confirm(
-                "新しいアップデートが見つかりました。Ver:" +
-                    parseFloat(obj.version) +
-                    "「" +
-                    obj.message +
-                    "」<br>アップデートを行いますか？",
+                confirm_message,
                 function () {
-                    alert("アップデートを行います。完了後、自動的にゲームは終了します。");
+                    alert($.lang("apply_web_patch"));
 
                     var http = require("http");
                     var fs = require("fs");

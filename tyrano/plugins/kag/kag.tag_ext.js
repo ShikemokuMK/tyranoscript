@@ -3411,7 +3411,15 @@ tyrano.plugin.kag.tag.chara_face = {
             storage_url = pm.storage;
         }
 
-        this.kag.stat.charas[pm.name]["map_face"][pm.face] = storage_url;
+        const chara = this.kag.stat.charas[pm.name];
+
+        if (!chara) {
+            this.kag.error("undefined_character", pm);
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        chara["map_face"][pm.face] = storage_url;
         this.kag.ftag.nextOrder();
     },
 };

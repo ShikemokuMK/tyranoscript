@@ -548,10 +548,10 @@ tyrano.plugin.kag.ftag = {
             if (tag.pm[array_vital[i]]) {
                 //値が入っていなかった場合
                 if (tag.pm[array_vital[i]] == "") {
-                    err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] }, "error");
+                    err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] });
                 }
             } else {
-                err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] }, "error");
+                err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] });
             }
         }
 

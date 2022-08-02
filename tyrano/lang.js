@@ -1,7 +1,7 @@
 window.tyrano_lang = {
     word: {
-        go_title: "タイトルに戻ります。よろしいですね？",
-        exit_game: "ウィンドウを閉じて終了します。よろしいですね？",
+        go_title: "タイトルに戻ります。よろしいですか？",
+        exit_game: "ウィンドウを閉じて終了します。よろしいですか？",
         not_saved: "まだ、保存されているデータがありません。",
         tag: "タグ",
         not_exists: "は存在しません。",
@@ -15,18 +15,9 @@ window.tyrano_lang = {
         double_start: "すでにゲームは起動済みです。二重起動はできません。",
         reload: "リロード",
         line: "{ line }行目",
-    },
-
-    alert: {
         initialized_saved_data: "セーブデータを初期化しました。",
-    },
-
-    confirm: {
         initializing_saved_data: "セーブデータを初期化します。よろしいですか？",
         saved_data_is_corrupted: "セーブデータが壊れている可能性があります。セーブデータを初期化しますか？",
-    },
-
-    error: {
         save_does_not_work: "この環境ではセーブ機能が動作しません。ローカルで実行している場合などに発生します。",
         undefined_tag: "タグ「{ name }」は存在しません。",
         undefined_label: "ラベル「{ name }」は存在しません。",
@@ -44,22 +35,24 @@ window.tyrano_lang = {
         invalid_keyframe: "キーフレームが無効な値です。",
         invalid_keyframe_percentage:
             'キーフレームに設定されているパーセンテージ「{ percentage }」は無効な値です。"0%"、"30%"のように指定してください。',
-        error_in_iscript: "[iscript]の内部でエラーが発生しました。",
-        missing_endif: "[if]のあとに[elsif][else][endif]のいずれかが見つかりません。または、[if]内のタグの数が多すぎます。",
-        missing_endmacro: "[macro]のあとに[endmacro]が見つかりません。または、[macro]内のタグの数が多すぎます。",
-        missing_endignore: "[ignore]のあとに[endignore]が見つかりません。または、[ignore]内の数が多すぎます。",
+        error_in_iscript: "[iscript] の内部でエラーが発生しました。",
+        missing_endif: "[if] のあとに [elsif] [else] [endif] のいずれかが見つかりません。または、[if] 内のタグの数が多すぎます。",
+        missing_endmacro: "[macro] のあとに [endmacro] が見つかりません。または、[macro] 内のタグの数が多すぎます。",
+        missing_endignore: "[ignore] のあとに [endignore] が見つかりません。または、[ignore] 内の数が多すぎます。",
         missing_parameter: "タグ「{ tag }」にパラメーター「{ param }」は必須です。",
-        if_and_endif_do_not_match: "[if]と[endif]の数が一致しません。",
+        if_and_endif_do_not_match: "[if] と [endif] の数が一致しません。",
         unsupported_extensions: "「{ ext }」はサポートしていないファイル形式です。",
-    },
-
-    warn: {
         undefined_keyconfig:
             'キーコンフィグが定義されていません。KeyConfig.js が存在しないか、KeyConfig.js 内で構文エラーが発生している可能性があります。カンマ "," やブラケット "]" "}" が不足していないかどうか、確認してください。',
         compensate_missing_quart:
             '予期しない "]" を検知しました。パラメータのクォートの数が足りていない可能性があるため、自動的に修正して解釈します。\n\n修正前: { before }\n修正後: { after }',
         duplicate_label:
             "ラベル「{ name }」は同一シナリオファイル内に重複しています。ラベル名は同一シナリオファイル内で重複しないようにしてください。",
+        file_not_found: "ファイルが見つかりませんでした。\n\n{ path }",
+        patch_not_found: "パッチファイルが見つかりませんでした。\n\n{ path }",
+        new_patch_found: "新しいアップデートが見つかりました。\n\nVer: { version }\n{ message }\n\n アップデートを行いますか？",
+        apply_web_patch: "アップデートを行います。完了後、自動的にゲームは終了します。",
+        apply_patch_complete: "アップデートを適用しました。ゲームを再起動してください。",
     },
 
     novel: {

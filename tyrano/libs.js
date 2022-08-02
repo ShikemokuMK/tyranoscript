@@ -401,7 +401,7 @@
                 callback(order_str);
             },
             error: function () {
-                alert("file not found:" + file_path);
+                alert($.lang("file_not_found", { path: file_path }));
                 callback("");
             },
         });
@@ -884,8 +884,8 @@
     };
 
     $.confirmSaveClear = function () {
-        if (confirm($.lang("saved_data_is_corrupted", "confirm"))) {
-            alert($.lang("initialized_saved_data", "alert"));
+        if (confirm($.lang("saved_data_is_corrupted"))) {
+            alert($.lang("initialized_saved_data"));
             TYRANO.kag.removeSaveData();
         }
     };
@@ -912,7 +912,7 @@
         } catch (e) {
             console.log("==============");
             console.log(e);
-            alert($.lang("save_does_not_work", "error"));
+            alert($.lang("save_does_not_work"));
             $.confirmSaveClear();
         }
 
@@ -1049,7 +1049,7 @@
             }
         } catch (e) {
             console.log(e);
-            alert($.lang("save_does_not_work", "error"));
+            alert($.lang("save_does_not_work"));
             $.confirmSaveClear();
         }
 
