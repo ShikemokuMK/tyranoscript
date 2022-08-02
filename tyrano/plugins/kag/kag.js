@@ -861,15 +861,49 @@ tyrano.plugin.kag = {
             //absolute指定
             $("#tyrano_base").css("position", "absolute");
 
-            const noScroll = (event) => {
-                event.preventDefault();
-            };
             // スクロール禁止(SP) vchatのときは例外
             if (this.kag.config["vchat"] != "true") {
+                const noScroll = (event) => {
+                    event.preventDefault();
+                };
                 document.addEventListener("touchmove", noScroll, {
                     passive: false,
                 });
             }
+
+            // Howl を走査して再生中のものを止めて再開フラグを立てる
+            const pauseSoundsOnWindowBlur = () => {
+                for (const howl of Howler._howls) {
+                    if (howl.playing()) {
+                        howl.pause();
+                        howl.__should_play_on_focus = true;
+                    } else {
+                        howl.__should_play_on_focus = false;
+                    }
+                }
+            };
+
+            // Howl を走査して再開フラグの立っているものを再生して回る
+            const resumeSoundsOnWindowFocus = () => {
+                for (const howl of Howler._howls) {
+                    if (howl.__should_play_on_focus) {
+                        howl.play();
+                        howl.__should_play_on_focus = false;
+                    }
+                }
+            };
+
+            $(document).on("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    resumeSoundsOnWindowFocus();
+                }
+                if (document.visibilityState === "hidden") {
+                    pauseSoundsOnWindowBlur();
+                }
+            });
+
+            // $(window).on("blur", pauseSoundsOnWindowBlur);
+            // $(window).on("focus", resumeSoundsOnWindowFocus);
         }
 
         //tyranoの大本部分の調整
