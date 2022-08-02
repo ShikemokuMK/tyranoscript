@@ -54,6 +54,8 @@ window.tyrano_lang = {
     },
 
     warn: {
+        undefined_keyconfig:
+            'キーコンフィグが定義されていません。KeyConfig.js が存在しないか、KeyConfig.js 内で構文エラーが発生している可能性があります。カンマ "," やブラケット "]" "}" が不足していないかどうか、確認してください。',
         compensate_missing_quart:
             '予期しない "]" を検知しました。パラメータのクォートの数が足りていない可能性があるため、自動的に修正して解釈します。\n\n修正前: { before }\n修正後: { after }',
         duplicate_label:

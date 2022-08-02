@@ -616,15 +616,20 @@ tyrano.plugin.kag.tag.showmenu = {
 [showmenubutton]
 
 :param
+keyfocus = `true`を指定すると、キーボードやゲームパッドで選択できるようになります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
 
 #[end]
 */
 
 tyrano.plugin.kag.tag.showmenubutton = {
-    pm: {},
+    pm: {
+        keyfocus: "false",
+    },
 
     start: function (pm) {
-        $(".button_menu").show();
+        const j_button = $(".button_menu");
+        j_button.show();
+        this.kag.makeFocusable(j_button, pm.keyfocus);
         this.kag.stat.visible_menu_button = true;
         this.kag.config.configVisible = "true";
         this.kag.ftag.nextOrder();

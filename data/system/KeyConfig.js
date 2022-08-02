@@ -5,21 +5,21 @@ Ver4.50以降で有効
 ティラノスクリプトのアクション（スキップを開始するなど）を割り当てることができます。
 
 <設定できるアクション>
-
-    next        : 次のテキストに進む, フォーカス中のボタンをクリックする（キーボード・ゲームパッドのみ）
+    
+    next        : 次のテキストに進む
     auto        : オートモードを開始／停止する
     skip        : スキップモードを開始／停止する
-    holdskip    : キーまたはボタンを押し込んでいる間だけスキップする（キーボード・ゲームパッドのみ）
+    holdskip    : キーまたはボタンを押し込んでいる間だけスキップする
     hidemessage : メッセージウィンドウの表示／非表示を切り替える
     fullscreen  : フルスクリーンを切り替える
     save        : セーブ画面を開く
     load        : ロード画面を開く
-    menu        : メニュー画面を開く
+    menu        : メニュー画面を開く／閉じる
     title       : タイトルに戻る
     backlog     : バックログを開く
     qsave       : クイックセーブを実行する
     qload       : クイックロードを実行する
-    focus_index : 特定の番号のボタンをフォーカスする（index パラメータの指定が必須）
+    focus_index : 特定の番号のボタンをフォーカスする（index の指定が必須）
     focus_next  : ボタンのフォーカスを次に移動する
     focus_prev  : ボタンのフォーカスを前に移動する
     focus_up    : ボタンのフォーカスを上に移動する
@@ -29,8 +29,25 @@ Ver4.50以降で有効
     scroll_up   : 上にスクロール
     scroll_down : 下にスクロール
     close       : メニューを閉じる
-    cancel      : フォーカスを外す, 確認ウィンドウをキャンセルする, メニューを閉じる, オートモード・スキップモードを解除する
+    ok          : 決定系の動作全般(※1)
+    cancel      : キャンセル系の動作全般(※2)
     sleepgame   : [sleepgame]を実行する（詳細は後述）
+    
+    ※1: 次のテキストに進む, 確認ウィンドウのOKボタンをクリックする, 
+    　   仮想マウスをクリックする, フォーカス中のボタンをクリックする, 
+    
+    ※2: ボタンのフォーカスを外す, 確認ウィンドウをキャンセルする, 
+    　   メニューを閉じる, オートモード・スキップモードを解除する
+    
+    
+    ★キーボード操作専用のアクション
+    
+    default      : そのキーを押したときのブラウザのデフォルト動作を実行します
+    default_debug: Config.tjs の debugMenu が true の場合のみデフォルト動作を実行します
+    vmouse_up    : 仮想マウスカーソルを上に動かします
+    vmouse_down  : 仮想マウスカーソルを下に動かします
+    vmouse_left  : 仮想マウスカーソルを左に動かします
+    vmouse_right : 仮想マウスカーソルを右に動かします
     
     
     ★ -a オプション
@@ -72,16 +89,34 @@ Ver4.50以降で有効
     
     (指定例) 
     
-    32: function () {
+    "Enter": function () {
         alert("Hello!")
     },
+    
+    
+    ★アクションの複数指定
+    
+    カンマ区切りで複数のアクションを記述できます。
+    複数のアクションを指定した場合、
+    実行可能なアクションのうち一番先頭のアクションを実行します。
+    
+    (指定例)
+    
+    "Enter": "close, next",
+    
+    この場合、close アクションが実行できる状況なら close だけを実行します。
+    close アクションが実行できない状況なら next を実行します。
+    
+    ※ アクション名にカンマを含めたときはアクションの複数指定と解釈されますので、
+    　 複数指定の意図以外でカンマを使うことはできません。
     
     
     
 <キーボード操作の指定方法> 
     
+    
     ★キータイプによる指定方法
-
+    
     "キータイプ" とそれに対応する "アクション" を次のように配置することで
     キーコンフィグを設定できます。
     
@@ -91,6 +126,7 @@ Ver4.50以降で有効
         " "         : "hidemessage",
         "Enter"     : "next",
     },
+    
     
     ★キーコードによる指定方法（従来の方法）
     
@@ -104,24 +140,20 @@ Ver4.50以降で有効
         "13" : "next",
     },
     
+    
     ★ヒント
     
     キータイプやキーコードは次のサイトで実際にキーを押すことで調べることができます。
     https://ogihara88sai.github.io/display-keydown-event/
     (上記サイトで表示される key がキータイプ、keyCode がキーコードです)
-
-    ★キーボード操作専用のアクション
     
-    vmouse_up    : 仮想マウスカーソルを上に動かします
-    vmouse_down  : 仮想マウスカーソルを下に動かします
-    vmouse_left  : 仮想マウスカーソルを左に動かします
-    vmouse_right : 仮想マウスカーソルを右に動かします
     
     
 <マウス操作>
     
     "マウス操作を表すキーワード" とそれに対応する "アクション" を配置することで
     キーコンフィグを設定できます。
+    
     
     ★マウス操作を表すキーワード一覧
     
@@ -147,11 +179,12 @@ Ver4.50以降で有効
     next_swipe_down    : マウスの「進む」ボタンを押しながら下に動かしたときの動作
     next_swipe_left    : マウスの「進む」ボタンを押しながら左に動かしたときの動作
     next_swipe_right   : マウスの「進む」ボタンを押しながら右に動かしたときの動作
-
+    
     
 <ジェスチャー操作>
-
+    
     スマホやタブレットにおけるフリック操作やホールド操作にキーコンフィグを割り当てることができます。
+    
     
     ★操作を表すキーワード一覧
     
@@ -161,6 +194,7 @@ Ver4.50以降で有効
     swipe_down_1  : 1本の指で画面下方向にフリックしたときの動作
     hold          : 画面を一定時間タッチし続けたときの動作
     
+    
     ★ヒント
     
     swipe_up_1 などの _1 は指の数を表しており、
@@ -168,10 +202,11 @@ Ver4.50以降で有効
     
     つまり、2本の指でスワイプしたときのアクションを指定したい場合は
     swipe_up_2 のような名前でアクションを定義すればよいということです。
-
+    
     
     
 <ゲームパッド操作>
+
 
     ★ボタン
     
@@ -247,6 +282,7 @@ Ver4.50以降で有効
         },
         ...
     
+    
     ★スティック入力
     
     スティック入力に仮想マウスカーソルの操作を割り当てることができます。
@@ -264,42 +300,59 @@ Ver4.50以降で有効
 
 */
 
-
-
-var __tyrano_key_config = {
+window.__tyrano_key_config = {
     
-    // 各種キーを押したときのブラウザ固有の動作を許可するか？
-    // "true" で許可、"false" で無効化
+    // ◆ system_key_event
+    //
+    // 各種キーを押したときのブラウザのデフォルト動作を許可するか？
+    // （F5で更新、F12で開発者ツールを開くなど）
+    //
+    // "true"  : ブラウザのデフォルト動作をすべて許可します。
+    // "false" : ブラウザのデフォルト動作をすべて無効化します。
+    // "debug" : Config.tjs の debugMenu.visible が true　の場合のみ、
+    //           ブラウザのデフォルト動作をすべて許可します。
+    // 
+    // ただし、ここに "false" や "debug" を指定した場合でも、
+    // 各キーに個別に default アクションや default_debug アクションを指定することで
+    // キーごとにブラウザのデフォルト動作を許可することができます。
+    //
+    // ブラウザの制限によって、ティラノスクリプトからは無効化しきれないデフォルト動作も存在します。
+    // ご注意ください。
+    // (無効化できない例) Ctrl + W : タブを閉じる
+    
+    // ブラウザのデフォルト動作は無効にしておく
     system_key_event: "false",
-    
-    // 補足：たとえば Google Chrome には次のようなショートカットキーが存在しますが、
-    // "system_key_event": "false", だとこれらの動作が無効化されます。
-    //   F12               : デベロッパーツールを開く
-    //   Ctrl  + Shift + I : 　　　　　〃
-    //   Ctrl  + Shift + J : 　　　　　〃
-    //   Ctrl  + U         : ソースを表示する
-    //   Shift + E         : タスクマネージャを開く
-    //   Ctrl  + Shift + O : ブックマークマネージャを開く
-    // ※一部、無効化しきれない動作も存在します。
 
     // キーボード操作
     key: {
         
-        "Enter"      : "next -a",
-        " "          : "hidemessage",
+        "Enter"      : "ok     -a",
         "Escape"     : "cancel -a",
-        "Meta"       : "holdskip",
+        " "          : "hidemessage",
+        "Meta"       : "holdskip", // Mac の Command キーのこと
         "Control"    : "holdskip",
         "m"          : "menu",
-        "w"          : "vmouse_up -a -h",
-        "s"          : "vmouse_down -a -h",
-        "a"          : "vmouse_left -a -h",
-        "d"          : "vmouse_right -a -h",
+        
+        // 方向キーで仮想マウスカーソルを操作できるようにします
+        "ArrowUp"    : "vmouse_up    -a -h",
+        "ArrowDown"  : "vmouse_down  -a -h",
+        "ArrowLeft"  : "vmouse_left  -a -h",
+        "ArrowRight" : "vmouse_right -a -h",
+        
+        // Tab キーでボタンをフォーカスできるようにします
         "Tab"        : "focus_next -a",
-        "ArrowLeft"  : "focus_left -a -h delay=300",
-        "ArrowUp"    : "focus_up -a -h delay=300",
-        "ArrowRight" : "focus_right -a -h delay=300",
-        "ArrowDown"  : "focus_down -a -h delay=300",
+        
+        // w, a, s, d でボタンのフォーカスを上下左右に動かせるようにします
+        "w"          : "focus_up    -a -h delay=300",
+        "s"          : "focus_down  -a -h delay=300",
+        "a"          : "focus_left  -a -h delay=300",
+        "d"          : "focus_right -a -h delay=300",
+        
+        // PageUp, PageDown でバックログをスクロールできるようにします
+        "PageUp"     : "scroll_up",
+        "PageDown"   : "scroll_down",
+        
+        // 数字キーで数に応じた特定のボタンをフォーカスできるようにします
         "1"          : "focus_index -a index=1",
         "2"          : "focus_index -a index=2",
         "3"          : "focus_index -a index=3",
@@ -309,6 +362,10 @@ var __tyrano_key_config = {
         "7"          : "focus_index -a index=7",
         "8"          : "focus_index -a index=8",
         "9"          : "focus_index -a index=9",
+        
+        // Config.tjs の debugMenu.visible が true の場合のみ
+        // F12 キーのデフォルト動作（開発者ツールを開く）を有効にします
+        "F12"        : "default_debug",
         
     },
 
@@ -341,7 +398,7 @@ var __tyrano_key_config = {
         
     },
 
-    // ジェスチャー操作
+    // スマホ・タブレットのジェスチャー操作
     gesture: {
         
         "swipe_up_1"    : "backlog",
@@ -354,10 +411,11 @@ var __tyrano_key_config = {
     
     // ゲームパッド操作
     gamepad: {
+        
         button: {
         
             A       : "cancel -a",
-            B       : "next -a",
+            B       : "ok     -a",
             X       : "auto",
             Y       : "backlog",
             LB      : "save",
@@ -369,24 +427,26 @@ var __tyrano_key_config = {
             HOME    : "title",
             LS      : "",
             RS      : "",
-            UP      : "focus_up -a -h delay=300",
-            DOWN    : "focus_down -a -h delay=300",
-            LEFT    : "focus_left -a -h delay=300",
+            UP      : "focus_up    -a -h delay=300",
+            DOWN    : "focus_down  -a -h delay=300",
+            LEFT    : "focus_left  -a -h delay=300",
             RIGHT   : "focus_right -a -h delay=300",
         
         },
+        
         stick_digital: {
             
             L_UP    : "",
             L_DOWN  : "",
             L_LEFT  : "",
             L_RIGHT : "",
-            R_UP    : "vmouse_wheelup -a -h",
+            R_UP    : "vmouse_wheelup   -a -h",
             R_DOWN  : "vmouse_wheeldown -a -h",
             R_LEFT  : "",
             R_RIGHT : "",
             
         },
+        
         stick: {
             
             L       : "vmouse_move",

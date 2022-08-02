@@ -20,6 +20,7 @@ tyrano.plugin.kag.key_mouse = {
     is_keydown: false, // キーの連続押し込み反応を防ぐ
     start_point: { x: 0, y: 0 }, // 指が動いた状態を管理するためのプロパティ
     end_point: { x: 0, y: 0 },
+    j_focus_cursor: null,
 
     // 定数プロパティ
     HOLD_TIMEOUT: 2000, // この時間(ミリ秒)タッチし続けたときに「ホールド」をトリガーする
@@ -38,6 +39,7 @@ tyrano.plugin.kag.key_mouse = {
     init() {
         //定義されてない場合デフォルトを設定
         if (typeof window.__tyrano_key_config === "undefined") {
+            this.kag.warning("undefined_keyconfig", false);
             window.__tyrano_key_config = this.default_keyconfig;
         }
 
@@ -51,6 +53,9 @@ tyrano.plugin.kag.key_mouse = {
 
         // イベントレイヤ
         const layer_obj_click = $(".layer_event_click");
+
+        // 選択肢フォーカス用の仮想マウスカーソル
+        this.j_focus_cursor = $('<img id="vmouse_focus" />').appendTo("body");
 
         //
         // スマートフォンイベント
@@ -206,63 +211,120 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     /**
+     * キーコンフィグが現在有効か
+     * @returns {boolean}
+     */
+    isKeyConfigEnabled() {
+        return this.kag.stat.enable_keyconfig;
+    },
+
+    /**
+     * ブラウザ固有の動作が有効かどうか
+     * @returns {boolean}
+     */
+    isDefaultActionEnabled(action) {
+        if (action === "default") {
+            return true;
+        } else if (action === "default_debug") {
+            return this.kag.config["debugMenu.visible"] === "true";
+        } else {
+            let option = this.keyconfig.system_key_event;
+            if (option === "debug") {
+                option = this.kag.config["debugMenu.visible"];
+            }
+            return option === true || option === "true";
+        }
+    },
+
+    /**
      * アクションを実行する
-     * @param {function|string|Object} action
+     * @param {any} action
      * @param {Event} event
      * @returns {boolean} アクションを実行できたかどうか
      */
     doAction(action, event) {
-        if (!action) return;
+        // false, 0, "", null, undefined, NaN は実行不可
+        if (!action) return false;
 
-        // キーコンフィグが有効かどうか
-        const config_enabled = this.kag.stat.enable_keyconfig;
-
-        // アクション名とパラメータを得る
-        let name;
-        let pm;
-        switch (typeof action) {
-            case "function":
-                // 関数ならそのまま実行して終了
-                if (config_enabled) action();
-                return config_enabled;
-            case "string": {
-                const tag = this.kag.parser.makeTag(action, 0);
-                name = tag.name;
-                pm = tag.pm;
-                break;
+        // 配列, 関数, 文字列, オブジェクト のタイプに応じて専用のメソッドを呼ぶ
+        if (Array.isArray(action)) return this.doActionArray(action, event);
+        const type = typeof action;
+        if (type === "function") return this.doActionFunction(action, event);
+        if (type === "string") {
+            if (action.includes(",")) {
+                const action_array = action.split(",").map((item) => {
+                    return item.trim();
+                });
+                return this.doActionArray(action_array, event);
+            } else {
+                return this.doActionString(action, event);
             }
-            case "object":
-                name = action.name;
-                pm = action.pm;
-                break;
         }
-        if (!name) return;
+        if (type === "object" && "name" in action) return this.doActionTag(action, event);
+
+        return false;
+    },
+
+    /**
+     * 配列で指定されたアクションを実行する
+     * 先頭のアクションからトライしてみて実行に成功した時点で抜ける
+     * @param {(function|string|Object)[]} action_array
+     * @param {Event} event
+     * @returns {boolean}
+     */
+    doActionArray(action_array, event) {
+        for (const action of action_array) {
+            const done = this.doAction(action, event);
+            if (done) return true;
+        }
+        return false;
+    },
+
+    /**
+     * 関数のアクションを実行
+     * @param {function} action_func
+     * @param {Event} event
+     * @returns {boolean}
+     */
+    doActionFunction(action_func, event) {
+        if (this.isKeyConfigEnabled()) {
+            return action_func(event);
+        }
+        return false;
+    },
+
+    /**
+     * 文字列のアクションを実行
+     * @param {string} action_string
+     * @param {Event} event
+     * @returns {boolean}
+     */
+    doActionString(action_string, event) {
+        const tag = this.kag.parser.makeTag(action_string, 0);
+        return this.doActionTag(tag, event);
+    },
+
+    /**
+     * タグ型のアクションを実行
+     * @param {{name: string; pm: Object;}} action_tag
+     * @param {Event} event
+     * @returns {boolean}
+     */
+    doActionTag(action_tag, event) {
+        const name = action_tag.name;
+        const pm = action_tag.pm || {};
+        if (!name) return false;
 
         // キーコンフィグが無効かつ -a オプションが指定されていないアクションならば実行しない
-        if (!config_enabled && pm["-a"] === undefined) {
+        if (!this.isKeyConfigEnabled() && pm["-a"] === undefined) {
             return false;
         }
 
-        // キーボード操作とゲームパッド操作を検知
-        const is_gamepad = event.type.indexOf("gamepad") === 0;
-        const is_keyboard = event.type.indexOf("key") === 0;
-
-        // キーボード操作またはゲームパッド操作の"next"アクションを検知したとき
-        // フォーカス中のボタンがある場合はクリックをトリガーする処理に変更する
-        if (name === "next" && (is_gamepad || is_keyboard)) {
-            // 最後に"next"アクションを実行したゲームパッドを記憶しておく
-            if (is_gamepad) {
-                this.gamepad.last_used_next_gamepad_index = event.detail.gamepad_index;
-            }
-            if (this.vmouse.is_visible) {
-                this.vmouse.leftdown();
-                return;
-            }
-            const j_focus = $(":focus.hover");
-            if (j_focus.length > 0) {
-                j_focus.eq(0).trigger("click");
-                return true;
-            }
+        // 最後に"next"アクションを実行したゲームパッドを記憶しておく
+        pm.is_gamepad = event.type.indexOf("gamepad") === 0;
+        pm.is_keyboard = event.type.indexOf("key") === 0;
+        if (pm.is_gamepad && (name === "ok" || name === "next")) {
+            this.gamepad.last_used_next_gamepad_index = event.detail.gamepad_index;
         }
 
         // ホールド連打かつ -h オプションが指定されていないアクションならば実行しない
@@ -272,8 +334,9 @@ tyrano.plugin.kag.key_mouse = {
         }
 
         // フォーカス系のロールじゃない場合はフォーカスを外す
-        if (!name.includes("focus")) {
-            this.util.unfocus();
+        if (!name.includes("focus") && name !== "ok") {
+            const will_move_vmouse = name.includes("vmouse");
+            this.util.unfocus(undefined, will_move_vmouse);
         }
 
         // アクションを実行
@@ -286,15 +349,34 @@ tyrano.plugin.kag.key_mouse = {
 
     test() {
         alert("Hello!");
+        return true;
     },
 
+    /**
+     * ブラウザ固有の動作を実行する
+     * @returns {false}
+     */
+    default() {
+        return false;
+    },
+
+    /**
+     * イベントレイヤのクリックをトリガーして次のタグに進む
+     * @returns {boolean}
+     */
     next() {
         if (this.util.canClick()) {
             this.util.clearSkip();
             $(".layer_event_click").trigger("click");
+            return true;
         }
+        return false;
     },
 
+    /**
+     * メニューを開く／閉じる
+     * @returns {boolean}
+     */
     showmenu() {
         if (this.util.canShowMenu()) {
             if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
@@ -302,9 +384,15 @@ tyrano.plugin.kag.key_mouse = {
             } else {
                 $(".button_menu").click();
             }
+            return true;
         }
+        return false;
     },
 
+    /**
+     * メッセージウィンドウを一時的に隠す／再度表示する／メニューを閉じる
+     * @returns {boolean}
+     */
     hidemessage() {
         if (this.util.canShowMenu()) {
             if ($(".menu_close").length > 0 && $(".layer_menu").css("display") != "none") {
@@ -318,101 +406,228 @@ tyrano.plugin.kag.key_mouse = {
                     }
                 }
             }
+            return true;
         }
+        return false;
     },
 
+    /**
+     * セーブメニューを開く
+     * @returns {boolean}
+     */
     save() {
-        this._role("save");
+        return this._role("save");
     },
 
+    /**
+     * ロードメニューを開く
+     * @returns {boolean}
+     */
     load() {
-        this._role("load");
+        return this._role("load");
     },
 
+    /**
+     * メインメニューを開く／閉じる
+     * @returns {boolean}
+     */
     menu() {
-        if (this.util.isOpenMenu()) {
-            this.close();
+        if (this.util.isMenuDisplayed()) {
+            return this.close();
         } else {
-            this._role("menu");
+            return this._role("menu");
         }
     },
 
+    /**
+     * タイトルに戻る
+     * @returns {boolean}
+     */
     title() {
-        this._role("title");
+        return this._role("title");
     },
 
+    /**
+     * キーやボタンを押している間だけスキップする
+     * @returns {boolean}
+     */
     holdskip() {
         if (this.util.canClick()) {
-            this._role("skip");
+            return this._role("skip");
         }
+        return false;
     },
 
+    /**
+     * スキップを開始／停止する
+     * @returns {boolean}
+     */
     skip() {
         if (this.util.canClick()) {
-            this._role("skip");
+            return this._role("skip");
         }
+        return false;
     },
 
+    /**
+     * バックログを開く
+     * @returns {boolean}
+     */
     backlog() {
         // メニュー表示中は不可
         if (!this.util.canShowMenu()) return false;
-        if (this.util.isOpenMenu()) return false;
+        if (this.util.isMenuDisplayed()) return false;
         return this._role("backlog");
     },
 
+    /**
+     * フルスクリーン状態を切り替える
+     * @returns {boolean}
+     */
     fullscreen() {
-        this._role("fullscreen");
+        return this._role("fullscreen");
     },
 
+    /**
+     * クイックセーブを実行する
+     * @returns {boolean}
+     */
     qsave() {
-        this._role("quicksave");
+        return this._role("quicksave");
     },
 
+    /**
+     * クイックロードを実行する
+     * @returns {boolean}
+     */
     qload() {
-        this._role("quickload");
+        return this._role("quickload");
     },
 
+    /**
+     * オートモードを開始／停止する
+     * @returns {boolean}
+     */
     auto() {
-        this._role("auto");
+        return this._role("auto");
     },
 
+    /**
+     * [sleepgame] を実行する
+     * @param {Object} pm
+     * @returns {boolean}
+     */
     sleepgame(pm) {
         // いますでにスリープ中の場合は不可
-        if (this.kag.tmp.sleep_game) return;
+        if (this.kag.tmp.sleep_game) return false;
 
         // [jump]ができない状況なら不可
-        if (!this.util.canJumpScenario()) return;
+        if (!this.util.canJumpScenario()) return false;
 
         this.kag.ftag.startTag("sleepgame", pm);
+
+        return true;
     },
 
+    /**
+     * メニュー系を閉じる
+     * @returns {boolean}
+     */
     close() {
-        if (!this.util.isOpenRemodal()) {
+        if (!this.util.isRemodalDisplayed()) {
             $(".menu_close").click();
+            return true;
         }
+        return false;
     },
 
+    /**
+     * 決定系の動作
+     * @returns {boolean}
+     */
+    ok(pm) {
+        // 仮想マウスが表示されているならマウスダウンをシミュレート
+        if (this.vmouse.is_visible) {
+            this.vmouse.leftdown();
+            return true;
+        }
+
+        // フォーカスされているボタンがあるならそれをクリック
+        const j_focus = this.util.findFocused();
+        if (j_focus.length > 0) {
+            j_focus.eq(0).trigger("click");
+            if (pm.is_keyboard) {
+                this.j_focus_cursor.hide();
+                this.vmouse.j_html.removeClass("vmouse-displayed");
+            }
+            return true;
+        }
+
+        // リモーダルウィンドウが表示されているならOKを押す
+        if (this.util.isRemodalDisplayed()) {
+            const j_confirm = $(".remodal").find(".remodal-confirm").click();
+            return true;
+        }
+
+        // 次のテキストに進む
+        return this.next();
+    },
+
+    /**
+     * フォーカスを外す／リモーダルをキャンセルする／メニューを閉じる／スキップやオートモードを停止する
+     * @returns {boolean}
+     */
     cancel() {
+        // フォーカスされているボタンがあるなら解除
         const j_focused = this.util.findFocused();
         if (j_focused.length > 0) {
-            j_focused.blur();
-            return;
+            this.util.unfocus();
+            return true;
         }
-        if (this.util.isOpenRemodal()) {
-            $(".remodal").find(".remodal-cancel").click();
-        } else if (this.util.isOpenMenu()) {
+
+        // リモーダルウィンドウが表示されていてキャンセルボタンが表示されているならそれを押す
+        if (this.util.isRemodalDisplayed()) {
+            const j_cancel = $(".remodal").find(".remodal-cancel");
+            if (j_cancel.css("display") !== "none") {
+                j_cancel.click();
+                return true;
+            }
+        }
+
+        // メニューが表示されているなら消す
+        if (this.util.isMenuDisplayed()) {
             $(".menu_close").click();
-        } else {
-            this.util.clearSkip();
+            return true;
         }
+
+        // スキップ・オートモードの解除
+        return this.util.clearSkip();
     },
 
+    /**
+     * メニューの上スクロールボタンをトリガーする
+     * @returns {boolean}
+     */
     scroll_up() {
-        $(".button_arrow_up").click();
+        const j_button = $(".button_arrow_up");
+        if (j_button.length > 0) {
+            j_button.click();
+            return true;
+        }
+        return false;
     },
 
+    /**
+     * メニューの下スクロールボタンをトリガーする
+     * @returns {boolean}
+     */
     scroll_down() {
-        $(".button_arrow_down").click();
+        const j_button = $(".button_down_up");
+        if (j_button.length > 0) {
+            j_button.click();
+            return true;
+        }
+        return false;
     },
 
     /**
@@ -433,6 +648,7 @@ tyrano.plugin.kag.key_mouse = {
         if (!j_target[0]) return false;
 
         this.util.focus(j_target);
+        return true;
     },
 
     /**
@@ -446,7 +662,7 @@ tyrano.plugin.kag.key_mouse = {
 
         // 存在しなければ帰る
         if (j_focusable.length === 0) {
-            return;
+            return false;
         }
 
         // j_focusable のうち、いまフォーカスされている要素
@@ -458,10 +674,10 @@ tyrano.plugin.kag.key_mouse = {
         // フォーカス候補が1つもないならおわり
         // フォーカス候補が1つしかないならそれをフォーカスしておわり
         if (j_unfocused.length === 0) {
-            return;
+            return false;
         } else if (j_unfocused.length === 1) {
             this.util.focus(j_unfocused);
-            return;
+            return true;
         }
 
         // ここに到達したということはフォーカス候補が2つ以上あるため
@@ -481,7 +697,7 @@ tyrano.plugin.kag.key_mouse = {
                 index++;
             }
             this.util.focus(j_focusable.eq(index));
-            return;
+            return true;
         }
 
         //
@@ -492,14 +708,15 @@ tyrano.plugin.kag.key_mouse = {
         const add = order === "next" ? 1 : -1;
         const next_index = (index + add + j_focusable.length) % j_focusable.length;
         this.util.focus(j_focusable.eq(next_index));
+        return true;
     },
 
     focus_next() {
-        this.focus_order("next");
+        return this.focus_order("next");
     },
 
     focus_prev() {
-        this.focus_order("prev");
+        return this.focus_order("prev");
     },
 
     /**
@@ -507,6 +724,7 @@ tyrano.plugin.kag.key_mouse = {
      * その要素間の位置関係を考慮したうえで
      * フォーカスを新しく当てる、もしくはフォーカスを上下左右に移動させる
      * @param {"up"|"down"|"left"|"right"} dir
+     * @returns {boolean} アクションを実行できたかどうか
      */
     focus_dir(dir = "down") {
         // キーボードでフォーカス可能な要素
@@ -514,7 +732,7 @@ tyrano.plugin.kag.key_mouse = {
 
         // 存在しなければ帰る
         if (j_focusable.length === 0) {
-            return;
+            return false;
         }
 
         // j_focusable のうち、いまフォーカスされている要素
@@ -526,10 +744,10 @@ tyrano.plugin.kag.key_mouse = {
         // フォーカス候補が1つもないならおわり
         // フォーカス候補が1つしかないならそれをフォーカスしておわり
         if (j_unfocused.length === 0) {
-            return;
+            return false;
         } else if (j_unfocused.length === 1) {
             this.util.focus(j_unfocused);
-            return;
+            return true;
         }
 
         // ここに到達したということはフォーカス候補が2つ以上あるため
@@ -606,7 +824,7 @@ tyrano.plugin.kag.key_mouse = {
                 index++;
             }
             this.util.focus(pos_list[index].j_elm);
-            return;
+            return true;
         }
 
         //
@@ -616,6 +834,7 @@ tyrano.plugin.kag.key_mouse = {
         // this.focus_dir_column(dir, pos_list, focused_pos);
         // this.focus_dir_beam(dir, pos_list, focused_pos);
         this.focus_dir_angle(dir, pos_list, focused_pos);
+        return true;
     },
 
     /**
@@ -764,44 +983,50 @@ tyrano.plugin.kag.key_mouse = {
     },
 
     focus_up() {
-        this.focus_dir("up");
+        return this.focus_dir("up");
     },
 
     focus_down() {
-        this.focus_dir("down");
+        return this.focus_dir("down");
     },
 
     focus_left() {
-        this.focus_dir("left");
+        return this.focus_dir("left");
     },
 
     focus_right() {
-        this.focus_dir("right");
+        return this.focus_dir("right");
     },
 
-    //役割系のロジック
+    /**
+     * 役割系のロール
+     * @param {string} role
+     * @returns {boolean}
+     */
     _role(role) {
-        // スキップのトグル
+        // スキップ解除
         if (role === "skip" && this.kag.stat.is_skip) {
             this.kag.setSkip(false);
-            return;
+            return true;
         }
 
-        // [l][p][s]で待機している状態ではロールを実行しない
-        if (!this.util.canShowMenu()) return;
+        // [l][p][s]で待機している状態以外ではロールを実行しない
+        if (!this.util.canShowMenu()) return false;
 
         // スキップの解除
         this.kag.setSkip(false);
 
         // オートの解除
-        if (role !== "auto") this.kag.ftag.startTag("autostop", { next: "false" });
+        if (role !== "auto") {
+            this.kag.ftag.startTag("autostop", { next: "false" });
+        }
 
         // セーブ系のロールか
         const is_save = role === "save" || role === "menu" || role === "quicksave" || role === "sleepgame";
         // テキスト追加中、アニメーション中、トランジション中など画面がアクティブに動いている最中か
         const is_active = this.kag.stat.is_adding_text || this.kag.stat.is_wait;
         // 画面がアクティブな状態ではセーブ系のロールは実行できない
-        if (is_save && is_active) return;
+        if (is_save && is_active) return false;
 
         switch (role) {
             case "save":
@@ -865,34 +1090,67 @@ tyrano.plugin.kag.key_mouse = {
                 }
                 break;
         }
+
+        return true;
+    },
+
+    /**
+     * 仮想マウスカーソルを上下左右に移動させる
+     * @param {Object} pm
+     * @param {"up" | "down" | "left" | "right"} dir
+     * @returns {true}
+     */
+    vmouse_dir(pm, dir) {
+        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
+        const xy = this.dir_xy[dir];
+        const speed = this.keyboard.isPressed("Control")
+            ? 4
+            : this.keyboard.isPressed("Shift")
+            ? 2
+            : this.keyboard.isPressed("Alt")
+            ? 0.2
+            : 1;
+        const x = xy.x * movement * speed;
+        const y = xy.y * movement * speed;
+        this.vmouse.move(x, y, this.keyboard.delay_update);
+        return true;
+    },
+
+    dir_xy: {
+        up: { x: 0, y: -1 },
+        down: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
+        right: { x: 1, y: 0 },
     },
 
     vmouse_up(pm) {
-        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
-        this.vmouse.move(0, -movement, this.keyboard.delay_update);
+        return this.vmouse_dir(pm, "up");
     },
 
     vmouse_down(pm) {
-        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
-        this.vmouse.move(0, movement, this.keyboard.delay_update);
+        return this.vmouse_dir(pm, "down");
     },
 
     vmouse_left(pm) {
-        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
-        this.vmouse.move(-movement, 0, this.keyboard.delay_update);
+        return this.vmouse_dir(pm, "left");
     },
 
     vmouse_right(pm) {
-        const movement = parseInt(pm.movement) || this.DEFAULT_VMOUSE_MOVEMENT;
-        this.vmouse.move(movement, 0, this.keyboard.delay_update);
+        return this.vmouse_dir(pm, "right");
     },
 
+    /**
+     * 仮想マウスカーソルのホイールをシミュレートする
+     * @return {true}
+     */
     vmouse_wheelup() {
         this.vmouse.wheelup();
+        return true;
     },
 
     vmouse_wheeldown() {
         this.vmouse.wheeldown();
+        return true;
     },
 
     /**
@@ -909,7 +1167,7 @@ tyrano.plugin.kag.key_mouse = {
          */
         canClick() {
             const is_event_layer_displayed = this.kag.layer.layer_event.css("display") !== "none";
-            if (is_event_layer_displayed && !this.isOpenMenu()) {
+            if (is_event_layer_displayed && !this.isMenuDisplayed()) {
                 return true;
             }
             return false;
@@ -918,18 +1176,22 @@ tyrano.plugin.kag.key_mouse = {
         /**
          * 画面をクリックしたときにスキップやオートモードを解除するためのメソッド
          * コンフィグも参照する
+         * @returns {boolean}
          */
         clearSkip() {
             // スキップの解除（[s]で待機している最中は解除しない）
             if (this.kag.stat.is_skip && !this.kag.stat.is_strong_stop) {
                 this.kag.setSkip(false);
-                return;
+                return true;
             }
 
             // オートモードの解除（「クリックでオートモード解除」のコンフィグが有効な場合のみ）
             if (this.kag.stat.is_auto && this.kag.config.autoClickStop === "true") {
                 this.kag.ftag.startTag("autostop", { next: "false" });
+                return true;
             }
+
+            return false;
         },
 
         /**
@@ -977,7 +1239,7 @@ tyrano.plugin.kag.key_mouse = {
          * いまリモーダルウィンドウが開いているかどうかを返す
          * @returns {boolean}
          */
-        isOpenRemodal() {
+        isRemodalDisplayed() {
             return $(".remodal-wrapper").hasClass("remodal-is-opened");
         },
 
@@ -985,7 +1247,7 @@ tyrano.plugin.kag.key_mouse = {
          * いまメニューが開かれているかどうかを返す
          * @returns {boolean}
          */
-        isOpenMenu() {
+        isMenuDisplayed() {
             return $(".layer_menu").css("display") !== "none";
         },
 
@@ -1003,9 +1265,9 @@ tyrano.plugin.kag.key_mouse = {
          */
         findFocusable() {
             let j_buttons;
-            if (this.isOpenRemodal()) {
+            if (this.isRemodalDisplayed()) {
                 j_buttons = $(".remodal-wrapper").find("[tabindex].tyrano-focusable");
-            } else if (this.isOpenMenu()) {
+            } else if (this.isMenuDisplayed()) {
                 j_buttons = $(".layer_menu").find("[tabindex].tyrano-focusable");
             } else {
                 j_buttons = $("#tyrano_base [tabindex].tyrano-focusable");
@@ -1034,18 +1296,46 @@ tyrano.plugin.kag.key_mouse = {
         },
 
         /**
+         * キーボードで選択肢をフォーカスしたときに仮のマウスカーソルを表示するかどうか
+         * @returns {boolean}
+         */
+        shouldDisplayFocusCursor() {
+            return this.parent.kag.config["keyFocusWithMouseCursor"] === "true";
+        },
+
+        /**
          * 要素をフォーカスする
          * @param {jQuery} j_elm
          */
         focus(j_elm) {
-            j_elm.focus().addClass("hover");
+            j_elm.focus().addClass("hover focus");
+            if (this.shouldDisplayFocusCursor()) {
+                const rect = j_elm[0].getBoundingClientRect();
+                const half_height = rect.height / 2;
+                let y = (rect.top + half_height) | 0;
+                let x = rect.right - half_height;
+                this.parent.vmouse.hide();
+                this.parent.vmouse.place(x, y, 0, false);
+                this.parent.vmouse.refreshTransform(this.parent.j_focus_cursor, x, y);
+                this.parent.vmouse.refreshImage("pointer", this.parent.j_focus_cursor);
+                this.parent.j_focus_cursor.show();
+                this.parent.vmouse.j_html.addClass("vmouse-displayed");
+            }
         },
 
         /**
          * 要素のフォーカスを外す
+         * @param {jQuery} j_elm
          */
-        unfocus() {
-            $(":focus").blur().removeClass("hover");
+        unfocus(j_elm, will_move_vmouse = false) {
+            if (!j_elm) j_elm = $(":focus");
+            if (will_move_vmouse && this.parent.vmouse.point_elm === j_elm[0]) {
+                return false;
+            }
+            if (j_elm.length === 0) return false;
+            j_elm.blur().removeClass("hover focus");
+            this.parent.j_focus_cursor.hide();
+            this.parent.vmouse.j_html.removeClass("vmouse-displayed");
         },
 
         /**
@@ -1286,6 +1576,7 @@ tyrano.plugin.kag.key_mouse = {
                     }
                 }
                 that.vmouse.hide();
+                that.util.unfocus();
             });
 
             //
@@ -1389,7 +1680,7 @@ tyrano.plugin.kag.key_mouse = {
      */
     keyboard: {
         parent: null,
-        state_map: {},
+        key_state_map: {},
         tick_rate: 0,
         delay_update: 0,
 
@@ -1417,13 +1708,14 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             $(document).keydown((e) => {
-                const state = this.getKeyState(e.key);
-                if (state.pressing) {
+                const state = this.getKeyState(e);
+
+                if (state.pressed) {
                     // 長押しによる連続入力は無視する
-                    return that.keyconfig.system_key_event !== "false";
+                    return false;
                 } else {
                     // 新規キーダウン
-                    state.pressing = true;
+                    state.pressed = true;
                     state.hold_frame = 0;
                     state.event = e.originalEvent;
                     if (this.tick_rate > 0) {
@@ -1440,30 +1732,22 @@ tyrano.plugin.kag.key_mouse = {
                 // ティラノイベント"keydown"を発火
                 that.kag.trigger("keydown", e);
 
-                // すでに別のキーが押されているときはキーコンフィグは反応させない
-                if (that.is_keydown) {
-                    if (that.keyconfig.system_key_event === "false") {
-                        // jQuery のイベントリスナ内で false を返すと
-                        // 自動的に event.stopPropagation() および event.preventDefault() が呼び出される
-                        // この event.preventDefault() によってブラウザ固有の動作がキャンセルされる
-                        return false;
-                    } else {
-                        // どちらにしろキーコンフィグは無効
-                        return true;
-                    }
-                }
-
                 const action = this.getAction(e);
                 const done = that.doAction(action, e);
 
-                // デフォルトの動作を無効化
+                // アクションが正常に実行できた場合はデフォルトの動作を無効化
                 if (done) {
                     return false;
                 }
 
-                if (that.keyconfig.system_key_event === "false") {
+                // Alt キーはブラウザデフォルトの動作としてフォーカスを外す作用を持っている！
+                // キーボード操作を快適にするために無効化させてもらおう
+                if (e.key === "Alt") {
                     return false;
                 }
+
+                // コンフィグも見る
+                return that.isDefaultActionEnabled(action);
             });
 
             //
@@ -1471,8 +1755,22 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             $(document).keyup((e) => {
-                const state = this.getKeyState(e.key);
-                state.pressing = false;
+                let state = this.getKeyState(e);
+
+                // いま放したキーがそもそも押されていなかった？妙だな…
+                // ※ Shift キーを押したケースで発生する。この場合は code で探す。
+                if (!state.pressed) {
+                    for (const key in this.key_state_map) {
+                        const stt = this.key_state_map[key];
+                        if (e.code === stt.code && stt.pressed) {
+                            console.warn(`${state.key} のかわりに ${stt.key} をキーアップしたことにします。`);
+                            state = stt;
+                            break;
+                        }
+                    }
+                }
+
+                state.pressed = false;
                 state.hold_frame = 0;
                 clearTimeout(state.timer_id);
 
@@ -1485,7 +1783,7 @@ tyrano.plugin.kag.key_mouse = {
                     if (name === "holdskip") {
                         that.kag.setSkip(false);
                     }
-                    if (name === "next") {
+                    if (name === "ok") {
                         if (that.vmouse.is_visible) {
                             that.vmouse.leftup();
                             return;
@@ -1495,11 +1793,24 @@ tyrano.plugin.kag.key_mouse = {
             });
 
             //
+            // ブラウザのフォーカスが外れたときにすべてのキーを離したことにする
+            //
+
+            $(window).on("blur", () => {
+                for (const key in this.key_state_map) {
+                    const state = this.key_state_map[key];
+                    state.pressed = false;
+                    state.hold_frame = 0;
+                    clearTimeout(state.timer_id);
+                }
+            });
+
+            //
             // キーホールド
             //
 
             $(document).on("keyhold", (e) => {
-                const state = this.getKeyState(e.key);
+                let state = this.getKeyState(e);
                 const action = this.getAction(e);
                 if (typeof action === "string") {
                     const tag = that.kag.parser.makeTag(action, 0);
@@ -1527,6 +1838,16 @@ tyrano.plugin.kag.key_mouse = {
         },
 
         /**
+         * あるキーが押されているかどうかを取得する
+         * @param {string} key
+         * @returns {boolean}
+         */
+        isPressed(key) {
+            const state = this.getKeyState(key);
+            return state && state.pressed;
+        },
+
+        /**
          * キーボードイベントを受け取って対応するアクションを返す
          * @param {KeyboradEvent} e
          * @returns
@@ -1538,25 +1859,42 @@ tyrano.plugin.kag.key_mouse = {
         /**
          * e.key を受け取ってキーボードステートを返す
          * 存在しなければ初期化もする
-         * @param {string} key KeyboardEvent.key
+         * @param {KeyboardEvennt | string} key KeyboardEvent.key
          * @returns
          */
         getKeyState(key) {
-            let state = this.state_map[key];
+            if (typeof key === "string") {
+                return this.key_state_map[key];
+            }
+            const event = key;
+            let state = this.key_state_map[event.key];
             if (!state) {
-                state = this.state_map[key] = new this.KeyState(key);
+                state = this.key_state_map[event.key] = new this.KeyState(event);
             }
             return state;
         },
 
+        getKeyStatesByCode(code) {
+            const arr = [];
+            for (const key in this.key_state_map) {
+                const stt = this.key_state_map[key];
+                if (code === stt.code) {
+                    arr.push(stt);
+                }
+            }
+            return arr;
+        },
+
         /**
          * キーの入力状態（押されているか、何フレーム長押しされているか等）を管理するクラス
-         * @param {string} key KeyboardEvent.key
+         * @param {KeyboardEvent} event
          * @returns {KeyState}
          */
-        KeyState: function (key) {
-            this.key = key;
-            this.pressing = false;
+        KeyState: function (event) {
+            this.key = event.key;
+            this.code = event.code;
+            this.key_code = event.keyCode;
+            this.pressed = false;
             this.hold_frame = 0;
             this.timer_id = null;
             this.event = null;
@@ -1887,17 +2225,21 @@ tyrano.plugin.kag.key_mouse = {
         /**
          * 仮想マウスカーソルの見た目の位置(CSS の transform プロパティ)を更新する
          */
-        refreshTransform() {
-            this.j_cursor.css({
-                transform: `translateX(${this.x}px) translateY(${this.y}px)`,
+        refreshTransform(j_cursor, x, y) {
+            if (!j_cursor) j_cursor = this.j_cursor;
+            if (!x) x = this.x;
+            if (!y) y = this.y;
+            j_cursor.css({
+                transform: `translateX(${x}px) translateY(${y}px)`,
             });
         },
 
         /**
          * 仮想マウスカーソルの hotspot を見た目に適用する
          */
-        refreshHotspot() {
-            this.j_cursor.css({
+        refreshHotspot(j_cursor) {
+            if (!j_cursor) j_cursor = this.j_cursor;
+            j_cursor.css({
                 marginLeft: `${-this.hotspot_x}px`,
                 marginTop: `${-this.hotspot_y}px`,
             });
@@ -2008,10 +2350,12 @@ tyrano.plugin.kag.key_mouse = {
          *　"default", "pointer" などのカーソル状態を受け取り
          * 仮想マウスカーソルの src 属性を更新する
          * @param {string} state カーソル状態, "default", "pointer" など
+         * @param {jQUery} j_cursor
          */
-        refreshImage(state) {
+        refreshImage(state, j_cursor) {
+            if (!j_cursor) j_cursor = this.j_cursor;
             if (state === "none") {
-                this.j_cursor.attr("src", this.default_image_map.none.image_url);
+                j_cursor.attr("src", this.default_image_map.none.image_url);
                 return;
             }
             let image_url;
@@ -2041,9 +2385,9 @@ tyrano.plugin.kag.key_mouse = {
             if (this.hotspot_x !== hotspot_x || this.hotspot_y !== hotspot_y) {
                 this.hotspot_x = hotspot_x;
                 this.hotspot_y = hotspot_y;
-                this.refreshHotspot();
+                this.refreshHotspot(j_cursor);
             }
-            this.j_cursor.attr("src", image_url);
+            j_cursor.attr("src", image_url);
         },
 
         /**
@@ -2061,12 +2405,13 @@ tyrano.plugin.kag.key_mouse = {
          * @param {number} x マウスカーソルの新しい x 座標（右が正, document の左端が 0）
          * @param {number} y マウスカーソルの新しい y 座標（下が正, document の上端が 0）
          * @param {number} duration 画面上のマウスカーソルの移動にかけるトランジション時間
+         * @param {boolean} should_display
          */
-        place(_x, _y, duration = 0) {
+        place(_x, _y, duration = 0, should_display = true) {
             if (!this.screen.viewport_width) return;
 
             // カーソルを表示
-            this.show();
+            if (should_display) this.show();
 
             // カーソルを画面内に収める
             // x = Math.max(0, Math.min(this.screen.viewport_width, _x));
@@ -2094,6 +2439,7 @@ tyrano.plugin.kag.key_mouse = {
             this.scanPointElement();
             this.scanState();
             this.hideWithTimeout();
+            this.parent.j_focus_cursor.hide();
         },
 
         /**

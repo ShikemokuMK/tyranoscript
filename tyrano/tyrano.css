@@ -834,25 +834,15 @@ div.img_next {
 /*-- キーボードによってフォーカスが当たったときのスタイル --*/
 :focus.focus {
     outline-offset: 0px;
-    outline-style: solid;
-    outline-width: 3px;
-    outline-color: black;
-    /* アニメーションも設定できる */
-    /* animation: focus 1000ms infinite alternate linear; */
-}
-
-@keyframes focus {
-    from {
-        outline-color: rgba(0, 0, 0, 1);
-    }
-    100% {
-        outline-color: rgba(0, 0, 0, 0);
-    }
+    outline-style: none;
+    outline-width: 0px;
+    outline-color: transparent;
 }
 
 /*------　仮想マウスカーソル関連 -------*/
 
 /*-- 仮想マウスカーソル --*/
+#vmouse_focus,
 #vmouse {
     margin-left: 0px;
     margin-top: 0px;
@@ -866,10 +856,16 @@ div.img_next {
     background-repeat: no-repeat;
     background-position: left top;
     transition: transform 50ms linear, opacity 100ms linear;
-    /* visibility: hidden; */
     opacity: 0;
     user-select: none;
 }
+
+#vmouse_focus {
+    display: none;
+    opacity: 1;
+    transition: none;
+}
+
 
 /* 仮想マウスカーソルが表示されているとき
  * 本当のマウスカーソルは非表示にする */

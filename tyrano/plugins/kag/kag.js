@@ -21,6 +21,9 @@ tyrano.plugin.kag = {
         "src",
         "data-event-tag",
         "data-event-pm",
+        "data-event-target",
+        "data-event-storage",
+        "tabindex",
         "l_visible",
         "data-parent-layer",
         "data-video-name",
@@ -1318,13 +1321,42 @@ tyrano.plugin.kag = {
             const width = this.config["keyFocusOutlineWidth"];
             $.insertRuleToTyranoCSS(`:focus.hover { outline-width: ${width}px}`);
         }
+
+        let focus_outline_color = "#000000";
         if (this.config["keyFocusOutlineColor"]) {
             const color = $.convertColor(this.config["keyFocusOutlineColor"]);
+            focus_outline_color = color;
             $.insertRuleToTyranoCSS(`:focus.hover { outline-color: ${color}}`);
         }
         if (this.config["keyFocusOutlineStyle"]) {
             const style = $.convertColor(this.config["keyFocusOutlineStyle"]);
             $.insertRuleToTyranoCSS(`:focus.hover { outline-style: ${style}}`);
+        }
+        if (this.config["keyFocusOutlineAnim"] && this.config["keyFocusOutlineAnim"] !== "none") {
+            switch (this.config["keyFocusOutlineAnim"]) {
+                default:
+                case "flash":
+                    $.insertRuleToTyranoCSS(`:focus.hover { animation: focus 1000ms infinite alternate linear; }`);
+                    $.insertRuleToTyranoCSS(`
+                    @keyframes focus {
+                        0%   { outline-color: ${focus_outline_color}; }
+                        3%   { outline-color: ${focus_outline_color}; }
+                        97%  { outline-color: transparent; }
+                        100% { outline-color: transparent; }
+                    }`);
+                    break;
+                case "flash_momentary":
+                    $.insertRuleToTyranoCSS(`:focus.hover { animation: focus 1000ms infinite steps(1, end); }`);
+                    $.insertRuleToTyranoCSS(`
+                    @keyframes focus {
+                        0% { outline-color: ${focus_outline_color}; }
+                        50%, 100% { outline-color: transparent; }
+                    }`);
+                    break;
+            }
+            if (this.config["keyFocusOutlineAnimDuration"]) {
+                $.insertRuleToTyranoCSS(`:focus.hover { animation-duration: ${this.config["keyFocusOutlineAnimDuration"]}ms; }`);
+            }
         }
         if (this.config["keyFocusWithHoverStyle"] === "true") {
             $.copyHoverCSSToFocusCSS('link[href="./tyrano/tyrano.css"]');
@@ -1334,14 +1366,25 @@ tyrano.plugin.kag = {
         // 終了時の確認ダイアログ
         //
 
-        // 通常セーブ、クイックセーブ、オートセーブ、ロード時に確認を破壊
-        this.kag.on("storage-save storage-quicksave storage-autosave load-complete", () => {
-            $.disableCloseConfirm();
-        });
-        // nextOrder 時に確認を復元
-        this.kag.on("nextorder", (e) => {
-            if (this.stat.use_close_confirm) $.enableCloseConfirm();
-        });
+        if (this.config["enableCloseConfirm" === "true"]) {
+            // 通常セーブ、クイックセーブ、オートセーブ、ロード時にコンファームを破壊
+            this.kag.on(
+                "storage-save storage-quicksave storage-autosave load-complete",
+                () => {
+                    $.disableCloseConfirm();
+                },
+                { system: true },
+            );
+
+            // nextOrder 時にコンファームを復元
+            this.kag.on(
+                "nextorder",
+                (e) => {
+                    if (this.stat.use_close_confirm) $.enableCloseConfirm();
+                },
+                { system: true },
+            );
+        }
 
         //ティラノライダーからの通知の場合、発生させる
         //that.rider.complete(this);
@@ -2018,6 +2061,7 @@ tyrano.plugin.kag = {
     //警告表示
     warning: function (message, replace_map, is_alert = true) {
         if (this.kag.config["debugMenu.visible"] == "true") {
+            if (typeof replace_map === "boolean") is_alert = replace_map;
             if (message in tyrano_lang.warn) {
                 message = $.lang(message, replace_map, "warn");
             }
@@ -2678,7 +2722,9 @@ tyrano.plugin.kag = {
         }
 
         $(".tyrano-focusable").each((i, elm) => {
-            this.makeFocusable($(elm));
+            const j_elm = $(elm);
+            const tabindex = parseInt(j_elm.attr("tabindex")) || 0;
+            this.makeFocusable(j_elm, tabindex);
         });
     },
 
