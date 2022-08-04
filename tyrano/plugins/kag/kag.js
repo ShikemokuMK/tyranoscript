@@ -1353,24 +1353,24 @@ tyrano.plugin.kag = {
 
         if (this.config["keyFocusOutlineWidth"]) {
             const width = this.config["keyFocusOutlineWidth"];
-            $.insertRuleToTyranoCSS(`:focus.hover { outline-width: ${width}px}`);
+            $.insertRuleToTyranoCSS(`:focus.focus { outline-width: ${width}px}`);
         }
 
         let focus_outline_color = "#000000";
         if (this.config["keyFocusOutlineColor"]) {
             const color = $.convertColor(this.config["keyFocusOutlineColor"]);
             focus_outline_color = color;
-            $.insertRuleToTyranoCSS(`:focus.hover { outline-color: ${color}}`);
+            $.insertRuleToTyranoCSS(`:focus.focus { outline-color: ${color}}`);
         }
         if (this.config["keyFocusOutlineStyle"]) {
             const style = $.convertColor(this.config["keyFocusOutlineStyle"]);
-            $.insertRuleToTyranoCSS(`:focus.hover { outline-style: ${style}}`);
+            $.insertRuleToTyranoCSS(`:focus.focus { outline-style: ${style}}`);
         }
         if (this.config["keyFocusOutlineAnim"] && this.config["keyFocusOutlineAnim"] !== "none") {
             switch (this.config["keyFocusOutlineAnim"]) {
                 default:
                 case "flash":
-                    $.insertRuleToTyranoCSS(`:focus.hover { animation: focus 1000ms infinite alternate linear; }`);
+                    $.insertRuleToTyranoCSS(`:focus.focus { animation: focus 1000ms infinite alternate linear; }`);
                     $.insertRuleToTyranoCSS(`
                     @keyframes focus {
                         0%   { outline-color: ${focus_outline_color}; }
@@ -1380,7 +1380,7 @@ tyrano.plugin.kag = {
                     }`);
                     break;
                 case "flash_momentary":
-                    $.insertRuleToTyranoCSS(`:focus.hover { animation: focus 1000ms infinite steps(1, end); }`);
+                    $.insertRuleToTyranoCSS(`:focus.focus { animation: focus 1000ms infinite steps(1, end); }`);
                     $.insertRuleToTyranoCSS(`
                     @keyframes focus {
                         0% { outline-color: ${focus_outline_color}; }
@@ -1419,6 +1419,12 @@ tyrano.plugin.kag = {
                 { system: true },
             );
         }
+
+        //
+        // remodal のリセット
+        //
+
+        this.kag.ftag.master_tag.dialog_config.init();
 
         //ティラノライダーからの通知の場合、発生させる
         //that.rider.complete(this);
@@ -2702,12 +2708,13 @@ tyrano.plugin.kag = {
             if (this.config["keyFocusWithHoverStyle"] === "true") {
                 j_elm.trigger("mouseenter");
             }
+            j_elm.addClass("focus");
         });
         j_elm.on("focusout", () => {
             if (this.config["keyFocusWithHoverStyle"] === "true") {
                 j_elm.trigger("mouseleave");
             }
-            j_elm.removeClass("hover");
+            j_elm.removeClass("focus");
         });
     },
 

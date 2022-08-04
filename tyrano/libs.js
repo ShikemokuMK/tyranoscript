@@ -1056,130 +1056,195 @@
         return gv;
     };
 
-    /*
-    $.setStorage = function(key,val){
-    val = JSON.stringify(val);
-    localStorage.setItem(key, LZString.compress(escape(val)));
-    //localStorage.setItem(key, escape(val));
-    };
-
-    $.getStorage = function(key){
-
-    try{
-
-    var gv = "null";
-
-    if(localStorage.getItem(key)){
-    gv = unescape(LZString.decompress(localStorage.getItem(key)));
-
-    if(gv=="null"){
-    gv = unescape(localStorage.getItem(key));
-    }
-    }
-
-    if(gv =="null") return null;
-
-    }catch(e){
-    alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
-    }
-
-    return gv;
-
-    };
-    */
-
-    $.alert = function (str, cb) {
-        $(".remodal_title").html(str);
-
-        $(".remodal").find(".remodal-cancel").hide().unfocusable();
-        $(".remodal").find(".remodal-confirm").show().focusable();
-
-        var inst = $("[data-remodal-id=modal]").remodal();
-        inst.open();
-
-        $(document).off("closed", ".remodal");
-        $(document).on("closed", ".remodal", function (e) {
-            if (typeof cb == "function") {
-                cb();
-            }
-        });
-
-        /*
-        if ($.userenv() != "pc") {
-            alert(str);
-            if(typeof cb == "function"){
-                cb();
-            }
-
-        }else{
-            alertify.alert(str,function(){;
-                if(typeof cb == "function"){
-                    cb();
-                }
-            });
-        }
-        */
-    };
-
-    $.inform = function (str, type) {
-        alertify.log(str, type);
-    };
-
-    $.confirm = function (str, cb_ok, cb_cancel) {
-        $(".remodal_title").html(str);
-
-        $(".remodal").find(".remodal-cancel").show().focusable();
-        $(".remodal").find(".remodal-confirm").show().focusable();
-
-        var inst = $("[data-remodal-id=modal]").remodal();
-        inst.open();
-
-        /////////OK /////////////
-
-        $(document).off("closed", ".remodal");
-
+    /**
+     * remodal のイベントをすべて消去
+     */
+    $.removeRemodalEvents = function (includes_closed) {
+        $(document).off("opening", ".remodal");
+        $(document).off("opened", ".remodal");
+        $(document).off("closing", ".remodal");
         $(document).off("confirmation", ".remodal");
-        $(document).on("confirmation", ".remodal", function (e) {
-            $(document).off("confirmation", ".remodal");
-            $(document).off("cancellation", ".remodal");
-
-            if (typeof cb_ok == "function") {
-                cb_ok();
-            }
-        });
-
-        ///////キャンセル//////////////
         $(document).off("cancellation", ".remodal");
-        $(document).on("cancellation", ".remodal", function (e) {
-            $(document).off("confirmation", ".remodal");
-            $(document).off("cancellation", ".remodal");
+        if (includes_closed) $(document).off("closed", ".remodal");
+    };
 
-            if (typeof cb_cancel == "function") {
-                cb_cancel();
+    /**
+     * remodal のイベント汎用処理
+     * @param {Object} options
+     * @param {"alert" | "confirm"} options.type
+     * @param {string} options.title
+     * @param {function} on_ok
+     * @param {function} on_cancel
+     */
+    $.remodalCommon = function (options = {}) {
+        const j_box = $("[data-remodal-id=modal]");
+        const j_ok = $(".remodal").find("#remodal-confirm");
+        const j_ng = $(".remodal").find("#remodal-cancel");
+        const j_wrapper = $(".remodal-wrapper");
+        const j_button = $([j_ok[0], j_ng[0]]);
+        const j_event = $([j_ok[0], j_ng[0], j_wrapper[0], j_box[0]]);
+        const j_anim = $(".remodal-base").add(j_box);
+
+        // <h1> の更新
+        $(".remodal_title").html(options.title);
+
+        // OK 表示
+        j_ok.show().focusable();
+        if (j_ok.hasClass("remodal-image-button")) {
+            j_ok.trigger("init");
+        }
+
+        // Cancel 表示
+        if (options.type === "confirm") {
+            j_ng.show().focusable();
+            if (j_ng.hasClass("remodal-image-button")) {
+                j_ng.trigger("init");
+            }
+        } else {
+            j_ng.hide();
+        }
+
+        // ポイント不可
+        j_event.setStyle("pointer-events", "none");
+
+        // remodal 初期化
+        j_box.css("font-family", TYRANO.kag.config.userFace);
+        const inst = j_box.remodal();
+
+        // 汎用クローズ処理
+        const close_common = () => {
+            j_event.setStyle("pointer-events", "none");
+            TYRANO.kag.key_mouse.vmouse.hide();
+            const effect = TYRANO.kag.tmp.remodal_closing_effect;
+            if (effect && effect !== "none") {
+                j_box.setStyleMap({ "animation-name": effect }, "webkit");
+                $(document).on("closed", ".remodal", () => {
+                    j_box.setStyleMap({ "animation-name": "" }, "webkit");
+                });
+            }
+
+            $.removeRemodalEvents(false);
+        };
+
+        //
+        // イベントリスナを設定
+        // https://github.com/VodkaBears/Remodal#events
+        //
+
+        // 旧イベントを消去
+        $.removeRemodalEvents(true);
+
+        let mousedown_elm = null;
+
+        // ラッパーのクリックでウィンドウを閉じられるようにする
+        j_wrapper
+            .off("mousedown.outerclose click.outerclose")
+            .on("click.outerclose", () => {
+                if (mousedown_elm !== j_wrapper[0]) return;
+                j_box.off("mousedown.outerclose");
+                j_wrapper.off("mousedown.outerclose click.outerclose");
+                if (options.type === "confirm") j_ng.trigger("click");
+            })
+            .on("mousedown.outerclose", () => {
+                mousedown_elm = j_wrapper[0];
+            });
+
+        // メッセージボックスのクリックがラッパーに突き抜けないようにする
+        j_box.off("mousedown.outerclose").on("mousedown.outerclose", (e) => {
+            mousedown_elm = j_box[0];
+            e.stopPropagation();
+        });
+
+        j_button.off("click.outerclose").on("click.outerclose", () => {
+            j_box.off("click.outerclose");
+        });
+
+        // 表示完了時
+        $(document).on("opened", ".remodal", () => {
+            // ポイント可
+            j_event.setStyle("pointer-events", "auto");
+        });
+
+        // アラート: クローズ時の処理
+        if (options.type === "alert") {
+            $(document).on("closed", ".remodal", () => {
+                close_common();
+                $.removeRemodalEvents(false);
+                if (typeof options.on_ok === "function") {
+                    options.on_ok();
+                }
+            });
+            return;
+        }
+
+        // コンファーム: OK 時の処理
+        $(document).on("confirmation", ".remodal", () => {
+            close_common();
+            if (typeof options.on_ok === "function") {
+                options.on_ok();
             }
         });
 
-        /*
-        if ($.userenv() != "pc") {
-
-            if(window.confirm(str)){
-                cb_ok();
-            }else{
-                cb_cancel();
+        // コンファーム: Cancel 時の処理
+        $(document).on("cancellation", ".remodal", () => {
+            close_common();
+            if (typeof options.on_cancel === "function") {
+                options.on_cancel();
             }
+        });
 
-        }else{
-            alertify.confirm(str,function(e){
-                if (e) {
-                // user clicked "ok"
-                    cb_ok();
-                } else {
-                    // user clicked "cancel"
-                    cb_cancel();
+        if (TYRANO.kag.tmp.remodal_opening_effect_time !== undefined) {
+            j_anim.setStyleMap({ "animation-duration": TYRANO.kag.tmp.remodal_opening_effect_time }, "webkit");
+        }
+
+        // オープン開始時にアニメクラスを付ける, オープン完了時に外す
+        const opening_effect = TYRANO.kag.tmp.remodal_opening_effect;
+        if (opening_effect && opening_effect !== "none") {
+            $(document).on("opening", ".remodal", () => {
+                j_box.setStyleMap({ "animation-name": opening_effect }, "webkit");
+            });
+            $(document).on("opened", ".remodal", () => {
+                j_box.setStyleMap({ "animation-name": "" }, "webkit");
+                if (TYRANO.kag.tmp.remodal_closing_effect_time !== undefined) {
+                    j_anim.setStyleMap({ "animation-duration": TYRANO.kag.tmp.remodal_closing_effect_time }, "webkit");
                 }
             });
         }
-        */
+
+        //
+        // 開く
+        //
+
+        inst.open();
+    };
+
+    /**
+     * モーダルウィンドウで remodal
+     * @param {string} title
+     * @param {function} on_ok
+     */
+    $.alert = (title, on_ok) => {
+        $.remodalCommon({ type: "alert", title, on_ok });
+    };
+
+    /**
+     * モーダルウィンドウでコンファーム, remodal
+     * @param {string} title
+     * @param {function} on_ok
+     * @param {function} on_cancel
+     */
+    $.confirm = function (title, on_ok, on_cancel) {
+        $.remodalCommon({ type: "confirm", title, on_ok, on_cancel });
+    };
+
+    /**
+     * 画面右下にトースト通知, alertify
+     * ゲーム画面(tyrano_base)よりも外側に出る
+     * @param {*} str
+     * @param {*} type
+     */
+    $.inform = (str, type) => {
+        alertify.log(str, type);
     };
 
     //オブジェクトの個数をもってきます。1
@@ -1769,17 +1834,28 @@
      * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
      * こちらのメソッドであれば処理時間が40-50%ほどで済む
      * @param {Object} map CSSのプロパティと値が対になっているオブジェクト
+     * @param {string[]} prefixes ベンダープレフィックス対応 (例) [ "webkit", "mz" ]
      * @return {jQuery}
      */
-    $.fn.setStyleMap = function (map) {
+    $.fn.setStyleMap = function (map, prefixes) {
         const len = this.length;
         if (len === 0) {
             return this;
         }
+        if (typeof prefixes === "string") {
+            prefixes = [prefixes];
+        }
         for (let i = 0; i < len; i++) {
             const elm = this[i];
-            for (const key in map) {
-                elm.style.setProperty(key, map[key]);
+            for (const plain_key in map) {
+                const value = map[plain_key];
+                if (prefixes) {
+                    for (const prefix of prefixes) {
+                        const prefix_key = `-${prefix}-${plain_key}`;
+                        elm.style.setProperty(prefix_key, value);
+                    }
+                }
+                elm.style.setProperty(plain_key, value);
             }
         }
         return this;
@@ -1940,6 +2016,8 @@
      * // "./data/fgimage/foo.png"
      */
     $.parseStorage = function (storage, folder = "") {
+        if (!storage) return "";
+
         // "http"で始まっているならそのまま返す
         if ($.isHTTP(storage)) {
             return storage;
@@ -2085,6 +2163,7 @@
             for (const selector of hash) {
                 if (selector.includes(":hover")) {
                     new_selector_texts.push(selector.replace(":hover", ".hover"));
+                    new_selector_texts.push(selector.replace(":hover", ".focus"));
                 }
                 if (selector.includes(":active")) {
                     new_selector_texts.push(selector.replace(":active", ".active"));
@@ -2303,14 +2382,45 @@
 
     // いま終了時コンファームが有効かどうか
     let is_close_confirm_enabled = false;
+    let is_set_electron_close_event = false;
 
     /**
-     * タブを閉じようとしたときのコンファームを有効化する
+     * プレイヤーが未保存の状態でページを離れようとしたときの警告を有効化する
+     * 再読み込み, ページ移動, タブを閉じる, などの操作が該当する
      */
     $.enableCloseConfirm = () => {
         if (is_close_confirm_enabled) return;
         is_close_confirm_enabled = true;
-        window.onbeforeunload = () => {
+
+        // Electron でない場合は簡単
+        if (!$.isElectron()) {
+            window.onbeforeunload = () => {
+                return $.lang("confirm_beforeunload");
+            };
+            return;
+        }
+
+        // Electron の場合
+        window.onbeforeunload = (e) => {
+            // 【！】remote は deprecated
+            const { remote } = require("electron");
+            const win = remote.getCurrentWindow();
+            const dialog = remote.dialog;
+            const choice = dialog.showMessageBoxSync(win, {
+                type: "warning",
+                buttons: ["OK", "Cancel"],
+                title: document.title,
+                message: $.lang("confirm"),
+                detail: $.lang("confirm_beforeunload"),
+                defaultId: 0,
+                cancelId: 1,
+            });
+            const leave = choice === 0;
+            if (leave) {
+                // void を返すとページの離脱が続行される
+                return;
+            }
+            // true を返すとページの離脱がキャンセルされる
             return true;
         };
     };
@@ -2382,6 +2492,132 @@
 
     // 計測を開始
     measureRefreshRate();
+
+    /**
+     * カンマ区切りあるいはスペース区切りの文字列を配列にして返す
+     * - "10, 20, 30" => [ "10", "20", "30" ]
+     * - "10 20 30" => [ "10", "20", "30" ]
+     * @param {string} value
+     * @returns {string[]}
+     */
+    $.splitCommaOrSpace = (value) => {
+        value = value.trim().replace(/ +/g, " ");
+        if (value.includes(","))
+            return value.split(",").map((item) => {
+                return item.trim();
+            });
+        if (value.includes(" ")) return value.split(" ");
+        return [value];
+    };
+
+    /**
+     * ティラノタグに指定された値をもとに margin を設定する
+     * 10,20,10 のようなカンマ区切りの指定に対応する
+     * @param {jQuery} j_elm
+     * @param {string} length_str
+     * @param {string} [prop="margin"]
+     */
+    $.setMargin = (j_elm, length_str, prop = "margin") => {
+        const hash = length_str.split(",").map((length) => {
+            return $.convertLength(length);
+        });
+        let top, bottom, left, right;
+        switch (hash.length) {
+            case 1:
+                top = bottom = left = right = hash[0];
+                break;
+            case 2:
+                top = bottom = hash[0];
+                left = right = hash[1];
+                break;
+            case 3:
+                top = hash[0];
+                left = right = hash[1];
+                bototm = hash[2];
+                break;
+            default:
+            case 4:
+                top = hash[0];
+                bottom = hash[1];
+                left = hash[2];
+                right = hash[3];
+                break;
+        }
+        const style = {};
+        style[`${prop}-top`] = top;
+        style[`${prop}-bottom`] = bottom;
+        style[`${prop}-left`] = left;
+        style[`${prop}-right`] = right;
+        j_elm.setStyleMap(style);
+    };
+
+    $.setPadding = (j_elm, length_str) => {
+        $.setMargin(j_elm, length_str, "padding");
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの width, height プロパティなどに設定できる値に変換する
+     * - 文字列中に数値しか含まれていないなら "px" を足して返す
+     * - それ以外はそのまま返す
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertLength = (value) => {
+        value = value.trim();
+        if (!value) return "";
+        // 数値オンリーか？
+        if (value.match(/^[0-9. +-]+$/)) {
+            // 数値オンリーなら px を補完
+            return value + "px";
+        } else {
+            // すでに単位が含まれているならそのまま返す
+            return value;
+        }
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの font-weight プロパティに設定できる値に変換する
+     * - "true" に対して "bold" を返す
+     * - "false" に対して "normal" を返す
+     * - それ以外はそのまま返す
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertFontWeight = (value) => {
+        value = value.trim();
+        if (value === "true") return "bold";
+        if (value === "false") return "normal";
+        return value;
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの background-image プロパティに設定できる値に変換する
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertBackgroundImage = (value, folder) => {
+        value = value.trim();
+        if (value.includes("-gradient(")) return value;
+        if (value.includes("url(")) return value;
+        return `url(${$.parseStorage(value, folder)})`;
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの background-position に設定できる値に変換する
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertBackgroundPosition = (value) => {
+        value = value.trim().replace(/ +/g, " ");
+        const hash = value.split(" ").map((item) => {
+            return $.convertLength(item);
+        });
+        return hash.join(" ");
+    };
 })(jQuery);
 
 // windowのloadイベントが発火済みかどうかを管理

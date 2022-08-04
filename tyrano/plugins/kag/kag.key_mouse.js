@@ -20,12 +20,12 @@ tyrano.plugin.kag.key_mouse = {
     is_keydown: false, // キーの連続押し込み反応を防ぐ
     start_point: { x: 0, y: 0 }, // 指が動いた状態を管理するためのプロパティ
     end_point: { x: 0, y: 0 },
-    j_focus_cursor: null,
+    is_holding_skip: false, // ホールドスキップ実行中は true
 
     // 定数プロパティ
     HOLD_TIMEOUT: 2000, // この時間(ミリ秒)タッチし続けたときに「ホールド」をトリガーする
     PREVENT_DOUBLE_TOUCH_TIME: 350, // この時間(ミリ秒)より短い時間の連続タップを抑制する
-    VMOUSE_TICK_RATE: 20, // 仮想マウスカーソルのチックレート
+    VMOUSE_TICK_RATE: 1, // 仮想マウスカーソルのチックレート
     GAMEPAD_TICK_RATE: 20, // ゲームパッドのチックレート
     KEYBOARD_TICK_RATE: 20, // キーボードのチックレート
     HOLD_MASH_DELAY: 0, // ホールド連打が始まるまでのディレイ
@@ -37,6 +37,10 @@ tyrano.plugin.kag.key_mouse = {
      * 初期化
      */
     init() {
+        // ユーティリティ初期化
+        this.util.parent = this;
+        this.util.refer(this.util);
+
         //定義されてない場合デフォルトを設定
         if (typeof window.__tyrano_key_config === "undefined") {
             this.kag.warning("undefined_keyconfig", false);
@@ -52,10 +56,7 @@ tyrano.plugin.kag.key_mouse = {
         this.map_pad = this.keyconfig["gamepad"] || { button: {}, stick_digital: {}, stick: {} };
 
         // イベントレイヤ
-        const layer_obj_click = $(".layer_event_click");
-
-        // 選択肢フォーカス用の仮想マウスカーソル
-        this.j_focus_cursor = $('<img id="vmouse_focus" />').appendTo("body");
+        this.j_event_layer = $(".layer_event_click");
 
         //
         // スマートフォンイベント
@@ -66,7 +67,7 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             // https://github.com/mattbryson/TouchSwipe-Jquery-Plugin
-            layer_obj_click.swipe({
+            this.j_event_layer.swipe({
                 swipe: (event, direction, distance, duration, fingerCount, fingerData) => {
                     this.is_swipe = true;
                     const action_key = "swipe_" + direction + "_" + fingerCount;
@@ -84,10 +85,10 @@ tyrano.plugin.kag.key_mouse = {
             // ホールド
             //
 
-            layer_obj_click
+            this.j_event_layer
                 .on("touchstart", (e) => {
                     // スキップ中にクリックされたら元に戻す
-                    this.util.clearSkip();
+                    this.util.clearSkipAndAuto();
                     this.hold_timer_id = setTimeout(() => {
                         let action = this.map_ges.hold;
                         if (typeof action === "object" && "action" in action) action = action.action;
@@ -118,7 +119,10 @@ tyrano.plugin.kag.key_mouse = {
         // イベントレイヤのクリック
         //
 
-        layer_obj_click.click((e) => {
+        this.j_event_layer.click((e) => {
+            // dispatchEvent ではなくユーザーの操作によって発生したか？
+            const is_trusted = e.originalEvent && e.originalEvent.isTrusted;
+
             // ブラウザの音声の再生制限を解除
             if (!this.kag.tmp.ready_audio) this.kag.readyAudio();
 
@@ -201,13 +205,6 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         this.vmouse.init(this);
-
-        //
-        // ユーティリティ初期化
-        //
-
-        this.util.parent = this;
-        this.util.kag = this.kag;
     },
 
     /**
@@ -294,11 +291,18 @@ tyrano.plugin.kag.key_mouse = {
             return false;
         }
 
-        // 最後に"next"アクションを実行したゲームパッドを記憶しておく
+        // 最後に"next"系アクションを実行したゲームパッドを記憶しておく
+        // [vibrate] タグでどのゲームパッドを振動させればよいかの判定に用いる
+        is_next = name === "ok" || name === "next";
         pm.is_gamepad = event.type.indexOf("gamepad") === 0;
         pm.is_keyboard = event.type.indexOf("key") === 0;
-        if (pm.is_gamepad && (name === "ok" || name === "next")) {
-            this.gamepad.last_used_next_gamepad_index = event.detail.gamepad_index;
+        if (is_next) {
+            if (pm.is_gamepad) {
+                this.gamepad.last_used_next_gamepad_index = event.detail.gamepad_index;
+            } else {
+                // ゲームパッド以外で"next"系アクションを使用した場合はいったん切る
+                this.gamepad.last_used_next_gamepad_index = -1;
+            }
         }
 
         // ホールド連打かつ -h オプションが指定されていないアクションならば実行しない
@@ -307,15 +311,18 @@ tyrano.plugin.kag.key_mouse = {
             return false;
         }
 
-        // フォーカス系のロールじゃない場合はフォーカスを外す
-        if (!name.includes("focus") && name !== "ok") {
-            const will_move_vmouse = name.includes("vmouse");
-            this.util.unfocus(undefined, will_move_vmouse);
-        }
-
         // アクションを実行
         if (typeof this[name] === "function") {
-            return this[name](pm);
+            const done = this[name](pm);
+            if (done) {
+                // フォーカス系のロールじゃない場合はフォーカスを外す
+                const type_focus = name.includes("focus");
+                const type_ok = name !== "ok";
+                if (!type_focus && !type_ok) {
+                    this.util.unfocus(undefined, name.includes("vmouse"));
+                }
+                return true;
+            }
         }
 
         return false;
@@ -340,7 +347,7 @@ tyrano.plugin.kag.key_mouse = {
      */
     next() {
         if (this.util.canClick()) {
-            this.util.clearSkip();
+            this.util.clearSkipAndAuto();
             $(".layer_event_click").trigger("click");
             return true;
         }
@@ -427,9 +434,12 @@ tyrano.plugin.kag.key_mouse = {
      */
     holdskip() {
         if (this.util.canClick()) {
+            this.is_holding_skip = true;
             return this._role("skip");
+        } else {
+            this.kag.setSkip(true);
+            return true;
         }
-        return false;
     },
 
     /**
@@ -439,8 +449,10 @@ tyrano.plugin.kag.key_mouse = {
     skip() {
         if (this.util.canClick()) {
             return this._role("skip");
+        } else {
+            this.kag.setSkip(!this.kag.stat.is_skip);
+            return true;
         }
-        return false;
     },
 
     /**
@@ -520,6 +532,8 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     ok(pm) {
+        this.util.clearSkipAndAuto();
+
         // 仮想マウスが表示されているならマウスダウンをシミュレート
         if (this.vmouse.is_visible) {
             this.vmouse.leftdown();
@@ -531,18 +545,14 @@ tyrano.plugin.kag.key_mouse = {
         const j_focus = this.util.findFocused();
         if (j_focus.length > 0) {
             this.vmouse.trigger("click", j_focus[0]);
-            if (pm.is_keyboard) {
-                this.j_focus_cursor.hide();
-                this.vmouse.j_html.removeClass("vmouse-displayed");
-            }
             return true;
         }
 
         // リモーダルウィンドウが表示されているならOKを押す
-        if (this.util.isRemodalDisplayed()) {
-            const j_confirm = $(".remodal").find(".remodal-confirm").click();
-            return true;
-        }
+        // if (this.util.isRemodalDisplayed()) {
+        //     const j_confirm = $(".remodal").find("#remodal-confirm").click();
+        //     return true;
+        // }
 
         // 次のテキストに進む
         return this.next();
@@ -553,6 +563,8 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     cancel() {
+        this.kag.key_mouse.vmouse.hide();
+
         // フォーカスされているボタンがあるなら解除
         const j_focused = this.util.findFocused();
         if (j_focused.length > 0) {
@@ -562,7 +574,7 @@ tyrano.plugin.kag.key_mouse = {
 
         // リモーダルウィンドウが表示されていてキャンセルボタンが表示されているならそれを押す
         if (this.util.isRemodalDisplayed()) {
-            const j_cancel = $(".remodal").find(".remodal-cancel");
+            const j_cancel = $(".remodal").find("#remodal-cancel");
             if (j_cancel.css("display") !== "none") {
                 j_cancel.click();
                 return true;
@@ -582,7 +594,7 @@ tyrano.plugin.kag.key_mouse = {
         }
 
         // スキップ・オートモードの解除
-        return this.util.clearSkip();
+        return this.util.clearSkipAndAuto();
     },
 
     /**
@@ -603,7 +615,7 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     scroll_down() {
-        const j_button = $(".button_down_up");
+        const j_button = $(".button_arrow_down");
         if (j_button.length > 0) {
             j_button.click();
             return true;
@@ -638,19 +650,14 @@ tyrano.plugin.kag.key_mouse = {
      * @param {"next"|"prev"} order
      */
     focus_order(order = "next") {
-        // キーボードでフォーカス可能な要素
-        const j_focusable = this.util.findFocusable();
+        const { j_focusable, j_focused, j_unfocused } = this.util.getFocusableInfo();
+        console.log("!");
+        console.log({ j_focusable, j_focused, j_unfocused });
 
         // 存在しなければ帰る
         if (j_focusable.length === 0) {
             return false;
         }
-
-        // j_focusable のうち、いまフォーカスされている要素
-        const j_focused = j_focusable.filter(":focus.hover");
-
-        // j_focusable のうち、いまフォーカスされていない要素（つまり、これからフォーカスする可能性のある要素）
-        const j_unfocused = j_focusable.not(":focus.hover");
 
         // フォーカス候補が1つもないならおわり
         // フォーカス候補が1つしかないならそれをフォーカスしておわり
@@ -708,19 +715,12 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean} アクションを実行できたかどうか
      */
     focus_dir(dir = "down") {
-        // キーボードでフォーカス可能な要素
-        const j_focusable = this.util.findFocusable();
+        const { j_focusable, j_focused, j_unfocused } = this.util.getFocusableInfo();
 
         // 存在しなければ帰る
         if (j_focusable.length === 0) {
             return false;
         }
-
-        // j_focusable のうち、いまフォーカスされている要素
-        const j_focused = j_focusable.filter(":focus.hover");
-
-        // j_focusable のうち、いまフォーカスされていない要素（つまり、これからフォーカスする可能性のある要素）
-        const j_unfocused = j_focusable.not(":focus.hover");
 
         // フォーカス候補が1つもないならおわり
         // フォーカス候補が1つしかないならそれをフォーカスしておわり
@@ -762,7 +762,7 @@ tyrano.plugin.kag.key_mouse = {
             const pos = { x, x1, x2, y, y1, y2, left, top, right, bottom, j_elm };
             pos_list.push(pos);
             // フォーカスされている要素の情報はおさえておく
-            if (j_elm.is(":focus.hover")) {
+            if (j_focused[0] === elm) {
                 focused_pos = pos;
             }
         });
@@ -799,9 +799,9 @@ tyrano.plugin.kag.key_mouse = {
         // いまフォーカスが当たっている要素がない場合は新規フォーカスとなる
         // 下キーなら一番下の要素を、上キーなら一番上の要素を、という感じで1つ選んでフォーカスしておわり
         if (!focused_pos) {
-            // const index = is_plus ? pos_list.length - 1 : 0;
-            let index = 0;
-            if (this.util.isCloseButton(pos_list[index].j_elm)) {
+            let index = is_plus ? pos_list.length - 1 : 0;
+            // let index = 0;
+            if (index === 0 && this.util.isCloseButton(pos_list[index].j_elm)) {
                 index++;
             }
             this.util.focus(pos_list[index].j_elm);
@@ -914,12 +914,12 @@ tyrano.plugin.kag.key_mouse = {
      * ／　　＼
      */
     focus_dir_angle(dir, pos_list, focused_pos) {
-        let candidate_pos_list;
-        const deg_360 = Math.PI * 2;
-        const deg_90 = Math.PI / 2;
-        const deg_45 = Math.PI / 4;
-        const deg_30 = Math.PI / 6;
-        const deg_10 = deg_30 / 3;
+        const deg_180 = Math.PI;
+        const deg_360 = deg_180 * 2;
+        const deg_90 = deg_180 / 2;
+        const deg_45 = deg_180 / 4;
+        const deg_30 = deg_180 / 6;
+        const deg_10 = deg_180 / 18;
         const dir_num = ["right", "up", "left", "down"].indexOf(dir);
         const dir_rad = dir_num * deg_90;
         const seraches = [deg_10, deg_30, deg_30 + deg_45];
@@ -928,53 +928,94 @@ tyrano.plugin.kag.key_mouse = {
             if (radian < 0) radian += Math.PI * 2;
             return radian;
         };
-        // 90°(45°*2)幅、150°幅(75°*2)の最大計2回探索する
-        // 最初の90°幅の探索で要素が見つかったなら2回目の探索は省略
+        const get_distance = (p1, p2, _x = "x") => {
+            return Math.sqrt(Math.pow(p2.y - p1.y, 2) + Math.pow(p1[_x] - p2[_x], 2));
+        };
+        // 各ポジションのスコアを計算
+        pos_list.forEach((this_pos) => {
+            if (this_pos === focused_pos) {
+                return;
+            }
+
+            // [このボタン] と [フォーカス中のボタン] 上のある点同士を結んだ線が形成する角度(radian, 0～2π)を計算する
+            // 水平右向きが 0、時計回りが正、一周してもう一度水平右向きになろうとするところで限りなく2πに近づく
+            // 中央点-中央点, 左端点-左端点, 右端点-右端点の3点について角度を調査
+            const rad0 = get_radian(this_pos, focused_pos);
+            const rad1 = get_radian(this_pos, focused_pos, "left");
+            const rad2 = get_radian(this_pos, focused_pos, "right");
+            const rads = [rad0, rad1, rad2];
+            //const rads = [rad0];
+
+            const d0 = get_distance(this_pos, focused_pos);
+            const d1 = get_distance(this_pos, focused_pos, "left");
+            const d2 = get_distance(this_pos, focused_pos, "right");
+            const ds = [d0, d1, d2];
+
+            // 調査した角度からスコアを計算, 最も良いスコアを選択
+            this_pos.score = -Infinity;
+            this_pos.score_reverse = -Infinity;
+            rads.forEach((rad, i) => {
+                // [フォーカスを動かす目標となる角度] との差を計算する
+                const dif1 = Math.abs(dir_rad - rad);
+                const dif2 = Math.abs(dir_rad + deg_360 - rad);
+                const dif = Math.max(0.1, Math.min(dif1, dif2));
+                // 2点間の距離
+                const d = ds[i];
+                // 角度がズレていることによるペナルティ
+                const penalty = 150 * Math.pow(dif / deg_10, 2);
+                const score = -(d + penalty);
+                if (score > this_pos.score) {
+                    this_pos.score = score;
+                    this_pos.dif_rad = dif;
+                }
+                // リバーススコア
+                // 下端まで行って下移動を実行したときに上端に戻るためのスコア
+                let dif_reverse = dif - deg_180;
+                if (dif_reverse < 0) dif_reverse + deg_360;
+                dif_reverse = Math.max(0.1, dif_reverse);
+                const score_reverse = d / (dif_reverse / deg_180);
+                if (score_reverse > this_pos.score_reverse) {
+                    this_pos.score_reverse = score_reverse;
+                    this_pos.dif_rad_reverse = dif_reverse;
+                }
+            });
+        });
+        // 探索角度を広げながら何回か探索する
+        let candidate_pos_list;
+        let candidate_pos_list_reverse;
         for (let i = 0; i < 3; i++) {
             candidate_pos_list = [];
+            candidate_pos_list_reverse = [];
             const search_width = seraches[i];
             pos_list.forEach((this_pos) => {
                 if (this_pos === focused_pos) {
                     return;
                 }
-                const rad0 = get_radian(this_pos, focused_pos);
-                const rad1 = get_radian(this_pos, focused_pos, "left");
-                const rad2 = get_radian(this_pos, focused_pos, "right");
-                const rads = [rad0, rad1, rad2];
-                // const rads = [rad0];
-                let best_score = -Infinity;
-                for (const rad of rads) {
-                    const dif1 = Math.abs(dir_rad - rad);
-                    const dif2 = Math.abs(dir_rad + deg_360 - rad);
-                    const dif = Math.min(dif1, dif2);
-                    if (dif < search_width) {
-                        const d0 = Math.sqrt(Math.pow(this_pos.y - focused_pos.y, 2) + Math.pow(this_pos.x - focused_pos.x, 2));
-                        const d1 = Math.sqrt(Math.pow(this_pos.y - focused_pos.y, 2) + Math.pow(this_pos.x1 - focused_pos.x, 2));
-                        const d2 = Math.sqrt(Math.pow(this_pos.y - focused_pos.y, 2) + Math.pow(this_pos.x2 - focused_pos.x, 2));
-                        const d = Math.min(d0, d1, d2);
-                        const penalty = 200 * (dif / search_width) * (dif / search_width);
-                        const score = -(d + penalty);
-                        if (score > best_score) {
-                            best_score = score;
-                        }
-                    }
-                }
-                if (best_score > -Infinity) {
-                    this_pos.score = best_score;
+                if (this_pos.dif_rad < search_width) {
                     candidate_pos_list.push(this_pos);
+                }
+                if (this_pos.dif_rad_reverse < search_width) {
+                    candidate_pos_list_reverse.push(this_pos);
                 }
             });
             if (candidate_pos_list.length > 0) {
                 break;
             }
         }
-        if (candidate_pos_list.length === 0) {
-            return;
+        if (candidate_pos_list.length > 0) {
+            candidate_pos_list.sort((a, b) => {
+                return a.score > b.score ? -1 : 1;
+            });
+        } else if (candidate_pos_list_reverse.length > 0) {
+            candidate_pos_list_reverse.sort((a, b) => {
+                return a.score_reverse > b.score_reverse ? -1 : 1;
+            });
+            candidate_pos_list = candidate_pos_list_reverse;
+        } else {
+            return false;
         }
-        candidate_pos_list.sort((a, b) => {
-            return a.score > b.score ? -1 : 1;
-        });
         this.util.focus(candidate_pos_list[0].j_elm);
+        return true;
     },
 
     focus_up() {
@@ -999,14 +1040,31 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     _role(role) {
-        // スキップ解除
-        if (role === "skip" && this.kag.stat.is_skip) {
-            this.kag.setSkip(false);
-            return true;
+        const can_show_menu = this.util.canShowMenu();
+
+        // スキップロールだけ先に判定する
+        if (role === "skip") {
+            if (this.kag.stat.is_skip) {
+                // スキップ中
+                this.kag.setSkip(false);
+                return true;
+            } else if (can_show_menu) {
+                // スキップ中ではない
+                if (this.kag.stat.is_adding_text) {
+                    // スキップ中ではない, メニューが開ける状態, テキスト追加中
+                    this.kag.setSkip(true);
+                    return true;
+                } else {
+                    // スキップ中ではない, メニューが開ける状態, テキスト追加中ではない
+                    this.kag.ftag.startTag("skipstart", {});
+                    return true;
+                }
+            }
+            return false;
         }
 
         // [l][p][s]で待機している状態以外ではロールを実行しない
-        if (!this.util.canShowMenu()) return false;
+        if (!can_show_menu) return false;
 
         // スキップの解除
         this.kag.setSkip(false);
@@ -1042,6 +1100,7 @@ tyrano.plugin.kag.key_mouse = {
                 break;
 
             case "title":
+                if (!$(".remodal").hasClass("remodal-is-closed")) return false;
                 $.confirm(
                     $.lang("go_title"),
                     () => {
@@ -1055,10 +1114,6 @@ tyrano.plugin.kag.key_mouse = {
 
             case "menu":
                 this.kag.menu.showMenu();
-                break;
-
-            case "skip":
-                this.kag.ftag.startTag("skipstart", {});
                 break;
 
             case "backlog":
@@ -1153,7 +1208,21 @@ tyrano.plugin.kag.key_mouse = {
      */
     util: {
         parent: null,
-        kag: null,
+
+        /**
+         * 循環参照を設定する
+         * @Object {Object} any_obj
+         */
+        refer(any_obj) {
+            const that = this.parent;
+            any_obj.parent = that;
+            any_obj.kag = that.kag;
+            any_obj.util = that.util;
+            any_obj.keyboard = that.keyboard;
+            any_obj.mouse = that.mouse;
+            any_obj.vmouse = that.vmouse;
+            any_obj.gamepad = that.gamepad;
+        },
 
         /**
          * イベントレイヤをクリックできる状態なら true を返す
@@ -1169,11 +1238,20 @@ tyrano.plugin.kag.key_mouse = {
         },
 
         /**
+         * ホールドスキップを解除する
+         * @returns {boolean}
+         */
+        clearHoldingSkip() {
+            this.kag.setSkip(false);
+            this.parent.is_holding_skip = false;
+        },
+
+        /**
          * 画面をクリックしたときにスキップやオートモードを解除するためのメソッド
          * コンフィグも参照する
          * @returns {boolean}
          */
-        clearSkip() {
+        clearSkipAndAuto() {
             // スキップの解除（[s]で待機している最中は解除しない）
             if (this.kag.stat.is_skip && !this.kag.stat.is_strong_stop) {
                 this.kag.setSkip(false);
@@ -1247,11 +1325,25 @@ tyrano.plugin.kag.key_mouse = {
         },
 
         /**
+         * フォーカスされていることを示すセレクタ
+         */
+        focused_selector: ":focus.focus",
+
+        /**
          * フォーカスされている要素を探して返す
          * @returns {jQuery}
          */
         findFocused() {
-            return $(":focus.hover");
+            return $(this.focused_selector);
+        },
+
+        /**
+         * 指定要素がフォーカスされているかどうかを返す
+         * @param {jQuery} j_elm
+         * @returns {boolean}
+         */
+        isFocused(j_elm) {
+            return j_elm.is(this.focused_selector);
         },
 
         /**
@@ -1268,7 +1360,9 @@ tyrano.plugin.kag.key_mouse = {
                 j_buttons = $("#tyrano_base [tabindex].tyrano-focusable");
             }
             j_buttons = j_buttons.filter(function () {
-                return $(this).css("display") !== "none";
+                const is_display = $(this).css("display") !== "none";
+                const is_pointable = $(this).css("pointer-events") !== "none";
+                return is_display && is_pointable;
             });
             if (j_buttons.length <= 1) {
                 return j_buttons;
@@ -1291,6 +1385,40 @@ tyrano.plugin.kag.key_mouse = {
         },
 
         /**
+         * - j_focusable: フォーカス可能な要素の jQUery
+         * - j_focused: フォーカス可能な要素のうち、フォーカスされている要素の jQUery
+         * - j_unfocused: フォーカス可能な要素のうち、フォーカスされていない要素の jQUery
+         * @returns {{j_focusable: jQuery; j_focused: jQuery; j_unfocused: jQuery}}
+         * @example
+         * const { j_focusable, j_focused, j_unfocused } = this.util.getFocusableInfo();
+         */
+        getFocusableInfo() {
+            const j_focusable = this.findFocusable();
+            let j_focused = $();
+            let j_unfocused = $();
+            const arr = [];
+
+            // 存在しなければ帰る
+            if (j_focusable.length === 0) {
+                return { j_focusable, j_focused, j_unfocused };
+            }
+
+            // j_focusable のうち、いまフォーカスされている要素
+            j_focusable.each((i, elm) => {
+                const j_elm = $(elm);
+                if (j_focused.length === 0 && this.isFocused(j_elm)) {
+                    j_focused = j_elm;
+                } else {
+                    arr.push(elm);
+                }
+            });
+
+            j_unfocused = $(arr);
+
+            return { j_focusable, j_focused, j_unfocused };
+        },
+
+        /**
          * キーボードで選択肢をフォーカスしたときに仮のマウスカーソルを表示するかどうか
          * @returns {boolean}
          */
@@ -1303,18 +1431,16 @@ tyrano.plugin.kag.key_mouse = {
          * @param {jQuery} j_elm
          */
         focus(j_elm) {
-            j_elm.focus().addClass("hover focus");
+            j_elm.focus();
             if (this.shouldDisplayFocusCursor()) {
                 const rect = j_elm[0].getBoundingClientRect();
                 const half_height = rect.height / 2;
                 let y = (rect.top + half_height) | 0;
                 let x = rect.right - half_height;
-                this.parent.vmouse.hide();
-                this.parent.vmouse.place(x, y, 0, false);
-                this.parent.vmouse.refreshTransform(this.parent.j_focus_cursor, x, y);
-                this.parent.vmouse.refreshImage("pointer", this.parent.j_focus_cursor);
-                this.parent.j_focus_cursor.show();
+                this.parent.vmouse.place(x, y, 0);
                 this.parent.vmouse.j_html.addClass("vmouse-displayed");
+            } else {
+                this.parent.vmouse.hide();
             }
         },
 
@@ -1323,14 +1449,12 @@ tyrano.plugin.kag.key_mouse = {
          * @param {jQuery} j_elm
          */
         unfocus(j_elm, will_move_vmouse = false) {
-            if (!j_elm) j_elm = $(":focus");
+            if (!j_elm) j_elm = this.findFocused();
             if (will_move_vmouse && this.parent.vmouse.point_elm === j_elm[0]) {
                 return false;
             }
             if (j_elm.length === 0) return false;
-            j_elm.blur().removeClass("hover focus");
-            this.parent.j_focus_cursor.hide();
-            this.parent.vmouse.j_html.removeClass("vmouse-displayed");
+            j_elm.blur();
         },
 
         /**
@@ -1523,6 +1647,8 @@ tyrano.plugin.kag.key_mouse = {
      * マウスマネージャ
      */
     mouse: {
+        x: 0,
+        y: 0,
         parent: null,
         dirs: ["up", "down", "left", "right"],
         swiping: false,
@@ -1541,14 +1667,14 @@ tyrano.plugin.kag.key_mouse = {
          * @param {Object} that TYRANO.kag.key_mouse
          */
         init(that) {
-            this.parent = that;
+            that.util.refer(this);
 
             //
             // クリック
             //
 
             $(document).on("click", (e) => {
-                that.kag.setSkip(false);
+                if (!that.is_holding_skip) that.kag.setSkip(false);
             });
 
             //
@@ -1556,7 +1682,11 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             $(document).on("mousedown", (e) => {
-                that.util.clearSkip();
+                if (e.originalEvent && e.originalEvent.isTrusted) {
+                    that.vmouse.hide();
+                }
+
+                that.util.clearSkipAndAuto();
 
                 // 左ボタンの押下は無視
                 if (e.button === 0) return;
@@ -1606,6 +1736,8 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             $(document).on("mousemove", (e) => {
+                this.x = e.pageX;
+                this.y = e.pageY;
                 if (this.swiping && !this.swiping_done) {
                     clearTimeout(this.swiping_timer_id);
                     this.swiping_x += e.pageX - this.swiping_prev_x;
@@ -1655,7 +1787,7 @@ tyrano.plugin.kag.key_mouse = {
                 // ホールドスキップ
                 if (is_holdskip) {
                     clearTimeout(this.swiping_timer_id);
-                    that.kag.setSkip(false);
+                    that.util.clearHoldingSkip();
                     return false;
                 }
 
@@ -1703,6 +1835,18 @@ tyrano.plugin.kag.key_mouse = {
 
                 that.doAction(action, e);
             });
+        },
+
+        isClickEnabled(e) {
+            const that = this.parent;
+            // dispatchEvent ではなくユーザーの操作によって発生したか
+            const is_trusted = e.isTrusted || (e.originalEvent && e.originalEvent.isTrusted);
+            if (!is_trusted) return true;
+            if (that.vmouse.is_visible) return false;
+            const now = that.util.getTime();
+            const dif = now - that.vmouse.last_hide_time;
+            if (dif < 1000) return false;
+            return true;
         },
 
         /**
@@ -1753,7 +1897,7 @@ tyrano.plugin.kag.key_mouse = {
          * @param {Object} that TYRANO.kag.key_mouse
          */
         init(that) {
-            this.parent = that;
+            that.util.refer(this);
 
             // チックレートからアップデート間隔を計算
             this.tick_rate = that.KEYBOARD_TICK_RATE;
@@ -1827,7 +1971,7 @@ tyrano.plugin.kag.key_mouse = {
                     for (const key in this.key_state_map) {
                         const stt = this.key_state_map[key];
                         if (e.code === stt.code && stt.pressed) {
-                            console.warn(`${state.key} のかわりに ${stt.key} をキーアップしたことにします。`);
+                            // console.warn(`${state.key} のかわりに ${stt.key} をキーアップしたことにします。`);
                             state = stt;
                             break;
                         }
@@ -1843,7 +1987,7 @@ tyrano.plugin.kag.key_mouse = {
                 const tag_array = this.parent.util.parseTagArray(action);
                 for (const tag of tag_array) {
                     if (tag && tag.name === "holdskip") {
-                        that.kag.setSkip(false);
+                        that.util.clearHoldingSkip();
                     }
                     if (tag && tag.name === "ok") {
                         if (that.vmouse.is_visible) {
@@ -2007,6 +2151,7 @@ tyrano.plugin.kag.key_mouse = {
         fade_duration: 100, // 画面上のカーソルのフェードイン・アウトの所要時間
         tick_rate: 0, // 1 秒間に何回カーソルの状態をアップデートするか
         delay_update: null, // …という数値から、何ミリ秒に 1 回アップデートすればよいかを計算する
+        last_hide_time: 0, // 最後に消したタイムスタンプ
         default_image_map: {
             none: {
                 image_url: "./tyrano/images/system/transparent.png",
@@ -2028,12 +2173,12 @@ tyrano.plugin.kag.key_mouse = {
 
         /**
          * 初期化
-         * @param {Object} parent TYRANO.kag.key_mouse
+         * @param {Object} that TYRANO.kag.key_mouse
          */
-        init(parent) {
+        init(that) {
             if (this.is_initialized) return;
             this.is_initialized = true;
-            this.parent = parent;
+            that.util.refer(this);
             this.j_html = $("html");
             this.j_body = $("body");
             this.j_cursor = $('<img id="vmouse" src="./tyrano/images/system/transparent.png" />');
@@ -2045,8 +2190,8 @@ tyrano.plugin.kag.key_mouse = {
             $.extend(true, this.image_map, this.default_image_map);
 
             // 画面リサイズ時に情報を更新する
-            parent.kag.on("resize", () => {
-                const info = parent.kag.tmp.screen_info;
+            that.kag.on("resize", () => {
+                const info = that.kag.tmp.screen_info;
                 const scale_x = info.scale_x;
                 const scale_y = info.scale_y;
                 const x = (info.viewport_width / 2) | 0;
@@ -2072,7 +2217,8 @@ tyrano.plugin.kag.key_mouse = {
                     radius,
                 });
             });
-            parent.kag.once("resize", () => {
+
+            that.kag.once("resize", () => {
                 this.x = this.screen.x;
                 this.y = this.screen.y;
                 this.refreshTransform();
@@ -2114,7 +2260,6 @@ tyrano.plugin.kag.key_mouse = {
         show() {
             if (!this.is_visible) {
                 this.is_visible = true;
-                //this.j_cursor.css("visibility", "visible");
                 this.j_cursor.css("opacity", "1");
                 this.j_html.addClass("vmouse-displayed");
                 if (this.tick_rate > 0) {
@@ -2130,7 +2275,7 @@ tyrano.plugin.kag.key_mouse = {
         hide() {
             if (this.is_visible) {
                 this.is_visible = false;
-                //this.j_cursor.css("visibility", "hidden");
+                this.last_hide_time = this.parent.util.getTime();
                 this.j_cursor.css("opacity", "0");
                 this.j_html.removeClass("vmouse-displayed");
                 this.mouseleaveAll();
@@ -2332,6 +2477,9 @@ tyrano.plugin.kag.key_mouse = {
             const arr = [];
             let next_elm = elm;
             while (next_elm) {
+                if (next_elm.tagName === "HTML" || next_elm.tagName === "BODY") {
+                    break;
+                }
                 arr.push(next_elm);
                 next_elm = next_elm.parentElement;
             }
@@ -2344,8 +2492,11 @@ tyrano.plugin.kag.key_mouse = {
         mouseleaveAll() {
             $(".hover").each((i, elm) => {
                 this.trigger("mouseleave", elm, { bubbles: false });
+                this.trigger("mouseout", elm, { bubbles: false });
                 elm.classList.remove("hover");
             });
+            this.point_elm = null;
+            this.point_tree = [];
         },
 
         /**
@@ -2416,8 +2567,8 @@ tyrano.plugin.kag.key_mouse = {
             // クラスや画像の更新
             // this.j_cursor.removeClass(this.state);
             // this.j_cursor.addClass(new_state);
-            this.refreshImage(new_state);
             this.state = new_state;
+            this.refreshImage();
             this.is_pointer = this.isStatePointer(this.state);
 
             // 予約は取り消してよい
@@ -2432,6 +2583,7 @@ tyrano.plugin.kag.key_mouse = {
          */
         refreshImage(state, j_cursor) {
             if (!j_cursor) j_cursor = this.j_cursor;
+            if (!state) state = this.state;
             if (state === "none") {
                 j_cursor.attr("src", this.default_image_map.none.image_url);
                 return;
@@ -2537,7 +2689,7 @@ tyrano.plugin.kag.key_mouse = {
             this.scanPointElement();
             this.scanState();
             this.hideWithTimeout();
-            this.parent.j_focus_cursor.hide();
+            // this.parent.j_focus_cursor.hide();
         },
 
         /**
@@ -2814,7 +2966,7 @@ tyrano.plugin.kag.key_mouse = {
 
         // スティックを倒した絶対量（0.0～1.0）をX方向・Y方向で分けて合計した値（0.0～2.0）がこれ以下であれば
         // スティックの入力を無視する
-        MINIMAM_VALUE_DETECT_AXE: 0.1,
+        MINIMAM_VALUE_DETECT_AXE: 0.15,
 
         // スティック入力をデジタルな十字キー入力にパースするとき
         // スティックを倒した絶対量（0.0～1.0）がこの値以上になった瞬間にデジタル入力をトリガーする
@@ -2865,7 +3017,7 @@ tyrano.plugin.kag.key_mouse = {
          * 初期化
          */
         init(that) {
-            this.parent = that;
+            that.util.refer(this);
             this.TICK_RATE = that.GAMEPAD_TICK_RATE;
             this.DELAY_UPDATE = (1000 / this.TICK_RATE) | 0;
             this.MOVEMENT_VMOUSE_RATIO = (this.MOVEMENT_VMOUSE_PER_SECOND / this.TICK_RATE) | 0;
@@ -2936,8 +3088,8 @@ tyrano.plugin.kag.key_mouse = {
                         const interval_f = Math.ceil(interval / this.DELAY_UPDATE);
                         const f = e.detail.hold_frame - delay_f;
                         if (f > 0 && f % interval_f === 0) {
-                            that.doAction(tag, e);
-                            return;
+                            const done = that.doAction(tag, e);
+                            if (done) return;
                         }
                     }
                 }
@@ -2964,7 +3116,7 @@ tyrano.plugin.kag.key_mouse = {
                 const tag_array = this.parent.util.parseTagArray(action);
                 for (const tag of tag_array) {
                     if (tag && tag.name === "holdskip") {
-                        that.kag.setSkip(false);
+                        that.util.clearHoldingSkip();
                     }
                     if (tag && tag.name === "ok") {
                         if (that.vmouse.is_visible) {

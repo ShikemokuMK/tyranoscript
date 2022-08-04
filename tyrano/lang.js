@@ -3,6 +3,8 @@ window.tyrano_lang = {
         go_title: "タイトルに戻ります。よろしいですか？",
         exit_game: "ウィンドウを閉じて終了します。よろしいですか？",
         not_saved: "まだ、保存されているデータがありません。",
+        confirm: "確認",
+        confirm_beforeunload: "保存していない内容があります。ゲームを終了してもよろしいですか？",
         tag: "タグ",
         not_exists: "は存在しません。",
         error: "エラーが発生しました。スクリプトを確認して下さい。",

@@ -292,7 +292,7 @@ body{
 
 /*テキストボックスの共通スタイル*/
 .text_box{
-
+    
 }
 
 .tyrano_base{
@@ -873,7 +873,76 @@ html.vmouse-displayed * {
     cursor: none !important;
 }
 
+/*------　汎用非表示クラス(レイアウトに影響を与えない) -------*/
 .hidden {
     visibility: hidden !important;
     opacity: 0 !important;
+}
+
+/*------　リモーダルのカスタマイズ -------*/
+
+/*-- ボタン --*/
+#remodal-confirm,
+#remodal-cancel {
+    cursor: pointer;
+	-moz-user-select: none;
+    user-select: none;
+	-webkit-user-drag: none;
+    margin: 0 2px;
+}
+
+/*-- ボタン(画像) --*/
+img#remodal-confirm,
+img#remodal-cancel {
+    display: inline-block;
+}
+
+/*-- メッセージボックス --*/
+[data-remodal-id=modal] {
+    overflow: hidden;
+}
+
+/*-- 背景 --*/
+.remodal-wrapper .remodal-base,
+.remodal-wrapper .remodal-base .remodal-image,
+.remodal-wrapper .remodal-boxbase {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-image: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-size: auto;
+    background-position: center;
+    opacity: 1;
+    pointer-events: none;
+}
+
+.remodal-wrapper .remodal_title,
+.remodal-wrapper .remodal_txt {
+    pointer-events: none;
+}
+
+
+/*-- キーフレアニメ --*/
+.remodal-is-opening .remodal-base,
+.remodal-is-closing .remodal-base {
+    -webkit-animation-duration: 0.3s;
+    animation-duration: 0.3s;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+
+.remodal-is-opening .remodal-base {
+    -webkit-animation-name: remodal-overlay-opening-keyframes;
+    animation-name: remodal-overlay-opening-keyframes;
+}
+
+.remodal-is-closing .remodal-base {
+    -webkit-animation-name: remodal-overlay-closing-keyframes;
+    animation-name: remodal-overlay-closing-keyframes;
 }

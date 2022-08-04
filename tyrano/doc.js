@@ -27,7 +27,7 @@ var GROUP_RANK = [
     "アニメーション",
     "カメラ操作",
     "システム操作",
-    "システム画面・画像変更",
+    "システムデザイン変更",
     "メニュー・HTML表示",
     "マクロ・分岐・サブルーチン関連",
     "変数・JS操作・ファイル読込",
@@ -95,140 +95,163 @@ var PARAM_EXP = {
 
         for (var i = 0; i < array_script.length; i++) {
             $.loadText("./tyrano/plugins/kag/" + array_script[i], function (text_str) {
-                var flag_tag = ""; //タグ解析中の場合タグ名が入る
-                var flag_param = ""; //パラメータ名
+                var tag_name = ""; // string, いま解析中のタグ名
+                var param_key = ""; // string, いま解析中のパラメータキー (例) "title", "group", "exp", ...
+                var param_text = ""; // string, いま解析中のパラメータのテキストを結合していったもの
 
-                var tmp_str = "";
-
-                //改行で刻んで1行ずつ見ていく
-                var array_str = text_str.split("\n");
-
-                for (var origin_line_str of array_str) {
+                text_str.split("\n").forEach((origin_line_str) => {
                     //トリミング
                     var line_str = $.trim(origin_line_str);
 
-                    if (line_str != "" || flag_tag != "") {
-                        //空行ではない場合、または空行であってもタグ解析中の場合(タグ解析中は空行(改行)も使いたい意図)
-                        if (line_str === "#[end]") {
-                            //タグ解析終了トークンに到達した場合
-                            //終了時点で登録すべきデータが残っていた場合は入れておく
-                            map_doc[flag_tag][flag_param] = tmp_str;
-                            flag_tag = "";
-                            flag_param = "";
-                        } else if (flag_tag != "") {
-                            //タグ解析中の場合
-                            if (line_str.substr(0, 1) == ":") {
-                                //:hogeという行の場合
-                                //まずそれまで読んでいたひとつ前の属性データを格納する
-                                if (tmp_str != "") {
-                                    if (flag_param != "") {
-                                        map_doc[flag_tag][flag_param] = tmp_str;
-                                    }
-                                }
-                                //新しい属性
-                                flag_param = "";
-                                flag_param = line_str.substr(1, line_str.length);
-                                //初期化
-                                map_doc[flag_tag][flag_param] = "";
-                                tmp_str = "";
-                            } else {
-                                //サンプルコード中はインデントを使う(トリミング前に戻す)
-                                if (flag_param === "sample") {
-                                    line_str = origin_line_str;
-                                }
-                                //:paramでも:titleでもないなら改行を足す
-                                if (flag_param != "param" && flag_param != "title") {
-                                    line_str += "\n";
-                                }
-                                if (flag_param === "param") {
-                                    line_str += "φ";
-                                }
-                                tmp_str += line_str;
-                            }
-
-                            //タグ読み込み開始
-                        } else if (line_str.substr(0, 2) === "#[") {
-                            var tag_name = line_str.replace("#[", "");
+                    if (!tag_name) {
+                        // ドキュメント解析中ではないときに #[ から始まる行を検知した場合は
+                        // ドキュメント解析モードに移行する
+                        if (line_str.substr(0, 2) === "#[") {
+                            tag_name = line_str.replace("#[", "");
                             tag_name = tag_name.replace("]", "");
                             tag_name = $.trim(tag_name);
-
-                            flag_tag = tag_name;
-                            flag_param = "";
-
-                            map_doc[flag_tag] = {};
+                            param_key = "";
+                            param_text = "";
+                            map_doc[tag_name] = {};
                         }
+                        return;
                     }
-                }
+
+                    // ドキュメント解析中に #[end] に一致する行を検知した場合は
+                    // 解析したデータを格納してドキュメント解析モードを終了する
+                    if (line_str === "#[end]") {
+                        if (param_key) map_doc[tag_name][param_key] = param_text;
+                        tag_name = "";
+                        param_key = "";
+                        param_text = "";
+                        return;
+                    }
+
+                    // ドキュメント解析中に : から始まる行を検知した場合はヘッダーとして解釈
+                    // :group, :title, :exp, :param, :sample
+                    if (line_str.substr(0, 1) == ":") {
+                        // 直前のコンテンツを格納する
+                        if (param_key) map_doc[tag_name][param_key] = param_text;
+
+                        // 新しいパラメータと初期化
+                        param_key = line_str.substr(1, line_str.length);
+                        map_doc[tag_name][param_key] = "";
+                        param_text = "";
+                        return;
+                    }
+
+                    //
+                    // パラメータテキストを足す処理を遂行
+                    // param_text += line_str
+                    // ただしなんのパラメータを読んでいるかで処理を変更したい
+                    //
+
+                    // :sample 中はインデントを使いたいのでトリミング前に戻す
+                    if (param_key === "sample") {
+                        line_str = origin_line_str;
+                    }
+
+                    param_text += line_str + "\n";
+                });
 
                 //macdoc を　解析して、HTMLを作成
 
                 loading_num++;
 
                 if (loading_num == script_num) {
-                    //HTML作成
-                    $.putHtml(map_doc, master_tag);
-
-                    ////////スタジオ用データ作成
                     for (const tag_name in map_doc) {
-                        var tag = map_doc[tag_name];
-                        tag.array_param = [];
-
-                        var array_param = tag.param.split(",φ");
-                        array_param = array_param.map((item) => {
-                            return item.replace(/φ/g, "");
-                        });
-                        if (array_param.length && array_param[array_param.length - 1] === "") {
-                            array_param.pop();
-                        }
-
-                        for (var k = 0; k < array_param.length; k++) {
-                            var tmp_array = array_param[k].split("=");
-                            var param_name = $.trim(tmp_array[0]);
-                            var param_value = $.trim(tmp_array.slice(1).join("="));
-                            param_value = replaceParamExpWithConstant(param_value, param_name, tag_name);
-                            param_value = markup(param_value);
-
-                            if (param_name == "") {
-                                continue;
-                            }
-
-                            var pm_obj = {
-                                name: param_name,
-                                value: param_value,
-                                vital: "×",
-                                default: "",
-                            };
-
-                            if (master_tag[tag_name].pm && master_tag[tag_name].pm[param_name]) {
-                                pm_obj["default"] = master_tag[tag_name].pm[param_name];
-                            }
-
-                            if (master_tag[tag_name] != null && master_tag[tag_name]["vital"] != null) {
-                                var array_vital = master_tag[tag_name]["vital"];
-
-                                for (var j = 0; j < array_vital.length; j++) {
-                                    if (master_tag[tag_name].vital[j] == param_name) {
-                                        pm_obj["vital"] = "◯";
-                                        break;
-                                    }
-                                }
-                            }
-
-                            tag.array_param.push(pm_obj);
-
-                            delete tag["param"];
-                        }
-                    } //end for loop
+                        map_doc[tag_name].array_param = $.parseParam(master_tag, tag_name, map_doc[tag_name].param);
+                    }
 
                     console.log("===map_doc");
                     console.log(map_doc);
 
                     $("#studio_json").val(JSON.stringify(map_doc, undefined, 4));
+
+                    $.putHtml(map_doc, master_tag);
                 }
-            }); //　ローディング
+            });
         }
 
         return html;
+    };
+
+    // ドキュメントの :param を解釈
+    //
+    // (入力例)
+    // "storage = ジャンプ先のシナリオを指定します。\ntarget = ジャンプ先のラベルを指定します。"
+    //
+    // (出力例)
+    // [
+    //     {
+    //         name: "storage",
+    //         value: "ジャンプ先のシナリオを指定します。",
+    //         vital: "〇",
+    //         default: "",
+    //     },
+    //     {
+    //         name: "storage",
+    //         value: "ジャンプ先のシナリオを指定します。",
+    //         vital: "〇",
+    //         default: "",
+    //     },
+    // ]
+    $.parseParam = function (master_tag, tag_name, param_text) {
+        if (!param_text) param_text = "";
+        const param_array = [];
+
+        // 改行でで分割, 最後の空文字を除去
+        const param_lines = param_text.split("\n");
+        if (param_lines.length && param_lines.slice(-1) === "") {
+            param_lines.pop();
+        }
+
+        let tmp_name = "";
+        let tmp_value = "";
+        let tmp_vital = "";
+        let tmp_default = "";
+
+        const push = () => {
+            if (!tmp_name) return;
+            tmp_value = tmp_value.trim();
+            if (tmp_value.slice(-1) === ",") tmp_value = tmp_value.slice(0, -1);
+            tmp_value = replaceParamExpWithConstant(tmp_value, tmp_name, tag_name);
+            tmp_value = markup(tmp_value);
+            param_array.push({
+                name: tmp_name,
+                value: tmp_value,
+                vital: tmp_vital,
+                default: tmp_default,
+            });
+            tmp_name = "";
+            tmp_value = "";
+            tmp_vital = "";
+            tmp_default = "";
+        };
+
+        param_lines.forEach((line) => {
+            line = line.trim();
+            const is_new_param = !!line.match(/^\s*[^ =]+\s*=\s*.*$/);
+            if (is_new_param) {
+                push();
+                tmp_name = line.match(/^\s*([^ =]+)/)[1];
+                if (master_tag[tag_name].pm && master_tag[tag_name].pm[tmp_name]) {
+                    tmp_default = master_tag[tag_name].pm[tmp_name];
+                }
+                if (master_tag[tag_name] && master_tag[tag_name].vital) {
+                    if (master_tag[tag_name].vital.includes(tmp_name)) {
+                        tmp_vital = "〇";
+                    }
+                }
+                const hash = line.split("=");
+                hash.shift();
+                tmp_value = hash.join("=");
+                return;
+            }
+            tmp_value += line;
+        });
+        push();
+        return param_array;
     };
 
     $.putHtml = function (map_doc, master_tag) {
@@ -404,59 +427,15 @@ var PARAM_EXP = {
                 '<thead style="background-color:pink"><tr><th>パラメータ</th><th>必須</th><th>解説</th><th>初期値</th></tr></thead>' +
                 "<tbody>";
 
-            var array_param = obj.param ? obj.param.split(",φ") : [];
-            array_param = array_param.map((item) => {
-                return item.replace(/φ/g, "");
-            });
-            if (array_param.length && array_param[array_param.length - 1] === "") {
-                array_param.pop();
-            }
-
-            //console.log("==== array_param  =====");
-            //console.log(array_param);
+            const array_param = obj.array_param;
 
             if (array_param.length === 0) {
                 html += '<tr ><td colspan="4">指定できるパラメータはありません。</td></tr>';
             }
-            for (var k = 0; k < array_param.length; k++) {
-                if (array_param[k] == "") {
-                    html += '<tr ><td colspan="4">指定できるパラメータはありません。</td></tr>';
-                    continue;
-                } else {
-                    var tmp_array = array_param[k].split("=");
-
-                    //属性名
-                    var param_name = $.trim(tmp_array[0]);
-
-                    //解説
-                    var param_exp = $.trim(tmp_array.slice(1).join("="));
-                    param_exp = replaceParamExpWithConstant(param_exp, param_name, tag_name);
-                    param_exp = markup(param_exp);
-
-                    //初期値
-                    var param_initial = "";
-                    try {
-                        param_initial = tyrano.plugin.kag.tag[tag_name].pm[param_name];
-                    } catch (err) {}
-                    param_initial = param_initial ? `<span class="code">${param_initial}</span>` : "";
-
-                    //必須
-                    var vital = "×";
-                    if (master_tag[tag_name] != null && master_tag[tag_name]["vital"] != null) {
-                        var array_vital = master_tag[tag_name]["vital"];
-
-                        for (var j = 0; j < array_vital.length; j++) {
-                            if (master_tag[tag_name].vital[j] == param_name) {
-                                vital = "◯";
-                                break;
-                            }
-                        }
-                    }
-
-                    html += `<tr><td>${param_name}</td><td>${vital}</td>` + `<td>${param_exp}</td><td>${param_initial}</td></tr>`;
-                }
-            } //end for loop
-
+            array_param.forEach((param) => {
+                const initial = param.default ? `<span class="code">${param.default}</span>` : "";
+                html += `<tr><td>${param.name}</td><td>${param.vital}</td>` + `<td>${param.value}</td><td>${initial}</td></tr>`;
+            });
             html += "</tbody></table>";
 
             //サンプルコード

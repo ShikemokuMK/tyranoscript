@@ -2333,6 +2333,14 @@ tyrano.plugin.kag.tag.jump = {
     },
 
     start: function (pm) {
+        if (this.kag.stat.hold_glink && !pm.storage && !pm.target) {
+            pm.storage = this.kag.stat.hold_glink_storage;
+            pm.target = this.kag.stat.hold_glink_target;
+            this.kag.stat.hold_glink = false;
+            this.kag.stat.hold_glink_storage = "";
+            this.kag.stat.hold_glink_target = "";
+        }
+
         var that = this;
         //ジャンプ直後のwt などでフラグがおかしくなる対策
         setTimeout(function () {
@@ -2603,7 +2611,7 @@ marginl      = メッセージウィンドウの左余白を指定します。,
 margint      = メッセージウィンドウの上余白を指定します。,
 marginr      = メッセージウィンドウの右余白を指定します。,
 marginb      = メッセージウィンドウの下余白を指定します。,
-margin       = メッセージウィンドウの余白を一括で指定します。たとえば`30`と指定すると上下左右すべてに30pxの余白ができます。<br>カンマ区切りで方向ごとの余白を一括指定することもできます。`上下,左右`、`上,左右,下`、`上,右,下,左`のように指定できます（方向の部分は数値に変えてください）。
+margin       = メッセージウィンドウの余白を一括で指定します。たとえば`30`と指定すると上下左右すべてに30pxの余白ができます。<br>カンマ区切りで方向ごとの余白を一括指定することもできます。`上下,左右`、`上,左右,下`、`上,右,下,左`のように指定できます（方向の部分は数値に変えてください）。,
 radius       = メッセージウィンドウの角の丸みを数値で指定します。例：`10`(控えめな角丸)、`30`(普通の角丸)、`100`(巨大な角丸),
 vertical     = メッセージウィンドウを縦書きモードにするかどうか。`true`または`false`で指定します。`true`で縦書き、`false`で横書き。,
 visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`を指定すると、同時にメッセージレイヤの表示状態を操作できます。,
@@ -4174,6 +4182,23 @@ tyrano.plugin.kag.tag.link = {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
+            //
+            // 無効な場合を検知
+            //
+
+            // 仮想マウスカーソルが表示中、あるいは非表示になってから間もないなら無効
+            if (!that.kag.key_mouse.mouse.isClickEnabled(e)) {
+                that.kag.key_mouse.vmouse.hide();
+                return false;
+            }
+
+            //
+            // クリックが有効だったときの処理
+            //
+
+            // 仮想マウスカーソルを消去
+            that.kag.key_mouse.vmouse.hide();
+
             // ティラノイベント"click-tag-link"を発火
             that.kag.trigger("click-tag-link", e);
 
@@ -4521,6 +4546,14 @@ tyrano.plugin.kag.tag.s = {
      */
     calcFlexPosition: function (glink_config) {
         const j_message_layer = this.kag.layer.getLayer(this.kag.stat.current_layer, this.kag.stat.current_page);
+        if (j_message_layer.css("display") === "none") {
+            return {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: "100%",
+            };
+        }
         const j_message_outer = j_message_layer.find(".message_outer");
         const gh = this.kag.tmp.screen_info.original_height;
         const gh_half = gh / 2;
@@ -6104,6 +6137,12 @@ tyrano.plugin.kag.tag.button = {
             //　無効な場合を検知
             //
 
+            // 仮想マウスカーソルが表示中、あるいは非表示になってから間もないなら無効
+            if (!that.kag.key_mouse.mouse.isClickEnabled(e)) {
+                that.kag.key_mouse.vmouse.hide();
+                return false;
+            }
+
             // [s]または[wait]に到達していないときの非固定ボタンは無効
             if (!this.kag.stat.is_strong_stop && !is_fix_button) return false;
 
@@ -6132,6 +6171,9 @@ tyrano.plugin.kag.tag.button = {
             //
             // クリックが有効だった場合の処理
             //
+
+            // 仮想マウスカーソルを消去
+            this.kag.key_mouse.vmouse.hide();
 
             // 非固定ボタンの場合クリック済みであるフラグを立てよう
             if (!is_fix_button) {
@@ -6326,6 +6368,7 @@ width            = `max`と指定すると、ボタンの横幅を『一番横�
 height           = `max`と指定すると、ボタンの高さを『一番横幅の大きいボタンの高さ』に揃えることができます。数値を直接指定することで共通の高さを指定することもできます。`default`を指定すると調整を行いません。,
 vertical         = ボタンの縦方向の揃え方を`top`(上揃え)、`center`(中央揃え)、`bottom`(下揃え)のいずれかで指定します。,
 horizontal       = ボタンの横方向の揃え方を`left`(左揃え)、`center`(中央揃え)、`right`(右揃え)のいずれかで指定します。,
+wrap             = `wrap`を指定すると、ボタンが収まりきらないときの折り返しが有効になります。,
 place_area       = 揃え方の基準となる領域の位置や大きさを指定できます。`auto`(デフォルト)を指定すると、メッセージウィンドウ考慮して自動で領域を調整します。`cover`だと画面全体を基準にします。領域の位置とサイズを直接指定したい場合は`100,100,1000,1000`のようにカンマ区切りで数値を4つ指定してください。そうすると、順にleft, top, width, heightとして解釈されます。,
 show_time        = 表示アニメーションにかける時間をミリ秒単位で指定します。`0`を指定するとアニメーションを行いません。なお、アニメーション中はクリックすることができません。,
 show_effect      = 表示アニメーションのエフェクトを以下のキーワードから指定できます。<br>`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``lightSpeedIn``rotateIn``rotateInDownLeft``rotateInDownRight``rotateInUpLeft``rotateInUpRight``zoomIn``zoomInDown``zoomInLeft``zoomInRight``zoomInUp``bounceIn``bounceInDown``bounceInLeft``bounceInRight``bounceInUp``rollIn``vanishIn``puffIn`,
@@ -6497,6 +6540,7 @@ tyrano.plugin.kag.tag.glink = {
         font_color: "",
         storage: null,
         target: null,
+        hold: "",
         name: "",
         text: "",
         x: "auto",
@@ -6685,6 +6729,12 @@ tyrano.plugin.kag.tag.glink = {
             // 無効な場合を検知
             //
 
+            // 仮想マウスカーソルが表示中、あるいは非表示になってから間もないなら無効
+            if (!this.kag.key_mouse.mouse.isClickEnabled(e)) {
+                this.kag.key_mouse.vmouse.hide();
+                return false;
+            }
+
             // [s]または[wait]に到達していないときは無効
             if (!this.kag.stat.is_strong_stop) return false;
 
@@ -6697,6 +6747,9 @@ tyrano.plugin.kag.tag.glink = {
 
             // ボタンクリック済み
             button_clicked = true;
+
+            // 仮想マウスカーソルを消去
+            this.kag.key_mouse.vmouse.hide();
 
             // 他の[glink]を即座に無効にするためにストロングストップを切っておこう
             this.kag.cancelStrongStop();
@@ -6729,7 +6782,16 @@ tyrano.plugin.kag.tag.glink = {
                 }
 
                 // [jump]の実行
-                this.kag.ftag.startTag("jump", pm);
+                if (pm.hold === "true") {
+                    this.kag.stat.hold_glink = true;
+                    this.kag.stat.hold_glink_storage = pm.storage;
+                    this.kag.stat.hold_glink_target = pm.target;
+                    this.kag.cancelStrongStop();
+                    this.kag.cancelWeakStop();
+                    this.kag.ftag.nextOrder();
+                } else {
+                    this.kag.ftag.startTag("jump", pm);
+                }
 
                 // 選択肢の後、スキップを継続するか否か
                 if (this.kag.stat.skip_link === "true") {
@@ -7041,7 +7103,7 @@ tyrano.plugin.kag.tag.clickable = {
 #[glyph]
 
 :group
-システム画面・画像変更
+システムデザイン変更
 
 :title
 クリック待ちグリフの設定

@@ -604,7 +604,7 @@ tyrano.plugin.kag.tag.showmenu = {
 #[showmenubutton]
 
 :group
-システム画面・画像変更
+システムデザイン変更
 
 :title
 メニューボタンの表示
@@ -640,7 +640,7 @@ tyrano.plugin.kag.tag.showmenubutton = {
 #[hidemenubutton]
 
 :group
-システム画面・画像変更
+システムデザイン変更
 
 :title
 メニューボタンの非表示
