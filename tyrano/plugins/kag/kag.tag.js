@@ -876,7 +876,7 @@ tyrano.plugin.kag.tag.text = {
      */
     showMessage: function (message_str, is_vertical) {
         // 現在の発言者名（誰も喋っていない場合は空の文字列）
-        const chara_name = this.kag.getCharaName();
+        const chara_name = this.kag.chara.getCharaName();
 
         // バックログにテキストを追加
         this.pushTextToBackLog(chara_name, message_str);
@@ -1362,7 +1362,7 @@ tyrano.plugin.kag.tag.text = {
         this.kag.stat.is_hide_message = false;
 
         // chara_name_area の隠蔽
-        this.kag.getCharaNameArea().hide();
+        this.kag.chara.getCharaNameArea().hide();
 
         // そもそも発言者が空欄ならothers用のふきだし処理にぶん投げる！(早期リターン)
         if (chara_jname == "") {

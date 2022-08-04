@@ -1938,7 +1938,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
     start: function (pm) {
         this.kag.weaklyStop();
-        const j_chara_name = this.kag.getCharaNameArea();
+        const j_chara_name = this.kag.chara.getCharaNameArea();
 
         //
         // 発言者名
@@ -1950,7 +1950,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
             // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
             if (this.kag.stat.chara_talk_focus != "none") {
-                this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
+                this.kag.chara.setNotSpeakerStyle(this.kag.chara.getCharaContainer());
             }
 
             //ズームの場合は最後にズームされたキャラをもとに戻す
@@ -1979,13 +1979,13 @@ tyrano.plugin.kag.tag.chara_ptext = {
                     j_chara_name.css("color", $.convertColor(cpm.color));
                 }
 
-                const j_chara_speaker = this.kag.getCharaElement(pm.name);
+                const j_chara_speaker = this.kag.chara.getCharaContainer(pm.name);
 
                 // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当ててから
                 // 発言者にのみ発言者用のスタイルを当てる
                 if (this.kag.stat.chara_talk_focus != "none") {
-                    this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
-                    this.kag.setSpeakerStyle(j_chara_speaker);
+                    this.kag.chara.setNotSpeakerStyle(this.kag.chara.getCharaContainer());
+                    this.kag.chara.setSpeakerStyle(j_chara_speaker);
                 }
 
                 // 発言時アニメーション機能が有効な場合
@@ -2018,7 +2018,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
                 // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
                 if (this.kag.stat.chara_talk_focus != "none") {
-                    this.kag.setNotSpeakerStyle(this.kag.getCharaElement());
+                    this.kag.chara.setNotSpeakerStyle(this.kag.chara.getCharaContainer());
                 }
 
                 //ズームの場合は最後にズームされたキャラをもとに戻す
@@ -2121,7 +2121,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
         var anim_time = this.kag.stat.chara_talk_anim_time;
 
         if (this.kag.stat.chara_last_zoom_name != "") {
-            let j_chara_last_zoom = this.kag.getCharaElement(this.kag.stat.chara_last_zoom_name);
+            let j_chara_last_zoom = this.kag.chara.getCharaContainer(this.kag.stat.chara_last_zoom_name);
 
             j_chara_last_zoom.css("margin", 0);
             j_chara_last_zoom.stop(true, true).animate(
@@ -2147,7 +2147,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
         this.kag.stat.chara_last_zoom_name = name;
 
         if (name != "") {
-            let chara_obj = this.kag.getCharaElement(name);
+            let chara_obj = this.kag.chara.getCharaContainer(name);
             chara_obj.css("margin", 0);
             chara_obj.stop(true, true).animate(
                 {
@@ -3950,7 +3950,7 @@ tyrano.plugin.kag.tag.filter = {
 
         const filter_str = this.buildFilterPropertyValue(pm);
 
-        j_obj.setFilterCSS(filter_str);
+        j_obj.setFilterCSS(filter_str, false);
 
         j_obj.addClass("tyrano_filter_effect");
 

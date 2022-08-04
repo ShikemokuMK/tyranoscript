@@ -99,6 +99,18 @@ body {
     opacity: 0 !important;
 }
 
+/* 新しいスタックコンテキストを作成 */
+.z-0 {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* [filter] で付与, [free_filter] で除去 */
+.tyrano_filter_effect {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
 /* 縦書き
 --------------------------------------*/
 

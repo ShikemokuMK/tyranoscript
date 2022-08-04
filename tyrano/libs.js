@@ -1723,19 +1723,20 @@
     /**
      * CSSのfilterプロパティに値をセット
      * prefixを考慮
-     * @param {string} str filterプロパティに値をセット
+     * @param {string} str filter プロパティにセットする値
+     * @param {boolean} [add_z_0=true] z-0 クラスを付けるかどうか
      * @return {jQuery}
      */
-    $.fn.setFilterCSS = function (str) {
-        // transform: translateZ(0); でGPUレイヤー作成を促す
+    $.fn.setFilterCSS = function (str, add_z_0 = true) {
+        // プレフィックスを考慮して filter プロパティをセット
+        this.setStyle("filter", str, ["webkit", "moz", "ms"]);
+
+        // z-0 クラスを付与して transform: translateZ(0) でGPUレイヤー作成を促す
         // Safari on iOS においてfilterプロパティだけではGPUレイヤーが作成されず
         // filterが崩れる可能性がある
-        return this.setStyleMap({
-            "-webkit-filter": str,
-            "-ms-filter": str,
-            "-moz-filter": str,
-            "transform": "translateZ(0)",
-        });
+        if (add_z_0) this.addClass("z-0");
+
+        return this;
     };
 
     /**
@@ -1833,8 +1834,8 @@
      * CSSのオブジェクトを渡してセットする
      * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
      * こちらのメソッドであれば処理時間が40-50%ほどで済む
-     * @param {Object} map CSSのプロパティと値が対になっているオブジェクト
-     * @param {string[]} prefixes ベンダープレフィックス対応 (例) [ "webkit", "mz" ]
+     * @param {{[key: string]: string;}} map CSSのプロパティと値が対になっているオブジェクト
+     * @param {string | string[]} [prefixes] ベンダープレフィックス対応 (例) [ "webkit", "mz" ]
      * @return {jQuery}
      */
     $.fn.setStyleMap = function (map, prefixes) {
@@ -1865,17 +1866,27 @@
      * CSSのキーとバリューを渡してセットする
      * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
      * こちらのメソッドであれば処理時間が40-50%ほどで済む
-     * @param {Object} key
-     * @param {Object} value
+     * @param {string} key
+     * @param {string} value
+     * @param {string | string[]} [prefixes] ベンダープレフィックス対応 (例) [ "webkit", "mz" ]
      * @return {jQuery}
      */
-    $.fn.setStyle = function (key, value) {
+    $.fn.setStyle = function (key, value, prefixes) {
         const len = this.length;
         if (len === 0) {
             return this;
         }
+        if (typeof prefixes === "string") {
+            prefixes = [prefixes];
+        }
         for (let i = 0; i < len; i++) {
             const elm = this[i];
+            if (prefixes) {
+                for (const prefix of prefixes) {
+                    const prefix_key = `-${prefix}-${key}`;
+                    elm.style.setProperty(prefix_key, value);
+                }
+            }
             elm.style.setProperty(key, value);
         }
         return this;

@@ -2490,78 +2490,6 @@ tyrano.plugin.kag = {
     },
 
     /**
-     * 発言者の名前欄を意味する<p>要素のjQueryオブジェクトを返す
-     * そもそも[chara_config]タグによる chara_ptext の設定が済んでいない場合は空のjQueryオブジェクトを返す
-     * @returns {jQuery}
-     */
-    getCharaNameArea: function () {
-        return this.stat.chara_ptext ? $("." + this.stat.chara_ptext) : $();
-    },
-
-    /**
-     * 発言者の名前を返す
-     * 発言者がいない場合は空の文字列を返す
-     * @returns {string}
-     */
-    getCharaName: function () {
-        let chara_name = "";
-        if (this.stat.chara_ptext != "") {
-            // 発言者エリアを取得
-            const j_chara_name = this.getCharaNameArea();
-            if (!j_chara_name.hasClass("multiple-text")) {
-                // ふつうはこれでよい
-                chara_name = $.isNull(j_chara_name.html());
-            } else {
-                // 個別縁取りが施されている場合
-                // この場合はそのままhtml()するとエラいことになる！
-                // span
-                //   span.stroke あ
-                //   span.fill   あ
-                // span
-                //   span.stroke か
-                //   span.fill   か
-                // span
-                //   span.stroke ね
-                //   span.fill   ね
-                // こんな構造になっているから
-                chara_name = j_chara_name.find(".fill").text();
-            }
-        }
-        return chara_name;
-    },
-
-    /**
-     * キャラクターのjQueryオブジェクトを返す
-     * @returns {jQuery}
-     */
-    getCharaElement: function (chara_name) {
-        let selector = ".tyrano_chara";
-        if (chara_name) {
-            selector += "." + chara_name;
-        }
-        return $("#tyrano_base").find(selector);
-    },
-
-    /**
-     * 発言していない人用のスタイルを当てる
-     * @param {jQuery} j_chara
-     */
-    setNotSpeakerStyle: function (j_chara) {
-        const filter = this.stat.apply_filter_str;
-        j_chara.setFilterCSS(filter);
-    },
-
-    /**
-     * 発言者用のスタイルを当てる
-     * @param {jQuery} j_chara
-     */
-    setSpeakerStyle: function (j_chara) {
-        // 発言していない人はフィルターなし
-        const filter = "";
-        j_chara.setFilterCSS(filter);
-    },
-
-    /**
      * ティラノスクリプトの[keyframe]-[frame]-[endkeyframe]で定義されたキーフレームアニメーションを
      * Web Animation APIで使用できるキーフレーム情報に変換する
      * @param {string} name [keyframe]タグに指定したname
@@ -2775,6 +2703,67 @@ tyrano.plugin.kag = {
 
     chara: {
         init() {},
+
+        /**
+         * 発言者の名前欄を意味する p 要素を返す
+         * [chara_config] タグによる chara_ptext の設定が済んでいない場合は
+         * 空のjQueryオブジェクトを返す
+         * @returns {jQuery}
+         */
+        getCharaNameArea() {
+            return this.kag.stat.chara_ptext ? $("." + this.kag.stat.chara_ptext) : $();
+        },
+
+        /**
+         * 発言者の名前を返す
+         * 発言者がいない場合は空の文字列を返す
+         * @returns {string}
+         */
+        getCharaName() {
+            let chara_name = "";
+            if (this.kag.stat.chara_ptext != "") {
+                // 発言者エリアを取得
+                const j_chara_name = this.getCharaNameArea();
+                if (!j_chara_name.hasClass("multiple-text")) {
+                    // ふつうはこれでよい
+                    chara_name = $.isNull(j_chara_name.html());
+                } else {
+                    // 個別縁取りが施されている場合
+                    // この場合はそのままhtml()するとエラいことになる！
+                    // span
+                    //   span.stroke あ
+                    //   span.fill   あ
+                    // span
+                    //   span.stroke か
+                    //   span.fill   か
+                    // span
+                    //   span.stroke ね
+                    //   span.fill   ね
+                    // こんな構造になっているから
+                    chara_name = j_chara_name.find(".fill").text();
+                }
+            }
+            return chara_name;
+        },
+
+        /**
+         * 発言していない人用のスタイルを当てる
+         * @param {jQuery} j_chara
+         */
+        setNotSpeakerStyle(j_chara) {
+            const filter = this.kag.stat.apply_filter_str;
+            j_chara.setFilterCSS(filter);
+        },
+
+        /**
+         * 発言している人用のスタイルを当てる
+         * @param {jQuery} j_chara
+         */
+        setSpeakerStyle: function (j_chara) {
+            // 発言していない人はフィルターなし
+            const filter = "";
+            j_chara.setFilterCSS(filter);
+        },
 
         /**
          * mix-blend-mode: plus-lighter を使用するか？
