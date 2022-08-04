@@ -293,7 +293,7 @@ tyrano.plugin.kag.key_mouse = {
 
         // 最後に"next"系アクションを実行したゲームパッドを記憶しておく
         // [vibrate] タグでどのゲームパッドを振動させればよいかの判定に用いる
-        is_next = name === "ok" || name === "next";
+        const is_next = name === "ok" || name === "next";
         pm.is_gamepad = event.type.indexOf("gamepad") === 0;
         pm.is_keyboard = event.type.indexOf("key") === 0;
         if (is_next) {

@@ -2533,7 +2533,7 @@
             case 3:
                 top = hash[0];
                 left = right = hash[1];
-                bototm = hash[2];
+                bottom = hash[2];
                 break;
             default:
             case 4:

@@ -42,6 +42,63 @@ body {
     background-color: rgba(0, 0, 0, 0);
 }
 
+/* 画面パーツ
+--------------------------------------*/
+
+/* メニューを開くボタン */
+.button_menu {
+    position: absolute;
+    z-index: 99999;
+    top: 20px;
+    cursor: pointer;
+}
+
+/* クリック待ちグリフ */
+.img_next {
+    padding-left: 3px;
+}
+
+.chara_part_container {
+    /* スタックコンテキストを生成 */
+    transform: translateZ(0);
+}
+
+.plus_lighter_container img {
+    mix-blend-mode: plus-lighter;
+}
+
+.tyrano_chara .chara_img {
+    position: absolute;
+}
+
+/* [edit]タグで出す<input>要素 */
+.text_box {
+}
+
+/*ダイアログボックス*/
+#alertify {
+    z-index: 9999999;
+}
+
+/* 汎用クラス
+--------------------------------------*/
+
+/* 左右反転 */
+.reflect {
+    -webkit-transform: scaleX(-1);
+    -moz-transform: scaleX(-1);
+    -ms-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+}
+
+/* 透明化 */
+.hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
 /* 縦書き
 --------------------------------------*/
 
@@ -270,50 +327,6 @@ body {
     color: #666;
     overflow: hidden;
     box-sizing: border-box;
-}
-
-/* 画面パーツ
---------------------------------------*/
-
-/* メニューを開くボタン */
-.button_menu {
-    position: absolute;
-    z-index: 99999;
-    top: 20px;
-    cursor: pointer;
-}
-
-/* クリック待ちグリフ */
-.img_next {
-    padding-left: 3px;
-}
-
-/* [edit]タグで出す<input>要素 */
-.text_box {
-}
-
-/*ダイアログボックス*/
-#alertify {
-    z-index: 9999999;
-}
-
-/* 汎用クラス
---------------------------------------*/
-
-/* 左右反転 */
-.reflect {
-    -webkit-transform: scaleX(-1);
-    -moz-transform: scaleX(-1);
-    -ms-transform: scaleX(-1);
-    -o-transform: scaleX(-1);
-    transform: scaleX(-1);
-    filter: FlipH;
-}
-
-/* 透明化 */
-.hidden {
-    visibility: hidden !important;
-    opacity: 0 !important;
 }
 
 /* VChat

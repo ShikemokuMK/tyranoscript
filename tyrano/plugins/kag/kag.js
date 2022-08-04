@@ -711,6 +711,10 @@ tyrano.plugin.kag = {
         this.studio.kag = that;
         this.studio.init();
 
+        this.chara = object(tyrano.plugin.kag.chara);
+        this.chara.kag = that;
+        this.chara.init();
+
         //セーブデータ認証用のKey確認（ローカルストレージ）
         if ($.isElectron() && that.kag.config.configSave == "file") {
             //PC
@@ -2767,6 +2771,78 @@ tyrano.plugin.kag = {
             const tabindex = parseInt(j_elm.attr("tabindex")) || 0;
             this.makeFocusable(j_elm, tabindex);
         });
+    },
+
+    chara: {
+        init() {},
+
+        /**
+         * mix-blend-mode: plus-lighter を使用するか？
+         * @returns {boolean}
+         */
+        isPlusLighterEnabled() {
+            return this.kag.stat.plus_lighter === "true";
+        },
+
+        /**
+         * キャラの div 要素を返す
+         * chara_name を省略することで全キャラの div 要素を取得できる
+         * @param {string} [chara_name]
+         * @param {jQuery} [j_layer]
+         * @returns {jQuery}
+         */
+        getCharaContainer(chara_name, j_layer) {
+            // レイヤ指定がなければすべての fore レイヤから探す
+            if (!j_layer) j_layer = $(".layer_fore");
+
+            // chara_name 指定がない場合はすべてのキャラを探す
+            let chara_selector = "";
+            if (chara_name) chara_selector = "." + chara_name;
+
+            return j_layer.find(".tyrano_chara" + chara_selector);
+        },
+
+        /**
+         * キャラの各パーツを div でラップする処理。
+         *
+         * V514時点でキャラのDOM構造は次のようになっている。
+         *
+         * div.tyrano_chara.akane
+         *     img.chara_img      ← [chara_face]  で定義, [chara_mod]  で表示変更
+         *     img.part.eye       ← [chara_layer] で定義, [chara_part] で表示変更
+         *     img.part.mouth
+         * 　　　...
+         *
+         * これを
+         *
+         * div.tyrano_chara.akane
+         *     div.chara_part_container
+         *         img.chara_img
+         *     div.chara_part_container
+         *         img.part.eye
+         *     div.chara_part_container
+         *         img.part.mouth
+         * 　　 ...
+         *
+         * のように変更する。各パーツの img 要素を div 要素でラップする。
+         * @param {jQuery} j_chara
+         */
+        setPartContainer(j_chara) {
+            if (!this.isPlusLighterEnabled()) return;
+            j_chara.children("img").each((i, img) => {
+                this.wrapPartContainer(img);
+            });
+        },
+
+        /**
+         * ひとつの img 要素を div.chara_part_container 要素でラップする
+         * @param {Element | jQuery} j_img
+         */
+        wrapPartContainer(j_img) {
+            const j_div = $('<div class="chara_part_container plus_lighter_container" />');
+            j_div.insertAfter(j_img);
+            j_div.append(j_img);
+        },
     },
 
     test: function () {},
