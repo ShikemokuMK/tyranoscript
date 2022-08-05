@@ -63,6 +63,9 @@ var PARAM_EXP = {
 };
 
 (function ($) {
+    /**
+     * JSファイルを読み込んでパースしたあと $.putHtml() を呼ぶ
+     */
     $.generateHtml = function () {
         var html = "";
 
@@ -176,26 +179,34 @@ var PARAM_EXP = {
         return html;
     };
 
-    // ドキュメントの :param を解釈
-    //
-    // (入力例)
-    // "storage = ジャンプ先のシナリオを指定します。\ntarget = ジャンプ先のラベルを指定します。"
-    //
-    // (出力例)
-    // [
-    //     {
-    //         name: "storage",
-    //         value: "ジャンプ先のシナリオを指定します。",
-    //         vital: "〇",
-    //         default: "",
-    //     },
-    //     {
-    //         name: "storage",
-    //         value: "ジャンプ先のシナリオを指定します。",
-    //         vital: "〇",
-    //         default: "",
-    //     },
-    // ]
+    /**
+     * ドキュメントの :param を解釈
+     *
+     * (入力例)
+     *
+     * "storage = ジャンプ先のシナリオを指定します。\ntarget = ジャンプ先のラベルを指定します。"
+     *
+     * (出力例)
+     *
+     * [
+     *     {
+     *         name: "storage",
+     *         value: "ジャンプ先のシナリオを指定します。",
+     *         vital: "〇",
+     *         default: "",
+     *     },
+     *     {
+     *         name: "storage",
+     *         value: "ジャンプ先のシナリオを指定します。",
+     *         vital: "〇",
+     *         default: "",
+     *     },
+     * ]
+     * @param {Object} master_tag
+     * @param {string} tag_name
+     * @param {string} param_text
+     * @returns {Object[]}
+     */
     $.parseParam = function (master_tag, tag_name, param_text) {
         if (!param_text) param_text = "";
         const param_array = [];
@@ -254,6 +265,11 @@ var PARAM_EXP = {
         return param_array;
     };
 
+    /**
+     * HTMLを生成する
+     * @param {Object} map_doc
+     * @param {Object} master_tag
+     */
     $.putHtml = function (map_doc, master_tag) {
         console.log("===map_doc");
         console.log(map_doc);
@@ -356,15 +372,18 @@ var PARAM_EXP = {
                     color: #a10f2b;
                 }
                 .news-v3 .code {
-                    padding: 1px 3px;
+                    padding: 0px 3px;
                     margin: 0px 2px 1px;
                     font-size: 100%;
                     background-color: rgba(0, 30, 150, 0.07);
-                    border-radius: 4px;
+                    border-radius: 5px;
                     font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
                     line-height: 140%;
                     display: inline-block;
                     word-break: keep-all;
+                    user-select: all;
+                }
+                .news-v3 .code::selection {
                 }
                 .news-v3 .tag {
                     text-decoration: none;
@@ -372,6 +391,9 @@ var PARAM_EXP = {
                 .news-v3 .tag > .code {
                     color: #c7254e;
                     background-color: #f9f2f4;
+                }
+                .news-v3 .tag + .tag > .code {
+                    margin-left: 0px;
                 }
                 .news-v3 .tag > .code:hover {
                     background-color: #ffe9ef;
@@ -472,6 +494,9 @@ var PARAM_EXP = {
         $(".area_ref").append(basic_exp);
         $(".area_ref").append(j_root);
 
+        // テキストノードを span 要素でラップする
+        wrapTextNodeBySpan(".area_ref");
+
         // htmlを全部<textarea>にぶち込む処理には時間がかかるのでここではまだぶち込まない
         $("#src_html").val("ボタンを押してください");
 
@@ -481,14 +506,59 @@ var PARAM_EXP = {
         }
         $("#auto_complete_tag").val(js_auto_complete);
 
-        window.Prism.highlightAll();
+        // window.Prism.highlightAll();
     };
 
+    /**
+     * テキストノードを span 要素でラップする
+     * @param {Element}
+     */
+    function wrapTextNodeBySpan(elm) {
+        $(elm)
+            .contents()
+            .filter(function () {
+                if (this.nodeType == 3) {
+                    // テキストノードの nodeType は3
+                    var node = this.nodeValue;
+                    if (node != null && node.trim() != "") {
+                        // 空白ノードでなければ返す
+                        return true;
+                    } else {
+                        // 空白は返さない
+                        return false;
+                    }
+                } else {
+                    // nodeType が 3 でないものは返さない
+                    if (this.classList.contains("language-tyranoscript")) {
+                        return false;
+                    }
+                    if (this.tagName === "SPAN") {
+                        return false;
+                    }
+                    if (this.tagName === "STYLE") {
+                        return false;
+                    }
+                    wrapTextNodeBySpan(this);
+                    return false;
+                }
+            })
+            .wrap("<span/>");
+    }
+
+    /**
+     * タグリファレンスの innerHTML をテキストボックスにぶちこむ
+     */
     $.setHtmlToTextarea = () => {
         $("#src_html").val($(".area_main").html());
     };
 
-    //タグ説明文のパース
+    /**
+     * タグ説明文のパースを行う
+     * 連続する空行を検知して p 要素で段落化するとか
+     * (マークダウン的な)
+     * @param {*} exp
+     * @returns
+     */
     function parseExp(exp) {
         //HTML特殊文字のエスケープ
         //exp = $.escapeHTML(exp);
@@ -504,16 +574,20 @@ var PARAM_EXP = {
             .join("");
     }
 
-    //マークアップ
+    /**
+     * HTMLタグによるマークアップを行う
+     * @param {string} p
+     * @returns
+     */
     function markup(p) {
         //トリミング
         p = p.trim();
         //段落内における改行は<br>に変換して見た目に反映
         p = p.replace(/\n/g, "<br>");
         //インラインティラノタグ(`[hoge]`)を変換
-        p = p.replace(/`\[([^`\s]+)\]`/g, `<a class="tag" href="#$1"><span class="code">[$1]</span></a>`);
+        p = p.replace(/`\[([^`\s]+)\]`/g, `<a class="tag" href="#$1" title="[$1]タグの説明にジャンプ"><span class="code">[$1]</span></a>`);
         //インラインコード(`hoge`)を変換
-        p = p.replace(/`([^`]+)`/g, ` <span class="code">$1</span> `);
+        p = p.replace(/`([^`]+)`/g, `<span class="code">$1</span>`);
         //URLを検出してリンク化
         p = p.replace(/(?<!href="|')https?:\/\/[-_.!~*'()a-zA-Z0-9;/?:@&=+$,%#]+/g, function (url) {
             return `<a href="${url}">${url}</a>`;
@@ -521,7 +595,13 @@ var PARAM_EXP = {
         return p;
     }
 
-    //パラメータの説明を定数から取ってくる
+    /**
+     * パラメータの説明を定数から取ってくる
+     * @param {*} str パラメータの説明文 (例) "ジャンプ先のラベルを指定します。"
+     * @param {*} param_name パラメータ名 (例) "target"
+     * @param {*} tag_name タグ名 (例) "jump"
+     * @returns
+     */
     function replaceParamExpWithConstant(str, param_name, tag_name) {
         //トリミング
         str = str.trim();

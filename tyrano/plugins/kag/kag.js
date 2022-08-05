@@ -2135,9 +2135,20 @@ tyrano.plugin.kag = {
         if (bool) {
             // ティラノイベント"auto-start"を発火
             this.trigger("auto-start");
+
+            // グリフ表示
+            this.kag.ftag.showGlyph("auto");
+            this.kag.ftag.changeAutoNextGlyph();
+
+            // スキップモードとオートモードは同時に成立しない
+            this.setSkip(false);
         } else {
             // ティラノイベント"auto-stop"を発火
             this.trigger("auto-stop");
+
+            // グリフ非表示
+            this.kag.ftag.hideGlyph("auto");
+            this.kag.ftag.restoreAutoNextGlyph();
         }
         this.stat.is_auto = bool;
     },
@@ -2153,9 +2164,18 @@ tyrano.plugin.kag = {
         if (bool) {
             // ティラノイベント"skip-start"を発火
             this.trigger("skip-start");
+
+            // グリフ表示
+            this.kag.ftag.showGlyph("skip");
+
+            // スキップモードとオートモードは同時に成立しない
+            this.setAuto(false);
         } else {
             // ティラノイベント"skip-stop"を発火
             this.trigger("skip-stop");
+
+            // グリフ非表示
+            this.kag.ftag.hideGlyph("skip");
         }
         this.stat.is_skip = bool;
     },

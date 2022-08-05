@@ -46,6 +46,60 @@ tyrano.plugin.kag.ftag = {
     },
 
     /**
+     * 固定オートモードグリフまたは固定スキップモードグリフを表示する
+     * @param {"skip" | "auto"} mode 表示するグリフを指定
+     */
+    showGlyph(mode) {
+        $("#mode_glyph_" + mode).show();
+    },
+
+    /**
+     * 固定オートモードグリフまたは固定スキップモードグリフを非表示にする
+     * @param {"skip" | "auto"} mode 非表示にするグリフを指定
+     */
+    hideGlyph(mode) {
+        $("#mode_glyph_" + mode).hide();
+    },
+
+    /**
+     * オートモード開始時にクリック待ちグリフを変化させる
+     * (メッセージ末尾のクリック待ちグリフとして格納されているオプションをオートモード用のオプションで上書きする)
+     */
+    changeAutoNextGlyph() {
+        const glyph_auto_pm = this.kag.stat.glyph_auto_next_pm;
+        if (!glyph_auto_pm) return;
+        this.kag.stat.glyph_pm_restore = this.kag.stat.glyph_pm || {
+            line: this.kag.stat.path_glyph,
+            fix: this.kag.stat.flag_glyph,
+            folder: "tyrano/images/system",
+        };
+        this.kag.stat.glyph_pm = glyph_auto_pm;
+    },
+
+    /**
+     * オートモード終了時にクリック待ちグリフをもとに戻す
+     * (メッセージ末尾のクリック待ちグリフとして格納されているオプションをもともとのクリック待ちグリフのオプションで上書きする)
+     */
+    restoreAutoNextGlyph() {
+        const glyph_default_pm = this.kag.stat.glyph_pm_restore;
+        if (!glyph_default_pm) return;
+        this.kag.stat.glyph_pm = glyph_default_pm;
+    },
+
+    /**
+     * グリフの情報格納キーを返す
+     * @param {"" | "skip" | "auto"} [mode=""] グリフのモード
+     * @param {booelean} [fix=true] 固定グリフかどうか
+     * @returns {"glyph_pm" | "glyph_skip_pm" | "glyph_auto_pm" | "glyph_auto_next_pm"}
+     */
+    getGlyphKey(mode, fix = true) {
+        let glyph_key = "glyph";
+        if (mode) glyph_key += "_" + mode;
+        if (mode === "auto" && !fix) glyph_key += "_next";
+        return glyph_key + "_pm";
+    },
+
+    /**
      * クリック待ちグリフを削除または隠蔽する
      */
     hideNextImg: function () {
@@ -72,23 +126,46 @@ tyrano.plugin.kag.ftag = {
 
     /**
      * 現在の設定に基づいてクリック待ちグリフのjQueryオブジェクトを作成して返す
-     * @returns {jQuery} クリック待ちグリフの<img>または<div>を含むjQueryオブジェクト
+     * @param {"" | "skip" | "auto"} [mode=""]
+     * @returns {jQuery | null} クリック待ちグリフの<img>または<div>を含むjQueryオブジェクト
      */
-    createNextImg: function () {
-        // 参照
-        const stat = this.kag.stat;
-        const pm = stat.glyph_pm || {
-            folder: "tyrano/images/system",
-        };
+    createNextImg: function (mode = "") {
+        const glyph_key = this.getGlyphKey(mode);
+
+        let pm = this.kag.stat[glyph_key];
+
+        // 情報がまだ格納されていない！
+        if (!pm) {
+            if (mode) {
+                // スキップモード, オートモードのデフォルトグリフは存在しない
+                return null;
+            } else {
+                // クリック待ちグリフには初期値を与える
+                pm = {
+                    line: this.kag.stat.path_glyph,
+                    fix: this.kag.stat.flag_glyph,
+                    folder: "tyrano/images/system",
+                };
+            }
+        }
 
         // クラスの配列
         const class_names = [];
 
+        // id 属性
+        let id = "";
+
         // クラス追加：固定グリフかどうかでクラス名が違う
-        if (stat.flag_glyph === "false") {
-            class_names.push("img_next");
+        if (!mode) {
+            if (pm.fix !== "true") {
+                // メッセージウィンドウ内
+                class_names.push("img_next");
+            } else {
+                // 固定
+                class_names.push("glyph_image");
+            }
         } else {
-            class_names.push("glyph_image");
+            id = "mode_glyph_" + mode;
         }
 
         // jQueryオブジェクトを生成
@@ -98,7 +175,7 @@ tyrano.plugin.kag.ftag = {
             // 画像パス指定
             default:
             case "image":
-                img_src = $.parseStorage(stat.path_glyph || "nextpage.gif", pm.folder);
+                img_src = $.parseStorage(pm.line || "nextpage.gif", pm.folder);
                 j_glyph = $(`<img src="${img_src}">`);
                 // 横幅と高さ
                 if (pm.width) {
@@ -215,6 +292,9 @@ tyrano.plugin.kag.ftag = {
 
         // 貯めこんだクラス名をここでセット
         j_glyph.attr("class", class_names.join(" "));
+
+        // id 属性もセット
+        if (id) j_glyph.attr("id", id);
 
         // nameパラメータが指定されている場合はそれも追加
         if (pm.name) {
@@ -7112,6 +7192,7 @@ tyrano.plugin.kag.tag.clickable = {
 クリック待ちグリフ（`[l]`や`[p]`でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。
 
 クリック待ちグリフのコンテンツには以下のパターンがあります。
+
 ①画像ファイル（`line`パラメータを指定する）※GIFやWebPもOK
 ②図形（`figure`パラメータを指定する）
 ③コマアニメ（`koma_anim`パラメータを指定する）
@@ -7250,15 +7331,48 @@ tyrano.plugin.kag.tag.glyph = {
         koma_count: "",
         koma_width: "",
         koma_anim_time: "1000",
+
+        // クリック待ちグリフ、オートモードグリフ、スキップモードグリフ
+        target: "",
     },
 
     start: function (pm) {
-        var that = this;
+        //
+        // 既存のグリフを削除する処理
+        //
+
+        // 固定グリフか？
+        const fix = pm.fix === "true";
+        // いままさに固定グリフが表示されていたか
+        let is_fix_glyph_displayed = false;
+        // 固定グリフ
+        let j_fix_glyph;
 
         // 固定グリフは削除
-        $(".glyph_image").remove();
+        switch (pm.target) {
+            default:
+            case "":
+                j_fix_glyph = $(".glyph_image");
+                break;
+            case "skip":
+                j_fix_glyph = $("#mode_glyph_skip");
+                break;
+            case "auto":
+                if (fix) {
+                    j_fix_glyph = $("#mode_glyph_auto");
+                }
+                break;
+        }
 
+        if (j_fix_glyph && j_fix_glyph.length) {
+            is_fix_glyph_displayed = j_fix_glyph.isDisplayed();
+            j_fix_glyph.remove();
+        }
+
+        //
         // グリフタイプを決定
+        //
+
         if (pm.figure) {
             pm.type = "figure";
         } else if (pm.html) {
@@ -7275,15 +7389,21 @@ tyrano.plugin.kag.tag.glyph = {
         }
 
         // 情報を格納
-        this.kag.stat.path_glyph = pm.line;
-        this.kag.stat.glyph_pm = $.extend({}, pm);
+        // glyph_pm, glyph_skip_pm, glyph_auto_pm, glyph_auto_next_pm
+        const glyph_key = this.kag.ftag.getGlyphKey(pm.target, fix);
+        this.kag.stat[glyph_key] = $.extend({}, pm);
+
+        if (!pm.target) {
+            // 旧実装のフォールバック
+            this.kag.stat.path_glyph = pm.line;
+            this.kag.stat.flag_glyph = pm.fix;
+        }
 
         // 画面上固定タイプか、メッセージ末尾タイプか
-        if (pm.fix == "true") {
+        if (fix) {
             // 画面上固定タイプ
-            this.kag.stat.flag_glyph = "true";
             // もう作っておいて非表示で画面上に配置しちゃおう
-            const j_next = this.kag.ftag.createNextImg();
+            const j_next = this.kag.ftag.createNextImg(pm.target);
             j_next.setStyleMap({
                 "position": "absolute",
                 "z-index": "9998",
@@ -7292,9 +7412,8 @@ tyrano.plugin.kag.tag.glyph = {
                 "display": "none",
             });
             this.kag.layer.getLayer(pm.layer).append(j_next);
-        } else {
-            // メッセージ末尾タイプ
-            this.kag.stat.flag_glyph = "false";
+            // さっきまで表示されていたならこれも表示する
+            if (is_fix_glyph_displayed) j_next.show();
         }
 
         // コマアニメを使用しない場合は早期リターン
@@ -7344,9 +7463,160 @@ tyrano.plugin.kag.tag.glyph = {
             pm.image_height = parseInt(pm.image_height * pm.scale_x);
             pm.koma_width = parseInt(pm.koma_width * pm.scale_x);
             pm.koma_height = parseInt(pm.koma_height * pm.scale_x);
-            this.kag.stat.glyph_pm = $.extend({}, pm);
+            this.kag.stat[glyph_key] = $.extend({}, pm);
             this.kag.ftag.nextOrder();
         });
+    },
+};
+
+/*
+#[glyph_skip]
+
+:group
+システムデザイン変更
+
+:title
+スキップモードグリフの設定
+
+:exp
+スキップモード中に表示されるグリフを設定できます。
+
+・`use`パラメータを指定したとき
+・`delete`パラメータを指定したとき
+・どちらも指定しなかったとき
+
+の3パターンで動作が異なります。
+
+`use`パラメータを指定した場合、`[ptext]`などですでに画面上に出している要素をスキップモードグリフにすることができます。
+
+`delete`パラメータを指定した場合、以前の`[glyph_skip]`で設定した定義を削除することができます。
+
+どちらも指定しなかった場合は`[glyph]`と同等の処理を行います。
+
+:param
+use    = すでに画面上に出ている要素をスキップモード中のグリフとして扱うようにできます。`[ptext]`や`[image]`に設定した`name`をここに指定します。
+delete = `true`を指定した場合、グリフの定義を削除する処理を実行します。
+その他 = `[glyph]`と同じパラメータが指定できます。ただし`fix`パラメータは`true`で固定されます。
+
+:sample
+;固定スキップモードグリフ、固定オートモードグリフを設定
+[glyph_skip fix="true" left="10" top="10" figure="diamond" anim="flash"  color="orange" time="400" width="80"]
+[glyph_auto fix="true" left="10" top="10" figure="star"    anim="spin_y" color="green" time="5000" width="80"]
+
+;オートモードグリフについては、
+;固定グリフと同時にメッセージ末尾型のオートモードグリフも設定できる
+[glyph_auto html="⌛" anim="flash"]
+
+;[ptext]で出した文字をスキップグリフ、オートグリフとして扱うパターン
+[ptext     name="glyph_skip" layer="message0" x="20" y="10" text="SKIP!" edge="4px orange" size="30"]
+[ptext     name="glyph_auto" layer="message0" x="20" y="10" text="AUTO" edge="4px green" size="30"]
+[glyph_skip use="glyph_skip"]
+[glyph_auto use="glyph_auto"]
+
+;上記のすべての設定を抹消する
+[glyph_auto delete="true" fix="true"]
+[glyph_auto delete="true" fix="false"]
+[glyph_skip delete="true"]
+
+#[end]
+*/
+
+//指定した位置にグラフィックボタンを配置する
+tyrano.plugin.kag.tag.glyph_skip = {
+    start: function (pm) {
+        if (pm.delete === "true") {
+            $("#mode_glyph_skip").remove();
+            delete this.kag.stat.glyph_auto_pm;
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        if (pm.use) {
+            $("#mode_glyph_skip").remove();
+            const j_glyph = $("." + pm.use).eq(0);
+            console.error(j_glyph);
+            if (j_glyph.length) {
+                j_glyph.attr("id", "mode_glyph_skip");
+                if (this.kag.stat.is_skip) {
+                    j_glyph.show();
+                } else {
+                    j_glyph.hide();
+                }
+            }
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        pm.target = "skip";
+        pm.fix = "true";
+        this.kag.ftag.startTag("glyph", pm);
+    },
+};
+
+/*
+#[glyph_auto]
+
+:group
+システムデザイン変更
+
+:title
+オートモードグリフの設定
+
+:exp
+オートモード中に表示されるグリフを設定できます。
+
+・`use``use``use`パラメータを指定したとき
+・`delete`パラメータを指定したとき
+・どちらも指定しなかったとき
+
+の3パターンで動作が異なります。
+
+`use`パラメータを指定した場合、`[ptext]`などですでに画面上に出している要素を画面固定のオートモードグリフにすることができます。
+
+`delete`パラメータを指定した場合、以前の`[glyph_auto]`で設定した定義を削除することができます。
+
+どちらも指定しなかった場合は`[glyph]`と同等の処理を行います。
+
+:param
+fix    = 画面固定グリフの設定をするなら`true`、メッセージ末尾のグリフの設定をするなら`false`を指定します。オートモードグリフに限り、固定グリフと非固定グリフを両方設定できます。
+use    = すでに画面上に出ている要素を画面固定グリフとして扱うようにできます。`[ptext]`や`[image]`に設定した`name`をここに指定します。
+delete = `true`を指定した場合、グリフの定義を削除する処理を実行します。
+その他 = `[glyph]`と同じパラメータが指定できます。
+
+#[end]
+*/
+
+//指定した位置にグラフィックボタンを配置する
+tyrano.plugin.kag.tag.glyph_auto = {
+    start: function (pm) {
+        if (pm.delete === "true") {
+            if (pm.fix === "true") {
+                $("#mode_glyph_auto").remove();
+                delete this.kag.stat.glyph_auto_pm;
+            } else {
+                delete this.kag.stat.glyph_auto_next_pm;
+            }
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        if (pm.use) {
+            $("#mode_glyph_auto").remove();
+            const j_glyph = $("." + pm.use).eq(0);
+            if (j_glyph.length) {
+                j_glyph.attr("id", "mode_glyph_auto");
+                if (this.kag.stat.is_auto) {
+                    j_glyph.show();
+                } else {
+                    j_glyph.hide();
+                }
+            }
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        pm.target = "auto";
+        this.kag.ftag.startTag("glyph", pm);
     },
 };
 

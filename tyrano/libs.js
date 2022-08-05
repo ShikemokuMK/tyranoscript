@@ -1918,6 +1918,16 @@
     };
 
     /**
+     * 要素が表示されていれば true を返す
+     * (display: none; でなければ true を返す)
+     * @return {boolean}
+     */
+    $.fn.isDisplayed = function () {
+        if (!this[0]) return false;
+        return this.css("display") !== "none";
+    };
+
+    /**
      * 渡されたjQueryコレクション内のすべての要素について横幅を調査し、
      * その調査で得られたもっとも大きい横幅をすべての要素のwidthプロパティにpx単位で適用する
      * box-sizingも考慮する
