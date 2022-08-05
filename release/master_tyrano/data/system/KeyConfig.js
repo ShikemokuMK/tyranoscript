@@ -5,20 +5,21 @@ Ver4.50以降で有効
 ティラノスクリプトのアクション（スキップを開始するなど）を割り当てることができます。
 
 <設定できるアクション>
-
-    next        : 次のテキストに進む, フォーカス中のボタンをクリックする（キーボード・ゲームパッドのみ）
+    
+    next        : 次のテキストに進む
     auto        : オートモードを開始／停止する
     skip        : スキップモードを開始／停止する
-    holdskip    : キーまたはボタンを押し込んでいる間だけスキップする（キーボード・ゲームパッドのみ）
+    holdskip    : キーまたはボタンを押し込んでいる間だけスキップする
     hidemessage : メッセージウィンドウの表示／非表示を切り替える
     fullscreen  : フルスクリーンを切り替える
     save        : セーブ画面を開く
     load        : ロード画面を開く
-    menu        : メニュー画面を開く
+    menu        : メニュー画面を開く／閉じる
     title       : タイトルに戻る
     backlog     : バックログを開く
     qsave       : クイックセーブを実行する
     qload       : クイックロードを実行する
+    focus_index : 特定の番号のボタンをフォーカスする（index の指定が必須）
     focus_next  : ボタンのフォーカスを次に移動する
     focus_prev  : ボタンのフォーカスを前に移動する
     focus_up    : ボタンのフォーカスを上に移動する
@@ -28,8 +29,25 @@ Ver4.50以降で有効
     scroll_up   : 上にスクロール
     scroll_down : 下にスクロール
     close       : メニューを閉じる
-    cancel      : フォーカスを外す, 確認ウィンドウをキャンセルする, メニューを閉じる, オートモード・スキップモードを解除する
+    ok          : 決定系の動作全般(※1)
+    cancel      : キャンセル系の動作全般(※2)
     sleepgame   : [sleepgame]を実行する（詳細は後述）
+    
+    ※1: 次のテキストに進む, 確認ウィンドウのOKボタンをクリックする, 
+    　   仮想マウスをクリックする, フォーカス中のボタンをクリックする, 
+    
+    ※2: ボタンのフォーカスを外す, 確認ウィンドウをキャンセルする, 
+    　   メニューを閉じる, オートモード・スキップモードを解除する
+    
+    
+    ★キーボード操作専用のアクション
+    
+    default      : そのキーを押したときのブラウザのデフォルト動作を実行します
+    default_debug: Config.tjs の debugMenu が true の場合のみデフォルト動作を実行します
+    vmouse_up    : 仮想マウスカーソルを上に動かします
+    vmouse_down  : 仮想マウスカーソルを下に動かします
+    vmouse_left  : 仮想マウスカーソルを左に動かします
+    vmouse_right : 仮想マウスカーソルを右に動かします
     
     
     ★ -a オプション
@@ -45,12 +63,14 @@ Ver4.50以降で有効
     
     ★ -h オプション
     
-    ゲームパッドのみ有効。-h オプションを付けることで hold アクションとなります。
-    ボタンが長押しされたときに連打として扱い、連続してアクションを実行するようになります。
+    キーボードまたはゲームパッドに設定するアクションにのみ有効。
+    -h オプションを付けることで hold アクションとなり、
+    キーまたはボタンの長押しが連打として扱われるようになります（ホールド連打）。
+    さらに delay パラメータを指定することで、ホールド連打が始まるまでの遅延を設定できます。
     
     (指定例) 
     
-    UP: "scroll_up -h",
+    UP: "scroll_up -h delay=300",
     
     
     ★sleepgameについて
@@ -69,43 +89,104 @@ Ver4.50以降で有効
     
     (指定例) 
     
-    32: function () {
+    "Enter": function () {
         alert("Hello!")
     },
     
+    
+    ★アクションの複数指定
+    
+    カンマ区切りで複数のアクションを記述できます。
+    複数のアクションを指定した場合、
+    実行可能なアクションのうち一番先頭のアクションを実行します。
+    
+    (指定例)
+    
+    "Enter": "close, next",
+    
+    この場合、close アクションが実行できる状況なら close だけを実行します。
+    close アクションが実行できない状況なら next を実行します。
+    
+    ※ アクション名にカンマを含めたときはアクションの複数指定と解釈されますので、
+    　 複数指定の意図以外でカンマを使うことはできません。
+    
+    
+    
 <キーボード操作の指定方法> 
     
-    "キーコード" と "そのキーが押されたときのアクション" を配置します。
-    キーコードはキーの種類に対応する特定の数値です。たとえばスペースキーなら"32"といった具合です。
-    キーコードの確認には次のサイトが利用可能です。
-    http://shanabrian.com/web/javascript/keycode.php
-    上記サイトで実際にキーを押すことでキーコードを確認できます。
     
-    ★使用頻度が高いと思われるキーコードの一覧
+    ★キータイプによる指定方法
     
-    32 : space
-    13 : Enter
-    91 : Command (Mac)
-    17 : Ctrl (Windows)
-    27 : Escape
-    37 : ←
-    38 : ↑
-    39 : →
-    40 : ↓
-    90 : z
-    88 : x
+    "キータイプ" とそれに対応する "アクション" を次のように配置することで
+    キーコンフィグを設定できます。
+    
+    (指定例)
+    
+    key: {
+        " "         : "hidemessage",
+        "Enter"     : "next",
+    },
+    
+    
+    ★キーコードによる指定方法（従来の方法）
+    
+    "キータイプ" のかわりに "キーコード" を使って定義することもできます。
+    たとえ、次のように指定すれば、上の例とまったく同じ指定をしたことになります。
+    
+    (キーコードを使った指定例)
+    
+    key: {
+        "32" : "hidemessage",
+        "13" : "next",
+    },
+    
+    
+    ★ヒント
+    
+    キータイプやキーコードは次のサイトで実際にキーを押すことで調べることができます。
+    https://ogihara88sai.github.io/display-keydown-event/
+    (上記サイトで表示される key がキータイプ、keyCode がキーコードです)
+    
+    
     
 <マウス操作>
     
-    right      : 右クリックしたときの動作
-    center     : センターボタン（マウスホイール）をクリックしたときの動作
-    wheel_up   : マウスホイールを上に回したときの動作
-    wheel_down : マウスホイールを下に回したときの動作
-
+    "マウス操作を表すキーワード" とそれに対応する "アクション" を配置することで
+    キーコンフィグを設定できます。
+    
+    
+    ★マウス操作を表すキーワード一覧
+    
+    right      : マウスの右側のボタンを押したときの動作
+    center     : マウスの中央のボタン（ホイール）を押したときの動作
+    wheel_up   : マウスのホイールを上に回したときの動作
+    wheel_down : マウスのホイールを下に回したときの動作
+    next       : マウスの「進む」ボタンを押したときの動作
+    prev       : マウスの「戻る」ボタンを押したときの動作
+    right_swipe_up     : マウスの右側のボタンを押しながら上に動かしたときの動作
+    right_swipe_down   : マウスの右側のボタンを押しながら下に動かしたときの動作
+    right_swipe_left   : マウスの右側のボタンを押しながら左に動かしたときの動作
+    right_swipe_right  : マウスの右側のボタンを押しながら右に動かしたときの動作
+    center_swipe_up    : マウスの中央のボタン（ホイール）を押しながら上に動かしたときの動作
+    center_swipe_down  : マウスの中央のボタン（ホイール）を押しながら下に動かしたときの動作
+    center_swipe_left  : マウスの中央のボタン（ホイール）を押しながら左に動かしたときの動作
+    center_swipe_right : マウスの中央のボタン（ホイール）を押しながら右に動かしたときの動作
+    prev_swipe_up      : マウスの「戻る」ボタンを押しながら上に動かしたときの動作
+    prev_swipe_down    : マウスの「戻る」ボタンを押しながら下に動かしたときの動作
+    prev_swipe_left    : マウスの「戻る」ボタンを押しながら左に動かしたときの動作
+    prev_swipe_right   : マウスの「戻る」ボタンを押しながら右に動かしたときの動作
+    next_swipe_up      : マウスの「進む」ボタンを押しながら上に動かしたときの動作
+    next_swipe_down    : マウスの「進む」ボタンを押しながら下に動かしたときの動作
+    next_swipe_left    : マウスの「進む」ボタンを押しながら左に動かしたときの動作
+    next_swipe_right   : マウスの「進む」ボタンを押しながら右に動かしたときの動作
+    
+    
 <ジェスチャー操作>
-
-    ★スマホ・タブレット限定
-    フリック操作やホールド操作にキーコンフィグを割り当てることができます。
+    
+    スマホやタブレットにおけるフリック操作やホールド操作にキーコンフィグを割り当てることができます。
+    
+    
+    ★操作を表すキーワード一覧
     
     swipe_up_1    : 1本の指で画面上方向にフリックしたときの動作
     swipe_left_1  : 1本の指で画面左方向にフリックしたときの動作
@@ -113,14 +194,19 @@ Ver4.50以降で有効
     swipe_down_1  : 1本の指で画面下方向にフリックしたときの動作
     hold          : 画面を一定時間タッチし続けたときの動作
     
+    
     ★ヒント
+    
     swipe_up_1 などの _1 は指の数を表しており、
     たとえば swipe_up_1 なら「1本の指で画面左方向にスワイプしたときの動作」という意味になります。
     
     つまり、2本の指でスワイプしたときのアクションを指定したい場合は
     swipe_up_2 のような名前でアクションを定義すればよいということです。
-
+    
+    
+    
 <ゲームパッド操作>
+
 
     ★ボタン
     
@@ -128,7 +214,7 @@ Ver4.50以降で有効
     
     (1) A, LEFT, START などの "ボタンを表すキーワード" と "アクション" を並べる。
     
-    指定可能なキーワードは、次のとおりです。
+    "ボタンを表すキーワード" として指定可能なものは以下のとおりです。
     
     A      : Aボタン（右側エリアの下ボタン）
     B      : Bボタン（右側エリアの右ボタン）
@@ -183,113 +269,195 @@ Ver4.50以降で有効
     (指定例)
     
     gamepad: {
-        button: {
-            ...
-        },
+        ...
         stick_digital: {
-            L: {
-                UP: "focus_up",
-                DOWN: "focus_down",
-                LEFT: "focus_left",
-                RIGHT: "focus_right",
-            },
-            R: {
-                ...
-            },
+            L_UP: "",
+            L_DOWN: "",
+            L_LEFT: "",
+            L_RIGHT: "",
+            R_UP: "vmouse_wheelup -a -h delay=0",
+            R_DOWN: "vmouse_wheeldown -a -h delay=0",
+            R_LEFT: "",
+            R_RIGHT: "",
         },
         ...
+    
+    
+    ★スティック入力
+    
+    スティック入力に仮想マウスカーソルの操作を割り当てることができます。
+    "vmouse_move" または "vmouse_aim" が指定可能です。
+    
+    vmouse_move : 仮想マウスカーソルを相対移動させます。基本はこちら。
+    vmouse_aim  : スティックの角度・倒し具合に対応する画面上の一点に仮想マウスカーソルを絶対移動させます。
+    
+    (指定例)
+
+    stick: {
+        L: "vmouse_move",
+        R: "",
+    }
 
 */
 
-var __tyrano_key_config = {
-    // ブラウザ固有の動作（キーの組み合わせによるショートカットアクション）を許可するか否か
-    // "true" だとブラウザ固有の動作が有効に、"false" だと無効になります。
-    // たとえば Google Chrome には次のようなショートカットアクションが存在しますが、
-    // "system_key_event" が "false" だとこのアクションが無効化されます。
-    //   Ctrl + Shift + I : デベロッパーツールを開く
-    //   Ctrl + Shift + O : ブックマークマネージャを開く
+window.__tyrano_key_config = {
+    
+    // ◆ system_key_event
+    //
+    // 各種キーを押したときのブラウザのデフォルト動作を許可するか？
+    // （F5で更新、F12で開発者ツールを開くなど）
+    //
+    // "true"  : ブラウザのデフォルト動作をすべて許可します。
+    // "false" : ブラウザのデフォルト動作をすべて無効化します。
+    // "debug" : Config.tjs の debugMenu.visible が true　の場合のみ、
+    //           ブラウザのデフォルト動作をすべて許可します。
+    // 
+    // ただし、ここに "false" や "debug" を指定した場合でも、
+    // 各キーに個別に default アクションや default_debug アクションを指定することで
+    // キーごとにブラウザのデフォルト動作を許可することができます。
+    //
+    // ブラウザの制限によって、ティラノスクリプトからは無効化しきれないデフォルト動作も存在します。
+    // ご注意ください。
+    // (無効化できない例) Ctrl + W : タブを閉じる
+    
+    // ブラウザのデフォルト動作は無効にしておく
     system_key_event: "false",
+    
+    // ◆ system_mouse_event
+    // マウスの進むボタンや戻るボタンを押したときのページ移動を許可するかどうか
+    // "true"  : 許可する
+    // "false" : 無効化する
+    system_mouse_event: "false",
 
     // キーボード操作
     key: {
-        9: "focus_next -a",   // Tab
-        27: "cancel -a",      // Escape
-        32: "hidemessage",    // Space
-        13: "next -a",        // Enter
-        91: "holdskip",       // Command (Mac)
-        17: "holdskip",       // Ctrl (Windows)
-        37: "focus_next -a",  // ←
-        38: "focus_up -a",    // ↑
-        39: "focus_right -a", // →
-        40: "focus_down -a",  // ↓
+        
+        "Enter"      : "ok     -a",
+        "Escape"     : "cancel -a",
+        " "          : "hidemessage",
+        "Meta"       : "holdskip", // Mac の Command キーのこと
+        "Control"    : "holdskip",
+        "m"          : "menu",
+        
+        // 方向キーで仮想マウスカーソルを操作できるようにします
+        "ArrowUp"    : "vmouse_up    -a -h",
+        "ArrowDown"  : "vmouse_down  -a -h",
+        "ArrowLeft"  : "vmouse_left  -a -h",
+        "ArrowRight" : "vmouse_right -a -h",
+        
+        // Tab キーでボタンをフォーカスできるようにします
+        "Tab"        : "focus_next -a",
+        
+        // w, a, s, d でボタンのフォーカスを上下左右に動かせるようにします
+        "w"          : "focus_up    -a -h delay=300",
+        "s"          : "focus_down  -a -h delay=300",
+        "a"          : "focus_left  -a -h delay=300",
+        "d"          : "focus_right -a -h delay=300",
+        
+        // PageUp, PageDown でバックログをスクロールできるようにします
+        "PageUp"     : "scroll_up",
+        "PageDown"   : "scroll_down",
+        
+        // 数字キーで数に応じた特定のボタンをフォーカスできるようにします
+        "1"          : "focus_index -a index=1",
+        "2"          : "focus_index -a index=2",
+        "3"          : "focus_index -a index=3",
+        "4"          : "focus_index -a index=4",
+        "5"          : "focus_index -a index=5",
+        "6"          : "focus_index -a index=6",
+        "7"          : "focus_index -a index=7",
+        "8"          : "focus_index -a index=8",
+        "9"          : "focus_index -a index=9",
+        
+        // Config.tjs の debugMenu.visible が true の場合のみ
+        // F12 キーのデフォルト動作（開発者ツールを開く）を有効にします
+        "F12"        : "default_debug",
+        
     },
 
     // マウス操作
     mouse: {
-        right: "hidemessage", // 右クリック
-        center: "menu",       // ホイールクリック
-        wheel_up: "backlog",  // ホイールアップ
-        wheel_down: "next",   // ホイールダウン
+        
+        "right"      : "hidemessage",
+        "center"     : "menu",
+        "wheel_up"   : "backlog",
+        "wheel_down" : "next",
+        "prev"       : "title",
+        "next"       : "holdskip",
+        
+        "right_swipe_up"     : "",
+        "right_swipe_down"   : "",
+        "right_swipe_left"   : "",
+        "right_swipe_right"  : "",
+        "center_swipe_up"    : "",
+        "center_swipe_down"  : "",
+        "center_swipe_left"  : "",
+        "center_swipe_right" : "",
+        "prev_swipe_up"      : "",
+        "prev_swipe_down"    : "",
+        "prev_swipe_left"    : "",
+        "prev_swipe_right"   : "",
+        "next_swipe_up"      : "",
+        "next_swipe_down"    : "",
+        "next_swipe_left"    : "",
+        "next_swipe_right"   : "",
+        
     },
 
-    // ジェスチャー操作
+    // スマホ・タブレットのジェスチャー操作
     gesture: {
-        // 上スワイプ
-        swipe_up_1: {
-            action: "backlog",
-        },
-        // 左スワイプ
-        swipe_left_1: {
-            action: "auto",
-        },
-        // 右スワイプ
-        swipe_right_1: {
-            action: "menu",
-        },
-        // 下スワイプ
-        swipe_down_1: {
-            action: "load",
-        },
-        // ホールド
-        hold: {
-            action: "skip",
-        },
+        
+        "swipe_up_1"    : "backlog",
+        "swipe_left_1"  : "auto",
+        "swipe_right_1" : "menu",
+        "swipe_down_1"  : "load",
+        "hold"          : "skip",
+    
     },
     
     // ゲームパッド操作
     gamepad: {
+        
         button: {
-            A: "cancel -a",
-            B: "next -a",
-            X: "auto",
-            Y: "backlog",
-            LB: "save",
-            LT: "load",
-            RB: "skip",
-            RT: "holdskip",
-            START: "menu",
-            SELECT: "",
-            HOME: "title",
-            LS: "",
-            RS: "",
-            UP: "focus_up -a -h",
-            DOWN: "focus_down -a -h",
-            LEFT: "focus_left -a -h",
-            RIGHT: "focus_right -a -h",
+        
+            A       : "cancel -a",
+            B       : "ok     -a",
+            X       : "auto",
+            Y       : "backlog",
+            LB      : "save",
+            LT      : "load",
+            RB      : "skip",
+            RT      : "holdskip",
+            START   : "menu",
+            SELECT  : "",
+            HOME    : "title",
+            LS      : "",
+            RS      : "",
+            UP      : "focus_up    -a -h delay=300",
+            DOWN    : "focus_down  -a -h delay=300",
+            LEFT    : "focus_left  -a -h delay=300",
+            RIGHT   : "focus_right -a -h delay=300",
+        
         },
+        
         stick_digital: {
-            L: {
-                UP: "focus_up -a -h",
-                DOWN: "focus_down -a -h",
-                LEFT: "focus_left -a -h",
-                RIGHT: "focus_right -a -h",
-            },
-            R: {
-                UP: "scroll_up -h",
-                DOWN: "scroll_down -h",
-                LEFT: "",
-                RIGHT: "",
-            },
+            
+            L_UP    : "",
+            L_DOWN  : "",
+            L_LEFT  : "",
+            L_RIGHT : "",
+            R_UP    : "vmouse_wheelup   -a -h",
+            R_DOWN  : "vmouse_wheeldown -a -h",
+            R_LEFT  : "",
+            R_RIGHT : "",
+            
         },
+        
+        stick: {
+            
+            L       : "vmouse_move",
+            R       : "",
+        
+        }
     },
 };
