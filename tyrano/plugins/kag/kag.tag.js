@@ -6394,7 +6394,14 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.menu.showMenu();
                         break;
                     case "skip":
-                        that.kag.ftag.startTag("skipstart", {});
+                        if (that.kag.stat.is_skip) {
+                            that.kag.setSkip(false);
+                        } else {
+                            if (that.kag.layer.layer_event.isDisplayed()) {
+                                that.kag.layer.layer_event.click();
+                            }
+                            that.kag.setSkip(true);
+                        }
                         break;
                     case "backlog":
                         that.kag.menu.displayLog();
@@ -6411,10 +6418,13 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.menu.loadQuickSave();
                         break;
                     case "auto":
-                        if (that.kag.stat.is_auto) {
-                            that.kag.ftag.startTag("autostop", { next: "false" });
+                        if (this.kag.stat.is_auto) {
+                            that.kag.setAuto(false);
                         } else {
-                            that.kag.ftag.startTag("autostart", {});
+                            if (that.kag.layer.layer_event.isDisplayed()) {
+                                that.kag.layer.layer_event.click();
+                            }
+                            that.kag.setAuto(true);
                         }
                         break;
                     case "sleepgame":

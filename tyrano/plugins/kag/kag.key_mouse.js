@@ -1682,11 +1682,12 @@ tyrano.plugin.kag.key_mouse = {
                 // ただし #tyrano_base 以下の要素からクリックイベントが伝搬してきた場合は拒否する
                 // あくまで "黒帯部分を直接クリックした場合" のみを検知したい
                 // そしてイベントレイヤが表示されている場合のみクリックをトリガーする
-                if (e.originalEvent && e.originalEvent.path) {
-                    if (!e.originalEvent.path.includes(tyrano_base)) {
-                        if (that.j_event_layer.css("display") !== "none") {
-                            that.j_event_layer.click();
-                        }
+                const oe = e.originalEvent;
+                if(!oe) return;
+                const path = oe.path || oe.composedPath && oe.composedPath();
+                if (path && !path.includes(tyrano_base)) {
+                    if (that.j_event_layer.css("display") !== "none") {
+                        that.j_event_layer.click();
                     }
                 }
             });

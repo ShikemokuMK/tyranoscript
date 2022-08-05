@@ -2151,6 +2151,8 @@ tyrano.plugin.kag = {
             // スキップモードとオートモードは同時に成立しない
             this.setSkip(false);
         } else {
+            this.stat.is_wait_auto = false;
+            
             // ティラノイベント"auto-stop"を発火
             this.trigger("auto-stop");
 
