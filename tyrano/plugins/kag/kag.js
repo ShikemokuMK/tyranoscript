@@ -2140,6 +2140,14 @@ tyrano.plugin.kag = {
             this.kag.ftag.showGlyph("auto");
             this.kag.ftag.changeAutoNextGlyph();
 
+            // オートモード状態にボタン画像を同期させる
+            $(".button-auto-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.autoimg, pm.folder));
+                j_elm.addClass("src-change-disabled");
+            });
+
             // スキップモードとオートモードは同時に成立しない
             this.setSkip(false);
         } else {
@@ -2149,6 +2157,14 @@ tyrano.plugin.kag = {
             // グリフ非表示
             this.kag.ftag.hideGlyph("auto");
             this.kag.ftag.restoreAutoNextGlyph();
+
+            // オートモード状態にボタン画像を同期させる
+            $(".button-auto-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.graphic, pm.folder));
+                j_elm.removeClass("src-change-disabled");
+            });
         }
         this.stat.is_auto = bool;
     },
@@ -2168,6 +2184,14 @@ tyrano.plugin.kag = {
             // グリフ表示
             this.kag.ftag.showGlyph("skip");
 
+            // スキップモード状態にボタン画像を同期させる
+            $(".button-skip-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.skipimg, pm.folder));
+                j_elm.addClass("src-change-disabled");
+            });
+
             // スキップモードとオートモードは同時に成立しない
             this.setAuto(false);
         } else {
@@ -2176,6 +2200,14 @@ tyrano.plugin.kag = {
 
             // グリフ非表示
             this.kag.ftag.hideGlyph("skip");
+
+            // スキップモード状態にボタン画像を同期させる
+            $(".button-skip-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.graphic, pm.folder));
+                j_elm.removeClass("src-change-disabled");
+            });
         }
         this.stat.is_skip = bool;
     },

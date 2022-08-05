@@ -6013,6 +6013,8 @@ leavese   = ボタンの上からマウスカーソルが外れた時に再生�
 activeimg = ボタンの上でマウスボタンを押している間に切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
 clickimg  = ボタンをクリックしたあとに切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
 enterimg  = ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
+autoimg   = オートモードが開始されたときに切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
+skipimg   = スキップモードが開始されたときに切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
 visible   = 最初からボタンを表示するかどうか。`true`で表示、`false`で非表示となります。,
 auto_next = `true`または`false`を指定します。これに`false`が指定してあり、かつ`fix=true`の場合、`[return]`で戻ったときに次のタグに進まなくなります。,
 savesnap  = `true`または`false`で指定します。`true`にすると、このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します。,
@@ -6050,6 +6052,8 @@ tyrano.plugin.kag.tag.button = {
         activeimg: "",
         clickimg: "",
         enterimg: "",
+        autoimg: "",
+        skipimg: "",
         keyfocus: "",
 
         auto_next: "yes",
@@ -6133,6 +6137,13 @@ tyrano.plugin.kag.tag.button = {
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
 
+        if (pm.autoimg) {
+            j_button.addClass("button-auto-sync");
+        }
+        if (pm.skipimg) {
+            j_button.addClass("button-skip-sync");
+        }
+
         //クラスとイベントを登録する
         that.kag.event.addEventElement({
             tag: "button",
@@ -6150,8 +6161,18 @@ tyrano.plugin.kag.tag.button = {
         this.kag.ftag.nextOrder();
     },
 
+    /**
+     * クリック時やホバー時などのイベントリスナをセットする
+     * タグを実行したときおよびセーブデータをロードしたときに実行される
+     * @param {jQuery} j_button
+     * @param {Object} pm
+     */
     setEvent: function (j_button, pm) {
         const that = this;
+
+        // セーブした瞬間にホバー時の画像などになっていると、それがそのまま保存・復元されてしまうため、
+        // もとの画像パスに戻す
+        j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
 
         // クリックされたか
         let button_clicked = false;
@@ -6183,15 +6204,19 @@ tyrano.plugin.kag.tag.button = {
             () => {
                 if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
                 if (!is_fix_button && button_clicked) return false;
-                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.enterimg, pm.folder));
+                if (!j_button.hasClass("src-change-disabled")) {
+                    if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.enterimg, pm.folder));
+                }
                 if (pm.enterse) this.kag.playSound(pm.enterse);
             },
             // マウスカーソルが外れた時
             () => {
                 if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
                 if (!is_fix_button && button_clicked) return false;
+                if (!j_button.hasClass("src-change-disabled")) {
+                    if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
+                }
                 if (pm.leavese) this.kag.playSound(pm.leavese);
-                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
             },
         );
 
@@ -6202,7 +6227,9 @@ tyrano.plugin.kag.tag.button = {
         j_button.on("mousedown touchstart", () => {
             if (!this.kag.stat.is_strong_stop) return false;
             if (button_clicked) return false;
-            if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
+            if (!j_button.hasClass("src-change-disabled")) {
+                if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
+            }
         });
 
         //
