@@ -922,7 +922,6 @@ tyrano.plugin.kag.key_mouse = {
         const deg_10 = deg_180 / 18;
         const dir_num = ["right", "up", "left", "down"].indexOf(dir);
         const dir_rad = dir_num * deg_90;
-        const seraches = [deg_10, deg_30, deg_30 + deg_45];
         const get_radian = (p1, p2, _x = "x") => {
             let radian = Math.atan2(p2.y - p1.y, p1[_x] - p2[_x]);
             if (radian < 0) radian += Math.PI * 2;
@@ -959,11 +958,10 @@ tyrano.plugin.kag.key_mouse = {
                 const dif1 = Math.abs(dir_rad - rad);
                 const dif2 = Math.abs(dir_rad + deg_360 - rad);
                 const dif = Math.max(0.1, Math.min(dif1, dif2));
+                
                 // 2点間の距離
                 const d = ds[i];
-                // 角度がズレていることによるペナルティ
-                const penalty = 150 * Math.pow(dif / deg_10, 2);
-                const score = -(d + penalty);
+                const score = -d * (1 + Math.pow(dif / deg_10, 1));
                 if (score > this_pos.score) {
                     this_pos.score = score;
                     this_pos.dif_rad = dif;
@@ -972,8 +970,9 @@ tyrano.plugin.kag.key_mouse = {
                 // 下端まで行って下移動を実行したときに上端に戻るためのスコア
                 let dif_reverse = dif - deg_180;
                 if (dif_reverse < 0) dif_reverse + deg_360;
-                dif_reverse = Math.max(0.1, dif_reverse);
-                const score_reverse = d / (dif_reverse / deg_180);
+                dif_reverse = Math.abs(dif_reverse);
+                dif_reverse = Math.pow(Math.max(0.1, dif_reverse), 2);
+                let score_reverse = d / (dif_reverse / deg_180);
                 if (score_reverse > this_pos.score_reverse) {
                     this_pos.score_reverse = score_reverse;
                     this_pos.dif_rad_reverse = dif_reverse;
@@ -983,7 +982,8 @@ tyrano.plugin.kag.key_mouse = {
         // 探索角度を広げながら何回か探索する
         let candidate_pos_list;
         let candidate_pos_list_reverse;
-        for (let i = 0; i < 3; i++) {
+        const seraches = [deg_30, deg_30 + deg_45];
+        for (let i = 0; i < seraches.length; i++) {
             candidate_pos_list = [];
             candidate_pos_list_reverse = [];
             const search_width = seraches[i];
