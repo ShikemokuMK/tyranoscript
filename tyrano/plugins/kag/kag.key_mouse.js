@@ -210,7 +210,7 @@ tyrano.plugin.kag.key_mouse = {
                     if (typeof action === "object" && "action" in action) action = action.action;
                     const tag_array = this.util.parseTagArray(action);
                     for (const tag of tag_array) {
-                        if (tag && tag.name === "holdskip") {
+                        if (tag && tag.name === "holdskip" && this.is_holding_skip) {
                             this.util.clearHoldingSkip();
                             break;
                         }
