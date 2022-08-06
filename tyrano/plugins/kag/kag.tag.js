@@ -4258,6 +4258,10 @@ tyrano.plugin.kag.tag.link = {
         var _storage = pm.storage;
         var that = TYRANO;
 
+        j_span.on("mousedown", () => {
+            return false;
+        });
+
         j_span.bind("click touchstart", function (e) {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
@@ -6235,6 +6239,7 @@ tyrano.plugin.kag.tag.button = {
             if (!j_button.hasClass("src-change-disabled")) {
                 if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
             }
+            return false;
         });
 
         //
@@ -6836,6 +6841,10 @@ tyrano.plugin.kag.tag.glink = {
             },
         );
 
+        j_button.on("mousedown", () => {
+            return false;
+        });
+
         //
         // クリックイベント
         //
@@ -6969,7 +6978,7 @@ tyrano.plugin.kag.tag.glink = {
             // アニメーション対象が存在しない、または、いまスキップ状態でありそれを選択後も継続させる設定である
             if (animation_target_count === 0 || should_keep_skip) {
                 next();
-                return;
+                return false;
             }
 
             //
@@ -6999,6 +7008,8 @@ tyrano.plugin.kag.tag.glink = {
                     this.startAnim(j_elm, elm.__hide_options, true);
                 }
             });
+
+            return false;
         });
     },
 

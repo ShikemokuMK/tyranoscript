@@ -3287,6 +3287,9 @@ btnfontcolor = ボタンの文字色を指定します。
 boxcolor     = メッセージボックスの背景色を指定できます。
 boxopacity   = メッセージボックスの不透明度を`0`～`255`で指定できます。`255`で完全に不透明です。
 boxradius    = メッセージボックスの角に丸みを付けたいときにその丸みの半径を数値で指定します。
+boxwidth     = メッセージボックスの横幅をpx単位で指定できます。
+boxheight    = メッセージボックスの高さpx単位で指定できます。
+boxpadding   = メッセージボックスの内余白をpx単位で指定できます。`10,20,10`のようなカンマ区切りの指定に対応します。
 boximg       = メッセージボックスの背景画像を指定できます。ファイルの場所は`image`が基準となります。
 boximgpos    = メッセージボックスの背景画像の表示位置を指定できます。たとえば`center`と指定すると画面中央、`left top`で左上、`right top`で右上、`right bottom`で右下、`left bottom`で左下となります。
 boximgrepeat = メッセージボックスの背景画像の繰り返しを指定できます。画像を繰り返して敷き詰める場合は`repeat`、繰り返したくない場合は`no-repeat`を指定します。
@@ -3308,6 +3311,8 @@ closetime    = ダイアログを開いたときのエフェクト時間をミ�
 gotitle      = タイトルに戻っていいかを確認するときのテキストを変更できます。
 
 okpos        = 「OK」ボタンの位置を左に変更したい場合は`left`、右に変更したい場合は`right`を指定します。
+
+ingame       = ディスプレイ全体ではなくゲーム画面の範囲内に確認ダイアログを収めたい場合には`true`を指定します。`false`でもとに戻ります。
 
 :sample
 [dialog_config bgimg="pattern.jpg" bgimgrepeat="repeat" bgopacity="66"]
@@ -3341,6 +3346,9 @@ tyrano.plugin.kag.tag.dialog_config = {
         boximgrepeat: "",
         boximgsize: "",
         boxopacity: "",
+        boxwidth: "",
+        boxheight: "",
+        boxpadding: "",
 
         bgcolor: "",
         bgimg: "",
@@ -3356,6 +3364,8 @@ tyrano.plugin.kag.tag.dialog_config = {
         closetime: "",
 
         gotitle: "",
+
+        ingame: "",
     },
 
     __initialized: false,
@@ -3388,8 +3398,8 @@ tyrano.plugin.kag.tag.dialog_config = {
         // ボタン共通スタイル
         if (pm.btntype) this.j_button.attr("class", pm.btntype);
         if (pm.btnwidth) this.j_button.setStyle("width", $.convertLength(pm.btnwidth));
-        if (pm.btnmargin) $.setMargin(this.j_button, pm.btnmargin);
-        if (pm.btnpadding) $.setPadding(this.j_button, pm.btnpadding);
+        if (pm.btnmargin) this.j_button.setMargin(pm.btnmargin);
+        if (pm.btnpadding) this.j_button.setPadding(pm.btnpadding);
 
         // フォント設定
         if (pm.fontsize) this.j_text.setStyle("font-size", $.convertLength(pm.fontsize));
@@ -3412,6 +3422,10 @@ tyrano.plugin.kag.tag.dialog_config = {
         if (pm.boximgsize) this.j_boxbase.setStyle("background-size", $.convertLength(pm.boximgsize));
         if (pm.boximgrepeat) this.j_boxbase.setStyle("background-repeat", pm.boximgrepeat);
         if (pm.boxopacity) this.j_boxbase.setStyle("opacity", $.convertOpacity(pm.boxopacity));
+        if (pm.boxwidth) this.j_box.setStyle("width", $.convertLength(pm.boxwidth)).setStyle("max-width", $.convertLength(pm.boxwidth));
+        if (pm.boxheight)
+            this.j_box.setStyle("height", $.convertLength(pm.boxheight)).setStyle("max-height", $.convertLength(pm.boxheight));
+        if (pm.boxpadding) this.j_box.setPadding(pm.boxpadding);
 
         // ボックス背景を変更するならデフォの設定を切る
         if (pm.boximg || pm.boxcolor) {
@@ -3454,6 +3468,16 @@ tyrano.plugin.kag.tag.dialog_config = {
             if (this.j_cancel_img) this.j_cancel_img[insert_method](this.j_cancel);
         }
 
+        if (pm.ingame) {
+            const j_remodal = $(".remodal-bg, .remodal-overlay, .remodal-wrapper");
+            if (pm.ingame === "true") {
+                j_remodal.appendTo("#tyrano_base");
+                j_remodal.setStyle("z-index", "1000000000");
+            } else if (pm.ingame === "false") {
+                j_remodal.appendTo("body");
+            }
+        }
+
         this.kag.ftag.nextOrder();
     },
 
@@ -3480,8 +3504,8 @@ tyrano.plugin.kag.tag.dialog_config = {
         if (pm.text) j_elm.text(pm.text);
         if (pm.type) j_elm.attr("class", pm.type);
         if (pm.width) j_elm.setStyle("width", $.convertLength(pm.width));
-        if (pm.margin) $.setMargin(j_elm, pm.margin);
-        if (pm.padding) $.setPadding(j_elm, pm.padding);
+        if (pm.margin) j_elm.setMargin(pm.margin);
+        if (pm.padding) j_elm.setPadding(pm.padding);
 
         // フォント設定
         if (pm.fontsize) j_elm.setStyle("font-size", $.convertLength(pm.fontsize));
@@ -3524,8 +3548,8 @@ tyrano.plugin.kag.tag.dialog_config = {
         }
 
         const j_img = this.createButton(pm);
-        if (pm.margin) $.setMargin(j_img, pm.margin);
-        if (pm.padding) $.setPadding(j_img, pm.padding);
+        if (pm.margin) j_img.setMargin(pm.margin);
+        if (pm.padding) j_img.setPadding(pm.padding);
 
         j_img.attr("id", id);
         j_img.addClass("remodal-image-button");

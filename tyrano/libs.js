@@ -581,7 +581,7 @@
     };
 
     $.insertRuleToTyranoCSS = function (css_str) {
-        const sheet = $('link[href="./tyrano/tyrano.css"]').get(0).sheet;
+        const sheet = $('link[href*="tyrano/tyrano.css"]').get(0).sheet;
         sheet.insertRule(css_str, sheet.cssRules.length);
     };
 
@@ -2538,7 +2538,10 @@
      * @param {string} length_str
      * @param {string} [prop="margin"]
      */
-    $.setMargin = (j_elm, length_str, prop = "margin") => {
+    $.fn.setMargin = function (length_str, prop = "margin") {
+        if (this.length === 0) {
+            return this;
+        }
         const hash = length_str.split(",").map((length) => {
             return $.convertLength(length);
         });
@@ -2569,11 +2572,14 @@
         style[`${prop}-bottom`] = bottom;
         style[`${prop}-left`] = left;
         style[`${prop}-right`] = right;
-        j_elm.setStyleMap(style);
+        this.each((i, elm) => {
+            $(elm).setStyleMap(style);
+        });
+        return this;
     };
 
-    $.setPadding = (j_elm, length_str) => {
-        $.setMargin(j_elm, length_str, "padding");
+    $.fn.setPadding = function (length_str) {
+        return this.setMargin(length_str, "padding");
     };
 
     /**

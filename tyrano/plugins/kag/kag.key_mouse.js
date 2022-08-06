@@ -94,6 +94,7 @@ tyrano.plugin.kag.key_mouse = {
 
             $([document, this.j_event_layer[0]]).swipe({
                 swipe: (event, direction, distance, duration, fingerCount, fingerData) => {
+                    if (this.util.isRemodalDisplayed()) return;
                     clearTimeout(this.hold_timer_id);
                     this.is_swipe = true;
                     const action_key = "swipe_" + direction + "_" + fingerCount;
@@ -143,6 +144,8 @@ tyrano.plugin.kag.key_mouse = {
             document.addEventListener(
                 "touchmove",
                 (e) => {
+                    if (this.util.isRemodalDisplayed()) return;
+
                     if (e.changedTouches && e.changedTouches[0]) {
                         const x = e.changedTouches[0].pageX;
                         const y = e.changedTouches[0].pageY;
@@ -170,11 +173,17 @@ tyrano.plugin.kag.key_mouse = {
             document.addEventListener(
                 "touchend",
                 (e) => {
-                    // スキップモードやオートモードを解除
-                    this.util.clearSkipAndAuto();
-
                     clearTimeout(this.hold_timer_id);
                     clearTimeout(this.touch_mash_timer_id);
+
+                    if (this.util.isRemodalDisplayed()) return;
+
+                    // スキップモードやオートモードを解除
+                    const path = e.path || (e.composedPath && e.composedPath());
+                    if (!path || (path && $(path).filter(".event-setting-element").length === 0)) {
+                        this.util.clearSkipAndAuto();
+                    }
+
                     const now = this.util.getTime();
 
                     // 前回タップからの経過時間
@@ -1440,12 +1449,23 @@ tyrano.plugin.kag.key_mouse = {
             return "onwheel" in document ? "wheel" : "onmousewheel" in document ? "mousewheel" : "DOMMouseScroll";
         },
 
+        remodal_wrapper: null,
+
         /**
          * いまリモーダルウィンドウが開いているかどうかを返す
          * @returns {boolean}
          */
         isRemodalDisplayed() {
-            return $(".remodal-wrapper").hasClass("remodal-is-opened");
+            let j_wrapper;
+            if (this.remodal_wrapper) {
+                j_wrapper = this.remodal_wrapper;
+            } else {
+                j_wrapper = $(".remodal-wrapper");
+                if (j_wrapper.length > 0) {
+                    this.remodal_wrapper = j_wrapper;
+                }
+            }
+            return j_wrapper.hasClass("remodal-is-opened");
         },
 
         /**
@@ -1807,6 +1827,8 @@ tyrano.plugin.kag.key_mouse = {
 
             const tyrano_base = $("#tyrano_base")[0];
             $(document).on("click", (e) => {
+                if (this.util.isRemodalDisplayed()) return;
+
                 // ゲーム画面外の黒帯部分のクリックでもゲームを進められるようにする
                 // ただし #tyrano_base 以下の要素からクリックイベントが伝搬してきた場合は拒否する
                 // あくまで "黒帯部分を直接クリックした場合" のみを検知したい

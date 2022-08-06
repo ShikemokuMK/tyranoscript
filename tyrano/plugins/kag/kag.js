@@ -1414,7 +1414,7 @@ tyrano.plugin.kag = {
             }
         }
         if (this.config["keyFocusWithHoverStyle"] === "true") {
-            $.copyHoverCSSToFocusCSS('link[href="./tyrano/tyrano.css"]');
+            $.copyHoverCSSToFocusCSS('link[href*="tyrano/tyrano.css"]');
         }
 
         //
