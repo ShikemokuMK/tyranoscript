@@ -4294,6 +4294,8 @@ tyrano.plugin.kag.tag.link = {
             } else {
                 that.kag.setSkip(false);
             }
+
+            return false;
         });
 
         that.kag.setElmCursor(j_span, "pointer");
@@ -6174,6 +6176,9 @@ tyrano.plugin.kag.tag.button = {
         // もとの画像パスに戻す
         j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
 
+        if (pm.autoimg && this.kag.stat.is_auto) j_button.attr("src", $.parseStorage(pm.autoimg, pm.folder));
+        if (pm.skipimg && this.kag.stat.is_skip) j_button.attr("src", $.parseStorage(pm.skipimg, pm.folder));
+
         // クリックされたか
         let button_clicked = false;
 
@@ -6435,9 +6440,6 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.ftag.startTag("sleepgame", pm);
                         break;
                 }
-
-                // バブリングさせない
-                e.stopPropagation();
 
                 return false;
             }

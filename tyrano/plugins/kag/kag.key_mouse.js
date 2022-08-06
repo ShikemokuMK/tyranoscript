@@ -18,12 +18,17 @@ tyrano.plugin.kag.key_mouse = {
     hold_timer_id: 0,
     previous_touchend_time: 0,
     is_keydown: false, // キーの連続押し込み反応を防ぐ
-    start_point: { x: 0, y: 0 }, // 指が動いた状態を管理するためのプロパティ
-    end_point: { x: 0, y: 0 },
+    prev_point: { x: 0, y: 0 }, // 指が動いた状態を管理するためのプロパティ
+    move_point: 0,
     is_holding_skip: false, // ホールドスキップ実行中は true
+    touch_mash_count: 0, // タップ連打数
+    touch_position: "", // タップ位置
 
     // 定数プロパティ
-    HOLD_TIMEOUT: 2000, // この時間(ミリ秒)タッチし続けたときに「ホールド」をトリガーする
+    MOVEMENT_CANCEL_HOLD: 100, // タッチした状態でこのpx以上指を動かすと「ホールド」をキャンセルする
+    HOLD_TIMEOUT: 1000, // この時間(ミリ秒)よりも長く続けたタッチを「ホールド」として扱う
+    TOUCH_MASH_MAX_TIME: 200, // この時間(ミリ秒)よりも短い間隔でのタップを「連打」として扱う
+    TOUCH_EDGE_WIDTH_RATIO: 0.3, // 「端タップ」として扱う画面左右端からの長さ（画面横サイズに対する比で指定）
     PREVENT_DOUBLE_TOUCH_TIME: 350, // この時間(ミリ秒)より短い時間の連続タップを抑制する
     VMOUSE_TICK_RATE: 1, // 仮想マウスカーソルのチックレート
     GAMEPAD_TICK_RATE: 20, // ゲームパッドのチックレート
@@ -55,6 +60,13 @@ tyrano.plugin.kag.key_mouse = {
         this.map_ges = this.keyconfig["gesture"] || {};
         this.map_pad = this.keyconfig["gamepad"] || { button: {}, stick_digital: {}, stick: {} };
 
+        // KeyConfig.js で上書きできるようにする
+        Object.keys(this.keyconfig).forEach((key) => {
+            if (!["key", "mouse", "gesture", "gamepad"].includes(key)) {
+                this[key] = this.keyconfig[key];
+            }
+        });
+
         // イベントレイヤ
         this.j_event_layer = $(".layer_event_click");
 
@@ -62,13 +74,27 @@ tyrano.plugin.kag.key_mouse = {
         // スマートフォンイベント
         //
         if ($.userenv() !== "pc") {
+            // ダブルタップ・トリプルタップ等が最大何連打まで定義されているか
+            let mash_right_max = 0;
+            let mash_left_max = 0;
+            Object.keys(this.map_ges).forEach((key) => {
+                if (key.indexOf("mash_right_") === 0 && this.map_ges[key]) {
+                    const num = parseInt(key.replace("mash_right_", ""));
+                    if (num > mash_right_max) mash_right_max = num;
+                } else if (key.indexOf("mash_left_") === 0 && this.map_ges[key]) {
+                    const num = parseInt(key.replace("mash_left_", ""));
+                    if (num > mash_left_max) mash_left_max = num;
+                }
+            });
+
             //
             // スワイプ
+            // https://github.com/mattbryson/TouchSwipe-Jquery-Plugin
             //
 
-            // https://github.com/mattbryson/TouchSwipe-Jquery-Plugin
-            this.j_event_layer.swipe({
+            $([document, this.j_event_layer[0]]).swipe({
                 swipe: (event, direction, distance, duration, fingerCount, fingerData) => {
+                    clearTimeout(this.hold_timer_id);
                     this.is_swipe = true;
                     const action_key = "swipe_" + direction + "_" + fingerCount;
                     let action = this.map_ges[action_key];
@@ -82,13 +108,21 @@ tyrano.plugin.kag.key_mouse = {
             });
 
             //
-            // ホールド
+            // タッチスタート
+            // * ホールドアクションの予約
             //
 
-            this.j_event_layer
-                .on("touchstart", (e) => {
-                    // スキップ中にクリックされたら元に戻す
-                    this.util.clearSkipAndAuto();
+            document.addEventListener(
+                "touchstart",
+                (e) => {
+                    if (e.changedTouches && e.changedTouches[0]) {
+                        const x = e.changedTouches[0].pageX;
+                        const y = e.changedTouches[0].pageY;
+                        this.prev_point.x = x;
+                        this.prev_point.y = y;
+                        this.move_point = 0;
+                    }
+
                     this.hold_timer_id = setTimeout(() => {
                         let action = this.map_ges.hold;
                         if (typeof action === "object" && "action" in action) action = action.action;
@@ -97,22 +131,120 @@ tyrano.plugin.kag.key_mouse = {
                             this.is_swipe = true;
                         }
                     }, this.HOLD_TIMEOUT);
-                })
-                .on("touchend", () => {
+                },
+                { capture: true },
+            );
+
+            //
+            // タッチムーブ
+            // * ホールドアクションのキャンセル
+            //
+
+            document.addEventListener(
+                "touchmove",
+                (e) => {
+                    if (e.changedTouches && e.changedTouches[0]) {
+                        const x = e.changedTouches[0].pageX;
+                        const y = e.changedTouches[0].pageY;
+                        const dx = Math.abs(x - this.prev_point.x);
+                        const dy = Math.abs(y - this.prev_point.y);
+                        this.move_point += dx + dy;
+                        if (this.move_point > this.MOVEMENT_CANCEL_HOLD) {
+                            clearTimeout(this.hold_timer_id);
+                        }
+                        this.prev_point.x = x;
+                        this.prev_point.y = y;
+                    }
+                },
+                { capture: true },
+            );
+
+            //
+            // タッチエンド
+            // * ホールドアクションの解除
+            // * ホールドスキップの解除
+            // * ダブルタップ・トリプルタップの判定
+            // * ダブルタップの e.preventDefault()
+            //
+
+            document.addEventListener(
+                "touchend",
+                (e) => {
+                    // スキップモードやオートモードを解除
+                    this.util.clearSkipAndAuto();
+
                     clearTimeout(this.hold_timer_id);
-                });
+                    clearTimeout(this.touch_mash_timer_id);
+                    const now = this.util.getTime();
 
-            //
-            // スマホでのダブルタップ抑制
-            //
+                    // 前回タップからの経過時間
+                    const touch_interval = now - this.previous_touchend_time;
 
-            $(".tyrano_base").on("touchend", (e) => {
-                const now = new Date().getTime();
-                if (now - this.previous_touchend_time < this.PREVENT_DOUBLE_TOUCH_TIME) {
-                    e.preventDefault();
-                }
-                this.previous_touchend_time = now;
-            });
+                    // タッチ位置を判定
+                    // "left", "", "right"
+                    let pos = "";
+                    const view_width = $.getViewPort().width;
+                    const edge_width = view_width * this.TOUCH_EDGE_WIDTH_RATIO;
+                    if (e.changedTouches && e.changedTouches[0]) {
+                        const x = e.changedTouches[0].pageX;
+                        if (x < edge_width) {
+                            pos = "left";
+                        } else if (x > view_width - edge_width) {
+                            pos = "right";
+                        } else {
+                            pos = "";
+                        }
+                    }
+
+                    // ホールドアクションにホールドスキップが設定されている場合はその解除
+                    let action = this.map_ges.hold;
+                    if (typeof action === "object" && "action" in action) action = action.action;
+                    const tag_array = this.util.parseTagArray(action);
+                    for (const tag of tag_array) {
+                        if (tag && tag.name === "holdskip") {
+                            this.util.clearHoldingSkip();
+                            break;
+                        }
+                    }
+
+                    // 同タッチ位置の連続タッチ数をインクリメント
+                    if (pos === this.touch_position && touch_interval < this.TOUCH_MASH_MAX_TIME) {
+                        this.touch_mash_count++;
+                        const event_type = `mash_${pos}_${this.touch_mash_count}`;
+                        const max = pos === "right" ? mash_right_max : mash_left_max;
+                        const action = this.map_ges[event_type];
+                        if (action) {
+                            if (this.touch_mash_count >= max) {
+                                // もうこの先の連打数にアクションが設定されていないならいまの連打数のアクションを即実行
+                                if (action) {
+                                    this.doAction(action, e);
+                                }
+                            } else {
+                                // まだこの先の連打数にアクションが設定されているならいまの連打数のアクションを即実行するわけにはいかない
+                                // たとえば「いまダブルタップした段階だが、トリプルタップのアクションが設定されている」場合、
+                                // 「トリプルタップが行われなかった」ことを検知してからダブルタップのアクションを実行する
+                                this.touch_mash_timer_id = setTimeout(() => {
+                                    this.touch_mash_count = 0;
+                                    if (action) {
+                                        this.doAction(action, e);
+                                    }
+                                }, this.TOUCH_MASH_MAX_TIME);
+                            }
+                        }
+                    } else {
+                        this.touch_mash_count = 1;
+                    }
+
+                    // ダブルタップによる拡大（ブラウザのデフォルトの動作）を抑制する
+                    if (touch_interval < this.PREVENT_DOUBLE_TOUCH_TIME) {
+                        e.preventDefault();
+                    }
+
+                    this.previous_touchend_time = now;
+                    this.touch_position = pos;
+                },
+                { capture: true, passive: false },
+            );
         }
 
         //
@@ -435,9 +567,9 @@ tyrano.plugin.kag.key_mouse = {
     holdskip() {
         if (this.util.canClick()) {
             this.is_holding_skip = true;
-            return this._role("skip");
+            return this._role("skip", { hold: true });
         } else {
-            this.kag.setSkip(true);
+            this.kag.setSkip(true, { hold: true });
             return true;
         }
     },
@@ -958,7 +1090,7 @@ tyrano.plugin.kag.key_mouse = {
                 const dif1 = Math.abs(dir_rad - rad);
                 const dif2 = Math.abs(dir_rad + deg_360 - rad);
                 const dif = Math.max(0.1, Math.min(dif1, dif2));
-                
+
                 // 2点間の距離
                 const d = ds[i];
                 const score = -d * (1 + Math.pow(dif / deg_10, 1));
@@ -1037,26 +1169,27 @@ tyrano.plugin.kag.key_mouse = {
     /**
      * 役割系のロール
      * @param {string} role
+     * @param {Object} options
      * @returns {boolean}
      */
-    _role(role) {
+    _role(role, options = {}) {
         const can_show_menu = this.util.canShowMenu();
 
         // スキップロールだけ先に判定する
         if (role === "skip") {
             if (this.kag.stat.is_skip) {
                 // スキップ中
-                this.kag.setSkip(false);
+                this.kag.setSkip(false, options);
                 return true;
             } else if (can_show_menu) {
                 // スキップ中ではない
                 if (this.kag.stat.is_adding_text) {
                     // スキップ中ではない, メニューが開ける状態, テキスト追加中
-                    this.kag.setSkip(true);
+                    this.kag.setSkip(true, options);
                     return true;
                 } else {
                     // スキップ中ではない, メニューが開ける状態, テキスト追加中ではない
-                    this.kag.ftag.startTag("skipstart", {});
+                    this.kag.ftag.startTag("skipstart", options);
                     return true;
                 }
             }
@@ -1242,7 +1375,7 @@ tyrano.plugin.kag.key_mouse = {
          * @returns {boolean}
          */
         clearHoldingSkip() {
-            this.kag.setSkip(false);
+            this.kag.setSkip(false, { hold: true });
             this.parent.is_holding_skip = false;
         },
 
@@ -1252,8 +1385,7 @@ tyrano.plugin.kag.key_mouse = {
          * @returns {boolean}
          */
         clearSkipAndAuto() {
-            // スキップの解除（[s]で待機している最中は解除しない）
-            if (this.kag.stat.is_skip && !this.kag.stat.is_strong_stop) {
+            if (this.kag.stat.is_skip) {
                 this.kag.setSkip(false);
                 return true;
             }
@@ -1675,16 +1807,13 @@ tyrano.plugin.kag.key_mouse = {
 
             const tyrano_base = $("#tyrano_base")[0];
             $(document).on("click", (e) => {
-                // ホールドスキップ中でなければスキップを解除する
-                if (!that.is_holding_skip) that.kag.setSkip(false);
-
                 // ゲーム画面外の黒帯部分のクリックでもゲームを進められるようにする
                 // ただし #tyrano_base 以下の要素からクリックイベントが伝搬してきた場合は拒否する
                 // あくまで "黒帯部分を直接クリックした場合" のみを検知したい
                 // そしてイベントレイヤが表示されている場合のみクリックをトリガーする
-                const oe = e.originalEvent;
-                if(!oe) return;
-                const path = oe.path || oe.composedPath && oe.composedPath();
+                let oe = e.originalEvent || e;
+                if (!oe) return;
+                const path = oe.path || (oe.composedPath && oe.composedPath());
                 if (path && !path.includes(tyrano_base)) {
                     if (that.j_event_layer.css("display") !== "none") {
                         that.j_event_layer.click();
@@ -1701,7 +1830,9 @@ tyrano.plugin.kag.key_mouse = {
                     that.vmouse.hide();
                 }
 
-                that.util.clearSkipAndAuto();
+                if (!that.is_holding_skip) {
+                    that.util.clearSkipAndAuto();
+                }
 
                 // 左ボタンの押下は無視
                 if (e.button === 0) return;

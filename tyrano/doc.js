@@ -379,8 +379,8 @@ var PARAM_EXP = {
                     border-radius: 5px;
                     font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
                     line-height: 140%;
-                    display: inline-block;
-                    word-break: keep-all;
+                    display: inline;
+                    word-break: inherit;
                     user-select: all;
                 }
                 .news-v3 .code::selection {

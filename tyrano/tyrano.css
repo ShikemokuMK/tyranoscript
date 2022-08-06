@@ -6,6 +6,11 @@
 /* レイヤ
 --------------------------------------*/
 
+html {
+    touch-action: none;
+    user-select: none;
+}
+
 body {
     background-color: black;
     -webkit-tap-highlight-color: transparent;
@@ -72,8 +77,10 @@ body {
 }
 
 /* [edit]タグで出す<input>要素 */
+/*
 .text_box {
 }
+*/
 
 /*ダイアログボックス*/
 #alertify {
@@ -891,10 +898,10 @@ img#remodal-cancel {
 }
 
 /* メッセージボックス */
+/*
 [data-remodal-id="modal"] {
-    /* border-radius で角を丸めたときに背景のアウター要素の角も丸まるように */
-    overflow: hidden;
 }
+*/
 
 /* 背景となるアウター要素 */
 .remodal-wrapper .remodal-base,
@@ -939,4 +946,102 @@ img#remodal-cancel {
 .remodal-is-closing .remodal-base {
     -webkit-animation-name: remodal-overlay-closing-keyframes;
     animation-name: remodal-overlay-closing-keyframes;
+}
+
+/* スキップ開始時・終了時などに画面中央に出すエフェクト
+--------------------------------------*/
+
+.mode_effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    display: block;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 1);
+    border-radius: 50%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    transform-origin: center center;
+    animation: mode_effect 800ms linear forwards;
+    z-index: 9999999999;
+}
+
+.mode_effect_default {
+    font-size: 10px;
+    width: 15em;
+    height: 15em;
+}
+
+.mode_effect_default.stop > div:first-child,
+.mode_effect_default.stop > div:last-child,
+.mode_effect_default.auto > div:last-child,
+.mode_effect_default.skip > div:first-child,
+.mode_effect_default.skip > div:last-child {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    display: block;
+    pointer-events: none;
+    background: transparent;
+    width: 7em;
+    height: 7em;
+    box-sizing: border-box;
+    border-bottom: 3.5em solid transparent;
+    border-left: 3.5em solid white;
+    border-right: 3.5em solid transparent;
+    border-top: 3.5em solid transparent;
+}
+
+.mode_effect_default.skip > div:first-child,
+.mode_effect_default.skip > div:last-child {
+    transform: translateX(0.6em);
+}
+
+.mode_effect_default.skip > div:last-child {
+    left: 7em;
+}
+
+.mode_effect_default.auto > div:first-child {
+    display: none;
+}
+.mode_effect_default.auto > div:last-child {
+    border-bottom: 3.5em solid transparent;
+    border-left: 5.7em solid white;
+    border-right: 5.7em solid transparent;
+    border-top: 3.5em solid transparent;
+    left: 5.4em;
+}
+
+.mode_effect_default.stop > div:first-child,
+.mode_effect_default.stop > div:last-child {
+    position: relative;
+    left: 0;
+    border: none;
+    width: 40%;
+    height: 40%;
+    border-right: 1.8em solid white;
+}
+
+.mode_effect_default.stop > div:last-child {
+    border-right: none;
+    border-left: 1.8em solid white;
+}
+
+@keyframes mode_effect {
+    from {
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    to {
+        transform: scale(1.2);
+        opacity: 0;
+    }
 }

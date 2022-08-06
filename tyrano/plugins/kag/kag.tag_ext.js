@@ -694,7 +694,7 @@ tyrano.plugin.kag.tag.skipstart = {
         if (this.kag.stat.is_skip == true || this.kag.stat.is_adding_text) {
             return false;
         }
-        this.kag.setSkip(true);
+        this.kag.setSkip(true, pm);
         this.kag.ftag.nextOrder();
     },
 };

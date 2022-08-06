@@ -118,6 +118,23 @@ tyrano.plugin.kag = {
         },
 
         preload_audio_map: {},
+
+        mode_effect: {
+            pc: {
+                skip: null,
+                auto: null,
+                stop: null,
+                holdskip: null,
+                holdstop: null,
+            },
+            phone: {
+                skip: null,
+                auto: null,
+                stop: null,
+                holdskip: null,
+                holdstop: null,
+            },
+        },
     },
 
     //逐次変化するKAGシステムの動作に必要な状況変化ファイル
@@ -2148,11 +2165,13 @@ tyrano.plugin.kag = {
                 j_elm.addClass("src-change-disabled");
             });
 
+            this.showModeEffect("auto");
+
             // スキップモードとオートモードは同時に成立しない
             this.setSkip(false);
         } else {
             this.stat.is_wait_auto = false;
-            
+
             // ティラノイベント"auto-stop"を発火
             this.trigger("auto-stop");
 
@@ -2167,6 +2186,8 @@ tyrano.plugin.kag = {
                 j_elm.attr("src", $.parseStorage(pm.graphic, pm.folder));
                 j_elm.removeClass("src-change-disabled");
             });
+
+            this.showModeEffect("stop");
         }
         this.stat.is_auto = bool;
     },
@@ -2174,8 +2195,9 @@ tyrano.plugin.kag = {
     /**
      * スキップモード状態を設定する (現在の状態からの変更がない場合は無視)
      * @param {boolean} スキップモードにするかどうか
+     * @param {options}
      */
-    setSkip: function (bool) {
+    setSkip: function (bool, options = {}) {
         if (this.stat.is_skip === bool) {
             return;
         }
@@ -2194,6 +2216,8 @@ tyrano.plugin.kag = {
                 j_elm.addClass("src-change-disabled");
             });
 
+            this.showModeEffect("skip", options);
+
             // スキップモードとオートモードは同時に成立しない
             this.setAuto(false);
         } else {
@@ -2210,6 +2234,8 @@ tyrano.plugin.kag = {
                 j_elm.attr("src", $.parseStorage(pm.graphic, pm.folder));
                 j_elm.removeClass("src-change-disabled");
             });
+
+            this.showModeEffect("stop", options);
         }
         this.stat.is_skip = bool;
     },
@@ -2886,6 +2912,69 @@ tyrano.plugin.kag = {
             j_div.insertAfter(j_img);
             j_div.append(j_img);
         },
+    },
+
+    /**
+     * モード変化のエフェクトを出す
+     * @param {"skip" | "stop" | "auto"} type
+     * @param {Object} [options]
+     * @param {boolean} options.hold
+     * @returns
+     */
+    showModeEffect(_type, options = {}) {
+        clearTimeout(this.tmp.screen_effect_timer_id);
+
+        const type = options.hold ? "hold" + _type : _type;
+
+        // 10ミリ秒後にエフェクトを予約
+        this.tmp.screen_effect_timer_id = setTimeout(() => {
+            // 10ミリ秒後の時点でモードに変化がなければリターン
+            if (this.kag.tmp.prev_screen_effect_type === type) return;
+
+            this.kag.tmp.prev_screen_effect_type = type;
+
+            // この環境の定義がなければリターン
+            const env = $.userenv() === "pc" ? "pc" : "phone";
+            if (!this.tmp.mode_effect[env] || !this.tmp.mode_effect[env][type]) return;
+
+            // storage が取れなければリターン
+            const def = this.tmp.mode_effect[env][type];
+            const storage = def.storage;
+            if (!storage || storage === "none") return;
+
+            // 前回エフェクトの削除
+            $("#mode_effect").remove();
+
+            // デフォルトなら div 要素, 画像が指定されているなら img 要素
+            let j_effect;
+            if (storage === "default") {
+                j_effect = $(`<div id="mode_effect" class="mode_effect mode_effect_default ${_type}"><div></div><div></div></div>`);
+                if (def.width && def.width !== "auto") j_effect.css("font-size", `${(def.width / 15).toFixed(0)}px`);
+                if (def.bgcolor) j_effect.css("background", $.convertColor(def.bgcolor));
+                if (def.color) {
+                    if (_type === "stop") {
+                        j_effect.children().eq(0).css("border-right-color", $.convertColor(def.color));
+                        j_effect.children().eq(1).css("border-left-color", $.convertColor(def.color));
+                    } else {
+                        j_effect.children().css("border-left-color", $.convertColor(def.color));
+                    }
+                }
+            } else {
+                const src = $.parseStorage(storage, "image");
+                j_effect = $(`<img id="mode_effect" src="${src}" class="mode_effect ${type}" />`);
+                if (def.width && def.width !== "auto") j_effect.css("width", $.convertLength(def.width));
+                if (def.height && def.height !== "auto") j_effect.css("height", $.convertLength(def.height));
+            }
+
+            const duration = 800;
+            j_effect.setStyle("animation-duration", `${duration}ms`);
+
+            $("#tyrano_base").append(j_effect);
+
+            setTimeout(() => {
+                j_effect.remove();
+            }, duration);
+        }, 10);
     },
 
     test: function () {},

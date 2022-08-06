@@ -192,7 +192,13 @@ Ver4.50以降で有効
     swipe_left_1  : 1本の指で画面左方向にフリックしたときの動作
     swipe_right_1 : 1本の指で画面右方向にフリックしたときの動作
     swipe_down_1  : 1本の指で画面下方向にフリックしたときの動作
+    
     hold          : 画面を一定時間タッチし続けたときの動作
+    
+    mash_right_2  : 画面右端をダブルタップしたときの動作
+    mash_right_3  : 画面右端をトリプルタップしたときの動作
+    mash_left_2   : 画面左端をダブルタップしたときの動作
+    mash_left_3   : 画面左端をトリプルタップしたときの動作
     
     
     ★ヒント
@@ -200,8 +206,8 @@ Ver4.50以降で有効
     swipe_up_1 などの _1 は指の数を表しており、
     たとえば swipe_up_1 なら「1本の指で画面左方向にスワイプしたときの動作」という意味になります。
     
-    つまり、2本の指でスワイプしたときのアクションを指定したい場合は
-    swipe_up_2 のような名前でアクションを定義すればよいということです。
+    2本の指でスワイプしたときのアクションを指定したい場合は
+    swipe_up_2 のような名前でアクションを定義すればOKです。
     
     
     
@@ -382,8 +388,8 @@ window.__tyrano_key_config = {
         "center"     : "menu",
         "wheel_up"   : "backlog",
         "wheel_down" : "next",
-        "prev"       : "title",
         "next"       : "holdskip",
+        "prev"       : "auto",
         
         "right_swipe_up"     : "",
         "right_swipe_down"   : "",
@@ -408,10 +414,19 @@ window.__tyrano_key_config = {
     gesture: {
         
         "swipe_up_1"    : "backlog",
+        "swipe_down_1"  : "load",
         "swipe_left_1"  : "auto",
         "swipe_right_1" : "menu",
-        "swipe_down_1"  : "load",
-        "hold"          : "skip",
+        "hold"          : "holdskip",
+        
+        // 画面右端のダブルタップ・トリプルタップ
+        "mash_right_2"  : "auto",
+        "mash_right_3"  : "skip",
+        
+        // 画面左端のダブルタップ・トリプルタップ
+        "mash_left_2"  : "",
+        "mash_left_3"  : "",
+        
     
     },
     

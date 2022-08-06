@@ -3402,7 +3402,10 @@ tyrano.plugin.kag.tag.dialog_config = {
         if (pm.btnfontcolor) this.j_button.setStyle("color", $.convertColor(pm.btnfontcolor));
 
         // ボックス
-        if (pm.boxradius) this.j_box.setStyle("border-radius", $.convertLength(pm.boxradius + "px"));
+        if (pm.boxradius) {
+            this.j_box.setStyle("border-radius", $.convertLength(pm.boxradius + "px"));
+            this.j_boxbase.setStyle("border-radius", $.convertLength(pm.boxradius + "px"));
+        }
         if (pm.boxcolor) this.j_boxbase.setStyle("background-color", $.convertColor(pm.boxcolor));
         if (pm.boximg) this.j_boxbase.setStyle("background-image", $.convertBackgroundImage(pm.boximg, "image"));
         if (pm.boximgpos) this.j_boxbase.setStyle("background-position", $.convertBackgroundPosition(pm.boximgpos));
@@ -3435,7 +3438,6 @@ tyrano.plugin.kag.tag.dialog_config = {
         if (pm.bgopacity) this.j_image.setStyle("opacity", $.convertOpacity(pm.bgopacity));
 
         // アニメーション
-        //if (pm.openeffect) this.j_box.setAnimation({ "animation-name": pm.openeffect });
         if (pm.openeffect) this.kag.tmp.remodal_opening_effect = pm.openeffect;
         if (pm.closeeffect) this.kag.tmp.remodal_closing_effect = pm.closeeffect;
         if (pm.opentime) this.kag.tmp.remodal_opening_effect_time = pm.opentime + "ms";
@@ -3455,6 +3457,12 @@ tyrano.plugin.kag.tag.dialog_config = {
         this.kag.ftag.nextOrder();
     },
 
+    /**
+     * 画像ボタンを更新する
+     * @param {{[key: string]: string}} pm
+     * @param {boolean} is_ok
+     * @returns
+     */
     changeButton(pm, is_ok) {
         // ボタンを画像に変更する
         if (pm.img) return this.replaceButton(pm, is_ok);
@@ -3494,6 +3502,11 @@ tyrano.plugin.kag.tag.dialog_config = {
         });
     },
 
+    /**
+     * ダイアログのボタンを button から img に置き換える
+     * @param {{[key: string]: string}} pm
+     * @param {boolean} is_ok
+     */
     replaceButton(pm, is_ok) {
         pm.img = $.parseStorage(pm.img, "image");
         pm.enterimg = $.parseStorage(pm.enterimg, "image");
@@ -3528,6 +3541,11 @@ tyrano.plugin.kag.tag.dialog_config = {
         else this.j_cancel_img = j_img;
     },
 
+    /**
+     * 画像ボタンの img 要素を作成して返す
+     * @param {{[key: string]: string}} pm
+     * @returns {jQuery}
+     */
     createButton(pm) {
         const j_img = $("<img />").attr("src", pm.img);
         if (pm.width) j_img.setStyle("width", $.convertLength(pm.width));
@@ -3805,6 +3823,89 @@ tyrano.plugin.kag.tag.dialog_config_filter = {
         pm = $.extend({}, filter.pm, pm);
         const filter_str = filter.buildFilterPropertyValue(pm);
         $(".remodal-base").setStyleMap({ "backdrop-filter": filter_str }, "webkit");
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[mode_effect]
+
+:group
+システムデザイン変更
+
+:title
+モード変化エフェクト
+
+:exp
+次のタイミングで画面中央にエフェクトを出すことができます。
+
+①スキップモード開始時
+②オートモード開始時
+③スキップモードまたはオートモード停止時
+④ホールドスキップモード開始時
+⑤ホールドスキップモード停止時
+
+※ホールドスキップとは「ボタンやキーを押している間だけスキップする機能」のことです。キーボードの`Ctrl`キーに割り当てられていることが一般的です。
+
+:param
+skip       = スキップモード開始時に表示されるエフェクト。`none`、`default`、または`imageフォルダを基準とする画像ファイルの場所`を指定します。`none`だとエフェクトなし、`default`だとデフォルトのエフェクト、画像ファイルを指定するとその画像を出すことができます。
+auto       = オートモード開始時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+stop       = スキップモードまたはオートモード停止時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+holdskip   = ホールドスキップモード開始時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+holdstop   = ホールドストップモード停止時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+all        = 5種類のエフェクトをまとめて指定できます。`skip`パラメータと同様に指定します。
+env        = `all``pc``phone`のいずれかを指定します。`pc`を指定すると、プレイヤーがPCでゲームを遊んでいるとき限定のエフェクトを設定できます。`phone`を指定すると、プレイヤーがスマホ・タブレットでゲームを遊んでいるとき限定のエフェクトを設定できます。`all`(デフォルト)の場合は2つの環境の設定をまとめて行います。
+width      = エフェクトの横幅を指定したい場合、数値(px単位)を指定します。
+height     = エフェクトの高さを指定したい場合、数値(px単位)を指定します。
+color      = エフェクトに`default`を使用する場合に、図形部分の色を指定できます。
+bgcolor    = エフェクトに`default`を使用する場合に、図形を囲む丸部分の色を指定できます。
+
+:sample
+[mode_effect all="default" holdskip="none" holdstop="none"]
+
+
+#[end]
+*/
+tyrano.plugin.kag.tag.mode_effect = {
+    pm: {
+        all: "", // none, default, hoge.png
+        skip: "",
+        auto: "",
+        holdskip: "",
+        stop: "",
+        env: "all", // all, pc, phone
+    },
+    next: function (pm) {
+        this.kag.ftag.nextOrder();
+    },
+    mode_list: ["skip", "auto", "stop", "holdskip", "holdstop"],
+    start: function (pm) {
+        let target_env_keys;
+
+        if (pm.env === "all") target_env_keys = ["pc", "phone"];
+        else target_env_keys = [pm.env];
+
+        if (pm.all) {
+            this.mode_list.forEach((mode) => {
+                if (!pm[mode]) {
+                    pm[mode] = pm.all;
+                }
+            });
+        }
+
+        target_env_keys.forEach((env_key) => {
+            const map = this.kag.tmp.mode_effect[env_key];
+            this.mode_list.forEach((mode) => {
+                if (pm[mode]) {
+                    if (!map[mode]) map[mode] = {};
+                    map[mode].storage = pm[mode];
+                    ["width", "height", "color", "bgcolor"].forEach((pm_key) => {
+                        if (pm[pm_key]) map[mode][pm_key] = pm[pm_key];
+                    });
+                }
+            });
+        });
+
         this.kag.ftag.nextOrder();
     },
 };
