@@ -429,6 +429,10 @@ tyrano.plugin.kag.menu = {
                 call_back();
             }
         } else {
+            var thumb_scale = this.kag.config.configThumbnailScale || 1;
+            if (thumb_scale < 0.01) thumb_scale = 0.01;
+            if (thumb_scale > 1) thumb_scale = 1;
+
             $("#tyrano_base").find(".layer_blend_mode").css("display", "none");
 
             setTimeout(function () {
@@ -460,11 +464,11 @@ tyrano.plugin.kag.menu = {
                     img.src = _stat.save_img;
                     img.onload = function () {
                         var canvas = document.createElement("canvas");
-                        canvas.width = that.kag.config.scWidth;
-                        canvas.height = that.kag.config.scHeight;
+                        canvas.width = that.kag.config.scWidth * thumb_scale;
+                        canvas.height = that.kag.config.scHeight * thumb_scale;
                         // Draw Image
                         var ctx = canvas.getContext("2d");
-                        ctx.drawImage(img, 0, 0);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         // To Base64
                         var img_code = that.createImgCode(canvas);
 
@@ -537,7 +541,7 @@ tyrano.plugin.kag.menu = {
                     tmp_base.find(".layer_menu").hide();
 
                     var opt = {
-                        scale: 1,
+                        scale: thumb_scale,
                         height: that.kag.config.scHeight,
                         width: that.kag.config.scWidth,
                     };
