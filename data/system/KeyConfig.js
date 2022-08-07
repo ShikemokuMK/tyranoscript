@@ -346,19 +346,19 @@ window.__tyrano_key_config = {
         "m"          : "menu",
         
         // 方向キーで仮想マウスカーソルを操作できるようにします
-        "ArrowUp"    : "vmouse_up    -a -h",
-        "ArrowDown"  : "vmouse_down  -a -h",
-        "ArrowLeft"  : "vmouse_left  -a -h",
-        "ArrowRight" : "vmouse_right -a -h",
+        "ArrowUp"    : "focus_up    -a -h delay=300",
+        "ArrowDown"  : "focus_down  -a -h delay=300",
+        "ArrowLeft"  : "focus_left  -a -h delay=300",
+        "ArrowRight" : "focus_right -a -h delay=300",
         
         // Tab キーでボタンをフォーカスできるようにします
         "Tab"        : "focus_next -a",
         
         // w, a, s, d でボタンのフォーカスを上下左右に動かせるようにします
-        "w"          : "focus_up    -a -h delay=300",
-        "s"          : "focus_down  -a -h delay=300",
-        "a"          : "focus_left  -a -h delay=300",
-        "d"          : "focus_right -a -h delay=300",
+        "w"          : "vmouse_up    -a -h",
+        "s"          : "vmouse_down  -a -h",
+        "a"          : "vmouse_left  -a -h",
+        "d"          : "vmouse_right -a -h",
         
         // PageUp, PageDown でバックログをスクロールできるようにします
         "PageUp"     : "scroll_up",
