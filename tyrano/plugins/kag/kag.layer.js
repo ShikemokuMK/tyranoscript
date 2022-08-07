@@ -127,7 +127,7 @@ tyrano.plugin.kag.layer = {
 
     //全景レイヤにオブジェクトを追加する
     appendImage: function (image_obj) {
-        $("." + this.kag.define.BASE_DIV_NAME).append(layer_obj);
+        $("." + this.kag.define.BASE_DIV_NAME).append(image_obj);
     },
 
     getLayer: function (layer_name, page) {
@@ -163,8 +163,8 @@ tyrano.plugin.kag.layer = {
 
         this.kag.stat.is_hide_message = true;
 
-        // ティラノイベント"messagewindow:hide"を発火
-        this.kag.trigger("messagewindow:hide");
+        // ティラノイベント"messagewindow-hide"を発火
+        this.kag.trigger("messagewindow-hide");
 
         var num_message_layer = parseInt(this.kag.config.numMessageLayers);
 
@@ -180,8 +180,8 @@ tyrano.plugin.kag.layer = {
     showMessageLayers: function () {
         this.kag.stat.is_hide_message = false;
 
-        // ティラノイベント"messagewindow:show"を発火
-        this.kag.trigger("messagewindow:show");
+        // ティラノイベント"messagewindow-show"を発火
+        this.kag.trigger("messagewindow-show");
 
         var num_message_layer = parseInt(this.kag.config.numMessageLayers);
 
@@ -229,8 +229,8 @@ tyrano.plugin.kag.layer = {
         if (!target_layer) {
             while (true) {
                 if (this.map_layer_fore["message" + num]) {
-                    var j_message_outer = this.map_layer_fore["message" + num].find(".message_outer");
-                    var j_message_inner = this.map_layer_fore["message" + num].find(".message_inner");
+                    const j_message_outer = this.map_layer_fore["message" + num].find(".message_outer");
+                    const j_message_inner = this.map_layer_fore["message" + num].find(".message_inner");
 
                     j_message_inner
                         .css("left", parseInt(j_message_outer.css("left")) + 10)
@@ -245,8 +245,8 @@ tyrano.plugin.kag.layer = {
             }
         } else {
             if (this.map_layer_fore[target_layer]) {
-                var j_message_outer = this.map_layer_fore[target_layer].find(".message_outer");
-                var j_message_inner = this.map_layer_fore[target_layer].find(".message_inner");
+                const j_message_outer = this.map_layer_fore[target_layer].find(".message_outer");
+                const j_message_inner = this.map_layer_fore[target_layer].find(".message_inner");
 
                 j_message_inner
                     .css("left", parseInt(j_message_outer.css("left")) + 10)
@@ -268,10 +268,10 @@ tyrano.plugin.kag.layer = {
             layer_blend: {},
         };
 
-        for (key in this.map_layer_fore) {
+        for (let key in this.map_layer_fore) {
             layer_info["map_layer_fore"][key] = $.makeSaveJSON(this.map_layer_fore[key].get(0), this.kag.array_white_attr);
         }
-        for (key in this.map_layer_back) {
+        for (let key in this.map_layer_back) {
             layer_info["map_layer_back"][key] = $.makeSaveJSON(this.map_layer_back[key].get(0), this.kag.array_white_attr);
         }
 
@@ -308,10 +308,10 @@ tyrano.plugin.kag.layer = {
             layer_blend: {},
         };
 
-        for (key in this.map_layer_fore) {
+        for (let key in this.map_layer_fore) {
             layer_info["map_layer_fore"][key] = $.playerHtmlPath(this.map_layer_fore[key].outerHTML());
         }
-        for (key in this.map_layer_back) {
+        for (let key in this.map_layer_back) {
             layer_info["map_layer_back"][key] = $.playerHtmlPath(this.map_layer_back[key].outerHTML());
         }
 
@@ -386,7 +386,7 @@ tyrano.plugin.kag.layer = {
         this.sortGameLayerKeys(fore_keys);
 
         // 各foreレイヤについて
-        for (var key of fore_keys) {
+        for (let key of fore_keys) {
             // 既存のレイヤーのDOMを削除
             this["map_layer_fore"][key].remove();
             delete this["map_layer_fore"][key];
@@ -396,18 +396,18 @@ tyrano.plugin.kag.layer = {
 
             // data-parent-layer属性を分析してそこにDOMを追加
             // 例) "root_layer_game", "root_layer_system"
-            var parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
+            const parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
             this.appendLayer(this["map_layer_fore"][key], parent_layer);
         }
 
         // backレイヤについても同様
         var back_keys = Object.keys(layer.map_layer_back);
         this.sortGameLayerKeys(back_keys);
-        for (var key of back_keys) {
+        for (let key of back_keys) {
             this["map_layer_back"][key].remove();
             delete this["map_layer_back"][key];
             this["map_layer_back"][key] = $.makeElementFromSave(layer["map_layer_back"][key], this.kag.array_white_attr);
-            var parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
+            const parent_layer = this["map_layer_fore"][key].attr("data-parent-layer");
             this.appendLayer(this["map_layer_back"][key], parent_layer);
 
             // ただしここでbackレイヤは対応するforeレイヤの直後に配置したい！
@@ -427,13 +427,13 @@ tyrano.plugin.kag.layer = {
         });
 
         // fixレイヤの復元
-        for (key in layer.layer_fix) {
+        for (let key in layer.layer_fix) {
             $("#tyrano_base").append($.makeElementFromSave(layer.layer_fix[key], this.kag.array_white_attr));
         }
 
         //ブレンド演出の削除と復元
         $(".blendlayer").remove();
-        for (key in layer.layer_blend) {
+        for (let key in layer.layer_blend) {
             var obj = $.makeElementFromSave(layer.layer_blend[key], this.kag.array_white_attr);
             if (obj.hasClass("blendvideo")) {
                 //ビデオの再現
@@ -466,7 +466,7 @@ tyrano.plugin.kag.layer = {
 
     //すべてのメッセージインナーレイヤ削除
     clearMessageInnerLayerAll: function () {
-        for (key in this.map_layer_fore) {
+        for (let key in this.map_layer_fore) {
             if (key.indexOf("message") != -1) {
                 //メッセージインナーの削除
                 this.map_layer_fore[key].find(".message_inner").html("");
@@ -479,7 +479,7 @@ tyrano.plugin.kag.layer = {
         //レイヤが指定されている場合は、そのレイヤのみコピーする
         layer = layer || "";
 
-        for (key in this.map_layer_fore) {
+        for (let key in this.map_layer_fore) {
             if (layer == "" || layer == key) {
                 var fore_class_name = this.map_layer_fore[key].attr("class");
                 var back_class_name = this.map_layer_back[key].attr("class");
@@ -503,26 +503,13 @@ tyrano.plugin.kag.layer = {
     },
 
     /**
-     * イベントレイヤの表示と is_stop=false
+     * イベントレイヤの表示
      */
-    showEventLayer: function () {
-        this.kag.stat.is_stop = false;
+    showEventLayer: function (type) {
+        // console.warn(type);
         this.layer_event.show();
     },
-
-    /**
-     * イベントレイヤの非表示と is_stop=true
-     */
     hideEventLayer: function () {
-        // 安定化対応
-        //
-        // * is_stop        (弱いストップ) アニメーションやトランジションの最中に有効
-        // * is_strong_stop (強いストップ) [s]や[wait]で有効
-        //
-        // * 弱いストップが有効なときはイベントレイヤをクリックしても反応しなくなる。
-        //   ただし、外部から直接 nextOrder が呼び出されたときは次のタグに進行する。
-        // * 強いストップが有効なときは外部から呼び出された nextOrder にすら反応しなくなる！
-        this.kag.stat.is_stop = true;
         this.layer_event.hide();
     },
 
@@ -535,6 +522,7 @@ tyrano.plugin.kag.layer = {
         const j_buttons = this.layer_free.find(".event-setting-element");
         this.kag.event.removeEventElement(j_buttons);
         j_buttons.off("click mouseenter mouseleave mousedown touchstart");
+        this.kag.makeUnfocusable(j_buttons);
     },
 
     //backlayの逆 トランスの後に実施する
@@ -542,7 +530,7 @@ tyrano.plugin.kag.layer = {
         //レイヤが指定されている場合は、そのレイヤのみコピーする
         layer = layer || "";
 
-        for (key in this.map_layer_back) {
+        for (let key in this.map_layer_back) {
             if (layer == "" || layer == key) {
                 var fore_class_name = this.map_layer_fore[key].attr("class");
                 var back_class_name = this.map_layer_back[key].attr("class");

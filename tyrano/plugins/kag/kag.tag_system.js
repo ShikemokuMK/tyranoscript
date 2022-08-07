@@ -2,7 +2,7 @@
 #[eval]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 式の評価
@@ -59,7 +59,7 @@ tyrano.plugin.kag.tag.eval = {
 #[clearvar]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 変数の消去
@@ -97,7 +97,7 @@ tyrano.plugin.kag.tag.clearvar = {
 #[clearsysvar]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 システム変数の全消去
@@ -125,7 +125,7 @@ tyrano.plugin.kag.tag.clearsysvar = {
 #[clearstack]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 スタックの消去
@@ -232,7 +232,7 @@ tyrano.plugin.kag.tag["close"] = {
 #[trace]
 
 :group
-その他
+変数・JS操作・ファイル読込
 
 :title
 コンソールへの値の出力
@@ -275,7 +275,7 @@ tyrano.plugin.kag.tag["trace"] = {
 #[body]
 
 :group
-システム操作
+システムデザイン変更
 
 :title
 ゲーム画面外の設定
@@ -372,7 +372,7 @@ tyrano.plugin.kag.tag["body"] = {
 #[title]
 
 :group
-システム操作
+システムデザイン変更
 
 :title
 タイトル指定
@@ -416,7 +416,7 @@ tyrano.plugin.kag.tag["title"] = {
 #[iscript]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 JavaScriptの記述
@@ -461,7 +461,7 @@ tyrano.plugin.kag.tag.iscript = {
 #[endscript]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 JavaScriptの終了
@@ -490,7 +490,7 @@ tyrano.plugin.kag.tag.endscript = {
         try {
             this.kag.evalScript(this.kag.stat.buff_script);
         } catch (err) {
-            that.kag.error("[iscript]に記述されたJavaScript実行時にエラーが発生しました。");
+            that.kag.error("error_in_iscript");
             console.error(err);
         }
         this.kag.stat.buff_script = "";
@@ -505,7 +505,7 @@ tyrano.plugin.kag.tag.endscript = {
 #[html]
 
 :group
-その他
+メニュー・HTML表示
 
 :title
 HTMLをレイヤ追加
@@ -567,7 +567,7 @@ tyrano.plugin.kag.tag.html = {
 #[endhtml]
 
 :group
-その他
+メニュー・HTML表示
 
 :title
 HTMLの終了
@@ -625,7 +625,7 @@ tyrano.plugin.kag.tag.endhtml = {
 #[emb]
 
 :group
-マクロ・変数・JS操作
+変数・JS操作・ファイル読込
 
 :title
 式評価結果の埋め込み
@@ -683,7 +683,7 @@ tyrano.plugin.kag.tag.emb = {
 #[if]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐
@@ -770,23 +770,13 @@ tyrano.plugin.kag.tag["if"] = {
             //まだ、if文をぬけられない
             //this.kag.pushStack("if", false);
             this.kag.pushStack("if", { bool: false, deep: pm.deep_if });
-
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    else: "",
-                    elsif: "",
-                    endif: "",
-                });
-
-                if (r == true) {
-                    //alert("処理が見つかった!")
-                    break;
-                    //指定の命令へ処理が写っていることでしょう
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("If文に誤りがあります");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                else: "",
+                elsif: "",
+                endif: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endif");
             }
         }
     },
@@ -796,7 +786,7 @@ tyrano.plugin.kag.tag["if"] = {
 #[elsif]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐（複数の条件）
@@ -837,21 +827,13 @@ tyrano.plugin.kag.tag["elsif"] = {
 
             //条件ミス
         } else {
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    else: "",
-                    elsif: "",
-                    endif: "",
-                });
-
-                if (r == true) {
-                    //alert("処理が見つかった!")
-                    break;
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("If文に誤りがあります");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                else: "",
+                elsif: "",
+                endif: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endif");
             }
         }
     },
@@ -861,7 +843,7 @@ tyrano.plugin.kag.tag["elsif"] = {
 #[else]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐（条件を満たさなかったとき）
@@ -898,20 +880,11 @@ tyrano.plugin.kag.tag["else"] = {
 
             //条件ミス
         } else {
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    endif: "",
-                });
-
-                if (r == true) {
-                    //alert("処理が見つかった!")
-                    break;
-                    //指定の命令へ処理が写っていることでしょう
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("If文に誤りがあります");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                endif: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endif");
             }
         }
     },
@@ -921,7 +894,7 @@ tyrano.plugin.kag.tag["else"] = {
 #[endif]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件分岐の終了
@@ -951,7 +924,7 @@ tyrano.plugin.kag.tag["endif"] = {
 #[call]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 サブルーチンの呼び出し
@@ -1022,7 +995,7 @@ tyrano.plugin.kag.tag["call"] = {
 #[return]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 サブルーチンから戻る
@@ -1054,6 +1027,8 @@ tyrano.plugin.kag.tag["return"] = {
                 if (this.kag.tmp.loading_make_ref == true) {
                     this.kag.stat.flag_ref_page = true;
                     this.kag.tmp.loading_make_ref = false;
+                    // ティラノイベント"load-complete"を発火
+                    this.kag.trigger("load-complete");
                 }
             }
         }
@@ -1070,7 +1045,7 @@ tyrano.plugin.kag.tag["return"] = {
 #[macro]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 マクロ定義の開始
@@ -1146,24 +1121,12 @@ tyrano.plugin.kag.tag.macro = {
 
         this.kag.tmp.checking_macro = true;
 
-        //endmacroが出るまで、無視される
-        for (var i = 0; i < 2000; i++) {
-            var r = this.kag.ftag.nextOrderWithTag({
-                endmacro: "",
-            });
-
-            if (r == true) {
-                //alert("endacroが見つかった");
-                break;
-                //指定の命令へ処理が写っていることでしょう
-            }
+        const done = this.kag.ftag.nextOrderWithTagSearch({
+            endmacro: "",
+        });
+        if (!done) {
+            this.kag.error("missing_endmacro");
         }
-
-        if (i > 1900) {
-            this.kag.error("マクロが閉じていません");
-        }
-
-        //this.kag.ftag.nextOrder();
     },
 };
 
@@ -1171,7 +1134,7 @@ tyrano.plugin.kag.tag.macro = {
 #[endmacro]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 マクロ定義の終了
@@ -1229,7 +1192,7 @@ tyrano.plugin.kag.tag.endmacro = {
 #[erasemacro]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 マクロの削除
@@ -1302,7 +1265,7 @@ tyrano.plugin.kag.tag.savesnap = {
 システム操作
 
 :title
-オートセーブ機能
+オートセーブを実行
 
 :exp
 このタグに到達した際、自動的にプレイ状況を保存します。
@@ -1373,7 +1336,7 @@ tyrano.plugin.kag.tag.autosave = {
 システム操作
 
 :title
-オートロード機能
+オートロードを実行
 
 :exp
 `[autosave]`タグで保存されたデータを読み込みます。
@@ -1402,7 +1365,7 @@ tyrano.plugin.kag.tag.autoload = {
 #[ignore]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 条件によりシナリオを無視
@@ -1428,18 +1391,11 @@ tyrano.plugin.kag.tag.ignore = {
 
     start: function (pm) {
         if (this.kag.embScript(pm.exp)) {
-            for (var i = 0; i < 2000; i++) {
-                var r = this.kag.ftag.nextOrderWithTag({
-                    endignore: "",
-                });
-
-                if (r == true) {
-                    break;
-                }
-            }
-
-            if (i > 1900) {
-                this.kag.error("ignoreが閉じていません");
+            const done = this.kag.ftag.nextOrderWithTagSearch({
+                endignore: "",
+            });
+            if (!done) {
+                this.kag.error("missing_endignore");
             }
         } else {
             this.kag.ftag.nextOrder();
@@ -1451,7 +1407,7 @@ tyrano.plugin.kag.tag.ignore = {
 #[endignore]
 
 :group
-マクロ・変数・JS操作
+マクロ・分岐・サブルーチン関連
 
 :title
 [ignore]の終了
@@ -1476,7 +1432,7 @@ tyrano.plugin.kag.tag.endignore = {
 #[edit]
 
 :group
-入力フォーム関連
+入力フォーム
 
 :title
 テキストボックス
@@ -1612,7 +1568,7 @@ tyrano.plugin.kag.tag.edit = {
 #[preload]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 素材ファイルの事前読み込み
@@ -1665,7 +1621,7 @@ tyrano.plugin.kag.tag.preload = {
         var that = this;
 
         if (pm.wait == "true") {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
         }
 
         var storage = pm.storage;
@@ -1688,7 +1644,7 @@ tyrano.plugin.kag.tag.preload = {
                         if (storage.length == sum) {
                             //すべてのプリロードが完了
                             if (pm.wait == "true") {
-                                that.kag.layer.showEventLayer();
+                                that.kag.cancelWeakStop();
                                 that.kag.ftag.nextOrder();
                             }
                         }
@@ -1698,7 +1654,7 @@ tyrano.plugin.kag.tag.preload = {
             }
 
             if (pm.wait == "false") {
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.nextOrder();
             }
         } else {
@@ -1706,7 +1662,7 @@ tyrano.plugin.kag.tag.preload = {
                 pm.storage,
                 function () {
                     if (pm.wait == "true") {
-                        that.kag.layer.showEventLayer();
+                        that.kag.cancelWeakStop();
                         that.kag.ftag.nextOrder();
                     }
                 },
@@ -1714,7 +1670,7 @@ tyrano.plugin.kag.tag.preload = {
             );
 
             if (pm.wait == "false") {
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.nextOrder();
             }
         }
@@ -1725,7 +1681,7 @@ tyrano.plugin.kag.tag.preload = {
 #[unload]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 音声プリロードデータの破棄
@@ -1791,7 +1747,7 @@ tyrano.plugin.kag.tag.unload = {
 #[clearfix]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 fixレイヤーのクリア
@@ -1835,7 +1791,7 @@ tyrano.plugin.kag.tag.clearfix = {
 #[commit]
 
 :group
-入力フォーム関連
+入力フォーム
 
 :title
 フォームの確定
@@ -1882,7 +1838,7 @@ tyrano.plugin.kag.tag.commit = {
 #[cursor]
 
 :group
-システム操作
+システムデザイン変更
 
 :title
 マウスカーソルに画像を設定
@@ -1890,30 +1846,321 @@ tyrano.plugin.kag.tag.commit = {
 :exp
 マウスカーソルに画像を設定することができます。画像は`data/image`フォルダに配置してください。使用可能な画像形式は`gif``png``jpg`です。
 
-ゲーム中に何度でも変更することが可能です。ゲームでの標準カーソルを指定したい場合は`data/system/Config.tjs`の`cursorDefault`を変更します。
+ゲーム中に何度でも変更することが可能です。[cursor]タグを通過する前の標準カーソルを指定したい場合は`data/system/Config.tjs`の`cursorDefault`を変更します。
 
 システムの標準カーソルに戻す場合は`default`を指定します。
 
+<b>★ヒント</b>
+マウスカーソル画像の推奨サイズは<b>32x32ピクセル以下</b>です。
+
+ブラウザによって異なるケースがありますが、概ね、マウスカーソルに設定可能な最大の画像サイズは128x128ピクセルです。それより大きい画像をマウスカーソルに設定することはできません。
+
+また、32x32ピクセルよりも大きな画像をマウスカーソルに設定した場合、画面端にマウスカーソルを移動させたときにカーソル画像がデフォルトに戻ってしまうことがあります。
+
+<b>★注意</b>
+開発者ツール（デベロッパーツール）を開いている場合などには、マウスカーソルの自動非表示が利かないことがあります。
+
+
 :sample
-[cursor storage="my_cursor.gif"]
+;デフォルトのマウスカーソル画像を変更
+[cursor storage="my_cursor_32x32.png"]
+
+;ボタンの上にマウスカーソルを乗せたときの画像を変更
+[cursor storage="my_cursor_pointer_32x32.png" type="pointer"]
+
+;一定時間マウスの操作がなかった場合にマウスカーソルを非表示にする
+[cursor auto_hide="true"]
+
+;クリックエフェクトを有効にする
+[cursor click_effect="true"]
+
+;クリックエフェクトの設定変更
+[cursor e_width="200" e_color="0xff0000" e_time="600" e_scale="200" e_blend="normal" e_opacity="100"]
+
+;クリックエフェクトの設定変更(デフォルト設定)
+[cursor e_width="100" e_color="0xffffff" e_time="300" e_scale="120" e_blend="overlay" e_opacity="204"]
 
 :param
-storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。
+storage = マウスカーソルに設定する画像ファイルを指定します。画像は`data/image`フォルダに配置します。`default`と指定するとデフォルトのカーソルに戻せます。,
+x       = 指定した数値の分だけ、マウスカーソルに設定する画像を左側にずらすことができます。,
+y       = 指定した数値の分だけ、マウスカーソルに設定する画像を上側にずらすことができます。,
+type    = ボタン類にマウスを載せたときのカーソルを変更したい場合、このパラメータに`pointer`を指定します。,
+auto_hide    = プレイヤーが一定時間マウス操作をしなかった場合にマウスカーソルを自動で非表示にするための設定です。`true`で自動非表示が有効、`false`で自動非表示が無効（常にマウスカーソル表示）になります。また、`2000`のように数値を指定することで、マウスカーソルの自動非表示を有効にした上でマウスカーソルを非表示にするまでの時間をミリ秒単位で設定できます。,
+click_effect = クリックエフェクトを有効にするかどうか。`true`または`false`で指定します。,
+e_width      = クリックエフェクトの横幅をpx単位で指定します。,
+e_opacity    = クリックエフェクトの最初の不透明度を`0～255`で指定します。,
+e_time       = クリックエフェクトの表示時間をミリ秒単位で指定します。,
+e_color      = クリックエフェクトの色を指定します。,
+e_blend      = クリックエフェクトの合成モードを指定します。`[layermode]`タグのmodeパラメータと同じキーワードが指定可能です。`normal`や`overlay`など。,
+e_scale      = クリックエフェクトの拡大率をパーセント単位で指定します。たとえば`200`と指定すると、エフェクトサイズが最終的に200%になるように拡大されていきます。,
 
 #[end]
 */
 
 tyrano.plugin.kag.tag.cursor = {
-    vital: ["storage"],
-
     pm: {
-        storage: "default",
+        storage: "",
+        x: "0",
+        y: "0",
+        type: "default",
+        click_effect: "",
+        mousedown_effect: "",
+        touch_effect: "",
+        next: "true",
     },
 
     start: function (pm) {
-        //評価された値を代入
-        this.kag.setCursor(pm.storage);
-        this.kag.ftag.nextOrder();
+        // storage パラメータになにかしらが指定されている場合
+        if (pm.storage) {
+            // なんのカーソルを変更するか
+            if (pm.type === "default") {
+                // デフォルトのカーソルを変更したい場合
+                this.kag.setCursor(pm);
+            } else {
+                // デフォルト以外のカーソル（たとえば pointer）を変更したい場合
+                // current_cursor_map オブジェクトに情報を格納してから overwriteCSS() を呼ぶ
+                if (!this.kag.stat.current_cursor_map) {
+                    this.kag.stat.current_cursor_map = {};
+                }
+                let image_url;
+                let css_str;
+                if (pm.storage === "default") {
+                    css_str = pm.type;
+                } else {
+                    image_url = `./data/image/${pm.storage}`;
+                    css_str = `url(${image_url}) ${pm.x} ${pm.y}, ${pm.type}`;
+                }
+                this.kag.key_mouse.vmouse.addImage(pm.type, image_url, pm.x, pm.y);
+                this.kag.stat.current_cursor_map[pm.type] = css_str;
+                this.overwriteCSS();
+            }
+        }
+
+        //
+        // カーソルの自動非表示
+        //
+
+        if (pm.auto_hide === "false") {
+            // 自動非表示を無効にする場合
+
+            // ステータスを更新してイベントを取り外す
+            this.kag.stat.cursor_auto_hide = false;
+            $("body").off("mousemove.cursor_auto_hide");
+
+            // この時点でカーソルが非表示になっている可能性があるので表示してやる
+            this.kag.setCursor(this.kag.stat.current_cursor);
+        } else if (pm.auto_hide) {
+            // 自動非表示を有効にする場合
+
+            // ステータスを更新してイベントを取り外す
+            this.kag.stat.cursor_auto_hide = pm.auto_hide;
+            const j_body = $("body").off("mousemove.cursor_auto_hide");
+
+            // マウスカーソルを非表示にする setTimeout の timerId 管理変数
+            this.kag.tmp.cursor_hide_timer = null;
+
+            // タイムアウト
+            const timeout = parseInt(pm.auto_hide) || 3000;
+
+            // いまマウスカーソルが表示されているかどうかのフラグ
+            this.kag.tmp.is_cursor_visible = true;
+
+            // マウスを動かすたびに呼ばれる
+            j_body.on("mousemove.cursor_auto_hide", () => {
+                // マウスを動かしたのでマウスカーソルを表示してあげよう
+                // ただし mousemove のたびに都度 setCursor を呼ぶのは無駄なのでフラグで管理する
+                // フラグが立っていないときだけ setCursor は呼ぶ、呼んだらフラグを立てる
+                if (!this.kag.tmp.is_cursor_visible) {
+                    this.kag.setCursor(this.kag.stat.current_cursor);
+                    this.kag.tmp.is_cursor_visible = true;
+                }
+
+                // timeout ミリ秒後にマウスカーソルを非表示にする予約を改めて取り付ける
+                clearTimeout(this.kag.tmp.cursor_hide_timer);
+                this.kag.tmp.cursor_hide_timer = setTimeout(() => {
+                    // カーソルを非表示にしてフラグを折る
+                    j_body.setStyle("cursor", "none");
+                    this.kag.tmp.is_cursor_visible = false;
+                }, timeout);
+            });
+
+            j_body.trigger("mousemove.cursor_auto_hide");
+        }
+
+        //
+        // クリックエフェクト
+        //
+
+        // クリックエフェクトの情報格納領域をステータス上に作成
+        if (!this.kag.stat.click_effect) {
+            this.kag.stat.click_effect = {};
+        }
+
+        // クリックエフェクトの有効・無効を操作する場合
+        if (pm.click_effect) {
+            const event_type = $.userenv() === "pc" ? "click" : "pointerdown";
+
+            // とりあえずクリックイベントリスナを取り外す
+            if (typeof this.kag.tmp.show_effect_callback === "function") {
+                document.body.removeEventListener(event_type, this.kag.tmp.show_effect_callback, { capture: true });
+            }
+
+            // click_effect ステータスを更新
+            this.kag.stat.click_effect.is_enabled = pm.click_effect === "true";
+
+            // クリックエフェクトを有効にする場合
+            if (this.kag.stat.click_effect.is_enabled) {
+                // クリックイベントリスナを tmp 領域に作成
+                // ※ あとで removeEventListener するときリスナを参照できるようにするため
+                if (typeof this.kag.tmp.show_effect_callback !== "function") {
+                    this.kag.tmp.show_effect_callback = (e) => {
+                        this.showEffect(e);
+                    };
+                }
+
+                // クリックイベントリスナを useCapture で取り付ける
+                document.body.addEventListener(event_type, this.kag.tmp.show_effect_callback, { capture: true });
+            }
+
+            this.overwriteCSS();
+        }
+
+        // e_ から始まるパラメータはクリックエフェクト用のパラメータであるため
+        // e_ を取り外した上で click_effect ステータスに保存する
+        for (const key in pm) {
+            if (key.includes("e_")) {
+                const _key = key.substring(2);
+                this.kag.stat.click_effect[_key] = pm[key];
+            }
+        }
+
+        // 仮想マウスカーソルに即反映
+        this.kag.key_mouse.vmouse.refreshImage();
+
+        //
+        // next="false" が渡されていない限り nextOrder
+        //
+
+        if (pm.next !== "false") {
+            this.kag.ftag.nextOrder();
+        }
+    },
+
+    /**
+     * セーブデータロード時のカーソル関連の復元
+     */
+    restore: function () {
+        // デフォルトのカーソルを復元する
+        this.kag.setCursor(this.kag.stat.current_cursor);
+
+        // ポインターのカーソルを復元する
+        this.overwriteCSS();
+
+        // カーソルの自動非表示を復元する
+        this.kag.ftag.startTag("cursor", {
+            auto_hide: String(this.kag.stat.cursor_auto_hide || false),
+            next: "false",
+        });
+
+        // クリックエフェクトを復元する
+        this.kag.ftag.startTag("cursor", {
+            click_effect: String(this.kag.stat.click_effect && this.kag.stat.click_effect.is_enabled),
+            next: "false",
+        });
+    },
+
+    /**
+     * クリックエフェクトを表示する
+     * @param {Event} e
+     */
+    showEffect: function (e) {
+        if (e.pageX === undefined || e.pageY === undefined) {
+            return;
+        }
+        let x = e.pageX;
+        let y = e.pageY;
+        if (this.kag.key_mouse.vmouse.is_visible) {
+            x = this.kag.key_mouse.vmouse.x;
+            y = this.kag.key_mouse.vmouse.y;
+        }
+        if (!this.kag.stat.click_effect) {
+            this.kag.stat.click_effect = {};
+        }
+        const base_width = parseInt(this.kag.stat.click_effect.width) || 100;
+        const width = parseInt(base_width * this.kag.tmp.screen_info.scale_x);
+        const color = $.convertColor(this.kag.stat.click_effect.color || "white");
+        const blend = this.kag.stat.click_effect.blend || "overlay";
+        const duration = parseInt(this.kag.stat.click_effect.time) || 300;
+        const opacity = $.convertOpacity(this.kag.stat.click_effect.opacity) || 0.8;
+        const j_effect = $('<div class="tyrano_click_effect">').appendTo("body");
+        j_effect
+            .setStyleMap({
+                "top": `${y}px`,
+                "left": `${x}px`,
+                "width": `${width}px`,
+                "height": `${width}px`,
+                "opacity": opacity,
+                "mix-blend-mode": blend,
+                "background-color": color,
+                "animation-duration": `${duration}ms`,
+            })
+            .show();
+        setTimeout(() => {
+            j_effect.remove();
+        }, duration);
+    },
+
+    /**
+     * メニューボタンやリモーダルに設定されている cursor: pointer; を
+     * <style>要素を用いてユーザー指定のカーソル画像で上書きするための処理
+     * [cursor]タグで設定を変更した段階、あるいは、セーブデータをロードした段階で呼ぶ
+     */
+    overwriteCSS: function () {
+        // current_cursor_map　が未定義なら必要ない
+        if (!this.kag.stat.current_cursor_map) {
+            return;
+        }
+
+        // pointer の設定が未定義ならやはり必要ない
+        if (!this.kag.stat.current_cursor_map.pointer) {
+            return;
+        }
+
+        // ゲームを起動してからカーソル上書き用の<style>要素をまだ作ったことがないならいま作ろう
+        if (!this.kag.tmp.j_cursor_css) {
+            this.kag.tmp.j_cursor_css = $("<style />");
+            this.kag.tmp.j_cursor_css.appendTo("head");
+        }
+
+        // <style>要素の textContent を作成
+        const pointer_css = this.kag.stat.current_cursor_map.pointer || "pointer";
+        let css_text = `
+            #remodal-cancel,
+            #remodal-confirm,
+            .button_menu,
+            .menu_item img,
+            .save_list_item {
+                cursor: ${pointer_css};
+            }
+        `;
+
+        if (this.kag.stat.click_effect) {
+            const scale = (this.kag.stat.click_effect.scale || 120) / 100;
+            css_text += `
+                @keyframes tyrano_click_effect {
+                    from {
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(${scale});
+                        opacity: 0;
+                    }
+                }
+            `;
+        }
+
+        // <style>要素の textContent を更新
+        this.kag.tmp.j_cursor_css.text(css_text);
     },
 };
 
@@ -1955,7 +2202,7 @@ tyrano.plugin.kag.tag.screen_full = {
 #[sleepgame]
 
 :group
-システム操作
+マクロ・分岐・サブルーチン関連
 
 :title
 ゲームの一時停止
@@ -2022,7 +2269,7 @@ tyrano.plugin.kag.tag.sleepgame = {
 #[awakegame]
 
 :group
-システム操作
+マクロ・分岐・サブルーチン関連
 
 :title
 ゲームの一時停止からの復帰
@@ -2094,7 +2341,7 @@ tyrano.plugin.kag.tag.awakegame = {
 #[breakgame]
 
 :group
-システム操作
+マクロ・分岐・サブルーチン関連
 
 :title
 ゲームの停止データの削除
@@ -2195,8 +2442,8 @@ tyrano.plugin.kag.tag.dialog = {
     start: function (pm) {
         var that = this;
 
-        $(".remodal").find(".remodal-confirm").html(pm.label_ok);
-        $(".remodal").find(".remodal-cancel").html(pm.label_cancel);
+        $(".remodal").find("#remodal-confirm").html(pm.label_ok);
+        $(".remodal").find("#remodal-cancel").html(pm.label_cancel);
 
         if (pm.type == "confirm") {
             $.confirm(
@@ -2260,7 +2507,7 @@ tyrano.plugin.kag.tag.dialog = {
 #[plugin]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 プラグイン読み込み
@@ -2327,7 +2574,7 @@ tyrano.plugin.kag.tag.plugin = {
 #[sysview]
 
 :group
-システム操作
+システムデザイン変更
 
 :title
 システム画面変更
@@ -2376,7 +2623,7 @@ tyrano.plugin.kag.tag.sysview = {
 #[loadcss]
 
 :group
-システム操作
+変数・JS操作・ファイル読込
 
 :title
 CSS反映
@@ -2409,7 +2656,13 @@ tyrano.plugin.kag.tag.loadcss = {
 
         //ファイルの読み込み
         var style = '<link class="_tyrano_cssload_tag" rel="stylesheet" href="' + file + "?" + Math.floor(Math.random() * 10000000) + '">';
-        $("head link:last").after(style);
+        const j_style = $(style);
+        $("head link:last").after(j_style);
+        if (this.kag.config["keyFocusWithHoverStyle"] === "true") {
+            j_style.on("load", () => {
+                $.copyHoverCSSToFocusCSS(j_style);
+            });
+        }
         this.kag.stat.cssload[file] = true;
 
         this.kag.ftag.nextOrder();
@@ -2420,7 +2673,7 @@ tyrano.plugin.kag.tag.loadcss = {
 #[save_img]
 
 :group
-システム操作
+システムデザイン変更
 
 :title
 セーブデータのサムネイル変更
@@ -2493,7 +2746,7 @@ tyrano.plugin.kag.tag.save_img = {
 #[nolog]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 バックログ記録の一時停止
@@ -2510,8 +2763,6 @@ tyrano.plugin.kag.tag.save_img = {
 ここもログに記録されない[p]
 [endnolog]
 ここから、ログ記録再開[p]
-
-:param
 
 :demo
 2,kaisetsu/07_pushlog
@@ -2535,7 +2786,8 @@ tyrano.plugin.kag.tag.nolog = {
 #[endnolog]
 
 :group
-システム操作
+メッセージ関連の設定
+
 
 :title
 バックログ記録の再開
@@ -2550,8 +2802,6 @@ tyrano.plugin.kag.tag.nolog = {
 ここもログに記録されない[p]
 [endnolog]
 ここから、ログ記録再開[p]
-
-:param
 
 :demo
 2,kaisetsu/07_pushlog
@@ -2575,7 +2825,7 @@ tyrano.plugin.kag.tag.endnolog = {
 #[pushlog]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 バックログにテキスト追加
@@ -2791,7 +3041,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
             },
             error: function (e) {
                 console.log(e);
-                alert("file not found:" + pm.url);
+                alert($.lang("patch_not_found", { path: pm.url }));
             },
         });
     },
@@ -2805,14 +3055,15 @@ tyrano.plugin.kag.tag.check_web_patch = {
         }
 
         if (parseFloat(this.kag.variable.sf._patch_version) < parseFloat(obj.version)) {
+            const confirm_message = $.lang("new_patch_found", {
+                version: parseFloat(obj.version),
+                message: obj.message,
+            }).replace(/\n/g, "<br>");
+
             $.confirm(
-                "新しいアップデートが見つかりました。Ver:" +
-                    parseFloat(obj.version) +
-                    "「" +
-                    obj.message +
-                    "」<br>アップデートを行いますか？",
+                confirm_message,
                 function () {
-                    alert("アップデートを行います。完了後、自動的にゲームは終了します。");
+                    alert($.lang("apply_web_patch"));
 
                     var http = require("http");
                     var fs = require("fs");
@@ -2876,7 +3127,7 @@ tyrano.plugin.kag.tag.check_web_patch = {
 #[set_resizecall]
 
 :group
-システム操作
+システムデザイン変更
 
 :title
 レスポンシブデザイン対応
@@ -2929,6 +3180,755 @@ tyrano.plugin.kag.tag.set_resizecall = {
         //強制発火
         //this.kag.tmp.largerWidth = !this.kag.tmp.largerWidth;
         //$(window).trigger("resize");
+
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[closeconfirm_on]
+
+:group
+システム操作
+
+:title
+終了時の確認の有効化
+
+:exp
+このタグを通過してからは、タグが進行する度にゲームが「未保存状態」になります。ゲームが「未保存状態」のときにプレイヤーがゲームを閉じようとすると、確認ダイアログが出ます。
+
+ゲームが「保存状態」になるのはプレイヤーがセーブまたはロードしたときです。
+
+:sample
+
+ここで閉じようとしても終了時の確認はない[p]
+ここで閉じようとしても終了時の確認はない[p]
+[closeconfirm_on]
+ここから未保存状態で閉じようとすると終了時の確認が出る[p]
+ここから未保存状態で閉じようとすると終了時の確認が出る[p]
+[closeconfirm_off]
+ここで閉じようとしても終了時の確認はない[p]
+ここで閉じようとしても終了時の確認はない[p]
+
+:param
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.closeconfirm_on = {
+    pm: {},
+
+    start: function (pm) {
+        this.kag.stat.use_close_confirm = true;
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[closeconfirm_off]
+
+:group
+システム操作
+
+:title
+終了時の確認の無効化
+
+:exp
+このタグを通過すると、ゲームが「未保存状態」のときにプレイヤーがゲームを閉じようとしても確認ダイアログが出なくなります。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.closeconfirm_off = {
+    pm: {},
+
+    start: function (pm) {
+        this.kag.stat.use_close_confirm = false;
+        $.disableCloseConfirm();
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[dialog_config]
+
+:group
+システムデザイン変更
+
+:title
+確認ダイアログのデザイン変更
+
+:exp
+タイトルに戻っていいかどうかを確認するときなどに表示される確認ダイアログのデザインを変更することができます。ダイアログのデザインを変更するタグには以下の4種類があります。
+
+・`[dialog_config]`
+・`[dialog_config_ok]`
+・`[dialog_config_ng]`
+・`[dialog_config_filter]`
+
+<b>★重要</b>
+このタグで変更した内容はセーブ・ロードによって復元されません。つまり、シナリオが始まったあと・ロードができる状態になったあとで演出の都合で一時的にこのタグでダイアログを変更する、といった使い方は危険です。ゲームを起動してからタイトルなどに移行するまでの間（`first.ks`など）に記述するとよいでしょう。
+
+:param
+btntype      = ボタンのタイプをまとめて指定できます。指定できるキーワードは`[glink]`の`color`パラメータに準じます。
+btnwidth     = ボタンの横幅をpx単位でまとめて指定できます。
+btnmargin    = ボタンの外余白をpx単位でまとめて指定できます。カンマ区切りに対応。`10,20`のように指定すると、縦余白が10、横余白が20と指定したことになります。
+btnpadding   = ボタンの内余白をpx単位でまとめて指定できます。カンマ区切りに対応。`10,20`のように指定すると、縦余白が10、横余白が20と指定したことになります。
+
+fontsize     = メッセージの文字サイズを指定します。
+fontbold     = メッセージを太字にする場合は`true`を指定します。
+fontface     = メッセージのフォントを指定します。
+fontcolor    = メッセージの文字色を指定します。
+btnfontsize  = ボタンの文字サイズを指定します。
+btnfontbold  = ボタンを文字を太字にする場合は`true`を指定します。
+btnfontface  = ボタンのフォントを指定します。
+btnfontcolor = ボタンの文字色を指定します。
+
+boxcolor     = メッセージボックスの背景色を指定できます。
+boxopacity   = メッセージボックスの不透明度を`0`～`255`で指定できます。`255`で完全に不透明です。
+boxradius    = メッセージボックスの角に丸みを付けたいときにその丸みの半径を数値で指定します。
+boxwidth     = メッセージボックスの横幅をpx単位で指定できます。
+boxheight    = メッセージボックスの高さpx単位で指定できます。
+boxpadding   = メッセージボックスの内余白をpx単位で指定できます。`10,20,10`のようなカンマ区切りの指定に対応します。
+boximg       = メッセージボックスの背景画像を指定できます。ファイルの場所は`image`が基準となります。
+boximgpos    = メッセージボックスの背景画像の表示位置を指定できます。たとえば`center`と指定すると画面中央、`left top`で左上、`right top`で右上、`right bottom`で右下、`left bottom`で左下となります。
+boximgrepeat = メッセージボックスの背景画像の繰り返しを指定できます。画像を繰り返して敷き詰める場合は`repeat`、繰り返したくない場合は`no-repeat`を指定します。
+boximgsize   = メッセージボックスの背景画像のサイズをpx単位で指定できます。
+
+bgcolor      = ダイアログ外側の背景色を指定できます。
+bgopacity    = ダイアログ外側の不透明度を`0`～`255`で指定できます。`255`で完全に不透明です。
+bgimg        = ダイアログ外側の背景画像を指定できます。ファイルの場所は`image`が基準となります。
+bgimgpos     = ダイアログ外側の背景画像の表示位置を指定できます。たとえば`center`と指定すると画面中央、`left top`で左上、`right top`で右上、`right bottom`で右下、`left bottom`で左下となります。
+bgimgrepeat  = ダイアログ外側の背景画像の繰り返しを指定できます。画像を繰り返して敷き詰める場合は`repeat`、繰り返したくない場合は`no-repeat`を指定します。
+bgimgsize    = ダイアログ外側の背景画像のサイズをpx単位で指定できます。
+
+openeffect   = ダイアログを開いたときのエフェクトを指定できます。指定できるキーワードは`[mask]`に準じます。
+opentime     = ダイアログを開いたときのエフェクト時間をミリ秒単位で指定できます。
+
+closeeffect  = ダイアログを開いたときのエフェクトを指定できます。指定できるキーワードは`[mask_off]`に準じます。
+closetime    = ダイアログを開いたときのエフェクト時間をミリ秒単位で指定できます。
+
+gotitle      = タイトルに戻っていいかを確認するときのテキストを変更できます。
+
+okpos        = 「OK」ボタンの位置を左に変更したい場合は`left`、右に変更したい場合は`right`を指定します。
+
+ingame       = ディスプレイ全体ではなくゲーム画面の範囲内に確認ダイアログを収めたい場合には`true`を指定します。`false`でもとに戻ります。
+
+:sample
+[dialog_config bgimg="pattern.jpg" bgimgrepeat="repeat" bgopacity="66"]
+[dialog_config boxradius="20" boxcolor="#F0E3FD" boximg="../bgimage/title.jpg" boximgpos="right bottom" boximgsize="200" boxopacity="200"]
+[dialog_config openeffect="rotateIn" opentime="800" closeeffect="rotateOut" closetime="800"]
+
+#[end]
+*/
+tyrano.plugin.kag.tag.dialog_config = {
+    pm: {
+        okpos: "",
+
+        btntype: "",
+        btnwidth: "",
+        btnmargin: "",
+        btnpadding: "",
+
+        fontsize: "",
+        fontbold: "",
+        fontface: "",
+        fontcolor: "",
+        btnfontsize: "",
+        btnfontbold: "",
+        btnfontface: "",
+        btnfontcolor: "",
+
+        boxradius: "",
+        boxcolor: "",
+        boximg: "",
+        boximgpos: "",
+        boximgrepeat: "",
+        boximgsize: "",
+        boxopacity: "",
+        boxwidth: "",
+        boxheight: "",
+        boxpadding: "",
+
+        bgcolor: "",
+        bgimg: "",
+        bgimgpos: "",
+        bgimgrepeat: "",
+        bgimgsize: "",
+        bgopacity: "",
+
+        openeffect: "",
+        opentime: "",
+
+        closeeffect: "",
+        closetime: "",
+
+        gotitle: "",
+
+        ingame: "",
+    },
+
+    __initialized: false,
+
+    init() {
+        if (this.__initialized) return;
+        this.__initialized = true;
+        this.j_overlay = $(".remodal-overlay");
+        this.j_box = $("[data-remodal-id=modal]");
+        this.j_wrapper = this.j_box.parent();
+        this.j_title = this.j_box.find(".remodal_title");
+        this.j_message = this.j_box.find(".remodal_txt");
+        this.j_text = $([this.j_title[0], this.j_message[0]]);
+        this.j_cancel = this.j_box.find(".remodal-cancel").attr("id", "remodal-cancel");
+        this.j_ok = this.j_box.find(".remodal-confirm").attr("id", "remodal-confirm");
+        this.j_button = $([this.j_ok[0], this.j_cancel[0]]);
+        this.j_boxbase = $('<div class="remodal-boxbase"></div>');
+        this.j_box.prepend(this.j_boxbase);
+        this.j_base = $('<div class="remodal-base"></div>');
+        this.j_image = $('<div class="remodal-image"</div>');
+        this.j_base.append(this.j_image);
+        this.j_wrapper.prepend(this.j_base);
+        this.j_ok_img = null;
+        this.j_cancel_img = null;
+    },
+
+    start: function (pm) {
+        this.init();
+
+        // ボタン共通スタイル
+        if (pm.btntype) this.j_button.attr("class", pm.btntype);
+        if (pm.btnwidth) this.j_button.setStyle("width", $.convertLength(pm.btnwidth));
+        if (pm.btnmargin) this.j_button.setMargin(pm.btnmargin);
+        if (pm.btnpadding) this.j_button.setPadding(pm.btnpadding);
+
+        // フォント設定
+        if (pm.fontsize) this.j_text.setStyle("font-size", $.convertLength(pm.fontsize));
+        if (pm.fontbold) this.j_text.setStyle("font-weight", $.convertFontWeight(pm.fontbold));
+        if (pm.fontface) this.j_text.setStyle("font-family", pm.fontface);
+        if (pm.fontcolor) this.j_text.setStyle("color", $.convertColor(pm.fontcolor));
+        if (pm.btnfontsize) this.j_button.setStyle("font-size", $.convertLength(pm.btnfontsize));
+        if (pm.btnfontbold) this.j_button.setStyle("font-weight", $.convertFontWeight(pm.btnfontbold));
+        if (pm.btnfontface) this.j_button.setStyle("font-family", pm.btnfontface);
+        if (pm.btnfontcolor) this.j_button.setStyle("color", $.convertColor(pm.btnfontcolor));
+
+        // ボックス
+        if (pm.boxradius) {
+            this.j_box.setStyle("border-radius", $.convertLength(pm.boxradius + "px"));
+            this.j_boxbase.setStyle("border-radius", $.convertLength(pm.boxradius + "px"));
+        }
+        if (pm.boxcolor) this.j_boxbase.setStyle("background-color", $.convertColor(pm.boxcolor));
+        if (pm.boximg) this.j_boxbase.setStyle("background-image", $.convertBackgroundImage(pm.boximg, "image"));
+        if (pm.boximgpos) this.j_boxbase.setStyle("background-position", $.convertBackgroundPosition(pm.boximgpos));
+        if (pm.boximgsize) this.j_boxbase.setStyle("background-size", $.convertLength(pm.boximgsize));
+        if (pm.boximgrepeat) this.j_boxbase.setStyle("background-repeat", pm.boximgrepeat);
+        if (pm.boxopacity) this.j_boxbase.setStyle("opacity", $.convertOpacity(pm.boxopacity));
+        if (pm.boxwidth) this.j_box.setStyle("width", $.convertLength(pm.boxwidth)).setStyle("max-width", $.convertLength(pm.boxwidth));
+        if (pm.boxheight)
+            this.j_box.setStyle("height", $.convertLength(pm.boxheight)).setStyle("max-height", $.convertLength(pm.boxheight));
+        if (pm.boxpadding) this.j_box.setPadding(pm.boxpadding);
+
+        // ボックス背景を変更するならデフォの設定を切る
+        if (pm.boximg || pm.boxcolor) {
+            this.j_box.setStyleMap({
+                background: "none",
+            });
+        }
+
+        // 背景を変更するならデフォの設定を切る
+        if (pm.bgimg || pm.bgcolor) {
+            this.j_overlay.setStyleMap({
+                webkitFilter: "none",
+                filter: "none",
+                background: "none",
+            });
+        }
+
+        // 背景
+        if (pm.bgcolor) this.j_image.setStyle("background-color", $.convertColor(pm.bgcolor));
+        if (pm.bgimg) this.j_image.setStyle("background-image", $.convertBackgroundImage(pm.bgimg, "image"));
+        if (pm.bgimgpos) this.j_image.setStyle("background-position", $.convertBackgroundPosition(pm.bgimgpos));
+        if (pm.bgimgsize) this.j_image.setStyle("background-size", $.convertLength(pm.bgimgsize));
+        if (pm.bgimgrepeat) this.j_image.setStyle("background-repeat", pm.bgimgrepeat);
+        if (pm.bgopacity) this.j_image.setStyle("opacity", $.convertOpacity(pm.bgopacity));
+
+        // アニメーション
+        if (pm.openeffect) this.kag.tmp.remodal_opening_effect = pm.openeffect;
+        if (pm.closeeffect) this.kag.tmp.remodal_closing_effect = pm.closeeffect;
+        if (pm.opentime) this.kag.tmp.remodal_opening_effect_time = pm.opentime + "ms";
+        if (pm.closetime) this.kag.tmp.remodal_closing_effect_time = pm.closetime + "ms";
+
+        // タイトルに戻るテキストの変更
+        if (pm.gotitle) tyrano_lang.word.go_title = pm.gotitle;
+
+        // ボタンの位置入れ替え
+        if (pm.okpos) {
+            const insert_method = pm.okpos === "left" ? "insertBefore" : "insertAfter";
+            this.j_ok[insert_method](this.j_cancel);
+            if (this.j_ok_img) this.j_ok_img[insert_method](this.j_ok);
+            if (this.j_cancel_img) this.j_cancel_img[insert_method](this.j_cancel);
+        }
+
+        if (pm.ingame) {
+            const j_remodal = $(".remodal-bg, .remodal-overlay, .remodal-wrapper");
+            if (pm.ingame === "true") {
+                j_remodal.appendTo("#tyrano_base");
+                j_remodal.setStyle("z-index", "1000000000");
+            } else if (pm.ingame === "false") {
+                j_remodal.appendTo("body");
+            }
+        }
+
+        this.kag.ftag.nextOrder();
+    },
+
+    /**
+     * 画像ボタンを更新する
+     * @param {{[key: string]: string}} pm
+     * @param {boolean} is_ok
+     * @returns
+     */
+    changeButton(pm, is_ok) {
+        // ボタンを画像に変更する
+        if (pm.img) return this.replaceButton(pm, is_ok);
+
+        const j_elm = is_ok ? this.j_ok : this.j_cancel;
+
+        const id = is_ok ? "remodal-confirm" : "remodal-cancel";
+        const j_old_image = $(`img#${id}`);
+        if (j_old_image.length > 0) {
+            j_old_image.remove();
+            j_elm.show().attr("id", id);
+            TYRANO.kag.makeFocusable(j_elm);
+        }
+
+        if (pm.text) j_elm.text(pm.text);
+        if (pm.type) j_elm.attr("class", pm.type);
+        if (pm.width) j_elm.setStyle("width", $.convertLength(pm.width));
+        if (pm.margin) j_elm.setMargin(pm.margin);
+        if (pm.padding) j_elm.setPadding(pm.padding);
+
+        // フォント設定
+        if (pm.fontsize) j_elm.setStyle("font-size", $.convertLength(pm.fontsize));
+        if (pm.fontbold) j_elm.setStyle("font-weight", $.convertFontWeight(pm.fontbold));
+        if (pm.fontface) j_elm.setStyle("font-family", pm.fontface);
+        if (pm.fontcolor) j_elm.setStyle("color", $.convertColor(pm.fontcolor));
+
+        // ホバーイン, ホバーアウト
+        j_elm.off("mouseenter mouseleave click");
+        j_elm.on("mouseenter", () => {
+            if (pm.enterse) this.kag.playSound(pm.enterse);
+        });
+        j_elm.on("mouseleave", () => {
+            if (pm.leavese) this.kag.playSound(pm.leavese);
+        });
+        j_elm.on("click", () => {
+            if (pm.clickse) this.kag.playSound(pm.clickse);
+        });
+    },
+
+    /**
+     * ダイアログのボタンを button から img に置き換える
+     * @param {{[key: string]: string}} pm
+     * @param {boolean} is_ok
+     */
+    replaceButton(pm, is_ok) {
+        pm.img = $.parseStorage(pm.img, "image");
+        pm.enterimg = $.parseStorage(pm.enterimg, "image");
+        pm.activeimg = $.parseStorage(pm.activeimg, "image");
+        pm.clickimg = $.parseStorage(pm.clickimg, "image");
+
+        const id = is_ok ? "remodal-confirm" : "remodal-cancel";
+        const j_original_button = is_ok ? this.j_ok : this.j_cancel;
+        const j_old_image = $(`img#${id}`);
+        if (j_old_image.length) {
+            j_old_image.remove();
+        } else {
+            j_original_button.hide().attr("id", "");
+            TYRANO.kag.makeUnfocusable(j_original_button);
+        }
+
+        const j_img = this.createButton(pm);
+        if (pm.margin) j_img.setMargin(pm.margin);
+        if (pm.padding) j_img.setPadding(pm.padding);
+
+        j_img.attr("id", id);
+        j_img.addClass("remodal-image-button");
+        j_img.insertBefore(j_original_button);
+        j_img.on("click", () => {
+            j_original_button.trigger("click");
+        });
+        j_img.on("touchstart", () => {
+            j_original_button.trigger("touchstart");
+        });
+
+        if (is_ok) this.j_ok_img = j_img;
+        else this.j_cancel_img = j_img;
+    },
+
+    /**
+     * 画像ボタンの img 要素を作成して返す
+     * @param {{[key: string]: string}} pm
+     * @returns {jQuery}
+     */
+    createButton(pm) {
+        const j_img = $("<img />").attr("src", pm.img);
+        if (pm.width) j_img.setStyle("width", $.convertLength(pm.width));
+
+        let clicked = false;
+
+        j_img.on("init", () => {
+            clicked = false;
+            j_img.attr("src", pm.img);
+        });
+
+        // ホバーイン
+        j_img.on("mouseenter", () => {
+            if (pm.enterimg) {
+                // アクティブ中にホバーインしたときに画像を変更しないようにする
+                if (!pm.activeimg || j_img.filter(":active").length === 0) j_img.attr("src", pm.enterimg);
+            }
+            if (pm.enterse) this.kag.playSound(pm.enterse);
+        });
+
+        // ホバーアウト
+        j_img.on("mouseleave", () => {
+            if (pm.activeimg) {
+                // アクティブ中にホバーアウトしたときに画像を変更しないようにする
+                if (j_img.filter(":active").length === 0) j_img.attr("src", pm.img);
+            } else {
+                // クリック済みなのに画像を変えてしまうことのないように
+                if (!clicked) j_img.attr("src", pm.img);
+            }
+            if (pm.leavese) this.kag.playSound(pm.leavese);
+        });
+
+        // マウスダウン (アクティブインでもある)
+        j_img.on("mousedown", () => {
+            if (pm.activeimg) j_img.attr("src", pm.activeimg);
+            if (pm.clickse) this.kag.playSound(pm.clickse);
+            window.__active_element = j_img[0];
+        });
+
+        // アクティブアウト
+        j_img.on("activeoff", () => {
+            // クリックのケース
+            if (j_img.filter(":hover").length > 0) {
+                clicked = true;
+                return;
+            }
+            // クリックでなかったケース
+            if (pm.activeimg) j_img.attr("src", pm.img);
+        });
+
+        // クリック
+        j_img.on("click", () => {
+            clicked = true;
+            if (pm.clickimg) j_img.attr("src", pm.clickimg);
+            if (pm.clickse) this.kag.playSound(pm.clickse);
+        });
+
+        j_img.on("remove", () => {
+            if (window.__active_element === j_img[0]) window.__active_element = null;
+        });
+
+        // :active が外れたときのイベント activeoff を設定できるようにするために、
+        // window の mouseup にイベントリスナを仕込む。
+        // ※ activeoff を設定したい要素の mousedown イベントに、
+        // 　 window.__active_element に自身を登録するイベントを仕込む必要あり。
+        if (!window.__is_set_active_remover) {
+            window.__is_set_active_remover = true;
+            window.addEventListener(
+                "mouseup",
+                () => {
+                    if (window.__active_element) {
+                        const elm = window.__active_element;
+                        window.__active_element = null;
+                        $(elm).trigger("activeoff");
+                    }
+                },
+                { capture: true },
+            );
+        }
+
+        return j_img;
+    },
+};
+
+/*
+#[dialog_config_ok]
+
+:group
+システムデザイン変更
+
+:title
+確認ダイアログのデザイン変更（OKボタン）
+
+:exp
+タイトルに戻っていいかどうかを確認するときなどに表示される確認ダイアログのデザインを変更することができます。ダイアログのデザインを変更するタグには以下の4種類があります。
+
+・`[dialog_config]`
+・`[dialog_config_ok]`
+・`[dialog_config_ng]`
+・`[dialog_config_filter]`
+
+このタグでは、OKボタンの設定を行うことができます。
+
+<b>★重要</b>
+このタグで変更した内容はセーブ・ロードによって復元されません。つまり、シナリオが始まったあと・ロードができる状態になったあとで演出の都合で一時的にこのタグでダイアログを変更する、といった使い方は危険です。ゲームを起動してからタイトルなどに移行するまでの間（`first.ks`など）に記述するとよいでしょう。
+
+<b>★重要</b>
+`img`パラメータが指定された`[glink_config_ok]`を通過するタイミングで、それまでのOKボタンの設定が破棄されます。つまり、画像をボタンに使う場合はタグを小分けして書かずにひとつの`[glink_config_ok]`で記述する必要があります。（文字ボタンの場合は関係ありません）
+
+:param
+text      = OKボタンのテキストを指定できます。
+type      = OKボタンのタイプを指定できます。指定できるキーワードは`[glink]`の`color`パラメータに準じます。
+width     = OKボタンの横幅をpx単位で指定できます。
+margin    = OKボタンの外余白をpx単位で指定できます。カンマ区切りに対応。`10,20`のように指定すると、縦余白が10、横余白が20と指定したことになります。
+padding   = OKボタンの内余白をpx単位で指定できます。カンマ区切りに対応。`10,20`のように指定すると、縦余白が10、横余白が20と指定したことになります。
+fontsize  = OKボタンの文字サイズを指定します。
+fontbold  = OKボタンを文字を太字にする場合は`true`を指定します。
+fontface  = OKボタンのフォントを指定します。
+fontcolor = OKボタンの文字色を指定します。
+img       = OKボタンに画像を使うことができます。`image`フォルダを基準とした画像ファイルの場所を指定します。
+imgwidth  = OKボタンの画像の横幅をpx単位で指定できます。
+enterimg  = マウスがOKボタンの上に乗ったときの画像ファイル。`image`フォルダから探します。
+activeimg = マウスがOKボタンを押し込んでから放されるまでの画像ファイル。`image`フォルダから探します。
+clickimg  = マウスがOKボタンをクリックした後の画像ファイル。`image`フォルダから探します。
+enterse   = マウスがOKボタンの上に乗ったときに再生する音声ファイル。`sound`フォルダから探します。
+leavese   = マウスがOKボタンの上から離れたときに再生する音声ファイル。`sound`フォルダから探します。
+clickse   = マウスがOKボタンを押し込んだときに再生する音声ファイル。`sound`フォルダから探します。
+
+:sample
+[dialog_config_ok text="いいですよ"]
+[dialog_config_ok width="200" margin="10,30" type="btn_04_green"]
+
+;画像ボタンにする場合はひとつのタグで記述
+[dialog_config_ok img="dialog/ok.png" width="100" margin="20" enterimg="dialog/ok_enter.png" activeimg="dialog/ok_active.png" clickimg="dialog/ok_click.png" enterse="lab1.mp3" leavese="lab2.mp3" clickse="lab3.mp3"]
+
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.dialog_config_ok = {
+    pm: {
+        text: "",
+        type: "",
+        width: "",
+        margin: "",
+        padding: "",
+        fontsize: "",
+        fontbold: "",
+        fontface: "",
+        fontcolor: "",
+
+        img: "",
+        imgwidth: "",
+        enterimg: "",
+        activeimg: "",
+        clickimg: "",
+        enterse: "",
+        leavese: "",
+        clickse: "",
+    },
+
+    start: function (pm) {
+        const that = this.kag.ftag.master_tag.dialog_config;
+        that.init();
+        that.changeButton(pm, true);
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[dialog_config_ng]
+
+:group
+システムデザイン変更
+
+:title
+確認ダイアログのデザイン変更（キャンセルボタン）
+
+:exp
+タイトルに戻っていいかどうかを確認するときなどに表示される確認ダイアログのデザインを変更することができます。ダイアログのデザインを変更するタグには以下の4種類があります。
+
+・`[dialog_config]`
+・`[dialog_config_ok]`
+・`[dialog_config_ng]`
+・`[dialog_config_filter]`
+
+このタグでは、キャンセルボタンの設定を行うことができます。
+
+<b>★重要</b>
+このタグで変更した内容はセーブ・ロードによって復元されません。つまり、シナリオが始まったあと・ロードができる状態になったあとで演出の都合で一時的にこのタグでダイアログを変更する、といった使い方は危険です。ゲームを起動してからタイトルなどに移行するまでの間（`first.ks`など）に記述するとよいでしょう。
+
+<b>★重要</b>
+`img`パラメータが指定された`[glink_config_ng]`を通過するタイミングで、それまでのキャンセルボタンの設定が破棄されます。つまり、画像をボタンに使う場合はタグを小分けして書かずにひとつの`[glink_config_ng]`で記述する必要があります。（文字ボタンの場合は関係ありません）
+
+:param
+text      = キャンセルボタンのテキストを指定できます。
+type      = キャンセルボタンのタイプを指定できます。指定できるキーワードは`[glink]`の`color`パラメータに準じます。
+width     = キャンセルボタンの横幅をpx単位で指定できます。
+margin    = キャンセルボタンの外余白をpx単位で指定できます。カンマ区切りに対応。`10,20`のように指定すると、縦余白が10、横余白が20と指定したことになります。
+padding   = キャンセルボタンの内余白をpx単位で指定できます。カンマ区切りに対応。`10,20`のように指定すると、縦余白が10、横余白が20と指定したことになります。
+fontsize  = キャンセルボタンの文字サイズを指定します。
+fontbold  = キャンセルボタンを文字を太字にする場合は`true`を指定します。
+fontface  = キャンセルボタンのフォントを指定します。
+fontcolor = キャンセルボタンの文字色を指定します。
+img       = キャンセルボタンに画像を使うことができます。`image`フォルダを基準とした画像ファイルの場所を指定します。
+imgwidth  = キャンセルボタンの画像の横幅をpx単位で指定できます。
+enterimg  = マウスがキャンセルボタンの上に乗ったときの画像ファイル。`image`フォルダから探します。
+activeimg = マウスがキャンセルボタンを押し込んでから放されるまでの画像ファイル。`image`フォルダから探します。
+clickimg  = マウスがキャンセルボタンをクリックした後の画像ファイル。`image`フォルダから探します。
+enterse   = マウスがキャンセルボタンの上に乗ったときに再生する音声ファイル。`sound`フォルダから探します。
+leavese   = マウスがキャンセルボタンの上から離れたときに再生する音声ファイル。`sound`フォルダから探します。
+clickse   = マウスがキャンセルボタンを押し込んだときに再生する音声ファイル。`sound`フォルダから探します。
+
+:sample
+[dialog_config_ng text="ダメです"]
+[dialog_config_ng width="200" margin="10,30" type="btn_04_white"]
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.dialog_config_ng = {
+    pm: tyrano.plugin.kag.tag.dialog_config_ok.pm,
+    start: function (pm) {
+        const that = this.kag.ftag.master_tag.dialog_config;
+        that.init();
+        that.changeButton(pm, false);
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[dialog_config_filter]
+
+:group
+システムデザイン変更
+
+:title
+確認ダイアログのデザイン変更（フィルター）
+
+:exp
+タイトルに戻っていいかどうかを確認するときなどに表示される確認ダイアログのデザインを変更することができます。ダイアログのデザインを変更するタグには以下の4種類があります。
+
+・`[dialog_config]`
+・`[dialog_config_ok]`
+・`[dialog_config_ng]`
+・`[dialog_config_filter]`
+
+このタグでは、ダイアログを表示したときに背景全体に適用するフィルターを指定できます。指定できるパラメータは`[filter]`と同じです。
+
+<b>★重要</b>
+このタグで変更した内容はセーブ・ロードによって復元されません。つまり、シナリオが始まったあと・ロードができる状態になったあとで演出の都合で一時的にこのタグでダイアログを変更する、といった使い方は危険です。ゲームを起動してからタイトルなどに移行するまでの間（`first.ks`など）に記述するとよいでしょう。
+
+:param
+layer      = フィルタをかけるレイヤを指定します。省略すると、もしくは`all`と指定するとゲーム画面全てに効果がかかります。,
+name       = 特定の要素にフィルタをかけたい場合に、その要素の`name`を指定します。,
+grayscale  = `0`(デフォルト)～`100`を指定することで、画像の表示をグレースケールに変換できます。,
+sepia      = `0`(デフォルト)～`100`を指定することで、画像の表示をセピア調に変換できます。,
+saturate   = `0`～`100`(デフォルト)を指定してあげることで、画像の表示の彩度（色の鮮やかさ）を変更できます。,
+hue        = `0`(デフォルト)～`360`を指定することで、画像の表示の色相を変更できます。,
+invert     = `0`(デフォルト)～`100`を指定することで、画像の表示の階調を反転させることができます。,
+opacity    = `0`～`100`(デフォルト)を指定することで、画像の表示の透過度を変更できます。,
+brightness = `100`(デフォルト)を基準とする数値を指定することで、画像の明度を変更できます。`0`で真っ暗に、`100`以上の数値でより明るくなります。,
+contrast   = `0`～`100`(デフォルト)を指定することで、画像の表示のコントラストを変更できます。,
+blur       = `0`(デフォルト)～`任意の値`を指定することで、画像の表示をぼかすことができます。
+
+:sample
+[dialog_config_filter blur="15"]
+
+
+#[end]
+*/
+tyrano.plugin.kag.tag.dialog_config_filter = {
+    start: function (pm) {
+        const filter = this.kag.ftag.master_tag.filter;
+        pm = $.extend({}, filter.pm, pm);
+        const filter_str = filter.buildFilterPropertyValue(pm);
+        $(".remodal-base").setStyleMap({ "backdrop-filter": filter_str }, "webkit");
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[mode_effect]
+
+:group
+システムデザイン変更
+
+:title
+モード変化エフェクト
+
+:exp
+次のタイミングで画面中央にエフェクトを出すことができます。
+
+①スキップモード開始時
+②オートモード開始時
+③スキップモードまたはオートモード停止時
+④ホールドスキップモード開始時
+⑤ホールドスキップモード停止時
+
+※ホールドスキップとは「ボタンやキーを押している間だけスキップする機能」のことです。キーボードの`Ctrl`キーに割り当てられていることが一般的です。
+
+:param
+skip       = スキップモード開始時に表示されるエフェクト。`none`、`default`、または`imageフォルダを基準とする画像ファイルの場所`を指定します。`none`だとエフェクトなし、`default`だとデフォルトのエフェクト、画像ファイルを指定するとその画像を出すことができます。
+auto       = オートモード開始時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+stop       = スキップモードまたはオートモード停止時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+holdskip   = ホールドスキップモード開始時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+holdstop   = ホールドストップモード停止時に表示されるエフェクト。`skip`パラメータと同様に指定します。
+all        = 5種類のエフェクトをまとめて指定できます。`skip`パラメータと同様に指定します。
+env        = `all``pc``phone`のいずれかを指定します。`pc`を指定すると、プレイヤーがPCでゲームを遊んでいるとき限定のエフェクトを設定できます。`phone`を指定すると、プレイヤーがスマホ・タブレットでゲームを遊んでいるとき限定のエフェクトを設定できます。`all`(デフォルト)の場合は2つの環境の設定をまとめて行います。
+width      = エフェクトの横幅を指定したい場合、数値(px単位)を指定します。
+height     = エフェクトの高さを指定したい場合、数値(px単位)を指定します。
+color      = エフェクトに`default`を使用する場合に、図形部分の色を指定できます。
+bgcolor    = エフェクトに`default`を使用する場合に、図形を囲む丸部分の色を指定できます。
+
+:sample
+[mode_effect all="default" holdskip="none" holdstop="none"]
+
+
+#[end]
+*/
+tyrano.plugin.kag.tag.mode_effect = {
+    pm: {
+        all: "", // none, default, hoge.png
+        skip: "",
+        auto: "",
+        holdskip: "",
+        stop: "",
+        env: "all", // all, pc, phone
+    },
+    next: function (pm) {
+        this.kag.ftag.nextOrder();
+    },
+    mode_list: ["skip", "auto", "stop", "holdskip", "holdstop"],
+    start: function (pm) {
+        let target_env_keys;
+
+        if (pm.env === "all") target_env_keys = ["pc", "phone"];
+        else target_env_keys = [pm.env];
+
+        if (pm.all) {
+            this.mode_list.forEach((mode) => {
+                if (!pm[mode]) {
+                    pm[mode] = pm.all;
+                }
+            });
+        }
+
+        target_env_keys.forEach((env_key) => {
+            const map = this.kag.tmp.mode_effect[env_key];
+            this.mode_list.forEach((mode) => {
+                if (pm[mode]) {
+                    if (!map[mode]) map[mode] = {};
+                    map[mode].storage = pm[mode];
+                    ["width", "height", "color", "bgcolor"].forEach((pm_key) => {
+                        if (pm[pm_key]) map[mode][pm_key] = pm[pm_key];
+                    });
+                }
+            });
+        });
 
         this.kag.ftag.nextOrder();
     },

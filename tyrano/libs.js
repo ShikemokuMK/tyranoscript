@@ -1,13 +1,6 @@
 (function ($) {
     //jquery 拡張
 
-    //アニメーション開始。未実装　キーフレアニメは投入したい
-    $.fn.a2d = function () {
-        return this.each(function (i) {
-            $(this).css("-webkit-animation-play-state", str);
-        });
-    };
-
     $.getBaseURL = function () {
         var str = location.pathname;
         var i = str.lastIndexOf("/");
@@ -73,7 +66,8 @@
     };
 
     $.getViewPort = function () {
-        var width, heiht;
+        let width;
+        let height;
 
         if (self.innerHeight) {
             // all except Explorer
@@ -203,7 +197,7 @@
     };
 
     //現在の時刻
-    $.getNowTime = function (format = "hh：mm：ss") {
+    $.getNowTime = function (format = "hh:mm:ss") {
         return $.formatDate(new Date(), format);
     };
 
@@ -399,40 +393,15 @@
     };
 
     $.loadText = function (file_path, callback) {
-        /*
-        var httpObj = jQuery.get(file_path + "?" + Math.floor(Math.random() * 1000000), null, function(obj) {
-
-            var order_str = "";
-
-            if (httpObj) {
-                if (httpObj.responseText) {
-                    order_str = httpObj.responseText;
-                } else {
-
-                    order_str = obj;
-
-                }
-            } else {
-
-                order_str = obj;
-
-            }
-
-            callback(order_str);
-            // createOrder
-        });
-
-        */
-
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
             success: function (text) {
-                order_str = text;
+                const order_str = text;
                 callback(order_str);
             },
             error: function () {
-                alert("file not found:" + file_path);
+                alert($.lang("file_not_found", { path: file_path }));
                 callback("");
             },
         });
@@ -488,9 +457,17 @@
         }
     };
 
-    $.lang = function (key) {
-        if (tyrano_lang["word"][key]) {
-            return tyrano_lang["word"][key];
+    $.lang = function (key, replace_map, target = "word") {
+        if (typeof replace_map === "string") target = replace_map;
+        let string_defined = tyrano_lang[target][key];
+        if (string_defined) {
+            if (replace_map) {
+                for (const replace_key in replace_map) {
+                    const pattern = new RegExp(`\\{\\s*${replace_key}\\s*\\}`, "g");
+                    string_defined = string_defined.replace(pattern, replace_map[replace_key]);
+                }
+            }
+            return string_defined;
         } else {
             return "NOT_DEFINED";
         }
@@ -527,7 +504,7 @@
         }
     };
 
-    ($.isNWJS = function () {
+    $.isNWJS = function () {
         //Electronならfalse
         if ($.isElectron()) {
             return false;
@@ -555,58 +532,66 @@
             //  通常のWebページとして動作している
             return false;
         }
-    }),
-        ($.isNeedClickAudio = function () {
-            //プレイヤーはクリックの必要なし
-            if ($.isTyranoPlayer()) {
-                return false;
-            }
+    };
 
-            //ブラウザやスマホアプリは必要
-            if ($.isElectron() || $.isNWJS()) {
-                return false;
-            }
+    $.isNeedClickAudio = function () {
+        //プレイヤーはクリックの必要なし
+        if ($.isTyranoPlayer()) {
+            return false;
+        }
 
-            return true;
-        });
+        //ブラウザやスマホアプリは必要
+        if ($.isElectron() || $.isNWJS()) {
+            return false;
+        }
 
-    ($.isElectron = function () {
+        return true;
+    };
+
+    $.isElectron = function () {
         if (navigator.userAgent.indexOf("TyranoErectron") != -1) {
             return true;
         } else {
             return false;
         }
-    }),
-        //オブジェクトを引き継ぐ。
-        ($.extendParam = function (pm, target) {
-            var tmp = target;
+    };
 
-            for (key in target) {
-                if (pm[key]) {
-                    if (pm[key] != "") {
-                        target[key] = pm[key];
-                    }
+    //オブジェクトを引き継ぐ。
+    $.extendParam = function (pm, target) {
+        var tmp = target;
+
+        for (let key in target) {
+            if (pm[key]) {
+                if (pm[key] != "") {
+                    target[key] = pm[key];
                 }
             }
+        }
 
-            return target;
-        });
+        return target;
+    };
 
-    ($.insertRule = function (css_str) {
+    $.insertRule = function (css_str) {
         var sheet = (function () {
             var style = document.createElement("style");
             document.getElementsByTagName("head")[0].appendChild(style);
             return style.sheet;
         })();
         sheet.insertRule(css_str, 0);
-    }),
-        ($.swfName = function (str) {
-            if (navigator.appName.indexOf("Microsoft") != -1) {
-                return window[str];
-            } else {
-                return document[str];
-            }
-        });
+    };
+
+    $.insertRuleToTyranoCSS = function (css_str) {
+        const sheet = $('link[href*="tyrano/tyrano.css"]').get(0).sheet;
+        sheet.insertRule(css_str, sheet.cssRules.length);
+    };
+
+    $.swfName = function (str) {
+        if (navigator.appName.indexOf("Microsoft") != -1) {
+            return window[str];
+        } else {
+            return document[str];
+        }
+    };
 
     //古いトランス。
     $.trans_old = function (method, j_obj, time, mode, callback) {
@@ -686,7 +671,7 @@
         if (mode == "hide") {
             j_obj.show();
             method = $.replaceAll(method, "In", "Out");
-            var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            const animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
             j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
@@ -697,7 +682,7 @@
             });
         } else if (mode == "show") {
             j_obj.show();
-            var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
+            const animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
             j_obj.addClass("animated " + method).one(animationEnd, function () {
                 j_obj.off(animationEnd);
                 j_obj.css("animation-duration", "");
@@ -711,7 +696,7 @@
 
     //要素から空白のオブジェクトを削除して返却する
     $.minifyObject = function (obj) {
-        for (key in obj) {
+        for (let key in obj) {
             if (obj[key] == null || obj[key] == "") {
                 delete obj[key];
             }
@@ -740,6 +725,14 @@
 
         if (img_storage.length == 0) {
             cb();
+        }
+    };
+
+    $.removeStorage = function (key, type) {
+        if (type == "file") {
+            $.removeStorageFile(key);
+        } else {
+            $.removeStorageWeb(key);
         }
     };
 
@@ -823,6 +816,10 @@
         return gv;
     };
 
+    $.removeStorageWeb = function (key) {
+        localStorage.removeItem(key);
+    };
+
     $.setStorageWeb = function (key, val) {
         val = JSON.stringify(val);
         //localStorage.setItem(key, LZString.compress(escape(val)));
@@ -872,7 +869,7 @@
                         html = html.substring(index, html.length);
 
                         var replace_index = html.indexOf("/game/data");
-                        tmp_html = html.substring(replace_index + "/game/data".length, html.length);
+                        const tmp_html = html.substring(replace_index + "/game/data".length, html.length);
                         html = "./data" + tmp_html;
                     }
                 }
@@ -887,9 +884,9 @@
     };
 
     $.confirmSaveClear = function () {
-        if (confirm("セーブデータが壊れている可能性があります。セーブデータを初期化しますか？")) {
-            alert("初期化");
-            localStorage.clear();
+        if (confirm($.lang("saved_data_is_corrupted"))) {
+            alert($.lang("initialized_saved_data"));
+            TYRANO.kag.removeSaveData();
         }
     };
 
@@ -915,7 +912,7 @@
         } catch (e) {
             console.log("==============");
             console.log(e);
-            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
+            alert($.lang("save_does_not_work"));
             $.confirmSaveClear();
         }
 
@@ -957,7 +954,7 @@
         //console.log(path);
 
         if (process.platform == "darwin") {
-            platrofm = "mac";
+            const platrofm = "mac";
             //TyranoStudio-darwin-x64.asar
             if (path.indexOf(".asar") != -1) {
                 path = $.replaceAll(path, "/Contents/Resources/app.asar", "");
@@ -988,6 +985,23 @@
         return path;
     };
 
+    $.removeStorageFile = function (key) {
+        try {
+            const fs = require("fs");
+            let out_path;
+            if (process.execPath.indexOf("var/folders") != -1) {
+                out_path = process.env.HOME + "/_TyranoGameData";
+                if (!fs.existsSync(out_path)) {
+                    fs.mkdirSync(out_path);
+                }
+            } else {
+                out_path = $.getExePath();
+            }
+            const file_path = out_path + "/" + key + ".sav";
+            fs.unlinkSync(file_path);
+        } catch (e) {}
+    };
+
     $.setStorageFile = function (key, val) {
         val = JSON.stringify(val);
         var fs = require("fs");
@@ -1011,8 +1025,6 @@
         try {
             var gv = "null";
             var fs = require("fs");
-            var out_path = "";
-
             var out_path = $.getExePath();
 
             if (process.execPath.indexOf("var/folders") != -1) {
@@ -1037,143 +1049,208 @@
             }
         } catch (e) {
             console.log(e);
-            alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
+            alert($.lang("save_does_not_work"));
             $.confirmSaveClear();
         }
 
         return gv;
     };
 
-    /*
-    $.setStorage = function(key,val){
-    val = JSON.stringify(val);
-    localStorage.setItem(key, LZString.compress(escape(val)));
-    //localStorage.setItem(key, escape(val));
-    };
-
-    $.getStorage = function(key){
-
-    try{
-
-    var gv = "null";
-
-    if(localStorage.getItem(key)){
-    gv = unescape(LZString.decompress(localStorage.getItem(key)));
-
-    if(gv=="null"){
-    gv = unescape(localStorage.getItem(key));
-    }
-    }
-
-    if(gv =="null") return null;
-
-    }catch(e){
-    alert("この環境はセーブ機能を利用できません。ローカルで実行している場合などに発生します");
-    }
-
-    return gv;
-
-    };
-    */
-
-    $.alert = function (str, cb) {
-        $(".remodal_title").html(str);
-
-        $(".remodal").find(".remodal-cancel").hide();
-        $(".remodal").find(".remodal-confirm").show();
-
-        var inst = $("[data-remodal-id=modal]").remodal();
-        inst.open();
-
-        $(document).off("closed", ".remodal");
-        $(document).on("closed", ".remodal", function (e) {
-            if (typeof cb == "function") {
-                cb();
-            }
-        });
-
-        /*
-        if ($.userenv() != "pc") {
-            alert(str);
-            if(typeof cb == "function"){
-                cb();
-            }
-
-        }else{
-            alertify.alert(str,function(){;
-                if(typeof cb == "function"){
-                    cb();
-                }
-            });
-        }
-        */
-    };
-
-    $.inform = function (str, type) {
-        alertify.log(str, type);
-    };
-
-    $.confirm = function (str, cb_ok, cb_cancel) {
-        $(".remodal_title").html(str);
-
-        $(".remodal").find(".remodal-cancel").show();
-        $(".remodal").find(".remodal-confirm").show();
-
-        var inst = $("[data-remodal-id=modal]").remodal();
-        inst.open();
-
-        /////////OK /////////////
-
-        $(document).off("closed", ".remodal");
-
+    /**
+     * remodal のイベントをすべて消去
+     */
+    $.removeRemodalEvents = function (includes_closed) {
+        $(document).off("opening", ".remodal");
+        $(document).off("opened", ".remodal");
+        $(document).off("closing", ".remodal");
         $(document).off("confirmation", ".remodal");
-        $(document).on("confirmation", ".remodal", function (e) {
-            $(document).off("confirmation", ".remodal");
-            $(document).off("cancellation", ".remodal");
-
-            if (typeof cb_ok == "function") {
-                cb_ok();
-            }
-        });
-
-        ///////キャンセル//////////////
         $(document).off("cancellation", ".remodal");
-        $(document).on("cancellation", ".remodal", function (e) {
-            $(document).off("confirmation", ".remodal");
-            $(document).off("cancellation", ".remodal");
+        if (includes_closed) $(document).off("closed", ".remodal");
+    };
 
-            if (typeof cb_cancel == "function") {
-                cb_cancel();
+    /**
+     * remodal のイベント汎用処理
+     * @param {Object} options
+     * @param {"alert" | "confirm"} options.type
+     * @param {string} options.title
+     * @param {function} on_ok
+     * @param {function} on_cancel
+     */
+    $.remodalCommon = function (options = {}) {
+        const j_box = $("[data-remodal-id=modal]");
+        const j_ok = $(".remodal").find("#remodal-confirm");
+        const j_ng = $(".remodal").find("#remodal-cancel");
+        const j_wrapper = $(".remodal-wrapper");
+        const j_button = $([j_ok[0], j_ng[0]]);
+        const j_event = $([j_ok[0], j_ng[0], j_wrapper[0], j_box[0]]);
+        const j_anim = $(".remodal-base").add(j_box);
+
+        // <h1> の更新
+        $(".remodal_title").html(options.title);
+
+        // OK 表示
+        j_ok.show().focusable();
+        if (j_ok.hasClass("remodal-image-button")) {
+            j_ok.trigger("init");
+        }
+
+        // Cancel 表示
+        if (options.type === "confirm") {
+            j_ng.show().focusable();
+            if (j_ng.hasClass("remodal-image-button")) {
+                j_ng.trigger("init");
+            }
+        } else {
+            j_ng.hide();
+        }
+
+        // ポイント不可
+        j_event.setStyle("pointer-events", "none");
+
+        // remodal 初期化
+        j_box.css("font-family", TYRANO.kag.config.userFace);
+        const inst = j_box.remodal();
+
+        // 汎用クローズ処理
+        const close_common = () => {
+            j_event.setStyle("pointer-events", "none");
+            TYRANO.kag.key_mouse.vmouse.hide();
+            const effect = TYRANO.kag.tmp.remodal_closing_effect;
+            if (effect && effect !== "none") {
+                j_box.setStyleMap({ "animation-name": effect }, "webkit");
+                $(document).on("closed", ".remodal", () => {
+                    j_box.setStyleMap({ "animation-name": "" }, "webkit");
+                });
+            }
+
+            $.removeRemodalEvents(false);
+        };
+
+        //
+        // イベントリスナを設定
+        // https://github.com/VodkaBears/Remodal#events
+        //
+
+        // 旧イベントを消去
+        $.removeRemodalEvents(true);
+
+        let mousedown_elm = null;
+
+        // ラッパーのクリックでウィンドウを閉じられるようにする
+        j_wrapper
+            .off("mousedown.outerclose click.outerclose")
+            .on("click.outerclose", () => {
+                if (mousedown_elm !== j_wrapper[0]) return;
+                j_box.off("mousedown.outerclose");
+                j_wrapper.off("mousedown.outerclose click.outerclose");
+                if (options.type === "confirm") j_ng.trigger("click");
+            })
+            .on("mousedown.outerclose", () => {
+                mousedown_elm = j_wrapper[0];
+            });
+
+        // メッセージボックスのクリックがラッパーに突き抜けないようにする
+        j_box.off("mousedown.outerclose").on("mousedown.outerclose", (e) => {
+            mousedown_elm = j_box[0];
+            e.stopPropagation();
+        });
+
+        j_button.off("click.outerclose").on("click.outerclose", () => {
+            j_box.off("click.outerclose");
+        });
+
+        // 表示完了時
+        $(document).on("opened", ".remodal", () => {
+            // ポイント可
+            j_event.setStyle("pointer-events", "auto");
+        });
+
+        // アラート: クローズ時の処理
+        if (options.type === "alert") {
+            $(document).on("closed", ".remodal", () => {
+                close_common();
+                $.removeRemodalEvents(false);
+                if (typeof options.on_ok === "function") {
+                    options.on_ok();
+                }
+            });
+            return;
+        }
+
+        // コンファーム: OK 時の処理
+        $(document).on("confirmation", ".remodal", () => {
+            close_common();
+            if (typeof options.on_ok === "function") {
+                options.on_ok();
             }
         });
 
-        /*
-        if ($.userenv() != "pc") {
-
-            if(window.confirm(str)){
-                cb_ok();
-            }else{
-                cb_cancel();
+        // コンファーム: Cancel 時の処理
+        $(document).on("cancellation", ".remodal", () => {
+            close_common();
+            if (typeof options.on_cancel === "function") {
+                options.on_cancel();
             }
+        });
 
-        }else{
-            alertify.confirm(str,function(e){
-                if (e) {
-                // user clicked "ok"
-                    cb_ok();
-                } else {
-                    // user clicked "cancel"
-                    cb_cancel();
+        if (TYRANO.kag.tmp.remodal_opening_effect_time !== undefined) {
+            j_anim.setStyleMap({ "animation-duration": TYRANO.kag.tmp.remodal_opening_effect_time }, "webkit");
+        }
+
+        // オープン開始時にアニメクラスを付ける, オープン完了時に外す
+        const opening_effect = TYRANO.kag.tmp.remodal_opening_effect;
+        if (opening_effect && opening_effect !== "none") {
+            $(document).on("opening", ".remodal", () => {
+                j_box.setStyleMap({ "animation-name": opening_effect }, "webkit");
+            });
+            $(document).on("opened", ".remodal", () => {
+                j_box.setStyleMap({ "animation-name": "" }, "webkit");
+                if (TYRANO.kag.tmp.remodal_closing_effect_time !== undefined) {
+                    j_anim.setStyleMap({ "animation-duration": TYRANO.kag.tmp.remodal_closing_effect_time }, "webkit");
                 }
             });
         }
-        */
+
+        //
+        // 開く
+        //
+
+        inst.open();
+    };
+
+    /**
+     * モーダルウィンドウで remodal
+     * @param {string} title
+     * @param {function} on_ok
+     */
+    $.alert = (title, on_ok) => {
+        $.remodalCommon({ type: "alert", title, on_ok });
+    };
+
+    /**
+     * モーダルウィンドウでコンファーム, remodal
+     * @param {string} title
+     * @param {function} on_ok
+     * @param {function} on_cancel
+     */
+    $.confirm = function (title, on_ok, on_cancel) {
+        $.remodalCommon({ type: "confirm", title, on_ok, on_cancel });
+    };
+
+    /**
+     * 画面右下にトースト通知, alertify
+     * ゲーム画面(tyrano_base)よりも外側に出る
+     * @param {*} str
+     * @param {*} type
+     */
+    $.inform = (str, type) => {
+        alertify.log(str, type);
     };
 
     //オブジェクトの個数をもってきます。1
     $.countObj = function (obj) {
         var num = 0;
-        for (key in obj) {
+        for (let key in obj) {
             num++;
         }
         return num;
@@ -1276,7 +1353,6 @@
             for (var i = 0; i < nodes.length; i++) {
                 if (typeof nodes[i].tag != "undefined" && nodes[i].tag.toLowerCase() == "script") {
                     break;
-                    return false;
                 }
 
                 if (typeof nodes[i].tag == "undefined") {
@@ -1443,7 +1519,7 @@
 
         // 文字列を「カッコの外にあるカンマ」で刻む
         // 色指定自体にカンマが含まれるケース（"rgb(255,255,255)"のような）を考慮しなければならない
-        const edge_str_hash = edge_str.split(/,(?![^\(]*\))/);
+        const edge_str_hash = edge_str.split(/,(?![^(]*\))/);
 
         // 内側から加算していった合計の縁取り太さ（複数縁取りを行う場合に意味を持つ）
         // filter: drop-shadow()方式では不要、text-shadow方式や-webkit-text-stroke方式では必要
@@ -1454,7 +1530,7 @@
             const this_edge_str_trim = $.trim(this_edge_str);
 
             // 先頭の〇〇pxをチェック
-            const width_match = this_edge_str_trim.match(/^[0-9\.]+px /);
+            const width_match = this_edge_str_trim.match(/^[0-9.]+px /);
 
             let width;
             let width_str;
@@ -1647,19 +1723,20 @@
     /**
      * CSSのfilterプロパティに値をセット
      * prefixを考慮
-     * @param {string} str filterプロパティに値をセット
+     * @param {string} str filter プロパティにセットする値
+     * @param {boolean} [add_z_0=true] z-0 クラスを付けるかどうか
      * @return {jQuery}
      */
-    $.fn.setFilterCSS = function (str) {
-        // transform: translateZ(0); でGPUレイヤー作成を促す
+    $.fn.setFilterCSS = function (str, add_z_0 = true) {
+        // プレフィックスを考慮して filter プロパティをセット
+        this.setStyle("filter", str, ["webkit", "moz", "ms"]);
+
+        // z-0 クラスを付与して transform: translateZ(0) でGPUレイヤー作成を促す
         // Safari on iOS においてfilterプロパティだけではGPUレイヤーが作成されず
         // filterが崩れる可能性がある
-        return this.setStyleMap({
-            "-webkit-filter": str,
-            "-ms-filter": str,
-            "-moz-filter": str,
-            "transform": "translateZ(0)",
-        });
+        if (add_z_0) this.addClass("z-0");
+
+        return this;
     };
 
     /**
@@ -1757,18 +1834,29 @@
      * CSSのオブジェクトを渡してセットする
      * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
      * こちらのメソッドであれば処理時間が40-50%ほどで済む
-     * @param {Object} map CSSのプロパティと値が対になっているオブジェクト
+     * @param {{[key: string]: string;}} map CSSのプロパティと値が対になっているオブジェクト
+     * @param {string | string[]} [prefixes] ベンダープレフィックス対応 (例) [ "webkit", "mz" ]
      * @return {jQuery}
      */
-    $.fn.setStyleMap = function (map) {
+    $.fn.setStyleMap = function (map, prefixes) {
         const len = this.length;
         if (len === 0) {
             return this;
         }
+        if (typeof prefixes === "string") {
+            prefixes = [prefixes];
+        }
         for (let i = 0; i < len; i++) {
             const elm = this[i];
-            for (const key in map) {
-                elm.style.setProperty(key, map[key]);
+            for (const plain_key in map) {
+                const value = map[plain_key];
+                if (prefixes) {
+                    for (const prefix of prefixes) {
+                        const prefix_key = `-${prefix}-${plain_key}`;
+                        elm.style.setProperty(prefix_key, value);
+                    }
+                }
+                elm.style.setProperty(plain_key, value);
             }
         }
         return this;
@@ -1778,17 +1866,27 @@
      * CSSのキーとバリューを渡してセットする
      * 本家jQueryの.css()メソッドは汎用性が高い分処理が遅い
      * こちらのメソッドであれば処理時間が40-50%ほどで済む
-     * @param {Object} key
-     * @param {Object} value
+     * @param {string} key
+     * @param {string} value
+     * @param {string | string[]} [prefixes] ベンダープレフィックス対応 (例) [ "webkit", "mz" ]
      * @return {jQuery}
      */
-    $.fn.setStyle = function (key, value) {
+    $.fn.setStyle = function (key, value, prefixes) {
         const len = this.length;
         if (len === 0) {
             return this;
         }
+        if (typeof prefixes === "string") {
+            prefixes = [prefixes];
+        }
         for (let i = 0; i < len; i++) {
             const elm = this[i];
+            if (prefixes) {
+                for (const prefix of prefixes) {
+                    const prefix_key = `-${prefix}-${key}`;
+                    elm.style.setProperty(prefix_key, value);
+                }
+            }
             elm.style.setProperty(key, value);
         }
         return this;
@@ -1817,6 +1915,16 @@
             }
         }
         return "";
+    };
+
+    /**
+     * 要素が表示されていれば true を返す
+     * (display: none; でなければ true を返す)
+     * @return {boolean}
+     */
+    $.fn.isDisplayed = function () {
+        if (!this[0]) return false;
+        return this.css("display") !== "none";
     };
 
     /**
@@ -1929,6 +2037,8 @@
      * // "./data/fgimage/foo.png"
      */
     $.parseStorage = function (storage, folder = "") {
+        if (!storage) return "";
+
         // "http"で始まっているならそのまま返す
         if ($.isHTTP(storage)) {
             return storage;
@@ -1999,7 +2109,7 @@
             str = str.substring(1);
         }
         // ハイフン＋なんらかの小文字アルファベットのマッチ
-        const match = str.match(/\-[a-z]/);
+        const match = str.match(/-[a-z]/);
         // マッチしなくなったら完成
         if (!match) {
             return str;
@@ -2039,173 +2149,503 @@
         }
         return Math.max(0, Math.min(1, vol_str / 100));
     };
-})(jQuery);
 
-jQuery.fn.outerHTML = function (s) {
-    if (s) {
-        this.before(s);
-        this.remove();
+    /**
+     * フォーカス可能にする
+     * @param {number} tabindex
+     * @return {jQuery}
+     */
+    $.fn.focusable = function (tabindex = 0) {
+        TYRANO.kag.makeFocusable(this, tabindex);
         return this;
-    } else {
-        var dummy = jQuery("<p>");
-        var elem = this.eq(0);
-        dummy.append(elem.clone());
-        return dummy.html();
-    }
-};
+    };
 
-// t: current time, b: begInnIng value, c: change In value, d: duration
-jQuery.easing["jswing"] = jQuery.easing["swing"];
+    /**
+     * フォーカス不可能にする
+     * @param {number} tabindex
+     * @return {jQuery}
+     */
+    $.fn.unfocusable = function (tabindex = 0) {
+        TYRANO.kag.makeUnfocusable(this, tabindex);
+        return this;
+    };
 
-jQuery.extend(jQuery.easing, {
-    def: "easeOutQuad",
-    swing: function (x, t, b, c, d) {
-        //alert(jQuery.easing.default);
-        return jQuery.easing[jQuery.easing.def](x, t, b, c, d);
-    },
-    easeInQuad: function (x, t, b, c, d) {
-        return c * (t /= d) * t + b;
-    },
-    easeOutQuad: function (x, t, b, c, d) {
-        return -c * (t /= d) * (t - 2) + b;
-    },
-    easeInOutQuad: function (x, t, b, c, d) {
-        if ((t /= d / 2) < 1) return (c / 2) * t * t + b;
-        return (-c / 2) * (--t * (t - 2) - 1) + b;
-    },
-    easeInCubic: function (x, t, b, c, d) {
-        return c * (t /= d) * t * t + b;
-    },
-    easeOutCubic: function (x, t, b, c, d) {
-        return c * ((t = t / d - 1) * t * t + 1) + b;
-    },
-    easeInOutCubic: function (x, t, b, c, d) {
-        if ((t /= d / 2) < 1) return (c / 2) * t * t * t + b;
-        return (c / 2) * ((t -= 2) * t * t + 2) + b;
-    },
-    easeInQuart: function (x, t, b, c, d) {
-        return c * (t /= d) * t * t * t + b;
-    },
-    easeOutQuart: function (x, t, b, c, d) {
-        return -c * ((t = t / d - 1) * t * t * t - 1) + b;
-    },
-    easeInOutQuart: function (x, t, b, c, d) {
-        if ((t /= d / 2) < 1) return (c / 2) * t * t * t * t + b;
-        return (-c / 2) * ((t -= 2) * t * t * t - 2) + b;
-    },
-    easeInQuint: function (x, t, b, c, d) {
-        return c * (t /= d) * t * t * t * t + b;
-    },
-    easeOutQuint: function (x, t, b, c, d) {
-        return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
-    },
-    easeInOutQuint: function (x, t, b, c, d) {
-        if ((t /= d / 2) < 1) return (c / 2) * t * t * t * t * t + b;
-        return (c / 2) * ((t -= 2) * t * t * t * t + 2) + b;
-    },
-    easeInSine: function (x, t, b, c, d) {
-        return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
-    },
-    easeOutSine: function (x, t, b, c, d) {
-        return c * Math.sin((t / d) * (Math.PI / 2)) + b;
-    },
-    easeInOutSine: function (x, t, b, c, d) {
-        return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
-    },
-    easeInExpo: function (x, t, b, c, d) {
-        return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
-    },
-    easeOutExpo: function (x, t, b, c, d) {
-        return t == d ? b + c : c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
-    },
-    easeInOutExpo: function (x, t, b, c, d) {
-        if (t == 0) return b;
-        if (t == d) return b + c;
-        if ((t /= d / 2) < 1) return (c / 2) * Math.pow(2, 10 * (t - 1)) + b;
-        return (c / 2) * (-Math.pow(2, -10 * --t) + 2) + b;
-    },
-    easeInCirc: function (x, t, b, c, d) {
-        return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
-    },
-    easeOutCirc: function (x, t, b, c, d) {
-        return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
-    },
-    easeInOutCirc: function (x, t, b, c, d) {
-        if ((t /= d / 2) < 1) return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
-        return (c / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
-    },
-    easeInElastic: function (x, t, b, c, d) {
-        var s = 1.70158;
-        var p = 0;
-        var a = c;
-        if (t == 0) return b;
-        if ((t /= d) == 1) return b + c;
-        if (!p) p = d * 0.3;
-        if (a < Math.abs(c)) {
-            a = c;
-            var s = p / 4;
-        } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-        return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
-    },
-    easeOutElastic: function (x, t, b, c, d) {
-        var s = 1.70158;
-        var p = 0;
-        var a = c;
-        if (t == 0) return b;
-        if ((t /= d) == 1) return b + c;
-        if (!p) p = d * 0.3;
-        if (a < Math.abs(c)) {
-            a = c;
-            var s = p / 4;
-        } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-        return a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) + c + b;
-    },
-    easeInOutElastic: function (x, t, b, c, d) {
-        var s = 1.70158;
-        var p = 0;
-        var a = c;
-        if (t == 0) return b;
-        if ((t /= d / 2) == 2) return b + c;
-        if (!p) p = d * (0.3 * 1.5);
-        if (a < Math.abs(c)) {
-            a = c;
-            var s = p / 4;
-        } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-        if (t < 1) return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
-        return a * Math.pow(2, -10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) * 0.5 + c + b;
-    },
-    easeInBack: function (x, t, b, c, d, s) {
-        if (s == undefined) s = 1.70158;
-        return c * (t /= d) * t * ((s + 1) * t - s) + b;
-    },
-    easeOutBack: function (x, t, b, c, d, s) {
-        if (s == undefined) s = 1.70158;
-        return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
-    },
-    easeInOutBack: function (x, t, b, c, d, s) {
-        if (s == undefined) s = 1.70158;
-        if ((t /= d / 2) < 1) return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
-        return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
-    },
-    easeInBounce: function (x, t, b, c, d) {
-        return c - jQuery.easing.easeOutBounce(x, d - t, 0, c, d) + b;
-    },
-    easeOutBounce: function (x, t, b, c, d) {
-        if ((t /= d) < 1 / 2.75) {
-            return c * (7.5625 * t * t) + b;
-        } else if (t < 2 / 2.75) {
-            return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
-        } else if (t < 2.5 / 2.75) {
-            return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
-        } else {
-            return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
+    /**
+     * rule のセレクタが :hover や :active であるなら
+     * セレクタを .hover や .active に書き変えたものを複製して stylesheet に追加する
+     * https://developer.mozilla.org/ja/docs/Web/API/CSSStyleSheet
+     * @param {CSSRule} rule
+     * @param {CSSStyleSheet} stylesheet
+     */
+    $.copyHoverRuleToFocusRule = (rule, stylesheet) => {
+        if (rule.selectorText) {
+            const new_selector_texts = [];
+            const hash = rule.selectorText.split(",");
+            for (const selector of hash) {
+                if (selector.includes(":hover")) {
+                    new_selector_texts.push(selector.replace(":hover", ".hover"));
+                    new_selector_texts.push(selector.replace(":hover", ".focus"));
+                }
+                if (selector.includes(":active")) {
+                    new_selector_texts.push(selector.replace(":active", ".active"));
+                }
+            }
+            if (new_selector_texts.length) {
+                const selector_text = new_selector_texts.join(",");
+                const bracket_index = rule.cssText.indexOf("{");
+                const style_text = rule.cssText.substring(bracket_index);
+                const css_text = selector_text + style_text;
+                stylesheet.insertRule(css_text, stylesheet.cssRules.length);
+            }
         }
-    },
-    easeInOutBounce: function (x, t, b, c, d) {
-        if (t < d / 2) return jQuery.easing.easeInBounce(x, t * 2, 0, c, d) * 0.5 + b;
-        return jQuery.easing.easeOutBounce(x, t * 2 - d, 0, c, d) * 0.5 + c * 0.5 + b;
-    },
-});
+    };
+
+    /**
+     * ボタンのホバー時の CSS をキーボードによるフォーカス時や仮想マウスカーソルによるホバー時にも適用するために、
+     * 渡された <style> 要素に記載されている CSS ルールをすべて洗い出し、
+     * :hover や :active へのルールを .hover や .active へのルールとしてコピーして、
+     * スタイルシートの末尾に insertRule する
+     * @param {jQuery|Element|string} j_style
+     */
+    $.copyHoverCSSToFocusCSS = function (j_style) {
+        try {
+            if (!(j_style instanceof jQuery)) j_style = $(j_style);
+            const stylesheet = j_style.get(0).sheet;
+            const import_map = {};
+            for (const rule of stylesheet.cssRules) {
+                if (rule instanceof CSSImportRule) {
+                    // @import で外部CSSを読み込んでいる場合は記憶しておく
+                    import_map[rule.href] = rule.styleSheet;
+                } else {
+                    $.copyHoverRuleToFocusRule(rule, stylesheet);
+                }
+            }
+            // @import で読み込んだ外部CSSに対しても同じことをする
+            for (const key in import_map) {
+                const imported_stylesheet = import_map[key];
+                for (const rule of imported_stylesheet.cssRules) {
+                    $.copyHoverRuleToFocusRule(rule, stylesheet);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    $.fn.outerHTML = function (s) {
+        if (s) {
+            this.before(s);
+            this.remove();
+            return this;
+        } else {
+            var dummy = $("<p>");
+            var elem = this.eq(0);
+            dummy.append(elem.clone());
+            return dummy.html();
+        }
+    };
+
+    // t: current time, b: begInnIng value, c: change In value, d: duration
+    $.easing["jswing"] = $.easing["swing"];
+
+    $.extend($.easing, {
+        def: "easeOutQuad",
+        swing: function (x, t, b, c, d) {
+            //alert(jQuery.easing.default);
+            return $.easing[$.easing.def](x, t, b, c, d);
+        },
+        _linear: function (x, t, b, c, d) {
+            return b + c * (t / d);
+        },
+        easeInQuad: function (x, t, b, c, d) {
+            return c * (t /= d) * t + b;
+        },
+        easeOutQuad: function (x, t, b, c, d) {
+            return -c * (t /= d) * (t - 2) + b;
+        },
+        easeInOutQuad: function (x, t, b, c, d) {
+            if ((t /= d / 2) < 1) return (c / 2) * t * t + b;
+            return (-c / 2) * (--t * (t - 2) - 1) + b;
+        },
+        easeInCubic: function (x, t, b, c, d) {
+            return c * (t /= d) * t * t + b;
+        },
+        easeOutCubic: function (x, t, b, c, d) {
+            return c * ((t = t / d - 1) * t * t + 1) + b;
+        },
+        easeInOutCubic: function (x, t, b, c, d) {
+            if ((t /= d / 2) < 1) return (c / 2) * t * t * t + b;
+            return (c / 2) * ((t -= 2) * t * t + 2) + b;
+        },
+        easeInQuart: function (x, t, b, c, d) {
+            return c * (t /= d) * t * t * t + b;
+        },
+        easeOutQuart: function (x, t, b, c, d) {
+            return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+        },
+        easeInOutQuart: function (x, t, b, c, d) {
+            if ((t /= d / 2) < 1) return (c / 2) * t * t * t * t + b;
+            return (-c / 2) * ((t -= 2) * t * t * t - 2) + b;
+        },
+        easeInQuint: function (x, t, b, c, d) {
+            return c * (t /= d) * t * t * t * t + b;
+        },
+        easeOutQuint: function (x, t, b, c, d) {
+            return c * ((t = t / d - 1) * t * t * t * t + 1) + b;
+        },
+        easeInOutQuint: function (x, t, b, c, d) {
+            if ((t /= d / 2) < 1) return (c / 2) * t * t * t * t * t + b;
+            return (c / 2) * ((t -= 2) * t * t * t * t + 2) + b;
+        },
+        easeInSine: function (x, t, b, c, d) {
+            return -c * Math.cos((t / d) * (Math.PI / 2)) + c + b;
+        },
+        easeOutSine: function (x, t, b, c, d) {
+            return c * Math.sin((t / d) * (Math.PI / 2)) + b;
+        },
+        easeInOutSine: function (x, t, b, c, d) {
+            return (-c / 2) * (Math.cos((Math.PI * t) / d) - 1) + b;
+        },
+        easeInExpo: function (x, t, b, c, d) {
+            return t == 0 ? b : c * Math.pow(2, 10 * (t / d - 1)) + b;
+        },
+        easeOutExpo: function (x, t, b, c, d) {
+            return t == d ? b + c : c * (-Math.pow(2, (-10 * t) / d) + 1) + b;
+        },
+        easeInOutExpo: function (x, t, b, c, d) {
+            if (t == 0) return b;
+            if (t == d) return b + c;
+            if ((t /= d / 2) < 1) return (c / 2) * Math.pow(2, 10 * (t - 1)) + b;
+            return (c / 2) * (-Math.pow(2, -10 * --t) + 2) + b;
+        },
+        easeInCirc: function (x, t, b, c, d) {
+            return -c * (Math.sqrt(1 - (t /= d) * t) - 1) + b;
+        },
+        easeOutCirc: function (x, t, b, c, d) {
+            return c * Math.sqrt(1 - (t = t / d - 1) * t) + b;
+        },
+        easeInOutCirc: function (x, t, b, c, d) {
+            if ((t /= d / 2) < 1) return (-c / 2) * (Math.sqrt(1 - t * t) - 1) + b;
+            return (c / 2) * (Math.sqrt(1 - (t -= 2) * t) + 1) + b;
+        },
+        easeInElastic: function (x, t, b, c, d) {
+            var s = 1.70158;
+            var p = 0;
+            var a = c;
+            if (t == 0) return b;
+            if ((t /= d) == 1) return b + c;
+            if (!p) p = d * 0.3;
+            if (a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            } else s = (p / (2 * Math.PI)) * Math.asin(c / a);
+            return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
+        },
+        easeOutElastic: function (x, t, b, c, d) {
+            var s = 1.70158;
+            var p = 0;
+            var a = c;
+            if (t == 0) return b;
+            if ((t /= d) == 1) return b + c;
+            if (!p) p = d * 0.3;
+            if (a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            } else s = (p / (2 * Math.PI)) * Math.asin(c / a);
+            return a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) + c + b;
+        },
+        easeInOutElastic: function (x, t, b, c, d) {
+            var s = 1.70158;
+            var p = 0;
+            var a = c;
+            if (t == 0) return b;
+            if ((t /= d / 2) == 2) return b + c;
+            if (!p) p = d * (0.3 * 1.5);
+            if (a < Math.abs(c)) {
+                a = c;
+                s = p / 4;
+            } else s = (p / (2 * Math.PI)) * Math.asin(c / a);
+            if (t < 1) return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p)) + b;
+            return a * Math.pow(2, -10 * (t -= 1)) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) * 0.5 + c + b;
+        },
+        easeInBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            return c * (t /= d) * t * ((s + 1) * t - s) + b;
+        },
+        easeOutBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
+        },
+        easeInOutBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            if ((t /= d / 2) < 1) return (c / 2) * (t * t * (((s *= 1.525) + 1) * t - s)) + b;
+            return (c / 2) * ((t -= 2) * t * (((s *= 1.525) + 1) * t + s) + 2) + b;
+        },
+        easeInBounce: function (x, t, b, c, d) {
+            return c - $.easing.easeOutBounce(x, d - t, 0, c, d) + b;
+        },
+        easeOutBounce: function (x, t, b, c, d) {
+            if ((t /= d) < 1 / 2.75) {
+                return c * (7.5625 * t * t) + b;
+            } else if (t < 2 / 2.75) {
+                return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
+            } else if (t < 2.5 / 2.75) {
+                return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
+            } else {
+                return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
+            }
+        },
+        easeInOutBounce: function (x, t, b, c, d) {
+            if (t < d / 2) return $.easing.easeInBounce(x, t * 2, 0, c, d) * 0.5 + b;
+            return $.easing.easeOutBounce(x, t * 2 - d, 0, c, d) * 0.5 + c * 0.5 + b;
+        },
+    });
+
+    // いま終了時コンファームが有効かどうか
+    let is_close_confirm_enabled = false;
+    let is_set_electron_close_event = false;
+
+    /**
+     * プレイヤーが未保存の状態でページを離れようとしたときの警告を有効化する
+     * 再読み込み, ページ移動, タブを閉じる, などの操作が該当する
+     */
+    $.enableCloseConfirm = () => {
+        if (is_close_confirm_enabled) return;
+        is_close_confirm_enabled = true;
+
+        // Electron でない場合は簡単
+        if (!$.isElectron()) {
+            window.onbeforeunload = () => {
+                return $.lang("confirm_beforeunload");
+            };
+            return;
+        }
+
+        // Electron の場合
+        window.onbeforeunload = (e) => {
+            // 【！】remote は deprecated
+            const { remote } = require("electron");
+            const win = remote.getCurrentWindow();
+            const dialog = remote.dialog;
+            const choice = dialog.showMessageBoxSync(win, {
+                type: "warning",
+                buttons: ["OK", "Cancel"],
+                title: document.title,
+                message: $.lang("confirm"),
+                detail: $.lang("confirm_beforeunload"),
+                defaultId: 0,
+                cancelId: 1,
+            });
+            const leave = choice === 0;
+            if (leave) {
+                // void を返すとページの離脱が続行される
+                return;
+            }
+            // true を返すとページの離脱がキャンセルされる
+            return true;
+        };
+    };
+
+    /**
+     * タブを閉じようとしたときのコンファームを無効化する
+     */
+    $.disableCloseConfirm = () => {
+        if (!is_close_confirm_enabled) return;
+        is_close_confirm_enabled = false;
+        window.onbeforeunload = null;
+    };
+
+    /**
+     * 使用ディスプレイのリフレッシュレート(通常は 60)の計測を開始し
+     * 計測が完了したらコールバックに結果を渡して実行する
+     * @param {function} onfinish 計測終了時コールバック
+     */
+    const __measureRefreshRate = (onfinish) => {
+        let previous_rate;
+        let previous_time;
+        let same_count = 0;
+        const measure = (time) => {
+            if (previous_time) {
+                const rate = Math.round(1000 / (time - previous_time));
+                if (previous_rate === rate) {
+                    same_count++;
+                    if (same_count > 10) {
+                        if (onfinish) onfinish(rate);
+                        return;
+                    }
+                } else {
+                    same_count = 0;
+                }
+                previous_rate = rate;
+            }
+            previous_time = time;
+            requestAnimationFrame(measure);
+        };
+        requestAnimationFrame(measure);
+    };
+
+    /**
+     * __measureRefreshRate をラップしてリフレッシュレートを計測する
+     * window.refreshRate にまず初期値として 60 を代入し、計測完了後に値を更新する
+     * つまり window.refreshRate は定数ではなく時々刻々と変化しうる
+     */
+    const measureRefreshRate = () => {
+        window.refreshRate = 60;
+        __measureRefreshRate((rate) => {
+            window.refreshRate = rate;
+            // 60 以外であれば 3 秒後に測りなおす
+            if (rate !== 60) {
+                setTimeout(() => {
+                    __measureRefreshRate((rate) => {
+                        // 測りなおした
+                        // 60 でなければ警告を出す
+                        if (rate < 60) {
+                            console.warn(`${rate} Hz: %cLow%c refresh rate of display detected.`, "font-weight: bold", "");
+                        } else if (rate > 60) {
+                            console.warn(`${rate} Hz: %cHigh%c refresh rate of display detected.`, "font-weight: bold", "");
+                        }
+                        window.refreshRate = rate;
+                    });
+                }, 3000);
+            }
+        });
+    };
+
+    // 計測を開始
+    measureRefreshRate();
+
+    /**
+     * カンマ区切りあるいはスペース区切りの文字列を配列にして返す
+     * - "10, 20, 30" => [ "10", "20", "30" ]
+     * - "10 20 30" => [ "10", "20", "30" ]
+     * @param {string} value
+     * @returns {string[]}
+     */
+    $.splitCommaOrSpace = (value) => {
+        value = value.trim().replace(/ +/g, " ");
+        if (value.includes(","))
+            return value.split(",").map((item) => {
+                return item.trim();
+            });
+        if (value.includes(" ")) return value.split(" ");
+        return [value];
+    };
+
+    /**
+     * ティラノタグに指定された値をもとに margin を設定する
+     * 10,20,10 のようなカンマ区切りの指定に対応する
+     * @param {jQuery} j_elm
+     * @param {string} length_str
+     * @param {string} [prop="margin"]
+     */
+    $.fn.setMargin = function (length_str, prop = "margin") {
+        if (this.length === 0) {
+            return this;
+        }
+        const hash = length_str.split(",").map((length) => {
+            return $.convertLength(length);
+        });
+        let top, bottom, left, right;
+        switch (hash.length) {
+            case 1:
+                top = bottom = left = right = hash[0];
+                break;
+            case 2:
+                top = bottom = hash[0];
+                left = right = hash[1];
+                break;
+            case 3:
+                top = hash[0];
+                left = right = hash[1];
+                bottom = hash[2];
+                break;
+            default:
+            case 4:
+                top = hash[0];
+                bottom = hash[1];
+                left = hash[2];
+                right = hash[3];
+                break;
+        }
+        const style = {};
+        style[`${prop}-top`] = top;
+        style[`${prop}-bottom`] = bottom;
+        style[`${prop}-left`] = left;
+        style[`${prop}-right`] = right;
+        this.each((i, elm) => {
+            $(elm).setStyleMap(style);
+        });
+        return this;
+    };
+
+    $.fn.setPadding = function (length_str) {
+        return this.setMargin(length_str, "padding");
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの width, height プロパティなどに設定できる値に変換する
+     * - 文字列中に数値しか含まれていないなら "px" を足して返す
+     * - それ以外はそのまま返す
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertLength = (value) => {
+        value = value.trim();
+        if (!value) return "";
+        // 数値オンリーか？
+        if (value.match(/^[0-9. +-]+$/)) {
+            // 数値オンリーなら px を補完
+            return value + "px";
+        } else {
+            // すでに単位が含まれているならそのまま返す
+            return value;
+        }
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの font-weight プロパティに設定できる値に変換する
+     * - "true" に対して "bold" を返す
+     * - "false" に対して "normal" を返す
+     * - それ以外はそのまま返す
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertFontWeight = (value) => {
+        value = value.trim();
+        if (value === "true") return "bold";
+        if (value === "false") return "normal";
+        return value;
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの background-image プロパティに設定できる値に変換する
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertBackgroundImage = (value, folder) => {
+        value = value.trim();
+        if (value.includes("-gradient(")) return value;
+        if (value.includes("url(")) return value;
+        return `url(${$.parseStorage(value, folder)})`;
+    };
+
+    /**
+     * ティラノタグのパラメータに指定された値を
+     * 実際のCSSの background-position に設定できる値に変換する
+     * @param {string} value
+     * @returns {string}
+     */
+    $.convertBackgroundPosition = (value) => {
+        value = value.trim().replace(/ +/g, " ");
+        const hash = value.split(" ").map((item) => {
+            return $.convertLength(item);
+        });
+        return hash.join(" ");
+    };
+})(jQuery);
 
 // windowのloadイベントが発火済みかどうかを管理
 window.isLoaded = false;

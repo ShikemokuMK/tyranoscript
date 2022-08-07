@@ -40,9 +40,63 @@ tyrano.plugin.kag.ftag = {
         //処理停止中なら
         this.kag.stat.is_trans = false;
         if (this.kag.stat.is_stop == true) {
-            this.kag.layer.showEventLayer();
+            this.kag.cancelWeakStop();
             this.nextOrder();
         }
+    },
+
+    /**
+     * 固定オートモードグリフまたは固定スキップモードグリフを表示する
+     * @param {"skip" | "auto"} mode 表示するグリフを指定
+     */
+    showGlyph(mode) {
+        $("#mode_glyph_" + mode).show();
+    },
+
+    /**
+     * 固定オートモードグリフまたは固定スキップモードグリフを非表示にする
+     * @param {"skip" | "auto"} mode 非表示にするグリフを指定
+     */
+    hideGlyph(mode) {
+        $("#mode_glyph_" + mode).hide();
+    },
+
+    /**
+     * オートモード開始時にクリック待ちグリフを変化させる
+     * (メッセージ末尾のクリック待ちグリフとして格納されているオプションをオートモード用のオプションで上書きする)
+     */
+    changeAutoNextGlyph() {
+        const glyph_auto_pm = this.kag.stat.glyph_auto_next_pm;
+        if (!glyph_auto_pm) return;
+        this.kag.stat.glyph_pm_restore = this.kag.stat.glyph_pm || {
+            line: this.kag.stat.path_glyph,
+            fix: this.kag.stat.flag_glyph,
+            folder: "tyrano/images/system",
+        };
+        this.kag.stat.glyph_pm = glyph_auto_pm;
+    },
+
+    /**
+     * オートモード終了時にクリック待ちグリフをもとに戻す
+     * (メッセージ末尾のクリック待ちグリフとして格納されているオプションをもともとのクリック待ちグリフのオプションで上書きする)
+     */
+    restoreAutoNextGlyph() {
+        const glyph_default_pm = this.kag.stat.glyph_pm_restore;
+        if (!glyph_default_pm) return;
+        this.kag.stat.glyph_pm = glyph_default_pm;
+    },
+
+    /**
+     * グリフの情報格納キーを返す
+     * @param {"" | "skip" | "auto"} [mode=""] グリフのモード
+     * @param {booelean} [fix=true] 固定グリフかどうか
+     * @returns {"glyph_pm" | "glyph_skip_pm" | "glyph_auto_pm" | "glyph_auto_next_pm"}
+     */
+    getGlyphKey(mode, fix = true) {
+        let glyph_key = "glyph";
+        if (mode) glyph_key += "_" + mode;
+        if (mode === "auto" && !fix) glyph_key += "_next";
+        return glyph_key + "_pm";
     },
 
     /**
@@ -72,23 +126,46 @@ tyrano.plugin.kag.ftag = {
 
     /**
      * 現在の設定に基づいてクリック待ちグリフのjQueryオブジェクトを作成して返す
-     * @returns {jQuery} クリック待ちグリフの<img>または<div>を含むjQueryオブジェクト
+     * @param {"" | "skip" | "auto"} [mode=""]
+     * @returns {jQuery | null} クリック待ちグリフの<img>または<div>を含むjQueryオブジェクト
      */
-    createNextImg: function () {
-        // 参照
-        const stat = this.kag.stat;
-        const pm = stat.glyph_pm || {
-            folder: "tyrano/images/system",
-        };
+    createNextImg: function (mode = "") {
+        const glyph_key = this.getGlyphKey(mode);
+
+        let pm = this.kag.stat[glyph_key];
+
+        // 情報がまだ格納されていない！
+        if (!pm) {
+            if (mode) {
+                // スキップモード, オートモードのデフォルトグリフは存在しない
+                return null;
+            } else {
+                // クリック待ちグリフには初期値を与える
+                pm = {
+                    line: this.kag.stat.path_glyph,
+                    fix: this.kag.stat.flag_glyph,
+                    folder: "tyrano/images/system",
+                };
+            }
+        }
 
         // クラスの配列
         const class_names = [];
 
+        // id 属性
+        let id = "";
+
         // クラス追加：固定グリフかどうかでクラス名が違う
-        if (stat.flag_glyph === "false") {
-            class_names.push("img_next");
+        if (!mode) {
+            if (pm.fix !== "true") {
+                // メッセージウィンドウ内
+                class_names.push("img_next");
+            } else {
+                // 固定
+                class_names.push("glyph_image");
+            }
         } else {
-            class_names.push("glyph_image");
+            id = "mode_glyph_" + mode;
         }
 
         // jQueryオブジェクトを生成
@@ -98,7 +175,7 @@ tyrano.plugin.kag.ftag = {
             // 画像パス指定
             default:
             case "image":
-                img_src = $.parseStorage(stat.path_glyph || "nextpage.gif", pm.folder);
+                img_src = $.parseStorage(pm.line || "nextpage.gif", pm.folder);
                 j_glyph = $(`<img src="${img_src}">`);
                 // 横幅と高さ
                 if (pm.width) {
@@ -145,7 +222,7 @@ tyrano.plugin.kag.ftag = {
                 }
                 break;
             // コマアニメ
-            case "koma_anim":
+            case "koma_anim": {
                 img_src = $.parseStorage(pm.koma_anim, pm.folder);
                 j_glyph = $(`<div></div>`);
                 const j_koma_anim = $(`<div></div>`);
@@ -175,6 +252,7 @@ tyrano.plugin.kag.ftag = {
                 );
                 j_glyph.append(j_koma_anim);
                 break;
+            }
         }
 
         if (pm.keyframe) {
@@ -215,6 +293,9 @@ tyrano.plugin.kag.ftag = {
         // 貯めこんだクラス名をここでセット
         j_glyph.attr("class", class_names.join(" "));
 
+        // id 属性もセット
+        if (id) j_glyph.attr("id", id);
+
         // nameパラメータが指定されている場合はそれも追加
         if (pm.name) {
             $.setName(j_glyph, pm.name);
@@ -226,7 +307,7 @@ tyrano.plugin.kag.ftag = {
     //次の命令を実行する
     nextOrder: function () {
         //基本非表示にする。
-        this.kag.layer.layer_event.hide();
+        this.kag.layer.hideEventLayer();
 
         var that = this;
 
@@ -244,6 +325,12 @@ tyrano.plugin.kag.ftag = {
         */
 
         this.current_order_index++;
+
+        // ティラノイベント"nextorder"を発火
+        that.kag.trigger("nextorder", {
+            scenario: this.kag.stat.current_scenario,
+            index: this.current_order_index,
+        });
 
         //ファイルの終端に着ている場合は戻す
         if (this.array_tag.length <= this.current_order_index) {
@@ -338,21 +425,21 @@ tyrano.plugin.kag.ftag = {
 
             //クリック待ち解除フラグがたってるなら
             if (this.checkCw(tag)) {
-                this.kag.layer.layer_event.show();
+                this.kag.layer.showEventLayer();
             }
 
             if (err_str != "") {
                 this.kag.error(err_str);
             } else {
                 tag.pm["_tag"] = tag.name;
-                // ティラノイベント"tag:<tagName>"を発火
-                this.kag.trigger(`tag:${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: false });
+                // ティラノイベント"tag-<tagName>"を発火
+                this.kag.trigger(`tag-${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: false });
                 this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
             }
         } else if (this.kag.stat.map_macro[tag.name]) {
             // マクロの場合
-            // ティラノイベント"tag:<tagName>"を発火
-            this.kag.trigger(`tag:${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: true });
+            // ティラノイベント"tag-<tagName>"を発火
+            this.kag.trigger(`tag-${tag.name}`, { target: tag.pm, in_scenario: true, is_macro: true });
 
             // マクロスタックを取得してみる
             var stack = TYRANO.kag.getStack("macro");
@@ -384,8 +471,7 @@ tyrano.plugin.kag.ftag = {
             this.kag.ftag.nextOrderWithIndex(map_obj.index, map_obj.storage);
         } else {
             //実装されていないタグの場合は、もう帰る
-            $.error_message($.lang("tag") + "：[" + tag.name + "]" + $.lang("not_exists"));
-
+            this.kag.error("undefined_tag", tag);
             this.nextOrder();
         }
 
@@ -411,6 +497,17 @@ tyrano.plugin.kag.ftag = {
         } else {
             return false;
         }
+    },
+
+    //指定のタグが現れるまで進み続ける
+    nextOrderWithTagSearch: function (target_tags) {
+        const last_index = this.array_tag.length - 1;
+        for (var i = 0; i < 2000; i++) {
+            if (this.current_order_index >= last_index) break;
+            const done = this.kag.ftag.nextOrderWithTag(target_tags);
+            if (done) return true;
+        }
+        return false;
     },
 
     //次のタグを実行。ただし、指定のタグの場合のみ
@@ -472,7 +569,7 @@ tyrano.plugin.kag.ftag = {
          }
          */
 
-        for (key in pm) {
+        for (let key in pm) {
             var val = pm[key];
 
             var c = "";
@@ -531,10 +628,10 @@ tyrano.plugin.kag.ftag = {
             if (tag.pm[array_vital[i]]) {
                 //値が入っていなかった場合
                 if (tag.pm[array_vital[i]] == "") {
-                    err_str += "タグ「" + tag.name + "」にパラメーター「" + array_vital[i] + "」は必須です　\n";
+                    err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] });
                 }
             } else {
-                err_str += "タグ「" + tag.name + "」にパラメーター「" + array_vital[i] + "」は必須です　\n";
+                err_str = $.lang("missing_parameter", { tag: tag.name, param: array_vital[i] });
             }
         }
 
@@ -562,8 +659,8 @@ tyrano.plugin.kag.ftag = {
             pm = {};
         }
 
-        // ティラノイベント"tag:<tagName>"を発火
-        TYRANO.kag.trigger(`tag:${name}`, { target: pm, is_next_order: false, is_macro: false });
+        // ティラノイベント"tag-<tagName>"を発火
+        TYRANO.kag.trigger(`tag-${name}`, { target: pm, is_next_order: false, is_macro: false });
 
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
@@ -572,7 +669,7 @@ tyrano.plugin.kag.ftag = {
     //indexを指定して、その命令を実行
     //シナリオファイルが異なる場合
     nextOrderWithLabel: function (label_name, scenario_file) {
-        this.kag.stat.is_strong_stop = false;
+        this.kag.cancelStrongStop();
 
         //Jump ラベル記録が必要な場合に記録しておく
         if (label_name) {
@@ -609,10 +706,10 @@ tyrano.plugin.kag.ftag = {
 
         //シナリオファイルが変わる場合は、全く違う動きをする
         if (scenario_file != this.kag.stat.current_scenario && original_scenario != null) {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
 
             this.kag.loadScenario(scenario_file, function (array_tag) {
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.buildTag(array_tag, label_name);
             });
         } else {
@@ -625,8 +722,7 @@ tyrano.plugin.kag.ftag = {
                 this.current_order_index = label_obj.index;
                 this.nextOrder();
             } else {
-                $.error_message($.lang("label") + "：'" + label_name + "'" + $.lang("not_exists"));
-
+                this.kag.error("undefined_label", { name: label_name });
                 this.nextOrder();
             }
         }
@@ -634,8 +730,8 @@ tyrano.plugin.kag.ftag = {
 
     //次の命令へ移動　index とストレージ名を指定する
     nextOrderWithIndex: function (index, scenario_file, flag, insert, auto_next) {
-        this.kag.stat.is_strong_stop = false;
-        this.kag.layer.showEventLayer();
+        this.kag.cancelStrongStop();
+        this.kag.cancelWeakStop();
 
         var that = this;
 
@@ -648,7 +744,7 @@ tyrano.plugin.kag.ftag = {
 
         //シナリオファイルが変わる場合は、全く違う動きをする
         if (scenario_file != this.kag.stat.current_scenario || flag == true) {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
 
             this.kag.loadScenario(scenario_file, function (tmp_array_tag) {
                 var array_tag = $.extend(true, [], tmp_array_tag);
@@ -656,15 +752,16 @@ tyrano.plugin.kag.ftag = {
                     array_tag.splice(index + 1, 0, insert);
                 }
 
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.buildTagIndex(array_tag, index, auto_next);
             });
         } else {
             //index更新
             this.current_order_index = index;
-
+            let nextorder_called = false;
             if (auto_next == "yes") {
                 this.nextOrder();
+                nextorder_called = true;
             } else if (auto_next == "snap") {
                 //ストロングの場合、すすめないように
                 this.kag.stat.is_strong_stop = this.kag.menu.snap.stat.is_strong_stop;
@@ -672,13 +769,17 @@ tyrano.plugin.kag.ftag = {
                 //スキップフラグが立っている場合は進めてくださいね。
                 if (this.kag.stat.is_skip == true && this.kag.stat.is_strong_stop == false) {
                     this.kag.ftag.nextOrder();
+                    nextorder_called = true;
                 }
             } else if (auto_next == "stop") {
-                //[s]タグで終わった人が登場してきた時
-                //this.kag.stat.is_strong_stop = true;
-                //レイヤイベントレイヤ非表示。
-                //this.current_order_index--;
-                this.kag.ftag.startTag("s", { val: {} });
+                this.kag.ftag.startTag("s");
+            }
+            // イベントレイヤを復活させる処理
+            // - 上で nextOrder が呼ばれたのなら、その nextOrder の中でイベントレイヤを復活させる処理が行われている
+            // - [s] 中ならイベントレイヤを復活させる必要はない
+            // このどちらにも該当しない場合は手動でイベントレイヤを復活させる必要がある
+            if (!nextorder_called && !this.kag.stat.is_strong_stop) {
+                this.kag.layer.showEventLayer();
             }
         }
     },
@@ -688,8 +789,6 @@ tyrano.plugin.kag.ftag = {
 tyrano.plugin.kag.tag.text = {
     //vital:["val"], //必須のタグ
 
-    cw: true,
-
     //初期値
     pm: {
         val: "",
@@ -697,7 +796,7 @@ tyrano.plugin.kag.tag.text = {
     },
 
     /**
-     * メッセージ関連のデフォルトのコンフィグ
+     * メッセージ・テキストのデフォルトのコンフィグ
      */
     default_message_config: {
         ch_speed_in_click: "1",
@@ -713,7 +812,7 @@ tyrano.plugin.kag.tag.text = {
     },
 
     /**
-     * メッセージ関連のコンフィグを取り出す
+     * メッセージ・テキストのコンフィグを取り出す
      * 基本的にstat.message_configから取り出すがそれが不可の場合はdefault_message_configを参照
      * (旧バージョンのセーブデータではstat.message_configが定義されていない点に留意)
      * @param {string} key
@@ -738,8 +837,8 @@ tyrano.plugin.kag.tag.text = {
             return;
         }
 
-        // ティラノイベント"tag:text:message"を発火
-        this.kag.trigger("tag:text:message", { target: pm });
+        // ティラノイベント"tag-text-message"を発火
+        this.kag.trigger("tag-text-message", { target: pm });
 
         // メッセージレイヤのアウターとインナーを取得
         // div.messageX_fore
@@ -857,7 +956,7 @@ tyrano.plugin.kag.tag.text = {
      */
     showMessage: function (message_str, is_vertical) {
         // 現在の発言者名（誰も喋っていない場合は空の文字列）
-        const chara_name = this.kag.getCharaName();
+        const chara_name = this.kag.chara.getCharaName();
 
         // バックログにテキストを追加
         this.pushTextToBackLog(chara_name, message_str);
@@ -1343,7 +1442,7 @@ tyrano.plugin.kag.tag.text = {
         this.kag.stat.is_hide_message = false;
 
         // chara_name_area の隠蔽
-        this.kag.getCharaNameArea().hide();
+        this.kag.chara.getCharaNameArea().hide();
 
         // そもそも発言者が空欄ならothers用のふきだし処理にぶん投げる！(早期リターン)
         if (chara_jname == "") {
@@ -1427,8 +1526,8 @@ tyrano.plugin.kag.tag.text = {
         j_outer_message.css("width", width);
         j_outer_message.css("height", height);
 
-        chara_left = parseInt(chara_obj.css("left"));
-        chara_top = parseInt(chara_obj.css("top"));
+        let chara_left = parseInt(chara_obj.css("left"));
+        let chara_top = parseInt(chara_obj.css("top"));
 
         let fuki_left = chara_fuki["left"];
         let fuki_top = chara_fuki["top"];
@@ -1449,8 +1548,8 @@ tyrano.plugin.kag.tag.text = {
         fuki_left = fuki_left * per_width;
         fuki_top = fuki_top * per_height;
 
-        fuki_left2 = chara_left + fuki_left;
-        fuki_top2 = chara_top + fuki_top;
+        let fuki_left2 = chara_left + fuki_left;
+        let fuki_top2 = chara_top + fuki_top;
 
         let outer_width = parseInt(j_outer_message.css("width"));
         let outer_height = parseInt(j_outer_message.css("height"));
@@ -1537,8 +1636,8 @@ tyrano.plugin.kag.tag.text = {
         }
 
         //吹き出しの大きさを自動調整。
-        width = j_msg_inner.css("width");
-        height = j_msg_inner.css("height");
+        let width = j_msg_inner.css("width");
+        let height = j_msg_inner.css("height");
 
         //20 はアイコンの文
         width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
@@ -1699,13 +1798,13 @@ tyrano.plugin.kag.tag.text = {
             // 次のタグ ([text]か[l]か[p]か[font]か…etc) には進ませない
             // 次にユーザーがメッセージウィンドウを表示したときに一度だけ nextOrder を走らせる
             this.kag.once(
-                "messagewindow:show",
+                "messagewindow-show",
                 () => {
                     this.kag.ftag.nextOrder();
                 },
                 {
-                    is_temp: true, // これはセーブデータロード時に削除すべきリスナ
-                    is_system: true, // これはシステムが利用するリスナ
+                    temp: true, // これはセーブデータロード時に削除すべきリスナ
+                    system: true, // これはシステムが利用するリスナ
                 },
             );
         } else {
@@ -1782,6 +1881,10 @@ tyrano.plugin.kag.tag.text = {
 
         // エフェクト速度
         this.kag.tmp.effect_speed = this.kag.stat.font.effect_speed;
+
+        // 文字表示中にクリックしたときに残りのテキストをマッハ表示する処理を割り込ませたいので
+        // クリックできるようにイベントレイヤを表示しておく必要がある
+        this.kag.waitClick("text");
 
         // 1文字目を追加 あとは関数内で再帰して表示
         this.addOneChar(0, j_char_span_children, j_message_span, j_msg_inner);
@@ -2032,7 +2135,7 @@ tyrano.plugin.kag.tag.label = {
 #[config_record_label]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 既読管理の設定
@@ -2085,7 +2188,7 @@ tyrano.plugin.kag.tag.config_record_label = {
 #[l]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 クリック待ち
@@ -2107,8 +2210,6 @@ tyrano.plugin.kag.tag.config_record_label = {
 
 //[l] クリック待ち
 tyrano.plugin.kag.tag.l = {
-    cw: true,
-
     start: function () {
         var that = this;
 
@@ -2141,7 +2242,9 @@ tyrano.plugin.kag.tag.l = {
             }, auto_speed);
         }
 
-        this.kag.layer.showEventLayer();
+        if (!this.kag.stat.is_skip) {
+            this.kag.waitClick("l");
+        }
     },
 };
 
@@ -2149,7 +2252,7 @@ tyrano.plugin.kag.tag.l = {
 #[p]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 クリック待ち＋改ページ
@@ -2172,8 +2275,6 @@ tyrano.plugin.kag.tag.l = {
 
 //[p] 改ページクリック待ち
 tyrano.plugin.kag.tag.p = {
-    cw: true,
-
     start: function () {
         var that = this;
         //改ページ
@@ -2206,7 +2307,9 @@ tyrano.plugin.kag.tag.p = {
             }, auto_speed);
         }
 
-        this.kag.layer.showEventLayer();
+        if (!this.kag.stat.is_skip) {
+            this.kag.waitClick("p");
+        }
     },
 };
 
@@ -2214,7 +2317,7 @@ tyrano.plugin.kag.tag.p = {
 #[graph]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 インライン画像表示
@@ -2310,6 +2413,14 @@ tyrano.plugin.kag.tag.jump = {
     },
 
     start: function (pm) {
+        if (this.kag.stat.hold_glink && !pm.storage && !pm.target) {
+            pm.storage = this.kag.stat.hold_glink_storage;
+            pm.target = this.kag.stat.hold_glink_target;
+            this.kag.stat.hold_glink = false;
+            this.kag.stat.hold_glink_storage = "";
+            this.kag.stat.hold_glink_target = "";
+        }
+
         var that = this;
         //ジャンプ直後のwt などでフラグがおかしくなる対策
         setTimeout(function () {
@@ -2322,7 +2433,7 @@ tyrano.plugin.kag.tag.jump = {
 #[r]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 改行
@@ -2358,7 +2469,7 @@ tyrano.plugin.kag.tag.r = {
 #[er]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤの文字の消去
@@ -2397,7 +2508,7 @@ tyrano.plugin.kag.tag.er = {
 #[cm]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 すべてのメッセージレイヤのクリア
@@ -2452,7 +2563,7 @@ tyrano.plugin.kag.tag.cm = {
 #[ct]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤにのリセット
@@ -2497,7 +2608,7 @@ tyrano.plugin.kag.tag.ct = {
 #[current]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 操作対象のメッセージレイヤの指定
@@ -2549,7 +2660,7 @@ tyrano.plugin.kag.tag.current = {
 #[position]
 
 :group
-レイヤ関連
+メッセージ関連の設定
 
 :title
 メッセージウィンドウの属性変更
@@ -2580,7 +2691,7 @@ marginl      = メッセージウィンドウの左余白を指定します。,
 margint      = メッセージウィンドウの上余白を指定します。,
 marginr      = メッセージウィンドウの右余白を指定します。,
 marginb      = メッセージウィンドウの下余白を指定します。,
-margin       = メッセージウィンドウの余白を一括で指定します。たとえば`30`と指定すると上下左右すべてに30pxの余白ができます。<br>カンマ区切りで方向ごとの余白を一括指定することもできます。`上下,左右`、`上,左右,下`、`上,右,下,左`のように指定できます（方向の部分は数値に変えてください）。
+margin       = メッセージウィンドウの余白を一括で指定します。たとえば`30`と指定すると上下左右すべてに30pxの余白ができます。<br>カンマ区切りで方向ごとの余白を一括指定することもできます。`上下,左右`、`上,左右,下`、`上,右,下,左`のように指定できます（方向の部分は数値に変えてください）。,
 radius       = メッセージウィンドウの角の丸みを数値で指定します。例：`10`(控えめな角丸)、`30`(普通の角丸)、`100`(巨大な角丸),
 vertical     = メッセージウィンドウを縦書きモードにするかどうか。`true`または`false`で指定します。`true`で縦書き、`false`で横書き。,
 visible      = メッセージレイヤを表示状態にするかどうか。`true`または`false`を指定すると、同時にメッセージレイヤの表示状態を操作できます。,
@@ -2779,7 +2890,7 @@ tyrano.plugin.kag.tag.position = {
 #[fuki_start]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤをふきだし化する
@@ -2848,7 +2959,7 @@ tyrano.plugin.kag.tag.fuki_start = {
 #[fuki_stop]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 メッセージレイヤのふきだし化を無効にする
@@ -2900,7 +3011,7 @@ tyrano.plugin.kag.tag.fuki_stop = {
 #[fuki_chara]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 ふきだしのキャラクター登録
@@ -2992,7 +3103,7 @@ tyrano.plugin.kag.tag.fuki_chara = {
             var cpm = this.kag.stat.charas[pm.name];
 
             if (cpm == null) {
-                this.kag.error("指定されたキャラクター「" + pm.name + "」は定義されていません。[chara_new]で定義してください");
+                this.kag.error("undefined_character");
                 return;
             }
 
@@ -3010,7 +3121,7 @@ tyrano.plugin.kag.tag.fuki_chara = {
 #[image]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 画像を表示
@@ -3247,7 +3358,7 @@ tyrano.plugin.kag.tag.image = {
 #[freeimage]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤのクリア
@@ -3347,7 +3458,7 @@ tyrano.plugin.kag.tag.freelayer = tyrano.plugin.kag.tag.freeimage;
 #[free]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 オブジェクトの解放
@@ -3428,7 +3539,7 @@ tyrano.plugin.kag.tag.free = {
                     that.kag.ftag.nextOrder();
                 }
             } else {
-                var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+                let j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
                 j_obj = j_obj.find("." + pm.name);
                 j_obj.remove();
 
@@ -3436,7 +3547,7 @@ tyrano.plugin.kag.tag.free = {
                 that.kag.ftag.nextOrder();
             }
         } else {
-            var j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+            let j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
             j_obj = j_obj.find("." + pm.name);
             j_obj.remove();
             //this.kag.layer.getLayer(pm.layer, pm.page).css("background-image", "");
@@ -3450,7 +3561,7 @@ tyrano.plugin.kag.tag.free = {
 #[ptext]
 
 :group
-レイヤ関連
+メッセージ・テキスト
 
 :title
 レイヤにテキストを表示
@@ -3738,7 +3849,7 @@ tyrano.plugin.kag.tag.ptext = {
 #[mtext]
 
 :group
-レイヤ関連
+メッセージ・テキスト
 
 :title
 演出テキスト
@@ -3900,7 +4011,7 @@ tyrano.plugin.kag.tag.mtext = {
         target_layer.append(tobj);
 
         //bool変換
-        for (key in pm) {
+        for (let key in pm) {
             if (pm[key] == "true") {
                 pm[key] = true;
             } else if (pm[key] == "false") {
@@ -3953,7 +4064,7 @@ tyrano.plugin.kag.tag.mtext = {
 #[backlay]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤ情報の表ページから裏ページへのコピー
@@ -3996,7 +4107,7 @@ tyrano.plugin.kag.tag.backlay = {
 #[wt]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 トランジションの終了待ち
@@ -4026,10 +4137,10 @@ tyrano.plugin.kag.tag.backlay = {
 tyrano.plugin.kag.tag.wt = {
     start: function (pm) {
         if (this.kag.stat.is_trans == false) {
-            this.kag.layer.showEventLayer();
+            this.kag.cancelWeakStop();
             this.kag.ftag.nextOrder();
         } else {
-            this.kag.layer.hideEventLayer();
+            this.kag.weaklyStop();
         }
     },
 };
@@ -4037,7 +4148,7 @@ tyrano.plugin.kag.tag.wt = {
 //音楽のフェードインを待つ
 tyrano.plugin.kag.tag.wb = {
     start: function (pm) {
-        this.kag.layer.hideEventLayer();
+        this.kag.weaklyStop();
     },
 };
 
@@ -4095,8 +4206,9 @@ start:function(pm){
 共通ルートです
 
 :param
-storage = !!jump,
-target  = !!jump
+storage  = !!jump,
+target   = !!jump,
+keyfocus = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
 
 :demo
 1,kaisetsu/14_select
@@ -4109,6 +4221,7 @@ tyrano.plugin.kag.tag.link = {
     pm: {
         target: null,
         storage: null,
+        keyfocus: "",
     },
 
     start: function (pm) {
@@ -4119,7 +4232,8 @@ tyrano.plugin.kag.tag.link = {
 
         that.kag.stat.display_link = true;
 
-        j_span.css("cursor", "pointer");
+        that.kag.setElmCursor(j_span, "pointer");
+        that.kag.makeFocusable(j_span, pm.keyfocus);
 
         (function () {
             var _target = pm.target;
@@ -4144,18 +4258,39 @@ tyrano.plugin.kag.tag.link = {
         var _storage = pm.storage;
         var that = TYRANO;
 
+        j_span.on("mousedown", () => {
+            return false;
+        });
+
         j_span.bind("click touchstart", function (e) {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
-            // ティラノイベント"click:tag:link"を発火
-            that.kag.trigger("click:tag:link", e);
+            //
+            // 無効な場合を検知
+            //
+
+            // 仮想マウスカーソルが表示中、あるいは非表示になってから間もないなら無効
+            if (!that.kag.key_mouse.mouse.isClickEnabled(e)) {
+                that.kag.key_mouse.vmouse.hide();
+                return false;
+            }
+
+            //
+            // クリックが有効だったときの処理
+            //
+
+            // 仮想マウスカーソルを消去
+            that.kag.key_mouse.vmouse.hide();
+
+            // ティラノイベント"click-tag-link"を発火
+            that.kag.trigger("click-tag-link", e);
 
             that.kag.stat.display_link = false;
 
             //ここから書き始める。イベントがあった場合の処理ですね　ジャンプで飛び出す
             TYRANO.kag.ftag.nextOrderWithLabel(_target, _storage);
-            TYRANO.kag.layer.showEventLayer();
+            TYRANO.kag.cancelWeakStop();
 
             //選択肢の後、スキップを継続するか否か
             if (that.kag.stat.skip_link == "true") {
@@ -4163,9 +4298,11 @@ tyrano.plugin.kag.tag.link = {
             } else {
                 that.kag.setSkip(false);
             }
+
+            return false;
         });
 
-        j_span.css("cursor", "pointer");
+        that.kag.setElmCursor(j_span, "pointer");
     },
 };
 
@@ -4231,8 +4368,8 @@ tyrano.plugin.kag.tag.endlink = {
 
 tyrano.plugin.kag.tag.s = {
     start: function () {
-        this.kag.stat.is_strong_stop = true;
-        this.kag.layer.hideEventLayer();
+        this.kag.stronglyStop();
+        this.kag.weaklyStop();
 
         // [glink]自動配置が有効な場合はここで表示する
         if (this.kag.stat.glink_config && this.kag.stat.glink_config.auto_place === "true") {
@@ -4495,8 +4632,16 @@ tyrano.plugin.kag.tag.s = {
      */
     calcFlexPosition: function (glink_config) {
         const j_message_layer = this.kag.layer.getLayer(this.kag.stat.current_layer, this.kag.stat.current_page);
+        if (j_message_layer.css("display") === "none") {
+            return {
+                left: "0",
+                top: "0",
+                width: "100%",
+                height: "100%",
+            };
+        }
         const j_message_outer = j_message_layer.find(".message_outer");
-        const gh = this.kag.tmp.scale_info.game_height;
+        const gh = this.kag.tmp.screen_info.original_height;
         const gh_half = gh / 2;
         const top = parseInt(j_message_outer.css("top")) || 0;
         const height = parseInt(j_message_outer.css("height")) || gh;
@@ -4586,14 +4731,14 @@ tyrano.plugin.kag.tag.wait = {
         var that = this;
 
         //クリック無効
-        this.kag.stat.is_strong_stop = true;
+        this.kag.weaklyStop();
+        this.kag.stronglyStop();
         this.kag.stat.is_wait = true;
-        this.kag.layer.hideEventLayer();
 
         that.kag.tmp.wait_id = setTimeout(function () {
-            that.kag.stat.is_strong_stop = false;
+            that.kag.cancelStrongStop();
+            that.kag.cancelWeakStop();
             that.kag.stat.is_wait = false;
-            that.kag.layer.showEventLayer();
             that.kag.ftag.nextOrder();
         }, pm.time);
     },
@@ -4633,9 +4778,9 @@ tyrano.plugin.kag.tag.wait_cancel = {
         //[wait]キャンセル
         clearTimeout(this.kag.tmp.wait_id);
         this.kag.tmp.wait_id = "";
-        this.kag.stat.is_strong_stop = false;
+        this.kag.cancelStrongStop();
         this.kag.stat.is_wait = false;
-        this.kag.layer.showEventLayer();
+        this.kag.cancelWeakStop();
 
         this.kag.ftag.nextOrder();
     },
@@ -4645,7 +4790,7 @@ tyrano.plugin.kag.tag.wait_cancel = {
 #[hidemessage]
 
 :group
-レイヤ関連
+メッセージ関連の設定
 
 :title
 メッセージレイヤの一時的な非表示
@@ -4665,13 +4810,11 @@ tyrano.plugin.kag.tag.wait_cancel = {
 tyrano.plugin.kag.tag.hidemessage = {
     start: function () {
         this.kag.stat.is_hide_message = true;
-        //メッセージレイヤを全て削除する //テキスト表示時に復活
+        // メッセージレイヤを隠す
         this.kag.layer.hideMessageLayers();
-
-        //クリックは復活させる
-        this.kag.layer.layer_event.show();
-
-        //this.kag.ftag.nextOrder();
+        // 次にクリックしたときにメッセージウィンドウを復活させる処理を割り込ませたいため
+        // クリックできるようにイベントレイヤを表示しておく必要あり
+        this.kag.layer.showEventLayer("hidemessage");
     },
 };
 
@@ -4679,7 +4822,7 @@ tyrano.plugin.kag.tag.hidemessage = {
 #[quake]
 
 :group
-システム操作
+演出・効果・動画
 
 :title
 画面を揺らす
@@ -4759,10 +4902,238 @@ tyrano.plugin.kag.tag.quake = {
 };
 
 /*
+#[quake2]
+
+:group
+演出・効果・動画
+
+:title
+画面を揺らす
+
+:exp
+指定したミリ秒だけ画面を揺らします。
+
+:sample
+画面を揺らすよ。[l][s]
+
+[quake2 time="1000"]
+
+[cm]揺れたね。[p]
+
+[quake2 time="1000" wait="false"]
+
+揺らしたまま次のタグに進むよ。[p]
+
+[quake2 time="3000" wait="false"]
+
+揺らしたまま次のタグに進んで、揺れの完了を待つよ…[wa]終わったよ。[p]
+
+:param
+time     = 揺れ全体の時間をミリ秒で指定します。,
+hmax     = 揺れの横方向への最大振幅を指定します。,
+vmax     = 揺れの縦方向への最大振幅を指定します。,
+wait     = 揺れの終了を待つかどうか。`true`または`false`で指定します。,
+copybase = `true`を指定した場合、画面が揺れている間、ベースレイヤの背景のコピーが最後面に固定されます。これによって、たとえば画面が上に揺れた瞬間に下側にできる隙間から黒色がのぞくことがなくなります。,
+
+#[end]
+*/
+
+//画面を揺らします
+tyrano.plugin.kag.tag.quake2 = {
+    pm: {
+        time: "1000",
+        hmax: "0",
+        vmax: "200",
+        wait: "true",
+        copybase: "true",
+        skippable: "true",
+    },
+    start: function (pm) {
+        // 前回の揺れが残っているなら終わらせる
+        if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+        // スキップ中でこの揺れがスキップ可能なら無視
+        if (this.kag.stat.is_skip && pm.skippable === "true") return this.kag.ftag.nextOrder();
+
+        const duration = parseInt(pm.time);
+        const j_quake = $("#root_layer_game, #root_layer_system");
+
+        // ベースレイヤのコピー
+        const do_copy = pm.copybase === "true";
+        let j_base_clone;
+        if (do_copy) {
+            j_base_clone = $(".base_fore").clone();
+            j_base_clone.attr("class", "temp-element quake2-element");
+            $("#tyrano_base").prepend(j_base_clone);
+        }
+
+        const vmax = parseInt(pm.vmax);
+        const hmax = parseInt(pm.hmax);
+        const is_wait = pm.wait !== "false";
+        let sign = 1;
+        const ignore_rate = Math.max(1, Math.ceil(refreshRate / 60));
+        let current_frame = 0;
+        const end_frame = ((duration / (1000 / 60)) * ignore_rate) | 0;
+        this.kag.pushAnimStack();
+
+        // 揺れを終わらせる
+        this.kag.tmp.quake2_finish = () => {
+            this.kag.tmp.quake2_finish = false;
+            cancelAnimationFrame(this.kag.tmp.quake2_timer_id);
+            j_quake.setStyle("transform", "");
+            this.kag.popAnimStack();
+            if (do_copy) j_base_clone.remove();
+            if (is_wait) this.kag.ftag.nextOrder();
+        };
+
+        // アニメーションループ
+        const loop = () => {
+            if (current_frame < end_frame) {
+                if (current_frame % ignore_rate === 0) {
+                    sign *= -1;
+                    let v = 0;
+                    let h = 0;
+                    if (vmax > 0) {
+                        v = sign * $.easing.easeOutQuad(null, current_frame, vmax, -vmax, end_frame);
+                    }
+                    if (hmax > 0) {
+                        h = sign * $.easing.easeOutQuad(null, current_frame, hmax, -hmax, end_frame);
+                    }
+                    const css = `translate(${h}px, ${v}px)`;
+                    j_quake.setStyle("transform", css);
+                    j_quake.setStyle("background", "red");
+                }
+                current_frame++;
+                this.kag.tmp.quake2_timer_id = requestAnimationFrame(loop);
+            } else {
+                if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+            }
+        };
+
+        // ロードしたときにこの揺れを終わらせる
+        this.kag.overwrite("load-start.quake2", () => {
+            if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+        });
+
+        // スキップを開始したときにこの揺れを終わらせる
+        this.kag.overwrite("skip-start.quake2", () => {
+            if (this.kag.tmp.quake2_finish) this.kag.tmp.quake2_finish();
+        });
+
+        // アニメーションを開始
+        this.kag.tmp.quake2_timer_id = requestAnimationFrame(loop);
+
+        if (!is_wait) this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[vibrate]
+
+:group
+演出・効果・動画
+
+:title
+スマホ・パッドの振動
+
+:exp
+プレイヤーが使用しているモバイル端末やゲームパッドを振動させることができます。
+
+指定した振動時間が長すぎると振動しなくなることがありますので注意してください。環境にもよりますが、目安として振動時間は5000ミリ秒以下に抑えるとよいでしょう。
+
+:sample
+[vibrate time=1000 power=100]
+1秒振動[p]
+
+[vibrate time="800,200" power="50" count="3"]
+パターン振動を3回繰り返し[p]
+
+[vibrate time="5000" power="50" count="3"]
+途中で振動停止…
+[wait time="1000"]
+[vibrate_stop]
+停止させました。[p]
+
+:param
+time  = 振動させる時間(ミリ秒)。`600,200,1000,200,600`のようにカンマ区切りで複数の数値を指定すると、600ミリ秒振動→200ミリ秒静止→1000ミリ秒静止→…というパターンを指定することができます。,
+power = 振動させる強さ(0～100)。ゲームパッドを振動させるときのみ有効なパラメータです。,
+count = 振動を繰り返す回数。,
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.vibrate = {
+    pm: {
+        time: "500",
+        power: "100",
+        count: "",
+    },
+    start: function (pm) {
+        let time;
+        const duration = parseInt(pm.time);
+        const power = parseInt(pm.power) / 100;
+        if (pm.time.includes(",")) {
+            time = pm.time.split(",").map((item) => {
+                return parseInt(item);
+            });
+        } else {
+            time = duration;
+        }
+        if (pm.count) {
+            let new_time = [];
+            if (typeof time === "number") {
+                const count = (parseInt(pm.count) || 1) * 2 - 1;
+                for (let i = 0; i < count; i++) {
+                    new_time.push(time);
+                }
+            } else {
+                const count = parseInt(pm.count) || 1;
+                for (let i = 0; i < count; i++) {
+                    new_time = new_time.concat(time.concat());
+                }
+            }
+            time = new_time;
+        }
+        try {
+            if (this.kag.key_mouse.gamepad.last_used_next_gamepad_index > -1) {
+                this.kag.key_mouse.gamepad.vibrate({ duration: time, power });
+            } else {
+                navigator.vibrate(time);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
+#[vibrate_stop]
+
+:group
+演出・効果・動画
+
+:title
+スマホ・パッドの振動停止
+
+:exp
+`[vibrate]`で開始したモバイル端末やゲームパッドの振動を途中で停止することができます。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.vibrate_stop = {
+    start: function (pm) {
+        this.kag.key_mouse.gamepad.vibrate({ duration: 0, power: 0 });
+        navigator.vibrate(0);
+        this.kag.ftag.nextOrder();
+    },
+};
+
+/*
 #[font]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキストスタイルの変更
@@ -4875,7 +5246,7 @@ tyrano.plugin.kag.tag.font = {
 #[deffont]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 デフォルトのテキストスタイル設定
@@ -4978,7 +5349,7 @@ tyrano.plugin.kag.tag.deffont = {
 #[message_config]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 メッセージコンフィグ
@@ -5087,7 +5458,7 @@ tyrano.plugin.kag.tag.message_config = {
 #[delay]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 文字の表示速度の設定
@@ -5128,7 +5499,7 @@ tyrano.plugin.kag.tag.delay = {
 #[resetdelay]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 文字の表示速度をデフォルトに戻す
@@ -5161,7 +5532,7 @@ tyrano.plugin.kag.tag.resetdelay = {
 #[configdelay]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 デフォルトの文字の表示速度の設定
@@ -5205,7 +5576,7 @@ tyrano.plugin.kag.tag.configdelay = {
 #[nowait]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキスト瞬間表示モードの開始
@@ -5214,10 +5585,6 @@ tyrano.plugin.kag.tag.configdelay = {
 テキスト瞬間表示モードを開始します。このモード中は、テキスト全体が一瞬で表示されます。文字が1文字ずつ追加されていく処理（通常の処理）は行われません。
 
 通常のモードに戻すには`[endnowait]`タグを使います。
-
-:sample
-
-:param
 
 #[end]
 */
@@ -5236,7 +5603,7 @@ tyrano.plugin.kag.tag.nowait = {
 #[endnowait]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキスト瞬間表示モードの停止
@@ -5244,10 +5611,6 @@ tyrano.plugin.kag.tag.nowait = {
 :exp
 `[nowait]`によるテキスト瞬間表示モードを停止します。
 テキストの表示速度は`[nowait]`タグを指定する前の状態に戻ります。
-
-:sample
-
-:param
 
 #[end]
 */
@@ -5266,7 +5629,7 @@ tyrano.plugin.kag.tag.endnowait = {
 #[resetfont]
 
 :group
-システム操作
+メッセージ関連の設定
 
 :title
 テキストスタイルのリセット
@@ -5314,7 +5677,7 @@ tyrano.plugin.kag.tag.resetfont = {
 #[layopt]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤの属性設定
@@ -5412,7 +5775,7 @@ tyrano.plugin.kag.tag.layopt = {
 #[ruby]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 ルビを振る
@@ -5458,7 +5821,7 @@ tyrano.plugin.kag.tag["ruby"] = {
 #[mark]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 テキストマーカー
@@ -5523,7 +5886,7 @@ tyrano.plugin.kag.tag["mark"] = {
 #[endmark]
 
 :group
-メッセージ関連
+メッセージ・テキスト
 
 :title
 テキストマーカー終了
@@ -5562,37 +5925,10 @@ tyrano.plugin.kag.tag["endmark"] = {
 };
 
 /*
-#[cancelskip]
-
-:group
-システム操作
-
-:title
-スキップモード解除
-
-:exp
-スキップモードを解除します。`[skipstop]`と同じ動作。
-プレイヤーがスキップモードを使用していても、`[cancelskip]`タグを通過すると強制的にスキップモードが停止されます。
-
-:sample
-
-:param
-
-#[end]
-*/
-
-tyrano.plugin.kag.tag.cancelskip = {
-    start: function (pm) {
-        this.kag.setSkip(false);
-        this.kag.ftag.nextOrder();
-    },
-};
-
-/*
 #[locate]
 
 :group
-システム操作
+画像・背景・レイヤ操作
 
 :title
 表示位置の指定
@@ -5683,9 +6019,14 @@ leavese   = ボタンの上からマウスカーソルが外れた時に再生�
 activeimg = ボタンの上でマウスボタンを押している間に切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
 clickimg  = ボタンをクリックしたあとに切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
 enterimg  = ボタンの上にマウスカーソルが乗った時に切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
+autoimg   = オートモードが開始されたときに切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
+skipimg   = スキップモードが開始されたときに切り替える画像ファイルを指定できます。ファイルは`image`フォルダに配置してください。,
 visible   = 最初からボタンを表示するかどうか。`true`で表示、`false`で非表示となります。,
 auto_next = `true`または`false`を指定します。これに`false`が指定してあり、かつ`fix=true`の場合、`[return]`で戻ったときに次のタグに進まなくなります。,
-savesnap  = `true`または`false`で指定します。`true`にすると、このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します。
+savesnap  = `true`または`false`で指定します。`true`にすると、このボタンが押された時点でのセーブスナップを確保します。セーブ画面へ移動する場合はここをtrueにして、保存してからセーブを実行します。,
+keyfocus  = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
+
+
 :demo
 1,kaisetsu/14_select
 
@@ -5717,6 +6058,9 @@ tyrano.plugin.kag.tag.button = {
         activeimg: "",
         clickimg: "",
         enterimg: "",
+        autoimg: "",
+        skipimg: "",
+        keyfocus: "",
 
         auto_next: "yes",
 
@@ -5753,8 +6097,9 @@ tyrano.plugin.kag.tag.button = {
         var j_button = $("<img />");
         j_button.attr("src", storage_url);
         j_button.css("position", "absolute");
-        j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
+        that.kag.setElmCursor(j_button, "pointer");
+        that.kag.makeFocusable(j_button, pm.keyfocus);
 
         //初期状態で表示か非表示か
         if (pm.visible == "true") {
@@ -5798,6 +6143,13 @@ tyrano.plugin.kag.tag.button = {
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
 
+        if (pm.autoimg) {
+            j_button.addClass("button-auto-sync");
+        }
+        if (pm.skipimg) {
+            j_button.addClass("button-skip-sync");
+        }
+
         //クラスとイベントを登録する
         that.kag.event.addEventElement({
             tag: "button",
@@ -5815,8 +6167,21 @@ tyrano.plugin.kag.tag.button = {
         this.kag.ftag.nextOrder();
     },
 
+    /**
+     * クリック時やホバー時などのイベントリスナをセットする
+     * タグを実行したときおよびセーブデータをロードしたときに実行される
+     * @param {jQuery} j_button
+     * @param {Object} pm
+     */
     setEvent: function (j_button, pm) {
         const that = this;
+
+        // セーブした瞬間にホバー時の画像などになっていると、それがそのまま保存・復元されてしまうため、
+        // もとの画像パスに戻す
+        j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
+
+        if (pm.autoimg && this.kag.stat.is_auto) j_button.attr("src", $.parseStorage(pm.autoimg, pm.folder));
+        if (pm.skipimg && this.kag.stat.is_skip) j_button.attr("src", $.parseStorage(pm.skipimg, pm.folder));
 
         // クリックされたか
         let button_clicked = false;
@@ -5848,15 +6213,19 @@ tyrano.plugin.kag.tag.button = {
             () => {
                 if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
                 if (!is_fix_button && button_clicked) return false;
-                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.enterimg, pm.folder));
+                if (!j_button.hasClass("src-change-disabled")) {
+                    if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.enterimg, pm.folder));
+                }
                 if (pm.enterse) this.kag.playSound(pm.enterse);
             },
             // マウスカーソルが外れた時
             () => {
                 if (!is_fix_button && !this.kag.stat.is_strong_stop) return false;
                 if (!is_fix_button && button_clicked) return false;
+                if (!j_button.hasClass("src-change-disabled")) {
+                    if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
+                }
                 if (pm.leavese) this.kag.playSound(pm.leavese);
-                if (pm.enterimg) j_button.attr("src", $.parseStorage(pm.graphic, pm.folder));
             },
         );
 
@@ -5867,7 +6236,10 @@ tyrano.plugin.kag.tag.button = {
         j_button.on("mousedown touchstart", () => {
             if (!this.kag.stat.is_strong_stop) return false;
             if (button_clicked) return false;
-            if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
+            if (!j_button.hasClass("src-change-disabled")) {
+                if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
+            }
+            return false;
         });
 
         //
@@ -5881,6 +6253,12 @@ tyrano.plugin.kag.tag.button = {
             //
             //　無効な場合を検知
             //
+
+            // 仮想マウスカーソルが表示中、あるいは非表示になってから間もないなら無効
+            if (!that.kag.key_mouse.mouse.isClickEnabled(e)) {
+                that.kag.key_mouse.vmouse.hide();
+                return false;
+            }
 
             // [s]または[wait]に到達していないときの非固定ボタンは無効
             if (!this.kag.stat.is_strong_stop && !is_fix_button) return false;
@@ -5911,13 +6289,16 @@ tyrano.plugin.kag.tag.button = {
             // クリックが有効だった場合の処理
             //
 
+            // 仮想マウスカーソルを消去
+            this.kag.key_mouse.vmouse.hide();
+
             // 非固定ボタンの場合クリック済みであるフラグを立てよう
             if (!is_fix_button) {
                 // ボタンクリック済み
                 button_clicked = true;
 
                 // 他の[button]を即座に無効にするためにストロングストップを切っておこう
-                this.kag.stat.is_strong_stop = false;
+                this.kag.cancelStrongStop();
 
                 // 念のためフリーレイヤ内のボタンのイベントをすべて解除しておこう
                 this.kag.layer.cancelAllFreeLayerButtonsEvents();
@@ -5949,8 +6330,8 @@ tyrano.plugin.kag.tag.button = {
             //
 
             if (is_jump_button) {
-                // ティラノイベント"click:tag:button"を発火
-                that.kag.trigger("click:tag:button", e);
+                // ティラノイベント"click-tag-button"を発火
+                that.kag.trigger("click-tag-button", e);
 
                 // [jump]を実行
                 that.kag.ftag.startTag("jump", pm);
@@ -5970,8 +6351,8 @@ tyrano.plugin.kag.tag.button = {
             //
 
             if (is_call_button) {
-                // ティラノイベント"click:tag:button:call"を発火
-                that.kag.trigger("click:tag:button:call", e);
+                // ティラノイベント"click-tag-button-call"を発火
+                that.kag.trigger("click-tag-button-call", e);
 
                 // [call]を実行
                 that.kag.ftag.startTag("call", {
@@ -5995,8 +6376,8 @@ tyrano.plugin.kag.tag.button = {
             //
 
             if (is_role_button) {
-                // ティラノイベント"click:tag:button:role"を発火
-                that.kag.trigger("click:tag:button:role", e);
+                // ティラノイベント"click-tag-button-role"を発火
+                that.kag.trigger("click-tag-button-role", e);
 
                 // スキップを停止
                 that.kag.setSkip(false);
@@ -6023,7 +6404,14 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.menu.showMenu();
                         break;
                     case "skip":
-                        that.kag.ftag.startTag("skipstart", {});
+                        if (that.kag.stat.is_skip) {
+                            that.kag.setSkip(false);
+                        } else {
+                            if (that.kag.layer.layer_event.isDisplayed()) {
+                                that.kag.layer.layer_event.click();
+                            }
+                            that.kag.setSkip(true);
+                        }
                         break;
                     case "backlog":
                         that.kag.menu.displayLog();
@@ -6040,10 +6428,13 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.menu.loadQuickSave();
                         break;
                     case "auto":
-                        if (that.kag.stat.is_auto) {
-                            that.kag.ftag.startTag("autostop", { next: "false" });
+                        if (this.kag.stat.is_auto) {
+                            that.kag.setAuto(false);
                         } else {
-                            that.kag.ftag.startTag("autostart", {});
+                            if (that.kag.layer.layer_event.isDisplayed()) {
+                                that.kag.layer.layer_event.click();
+                            }
+                            that.kag.setAuto(true);
                         }
                         break;
                     case "sleepgame":
@@ -6054,9 +6445,6 @@ tyrano.plugin.kag.tag.button = {
                         that.kag.ftag.startTag("sleepgame", pm);
                         break;
                 }
-
-                // バブリングさせない
-                e.stopPropagation();
 
                 return false;
             }
@@ -6104,6 +6492,7 @@ width            = `max`と指定すると、ボタンの横幅を『一番横�
 height           = `max`と指定すると、ボタンの高さを『一番横幅の大きいボタンの高さ』に揃えることができます。数値を直接指定することで共通の高さを指定することもできます。`default`を指定すると調整を行いません。,
 vertical         = ボタンの縦方向の揃え方を`top`(上揃え)、`center`(中央揃え)、`bottom`(下揃え)のいずれかで指定します。,
 horizontal       = ボタンの横方向の揃え方を`left`(左揃え)、`center`(中央揃え)、`right`(右揃え)のいずれかで指定します。,
+wrap             = `wrap`を指定すると、ボタンが収まりきらないときの折り返しが有効になります。,
 place_area       = 揃え方の基準となる領域の位置や大きさを指定できます。`auto`(デフォルト)を指定すると、メッセージウィンドウ考慮して自動で領域を調整します。`cover`だと画面全体を基準にします。領域の位置とサイズを直接指定したい場合は`100,100,1000,1000`のようにカンマ区切りで数値を4つ指定してください。そうすると、順にleft, top, width, heightとして解釈されます。,
 show_time        = 表示アニメーションにかける時間をミリ秒単位で指定します。`0`を指定するとアニメーションを行いません。なお、アニメーション中はクリックすることができません。,
 show_effect      = 表示アニメーションのエフェクトを以下のキーワードから指定できます。<br>`fadeIn``fadeInDown``fadeInLeft``fadeInRight``fadeInUp``lightSpeedIn``rotateIn``rotateInDownLeft``rotateInDownRight``rotateInUpLeft``rotateInUpRight``zoomIn``zoomInDown``zoomInLeft``zoomInRight``zoomInUp``bounceIn``bounceInDown``bounceInLeft``bounceInRight``bounceInUp``rollIn``vanishIn``puffIn`,
@@ -6185,8 +6574,8 @@ tyrano.plugin.kag.tag.glink_config = {
         }
 
         // 横揃えの方向
-        if (pm.horizontal === "left") pm.horizontal = "start";
-        if (pm.horizontal === "right") pm.horizontal = "end";
+        if (pm.horizontal === "left") pm.horizontal = "flex-start";
+        if (pm.horizontal === "right") pm.horizontal = "flex-end";
 
         // 縦揃えの方向
         if (pm.vertical === "top") pm.vertical = "start";
@@ -6260,6 +6649,7 @@ bold       = 太字にする場合は`true`を指定します。,
 opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0`で完全に透明です。,
 edge       = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
 shadow     = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。,
+keyfocus   = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
 
 :demo
 1,kaisetsu/14_select
@@ -6274,6 +6664,7 @@ tyrano.plugin.kag.tag.glink = {
         font_color: "",
         storage: null,
         target: null,
+        hold: "",
         name: "",
         text: "",
         x: "auto",
@@ -6290,6 +6681,7 @@ tyrano.plugin.kag.tag.glink = {
         leavese: "",
         face: "",
         bold: "",
+        keyfocus: "",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -6302,9 +6694,10 @@ tyrano.plugin.kag.tag.glink = {
 
         var j_button = $("<div class='glink_button'>" + pm.text + "</div>");
         j_button.css("position", "absolute");
-        j_button.css("cursor", "pointer");
         j_button.css("z-index", 99999999);
         j_button.css("font-size", pm.size + "px");
+        that.kag.setElmCursor(j_button, "pointer");
+        that.kag.makeFocusable(j_button, pm.keyfocus);
 
         if (pm.font_color != "") {
             j_button.css("color", $.convertColor(pm.font_color));
@@ -6448,6 +6841,10 @@ tyrano.plugin.kag.tag.glink = {
             },
         );
 
+        j_button.on("mousedown", () => {
+            return false;
+        });
+
         //
         // クリックイベント
         //
@@ -6459,6 +6856,12 @@ tyrano.plugin.kag.tag.glink = {
             //
             // 無効な場合を検知
             //
+
+            // 仮想マウスカーソルが表示中、あるいは非表示になってから間もないなら無効
+            if (!this.kag.key_mouse.mouse.isClickEnabled(e)) {
+                this.kag.key_mouse.vmouse.hide();
+                return false;
+            }
 
             // [s]または[wait]に到達していないときは無効
             if (!this.kag.stat.is_strong_stop) return false;
@@ -6473,8 +6876,11 @@ tyrano.plugin.kag.tag.glink = {
             // ボタンクリック済み
             button_clicked = true;
 
+            // 仮想マウスカーソルを消去
+            this.kag.key_mouse.vmouse.hide();
+
             // 他の[glink]を即座に無効にするためにストロングストップを切っておこう
-            this.kag.stat.is_strong_stop = false;
+            this.kag.cancelStrongStop();
 
             // クリックされたというクラスを付ける
             j_button.addClass("glink_button_clicked");
@@ -6482,8 +6888,8 @@ tyrano.plugin.kag.tag.glink = {
             // 画像変更
             if (pm.clickimg) j_button.css("background-image", "url(./data/image/" + pm.clickimg + ")");
 
-            // ティラノイベント"click:tag:glink"を発火
-            this.kag.trigger("click:tag:glink", e);
+            // ティラノイベント"click-tag-glink"を発火
+            this.kag.trigger("click-tag-glink", e);
 
             // クリック効果音を鳴らす
             if (pm.clickse) this.kag.playSound(pm.clickse);
@@ -6504,7 +6910,16 @@ tyrano.plugin.kag.tag.glink = {
                 }
 
                 // [jump]の実行
-                this.kag.ftag.startTag("jump", pm);
+                if (pm.hold === "true") {
+                    this.kag.stat.hold_glink = true;
+                    this.kag.stat.hold_glink_storage = pm.storage;
+                    this.kag.stat.hold_glink_target = pm.target;
+                    this.kag.cancelStrongStop();
+                    this.kag.cancelWeakStop();
+                    this.kag.ftag.nextOrder();
+                } else {
+                    this.kag.ftag.startTag("jump", pm);
+                }
 
                 // 選択肢の後、スキップを継続するか否か
                 if (this.kag.stat.skip_link === "true") {
@@ -6563,7 +6978,7 @@ tyrano.plugin.kag.tag.glink = {
             // アニメーション対象が存在しない、または、いまスキップ状態でありそれを選択後も継続させる設定である
             if (animation_target_count === 0 || should_keep_skip) {
                 next();
-                return;
+                return false;
             }
 
             //
@@ -6590,13 +7005,15 @@ tyrano.plugin.kag.tag.glink = {
                             next();
                         }
                     };
-                    this.startAnim(j_elm, elm.__hide_options);
+                    this.startAnim(j_elm, elm.__hide_options, true);
                 }
             });
+
+            return false;
         });
     },
 
-    startAnim: function (j_collection, options) {
+    startAnim: function (j_collection, options, do_hide) {
         // クリック不可にする
         j_collection.setStyleMap({ "pointer-events": "none" });
 
@@ -6635,6 +7052,10 @@ tyrano.plugin.kag.tag.glink = {
             j_elm.on("animationend", (e) => {
                 if (j_elm.get(0) === e.target) {
                     j_elm.off("animationend");
+                    j_elm.removeClass(options.effect);
+                    if (do_hide) {
+                        j_elm.addClass("hidden");
+                    }
                     if (options.callback) options.callback();
                 }
             });
@@ -6718,7 +7139,6 @@ tyrano.plugin.kag.tag.clickable = {
 
         var j_button = $("<div />");
         j_button.css("position", "absolute");
-        j_button.css("cursor", "pointer");
         j_button.css("top", this.kag.stat.locate.y + "px");
         j_button.css("left", this.kag.stat.locate.x + "px");
         j_button.css("width", pm.width + "px");
@@ -6726,6 +7146,7 @@ tyrano.plugin.kag.tag.clickable = {
         j_button.css("opacity", $.convertOpacity(pm.opacity));
         j_button.css("background-color", $.convertColor(pm.color));
         j_button.css("border", $.replaceAll(pm.border, ":", " "));
+        that.kag.setElmCursor(j_button, "pointer");
 
         //alert($.replaceAll(pm.border,":"," "));
 
@@ -6754,6 +7175,9 @@ tyrano.plugin.kag.tag.clickable = {
     },
 
     setEvent: function (j_button, pm) {
+        const that = this;
+        let button_clicked = false;
+
         //
         // ホバーイベント
         //
@@ -6782,7 +7206,7 @@ tyrano.plugin.kag.tag.clickable = {
 
             // 1度クリックしたボタンも無効
             if (button_clicked) return false;
-            ("");
+
             //
             // クリックが有効だったときの処理
             //
@@ -6791,10 +7215,10 @@ tyrano.plugin.kag.tag.clickable = {
             button_clicked = true;
 
             // 他の[clickable]を即座に無効にするためにストロングストップを切る
-            this.kag.stat.is_strong_stop = false;
+            this.kag.cancelStrongStop();
 
-            // ティラノイベント"click:tag:clickable"を発火
-            that.kag.trigger("click:tag:clickable", e);
+            // ティラノイベント"click-tag-clickable"を発火
+            that.kag.trigger("click-tag-clickable", e);
 
             // [cm]の実行
             this.kag.ftag.startTag("cm", { next: "false" });
@@ -6809,7 +7233,7 @@ tyrano.plugin.kag.tag.clickable = {
 #[glyph]
 
 :group
-システム操作
+システムデザイン変更
 
 :title
 クリック待ちグリフの設定
@@ -6818,6 +7242,7 @@ tyrano.plugin.kag.tag.clickable = {
 クリック待ちグリフ（`[l]`や`[p]`でクリックを待つ状態のときにメッセージの末尾に表示される画像）の設定が変更できます。使用する画像を変更したり、位置をメッセージの最後ではなく画面上の固定位置に出すようにしたりできます。
 
 クリック待ちグリフのコンテンツには以下のパターンがあります。
+
 ①画像ファイル（`line`パラメータを指定する）※GIFやWebPもOK
 ②図形（`figure`パラメータを指定する）
 ③コマアニメ（`koma_anim`パラメータを指定する）
@@ -6956,15 +7381,48 @@ tyrano.plugin.kag.tag.glyph = {
         koma_count: "",
         koma_width: "",
         koma_anim_time: "1000",
+
+        // クリック待ちグリフ、オートモードグリフ、スキップモードグリフ
+        target: "",
     },
 
     start: function (pm) {
-        var that = this;
+        //
+        // 既存のグリフを削除する処理
+        //
+
+        // 固定グリフか？
+        const fix = pm.fix === "true";
+        // いままさに固定グリフが表示されていたか
+        let is_fix_glyph_displayed = false;
+        // 固定グリフ
+        let j_fix_glyph;
 
         // 固定グリフは削除
-        $(".glyph_image").remove();
+        switch (pm.target) {
+            default:
+            case "":
+                j_fix_glyph = $(".glyph_image");
+                break;
+            case "skip":
+                j_fix_glyph = $("#mode_glyph_skip");
+                break;
+            case "auto":
+                if (fix) {
+                    j_fix_glyph = $("#mode_glyph_auto");
+                }
+                break;
+        }
 
+        if (j_fix_glyph && j_fix_glyph.length) {
+            is_fix_glyph_displayed = j_fix_glyph.isDisplayed();
+            j_fix_glyph.remove();
+        }
+
+        //
         // グリフタイプを決定
+        //
+
         if (pm.figure) {
             pm.type = "figure";
         } else if (pm.html) {
@@ -6981,15 +7439,21 @@ tyrano.plugin.kag.tag.glyph = {
         }
 
         // 情報を格納
-        this.kag.stat.path_glyph = pm.line;
-        this.kag.stat.glyph_pm = $.extend({}, pm);
+        // glyph_pm, glyph_skip_pm, glyph_auto_pm, glyph_auto_next_pm
+        const glyph_key = this.kag.ftag.getGlyphKey(pm.target, fix);
+        this.kag.stat[glyph_key] = $.extend({}, pm);
+
+        if (!pm.target) {
+            // 旧実装のフォールバック
+            this.kag.stat.path_glyph = pm.line;
+            this.kag.stat.flag_glyph = pm.fix;
+        }
 
         // 画面上固定タイプか、メッセージ末尾タイプか
-        if (pm.fix == "true") {
+        if (fix) {
             // 画面上固定タイプ
-            this.kag.stat.flag_glyph = "true";
             // もう作っておいて非表示で画面上に配置しちゃおう
-            const j_next = this.kag.ftag.createNextImg();
+            const j_next = this.kag.ftag.createNextImg(pm.target);
             j_next.setStyleMap({
                 "position": "absolute",
                 "z-index": "9998",
@@ -6998,9 +7462,8 @@ tyrano.plugin.kag.tag.glyph = {
                 "display": "none",
             });
             this.kag.layer.getLayer(pm.layer).append(j_next);
-        } else {
-            // メッセージ末尾タイプ
-            this.kag.stat.flag_glyph = "false";
+            // さっきまで表示されていたならこれも表示する
+            if (is_fix_glyph_displayed) j_next.show();
         }
 
         // コマアニメを使用しない場合は早期リターン
@@ -7050,9 +7513,160 @@ tyrano.plugin.kag.tag.glyph = {
             pm.image_height = parseInt(pm.image_height * pm.scale_x);
             pm.koma_width = parseInt(pm.koma_width * pm.scale_x);
             pm.koma_height = parseInt(pm.koma_height * pm.scale_x);
-            this.kag.stat.glyph_pm = $.extend({}, pm);
+            this.kag.stat[glyph_key] = $.extend({}, pm);
             this.kag.ftag.nextOrder();
         });
+    },
+};
+
+/*
+#[glyph_skip]
+
+:group
+システムデザイン変更
+
+:title
+スキップモードグリフの設定
+
+:exp
+スキップモード中に表示されるグリフを設定できます。
+
+・`use`パラメータを指定したとき
+・`delete`パラメータを指定したとき
+・どちらも指定しなかったとき
+
+の3パターンで動作が異なります。
+
+`use`パラメータを指定した場合、`[ptext]`などですでに画面上に出している要素をスキップモードグリフにすることができます。
+
+`delete`パラメータを指定した場合、以前の`[glyph_skip]`で設定した定義を削除することができます。
+
+どちらも指定しなかった場合は`[glyph]`と同等の処理を行います。
+
+:param
+use    = すでに画面上に出ている要素をスキップモード中のグリフとして扱うようにできます。`[ptext]`や`[image]`に設定した`name`をここに指定します。
+delete = `true`を指定した場合、グリフの定義を削除する処理を実行します。
+その他 = `[glyph]`と同じパラメータが指定できます。ただし`fix`パラメータは`true`で固定されます。
+
+:sample
+;固定スキップモードグリフ、固定オートモードグリフを設定
+[glyph_skip fix="true" left="10" top="10" figure="diamond" anim="flash"  color="orange" time="400" width="80"]
+[glyph_auto fix="true" left="10" top="10" figure="star"    anim="spin_y" color="green" time="5000" width="80"]
+
+;オートモードグリフについては、
+;固定グリフと同時にメッセージ末尾型のオートモードグリフも設定できる
+[glyph_auto html="⌛" anim="flash"]
+
+;[ptext]で出した文字をスキップグリフ、オートグリフとして扱うパターン
+[ptext     name="glyph_skip" layer="message0" x="20" y="10" text="SKIP!" edge="4px orange" size="30"]
+[ptext     name="glyph_auto" layer="message0" x="20" y="10" text="AUTO" edge="4px green" size="30"]
+[glyph_skip use="glyph_skip"]
+[glyph_auto use="glyph_auto"]
+
+;上記のすべての設定を抹消する
+[glyph_auto delete="true" fix="true"]
+[glyph_auto delete="true" fix="false"]
+[glyph_skip delete="true"]
+
+#[end]
+*/
+
+//指定した位置にグラフィックボタンを配置する
+tyrano.plugin.kag.tag.glyph_skip = {
+    start: function (pm) {
+        if (pm.delete === "true") {
+            $("#mode_glyph_skip").remove();
+            delete this.kag.stat.glyph_auto_pm;
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        if (pm.use) {
+            $("#mode_glyph_skip").remove();
+            const j_glyph = $("." + pm.use).eq(0);
+            console.error(j_glyph);
+            if (j_glyph.length) {
+                j_glyph.attr("id", "mode_glyph_skip");
+                if (this.kag.stat.is_skip) {
+                    j_glyph.show();
+                } else {
+                    j_glyph.hide();
+                }
+            }
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        pm.target = "skip";
+        pm.fix = "true";
+        this.kag.ftag.startTag("glyph", pm);
+    },
+};
+
+/*
+#[glyph_auto]
+
+:group
+システムデザイン変更
+
+:title
+オートモードグリフの設定
+
+:exp
+オートモード中に表示されるグリフを設定できます。
+
+・`use``use``use`パラメータを指定したとき
+・`delete`パラメータを指定したとき
+・どちらも指定しなかったとき
+
+の3パターンで動作が異なります。
+
+`use`パラメータを指定した場合、`[ptext]`などですでに画面上に出している要素を画面固定のオートモードグリフにすることができます。
+
+`delete`パラメータを指定した場合、以前の`[glyph_auto]`で設定した定義を削除することができます。
+
+どちらも指定しなかった場合は`[glyph]`と同等の処理を行います。
+
+:param
+fix    = 画面固定グリフの設定をするなら`true`、メッセージ末尾のグリフの設定をするなら`false`を指定します。オートモードグリフに限り、固定グリフと非固定グリフを両方設定できます。
+use    = すでに画面上に出ている要素を画面固定グリフとして扱うようにできます。`[ptext]`や`[image]`に設定した`name`をここに指定します。
+delete = `true`を指定した場合、グリフの定義を削除する処理を実行します。
+その他 = `[glyph]`と同じパラメータが指定できます。
+
+#[end]
+*/
+
+//指定した位置にグラフィックボタンを配置する
+tyrano.plugin.kag.tag.glyph_auto = {
+    start: function (pm) {
+        if (pm.delete === "true") {
+            if (pm.fix === "true") {
+                $("#mode_glyph_auto").remove();
+                delete this.kag.stat.glyph_auto_pm;
+            } else {
+                delete this.kag.stat.glyph_auto_next_pm;
+            }
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        if (pm.use) {
+            $("#mode_glyph_auto").remove();
+            const j_glyph = $("." + pm.use).eq(0);
+            if (j_glyph.length) {
+                j_glyph.attr("id", "mode_glyph_auto");
+                if (this.kag.stat.is_auto) {
+                    j_glyph.show();
+                } else {
+                    j_glyph.hide();
+                }
+            }
+            this.kag.ftag.nextOrder();
+            return;
+        }
+
+        pm.target = "auto";
+        this.kag.ftag.startTag("glyph", pm);
     },
 };
 
@@ -7074,7 +7688,7 @@ start:function(pm){
 #[trans]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 レイヤのトランジション
@@ -7138,7 +7752,7 @@ tyrano.plugin.kag.tag.trans = {
         var map_layer_fore = $.cloneObject(this.kag.layer.map_layer_fore);
         var map_layer_back = $.cloneObject(this.kag.layer.map_layer_back);
 
-        for (key in map_layer_fore) {
+        for (let key in map_layer_fore) {
             //指定条件のレイヤのみ実施
             if (pm.children == true || key === pm.layer) {
                 (function () {
@@ -7181,7 +7795,7 @@ tyrano.plugin.kag.tag.trans = {
 #[bg]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 背景の切り替え
@@ -7259,7 +7873,7 @@ tyrano.plugin.kag.tag.bg = {
             that.kag.layer.updateLayer("base", "fore", j_new_bg);
 
             if (pm.wait == "true") {
-                that.kag.layer.hideEventLayer();
+                that.kag.weaklyStop();
             }
 
             //スキップ中は時間を短くする
@@ -7281,7 +7895,7 @@ tyrano.plugin.kag.tag.bg = {
                 }
 
                 if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
+                    that.kag.cancelWeakStop();
                     that.kag.ftag.nextOrder();
                 }
             });
@@ -7299,7 +7913,7 @@ tyrano.plugin.kag.tag.bg = {
 #[bg2]
 
 :group
-レイヤ関連
+画像・背景・レイヤ操作
 
 :title
 背景の切り替え
@@ -7418,7 +8032,7 @@ tyrano.plugin.kag.tag.bg2 = {
             that.kag.layer.updateLayer("base", "fore", j_new_bg);
 
             if (pm.wait == "true") {
-                that.kag.layer.hideEventLayer();
+                that.kag.weaklyStop();
             }
 
             //スキップ中は時間を短くする
@@ -7440,7 +8054,7 @@ tyrano.plugin.kag.tag.bg2 = {
                 }
 
                 if (pm.wait == "true") {
-                    that.kag.layer.showEventLayer();
+                    that.kag.cancelWeakStop();
                     that.kag.ftag.nextOrder();
                 }
             });
@@ -7458,7 +8072,7 @@ tyrano.plugin.kag.tag.bg2 = {
 #[layermode]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 レイヤーモード
@@ -7525,6 +8139,7 @@ tyrano.plugin.kag.tag.layermode = {
             blend_layer.css("opacity", $.convertOpacity(pm.opacity));
         }
 
+        let folder;
         if (pm.folder != "") {
             folder = pm.folder;
         } else {
@@ -7573,7 +8188,7 @@ tyrano.plugin.kag.tag.layermode = {
 #[layermode_movie]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 レイヤーモード（動画）
@@ -7775,7 +8390,7 @@ tyrano.plugin.kag.tag.layermode_movie = {
 #[free_layermode]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 合成レイヤの消去

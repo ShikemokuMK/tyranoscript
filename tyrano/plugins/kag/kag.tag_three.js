@@ -1,6 +1,6 @@
 $.three_pos = function (str) {
     var obj = {};
-    arr_obj = str.split(",");
+    var arr_obj = str.split(",");
 
     if (arr_obj.length == 1) {
         obj.x = parseFloat(arr_obj[0]);
@@ -41,7 +41,7 @@ $.checkThreeModel = function (name) {
     if (TYRANO.kag.tmp.three.models[name]) {
         return true;
     } else {
-        alert("model「" + name + "」は未定義です。宣言してください。");
+        TYRANO.kag.error("undefined_3d_model", { name });
     }
 };
 
@@ -256,7 +256,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
                 var name = intersects[0].object.userData["name"];
                 if (that.kag.stat.is_strong_stop == true) {
                     if (three.evt[name]) {
-                        that.kag.layer.showEventLayer();
+                        that.kag.cancelWeakStop();
                         that.kag.ftag.startTag("jump", three.evt[name]);
                         return;
                     }
@@ -276,7 +276,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
 
         var delta = this.clock.getDelta();
 
-        for (key in models) {
+        for (let key in models) {
             if (models[key].mixer) {
                 models[key].update(delta);
             }
@@ -460,7 +460,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
             });
         } else if (ext == "mmd") {
         } else {
-            alert("エラー：" + ext + "はサポートしていないファイル形式です");
+            this.kag.error("unsupported_extensions", { ext });
         }
 
         //読み込んだシーンが暗いので、明るくする
@@ -1021,7 +1021,7 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
                 const loader = new THREE.TextureLoader();
 
                 for (let i = 0; i < arr_texture.length; i++) {
-                    var texture_url = "./data/others/3d/texture/" + arr_texture[i];
+                    let texture_url = "./data/others/3d/texture/" + arr_texture[i];
                     const texture = loader.load(texture_url);
                     arr_material.push(new THREE.MeshStandardMaterial({ map: texture }));
                 }
@@ -1029,7 +1029,7 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
                 // マテリアルにテクスチャーを設定
                 material = arr_material;
             } else {
-                var texture_url = "./data/others/3d/texture/" + pm.texture;
+                let texture_url = "./data/others/3d/texture/" + pm.texture;
                 const loader = new THREE.TextureLoader();
                 const texture = loader.load(texture_url);
                 // マテリアルにテクスチャーを設定
@@ -1585,7 +1585,7 @@ tyrano.plugin.kag.tag["3d_anim"] = {
             if (pm.name == "camera" && pm.lookat != "") {
                 if (three.models[pm.lookat]) {
                     var model = three.models[pm.lookat].model;
-                    var pos = { x: 0, y: 0, z: 0 };
+                    let pos = { x: 0, y: 0, z: 0 };
                     pos.x = model.position.x;
                     pos.y = model.position.y;
                     pos.z = model.position.z;
@@ -1612,7 +1612,7 @@ tyrano.plugin.kag.tag["3d_anim"] = {
         var cnt_type = Object.keys(map_type).length;
 
         for (let key in map_type) {
-            var pos = map_type[key];
+            let pos = map_type[key];
             var type = key;
 
             this.kag.tmp.three.models[pm.name].toAnim(type, pos, options, () => {
@@ -2283,19 +2283,19 @@ tyrano.plugin.kag.tag["3d_debug_camera"] = {
             if (!mousedown) return;
 
             if (button == 0) {
-                var hen_x = first_client_x - e.clientX;
+                let hen_x = first_client_x - e.clientX;
                 model.rotation.y = first_model_y + hen_x * 0.005;
 
-                var hen_y = first_client_y - e.clientY;
+                let hen_y = first_client_y - e.clientY;
                 model.rotation.x = first_model_x + hen_y * 0.005;
             } else if (button == 1) {
-                var hen_y = first_client_y - e.clientY;
+                let hen_y = first_client_y - e.clientY;
                 model.position.z = first_model_z + hen_y;
             } else if (button == 2) {
-                var hen_x = first_client_x - e.clientX;
+                let hen_x = first_client_x - e.clientX;
                 model.position.x = first_model_x + hen_x * 1;
 
-                var hen_y = first_client_y - e.clientY;
+                let hen_y = first_client_y - e.clientY;
                 model.position.y = first_model_y + hen_y * -1;
 
                 model.position.x = $.orgFloor(model.position.x, 1);
@@ -2592,7 +2592,7 @@ tyrano.plugin.kag.tag["3d_debug"] = {
             j_close_button.hide();
 
             if (button == 0) {
-                moveDistance = {
+                let moveDistance = {
                     x: prevPosition.x - e.clientX,
                     y: prevPosition.y - e.clientY,
                 };

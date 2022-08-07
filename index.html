@@ -1,133 +1,105 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Loading TyranoScript</title>
+    <head>
+        <title>Loading TyranoScript</title>
 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+        <meta name="robots" content="noindex,nofollow" />
 
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <link href="./tyrano/tyrano.css" rel="stylesheet" />
+        <link href="./tyrano/libs/jquery-ui/jquery-ui.css" rel="stylesheet" />
 
-<meta name="robots" content="noindex,nofollow" />
+        <!-- jQuery -->
+        <script src="./tyrano/libs/jquery-3.6.0.min.js"></script>
+        <script>
+            try {
+                window.jQuery = window.$ = require("./tyrano/libs/jquery-3.6.0.min.js");
+            } catch (e) {}
+        </script>
 
-<link href="./tyrano/tyrano.css" rel="stylesheet" type="text/css"/>
+        <!-- jQuery Plugins -->
+        <script src="./tyrano/libs/jquery-migrate-1.4.1.js"></script>
+        <script src="./tyrano/libs/jquery-ui/jquery-ui.min.js"></script>
+        <script src="./tyrano/libs/jquery.a3d.js"></script>
+        <script src="./tyrano/libs/jsrender.min.js"></script>
 
-<link href="./tyrano/libs/jquery-ui/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <!-- 廃止予定 alertify.js -->
+        <link href="./tyrano/libs/alertify/alertify.core.css" rel="stylesheet" />
+        <link href="./tyrano/libs/alertify/alertify.default.css" rel="stylesheet" />
+        <script src="./tyrano/libs/alertify/alertify.min.js"></script>
 
-<script type="text/javascript" src="./tyrano/libs/jquery-3.6.0.min.js"></script>
+        <!-- remodal -->
+        <link href="./tyrano/libs/remodal/remodal.css" rel="stylesheet" />
+        <link href="./tyrano/libs/remodal/remodal-default-theme.css" rel="stylesheet" />
+        <script src="./tyrano/libs/remodal/remodal.js"></script>
 
-<script>
+        <!-- html2canvas -->
+        <script src="./tyrano/libs/html2canvas.js"></script>
 
-try{
-    window.jQuery = window.$ = require('./tyrano/libs/jquery-3.6.0.min.js');
-}catch(e){
-    
-}
+        <!-- KeyConfig.js -->
+        <script src="./data/system/KeyConfig.js"></script>
 
+        <!-- tyrano -->
+        <script src="./tyrano/lang.js"></script>
+        <script src="./tyrano/libs.js"></script>
+        <script src="./tyrano/tyrano.js"></script>
+        <script src="./tyrano/tyrano.base.js"></script>
+        <script src="./tyrano/plugins/kag/kag.js"></script>
+        <script src="./tyrano/plugins/kag/kag.event.js"></script>
+        <script src="./tyrano/plugins/kag/kag.key_mouse.js"></script>
+        <script src="./tyrano/plugins/kag/kag.layer.js"></script>
+        <script src="./tyrano/plugins/kag/kag.menu.js"></script>
+        <script src="./tyrano/plugins/kag/kag.parser.js"></script>
+        <script src="./tyrano/plugins/kag/kag.rider.js"></script>
+        <script src="./tyrano/plugins/kag/kag.studio.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_audio.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_camera.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_ext.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_system.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_vchat.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_ar.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag_three.js"></script>
+        <script src="./tyrano/plugins/kag/kag.tag.js"></script>
 
-</script>
+        <!-- Others -->
+        <link href="./tyrano/libs/textillate/assets/animate.css" rel="stylesheet" />
+        <script src="./tyrano/libs/textillate/assets/jquery.lettering.js"></script>
+        <script src="./tyrano/libs/textillate/jquery.textillate.js"></script>
+        <script src="./tyrano/libs/jquery.touchSwipe.min.js"></script>
+        <script src="./tyrano/libs/howler.js"></script>
+        <script src="./tyrano/libs/jsQR.js"></script>
+        <script src="./tyrano/libs/anime.min.js"></script>
+        <script src="./tyrano/libs/lz-string.min.js"></script>
+    </head>
 
-<script src="./tyrano/libs/jquery-migrate-1.4.1.js"></script>
+    <body onselectstart="return false" onContextmenu="return false" ontouchmove="event.preventDefault()">
+        <div id="tyrano_base" class="tyrano_base" style="overflow: hidden" unselectable="on" ondragstart="return false"></div>
+        <div id="vchat_base" class="vchat_base" style="overflow: hidden" unselectable="on" ondragstart="return false"></div>
 
+        <!--  First シナリオファイルに外部ファイルを利用したい場合は、こちらにシナリオファイルのURLを指定できます-->
+        <!--
+        <input type="hidden" id="first_scenario_file" value="http://test.com/tyrano/data/scenario/first.ks">
+        -->
 
+        <!-- コンフィグ調整をindex.htmlでもできる -->
+        <!--
+        <input type="hidden" tyrano="config" key="vchat" value="true" />
+        <input type="hidden" tyrano="config" key="vchatMenuVisible" value="true" />
+        -->
 
-<script type="text/javascript" src="./tyrano/libs/jquery-ui/jquery-ui.min.js"></script>
-<script type="text/javascript" src="./tyrano/libs/jquery.a3d.js"></script>
-<script type="text/javascript" src="./tyrano/libs/jsrender.min.js"></script>
-
-<!-- 廃止予定 alertify.js -->
-<link href="./tyrano/libs/alertify/alertify.core.css" rel="stylesheet" type="text/css"/>
-<link href="./tyrano/libs/alertify/alertify.default.css" rel="stylesheet" type="text/css"/>
-<script type="text/javascript" src="./tyrano/libs/alertify/alertify.min.js"></script>
-
-<!-- remodal -->
-<link rel="stylesheet" href="./tyrano/libs/remodal/remodal.css">
-<link rel="stylesheet" href="./tyrano/libs/remodal/remodal-default-theme.css">
-<script src="./tyrano/libs/remodal/remodal.js"></script>
-
-<script type="text/javascript" src="./tyrano/libs/html2canvas.js"></script>
-
-
-<script type="text/javascript" src="./data/system/KeyConfig.js"></script>
-
-<script type="text/javascript" src="./tyrano/lang.js" ></script>
-<script type="text/javascript" src="./tyrano/libs.js" ></script>
-
-<script type="text/javascript" src="./tyrano/tyrano.js" ></script>
-<script type="text/javascript" src="./tyrano/tyrano.base.js" ></script>
-
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.event.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.key_mouse.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.layer.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.menu.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.parser.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.rider.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.studio.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_audio.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_camera.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ext.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_system.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_vchat.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_ar.js" ></script>
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag_three.js" ></script>
-
-<script type="text/javascript" src="./tyrano/plugins/kag/kag.tag.js" ></script>
-
-<link href="./tyrano/libs/textillate/assets/animate.css" rel="stylesheet">
-<script type="text/javascript" src="./tyrano/libs/textillate/assets/jquery.lettering.js"></script>
-<script type="text/javascript" src="./tyrano/libs/textillate/jquery.textillate.js"></script>
-<script type="text/javascript" src="./tyrano/libs/jquery.touchSwipe.min.js"></script>
-<script type="text/javascript" src="./tyrano/libs/howler.js"></script>
-<script type="text/javascript" src="./tyrano/libs/jsQR.js"></script>
-<script type="text/javascript" src="./tyrano/libs/anime.min.js"></script>
-
-
-<script type="text/javascript" src="./tyrano/libs/lz-string.min.js"></script>
-
-<script type="text/javascript">
-function doScroll() { if (window.pageYOffset === 0) { window.scrollTo(0,1); } }  
-window.onload = function() { setTimeout(doScroll, 100); }  
-
-</script>  
-
-</head>
-
-<body onselectstart="return false" onContextmenu="return false" ontouchmove="event.preventDefault()" >
-
-<div id="tyrano_base" class="tyrano_base" style="overflow:hidden" unselectable="on" ondragstart="return false" ></div>
-<div id="vchat_base" class="vchat_base" style="overflow:hidden" unselectable="on" ondragstart="return false" >
-    
-
-</div> <!-- end vchat_base -->
-
-
-
-
-<!--  First シナリオファイルに外部ファイルを利用したい場合は、こちらにシナリオファイルのURLを指定できます-->
-<!--
-<input type="hidden" id="first_scenario_file" value="http://test.com/tyrano/data/scenario/first.ks">
--->
-
-<!-- コンフィグ調整をindex.htmlでもできる -->
-<!--
-<input type="hidden" tyrano="config" key="vchat" value="true" />
-<input type="hidden" tyrano="config" key="vchatMenuVisible" value="true" />
--->
-
-<!-- モーダル用 -->
-<div class="remodal-bg" ></div>
-<div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking:false,closeOnEscape:false,closeOnOutsideClick:false">
-  <!--
-  <button data-remodal-action="close" class="remodal-close"></button>
-  -->
-  <h1 class="remodal_title"></h1>
-  <p class="remodal_txt">
-  </p>
-  <br>
-  <button data-remodal-action="cancel" class="remodal-cancel">Cancel</button>
-  <button data-remodal-action="confirm" class="remodal-confirm">OK</button>
-</div>
-
-
-</body>
+        <!-- モーダル用 -->
+        <div class="remodal-bg"></div>
+        <div
+            class="remodal"
+            data-remodal-id="modal"
+            data-remodal-options="hashTracking:false,closeOnEscape:false,closeOnOutsideClick:false"
+        >
+            <h1 class="remodal_title"></h1>
+            <p class="remodal_txt"></p>
+            <br />
+            <button data-remodal-action="cancel" class="remodal-cancel">Cancel</button>
+            <button data-remodal-action="confirm" class="remodal-confirm">OK</button>
+        </div>
+    </body>
 </html>
