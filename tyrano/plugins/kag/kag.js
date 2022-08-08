@@ -1878,6 +1878,13 @@ tyrano.plugin.kag = {
 
     //画像のプリロード オンの場合は、ロードが完了するまで次へ行かない
     preload: function (src, callbk, options = {}) {
+        this.kag.showLoadingLog("preload");
+
+        const onend = (elm) => {
+            this.kag.hideLoadingLog();
+            if (callbk) callbk(elm);
+        };
+
         var that = this;
 
         var ext = $.getExt(src);
@@ -1913,12 +1920,12 @@ tyrano.plugin.kag = {
                     case "loading":
                         // ロード中の場合はロードイベントリスナを追加
                         preloaded_audio.once("load", () => {
-                            if (callbk) callbk(preloaded_audio);
+                            onend(preloaded_audio);
                         });
                         return;
                     case "loaded":
                         // ロード済みなら即コールバック
-                        if (callbk) callbk(preloaded_audio);
+                        onend(preloaded_audio);
                         return;
                 }
             }
@@ -1935,14 +1942,14 @@ tyrano.plugin.kag = {
 
             // ロードに成功したとき
             audio_obj.once("load", () => {
-                if (callbk) callbk(audio_obj);
+                onend(audio_obj);
             });
 
             // ロードに失敗したとき
             audio_obj.once("loaderror", () => {
                 audio_obj.unload();
                 this.kag.error("preload_failure_sound", { src });
-                if (callbk) callbk(audio_obj);
+                onend(audio_obj);
                 delete this.kag.tmp.preload_audio_map[src];
             });
 
@@ -1965,22 +1972,22 @@ tyrano.plugin.kag = {
             // 動画ファイルプリロード
             $("<video />")
                 .on("loadeddata", function (e) {
-                    callbk && callbk();
+                    onend(this);
                 })
                 .on("error", function (e) {
                     that.kag.error("preload_failure_video", { src });
-                    callbk && callbk();
+                    onend();
                 })
                 .attr("src", src);
         } else {
             // 画像ファイルプリロード
             $("<img />")
                 .on("load", function (e) {
-                    if (callbk) callbk(this);
+                    onend(this);
                 })
                 .on("error", function (e) {
                     that.kag.error("preload_failure_image", { src });
-                    if (callbk) callbk();
+                    onend();
                 })
                 .attr("src", src);
         }
@@ -2974,6 +2981,56 @@ tyrano.plugin.kag = {
             setTimeout(() => {
                 j_effect.remove();
             }, duration);
+        }, 10);
+    },
+
+    /**
+     * 「ローディング中...」のログを画面端に出す
+     * @param {"preload" | "save"} type
+     */
+    showLoadingLog(type = "preload") {
+        // 未定義なら
+        if (!this.kag.stat.loading_log) return;
+
+        // 予約解除
+        const tmp = this.kag.tmp;
+        clearTimeout(tmp.loading_log_hide_timer_id);
+
+        // テキスト参照
+        let text = this.kag.stat.loading_log.message_map[type];
+        if (!text || text === "none") return;
+        if (text === "default") text = this.kag.getTag("loading_log").default_message_map[type];
+        if (text === "notext") text = "";
+        tmp.j_loading_log_message.text(text);
+
+        // 「...」のアニメーションの設定
+        if (text) {
+            tmp.j_loading_log_message.setStyle("animation-duration", `${this.kag.stat.loading_log.dot_time}ms`);
+        }
+
+        if (this.kag.stat.loading_log.use_icon) {
+            tmp.j_loading_log_icon.show();
+        } else {
+            tmp.j_loading_log_icon.hide();
+        }
+
+        // タイムアウトを設ける (数フレームだけローディングが出るのは鬱陶しいため)
+        clearTimeout(tmp.loading_log_timer_id);
+        tmp.loading_log_timer_id = $.setTimeout(() => {
+            tmp.j_loading_log.show();
+        }, Math.max(11, this.kag.stat.loading_log.min_time));
+    },
+
+    /**
+     * 「ローディング中」のログを消す
+     */
+    hideLoadingLog() {
+        if (!this.kag.ftag.master_tag.loading_log || !this.kag.ftag.master_tag.loading_log.initialized) return;
+        const tmp = this.kag.tmp;
+        clearTimeout(tmp.loading_log_hide_timer_id);
+        tmp.loading_log_hide_timer_id = setTimeout(() => {
+            clearTimeout(tmp.loading_log_timer_id);
+            tmp.j_loading_log.hide();
         }, 10);
     },
 

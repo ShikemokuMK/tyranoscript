@@ -393,6 +393,8 @@ tyrano.plugin.kag.menu = {
                         // ティラノイベント"snapsave-complete"を発火
                         that.kag.trigger("snapsave-complete");
                     }
+
+                    that.kag.hideLoadingLog();
                 };
 
                 if (that.kag.stat.save_img != "") {
@@ -418,6 +420,8 @@ tyrano.plugin.kag.menu = {
                     //
                     // html2canvas.jsでゲーム画面のキャプチャを実行する場合
                     //
+
+                    that.kag.showLoadingLog("save");
 
                     //ビデオをキャプチャするための仕組み
                     let canvas = document.createElement("canvas"); // declare a canvas element in your html

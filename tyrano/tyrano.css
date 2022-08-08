@@ -1045,3 +1045,65 @@ img#remodal-cancel {
         opacity: 0;
     }
 }
+
+/* ローディングの通知を画面端に出す
+--------------------------------------*/
+
+.tyrano-loading {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: inline-flex;
+    box-sizing: border-box;
+    font-size: 25px;
+    align-items: center;
+    margin: 0.7em;
+    pointer-events: none;
+    font-weight: bold;
+    z-index: 9999999999;
+    filter: drop-shadow(0 0 0.2em black);
+}
+
+.tyrano-loading .icon {
+    box-sizing: border-box;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 100%;
+    border: 0.2em solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    animation: tyrano-loading-spin 1s infinite linear;
+}
+
+.tyrano-loading .message {
+    margin-left: 0.7em;
+    color: white;
+    line-height: 100%;
+}
+
+.tyrano-loading .message::after {
+    content: " ";
+    animation: dot-animation 2s steps(4) infinite;
+    animation-duration: inherit;
+    position: absolute;
+}
+
+@keyframes dot-animation {
+    0% {
+        content: "";
+    }
+    25% {
+        content: ".";
+    }
+    50% {
+        content: "..";
+    }
+    75% {
+        content: "...";
+    }
+}
+
+@keyframes tyrano-loading-spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}

@@ -446,6 +446,7 @@ tyrano.plugin.kag.tag.playbgm = {
             }
             // 再生開始
             audio_obj.play(sprite_name);
+            this.kag.hideLoadingLog();
         });
 
         // 再生開始時
@@ -557,6 +558,7 @@ tyrano.plugin.kag.tag.playbgm = {
 
         // プリロードの痕跡はない
         // ふつうにロード
+        this.kag.showLoadingLog();
         audio_obj.load();
     },
 

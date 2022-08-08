@@ -393,14 +393,18 @@
     };
 
     $.loadText = function (file_path, callback) {
+        if (window.TYRANO) window.TYRANO.kag.showLoadingLog();
+
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
             cache: false,
             success: function (text) {
+                if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
                 const order_str = text;
                 callback(order_str);
             },
             error: function () {
+                if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
                 alert($.lang("file_not_found", { path: file_path }));
                 callback("");
             },
@@ -2644,6 +2648,14 @@
             return $.convertLength(item);
         });
         return hash.join(" ");
+    };
+
+    $.captureStackTrace = (str = "captured stack trace!") => {
+        try {
+            throw new Error(str);
+        } catch (e) {
+            console.warn(e);
+        }
     };
 })(jQuery);
 
