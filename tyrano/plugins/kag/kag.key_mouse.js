@@ -938,10 +938,28 @@ tyrano.plugin.kag.key_mouse = {
         //
 
         // いまフォーカスが当たっている要素がない場合は新規フォーカスとなる
-        // 下キーなら一番下の要素を、上キーなら一番上の要素を、という感じで1つ選んでフォーカスしておわり
         if (!focused_pos) {
-            let index = is_plus ? pos_list.length - 1 : 0;
-            // let index = 0;
+            let index;
+            switch (this.kag.config["firstKeyFocusType"]) {
+                default:
+                case "first":
+                    // どの方向キーを押した場合でも固定で最初のボタンを新規フォーカス
+                    index = 0;
+                    break;
+                case "dir":
+                    // 下キーなら一番下の要素を、上キーなら一番上の要素を新規フォーカス
+                    index = is_plus ? pos_list.length - 1 : 0;
+                    break;
+                case "dir-2":
+                    // 選択肢が2個以下なら方向キーどおりに、3個以上なら固定で先頭をフォーカス
+                    if (pos_list.length === 2) {
+                        index = is_plus ? pos_list.length - 1 : 0;
+                    } else {
+                        index = 0;
+                    }
+            }
+
+            // メニューの閉じるボタンが最初に選択されるのはヘンなのでその場合は1足す
             if (index === 0 && this.util.isCloseButton(pos_list[index].j_elm)) {
                 index++;
             }

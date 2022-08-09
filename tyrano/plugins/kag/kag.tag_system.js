@@ -3933,3 +3933,109 @@ tyrano.plugin.kag.tag.mode_effect = {
         this.kag.ftag.nextOrder();
     },
 };
+
+/*
+#[loading_log]
+
+:group
+システムデザイン変更
+
+:title
+ローディングログ
+
+:exp
+素材の読み込みを行っているときやセーブ処理が走っているときなど、ゲームが一時的に止まっているタイミングで画面端に「Loading...」のようなログを出すことができます。
+
+:param
+preload = 素材の読み込み中に表示するテキストを自由に設定できます。`none`を指定するとログを無効にできます。`default`を指定するとデフォルトのログになります。`notext`を指定するとテキストなしでローディングアイコンだけを出すことができます。
+save    = セーブ処理中に表示するテキストを自由に設定できます。preload パラメータと同様に、`none`、`default`、`notext`というキーワードが指定可能。
+all     = preload、save パラメータをまとめて指定できます。たとえば、`all="default"`とすればすべてのログにデフォルトのテキストを設定できます。
+dottime = テキストの後ろに「...」というドットが増えていくアニメーションの所要時間をミリ秒で指定できます。`0`を指定するとドットアニメーションを無くすことができます。
+icon    = ローディングアイコンを表示するかどうかを`true`または`false`で指定します。ローディングアイコンを非表示にしてテキストのみにしたい場合には`false`を指定してください。
+
+:sample
+[loading_log all="default"]
+
+#[end]
+*/
+tyrano.plugin.kag.tag.loading_log = {
+    pm: {
+        mintime: "",
+        all: "",
+        load: "",
+        save: "",
+        dottime: "",
+    },
+    initialized: false,
+    init() {
+        if (this.initialized) return;
+        this.initialized = true;
+        this.j_loading_log = $("#tyrano-loading");
+        if (!this.j_loading_log.length) {
+            const html = `
+            <div id="tyrano-loading" class="tyrano-loading">
+                <div class="icon"></div>
+                <div class="message"></div>
+            </div>
+            `;
+            this.j_loading_log = $(html);
+        }
+        this.kag.tmp.j_loading_log = this.j_loading_log;
+        this.kag.stat.loading_log = {
+            min_time: 20,
+            dot_time: 1500,
+            use_icon: true,
+            use: false,
+            message_map: {
+                preload: "",
+                save: "",
+            },
+        };
+        this.kag.tmp.j_loading_log_message = this.j_loading_log.find(".message");
+        this.kag.tmp.j_loading_log_icon = this.j_loading_log.find(".icon");
+        this.j_loading_log.appendTo("#tyrano_base");
+    },
+    default_message_map: {
+        preload: "Loading",
+        save: "Saving",
+    },
+    start(pm) {
+        this.init();
+        if (pm.mintime) this.kag.stat.loading_log.min_time = parseInt(pm.mintime);
+        if (pm.all) {
+            ["preload", "save"].forEach((key) => {
+                if (!pm[key]) {
+                    pm[key] = pm.all;
+                }
+            });
+        }
+        if (pm.icon) this.kag.stat.loading_log.use_icon = pm.icon === "true";
+        if (pm.preload) this.kag.stat.loading_log.message_map.preload = pm.preload;
+        if (pm.save) this.kag.stat.loading_log.message_map.save = pm.save;
+        if (pm.dottime) this.kag.stat.loading_log.dot_time = parseInt(pm.dottime);
+        if (pm.left) {
+            this.j_loading_log.setStyleMap({
+                left: $.convertLength(pm.left),
+                right: "auto",
+            });
+        } else if (pm.right) {
+            this.j_loading_log.setStyleMap({
+                left: "auto",
+                right: $.convertLength(pm.right),
+            });
+        }
+        if (pm.top) {
+            this.j_loading_log.setStyleMap({
+                top: $.convertLength(pm.top),
+                bottom: "auto",
+            });
+        } else if (pm.bottom) {
+            this.j_loading_log.setStyleMap({
+                top: "auto",
+                bottom: $.convertLength(pm.bottom),
+            });
+        }
+        this.j_loading_log.hide();
+        this.kag.ftag.nextOrder();
+    },
+};
