@@ -4258,11 +4258,22 @@ tyrano.plugin.kag.tag.link = {
         var _storage = pm.storage;
         var that = TYRANO;
 
+        // クリックされたかどうか
+        var clicked = false;
+
         j_span.on("mousedown", () => {
             return false;
         });
 
         j_span.bind("click touchstart", function (e) {
+            // クリック済みなら反応しない
+            if (clicked) {
+                return;
+            }
+
+            // クリック済み
+            clicked = true;
+
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 

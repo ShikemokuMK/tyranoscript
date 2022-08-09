@@ -113,7 +113,7 @@ tyrano.plugin.kag.key_mouse = {
             // * ホールドアクションの予約
             //
 
-            document.addEventListener(
+            this.j_event_layer[0].addEventListener(
                 "touchstart",
                 (e) => {
                     if (e.changedTouches && e.changedTouches[0]) {
@@ -133,7 +133,7 @@ tyrano.plugin.kag.key_mouse = {
                         }
                     }, this.HOLD_TIMEOUT);
                 },
-                { capture: true },
+                { capture: false },
             );
 
             //
@@ -159,7 +159,7 @@ tyrano.plugin.kag.key_mouse = {
                         this.prev_point.y = y;
                     }
                 },
-                { capture: true },
+                { capture: false },
             );
 
             //
@@ -170,7 +170,7 @@ tyrano.plugin.kag.key_mouse = {
             // * ダブルタップの e.preventDefault()
             //
 
-            document.addEventListener(
+            this.j_event_layer[0].addEventListener(
                 "touchend",
                 (e) => {
                     clearTimeout(this.hold_timer_id);
@@ -252,7 +252,7 @@ tyrano.plugin.kag.key_mouse = {
                     this.previous_touchend_time = now;
                     this.touch_position = pos;
                 },
-                { capture: true, passive: false },
+                { capture: false, passive: false },
             );
         }
 
