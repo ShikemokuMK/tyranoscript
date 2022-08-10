@@ -695,6 +695,7 @@ tyrano.plugin.kag.tag.skipstart = {
             return false;
         }
         this.kag.setSkip(true, pm);
+        this.kag.ftag.hideNextImg();
         this.kag.ftag.nextOrder();
     },
 };
@@ -772,6 +773,7 @@ tyrano.plugin.kag.tag.autostart = {
 
         //[p][l] の処理に、オート判定が入ってます
         this.kag.setAuto(true);
+        this.kag.ftag.hideNextImg();
         this.kag.ftag.nextOrder();
     },
 };
