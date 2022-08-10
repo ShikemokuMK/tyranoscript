@@ -6848,7 +6848,8 @@ tyrano.plugin.kag.tag.glink = {
     },
 
     setEvent: function (j_button, pm) {
-        let button_clicked = false;
+        let button_clicked = false; // ボタンがクリックされたか
+        const use_cm = pm.cm !== "false"; // クリック時に[cm]を使用するか。cm="false" が指定されていないなら true
 
         //
         // ホバーイベント
@@ -6896,8 +6897,9 @@ tyrano.plugin.kag.tag.glink = {
             // [s]または[wait]に到達していないときは無効
             if (!this.kag.stat.is_strong_stop) return false;
 
-            // 1度クリックしたボタンも無効
-            if (button_clicked) return false;
+            // 1度クリックした cm="true" なボタンは無効
+            if (button_clicked && use_cm) return false;
+            // ※ cm="false" なボタンは何度でもクリックできるようにする
 
             //
             // クリックが有効だったときの処理
@@ -6930,13 +6932,14 @@ tyrano.plugin.kag.tag.glink = {
             // [cm]+[jump]を実行する関数
             const next = () => {
                 // [cm]を実行するかどうか
-                if (pm.cm === "true") {
+                if (use_cm) {
                     // [cm]の実行
                     this.kag.ftag.startTag("cm", { next: "false" });
                 } else {
                     // [cm]を実行しない場合はボタンが残り続ける
                     // 念のため、すべてのボタンのマウス系イベントを解除しておこう
-                    this.kag.layer.cancelAllFreeLayerButtonsEvents();
+                    // this.kag.layer.cancelAllFreeLayerButtonsEvents();
+                    // cm="false" なボタンは何度でもクリックできるようにしたいためコメントアウト
                 }
 
                 // [jump]の実行
