@@ -26,7 +26,7 @@ tyrano.plugin.kag.event = {
      * ロードで復元されないようにする
      * @param {jQuery} j_obj
      */
-    removeEventElement: function (j_obj) {
+    removeEventAttr: function (j_obj) {
         j_obj
             .removeClass("event-setting-element")
             .removeAttr("data-event-target")

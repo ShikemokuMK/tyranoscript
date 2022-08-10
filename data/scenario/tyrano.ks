@@ -168,7 +168,7 @@ tf.savetext = "<span style='font-size:10px'>"+tf.save_date+"</span><br />"+tf.ti
 
 [macro name="endreplay"]
 
-    [if exp="tf.flag_replay == true"]
+    [if exp="tf.system.flag_replay == true"]
         
         @layopt page="fore" layer="message0" visible=false
         ;システムボタンを非表示にするなど

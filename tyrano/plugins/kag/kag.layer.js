@@ -520,7 +520,7 @@ tyrano.plugin.kag.layer = {
     cancelAllFreeLayerButtonsEvents: function () {
         const that = this;
         const j_buttons = this.layer_free.find(".event-setting-element");
-        this.kag.event.removeEventElement(j_buttons);
+        this.kag.event.removeEventAttr(j_buttons);
         j_buttons.off("click mouseenter mouseleave mousedown touchstart");
         this.kag.makeUnfocusable(j_buttons);
     },

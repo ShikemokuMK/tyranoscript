@@ -1169,8 +1169,12 @@
             j_event.setStyle("pointer-events", "auto");
         });
 
-        // アラート: クローズ時の処理
+        //
+        // ボタンのクリックイベント
+        //
+
         if (options.type === "alert") {
+            // アラート: クローズ時の処理
             $(document).on("closed", ".remodal", () => {
                 close_common();
                 $.removeRemodalEvents(false);
@@ -1178,24 +1182,29 @@
                     options.on_ok();
                 }
             });
-            return;
         }
 
-        // コンファーム: OK 時の処理
-        $(document).on("confirmation", ".remodal", () => {
-            close_common();
-            if (typeof options.on_ok === "function") {
-                options.on_ok();
-            }
-        });
+        if (options.type === "confirm") {
+            // コンファーム: OK 時の処理
+            $(document).on("confirmation", ".remodal", () => {
+                close_common();
+                if (typeof options.on_ok === "function") {
+                    options.on_ok();
+                }
+            });
 
-        // コンファーム: Cancel 時の処理
-        $(document).on("cancellation", ".remodal", () => {
-            close_common();
-            if (typeof options.on_cancel === "function") {
-                options.on_cancel();
-            }
-        });
+            // コンファーム: Cancel 時の処理
+            $(document).on("cancellation", ".remodal", () => {
+                close_common();
+                if (typeof options.on_cancel === "function") {
+                    options.on_cancel();
+                }
+            });
+        }
+
+        //
+        // オープンアニメーション
+        //
 
         if (TYRANO.kag.tmp.remodal_opening_effect_time !== undefined) {
             j_anim.setStyleMap({ "animation-duration": TYRANO.kag.tmp.remodal_opening_effect_time }, "webkit");
