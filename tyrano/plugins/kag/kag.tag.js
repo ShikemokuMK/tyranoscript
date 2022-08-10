@@ -125,8 +125,39 @@ tyrano.plugin.kag.ftag = {
     },
 
     /**
+     * クリック待ちグリフを復元する（セーブデータロード時に使用）
+     * ただDOMを復元するだけではアニメーションが再現されないケースがあるため
+     */
+    restoreNextImg: function () {
+        const is_fixed = this.kag.stat.flag_glyph === "true";
+        const class_name = is_fixed ? "glyph_image" : "img_next";
+        const j_glyph = $("." + class_name);
+
+        // クリック待ちグリフが存在しないセーブデータを読み込んだ場合にはなにもする必要はない
+        if (j_glyph.length === 0) return;
+
+        // stat 領域に glyph_pm プロパティが存在しない場合
+        // つまり [glyph] タグで独自のグリフを設定していない場合もなにもしなくていい
+        if (!this.kag.stat.glyph_pm) return;
+
+        //
+        // 作り直し
+        //
+
+        if (is_fixed) {
+            // 固定グリフ
+            const pm = $.extend({}, this.kag.stat.glyph_pm, { next: "false" });
+            this.kag.ftag.startTag("glyph", pm);
+        } else {
+            // 非固定グリフ
+            this.showNextImg();
+        }
+    },
+
+    /**
      * 現在の設定に基づいてクリック待ちグリフのjQueryオブジェクトを作成して返す
-     * @param {"" | "skip" | "auto"} [mode=""]
+     * @param {"" | "skip" | "auto"} [mode=""] グリフのモード。
+     *   "" なら「クリック待ちグリフ」、"skip" なら「スキップ中グリフ」、"auto" なら「オート中グリフ」
      * @returns {jQuery | null} クリック待ちグリフの<img>または<div>を含むjQueryオブジェクト
      */
     createNextImg: function (mode = "") {
@@ -155,7 +186,7 @@ tyrano.plugin.kag.ftag = {
         // id 属性
         let id = "";
 
-        // クラス追加：固定グリフかどうかでクラス名が違う
+        // クラス名や id 属性の調整
         if (!mode) {
             if (pm.fix !== "true") {
                 // メッセージウィンドウ内
@@ -262,24 +293,12 @@ tyrano.plugin.kag.ftag = {
             // プリセットのアニメーションを使用する場合
             // クラス追加
             class_names.push("img_next_" + pm.anim);
-            if (pm.time) {
-                j_glyph.setStyle("animation-duration", $.convertDuration(pm.time));
-            }
-            if (pm.delay) {
-                j_glyph.setStyle("animation-delay", $.convertDuration(pm.delay));
-            }
-            if (pm.count) {
-                j_glyph.setStyle("animation-iteration-count", pm.count);
-            }
-            if (pm.mode) {
-                j_glyph.setStyle("animation-fill-mode", pm.mode);
-            }
-            if (pm.easing) {
-                j_glyph.setStyle("animation-timing-function", pm.easing);
-            }
-            if (pm.direction) {
-                j_glyph.setStyle("animation-direction", pm.direction);
-            }
+            if (pm.time) j_glyph.setStyle("animation-duration", $.convertDuration(pm.time));
+            if (pm.delay) j_glyph.setStyle("animation-delay", $.convertDuration(pm.delay));
+            if (pm.count) j_glyph.setStyle("animation-iteration-count", pm.count);
+            if (pm.mode) j_glyph.setStyle("animation-fill-mode", pm.mode);
+            if (pm.easing) j_glyph.setStyle("animation-timing-function", pm.easing);
+            if (pm.direction) j_glyph.setStyle("animation-direction", pm.direction);
         }
 
         // マージン設定がある場合
@@ -7473,13 +7492,15 @@ tyrano.plugin.kag.tag.glyph = {
                 "display": "none",
             });
             this.kag.layer.getLayer(pm.layer).append(j_next);
-            // さっきまで表示されていたならこれも表示する
+
+            // この[glyph]タグを通過する直前までグリフが表示されていたなら
+            // 新しく作り直したグリフも表示する
             if (is_fix_glyph_displayed) j_next.show();
         }
 
         // コマアニメを使用しない場合は早期リターン
         if (!pm.koma_anim) {
-            this.kag.ftag.nextOrder();
+            this.nextOrder(pm);
             return;
         }
 
@@ -7487,7 +7508,7 @@ tyrano.plugin.kag.tag.glyph = {
         // 画像幅を取得したいのでプリロードする
         this.kag.preload($.parseStorage(pm.koma_anim, pm.folder), (img) => {
             if (!img) {
-                this.kag.ftag.nextOrder();
+                this.nextOrder(pm);
                 return;
             }
             pm.image_width = img.naturalWidth;
@@ -7525,8 +7546,15 @@ tyrano.plugin.kag.tag.glyph = {
             pm.koma_width = parseInt(pm.koma_width * pm.scale_x);
             pm.koma_height = parseInt(pm.koma_height * pm.scale_x);
             this.kag.stat[glyph_key] = $.extend({}, pm);
-            this.kag.ftag.nextOrder();
+            this.nextOrder(pm);
         });
+    },
+
+    // next="false" が渡されているときは nextOrder しない
+    nextOrder(pm) {
+        if (pm.next !== "false") {
+            this.kag.ftag.nextOrder();
+        }
     },
 };
 

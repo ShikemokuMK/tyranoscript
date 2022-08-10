@@ -1012,6 +1012,9 @@ tyrano.plugin.kag.menu = {
         //フォーカスの復元
         this.kag.restoreFocusable();
 
+        //クリック待ちグリフの復元
+        this.kag.ftag.restoreNextImg();
+
         //メニューボタンの状態
         if (this.kag.stat.visible_menu_button == true) {
             $(".button_menu").show();
