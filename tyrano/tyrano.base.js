@@ -153,52 +153,65 @@ tyrano.base = {
                 }
 
                 // スケーリングの情報を記憶しておく
-                $.extend(that.tyrano.kag.tmp.scale_info, {
+                that.updateScreenInfo({
                     scale_x: scale_f,
                     scale_y: scale_f,
-                    margin_top: margin_top,
-                    margin_left: margin_left,
-                    game_width: parseInt(width),
-                    game_height: parseInt(height),
-                    view_width: view_width,
-                    view_height: view_height,
+                    top: margin_top,
+                    left: margin_left,
+                    original_width: parseInt(width),
+                    original_height: parseInt(height),
+                    viewport_width: view_width,
+                    viewport_height: view_height,
                 });
 
                 // ティラノイベント"resize"を発火
-                that.kag.trigger("resize", { target: j_tyrano_base, scale_info: that.tyrano.kag.tmp.scale_info });
+                that.kag.trigger("resize", { target: j_tyrano_base, screen_info: that.tyrano.kag.tmp.screen_info });
             }, timeout);
         } else if (screen_ratio == "fit") {
             // 縦横比を維持しない場合
             $.setTimeout(function () {
                 j_tyrano_base.css("transform", "scaleX(" + width_f + ") scaleY(" + height_f + ")");
                 window.scrollTo(0, 1);
-                $.extend(that.tyrano.kag.tmp.scale_info, {
+                that.updateScreenInfo({
                     scale_x: width_f,
                     scale_y: height_f,
-                    margin_top: 0,
-                    margin_left: 0,
-                    game_width: parseInt(width),
-                    game_height: parseInt(height),
-                    view_width: view_width,
-                    view_height: view_height,
+                    top: 0,
+                    left: 0,
+                    original_width: parseInt(width),
+                    original_height: parseInt(height),
+                    viewport_width: view_width,
+                    viewport_height: view_height,
                 });
 
                 // ティラノイベント"resize"を発火
-                that.kag.trigger("resize", { target: j_tyrano_base, scale_info: that.tyrano.kag.tmp.scale_info });
+                that.kag.trigger("resize", { target: j_tyrano_base, screen_info: that.tyrano.kag.tmp.screen_info });
             }, timeout);
         } else {
-            $.extend(that.tyrano.kag.tmp.scale_info, {
+            that.updateScreenInfo({
                 scale_x: 1,
                 scale_y: 1,
-                margin_top: 0,
-                margin_left: 0,
-                game_width: parseInt(width),
-                game_height: parseInt(height),
-                view_width: view_width,
-                view_height: view_height,
+                top: 0,
+                left: 0,
+                original_width: parseInt(width),
+                original_height: parseInt(height),
+                viewport_width: view_width,
+                viewport_height: view_height,
             });
             // スクリーンサイズ固定
         }
+    },
+
+    /**
+     * スクリーン情報をアップデート
+     * @param {Object} data
+     */
+    updateScreenInfo(data) {
+        const info = this.tyrano.kag.tmp.screen_info;
+        $.extend(info, data);
+        info.width = info.original_width * info.scale_x;
+        info.height = info.original_height * info.scale_y;
+        info.right = info.left + info.width;
+        info.bottom = info.top + info.height;
     },
 
     /**
@@ -213,11 +226,11 @@ tyrano.base = {
      */
     convertPageXYIntoGameXY: function (page_x, page_y, as_int = false) {
         // スケーリング情報の参照
-        const info = this.tyrano.kag.tmp.scale_info;
+        const info = this.tyrano.kag.tmp.screen_info;
 
         // マージンを引く
-        const x_removed_margin = page_x - info.margin_left;
-        const y_removed_margin = page_y - info.margin_top;
+        const x_removed_margin = page_x - info.left;
+        const y_removed_margin = page_y - info.top;
 
         // スケールを戻す
         const x_unscaled = x_removed_margin / info.scale_x;

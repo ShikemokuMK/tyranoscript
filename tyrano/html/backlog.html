@@ -1,20 +1,37 @@
-<div>
+<div id="menu_backlog_wrapper">
+    <div class="display_menu">
+        <!-- 閉じるボタン -->
+        <div class="menu_item" style="float: right; margin: 20px 10px 0 0">
+            <img class="menu_close" src="./tyrano/images/system/menu_button_close.png" />
+        </div>
 
-	<div class="display_menu">
+        <!-- スクロールボタン -->
+        <img class="button_arrow_up button_smart" src="./tyrano/images/system/arrow_up.png" style="left: 670px; top: 20px" />
+        <img class="button_arrow_down button_smart" src="./tyrano/images/system/arrow_down.png" style="left: 800px; top: 15px" />
+        <div style="clear: both"></div>
 
-	<div class="menu_item" style="float:right; margin: 20px 10px 0 0;">
-	<img class="menu_close" src="tyrano/images/system/menu_button_close.png">
-	</div>
+        <!-- ログ本体 -->
+        <div class="log_body"></div>
+    </div>
 
-	<img class="button_arrow_up button_smart" src="tyrano/images/system/arrow_up.png" style="cursor:pointer;left:670px;top:20px;position:absolute;">
-	<img class="button_arrow_down button_smart" src="tyrano/images/system/arrow_down.png" style="cursor:pointer;left:800px;top:15px;position:absolute;">
+    <!-- 背景とタイトル画像 -->
+    <img class="img_label img_label_backlog" src="./tyrano/images/system/label_backlog.png" />
+    <img class="img_bg_base" src="./tyrano/images/system/bg_base.png" />
 
-	<div style="clear:both"></div>
-
-	<div class="log_body"></div>
-
-</div>
-
-	<img class="img_label img_label_backlog" src="tyrano/images/system/label_backlog.png" style="left: 0px; top: 0px; position: absolute;">
-	<img class="img_bg_base" src="tyrano/images/system/bg_base.png" style="z-index:-1;left:0;top:0;width:100%;height:100%;position:absolute;">
+    <!-- ボタンホバー時に画像を変更する -->
+    <script>
+        $("#menu_backlog_wrapper .menu_item img").each((i, elm) => {
+            const j_elm = $(elm);
+            const original_src = j_elm.attr("src");
+            const hover_src = original_src.replace(".png", "2.png");
+            j_elm.hover(
+                () => {
+                    j_elm.attr("src", hover_src);
+                },
+                () => {
+                    j_elm.attr("src", original_src);
+                },
+            );
+        });
+    </script>
 </div>

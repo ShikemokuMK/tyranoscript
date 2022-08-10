@@ -21,6 +21,9 @@ tyrano.plugin.kag = {
         "src",
         "data-event-tag",
         "data-event-pm",
+        "data-event-target",
+        "data-event-storage",
+        "tabindex",
         "l_visible",
         "data-parent-layer",
         "data-video-name",
@@ -154,6 +157,23 @@ tyrano.plugin.kag = {
         },
 
         preload_audio_map: {},
+
+        mode_effect: {
+            pc: {
+                skip: null,
+                auto: null,
+                stop: null,
+                holdskip: null,
+                holdstop: null,
+            },
+            phone: {
+                skip: null,
+                auto: null,
+                stop: null,
+                holdskip: null,
+                holdstop: null,
+            },
+        },
     },
 
     //逐次変化するKAGシステムの動作に必要な状況変化ファイル
@@ -254,6 +274,7 @@ tyrano.plugin.kag = {
         path_glyph: "nextpage.gif", //glyph画像ファイル名
 
         current_cursor: "auto", //現在のカーソル指定
+        use_close_confirm: false,
 
         //表示フォント指定
         font: {
@@ -552,7 +573,7 @@ tyrano.plugin.kag = {
             (async () => {
                 await asar.createPackage(src, dest);
 
-                $.alert("パッチを適応しました。再度、起動してください。", function () {
+                $.alert($.lang("apply_patch_complete"), function () {
                     //パッチの削除。
                     fse.removeSync(_path.resolve(patch_path));
 
@@ -565,13 +586,13 @@ tyrano.plugin.kag = {
 
             return;
         } else {
-            var AdmZip = require("adm-zip");
+            const AdmZip = require("adm-zip");
 
             var path = require("path");
             var abspath = path.resolve("./");
 
             // reading archives
-            var zip = new AdmZip(patch_path);
+            const zip = new AdmZip(patch_path);
             zip.extractAllTo(unzip_path + "/update_tmp", true);
 
             //ファイルを上書きしている
@@ -635,12 +656,22 @@ tyrano.plugin.kag = {
         }
     },
 
+    removeSaveData: function () {
+        const project_id = this.kag.config.projectID;
+        const type = this.kag.config.configSave;
+        const suffixes = ["_sf", "_tyrano_data", "_tyrano_quick_save", "_tyrano_auto_save"];
+        for (const suffix of suffixes) {
+            const key = project_id + suffix;
+            $.removeStorage(key, type);
+        }
+    },
+
     //システム変数を保存する
     saveSystemVariable: function () {
         $.setStorage(this.kag.config.projectID + "_sf", this.variable.sf, this.kag.config.configSave);
 
-        // ティラノイベント"storage:sf"を発火
-        this.kag.trigger("storage:sf");
+        // ティラノイベント"storage-sf"を発火
+        this.kag.trigger("storage-sf");
     },
 
     //すべての変数クリア
@@ -736,6 +767,10 @@ tyrano.plugin.kag = {
         this.studio.kag = that;
         this.studio.init();
 
+        this.chara = object(tyrano.plugin.kag.chara);
+        this.chara.kag = that;
+        this.chara.init();
+
         //セーブデータ認証用のKey確認（ローカルストレージ）
         if ($.isElectron() && that.kag.config.configSave == "file") {
             //PC
@@ -753,14 +788,14 @@ tyrano.plugin.kag = {
                 localStorage.setItem(that.save_key_id, that.save_key_val);
 
                 //セーブデータ上書き
-                var tmp_array = that.menu.getSaveData();
+                let tmp_array = that.menu.getSaveData();
                 //ハッシュを上書き
                 tmp_array["hash"] = that.save_key_val;
                 $.setStorage(that.kag.config.projectID + "_tyrano_data", tmp_array, that.kag.config.configSave);
             }
 
             //ハッシュに差分があったら、警告を表示して上書きするか確認。
-            var tmp_array = that.menu.getSaveData();
+            let tmp_array = that.menu.getSaveData();
 
             if (tmp_array["hash"] != that.save_key_val) {
                 alert($.lang("save_file_violation_1"));
@@ -886,15 +921,49 @@ tyrano.plugin.kag = {
             //absolute指定
             $("#tyrano_base").css("position", "absolute");
 
-            function noScroll(event) {
-                event.preventDefault();
-            }
             // スクロール禁止(SP) vchatのときは例外
             if (this.kag.config["vchat"] != "true") {
+                const noScroll = (event) => {
+                    event.preventDefault();
+                };
                 document.addEventListener("touchmove", noScroll, {
                     passive: false,
                 });
             }
+
+            // Howl を走査して再生中のものを止めて再開フラグを立てる
+            const pauseSoundsOnWindowBlur = () => {
+                for (const howl of Howler._howls) {
+                    if (howl.playing()) {
+                        howl.pause();
+                        howl.__should_play_on_focus = true;
+                    } else {
+                        howl.__should_play_on_focus = false;
+                    }
+                }
+            };
+
+            // Howl を走査して再開フラグの立っているものを再生して回る
+            const resumeSoundsOnWindowFocus = () => {
+                for (const howl of Howler._howls) {
+                    if (howl.__should_play_on_focus) {
+                        howl.play();
+                        howl.__should_play_on_focus = false;
+                    }
+                }
+            };
+
+            $(document).on("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    resumeSoundsOnWindowFocus();
+                }
+                if (document.visibilityState === "hidden") {
+                    pauseSoundsOnWindowBlur();
+                }
+            });
+
+            // $(window).on("blur", pauseSoundsOnWindowBlur);
+            // $(window).on("focus", resumeSoundsOnWindowFocus);
         }
 
         //tyranoの大本部分の調整
@@ -910,15 +979,19 @@ tyrano.plugin.kag = {
         this.base.kag = this;
 
         // 現在のゲーム画面のスケーリング情報を格納
-        this.tmp.scale_info = {
+        this.tmp.screen_info = {
             scale_x: 1,
             scale_y: 1,
-            margin_top: 0,
-            margin_left: 0,
-            game_width: 1280,
-            game_height: 720,
-            view_width: 1920,
-            height_hegiht: 1080,
+            width: 1280,
+            height: 720,
+            top: 0,
+            bottom: 720,
+            left: 0,
+            right: 1280,
+            original_width: 1280,
+            original_height: 720,
+            viewport_width: 1920,
+            viewport_hegiht: 1080,
         };
 
         // ゲーム画面フィットを即実行する
@@ -1036,11 +1109,11 @@ tyrano.plugin.kag = {
                 false;
 
             if (is_full_screen) {
-                // ティラノイベント"fullscreen:start"を発火
-                this.kag.trigger("fullscreen:start", e);
+                // ティラノイベント"fullscreen-start"を発火
+                this.kag.trigger("fullscreen-start", e);
             } else {
-                // ティラノイベント"fullscreen:stop"を発火
-                this.kag.trigger("fullscreen:stop", e);
+                // ティラノイベント"fullscreen-stop"を発火
+                this.kag.trigger("fullscreen-stop", e);
             }
         });
 
@@ -1082,7 +1155,7 @@ tyrano.plugin.kag = {
 
         var num_message_layer = parseInt(this.config.numMessageLayers);
 
-        for (var i = 1; i < num_message_layer; i++) {
+        for (let i = 1; i < num_message_layer; i++) {
             var message_layer_name = "message" + i;
 
             this.layer.addLayer(message_layer_name);
@@ -1102,7 +1175,7 @@ tyrano.plugin.kag = {
 
         //指定された個数分、Foreレイヤを登録する
         var fore_layer_num = parseInt(this.config.numCharacterLayers);
-        for (var i = 0; i < fore_layer_num; i++) {
+        for (let i = 0; i < fore_layer_num; i++) {
             this.layer.addLayer("" + i);
             this.layer
                 .getLayer("" + i, "fore")
@@ -1205,8 +1278,10 @@ tyrano.plugin.kag = {
         if (this.kag.config["vchatMenuVisible"] && this.kag.config["vchatMenuVisible"] == "true") {
             //コンフィグを表示する。
             setTimeout(function () {
+                let player_back_cnt;
+
                 (function () {
-                    var player_back_cnt = 0;
+                    player_back_cnt = 0;
                     var j_menu_button = $(
                         "<div id='player_menu_button' class='player_menu_area' style='display:none;opacity:0.6;border-radius:5px;padding:10px;margin:10px;cursor:pointer;position:absolute;left:0px;top:0px;background-color:white;font-size:2em'><span style='color:#6495ED'>メニュー</span></div>",
                     );
@@ -1332,6 +1407,85 @@ tyrano.plugin.kag = {
             });
         });
 
+        //
+        // キーボードによるボタンフォーカス関連の設定
+        //
+
+        if (this.config["keyFocusOutlineWidth"]) {
+            const width = this.config["keyFocusOutlineWidth"];
+            $.insertRuleToTyranoCSS(`:focus.focus { outline-width: ${width}px}`);
+        }
+
+        let focus_outline_color = "#000000";
+        if (this.config["keyFocusOutlineColor"]) {
+            const color = $.convertColor(this.config["keyFocusOutlineColor"]);
+            focus_outline_color = color;
+            $.insertRuleToTyranoCSS(`:focus.focus { outline-color: ${color}}`);
+        }
+        if (this.config["keyFocusOutlineStyle"]) {
+            const style = $.convertColor(this.config["keyFocusOutlineStyle"]);
+            $.insertRuleToTyranoCSS(`:focus.focus { outline-style: ${style}}`);
+        }
+        if (this.config["keyFocusOutlineAnim"] && this.config["keyFocusOutlineAnim"] !== "none") {
+            switch (this.config["keyFocusOutlineAnim"]) {
+                default:
+                case "flash":
+                    $.insertRuleToTyranoCSS(`:focus.focus { animation: focus 1000ms infinite alternate linear; }`);
+                    $.insertRuleToTyranoCSS(`
+                    @keyframes focus {
+                        0%   { outline-color: ${focus_outline_color}; }
+                        3%   { outline-color: ${focus_outline_color}; }
+                        97%  { outline-color: transparent; }
+                        100% { outline-color: transparent; }
+                    }`);
+                    break;
+                case "flash_momentary":
+                    $.insertRuleToTyranoCSS(`:focus.focus { animation: focus 1000ms infinite steps(1, end); }`);
+                    $.insertRuleToTyranoCSS(`
+                    @keyframes focus {
+                        0% { outline-color: ${focus_outline_color}; }
+                        50%, 100% { outline-color: transparent; }
+                    }`);
+                    break;
+            }
+            if (this.config["keyFocusOutlineAnimDuration"]) {
+                $.insertRuleToTyranoCSS(`:focus.hover { animation-duration: ${this.config["keyFocusOutlineAnimDuration"]}ms; }`);
+            }
+        }
+        if (this.config["keyFocusWithHoverStyle"] === "true") {
+            $.copyHoverCSSToFocusCSS('link[href*="tyrano/tyrano.css"]');
+        }
+
+        //
+        // 終了時の確認ダイアログ
+        //
+
+        if (this.config["useCloseConfirm"] === "true") {
+            // 通常セーブ、クイックセーブ、オートセーブ、ロード時にコンファームを破壊
+            this.kag.on(
+                "storage-save storage-quicksave storage-autosave load-complete",
+                () => {
+                    $.disableCloseConfirm();
+                },
+                { system: true },
+            );
+
+            // nextOrder 時にコンファームを復元
+            this.kag.on(
+                "nextorder",
+                (e) => {
+                    if (this.stat.use_close_confirm) $.enableCloseConfirm();
+                },
+                { system: true },
+            );
+        }
+
+        //
+        // remodal のリセット
+        //
+
+        this.kag.ftag.master_tag.dialog_config.init();
+
         //ティラノライダーからの通知の場合、発生させる
         //that.rider.complete(this);
 
@@ -1453,12 +1607,41 @@ tyrano.plugin.kag = {
     setCursor: function (cursor) {
         this.stat.current_cursor = cursor;
 
-        if (cursor === "default") {
-            //標準のカーソルをセット
-            $("body").css("cursor", "auto");
-        } else {
-            $("body").css("cursor", "url(./data/image/" + cursor + "),default");
+        let storage, x, y;
+        if (typeof cursor === "string") {
+            storage = cursor;
+            x = "0";
+            y = "0";
+        } else if (typeof cursor === "object") {
+            storage = cursor.storage;
+            x = cursor.x;
+            y = cursor.y;
         }
+
+        let image_url;
+        let css_str;
+        if (storage === "default") {
+            css_str = "auto";
+        } else {
+            image_url = `./data/image/${storage}`;
+            css_str = `url(${image_url}) ${x} ${y}, default`;
+        }
+
+        $("body").css("cursor", css_str);
+        this.kag.key_mouse.vmouse.addImage("default", image_url, x, y);
+    },
+
+    /**
+     * ある要素にカーソル設定をセットする
+     * @param {jQuery} j_elm
+     * @param {string} type (例) "pointer"
+     */
+    setElmCursor: function (j_elm, type) {
+        if (!this.stat.current_cursor_map) {
+            this.stat.current_cursor_map = {};
+        }
+        const option = this.stat.current_cursor_map[type] || type;
+        j_elm.css("cursor", option);
     },
 
     //吹き出しのスタイルをアップデートする
@@ -1498,7 +1681,7 @@ tyrano.plugin.kag = {
             style_text = "top:" + sippo_left + "px;";
         }
 
-        style_text_key = "";
+        let style_text_key = "";
 
         //トップ指定の場合
 
@@ -1602,7 +1785,7 @@ tyrano.plugin.kag = {
             //停止中なら
             if (this.kag.stat.is_wait_anim == true) {
                 this.kag.stat.is_wait_anim = false;
-                this.kag.layer.showEventLayer();
+                this.kag.cancelWeakStop();
                 this.kag.ftag.nextOrder();
             }
         }
@@ -1611,7 +1794,7 @@ tyrano.plugin.kag = {
     //シナリオファイルの読み込み
     loadScenario: function (file_name, call_back) {
         var that = this;
-        this.stat.is_strong_stop = true;
+        this.stronglyStop();
 
         this.stat.current_scenario = file_name;
 
@@ -1635,7 +1818,7 @@ tyrano.plugin.kag = {
 
                 //ラベル情報を格納
                 that.stat.map_label = map_label;
-                that.stat.is_strong_stop = false;
+                that.cancelStrongStop();
 
                 call_back(tag_obj);
             }
@@ -1649,7 +1832,7 @@ tyrano.plugin.kag = {
 
                 //ラベル情報を格納
                 that.stat.map_label = map_label;
-                that.stat.is_strong_stop = false;
+                that.cancelStrongStop();
 
                 if (call_back) {
                     call_back(tag_obj);
@@ -1734,6 +1917,13 @@ tyrano.plugin.kag = {
 
     //画像のプリロード オンの場合は、ロードが完了するまで次へ行かない
     preload: function (src, callbk, options = {}) {
+        this.kag.showLoadingLog("preload");
+
+        const onend = (elm) => {
+            this.kag.hideLoadingLog();
+            if (callbk) callbk(elm);
+        };
+
         var that = this;
 
         var ext = $.getExt(src);
@@ -1769,12 +1959,12 @@ tyrano.plugin.kag = {
                     case "loading":
                         // ロード中の場合はロードイベントリスナを追加
                         preloaded_audio.once("load", () => {
-                            if (callbk) callbk(preloaded_audio);
+                            onend(preloaded_audio);
                         });
                         return;
                     case "loaded":
                         // ロード済みなら即コールバック
-                        if (callbk) callbk(preloaded_audio);
+                        onend(preloaded_audio);
                         return;
                 }
             }
@@ -1791,14 +1981,14 @@ tyrano.plugin.kag = {
 
             // ロードに成功したとき
             audio_obj.once("load", () => {
-                if (callbk) callbk(audio_obj);
+                onend(audio_obj);
             });
 
             // ロードに失敗したとき
             audio_obj.once("loaderror", () => {
                 audio_obj.unload();
-                //that.kag.error("オーディオファイル「"+src+"」が見つかりません。場所はフルパスで指定されていますか？ (例)data/bgm/music.ogg");
-                if (callbk) callbk(audio_obj);
+                this.kag.error("preload_failure_sound", { src });
+                onend(audio_obj);
                 delete this.kag.tmp.preload_audio_map[src];
             });
 
@@ -1821,28 +2011,22 @@ tyrano.plugin.kag = {
             // 動画ファイルプリロード
             $("<video />")
                 .on("loadeddata", function (e) {
-                    callbk && callbk();
+                    onend(this);
                 })
                 .on("error", function (e) {
-                    that.kag.error(
-                        "動画ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/video/file.mp4",
-                    );
-                    callbk && callbk();
+                    that.kag.error("preload_failure_video", { src });
+                    onend();
                 })
                 .attr("src", src);
         } else {
             // 画像ファイルプリロード
             $("<img />")
                 .on("load", function (e) {
-                    if (callbk) callbk(this);
+                    onend(this);
                 })
                 .on("error", function (e) {
-                    //画像が見つからなかった時のエラー
-                    //that.kag.message(画像ファイル「"+src+"」が見つかりません");
-                    that.kag.error(
-                        "画像ファイル「" + src + "」が見つかりません。場所はフルパスで指定されていますか？ (例)data/fgimage/file.png",
-                    );
-                    if (callbk) callbk();
+                    that.kag.error("preload_failure_image", { src });
+                    onend();
                 })
                 .attr("src", src);
         }
@@ -1913,7 +2097,7 @@ tyrano.plugin.kag = {
 
     //値が空白のものは設定しない
     setStyles: function (j_obj, array_style) {
-        for (key in array_style) {
+        for (let key in array_style) {
             if (typeof array_style[key] != "undefined") {
                 if (array_style[key] === "") {
                 } else {
@@ -1966,21 +2150,34 @@ tyrano.plugin.kag = {
         }
     },
 
-    error: function (str) {
+    error: function (message, replace_map) {
         if (this.kag.config["debugMenu.visible"] == "true") {
-            //Error:first.ks：28行目:まるまるまる
-            var current_storage = this.kag.stat.current_scenario;
-            var line = parseInt(this.kag.stat.current_line) + 1;
-
-            var err = "Error:" + current_storage + ":" + line + "行目:" + str;
-
-            $.error_message(err);
+            // Error: first.ks：28行目
+            // ほにゃららのエラーが発生しました。
+            const current_storage = this.kag.stat.current_scenario;
+            const line = parseInt(this.kag.stat.current_line) + 1;
+            const line_str = $.lang("line", { line });
+            if (message in tyrano_lang.word) {
+                message = $.lang(message, replace_map);
+            }
+            const error_str = `Error: ${current_storage}:${line_str}\n\n${message}`;
+            $.error_message(error_str);
         }
     },
+
     //警告表示
-    warning: function (str) {
+    warning: function (message, replace_map, is_alert = true) {
         if (this.kag.config["debugMenu.visible"] == "true") {
-            alert(str);
+            if (typeof replace_map === "boolean") is_alert = replace_map;
+            if (message in tyrano_lang.word) {
+                message = $.lang(message, replace_map);
+            }
+            const warning_str = `Warning: ${message}`;
+            if (is_alert) {
+                $.error_message(warning_str);
+            } else {
+                console.warn(warning_str);
+            }
         }
     },
 
@@ -1999,11 +2196,44 @@ tyrano.plugin.kag = {
             return;
         }
         if (bool) {
-            // ティラノイベント"auto:start"を発火
-            this.trigger("auto:start");
+            // ティラノイベント"auto-start"を発火
+            this.trigger("auto-start");
+
+            // グリフ表示
+            this.kag.ftag.showGlyph("auto");
+            this.kag.ftag.changeAutoNextGlyph();
+
+            // オートモード状態にボタン画像を同期させる
+            $(".button-auto-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.autoimg, pm.folder));
+                j_elm.addClass("src-change-disabled");
+            });
+
+            this.showModeEffect("auto");
+
+            // スキップモードとオートモードは同時に成立しない
+            this.setSkip(false);
         } else {
-            // ティラノイベント"auto:stop"を発火
-            this.trigger("auto:stop");
+            this.stat.is_wait_auto = false;
+
+            // ティラノイベント"auto-stop"を発火
+            this.trigger("auto-stop");
+
+            // グリフ非表示
+            this.kag.ftag.hideGlyph("auto");
+            this.kag.ftag.restoreAutoNextGlyph();
+
+            // オートモード状態にボタン画像を同期させる
+            $(".button-auto-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.graphic, pm.folder));
+                j_elm.removeClass("src-change-disabled");
+            });
+
+            this.showModeEffect("stop");
         }
         this.stat.is_auto = bool;
     },
@@ -2011,19 +2241,78 @@ tyrano.plugin.kag = {
     /**
      * スキップモード状態を設定する (現在の状態からの変更がない場合は無視)
      * @param {boolean} スキップモードにするかどうか
+     * @param {options}
      */
-    setSkip: function (bool) {
+    setSkip: function (bool, options = {}) {
         if (this.stat.is_skip === bool) {
             return;
         }
         if (bool) {
-            // ティラノイベント"skip:start"を発火
-            this.trigger("skip:start");
+            // ティラノイベント"skip-start"を発火
+            this.trigger("skip-start");
+
+            // グリフ表示
+            this.kag.ftag.showGlyph("skip");
+
+            // スキップモード状態にボタン画像を同期させる
+            $(".button-skip-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.skipimg, pm.folder));
+                j_elm.addClass("src-change-disabled");
+            });
+
+            this.showModeEffect("skip", options);
+
+            // スキップモードとオートモードは同時に成立しない
+            this.setAuto(false);
         } else {
-            // ティラノイベント"skip:stop"を発火
-            this.trigger("skip:stop");
+            // ティラノイベント"skip-stop"を発火
+            this.trigger("skip-stop");
+
+            // グリフ非表示
+            this.kag.ftag.hideGlyph("skip");
+
+            // スキップモード状態にボタン画像を同期させる
+            $(".button-skip-sync").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                j_elm.attr("src", $.parseStorage(pm.graphic, pm.folder));
+                j_elm.removeClass("src-change-disabled");
+            });
+
+            this.showModeEffect("stop", options);
         }
         this.stat.is_skip = bool;
+    },
+
+    /**
+     * stat.is_stop に true を入れる
+     *
+     * - is_stop        (弱いストップ) アニメーションやトランジションの最中に有効
+     * - is_strong_stop (強いストップ) [s]や[wait]で有効
+     *
+     * - 弱いストップが有効なときはイベントレイヤをクリックしても反応しなくなる。
+     *   ただし、外部から直接 nextOrder が呼び出されたときは次のタグに進行する。
+     * - 強いストップが有効なときは外部から呼び出された nextOrder にすら反応しなくなる！
+     */
+    weaklyStop: function () {
+        this.stat.is_stop = true;
+    },
+    cancelWeakStop: function () {
+        this.stat.is_stop = false;
+    },
+    stronglyStop: function () {
+        this.stat.is_strong_stop = true;
+    },
+    cancelStrongStop: function () {
+        this.stat.is_strong_stop = false;
+    },
+    waitClick: function (name) {
+        // console.warn(`waitClick: ${name}`);
+        this.layer.showEventLayer();
+        this.cancelStrongStop();
+        this.cancelWeakStop();
     },
 
     /**
@@ -2068,13 +2357,16 @@ tyrano.plugin.kag = {
     logEventLisnenerCount: function () {
         let str = "現在登録されているイベントリスナ\n";
         const map = this.event_listener_map;
+        let sum = 0;
         for (const event in map) {
             if (map[event]) {
                 str += `${event}: ${map[event].length}件\n`;
+                sum += map[event].length;
             }
         }
         str += "%o";
         console.log(str, map);
+        console.log(`合計 ${sum} 個のイベントリスナが登録されています。`);
     },
 
     /**
@@ -2104,7 +2396,7 @@ tyrano.plugin.kag = {
                 callback_return_value = listener.callback.call(this, event_obj);
             }
             // このリスナがonceリスナなら記憶しておく
-            if (listener.is_once) {
+            if (listener.once) {
                 exists_once = true;
                 unbind_target_ids.push(listener.id);
             }
@@ -2140,9 +2432,9 @@ tyrano.plugin.kag = {
      *   コールバック内で return false するとイベントリスナの呼び出しを中断する
      *   それ以降のイベントリスナは呼び出されない(onceの削除もされない)
      * @param {Object} options
-     * @param {boolean} options.is_once イベントリスナを1回実行したら削除すべきならtrue
-     * @param {boolean} options.is_system (ユーザーが独自に追加したのではなく)システムが利用しているリスナならtrue
-     * @param {boolean} options.is_temp セーブデータロード時に削除すべきならtrue
+     * @param {boolean} options.once イベントリスナを1回実行したら削除すべきならtrue
+     * @param {boolean} options.system (ユーザーが独自に追加したのではなく)システムが利用しているリスナならtrue
+     * @param {boolean} options.temp セーブデータロード時に削除すべきならtrue
      * @param {number} options.priority　優先度。これが「高い」ほうから順に実行される。デフォルトは0
      */
     on: function (event_names, callback, options = {}) {
@@ -2153,7 +2445,7 @@ tyrano.plugin.kag = {
         for (const event_name of event_name_hash) {
             // 例) "save.hoge.fuga"
             const dot_hash = event_name.split("."); // ["save", "hoge", "fuga"]
-            const event = dot_hash[0]; // "save"
+            const event = dot_hash[0].replace(/:/g, "-"); // "save"
             const namespaces = dot_hash.slice(1); // ["hoge", "fuga"]
             if (event !== "") {
                 if (map[event] === undefined) {
@@ -2164,9 +2456,9 @@ tyrano.plugin.kag = {
                     callback: callback,
                     namespaces: namespaces,
                     priority: options.priority || 0,
-                    is_once: !!options.is_once || false,
-                    is_system: options.is_system || false,
-                    is_temp: options.is_temp || false,
+                    once: !!options.once || false,
+                    system: options.system || false,
+                    temp: options.temp || false,
                 };
                 map[event].push(listener);
                 this.event_listener_count += 1;
@@ -2175,15 +2467,27 @@ tyrano.plugin.kag = {
         }
         if (this.is_event_logging_enabled) this.logEventLisnenerCount();
     },
+
     /**
      * on メソッドのラッパー
-     * is_once オプションを true で上書きしたうえで on メソッドに投げる
+     * once オプションを true で上書きしたうえで on メソッドに投げる
      * @param {string} event_names
      * @param {function} callback
      * @param {ListenerOption} options
      */
     once: function (event_names, callback, options = {}) {
-        options.is_once = true;
+        options.once = true;
+        this.on(event_names, callback, options);
+    },
+
+    /**
+     * on + off メソッドのラッパー
+     * @param {string} event_names
+     * @param {function} callback
+     * @param {ListenerOption} options
+     */
+    overwrite: function (event_names, callback, options = {}) {
+        this.off(event_names, options);
         this.on(event_names, callback, options);
     },
 
@@ -2214,7 +2518,7 @@ tyrano.plugin.kag = {
      *   ドット区切りで名前空間を複数指定可能 指定したすべての名前空間を持つリスナだけを削除できる
      *   いきなりドットで書き始めることで削除対象のリスナを"名前空間だけ"で指定することも可能
      * @param {Object} options
-     * @param {boolean} options.off_system システムリスナを除去するかどうか
+     * @param {boolean} options.system システムリスナを除去するかどうか
      */
     off: function (event_names, options = {}) {
         const map = this.event_listener_map;
@@ -2260,10 +2564,10 @@ tyrano.plugin.kag = {
                         }
 
                         // システムリスナの場合、基本生き残り確定だが、
-                        if (listener.is_system) {
+                        if (listener.system) {
                             should_keep = true;
                             // システムリスナすら除去するオプションが指定されているようならやっぱり殺す
-                            if (options.off_system) {
+                            if (options.system) {
                                 should_keep = false;
                             }
                         }
@@ -2288,7 +2592,7 @@ tyrano.plugin.kag = {
         for (const event in map) {
             if (map[event]) {
                 map[event] = map[event].filter((listener) => {
-                    return !listener.is_temp;
+                    return !listener.temp;
                 });
             }
         }
@@ -2309,78 +2613,6 @@ tyrano.plugin.kag = {
      */
     getTag: function (tag_name = "") {
         return this.ftag.master_tag[tag_name];
-    },
-
-    /**
-     * 発言者の名前欄を意味する<p>要素のjQueryオブジェクトを返す
-     * そもそも[chara_config]タグによる chara_ptext の設定が済んでいない場合は空のjQueryオブジェクトを返す
-     * @returns {jQuery}
-     */
-    getCharaNameArea: function () {
-        return this.stat.chara_ptext ? $("." + this.stat.chara_ptext) : $();
-    },
-
-    /**
-     * 発言者の名前を返す
-     * 発言者がいない場合は空の文字列を返す
-     * @returns {string}
-     */
-    getCharaName: function () {
-        let chara_name = "";
-        if (this.stat.chara_ptext != "") {
-            // 発言者エリアを取得
-            const j_chara_name = this.getCharaNameArea();
-            if (!j_chara_name.hasClass("multiple-text")) {
-                // ふつうはこれでよい
-                chara_name = $.isNull(j_chara_name.html());
-            } else {
-                // 個別縁取りが施されている場合
-                // この場合はそのままhtml()するとエラいことになる！
-                // span
-                //   span.stroke あ
-                //   span.fill   あ
-                // span
-                //   span.stroke か
-                //   span.fill   か
-                // span
-                //   span.stroke ね
-                //   span.fill   ね
-                // こんな構造になっているから
-                chara_name = j_chara_name.find(".fill").text();
-            }
-        }
-        return chara_name;
-    },
-
-    /**
-     * キャラクターのjQueryオブジェクトを返す
-     * @returns {jQuery}
-     */
-    getCharaElement: function (chara_name) {
-        let selector = ".tyrano_chara";
-        if (chara_name) {
-            selector += "." + chara_name;
-        }
-        return $("#tyrano_base").find(selector);
-    },
-
-    /**
-     * 発言していない人用のスタイルを当てる
-     * @param {jQuery} j_chara
-     */
-    setNotSpeakerStyle: function (j_chara) {
-        const filter = this.stat.apply_filter_str;
-        j_chara.setFilterCSS(filter);
-    },
-
-    /**
-     * 発言者用のスタイルを当てる
-     * @param {jQuery} j_chara
-     */
-    setSpeakerStyle: function (j_chara) {
-        // 発言していない人はフィルターなし
-        const filter = "";
-        j_chara.setFilterCSS(filter);
     },
 
     /**
@@ -2509,6 +2741,336 @@ tyrano.plugin.kag = {
             buf: buf,
             stop: "true",
         });
+    },
+
+    /**
+     * あるjQueryオブジェクト（ボタン類）をキーボードでフォーカス可能にする
+     * @param {jQuery} j_elm
+     * @param {number|string} tabindex
+     */
+    makeFocusable: function (j_elm, tabindex = 0) {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+        if (typeof tabindex === "string") {
+            if (tabindex === "false") {
+                return;
+            }
+            tabindex = parseInt(tabindex) || 0;
+        }
+        j_elm.attr("tabindex", tabindex);
+        j_elm.addClass("tyrano-focusable");
+        j_elm.off("focusin focusout");
+        j_elm.on("focusin", () => {
+            if (this.config["keyFocusWithHoverStyle"] === "true") {
+                j_elm.trigger("mouseenter");
+            }
+            j_elm.addClass("focus");
+        });
+        j_elm.on("focusout", () => {
+            if (this.config["keyFocusWithHoverStyle"] === "true") {
+                j_elm.trigger("mouseleave");
+            }
+            j_elm.removeClass("focus");
+        });
+    },
+
+    /**
+     * あるjQueryオブジェクト（ボタン類）をキーボードでフォーカス不可能にする
+     * @param {jQuery} j_elm
+     */
+    makeUnfocusable: function (j_elm) {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+        j_elm.removeAttr("tabindex");
+        j_elm.removeClass("tyrano-focusable");
+        j_elm.off("focusin focusout");
+    },
+
+    /**
+     * あるjQueryオブジェクトに含まれるすべてのボタン類をフォーカス不可能にする
+     * @param {jQuery} j_elm
+     */
+    makeUnfocusableAll: function (j_elm) {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+        this.makeUnfocusable(j_elm.find("[tabindex]"));
+    },
+
+    /**
+     * フォーカスを外す
+     */
+    unfocus: function () {
+        $(":focus").blur().removeClass("hover");
+    },
+
+    /**
+     * フォーカスの復元
+     * イベントリスナやホワイトリストに載っていないアトリビュートはセーブ＆ロード時に破壊されるため
+     * 改めて準備する必要がある
+     */
+    restoreFocusable: function () {
+        // キーフォーカスが無効なら帰る
+        if (this.config["useKeyFocus"] === "false") {
+            return;
+        }
+
+        $(".tyrano-focusable").each((i, elm) => {
+            const j_elm = $(elm);
+            const tabindex = parseInt(j_elm.attr("tabindex")) || 0;
+            this.makeFocusable(j_elm, tabindex);
+        });
+    },
+
+    chara: {
+        init() {},
+
+        /**
+         * 発言者の名前欄を意味する p 要素を返す
+         * [chara_config] タグによる chara_ptext の設定が済んでいない場合は
+         * 空のjQueryオブジェクトを返す
+         * @returns {jQuery}
+         */
+        getCharaNameArea() {
+            return this.kag.stat.chara_ptext ? $("." + this.kag.stat.chara_ptext) : $();
+        },
+
+        /**
+         * 発言者の名前を返す
+         * 発言者がいない場合は空の文字列を返す
+         * @returns {string}
+         */
+        getCharaName() {
+            let chara_name = "";
+            if (this.kag.stat.chara_ptext != "") {
+                // 発言者エリアを取得
+                const j_chara_name = this.getCharaNameArea();
+                if (!j_chara_name.hasClass("multiple-text")) {
+                    // ふつうはこれでよい
+                    chara_name = $.isNull(j_chara_name.html());
+                } else {
+                    // 個別縁取りが施されている場合
+                    // この場合はそのままhtml()するとエラいことになる！
+                    // span
+                    //   span.stroke あ
+                    //   span.fill   あ
+                    // span
+                    //   span.stroke か
+                    //   span.fill   か
+                    // span
+                    //   span.stroke ね
+                    //   span.fill   ね
+                    // こんな構造になっているから
+                    chara_name = j_chara_name.find(".fill").text();
+                }
+            }
+            return chara_name;
+        },
+
+        /**
+         * 発言していない人用のスタイルを当てる
+         * @param {jQuery} j_chara
+         */
+        setNotSpeakerStyle(j_chara) {
+            const filter = this.kag.stat.apply_filter_str;
+            j_chara.setFilterCSS(filter);
+        },
+
+        /**
+         * 発言している人用のスタイルを当てる
+         * @param {jQuery} j_chara
+         */
+        setSpeakerStyle: function (j_chara) {
+            // 発言していない人はフィルターなし
+            const filter = "";
+            j_chara.setFilterCSS(filter);
+        },
+
+        /**
+         * mix-blend-mode: plus-lighter を使用するか？
+         * @returns {boolean}
+         */
+        isPlusLighterEnabled() {
+            return this.kag.stat.plus_lighter === "true";
+        },
+
+        /**
+         * キャラの div 要素を返す
+         * chara_name を省略することで全キャラの div 要素を取得できる
+         * @param {string} [chara_name]
+         * @param {jQuery} [j_layer]
+         * @returns {jQuery}
+         */
+        getCharaContainer(chara_name, j_layer) {
+            // レイヤ指定がなければすべての fore レイヤから探す
+            if (!j_layer) j_layer = $(".layer_fore");
+
+            // chara_name 指定がない場合はすべてのキャラを探す
+            let chara_selector = "";
+            if (chara_name) chara_selector = "." + chara_name;
+
+            return j_layer.find(".tyrano_chara" + chara_selector);
+        },
+
+        /**
+         * キャラの各パーツを div でラップする処理。
+         *
+         * V514時点でキャラのDOM構造は次のようになっている。
+         *
+         * div.tyrano_chara.akane
+         *     img.chara_img      ← [chara_face]  で定義, [chara_mod]  で表示変更
+         *     img.part.eye       ← [chara_layer] で定義, [chara_part] で表示変更
+         *     img.part.mouth
+         * 　　　...
+         *
+         * これを
+         *
+         * div.tyrano_chara.akane
+         *     div.chara_part_container
+         *         img.chara_img
+         *     div.chara_part_container
+         *         img.part.eye
+         *     div.chara_part_container
+         *         img.part.mouth
+         * 　　 ...
+         *
+         * のように変更する。各パーツの img 要素を div 要素でラップする。
+         * @param {jQuery} j_chara
+         */
+        setPartContainer(j_chara) {
+            if (!this.isPlusLighterEnabled()) return;
+            j_chara.children("img").each((i, img) => {
+                this.wrapPartContainer(img);
+            });
+        },
+
+        /**
+         * ひとつの img 要素を div.chara_part_container 要素でラップする
+         * @param {Element | jQuery} j_img
+         */
+        wrapPartContainer(j_img) {
+            const j_div = $('<div class="chara_part_container plus_lighter_container" />');
+            j_div.insertAfter(j_img);
+            j_div.append(j_img);
+        },
+    },
+
+    /**
+     * モード変化のエフェクトを出す
+     * @param {"skip" | "stop" | "auto"} type
+     * @param {Object} [options]
+     * @param {boolean} options.hold
+     * @returns
+     */
+    showModeEffect(_type, options = {}) {
+        clearTimeout(this.tmp.screen_effect_timer_id);
+
+        const type = options.hold ? "hold" + _type : _type;
+
+        // 10ミリ秒後にエフェクトを予約
+        this.tmp.screen_effect_timer_id = setTimeout(() => {
+            // 10ミリ秒後の時点でモードに変化がなければリターン
+            if (this.kag.tmp.prev_screen_effect_type === type) return;
+
+            this.kag.tmp.prev_screen_effect_type = type;
+
+            // この環境の定義がなければリターン
+            const env = $.userenv() === "pc" ? "pc" : "phone";
+            if (!this.tmp.mode_effect[env] || !this.tmp.mode_effect[env][type]) return;
+
+            // storage が取れなければリターン
+            const def = this.tmp.mode_effect[env][type];
+            const storage = def.storage;
+            if (!storage || storage === "none") return;
+
+            // 前回エフェクトの削除
+            $("#mode_effect").remove();
+
+            // デフォルトなら div 要素, 画像が指定されているなら img 要素
+            let j_effect;
+            if (storage === "default") {
+                j_effect = $(`<div id="mode_effect" class="mode_effect mode_effect_default ${_type}"><div></div><div></div></div>`);
+                if (def.width && def.width !== "auto") j_effect.css("font-size", `${(def.width / 15).toFixed(0)}px`);
+                if (def.bgcolor) j_effect.css("background", $.convertColor(def.bgcolor));
+                if (def.color) {
+                    if (_type === "stop") {
+                        j_effect.children().eq(0).css("border-right-color", $.convertColor(def.color));
+                        j_effect.children().eq(1).css("border-left-color", $.convertColor(def.color));
+                    } else {
+                        j_effect.children().css("border-left-color", $.convertColor(def.color));
+                    }
+                }
+            } else {
+                const src = $.parseStorage(storage, "image");
+                j_effect = $(`<img id="mode_effect" src="${src}" class="mode_effect ${type}" />`);
+                if (def.width && def.width !== "auto") j_effect.css("width", $.convertLength(def.width));
+                if (def.height && def.height !== "auto") j_effect.css("height", $.convertLength(def.height));
+            }
+
+            const duration = 800;
+            j_effect.setStyle("animation-duration", `${duration}ms`);
+
+            $("#tyrano_base").append(j_effect);
+
+            setTimeout(() => {
+                j_effect.remove();
+            }, duration);
+        }, 10);
+    },
+
+    /**
+     * 「ローディング中...」のログを画面端に出す
+     * @param {"preload" | "save"} type
+     */
+    showLoadingLog(type = "preload") {
+        // 未定義なら
+        if (!this.kag.stat.loading_log) return;
+
+        // 予約解除
+        const tmp = this.kag.tmp;
+        clearTimeout(tmp.loading_log_hide_timer_id);
+
+        // テキスト参照
+        let text = this.kag.stat.loading_log.message_map[type];
+        if (!text || text === "none") return;
+        if (text === "default") text = this.kag.getTag("loading_log").default_message_map[type];
+        if (text === "notext") text = "";
+        tmp.j_loading_log_message.text(text);
+
+        // 「...」のアニメーションの設定
+        if (text) {
+            tmp.j_loading_log_message.setStyle("animation-duration", `${this.kag.stat.loading_log.dot_time}ms`);
+        }
+
+        if (this.kag.stat.loading_log.use_icon) {
+            tmp.j_loading_log_icon.show();
+        } else {
+            tmp.j_loading_log_icon.hide();
+        }
+
+        // タイムアウトを設ける (数フレームだけローディングが出るのは鬱陶しいため)
+        clearTimeout(tmp.loading_log_timer_id);
+        tmp.loading_log_timer_id = $.setTimeout(() => {
+            tmp.j_loading_log.show();
+        }, Math.max(11, this.kag.stat.loading_log.min_time));
+    },
+
+    /**
+     * 「ローディング中」のログを消す
+     */
+    hideLoadingLog() {
+        if (!this.kag.ftag.master_tag.loading_log || !this.kag.ftag.master_tag.loading_log.initialized) return;
+        const tmp = this.kag.tmp;
+        clearTimeout(tmp.loading_log_hide_timer_id);
+        tmp.loading_log_hide_timer_id = setTimeout(() => {
+            clearTimeout(tmp.loading_log_timer_id);
+            tmp.j_loading_log.hide();
+        }, 10);
     },
 
     test: function () {},

@@ -14,5 +14,14 @@
 	},
 	"webkit": {
 		"plugin": true
+	},
+	"scripts": {
+		"lint": "eslint --ext .js ./tyrano",
+		"format": "prettier --write ./tyrano/**/*.js"
+	},
+	"devDependencies": {
+		"eslint": "^8.20.0",
+		"eslint-config-prettier": "^8.5.0",
+		"prettier": "^2.7.1"
 	}
 }

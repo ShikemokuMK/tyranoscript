@@ -37,7 +37,7 @@ tyrano.plugin.kag.tag.vchat_in = {
     pm: {},
 
     start: function (pm) {
-        this.kag.layer.hideEventLayer();
+        this.kag.weaklyStop();
 
         var that = this;
 
@@ -94,8 +94,6 @@ tyrano.plugin.kag.tag.vchat_in = {
             /*  "font-family":that.kag.stat.font.face,*/
         });
 
-        var j_area_chat = $("#vchat_base");
-
         j_area_chat.prepend(j_vchat);
 
         //スクロールを一番上にする。
@@ -108,7 +106,7 @@ tyrano.plugin.kag.tag.vchat_in = {
             $("#vchat_base").find(".vchat:eq(-1)").remove();
         }
 
-        this.kag.layer.showEventLayer();
+        this.kag.cancelWeakStop();
 
         return false;
     },

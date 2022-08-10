@@ -361,7 +361,7 @@ tyrano.plugin.kag.tag.wait_camera = {
     start: function (pm) {
         //今、カメラ中なら待つ
         if (this.kag.stat.is_move_camera == true) {
-            //this.kag.layer.hideEventLayer();
+            //this.kag.weaklyStop();
             this.kag.stat.is_wait_camera = true;
         } else {
             this.kag.ftag.nextOrder();
@@ -373,7 +373,7 @@ tyrano.plugin.kag.tag.wait_camera = {
 #[mask]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 スクリーンマスク表示
@@ -418,7 +418,7 @@ tyrano.plugin.kag.tag.mask = {
 
     start: function (pm) {
         var that = this;
-        that.kag.layer.hideEventLayer();
+        that.kag.weaklyStop();
 
         if (pm.time == "0") {
             pm.time = "1";
@@ -441,7 +441,7 @@ tyrano.plugin.kag.tag.mask = {
         }
 
         if (pm.graphic != "") {
-            var foler = "";
+            var folder = "";
             if (pm.folder != "") {
                 folder = pm.folder;
             } else {
@@ -483,7 +483,7 @@ tyrano.plugin.kag.tag.mask = {
 #[mask_off]
 
 :group
-レイヤ関連
+演出・効果・動画
 
 :title
 スクリーンマスク消去
@@ -537,11 +537,11 @@ tyrano.plugin.kag.tag.mask_off = {
             var animationEnd = "webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend";
             j_div.addClass("animated " + pm.effect).one(animationEnd, function () {
                 j_div.remove();
-                that.kag.layer.showEventLayer();
+                that.kag.cancelWeakStop();
                 that.kag.ftag.nextOrder();
             });
         } else {
-            that.kag.layer.showEventLayer();
+            that.kag.cancelWeakStop();
             that.kag.ftag.nextOrder();
         }
     },

@@ -14,7 +14,7 @@ $.makeHash = function (num) {
 
 $.three_pos = function (str) {
     var obj = {};
-    arr_obj = str.split(",");
+    var arr_obj = str.split(",");
 
     if (arr_obj.length == 1) {
         obj.x = parseFloat(arr_obj[0]);
@@ -58,8 +58,8 @@ $.checkThreeModel = function (name) {
     if (TYRANO.kag.tmp.three.models[name]) {
         return true;
     } else {
-        console.log("model「" + name + "」は未定義です。宣言してください。");
         return false;
+        TYRANO.kag.error("undefined_3d_model", { name });
     }
 };
 
@@ -444,6 +444,7 @@ this.kag.tmp.three.outlinePass = outlinePass;
 
                 if (that.kag.stat.is_strong_stop == true) {
                     if (three.evt[name]) {
+
                         if (three.stat.start_event == false) {
                             return;
                         }
@@ -540,6 +541,8 @@ return;
                     }
 
                     if (name == "") {
+                        that.kag.cancelWeakStop();
+                        that.kag.ftag.startTag("jump", three.evt[name]);
                         return;
                     }
 
@@ -681,7 +684,7 @@ TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
 
         var delta = this.clock.getDelta();
 
-        for (key in models) {
+        for (let key in models) {
             if (models[key].mixer) {
                 models[key].update(delta);
             }
@@ -1215,7 +1218,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
                 );
             });
         } else {
-            alert("エラー：" + ext + "はサポートしていないファイル形式です");
+            this.kag.error("unsupported_extensions", { ext });
         }
 
         //読み込んだシーンが暗いので、明るくする
@@ -1870,6 +1873,7 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
                 const loader = new THREE.TextureLoader();
 
                 for (let i = 0; i < arr_texture.length; i++) {
+
                     if (arr_texture[i] == "") {
                         arr_texture[i] = "_system/green.png";
                     }
@@ -1894,6 +1898,7 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
                 // マテリアルにテクスチャーを設定
                 material = arr_material;
             } else {
+
                 var texture_url = "";
                 if ($.isHTTP(pm.texture)) {
                     texture_url = pm.texture;
@@ -2580,8 +2585,30 @@ tyrano.plugin.kag.tag["3d_clone"] = {
         var model_obj = this.kag.tmp.three.models[pm.name].model.clone();
 
         if (pm.pos != "") {
+
             let pos = $.three_pos(pm.pos);
             model_obj.position.set(pos.x, pos.y, pos.z);
+
+            if (pm.name == "camera" && pm.lookat != "") {
+                if (three.models[pm.lookat]) {
+                    var model = three.models[pm.lookat].model;
+                    let pos = { x: 0, y: 0, z: 0 };
+                    pos.x = model.position.x;
+                    pos.y = model.position.y;
+                    pos.z = model.position.z;
+
+                    map_type["position"] = pos;
+                } else {
+                    //座標を直接し指定
+                    map_type["position"] = $.three_pos(pm.lookat);
+                }
+            } else {
+                map_type["position"] = $.three_pos(pm.pos);
+            }
+        }
+
+        if (pm.rot != "") {
+            map_type["rotation"] = $.three_pos(pm.rot);
         }
 
         if (pm.scale != "") {
@@ -2592,6 +2619,25 @@ tyrano.plugin.kag.tag["3d_clone"] = {
         if (pm.rot != "") {
             let rot = $.three_pos(pm.rot);
             model_obj.rotation.set(rot.x, rot.y, rot.z);
+        }
+        
+        var cnt_fin = 0;
+        var cnt_type = Object.keys(map_type).length;
+
+        for (let key in map_type) {
+            let pos = map_type[key];
+            var type = key;
+
+            this.kag.tmp.three.models[pm.name].toAnim(type, pos, options, () => {
+                cnt_fin++;
+
+                if (cnt_fin >= cnt_type) {
+                    if (pm.wait == "true") {
+                        this.kag.ftag.nextOrder();
+                    }
+                }
+            });
+
         }
 
         three.scene.add(model_obj);
@@ -5640,6 +5686,7 @@ text=表示するテキスト文字列を指定します,
 tyrano.plugin.kag.tag["3d_helper"] = {
     vital: [],
 
+
     pm: {
         name: "",
         grid: "",
@@ -5647,6 +5694,22 @@ tyrano.plugin.kag.tag["3d_helper"] = {
         next: "true",
     },
 
+    /*
+    if(button == 0) {
+                let moveDistance = {
+                    x: prevPosition.x - e.clientX,
+                    y: prevPosition.y - e.clientY,
+                };
+                model.rotation.x += moveDistance.y * 0.01;
+                model.rotation.y -= moveDistance.x * 0.01;
+                prevPosition = { x: e.clientX, y: e.clientY };
+            } else if (button == 1) {
+                var hen_y = first_client_y - e.clientY;
+                model.position.z = first_model_z + hen_y;
+            } else if (button == 2) {
+                vec.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0.5);
+*/
+    
     start: function (pm) {
         let three = TYRANO.kag.tmp.three;
 
