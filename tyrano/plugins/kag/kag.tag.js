@@ -4241,6 +4241,7 @@ tyrano.plugin.kag.tag.link = {
         target: null,
         storage: null,
         keyfocus: "",
+        once: "true",
     },
 
     start: function (pm) {
@@ -4280,19 +4281,14 @@ tyrano.plugin.kag.tag.link = {
         // クリックされたかどうか
         var clicked = false;
 
+        const once = pm.once !== "false";
+
+        // mousedown イベントを親要素に貫通させない
         j_span.on("mousedown", () => {
             return false;
         });
 
-        j_span.bind("click touchstart", function (e) {
-            // クリック済みなら反応しない
-            if (clicked) {
-                return;
-            }
-
-            // クリック済み
-            clicked = true;
-
+        j_span.on("click", (e) => {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
@@ -4306,9 +4302,29 @@ tyrano.plugin.kag.tag.link = {
                 return false;
             }
 
+            // クリック済みなら反応しない
+            if (clicked && once) {
+                return;
+            }
+
             //
             // クリックが有効だったときの処理
             //
+
+            // クリック済み
+            clicked = true;
+
+            // いま存在する once タイプの [link] 要素をクリックできなくする
+            $("[data-event-tag=link]").each((i, elm) => {
+                const j_elm = $(elm);
+                const pm = JSON.parse(j_elm.attr("data-event-pm"));
+                const once = pm.once !== "false";
+                if (once) {
+                    j_elm.off("click");
+                    j_elm.setStyle("cursor", "auto");
+                    this.kag.event.removeEventAttr(j_elm);
+                }
+            });
 
             // 仮想マウスカーソルを消去
             that.kag.key_mouse.vmouse.hide();
