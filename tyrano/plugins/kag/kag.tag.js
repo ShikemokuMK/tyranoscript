@@ -6250,6 +6250,9 @@ tyrano.plugin.kag.tag.button = {
         // [call]スタックが存在するか
         const exists_call_stack = !!that.kag.getStack("call");
 
+        // preexp をこの時点で評価
+        const preexp = this.kag.embScript(pm.preexp);
+
         //
         // ホバーイベント
         //
@@ -6366,7 +6369,7 @@ tyrano.plugin.kag.tag.button = {
             if (pm.clickse) this.kag.playSound(pm.clickse);
 
             // JSの実行
-            if (pm.exp) this.kag.embScript(pm.exp, this.kag.embScript(pm.preexp));
+            if (pm.exp) this.kag.embScript(pm.exp, preexp);
 
             // セーブスナップの取得
             if (pm.savesnap === "true") that.kag.menu.snapSave(that.kag.stat.current_save_str);
@@ -6864,8 +6867,14 @@ tyrano.plugin.kag.tag.glink = {
     },
 
     setEvent: function (j_button, pm) {
-        let button_clicked = false; // ボタンがクリックされたか
-        const use_cm = pm.cm !== "false"; // クリック時に[cm]を使用するか。cm="false" が指定されていないなら true
+        // ボタンがクリックされたか
+        let button_clicked = false;
+
+        // クリック時に[cm]を使用するか。cm="false" が指定されていないなら true
+        const use_cm = pm.cm !== "false";
+
+        // preexp をこの時点で評価
+        const preexp = this.kag.embScript(pm.preexp);
 
         //
         // ホバーイベント
@@ -6943,7 +6952,7 @@ tyrano.plugin.kag.tag.glink = {
             if (pm.clickse) this.kag.playSound(pm.clickse);
 
             // JSの実行
-            if (pm.exp) this.kag.embScript(pm.exp, this.kag.embScript(pm.preexp));
+            if (pm.exp) this.kag.embScript(pm.exp, preexp);
 
             // [cm]+[jump]を実行する関数
             const next = () => {
