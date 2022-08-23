@@ -1175,11 +1175,11 @@ tyrano.plugin.kag.tag.bgmopt = {
         // スロットが指定されているかどうかで場合分け
         if (pm.buf) {
             // スロットが指定されている場合
-            if (pm.volume) this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
+            if (pm.volume !== "") this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
             config_volume = this.kag.stat.map_bgm_volume[pm.buf];
         } else {
             // スロットが指定されていない場合は個別設定を初期化してから代入
-            if (pm.volume) {
+            if (pm.volume !== "") {
                 this.kag.stat.map_bgm_volume = {};
                 this.kag.config.defaultBgmVolume = pm.volume;
             }
@@ -1284,11 +1284,11 @@ tyrano.plugin.kag.tag.seopt = {
         // スロットが指定されているかどうかで場合分け
         if (pm.buf) {
             // スロットが指定されている場合
-            if (pm.volume) this.kag.stat.map_se_volume[pm.buf] = pm.volume;
+            if (pm.volume !== "") this.kag.stat.map_se_volume[pm.buf] = pm.volume;
             config_volume = this.kag.stat.map_se_volume[pm.buf];
         } else {
             // スロットが指定されていない場合は個別設定を初期化してから代入
-            if (pm.volume) {
+            if (pm.volume !== "") {
                 this.kag.stat.map_se_volume = {};
                 this.kag.config.defaultSeVolume = pm.volume;
             }
