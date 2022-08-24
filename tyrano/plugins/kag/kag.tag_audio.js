@@ -726,8 +726,9 @@ tyrano.plugin.kag.tag.stopbgm = {
                 continue;
             }
 
-            // Howlオブジェクトの参照を取得
+            // Howlオブジェクトの参照を取得し、マップからは削除
             const audio_obj = target_map[key];
+            delete target_map[key];
 
             // Howlオブジェクトが取れなければスルー
             if (!audio_obj) {
@@ -913,8 +914,8 @@ tyrano.plugin.kag.tag.xchgbgm = {
         }
 
         // このbufで再生中のBGMがある場合
-        let audio_obj;
-        if ((audio_obj = this.kag.tmp.map_bgm[pm.buf]) && audio_obj.playing()) {
+        const audio_obj = this.kag.tmp.map_bgm[pm.buf];
+        if (audio_obj && audio_obj.playing()) {
             // フェードアウト完了イベントリスナを登録する関数
             const bind_fade_complete_listener = () => {
                 audio_obj.once("fade", () => {
