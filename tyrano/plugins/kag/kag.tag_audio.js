@@ -726,8 +726,9 @@ tyrano.plugin.kag.tag.stopbgm = {
                 continue;
             }
 
-            // Howlオブジェクトの参照を取得
+            // Howlオブジェクトの参照を取得し、マップからは削除
             const audio_obj = target_map[key];
+            delete target_map[key];
 
             // Howlオブジェクトが取れなければスルー
             if (!audio_obj) {
@@ -913,8 +914,8 @@ tyrano.plugin.kag.tag.xchgbgm = {
         }
 
         // このbufで再生中のBGMがある場合
-        let audio_obj;
-        if ((audio_obj = this.kag.tmp.map_bgm[pm.buf]) && audio_obj.playing()) {
+        const audio_obj = this.kag.tmp.map_bgm[pm.buf];
+        if (audio_obj && audio_obj.playing()) {
             // フェードアウト完了イベントリスナを登録する関数
             const bind_fade_complete_listener = () => {
                 audio_obj.once("fade", () => {
@@ -1175,11 +1176,11 @@ tyrano.plugin.kag.tag.bgmopt = {
         // スロットが指定されているかどうかで場合分け
         if (pm.buf) {
             // スロットが指定されている場合
-            if (pm.volume) this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
+            if (pm.volume !== "") this.kag.stat.map_bgm_volume[pm.buf] = pm.volume;
             config_volume = this.kag.stat.map_bgm_volume[pm.buf];
         } else {
             // スロットが指定されていない場合は個別設定を初期化してから代入
-            if (pm.volume) {
+            if (pm.volume !== "") {
                 this.kag.stat.map_bgm_volume = {};
                 this.kag.config.defaultBgmVolume = pm.volume;
             }
@@ -1284,11 +1285,11 @@ tyrano.plugin.kag.tag.seopt = {
         // スロットが指定されているかどうかで場合分け
         if (pm.buf) {
             // スロットが指定されている場合
-            if (pm.volume) this.kag.stat.map_se_volume[pm.buf] = pm.volume;
+            if (pm.volume !== "") this.kag.stat.map_se_volume[pm.buf] = pm.volume;
             config_volume = this.kag.stat.map_se_volume[pm.buf];
         } else {
             // スロットが指定されていない場合は個別設定を初期化してから代入
-            if (pm.volume) {
+            if (pm.volume !== "") {
                 this.kag.stat.map_se_volume = {};
                 this.kag.config.defaultSeVolume = pm.volume;
             }
