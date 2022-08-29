@@ -4532,7 +4532,7 @@ tyrano.plugin.kag.tag.button = {
         savesnap: "false",
         folder: "image",
         exp: "",
-        prevar: "",
+        preexp: "",
         visible: "true",
         hint: "",
         clickse: "",
@@ -4621,6 +4621,13 @@ tyrano.plugin.kag.tag.button = {
 
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
+
+        //preexpにmpやtfなどの一時変数が指定されるとロード後に復元できないので
+        //data属性に格納する前にあらかじめ評価しておきます
+        if (pm.preexp !== "") {
+            var preexp_entity = that.kag.embScript(pm.preexp);
+            pm.preexp = JSON.stringify(preexp_entity);
+        }
 
         //クラスとイベントを登録する
         that.kag.event.addEventElement({
@@ -4986,6 +4993,8 @@ tyrano.plugin.kag.tag.glink = {
         y: "",
         width: "",
         height: "",
+        exp: "",
+        preexp: "",
         size: 30,
         graphic: "",
         enterimg: "",
@@ -5062,6 +5071,13 @@ tyrano.plugin.kag.tag.glink = {
 
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
+
+        //preexpにmpやtfなどの一時変数が指定されるとロード後に復元できないので
+        //data属性に格納する前にあらかじめ評価しておきます
+        if (pm.preexp !== "") {
+            var preexp_entity = that.kag.embScript(pm.preexp);
+            pm.preexp = JSON.stringify(preexp_entity);
+        }
 
         that.kag.event.addEventElement({
             tag: "glink",
