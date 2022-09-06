@@ -273,7 +273,7 @@ tyrano.plugin.kag.tag.playbgm = {
             case "sound":
                 config_volume = $.parseVolume(this.kag.config.defaultSeVolume);
                 // このbufの個別SE音量が存在する場合はそれで上書き
-                if (this.kag.stat.map_bgm_volume[buf]) {
+                if (this.kag.stat.map_se_volume[buf]) {
                     config_volume = $.parseVolume(this.kag.stat.map_se_volume[buf]);
                 }
                 break;
