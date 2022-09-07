@@ -1430,9 +1430,8 @@ tyrano.plugin.kag.tag.text = {
         for (let i = edges.length - 1; i >= 0; i--) {
             const edge = edges[i];
             const width = edge.total_width * 2;
-            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${
-                100 - i
-            }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
+            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${100 - i
+                }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
             if (is_edge_overlap) {
                 style += "opacity:1;";
             }
@@ -2063,7 +2062,7 @@ tyrano.plugin.kag.tag.text = {
         }
     },
 
-    nextOrder: function () {},
+    nextOrder: function () { },
 
     setFukiStyle: function (j_outer_message, chara_fuki) {
         //見た目の指定がある場合は設定する
@@ -6095,7 +6094,7 @@ tyrano.plugin.kag.tag.button = {
         savesnap: "false",
         folder: "image",
         exp: "",
-        prevar: "",
+        preexp: "",
         visible: "true",
         hint: "",
         clickse: "",
@@ -6188,6 +6187,11 @@ tyrano.plugin.kag.tag.button = {
 
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
+
+        if (pm.preexp !== "") {
+            var preexp_entity = that.kag.embScript(pm.preexp);
+            pm.preexp = JSON.stringify(preexp_entity);
+        }
 
         if (pm.autoimg) {
             j_button.addClass("button-auto-sync");
@@ -6720,6 +6724,8 @@ tyrano.plugin.kag.tag.glink = {
         y: "",
         width: "",
         height: "",
+        exp: "",
+        preexp: "",
         size: 30,
         graphic: "",
         enterimg: "",
@@ -6814,6 +6820,13 @@ tyrano.plugin.kag.tag.glink = {
 
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
+
+        //preexpにmpやtfなどの一時変数が指定されるとロード後に復元できないので
+        //data属性に格納する前にあらかじめ評価しておきます
+        if (pm.preexp !== "") {
+            var preexp_entity = that.kag.embScript(pm.preexp);
+            pm.preexp = JSON.stringify(preexp_entity);
+        }
 
         // アニメーション系のパラメータの glink_config からの上書き
         const glink_config = this.kag.getTag("glink_config").getConfig();
@@ -8332,8 +8345,8 @@ tyrano.plugin.kag.tag.layermode_movie = {
 
         blend_layer = $(
             "<video class='layer_blend_mode blendlayer blendvideo' data-video-name='" +
-                pm.name +
-                "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
+            pm.name +
+            "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
         );
         var video = blend_layer.get(0);
         var url = "./data/video/" + pm.video;
