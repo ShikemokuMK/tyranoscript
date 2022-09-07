@@ -18,7 +18,8 @@ JavaScriptファイルは`data/others`フォルダに配置してください。
 [loadjs storage="sample.js"]
 
 :param
-storage = ロードするJavaScriptファイルを指定します。
+storage = ロードするJavaScriptファイルを指定します。,
+type= 読み込み方式。`module`を指定することができます。 
 
 :demo
 2,kaisetsu/21_othello
@@ -31,14 +32,27 @@ tyrano.plugin.kag.tag.loadjs = {
 
     pm: {
         storage: "",
+        type: "",
     },
 
     start: function (pm) {
         var that = this;
 
-        $.getScript("./data/others/" + pm.storage, function () {
-            that.kag.ftag.nextOrder();
-        });
+        if (pm.type === "module") {
+
+            import("../../../data/others/" + pm.storage).then((module) => {
+                that.kag.ftag.nextOrder();
+            });
+
+        } else {
+
+            $.getScript("./data/others/" + pm.storage, function () {
+                that.kag.ftag.nextOrder();
+            });
+
+        }
+
+
     },
 };
 
@@ -3325,7 +3339,7 @@ tyrano.plugin.kag.tag.chara_move = {
                     }
                 });
 
-                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () {});
+                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () { });
             } else {
                 target_obj.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)) / 2, 0, function () {
                     target_obj.css(anim_style);
