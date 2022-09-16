@@ -430,16 +430,27 @@ this.kag.tmp.three.outlinePass = outlinePass;
             // オブジェクトの取得
             var intersects = raycaster.intersectObjects(scene.children, true);
             var name = "";
+            var uuid = "";
 
             var distance = -1;
 
             if (intersects.length > 0) {
                 for (key in intersects) {
-                    if (typeof intersects[key].object.userData["name"] != "undefined") {
+
+                    //先にuuidで判定する。
+                    if (typeof intersects[key].object.userData["mode"] != "undefined") {
+                        name = "evt_" + intersects[key].object.uuid;
+                        distance = intersects[key].distance;
+                        break;
+                    }
+                    else if (typeof intersects[key].object.userData["name"] != "undefined") {
                         name = intersects[key].object.userData["name"];
                         distance = intersects[key].distance;
                         break;
                     }
+
+
+
                 }
 
                 if (that.kag.stat.is_strong_stop == true) {
@@ -516,12 +527,25 @@ this.kag.tmp.three.outlinePass = outlinePass;
             console.log(intersects);
 
             if (intersects.length > 0) {
+
                 for (key in intersects) {
+
                     if (typeof intersects[key].object.userData["name"] != "undefined") {
                         name = intersects[key].object.userData["name"];
                         distance = intersects[key].distance;
-                        break;
+
+                        if (three.evt[name]) break;
+
                     }
+
+                    if (typeof intersects[key].object.uuid != "undefined") {
+                        name = "evt_" + intersects[key].object.uuid;
+                        distance = intersects[key].distance;
+
+                        if (three.evt[name]) break;
+
+                    }
+
                 }
 
                 //カメラを選択できるぞ。
@@ -668,6 +692,21 @@ TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
         }
     },
 
+    getCollisionObjectID: function (object) {
+
+        if (typeof object.userData["mode"] != "undefined" && object.userData["mode"] == "collision") {
+            return "evt_" + object.uuid;
+        }
+
+        if (typeof object.userData["name"] != "undefined") {
+            return object.userData["name"];
+        }
+
+        return "";
+
+
+    },
+
     updateFrame: function () {
         var three = this.kag.tmp.three;
         let fps = three.stat.fps;
@@ -730,14 +769,7 @@ vector.applyQuaternion(camera.quaternion);
             var ray_zf = new THREE.Raycaster();
             ray_zf.setFromCamera(dir_zf, camera);
 
-            /*
-var ray_zf = new THREE.Raycaster(hitter, dir_zf);
 
-console.log("wwwwwwwwwww");
-console.log(three.groups);
-ray_zf.setFromCamera( mouse, camera );
-
-*/
 
             var objs_zf = ray_zf.intersectObjects(three.groups["default"], true);
 
@@ -757,7 +789,7 @@ ray_zf.setFromCamera( mouse, camera );
                     //前方判定でぶつかったとき
                     //if(angle < 1 ){
 
-                    collision_event_name = objs_zf[0].object.name;
+                    collision_event_name = that.getCollisionObjectID(objs_zf[0].object);
 
                     //さらに後ろに下げる。
                     //camera.position.z +=15;
@@ -770,12 +802,15 @@ ray_zf.setFromCamera( mouse, camera );
             var dir_zb = new THREE.Vector3(0, 0, 1);
             dir_zb.applyQuaternion(camera.quaternion);
 
-            var ray_zb = new THREE.Raycaster(camera.position, dir_zb);
+            var ray_zb = new THREE.Raycaster();
+            ray_zb.setFromCamera(dir_zb, camera);
+
             var objs_zb = ray_zb.intersectObjects(three.groups["default"], true);
 
             if (objs_zb.length > 0) {
                 //console.log("B:",objs_zb[0]);
                 if (objs_zb[0].distance < 10 + actualMoveSpeed * 3) {
+
                     console.log("zb");
                     console.log(objs_zb[0]);
 
@@ -787,7 +822,7 @@ ray_zf.setFromCamera( mouse, camera );
                     //前方判定でぶつかったとき
                     //if(angle < 1 ){
 
-                    collision_event_name = objs_zb[0].object.name;
+                    collision_event_name = that.getCollisionObjectID(objs_zb[0].object);
 
                     /*
 console.log(objs_zb[0].object.name);
@@ -818,7 +853,7 @@ console.log(camera.rotation.y);
                     //let angle = vector.angleTo(objs_xl[0].object.position);
                     //if(angle < 1 ){
 
-                    collision_event_name = objs_xl[0].object.name;
+                    collision_event_name = that.getCollisionObjectID(objs_xl[0].object);
 
                     //}
                 }
@@ -849,7 +884,7 @@ console.log(camera.rotation.y);
                     //前方判定でぶつかったとき
                     //if(angle < 1 ){
 
-                    collision_event_name = objs_xr[0].object.name;
+                    collision_event_name = that.getCollisionObjectID(objs_xr[0].object);
 
                     //}
                 }
@@ -857,6 +892,10 @@ console.log(camera.rotation.y);
 
             //コリジョンイベント判定
             if (collision_event_name != "") {
+
+                console.log(three.evt);
+                console.log(collision_event_name);
+
                 if (three.evt[collision_event_name]) {
                     let evt_pm = three.evt[collision_event_name];
 
@@ -1047,6 +1086,9 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
         motion: "",
         next: "true",
         folder: "",
+
+        texture_update: "",
+
     },
 
     start: function (pm) {
@@ -1119,6 +1161,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
                 }
             });
         } else if (ext == "obj") {
+
             var obj_url = "./data/" + folder + "/" + pm.storage;
             var mtl_file = obj_url.replace(".obj", ".mtl");
             var mtl_url = mtl_file;
@@ -1160,18 +1203,115 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
                 );
             });
         } else if (ext == "json") {
+
+
+            function toBase64Url(url, callback) {
+
+                return new Promise(resolve => {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onload = function () {
+                        var reader = new FileReader();
+                        reader.onloadend = function () {
+                            //callback(reader.result);
+
+                            resolve(reader.result);
+
+                        }
+                        reader.readAsDataURL(xhr.response);
+                    };
+                    xhr.open('GET', url);
+                    xhr.responseType = 'blob';
+                    xhr.send();
+                });
+
+            }
+
+            function setEvent(object) {
+
+                if (object.userData) {
+
+                    if (typeof object.userData.mode != "undefined") {
+                        three.evt["evt_" + object.uuid] = object.userData;
+                    }
+
+                }
+
+                if (object.children) {
+
+                    const objects = object.children;
+
+                    for (let i = 0; i < objects.length; i++) {
+
+                        setEvent(objects[i]);
+
+                    }
+                }
+
+
+            }
+
             var obj_url = "./data/" + folder + "/" + pm.storage;
             var objLoader = new THREE.ObjectLoader();
 
-            $.loadText(obj_url, (json) => {
+            $.loadText(obj_url, async (json) => {
+
                 console.log("json======");
                 console.log(json);
 
-                //ユーザーデータの取得これをつかって、ティラノ系のイベントを操作できないかしら。
-                const materials = json.materials;
-                for (let i = 0; i < materials.length; i++) {
-                    console.log(materials[i].userData);
+                //textureの上書きがある場合
+                if (pm.texture_update != "") {
+
+                    console.log(pm.texture_update);
+                    const texture_update = JSON.parse(pm.texture_update);
+
+                    const materials = json.materials;
+                    const textures = json.textures;
+                    const images = json.images;
+
+                    for (let i = 0; i < materials.length; i++) {
+
+                        const material = materials[i];
+                        const mat_name = material.name;
+                        const map = material.map;
+
+                        for (let j = 0; j < textures.length; j++) {
+                            const texture = textures[j];
+                            if (map == texture.uuid) {
+
+                                const _image = texture.image;
+
+                                for (let k = 0; k < images.length; k++) {
+                                    const image = images[k];
+                                    if (_image == image.uuid) {
+                                        images[k].name = mat_name;
+                                    }
+                                }
+                            }
+
+                        }
+
+                    }
+
+                    for (let i = 0; i < images.length; i++) {
+
+                        const image = images[i];
+                        var data64 = "";
+
+                        if (texture_update[image.name]) {
+
+                            data64 = await toBase64Url(texture_update[image.name]);
+                            image.url = data64;
+
+                        }
+
+                    }
                 }
+
+                //ユーザーデータの取得これをつかって、ティラノ系のイベントを操作できないかしら。
+                const object = json.object;
+                console.log(object);
+                setEvent(object);
+
 
                 objLoader.parse(
                     json,
@@ -2620,7 +2760,7 @@ tyrano.plugin.kag.tag["3d_clone"] = {
             let rot = $.three_pos(pm.rot);
             model_obj.rotation.set(rot.x, rot.y, rot.z);
         }
-        
+
         var cnt_fin = 0;
         var cnt_type = Object.keys(map_type).length;
 
@@ -3995,13 +4135,13 @@ canvas.addEventListener("touchend", onTouchEnd, false);
 
             var j_close_button = $(
                 "<div class='area_three_debug' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
-                    pm.button_text +
-                    "</span></button></div>",
+                pm.button_text +
+                "</span></button></div>",
             );
             j_close_button.draggable({
                 scroll: false,
                 //containment:".tyrano_base",
-                stop: (e, ui) => {},
+                stop: (e, ui) => { },
             });
 
             var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
@@ -4471,13 +4611,13 @@ render();
 
         var j_close_button = $(
             "<div class='area_three_debug area_three_debug_object' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
-                pm.button_text +
-                "</span></button></div>",
+            pm.button_text +
+            "</span></button></div>",
         );
         j_close_button.draggable({
             scroll: false,
             //containment:".tyrano_base",
-            stop: (e, ui) => {},
+            stop: (e, ui) => { },
         });
 
         //var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
@@ -4905,13 +5045,13 @@ model.position.y = $.orgFloor(hen_pos.y + pos.y,1);
 
         var j_close_button = $(
             "<div class='area_three_debug area_three_debug_object' style='position:absolute;z-index:9999999999;padding:10px;opacity:0.8;background-color:white;left:0px;top:0px'><button style='cursor:pointer'><span style=''>" +
-                pm.button_text +
-                "</span></button></div>",
+            pm.button_text +
+            "</span></button></div>",
         );
         j_close_button.draggable({
             scroll: false,
             //containment:".tyrano_base",
-            stop: (e, ui) => {},
+            stop: (e, ui) => { },
         });
 
         var j_debug_msg = $("<div style='padding:5px'><input type='text' style='width:320px' /></div>");
@@ -5709,7 +5849,7 @@ tyrano.plugin.kag.tag["3d_helper"] = {
             } else if (button == 2) {
                 vec.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1, 0.5);
 */
-    
+
     start: function (pm) {
         let three = TYRANO.kag.tmp.three;
 
