@@ -29,6 +29,9 @@ tyrano.plugin.kag = {
         "data-video-name",
         "data-video-pm",
         "data-effect",
+        "data",
+        "type",
+
     ],
 
     config: {
@@ -823,8 +826,8 @@ tyrano.plugin.kag = {
         //コンフィグボタン追加
         var button_menu_obj = $(
             "<div class='button_menu' style='z-index:100000000'><img src='./tyrano/images/system/" +
-                $.novel("file_button_menu") +
-                "'  /></div>",
+            $.novel("file_button_menu") +
+            "'  /></div>",
         );
 
         //コンフィグボタンの位置を指定する
@@ -2789,7 +2792,7 @@ tyrano.plugin.kag = {
     },
 
     chara: {
-        init() {},
+        init() { },
 
         /**
          * 発言者の名前欄を意味する p 要素を返す
@@ -3034,7 +3037,7 @@ tyrano.plugin.kag = {
         }, 10);
     },
 
-    test: function () {},
+    test: function () { },
 };
 
 //すべてのタグに共通する、拡張用
