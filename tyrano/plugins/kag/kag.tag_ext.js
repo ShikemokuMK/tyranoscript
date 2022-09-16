@@ -18,7 +18,8 @@ JavaScriptファイルは`data/others`フォルダに配置してください。
 [loadjs storage="sample.js"]
 
 :param
-storage = ロードするJavaScriptファイルを指定します。
+storage = ロードするJavaScriptファイルを指定します。,
+type= 読み込み方式。`module`を指定することができます。 
 
 :demo
 2,kaisetsu/21_othello
@@ -31,14 +32,27 @@ tyrano.plugin.kag.tag.loadjs = {
 
     pm: {
         storage: "",
+        type: "",
     },
 
     start: function (pm) {
         var that = this;
 
-        $.getScript("./data/others/" + pm.storage, function () {
-            that.kag.ftag.nextOrder();
-        });
+        if (pm.type === "module") {
+
+            import("../../../data/others/" + pm.storage).then((module) => {
+                that.kag.ftag.nextOrder();
+            });
+
+        } else {
+
+            $.getScript("./data/others/" + pm.storage, function () {
+                that.kag.ftag.nextOrder();
+            });
+
+        }
+
+
     },
 };
 
@@ -2585,6 +2599,7 @@ tyrano.plugin.kag.tag.chara_show = {
 
         //
         cpm.is_show = "true";
+        cpm.layer = pm.layer;
 
         //画像は事前にロードしておく必要がありそう
         this.kag.preloadAll(array_storage, function () {
@@ -2957,8 +2972,7 @@ tyrano.plugin.kag.tag.chara_hide_all = {
         var that = this;
 
         var target_layer = this.kag.layer.getLayer(pm.layer, pm.page);
-
-        var img_obj = this.kag.chara.getCharaContainer();
+        var img_obj = this.kag.chara.getCharaContainer(undefined, target_layer);
 
         var chara_num = 0;
         that.kag.weaklyStop();
@@ -2968,7 +2982,11 @@ tyrano.plugin.kag.tag.chara_hide_all = {
         //すべてのキャラを非表示状態にする
         var charas = this.kag.stat.charas;
         for (let key in charas) {
-            charas[key].is_show = "false";
+            if (charas[key].layer === undefined) {
+                charas[key].is_show = "false";
+            } else if (charas[key].layer === pm.layer) {
+                charas[key].is_show = "false";
+            }
         }
 
         //キャラがいない場合、次へ
@@ -3325,7 +3343,7 @@ tyrano.plugin.kag.tag.chara_move = {
                     }
                 });
 
-                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () {});
+                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () { });
             } else {
                 target_obj.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)) / 2, 0, function () {
                     target_obj.css(anim_style);

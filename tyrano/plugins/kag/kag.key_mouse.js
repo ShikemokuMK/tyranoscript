@@ -2102,6 +2102,19 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             $(document).keydown((e) => {
+                // <input type="text"> または <textarea> にフォーカスがあたっているとき、
+                // すなわちユーザーにテキスト入力をしてもらうシチュエーションでは
+                // キーコンフィグアクションを無効にする
+                const elm = document.activeElement;
+                if (elm) {
+                    if (elm.tagName === "INPUT" && elm.type === "text") {
+                        return;
+                    }
+                    if (elm.tagName === "TEXTAREA") {
+                        return;
+                    }
+                }
+
                 const state = this.getKeyState(e);
 
                 if (state.pressed) {

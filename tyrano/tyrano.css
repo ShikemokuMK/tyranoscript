@@ -926,7 +926,9 @@ img#remodal-cancel {
 /* メッセージボックスのテキスト */
 .remodal-wrapper .remodal_title,
 .remodal-wrapper .remodal_txt {
-    pointer-events: none;
+    pointer-events: auto;
+    user-select: auto;
+    cursor: auto;
 }
 
 /*-- キーフレアニメ --*/
