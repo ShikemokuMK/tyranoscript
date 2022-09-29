@@ -19,6 +19,7 @@ tyrano.plugin.kag = {
     array_white_attr: [
         "id",
         "src",
+        "name",
         "data-event-tag",
         "data-event-pm",
         "data-event-target",
