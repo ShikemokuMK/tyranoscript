@@ -951,7 +951,7 @@ tyrano.plugin.kag.tag.xchgbgm = {
 効果音の再生
 
 :exp
-BGMを再生します。再生する音声ファイルは`data/bgm`フォルダに配置します。
+効果音を再生します。再生する音声ファイルは`data/sound`フォルダに配置します。
 
 <b>`mp3`形式推奨</b>。`ogg``m4a``wav`形式にも対応します。
 
