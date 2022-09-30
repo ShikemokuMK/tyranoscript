@@ -86,6 +86,10 @@ tyrano.plugin.kag.tag.camera = {
             return false;
         }
         */
+        
+        if (parseInt(pm.time) < 10) {
+            pm.time = 10;
+        }
 
         //duration を確認する
         var duration = pm.time + "ms";
