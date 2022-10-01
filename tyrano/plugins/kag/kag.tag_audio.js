@@ -23,6 +23,8 @@ loop        = !!,
 sprite_time = !!,
 volume      = !!,
 html5       = !!,
+pause       = `true`を指定するとタグ実行時にBGMを再生しません。`[resumebgm]`で再生できます,
+seek        = 再生開始時間を設定できます。例えば4.5と指定すると4.5秒進んだ位置からBGMが再生されます,
 restart     = この`[playbgm]`で再生しようとしたBGMがすでに再生されていた場合の処理を設定できます。`true`なら最初から再生し直し、`false`なら無視となります。
 
 #[end]
@@ -42,7 +44,10 @@ tyrano.plugin.kag.tag.playbgm = {
         target: "bgm", //"bgm" or "se"
 
         sprite_time: "", //200-544
-
+        
+        pause: "false",
+        seek: "",
+        
         html5: "false",
 
         click: "false", //音楽再生にクリックが必要か否か
@@ -331,6 +336,8 @@ tyrano.plugin.kag.tag.playbgm = {
             case "bgm":
                 // BGM再生中！
                 this.kag.tmp.is_bgm_play = true;
+                this.kag.stat.current_bgm_pause_seek =""; //ポーズ無効
+
                 break;
 
             // SEの場合
@@ -386,7 +393,7 @@ tyrano.plugin.kag.tag.playbgm = {
         // このときのタグ音量とコンフィグ音量はそれぞれ記憶しておく [bgmopt effect="true"]対策
         audio_obj.__tag_volume = tag_volume;
         audio_obj.__config_volume = config_volume;
-
+        
         //
         // 同一bufの旧オーディオの停止および破棄, 参照の格納, セーブデータロード時復元のための記憶
         //
@@ -444,9 +451,22 @@ tyrano.plugin.kag.tag.playbgm = {
                 preloaded_audio_del.unload();
                 delete this.kag.tmp.preload_audio_map[storage];
             }
-            // 再生開始
-            audio_obj.play(sprite_name);
+            
             this.kag.hideLoadingLog();
+            
+            //途中から再生の場合
+            if (pm.seek != "") {
+                audio_obj.seek(parseFloat(pm.seek));
+            }
+
+            // 再生開始 初期状態が停止の場合は再生しない
+            if (pm.pause != "true") {
+                audio_obj.play(sprite_name);
+            } else {
+                next();
+            }
+            
+            
         });
 
         // 再生開始時
@@ -790,7 +810,9 @@ loop        = !!,
 sprite_time = !!,
 time        = フェードイン時間をミリ秒で指定します。,
 volume      = !!,
-html5       = !!
+html5       = !!,
+pause       = `true`を指定するとタグ実行時にBGMを再生しません。`[resumebgm]`で再生できます,
+seek        = 再生開始時間を設定できます。例えば4.5と指定すると4.5秒進んだ位置からBGMが再生されます
 
 #[end]
 */
@@ -805,6 +827,8 @@ tyrano.plugin.kag.tag.fadeinbgm = {
         sprite_time: "", //200-544
         html5: "false",
         time: 2000,
+        pause: "false",
+        seek:"",
     },
 
     start: function (pm) {
@@ -1479,6 +1503,7 @@ tyrano.plugin.kag.tag.changevol = {
 
 :exp
 現在再生中のBGMを一時停止できます。
+少しあとに同じBGMの再生を再開する場合のみ使用してください。それ以外の場合は`[stopbgm]`での停止が適切です。
 
 :sample
 
@@ -1508,6 +1533,7 @@ tyrano.plugin.kag.tag.pausebgm = {
         for (const buf in target_dict) {
             const audio_obj = target_dict[buf];
             audio_obj.pause();
+            this.kag.stat.current_bgm_pause_seek = audio_obj.seek();
         }
 
         next();
@@ -1524,6 +1550,7 @@ tyrano.plugin.kag.tag.pausebgm = {
 一時停止中のオーディオの再開
 
 :exp
+`[pausebgm]`で停止していたBGM再生を再開できます。
 一時停止中のオーディオを再開できます。
 
 :sample
@@ -1555,6 +1582,8 @@ tyrano.plugin.kag.tag.resumebgm = {
             const audio_obj = target_dict[buf];
             audio_obj.play();
         }
+        
+        this.kag.stat.current_bgm_pause_seek ="";
 
         next();
     },

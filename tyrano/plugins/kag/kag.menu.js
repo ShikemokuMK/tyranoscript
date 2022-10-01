@@ -823,8 +823,15 @@ tyrano.plugin.kag.menu = {
                 if (this.kag.stat.current_bgm_vol != "") {
                     pm["volume"] = this.kag.stat.current_bgm_vol;
                 }
-
+                
+                if (this.kag.stat.current_bgm_pause_seek != "") {
+                    pm["pause"] = "true";
+                    pm["seek"] = this.kag.stat.current_bgm_pause_seek;
+                }
+                
                 this.kag.ftag.startTag("playbgm", pm);
+                
+                
             }
 
             // ループSE
@@ -834,6 +841,7 @@ tyrano.plugin.kag.menu = {
                 pm_obj["stop"] = "true";
                 this.kag.ftag.startTag("playbgm", pm_obj);
             }
+            
         }
 
         //読み込んだCSSがある場合

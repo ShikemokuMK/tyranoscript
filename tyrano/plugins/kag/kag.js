@@ -192,6 +192,9 @@ tyrano.plugin.kag = {
         current_bgm: "", //現在再生中のBGM
         current_bgm_vol: "", //現在再生中のBGMボリューム
         current_bgm_html5: "false", //現在再生中のhtml5パラメータ
+        
+        current_bgm_pause_seek:"", //ポーズ中ならその時間が入る。ポーズ中じゃない場合は空白
+        
 
         current_se: {}, //現在再生中のループ効果音
 
