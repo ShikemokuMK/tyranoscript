@@ -193,6 +193,8 @@ tyrano.plugin.kag = {
         current_bgm_vol: "", //現在再生中のBGMボリューム
         current_bgm_html5: "false", //現在再生中のhtml5パラメータ
         
+        current_bgm_base64:"", //現在再生中のBGMがbase64エンコードされているかどうか。されている場合はファイル形式が格納される。(mp3 ogg etc)
+        
         current_bgm_pause_seek:"", //ポーズ中ならその時間が入る。ポーズ中じゃない場合は空白
         
 

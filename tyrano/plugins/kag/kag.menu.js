@@ -829,6 +829,10 @@ tyrano.plugin.kag.menu = {
                     pm["seek"] = this.kag.stat.current_bgm_pause_seek;
                 }
                 
+                if (this.kag.stat.current_bgm_base64 != "") {
+                    pm["base64"] = this.kag.stat.current_bgm_base64;
+                }
+                
                 this.kag.ftag.startTag("playbgm", pm);
                 
                 

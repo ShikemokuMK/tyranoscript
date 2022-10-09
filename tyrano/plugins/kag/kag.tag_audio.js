@@ -52,6 +52,9 @@ tyrano.plugin.kag.tag.playbgm = {
 
         click: "false", //音楽再生にクリックが必要か否か
         stop: "false", //trueの場合自動的に次の命令へ移動しない。ロード対策
+        
+        base64: "", //base64 対応
+        
     },
 
     waitClick: function (pm) {
@@ -190,7 +193,7 @@ tyrano.plugin.kag.tag.playbgm = {
         return hours_ms + minutes_ms + seconds_ms + milli_seconds_ms;
     },
 
-    play: function (pm) {
+    play: async function (pm) {
         // 再生しようとしているのはSEか？(BGMではなく)
         const is_se = pm.target === "se";
 
@@ -352,10 +355,24 @@ tyrano.plugin.kag.tag.playbgm = {
                 break;
         }
 
+        //crypt機能
+        
+        if (pm.base64 != "") {
+            
+            storage = "data:audio/" + pm.base64 + ";base64," + await $.loadTextSync(storage);
+            this.kag.stat.current_bgm_base64 = pm.base64;
+                
+        } else {
+            
+            this.kag.stat.current_bgm_base64 = "";
+            
+        }
+        
         //
         // Howlオプション
         //
-
+        
+        
         // Howlオブジェクト格納用
         let audio_obj;
 
