@@ -1850,7 +1850,15 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             const tyrano_base = $("#tyrano_base")[0];
+
+            // 黒帯クリックでもゲームを進められるようにするための処理
             $(document).on("click", (e) => {
+                // 黒帯クリックが無効なら無視
+                if (this.kag.config.offscreenClickable === "false") {
+                    return;
+                }
+
+                // リモーダルウィンドウが表示中の場合は無視
                 if (this.util.isRemodalDisplayed()) return;
 
                 // ゲーム画面外の黒帯部分のクリックでもゲームを進められるようにする
