@@ -274,6 +274,12 @@ tyrano.plugin.kag.key_mouse = {
             // 無視するケースを洗い出す
             //
 
+            // クリックできない状況なら無視する
+            // イベントレイヤが表示されていない、または、メニューが表示されている
+            if (!this.util.canClick()) {
+                return false;
+            }
+
             // スワイプフラグが立っているときのタップは一度だけ無視する
             if (this.is_swipe) {
                 this.is_swipe = false;
