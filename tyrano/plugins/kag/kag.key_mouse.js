@@ -274,6 +274,12 @@ tyrano.plugin.kag.key_mouse = {
             // 無視するケースを洗い出す
             //
 
+            // クリックできない状況なら無視する
+            // イベントレイヤが表示されていない、または、メニューが表示されている
+            if (!this.util.canClick()) {
+                return false;
+            }
+
             // スワイプフラグが立っているときのタップは一度だけ無視する
             if (this.is_swipe) {
                 this.is_swipe = false;
@@ -1844,7 +1850,15 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             const tyrano_base = $("#tyrano_base")[0];
+
+            // 黒帯クリックでもゲームを進められるようにするための処理
             $(document).on("click", (e) => {
+                // 黒帯クリックが無効なら無視
+                if (this.kag.config.offscreenClickable === "false") {
+                    return;
+                }
+
+                // リモーダルウィンドウが表示中の場合は無視
                 if (this.util.isRemodalDisplayed()) return;
 
                 // ゲーム画面外の黒帯部分のクリックでもゲームを進められるようにする
@@ -2382,7 +2396,7 @@ tyrano.plugin.kag.key_mouse = {
             this.j_body = $("body");
             this.j_cursor = $('<img id="vmouse" src="./tyrano/images/system/transparent.png" />');
             this.j_body.append(this.j_cursor);
-            this.tick_rate = parent.VMOUSE_TICK_RATE;
+            this.tick_rate = this.parent.VMOUSE_TICK_RATE;
             if (this.tick_rate > 0) {
                 this.delay_update = (1000 / this.tick_rate) | 0;
             }
