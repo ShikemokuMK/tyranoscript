@@ -2396,7 +2396,7 @@ tyrano.plugin.kag.key_mouse = {
             this.j_body = $("body");
             this.j_cursor = $('<img id="vmouse" src="./tyrano/images/system/transparent.png" />');
             this.j_body.append(this.j_cursor);
-            this.tick_rate = parent.VMOUSE_TICK_RATE;
+            this.tick_rate = this.parent.VMOUSE_TICK_RATE;
             if (this.tick_rate > 0) {
                 this.delay_update = (1000 / this.tick_rate) | 0;
             }
