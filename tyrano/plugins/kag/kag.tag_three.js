@@ -746,6 +746,9 @@ TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
 
         //FPSの動作設定
         if (fps.active == true) {
+
+            var hitter = new THREE.Vector3(camera.position.x, camera.position.y + 10, camera.position.z);
+
             var _camera = camera;
             var _hitMargin = 0.5;
             var _hitteHeightOfset = 0;
@@ -768,8 +771,6 @@ vector.applyQuaternion(camera.quaternion);
             var dir_zf = new THREE.Vector3(0, 0, 1);
             var ray_zf = new THREE.Raycaster();
             ray_zf.setFromCamera(dir_zf, camera);
-
-
 
             var objs_zf = ray_zf.intersectObjects(three.groups["default"], true);
 
@@ -798,12 +799,12 @@ vector.applyQuaternion(camera.quaternion);
                 }
             }
 
-            // 後方向アタリ判定
+            // 後方向アタリ判定z
             var dir_zb = new THREE.Vector3(0, 0, 1);
             dir_zb.applyQuaternion(camera.quaternion);
 
-            var ray_zb = new THREE.Raycaster();
-            ray_zb.setFromCamera(dir_zb, camera);
+            var ray_zb = new THREE.Raycaster(hitter, dir_zb);
+            //ray_zb.setFromCamera(dir_zb, camera);
 
             var objs_zb = ray_zb.intersectObjects(three.groups["default"], true);
 
@@ -997,13 +998,13 @@ const intersects2 = ray2.intersectObjects(three.groups["default"],true);
 
             if (fps.rotateLeft || fps.offRotateBufferL) {
                 if (fps.moveForward) {
-                    camera.translateX(-1.5);
-                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                    camera.translateX(-actualMoveSpeed);
+                    //actualMoveSpeed = actualMoveSpeed / 1.6;
                 } else if (fps.moveBackward) {
-                    camera.translateX(-1.5);
-                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                    camera.translateX(-actualMoveSpeed);
+                    //actualMoveSpeed = actualMoveSpeed / 1.6;
                 } else {
-                    camera.translateX(-1.5);
+                    camera.translateX(-actualMoveSpeed);
                 }
 
                 //camera.rotation.y += actualRotateSpeed;
@@ -1011,13 +1012,13 @@ const intersects2 = ray2.intersectObjects(three.groups["default"],true);
 
             if (fps.rotateRight || fps.offRotateBufferR) {
                 if (fps.moveForward) {
-                    camera.translateX(+1.5);
-                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                    camera.translateX(+actualMoveSpeed);
+                    //actualMoveSpeed = actualMoveSpeed / 1.6;
                 } else if (fps.moveBackward) {
-                    camera.translateX(+1.5);
-                    actualMoveSpeed = actualMoveSpeed / 1.6;
+                    camera.translateX(+actualMoveSpeed);
+                    //actualMoveSpeed = actualMoveSpeed / 1.6;
                 } else {
-                    camera.translateX(+1.5);
+                    camera.translateX(+actualMoveSpeed);
                 }
 
                 //camera.rotation.y -= actualRotateSpeed;
@@ -1087,7 +1088,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
         next: "true",
         folder: "",
 
-        texture_update: "",
+        update: "",
 
     },
 
@@ -1102,10 +1103,17 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
             folder = "others/3d/model";
         }
 
+        var storage_url = "";
+
+        if ($.isHTTP(pm.storage)) {
+            storage_url = pm.storage;
+        } else {
+            storage_url = "./data/" + folder + "/" + pm.storage;
+        }
+
         var ext = $.getExt(pm.storage);
 
         if (ext == "gltf" || ext == "glb") {
-            var storage_url = "./data/" + folder + "/" + pm.storage;
 
             var loader = new THREE.GLTFLoader();
             loader.load(storage_url, (data) => {
@@ -1162,7 +1170,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
             });
         } else if (ext == "obj") {
 
-            var obj_url = "./data/" + folder + "/" + pm.storage;
+            var obj_url = storage_url;
             var mtl_file = obj_url.replace(".obj", ".mtl");
             var mtl_url = mtl_file;
 
@@ -1203,7 +1211,6 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
                 );
             });
         } else if (ext == "json") {
-
 
             function toBase64Url(url, callback) {
 
@@ -1250,7 +1257,7 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 
             }
 
-            var obj_url = "./data/" + folder + "/" + pm.storage;
+            var obj_url = storage_url;
             var objLoader = new THREE.ObjectLoader();
 
             $.loadText(obj_url, async (json) => {
@@ -1258,53 +1265,119 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
                 console.log("json======");
                 console.log(json);
 
-                //textureの上書きがある場合
-                if (pm.texture_update != "") {
+                if (pm.update != "") {
 
-                    console.log(pm.texture_update);
-                    const texture_update = JSON.parse(pm.texture_update);
+                    console.log("update =============== ");
+                    console.log(pm.update);
 
+                    const json_update = JSON.parse(pm.update);
+                    const texture_update = json_update.texture || {};
+                    const visible_update = json_update.visible || {};
+
+                    const object = json.object;
+
+                    //materialを探す
                     const materials = json.materials;
                     const textures = json.textures;
                     const images = json.images;
 
-                    for (let i = 0; i < materials.length; i++) {
+                    async function set_texture_update(object) {
 
-                        const material = materials[i];
-                        const mat_name = material.name;
-                        const map = material.map;
+                        //visible設定
+                        if (typeof visible_update[object.name] != "undefined" && visible_update[object.name] == false) {
+                            object.visible = false;
+                        }
 
-                        for (let j = 0; j < textures.length; j++) {
-                            const texture = textures[j];
-                            if (map == texture.uuid) {
+                        if (object.material) {
 
-                                const _image = texture.image;
+                            for (let i = 0; i < materials.length; i++) {
 
-                                for (let k = 0; k < images.length; k++) {
-                                    const image = images[k];
-                                    if (_image == image.uuid) {
-                                        images[k].name = mat_name;
+                                const material = materials[i];
+                                const mat_uuid = material.uuid;
+
+                                if (!material.map) continue;
+
+                                const map = material.map;
+
+                                if (object.material == mat_uuid) {
+
+                                    const obj_name = object.name;
+
+                                    for (let j = 0; j < textures.length; j++) {
+                                        const texture = textures[j];
+                                        if (map == texture.uuid) {
+
+                                            const _image = texture.image;
+
+                                            for (let k = 0; k < images.length; k++) {
+                                                const image = images[k];
+                                                if (_image == image.uuid) {
+                                                    images[k].name = obj_name;
+                                                }
+                                            }
+                                        }
+
                                     }
                                 }
+
+                            }
+
+                            for (let i = 0; i < images.length; i++) {
+
+                                const image = images[i];
+                                var data64 = "";
+
+                                if (texture_update[image.name]) {
+
+                                    const obj = texture_update[image.name];
+
+                                    if (obj["image"]) {
+                                        data64 = await toBase64Url(obj.image);
+                                        image.url = data64;
+                                    }
+
+                                    //リピート回数
+                                    if (obj.repeat_x && obj.repeat_y) {
+
+                                        //textures を　ループ
+                                        for (let j = 0; j < textures.length; j++) {
+                                            const texture = textures[j];
+                                            if (image.uuid == texture.image) {
+
+                                                texture.repeat = [parseInt(obj.repeat_x), parseInt(obj.repeat_y)];
+
+                                            }
+
+                                        }
+
+                                    }
+
+                                }
+
                             }
 
                         }
 
-                    }
+                        if (object.children) {
 
-                    for (let i = 0; i < images.length; i++) {
+                            const objects = object.children;
 
-                        const image = images[i];
-                        var data64 = "";
+                            console.log("wwwwwwwwwwwwww objects");
+                            console.log(objects);
 
-                        if (texture_update[image.name]) {
+                            for (let i = 0; i < objects.length; i++) {
 
-                            data64 = await toBase64Url(texture_update[image.name]);
-                            image.url = data64;
+                                await set_texture_update(objects[i]);
 
+                            }
                         }
 
                     }
+
+                    await set_texture_update(object);
+
+
+
                 }
 
                 //ユーザーデータの取得これをつかって、ティラノ系のイベントを操作できないかしら。
@@ -1313,12 +1386,11 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
                 setEvent(object);
 
 
+
                 objLoader.parse(
                     json,
 
                     (obj) => {
-                        console.log("wwwwwwwwwwwww");
-                        console.log(obj);
 
                         var model = obj;
                         let pos = $.three_pos(pm.pos);
@@ -2394,6 +2466,113 @@ console.log(pm);
     },
 };
 
+//ビデオプレイ
+tyrano.plugin.kag.tag["3d_video_play"] = {
+    vital: ["name"],
+
+    pm: {
+        name: "",
+        texture: "",
+
+        scale: "",
+        pos: "",
+        rot: "",
+
+        auto: "false",
+
+        next: "true",
+    },
+
+    start: function (pm) {
+
+        var three = this.kag.tmp.three;
+        var scene = three.scene;
+
+        if ($.checkThreeModel(pm.name) == false) {
+            return;
+        }
+
+        let folder = "texture";
+
+        var texture_url = "";
+
+        if ($.isHTTP(pm.texture)) {
+            texture_url = pm.texture;
+        } else {
+            texture_url = "./data/others/3d/" + folder + "/" + pm.texture;
+        }
+
+        let model = this.kag.tmp.three.models[pm.name];
+
+        function stop_video(model) {
+
+            model.video.remove();
+            delete model.video;
+            const mat = model.old_material;
+            model.model.material = mat;
+            model.needsUpdate();
+
+        }
+
+        if (model.video) {
+
+            stop_video(model);
+            return false;
+        }
+
+
+
+        const video = $("<video src='" + texture_url + "' />").get(0);
+
+        if (pm.auto == "true") {
+            video.muted = true;
+            video.autoplay = true;
+        }
+
+        setTimeout(function () {
+
+            //$("body").on("click", (e) => {
+            //alert("wwwwww");
+            video.play();
+            //$("body").off("click");
+            //});
+
+        }, 300);
+
+
+        /*
+        $("body").on("click", () => {
+            video.play();
+        });
+        */
+
+
+        video.addEventListener('ended', function () {
+            stop_video(model);
+        });
+
+        const video_texture = new THREE.VideoTexture(video);
+
+        let material = new THREE.MeshBasicMaterial({
+            map: video_texture,
+            alphaTest: 0.5,
+            transparent: true,
+        });
+
+        const old_material = model.model.material;
+
+        model.video = video;
+        model.old_material = old_material;
+        model.model.material = material;
+        model.needsUpdate();
+
+        if (pm.next == "true") {
+            this.kag.ftag.nextOrder();
+        }
+
+    },
+};
+
 //基本図形 直接タグで実行することはない。
 tyrano.plugin.kag.tag["3d_sprite_mod"] = {
     vital: ["name"],
@@ -2563,6 +2742,7 @@ pos=3Dオブジェクトを配置する座標を指定します。半角のカ�
 rot=3Dオブジェクトの傾きを指定します。半角カンマで区切ってxyz軸の回転を設定します。,
 scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
 group=グループに所属させることができます。グループ名を指定してください,
+group_uuid=シーン中でuuidを指定してグループの直下に追加することが可能です,
 force_sprite=該当オブジェクトは強制的にスプライトグループに格納されます。,
 visible=true or false を指定。初期状態で非表示状態でシーンに追加したい場合はfalseを指定。
 
@@ -2577,6 +2757,7 @@ tyrano.plugin.kag.tag["3d_show"] = {
     pm: {
         name: "",
         group: "default",
+        group_uuid: "",
         time: "500",
 
         scale: "",
@@ -2629,8 +2810,13 @@ tyrano.plugin.kag.tag["3d_show"] = {
 
         //シーン追加
         model.model.name = pm.name;
-        three.scene.add(model.model);
 
+        if (pm.group_uuid != "") {
+            const group_obj = three.scene.getObjectByProperty("uuid", pm.group_uuid);
+            group_obj.add(model.model);
+        } else {
+            three.scene.add(model.model);
+        }
         var options = {
             duration: parseInt(pm.time),
         };
@@ -4431,6 +4617,7 @@ three.camera.position.addScaledVector(direction, speed);
         });
 
         control.addEventListener("mouseUp", (e, m) => {
+
             console.log(e);
             console.log(m);
             console.log("mouseup!");
