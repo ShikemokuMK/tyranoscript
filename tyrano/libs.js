@@ -410,6 +410,29 @@
             },
         });
     };
+    
+    $.loadTextSync = function (file_path) {
+        
+        return new Promise((resolve, reject) => {
+            
+            $.ajax({
+                url: file_path + "?" + Math.floor(Math.random() * 1000000),
+                cache: false,
+                success: function (text) {
+                    if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
+                    const order_str = text;
+                    resolve(order_str);
+                },
+                
+                error: function () {
+                    if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
+                    alert($.lang("file_not_found", { path: file_path }));
+                    reject();
+                },
+            });
+            
+        });
+    };
 
     //クッキーを取得
     $.getCookie = function (key) {

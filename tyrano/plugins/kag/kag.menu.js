@@ -823,8 +823,19 @@ tyrano.plugin.kag.menu = {
                 if (this.kag.stat.current_bgm_vol != "") {
                     pm["volume"] = this.kag.stat.current_bgm_vol;
                 }
-
+                
+                if (this.kag.stat.current_bgm_pause_seek != "") {
+                    pm["pause"] = "true";
+                    pm["seek"] = this.kag.stat.current_bgm_pause_seek;
+                }
+                
+                if (this.kag.stat.current_bgm_base64 != "") {
+                    pm["base64"] = this.kag.stat.current_bgm_base64;
+                }
+                
                 this.kag.ftag.startTag("playbgm", pm);
+                
+                
             }
 
             // ループSE
@@ -834,6 +845,7 @@ tyrano.plugin.kag.menu = {
                 pm_obj["stop"] = "true";
                 this.kag.ftag.startTag("playbgm", pm_obj);
             }
+            
         }
 
         //読み込んだCSSがある場合
@@ -902,15 +914,23 @@ tyrano.plugin.kag.menu = {
 
                 //アニメーションの実行
                 if (key == "layer_camera") {
+                    
                     $(".layer_camera").css("-webkit-transform-origin", "center center");
-                    setTimeout(function () {
-                        $(".layer_camera").a3d(a3d_define);
-                    }, 1);
+                    (function (_a3d_define) {
+                        setTimeout(function () {
+                            $(".layer_camera").a3d(a3d_define);
+                        }, 1);
+                    })(a3d_define);
+                        
                 } else {
+                    
                     $("." + key + "_fore").css("-webkit-transform-origin", "center center");
-                    setTimeout(function () {
-                        $("." + key + "_fore").a3d(a3d_define);
-                    }, 1);
+                    (function (_a3d_define) {
+                        setTimeout(function () {
+                            $("." + key + "_fore").a3d(_a3d_define);
+                        }, 1);
+                    })(a3d_define);
+                    
                 }
             }
         }
