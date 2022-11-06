@@ -2008,7 +2008,7 @@ tyrano.plugin.kag.key_mouse = {
                         }
                     }
                 }
-
+                
                 return that.util.isDefaultActionEnabled(action, "mouse");
             });
 

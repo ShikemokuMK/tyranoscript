@@ -12,6 +12,8 @@ class ThreeModel {
         this.pm    = obj.pm;
         */
         
+		this.three = three;
+		
         for(let key in obj){
 	    	this[key] = obj[key];
 	    }
@@ -20,15 +22,15 @@ class ThreeModel {
         this.setUserData("name",obj.name);
         
         if(this.pm.visible == true){
-	    	this.visible = true;
-			this.opacity(1);
+	    	
+	    	this.show();
+	    	
 			three.scene.add(this.model);
         }else{
 			this.visible = false;
 			this.opacity(0);
         }
 	    
-        
         this.anim_obj = {};
         
     }   
@@ -59,6 +61,25 @@ class ThreeModel {
 	
 		this.model.rotation.set(x,y,z);
     
+	}
+	
+	setOutline() {
+		/*
+		var hex  = 0xff0000;
+		var bbox = new THREE.BoundingBoxHelper(this.model, hex );
+		bbox.update();
+		this.model.add( bbox );
+		*/
+		
+		//console.log("ggggggggg");
+		//console.log(this.model);
+		
+		//var axisHelper = new THREE.AxisHelper(50);
+		//this.model.add( axisHelper );
+		
+		this.three.outlinePass.selectedObjects = [];
+		this.three.outlinePass.selectedObjects.push(this.model);
+		
 	}
 	
 	fade(direction,options,cb){
@@ -127,6 +148,19 @@ class ThreeModel {
 		const action = this.mixer.clipAction(anim);
 		action.reset().play().fadeIn(0.5);
 		
+	}
+	
+	setVisible(visible){
+		
+		if(visible==true){
+			this.opacity(1);
+		}else{
+			this.opacity(0);
+		}
+			
+		this.visible = visible;
+		this.model.visible = visible;
+	
 	}
     
     //ポジションを指定位置まで移動させる
@@ -260,7 +294,22 @@ class ThreeModel {
 	        
         }
         
-    }
+	}
+	
+	show(){
+		
+		if(typeof this.pm["opacity"]=="undefined" || this.pm["opacity"]==""){
+			this.opacity(1);
+		}else{
+			this.opacity(parseFloat(this.pm["opacity"]));
+		}
+		
+		this.visible = true;
+		this.model.visible = true;
+		
+	}
+	
+	
     
     setUserData(key,val){
 		
@@ -312,5 +361,6 @@ class ThreeModel {
 		
 	
 	}
+	
 
 }

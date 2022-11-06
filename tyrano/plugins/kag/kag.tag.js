@@ -325,6 +325,12 @@ tyrano.plugin.kag.ftag = {
 
     //次の命令を実行する
     nextOrder: function () {
+        //nextOrderの割り込みが発生している場合
+        if (typeof this.kag.tmp.cut_nextorder == "function") {
+            this.kag.tmp.cut_nextorder();
+            return false;
+        }
+
         //基本非表示にする。
         this.kag.layer.hideEventLayer();
 
@@ -673,9 +679,14 @@ tyrano.plugin.kag.ftag = {
     },
 
     //タグを指定して直接実行
-    startTag: function (name, pm) {
+    startTag: function (name, pm, cb) {
         if (typeof pm == "undefined") {
             pm = {};
+        }
+
+        //コールバックがある場合はnextOrderの書き換え
+        if (typeof cb == "function") {
+            this.kag.tmp.cut_nextorder = cb;
         }
 
         // ティラノイベント"tag-<tagName>"を発火
@@ -683,6 +694,29 @@ tyrano.plugin.kag.ftag = {
 
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
+    },
+
+    //タグをnextorderの順番で使用する
+    startTags: function (array_tag, cb) {
+        var that = this;
+        let i = 0;
+
+        let post_tag = () => {
+            let tobj = array_tag[i];
+
+            that.startTag(tobj.tag, tobj.pm, function () {
+                TYRANO.kag.tmp.cut_nextorder = null;
+                i++;
+
+                if (array_tag.length == i) {
+                    cb();
+                } else {
+                    post_tag();
+                }
+            });
+        };
+
+        post_tag();
     },
 
     //indexを指定して、その命令を実行
@@ -6251,9 +6285,6 @@ tyrano.plugin.kag.tag.button = {
         // セーブに関連する機能を持ったロールボタンか
         const is_save_button = pm.role == "save" || pm.role == "menu" || pm.role == "quicksave" || pm.role == "sleepgame";
 
-        // [call]スタックが存在するか
-        const exists_call_stack = !!that.kag.getStack("call");
-
         // preexp をこの時点で評価
         const preexp = this.kag.embScript(pm.preexp);
 
@@ -6330,6 +6361,12 @@ tyrano.plugin.kag.tag.button = {
 
             // [sleepgame]しようとしたものの現在すでに[sleepgame]中なら無効
             if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
+
+            // storageもtargetも指定されてない場合は無効
+            if (pm.storage == null && pm.target == null) return false;
+
+            // [call]スタックが存在するか ボタン実行時に判定する。
+            const exists_call_stack = !!that.kag.getStack("call");
 
             // [call]しようとしたもののすでに[call]スタックが溜まっているなら無効
             if (is_call_button && exists_call_stack) {
