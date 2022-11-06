@@ -6285,9 +6285,6 @@ tyrano.plugin.kag.tag.button = {
         // セーブに関連する機能を持ったロールボタンか
         const is_save_button = pm.role == "save" || pm.role == "menu" || pm.role == "quicksave" || pm.role == "sleepgame";
 
-        // [call]スタックが存在するか
-        const exists_call_stack = !!that.kag.getStack("call");
-
         // preexp をこの時点で評価
         const preexp = this.kag.embScript(pm.preexp);
 
@@ -6364,6 +6361,12 @@ tyrano.plugin.kag.tag.button = {
 
             // [sleepgame]しようとしたものの現在すでに[sleepgame]中なら無効
             if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
+
+            // storageもtargetも指定されてない場合は無効
+            if (pm.storage == null && pm.target == null) return false;
+
+            // [call]スタックが存在するか ボタン実行時に判定する。
+            const exists_call_stack = !!that.kag.getStack("call");
 
             // [call]しようとしたもののすでに[call]スタックが溜まっているなら無効
             if (is_call_button && exists_call_stack) {
