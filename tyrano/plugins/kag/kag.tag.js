@@ -2474,12 +2474,10 @@ tyrano.plugin.kag.tag.jump = {
         }
 
         var that = this;
-        //ジャンプ直後のwt などでフラグがおかしくなる対策。クロージャーで包む
-        (function (_pm) {
-            setTimeout(function () {
-                that.kag.ftag.nextOrderWithLabel(_pm.target, _pm.storage);
-            }, 1);
-        })(pm)
+        //ジャンプ直後のwt などでフラグがおかしくなる対策
+        setTimeout(function () {
+            that.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
+        }, 1);
     },
 };
 
