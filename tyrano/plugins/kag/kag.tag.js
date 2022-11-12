@@ -2474,10 +2474,12 @@ tyrano.plugin.kag.tag.jump = {
         }
 
         var that = this;
-        //ジャンプ直後のwt などでフラグがおかしくなる対策
-        setTimeout(function () {
-            that.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
-        }, 1);
+        //ジャンプ直後のwt などでフラグがおかしくなる対策。クロージャーで包む
+        (function (_pm) {
+            setTimeout(function () {
+                that.kag.ftag.nextOrderWithLabel(_pm.target, _pm.storage);
+            }, 1);
+        })(pm)
     },
 };
 
@@ -6362,8 +6364,8 @@ tyrano.plugin.kag.tag.button = {
             // [sleepgame]しようとしたものの現在すでに[sleepgame]中なら無効
             if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
 
-            // storageもtargetも指定されてない場合は無効
-            if (pm.storage == null && pm.target == null) return false;
+            // ロールボタンじゃなくて、storageもtargetも指定されてない場合は無効
+            if (!is_role_button && pm.storage == null && pm.target == null) return false;
 
             // [call]スタックが存在するか ボタン実行時に判定する。
             const exists_call_stack = !!that.kag.getStack("call");
