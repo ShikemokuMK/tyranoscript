@@ -6323,14 +6323,15 @@ tyrano.plugin.kag.tag.button = {
             if (!j_button.hasClass("src-change-disabled")) {
                 if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
             }
-            return false;
+            //falseを返すと ipad などの一部環境で不具合
+            return true;
         });
 
         //
         // クリックイベント
         //
 
-        j_button.click((e) => {
+        j_button.on("click",(e) => {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
