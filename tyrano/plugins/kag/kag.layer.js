@@ -562,5 +562,5 @@ tyrano.plugin.kag.layer = {
         }
     },
 
-    test: function () {},
+    test: function () { },
 };

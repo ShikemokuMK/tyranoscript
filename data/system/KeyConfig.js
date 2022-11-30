@@ -417,7 +417,7 @@ window.__tyrano_key_config = {
         "swipe_down_1"  : "load",
         "swipe_left_1"  : "auto",
         "swipe_right_1" : "menu",
-        "hold"          : "holdskip",
+        "hold"          : "",
         
         // 画面右端のダブルタップ・トリプルタップ
         "mash_right_2"  : "auto",

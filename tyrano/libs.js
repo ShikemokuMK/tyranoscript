@@ -13,6 +13,11 @@
     };
 
     $.isHTTP = function (str) {
+
+        if ($.isBase64(str)) {
+            return true;
+        }
+
         if (str.substring(0, 4) === "http") {
             return true;
         } else {
@@ -344,7 +349,7 @@
     };
 
     //パスにfgimage bgimage image が含まれていた場合、それを適応する
-    $.convertStorage = function (path) {};
+    $.convertStorage = function (path) { };
 
     $.convertColor = function (val) {
         if (val.indexOf("0x") != -1) {
@@ -410,11 +415,11 @@
             },
         });
     };
-    
+
     $.loadTextSync = function (file_path) {
-        
+
         return new Promise((resolve, reject) => {
-            
+
             $.ajax({
                 url: file_path + "?" + Math.floor(Math.random() * 1000000),
                 cache: false,
@@ -423,14 +428,14 @@
                     const order_str = text;
                     resolve(order_str);
                 },
-                
+
                 error: function () {
                     if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
                     alert($.lang("file_not_found", { path: file_path }));
                     reject();
                 },
             });
-            
+
         });
     };
 
@@ -1026,7 +1031,7 @@
             }
             const file_path = out_path + "/" + key + ".sav";
             fs.unlinkSync(file_path);
-        } catch (e) {}
+        } catch (e) { }
     };
 
     $.setStorageFile = function (key, val) {
@@ -1282,6 +1287,31 @@
     $.inform = (str, type) => {
         alertify.log(str, type);
     };
+
+    $.prompt = function (str, cb) {
+
+        alertify.prompt(str, function (flag, text) {
+
+            if (typeof cb == "function") {
+                cb(flag, text);
+            }
+
+        });
+
+    };
+
+    $.isBase64 = function (str) {
+
+        if (!str) return false;
+
+        if (str.substr(0, 10) == "data:image") {
+            return true;
+        } else {
+            return false;
+        }
+
+
+    }
 
     //オブジェクトの個数をもってきます。1
     $.countObj = function (obj) {
