@@ -6407,7 +6407,7 @@ tyrano.plugin.kag.tag.button = {
             if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
 
             // storageもtargetも指定されてない場合は無効
-            if (pm.storage == null && pm.target == null) return false;
+            if (pm.role =="" && pm.storage == null && pm.target == null) return false;
 
             // [call]スタックが存在するか ボタン実行時に判定する。
             const exists_call_stack = !!that.kag.getStack("call");
