@@ -71,9 +71,27 @@ tyrano.plugin.kag.menu = {
                     })
                     .focusable();
 
+                //戻る機能
                 that.setMenuCloseEvent(layer_menu);
-                that.setMenuCloseEvent(layer_menu, { target: "menu_window_close" });
+                //that.setMenuCloseEvent(layer_menu, { target: "menu_window_close" });
 
+                layer_menu
+                    .find(".menu_window_close")
+                    .click(function (e) {
+
+                        //ウィンドウ消去
+                        that.kag.layer.hideMessageLayers();
+                        layer_menu.html("");
+                        layer_menu.hide();
+                        if (that.kag.stat.visible_menu_button == true) {
+                            $(".button_menu").show();
+                        }
+
+                        e.stopPropagation();
+
+
+                    }).focusable();
+                
                 layer_menu
                     .find(".menu_save")
                     .click(function (e) {

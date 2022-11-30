@@ -6361,8 +6361,8 @@ tyrano.plugin.kag.tag.button = {
         //
 
         j_button.on("mousedown touchstart", () => {
-            if (!this.kag.stat.is_strong_stop) return false;
-            if (button_clicked) return false;
+            if (!this.kag.stat.is_strong_stop) return true;
+            if (button_clicked) return true;
             if (!j_button.hasClass("src-change-disabled")) {
                 if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
             }
