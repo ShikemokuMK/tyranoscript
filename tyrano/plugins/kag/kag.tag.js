@@ -328,7 +328,6 @@ tyrano.plugin.kag.ftag = {
 
         //nextOrderの割り込みが発生している場合
         if (typeof this.kag.tmp.cut_nextorder == "function") {
-            console.log("cut");
             this.kag.tmp.cut_nextorder();
             return false;
         }
@@ -682,9 +681,19 @@ tyrano.plugin.kag.ftag = {
 
     //タグを指定して直接実行
     startTag: function (name, pm, cb) {
+
         if (typeof pm == "undefined") {
             pm = {};
         }
+
+        /*
+        if (typeof pm.next != "undefined" && pm.next == "false") {
+            this.kag.tmp.cut_nextorder = () => {
+                //何もしない。nextOrderで。
+                this.kag.tmp.cut_nextorder = null;
+            }
+        }
+        */
 
         //コールバックがある場合はnextOrderの書き換え
         if (typeof cb == "function") {
@@ -696,6 +705,7 @@ tyrano.plugin.kag.ftag = {
 
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
+
     },
 
     bufTags: [],
@@ -711,9 +721,8 @@ tyrano.plugin.kag.ftag = {
 
         this.bufTags.push({ "tags": array_tag, "cb": cb });
 
-        console.log("buftags");
-        console.log(this.bufTags);
-
+        //console.log("buftags");
+        //console.log(this.bufTags);
 
         let post_tag = () => {
 
@@ -730,8 +739,8 @@ tyrano.plugin.kag.ftag = {
 
             tobj = this.current_tags[this.cntTag];
 
-            console.log(this.cntTag);
-            console.log(tobj);
+            //console.log(this.cntTag);
+            //console.log(tobj);
 
             that.startTag(tobj.tag, tobj.pm, () => {
 
@@ -744,13 +753,19 @@ tyrano.plugin.kag.ftag = {
 
                     if (this.bufTags.length != 0) {
                         this.cntTag = 0;
-                        post_tag();
+                        setTimeout(() => {
+                            post_tag();
+                        }, 10);
                     } else {
                         this.isExeTag = false;
                     }
 
                 } else {
-                    post_tag();
+                    setTimeout(() => {
+
+                        post_tag();
+
+                    }, 10);
                 }
             });
         };
@@ -2139,7 +2154,7 @@ tyrano.plugin.kag.tag.text = {
         }
     },
 
-    nextOrder: function () { },
+    //nextOrder: function () { },
 
     setFukiStyle: function (j_outer_message, chara_fuki) {
         //見た目の指定がある場合は設定する
@@ -6231,13 +6246,17 @@ tyrano.plugin.kag.tag.button = {
         }
 
         if (pm.x == "") {
-            j_button.css("left", this.kag.stat.locate.x + "px");
+            if (this.kag.stat.locate.x != 0) {
+                j_button.css("left", this.kag.stat.locate.x + "px");
+            }
         } else {
             j_button.css("left", pm.x + "px");
         }
 
         if (pm.y == "") {
-            j_button.css("top", this.kag.stat.locate.y + "px");
+            if (this.kag.stat.locate.y != 0) {
+                j_button.css("top", this.kag.stat.locate.y + "px");
+            }
         } else {
             j_button.css("top", pm.y + "px");
         }
@@ -6407,7 +6426,7 @@ tyrano.plugin.kag.tag.button = {
             if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
 
             // storageもtargetも指定されてない場合は無効
-            if (pm.role =="" && pm.storage == null && pm.target == null) return false;
+            if (pm.role == "" && pm.storage == null && pm.target == null) return false;
 
             // [call]スタックが存在するか ボタン実行時に判定する。
             const exists_call_stack = !!that.kag.getStack("call");

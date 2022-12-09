@@ -300,6 +300,14 @@
         return str.replace(/^\s+|\s+$/g, "");
     };
 
+    $.tag = function (tag_name, pm) {
+        var pm_str = "";
+        for (key in pm) {
+            pm_str += " " + key + "=\"" + pm[key] + "\" ";
+        }
+        return "[" + tag_name + " " + pm_str + " ]";
+    };
+
     $.rmspace = function (str) {
         str = str.replace(/ /g, "");
         str = str.replace(/　/g, "");

@@ -1,3 +1,4 @@
+
 $.makeHash = function (num) {
     // 生成する文字列の長さ
     var l = num;
@@ -141,7 +142,7 @@ tyrano.plugin.kag.tag["3d_init"] = {
 
         studio: "false", //"studio"が指定されている場合は、開発ツール用の動きをする
 
-        fps30: "false", //フレームレートを半分にする
+        fps_rate: 0, // フレームレート 0:制限なし 1:高め(1/2) 2:ふつう (1/4) 3 低め (1/8)
         stats: "false", // fpsステータスの表示設定
         background: "true", //バックグラウンドでの動作
 
@@ -297,13 +298,10 @@ this.kag.tmp.three.outlinePass = outlinePass;
 
         var t = Math.random();
 
-        let cnt_frame = false;
-        let fps30 = false;
+        let cnt_frame = 0;
         let fps_stats = false;
 
-        if (pm.fps30 == "true") {
-            fps30 = true;
-        }
+        three.stat.fps.fps_rate = parseInt(pm.fps_rate);
 
         if (pm.stats == "true") {
             var stats = new Stats();
@@ -317,18 +315,20 @@ this.kag.tmp.three.outlinePass = outlinePass;
 
         //毎フレーム時に実行されるループイベントです
         function tick() {
+
             if (three.stat.animation_loop == false) {
                 return;
             }
 
-            if (fps30 == true) {
-                if (cnt_frame == true) {
-                    cnt_frame = false;
+
+            if (three.stat.fps.fps_rate != 0) {
+                if (three.stat.fps.fps_rate > cnt_frame) {
+                    cnt_frame++;
                     var req_id = requestAnimationFrame(tick);
                     return;
+                } else {
+                    cnt_frame = 0;
                 }
-
-                cnt_frame = true;
             }
 
             if (fps_stats == true) {
@@ -354,6 +354,7 @@ this.kag.tmp.three.outlinePass = outlinePass;
             if (three.stat.is_load == false) {
                 window.cancelAnimationFrame(req_id);
             }
+
         }
 
         if (pm.background == "false") {
@@ -634,9 +635,12 @@ TYRANO.kag.studio.selectCamera("camera", that.kag.tmp.three.models["camera"]);
 
                         if (type == "jump") {
                             that.kag.layer.showEventLayer();
+                            //変数に値を格納する
+                            that.kag.stat.f["eventUserData"] = three.evt[name];
                             that.kag.ftag.startTag("jump", three.evt[name]);
                             return;
                         } else if (type == "eval") {
+                            that.kag.stat.f["eventUserData"] = three.evt[name];
                             eval(three.evt[name]["exp"]);
                             return;
                         }
@@ -799,6 +803,7 @@ vector.applyQuaternion(camera.quaternion);
                 //console.log("F:",objs_zf[0].object.userData.name);
                 if (objs_zf[0].distance < 10 + actualMoveSpeed * 3) {
                     //stop();
+                    console.log(objs_zf[0]);
                     console.log("zf");
                     camera.position.z += 1;
 
@@ -889,7 +894,7 @@ console.log(camera.rotation.y);
             if (objs_xr.length > 0) {
                 //console.log("R:",objs_xr[0].distance);
                 if (objs_xr[0].distance < 10 + actualMoveSpeed * 3) {
-                    
+
                     camera.position.x -= 1;
                     _stop_move = true;
 
@@ -1288,13 +1293,13 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 
             $.loadText(obj_url, async (json) => {
 
-                console.log("json======");
-                console.log(json);
+                //console.log("json======");
+                //console.log(json);
 
                 if (pm.update != "") {
 
-                    console.log("update =============== ");
-                    console.log(pm.update);
+                    //console.log("update =============== ");
+                    //console.log(pm.update);
 
                     const json_update = JSON.parse(pm.update);
                     const texture_update = json_update.texture || {};
@@ -1318,6 +1323,11 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
                         //データの更新
                         if (typeof data_update[object.name] != "undefined") {
                             object.userData = $.extend(object.userData, data_update[object.name]);
+
+                            //ネームが指定されている場合はオブジェクトのnameも更新
+                            if (object.userData["uuid"]) {
+                                object.uuid = object.userData["uuid"];
+                            }
                         }
 
                         if (object.material) {
@@ -3202,9 +3212,11 @@ tyrano.plugin.kag.tag["3d_delete"] = {
 
     pm: {
         name: "",
+        next: "true",
     },
 
     start: function (pm) {
+
         if ($.checkThreeModel(pm.name) == false) {
             return;
         }
@@ -3214,7 +3226,18 @@ tyrano.plugin.kag.tag["3d_delete"] = {
         var model = models[pm.name];
 
         if (model.model) {
+
+            /*
+            model.model.traverse(function (obj) {
+                alert(obj.name);
+                three.scene.remove(obj);
+
+            });
+            */
+
+            model.model.clear();
             three.scene.remove(model.model);
+
         }
 
         //グループの場合は付随するオブジェクトも削除
@@ -3235,7 +3258,9 @@ tyrano.plugin.kag.tag["3d_delete"] = {
 
         delete this.kag.tmp.three.models[pm.name];
 
-        this.kag.ftag.nextOrder();
+        if (pm.next == "true") {
+            this.kag.ftag.nextOrder();
+        }
     },
 };
 
@@ -3483,6 +3508,8 @@ tyrano.plugin.kag.tag["3d_anim"] = {
         callback: "",
 
         wait: "true",
+        next: "true",
+
     },
 
     start: function (pm) {
@@ -3539,7 +3566,9 @@ tyrano.plugin.kag.tag["3d_anim"] = {
 
                 if (cnt_fin >= cnt_type) {
                     if (pm.wait == "true") {
-                        this.kag.ftag.nextOrder();
+                        if (pm.next == "true") {
+                            this.kag.ftag.nextOrder();
+                        }
                     }
 
                     if (typeof pm.callback == "function") {
@@ -3550,7 +3579,9 @@ tyrano.plugin.kag.tag["3d_anim"] = {
         }
 
         if (pm.wait != "true") {
-            this.kag.ftag.nextOrder();
+            if (pm.next == "true") {
+                this.kag.ftag.nextOrder();
+            }
         }
     },
 };
@@ -4660,7 +4691,7 @@ three.camera.position.addScaledVector(direction, speed);
 
         control.addEventListener("mouseUp", (e, m) => {
 
-            
+
             var msg_pos =
                 $.orgFloor(model.position.x, 100) + "," + $.orgFloor(model.position.y, 100) + "," + $.orgFloor(model.position.z, 100);
             var msg_rot =
@@ -5405,7 +5436,7 @@ tyrano.plugin.kag.tag["3d_fps_control"] = {
 
         if (pm.joystick == "true") {
             let j_joy = $(
-                '<div id="joyDiv" style="opacity:0.5;position:absolute;width:200px;height:200px;bottom:0px;left:0px;z-index:99"></div>',
+                '<div id="joyDiv" style="opacity:0.5;position:absolute;width:100px;height:100px;bottom:0px;left:0px;z-index:99"></div>',
             );
             $("body").prepend(j_joy);
             TYRANO.kag.tmp.three.stat.fps.joy = new JoyStick("joyDiv", {
@@ -5593,6 +5624,8 @@ tyrano.plugin.kag.tag["3d_add_group"] = {
         var model_obj;
 
         if (pm.clone == "true") {
+            console.log("ffffff");
+            console.log(pm);
             model_obj = this.kag.tmp.three.models[pm.name].model.clone();
         } else {
             model_obj = this.kag.tmp.three.models[pm.name].model;

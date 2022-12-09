@@ -150,6 +150,8 @@ tyrano.plugin.kag = {
                     isJoy: false,
                     camera_pos_y: 40,
 
+                    fps_rate: 0,
+
                     move_trans_control: false,
 
                 }
@@ -1406,6 +1408,8 @@ tyrano.plugin.kag = {
 
                 "./tyrano/libs/three/controls/OrbitControls.js",
                 "./tyrano/libs/three/classes/ThreeModel.js",
+                "./tyrano/libs/three/etc/stats.min.js",
+
             ];
         }
 
