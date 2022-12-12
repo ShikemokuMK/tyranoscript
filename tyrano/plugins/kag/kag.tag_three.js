@@ -5614,10 +5614,12 @@ tyrano.plugin.kag.tag["3d_add_group"] = {
         var three = this.kag.tmp.three;
 
         if ($.checkThreeModel(pm.name) == false) {
+            this.kag.ftag.nextOrder();
             return;
         }
 
         if ($.checkThreeModel(pm.group) == false) {
+            this.kag.ftag.nextOrder();
             return;
         }
 
