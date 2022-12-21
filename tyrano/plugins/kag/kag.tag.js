@@ -739,8 +739,8 @@ tyrano.plugin.kag.ftag = {
 
             tobj = this.current_tags[this.cntTag];
 
-            //console.log(this.cntTag);
-            //console.log(tobj);
+            //            console.log(this.cntTag);
+            //            console.log(tobj);
 
             that.startTag(tobj.tag, tobj.pm, () => {
 

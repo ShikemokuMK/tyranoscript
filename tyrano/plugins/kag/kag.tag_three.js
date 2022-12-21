@@ -486,7 +486,9 @@ this.kag.tmp.three.outlinePass = outlinePass;
                         }
 
                         //カーソルを変更する。
-                        $("body").css("cursor", "pointer");
+                        if ($("body").css("cursor") != "pointer") {
+                            $("body").css("cursor", "pointer");
+                        }
 
                         return;
                     }
@@ -494,8 +496,33 @@ this.kag.tmp.three.outlinePass = outlinePass;
                     //console.log("none");
                 }
 
-                $("body").css("cursor", "default");
+                if ($("body").css("cursor") != "default") {
+                    $("body").css("cursor", "default");
+                }
+
             }
+        });
+
+        let flag_hold = false
+
+
+        j_canvas.on("touchstart", function (event, data) {
+
+            flag_hold = true;
+
+            setTimeout(function () {
+                if (flag_hold) {
+                    j_canvas.trigger("contextmenu", event);
+                }
+            }, 1000);
+
+
+        });
+
+        j_canvas.on("touchend", function (event, data) {
+
+            flag_hold = false;
+
         });
 
         j_canvas.on("click contextmenu", function (event, data) {
@@ -504,8 +531,23 @@ this.kag.tmp.three.outlinePass = outlinePass;
                 event = data;
             }
 
-            var x = event.clientX;
-            var y = event.clientY;
+            var x = 0;
+            var y = 0;
+
+            if (event.type == "touchstart") {
+                var touchObject = event.changedTouches[0];
+                event.type = "contextmenu"
+                // 位置座標を取得する
+                x = touchObject.pageX;	// 水平方向の位置座標
+                y = touchObject.pageY;
+                event.clientX = x;
+                event.clientY = y - 100;
+
+
+            } else {
+                x = event.clientX;
+                y = event.clientY;
+            }
 
             // マウスクリック位置を正規化
             var mouse = new THREE.Vector2();
@@ -1421,7 +1463,6 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 
                 //ユーザーデータの取得これをつかって、ティラノ系のイベントを操作できないかしら。
                 const object = json.object;
-                console.log(object);
                 setEvent(object);
 
 
@@ -2112,6 +2153,8 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
         doubleside: "false",
         tonemap: "true",
 
+        user_data: "",
+
         motion: "",
 
         opacity: "",
@@ -2242,6 +2285,12 @@ tyrano.plugin.kag.tag["obj_model_new"] = {
         model.position.set(pos.x, pos.y, pos.z);
         model.scale.set(scale.x, scale.y, scale.z);
         model.rotation.set(rot.x, rot.y, rot.z);
+
+        //modelにアップデート
+        if (pm.user_data != "") {
+            model.userData = $.extend(model.userData, pm.user_data);
+
+        }
 
         // 3D空間にメッシュを追加
         //scene.add(model);
