@@ -2034,8 +2034,15 @@ tyrano.plugin.kag = {
             audio_obj.load();
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
             // 動画ファイルプリロード
+            
+            let evt_name = "loadeddata";
+            
+            if($.userenv()=="iphone"){
+                evt_name = "loadedmetadata";
+            }
+            
             $("<video />")
-                .on("loadeddata", function (e) {
+                .on(evt_name, function (e) {
                     onend(this);
                 })
                 .on("error", function (e) {
