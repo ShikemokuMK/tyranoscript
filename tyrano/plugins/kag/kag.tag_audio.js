@@ -44,17 +44,16 @@ tyrano.plugin.kag.tag.playbgm = {
         target: "bgm", //"bgm" or "se"
 
         sprite_time: "", //200-544
-        
+
         pause: "false",
         seek: "",
-        
+
         html5: "false",
 
         click: "false", //音楽再生にクリックが必要か否か
         stop: "false", //trueの場合自動的に次の命令へ移動しない。ロード対策
-        
+
         base64: "", //base64 対応
-        
     },
 
     waitClick: function (pm) {
@@ -339,7 +338,7 @@ tyrano.plugin.kag.tag.playbgm = {
             case "bgm":
                 // BGM再生中！
                 this.kag.tmp.is_bgm_play = true;
-                this.kag.stat.current_bgm_pause_seek =""; //ポーズ無効
+                this.kag.stat.current_bgm_pause_seek = ""; //ポーズ無効
 
                 break;
 
@@ -356,23 +355,18 @@ tyrano.plugin.kag.tag.playbgm = {
         }
 
         //crypt機能
-        
+
         if (pm.base64 != "") {
-            
-            storage = "data:audio/" + pm.base64 + ";base64," + await $.loadTextSync(storage);
+            storage = "data:audio/" + pm.base64 + ";base64," + (await $.loadTextSync(storage));
             this.kag.stat.current_bgm_base64 = pm.base64;
-                
         } else {
-            
             this.kag.stat.current_bgm_base64 = "";
-            
         }
-        
+
         //
         // Howlオプション
         //
-        
-        
+
         // Howlオブジェクト格納用
         let audio_obj;
 
@@ -410,7 +404,7 @@ tyrano.plugin.kag.tag.playbgm = {
         // このときのタグ音量とコンフィグ音量はそれぞれ記憶しておく [bgmopt effect="true"]対策
         audio_obj.__tag_volume = tag_volume;
         audio_obj.__config_volume = config_volume;
-        
+
         //
         // 同一bufの旧オーディオの停止および破棄, 参照の格納, セーブデータロード時復元のための記憶
         //
@@ -468,9 +462,9 @@ tyrano.plugin.kag.tag.playbgm = {
                 preloaded_audio_del.unload();
                 delete this.kag.tmp.preload_audio_map[storage];
             }
-            
+
             this.kag.hideLoadingLog();
-            
+
             //途中から再生の場合
             if (pm.seek != "") {
                 audio_obj.seek(parseFloat(pm.seek));
@@ -482,8 +476,6 @@ tyrano.plugin.kag.tag.playbgm = {
             } else {
                 next();
             }
-            
-            
         });
 
         // 再生開始時
@@ -845,7 +837,7 @@ tyrano.plugin.kag.tag.fadeinbgm = {
         html5: "false",
         time: 2000,
         pause: "false",
-        seek:"",
+        seek: "",
     },
 
     start: function (pm) {
@@ -1599,8 +1591,8 @@ tyrano.plugin.kag.tag.resumebgm = {
             const audio_obj = target_dict[buf];
             audio_obj.play();
         }
-        
-        this.kag.stat.current_bgm_pause_seek ="";
+
+        this.kag.stat.current_bgm_pause_seek = "";
 
         next();
     },
@@ -1817,6 +1809,10 @@ tyrano.plugin.kag.tag.voconfig = {
                     buf: pm.sebuf,
                     number: 0,
                 };
+            }
+
+            if (pm.sebuf !== "") {
+                vochara["buf"] = pm.sebuf;
             }
 
             if (pm.vostorage != "") {
