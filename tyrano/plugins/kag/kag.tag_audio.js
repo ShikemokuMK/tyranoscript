@@ -1786,7 +1786,7 @@ waittime  = オートモードにおいて、ボイスを再生し終わって�
 
 tyrano.plugin.kag.tag.voconfig = {
     pm: {
-        sebuf: "0",
+        sebuf: "",
         name: "",
         vostorage: "",
         number: "",
@@ -1806,7 +1806,7 @@ tyrano.plugin.kag.tag.voconfig = {
             } else {
                 vochara = {
                     vostorage: "",
-                    buf: pm.sebuf,
+                    buf: pm.sebuf || "0",
                     number: 0,
                 };
             }
