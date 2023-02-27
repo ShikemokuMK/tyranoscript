@@ -2273,12 +2273,15 @@ tyrano.plugin.kag.tag.l = {
         // スキップまたはオートモード時の処理
         //
 
+        // スキップモードの場合は単に次のタグに進んで早期リターン
         if (this.kag.stat.is_skip == true) {
-            //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
-        } else if (this.kag.stat.is_auto == true) {
-            // オートモード時は現在表示されているメッセージ量から待機時間を計算して
-            // setTimeout で次のタグに進む
+            return;
+        }
+
+        // オートモード時は現在表示されているメッセージ量から待機時間を計算して
+        // setTimeout で次のタグに進む
+        if (this.kag.stat.is_auto == true) {
             this.kag.stat.is_wait_auto = true;
 
             var auto_speed = that.kag.config.autoSpeed;
@@ -2300,10 +2303,8 @@ tyrano.plugin.kag.tag.l = {
             }, auto_speed);
         }
 
-        // スキップモードでなければ waitClick を呼んでイベントレイヤ―の表示処理などを行う
-        if (!this.kag.stat.is_skip) {
-            this.kag.waitClick("l");
-        }
+        // waitClick を呼んでイベントレイヤ―の表示処理などを行う
+        this.kag.waitClick("l");
     },
 };
 
@@ -7710,7 +7711,6 @@ tyrano.plugin.kag.tag.glyph_skip = {
         if (pm.use) {
             $("#mode_glyph_skip").remove();
             const j_glyph = $("." + pm.use).eq(0);
-            console.error(j_glyph);
             if (j_glyph.length) {
                 j_glyph.attr("id", "mode_glyph_skip");
                 if (this.kag.stat.is_skip) {

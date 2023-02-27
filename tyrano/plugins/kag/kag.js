@@ -32,7 +32,6 @@ tyrano.plugin.kag = {
         "data-effect",
         "data",
         "type",
-
     ],
 
     config: {
@@ -87,8 +86,8 @@ tyrano.plugin.kag = {
         is_bgm_play_wait: false, //BGMの完了を待っているか否か。
 
         loading_make_ref: false,
-        
-        cut_nextorder:null, 
+
+        cut_nextorder: null,
 
         wait_id: "", //waitをキャンセルするために使います。
 
@@ -106,8 +105,8 @@ tyrano.plugin.kag = {
                 is_load: false,
                 canvas_show: false,
                 start_event: true,
-                
-                animation_loop:true,
+
+                animation_loop: true,
 
                 scene_pm: {}, //シーン情報の設定
                 init_pm: {}, //初期設定のpm
@@ -119,41 +118,38 @@ tyrano.plugin.kag = {
                     enable: -1,
                     mode: 0,
                 },
-                
-                fps:{
-					
-					active:false,
-					
-					movementSpeed:100,
-					rotateSpeed:0.5,
-					
-					tmpMoveBuffer:0,
-					tmpRotateBuffer:0,
-					
-					offMoveBufferF:false,
-					offMoveBufferB:false,
-					offRotateBufferL:false,
-					offRotateBufferR:false,
-					
-					is_colid:false,
-					
-					moveForward:false,
-					moveBackward:false,
-					rotateLeft:false,
-					rotateRight:false,
-               
-                    memory_pos:{x:0,y:0,z:0},
-					
+
+                fps: {
+                    active: false,
+
+                    movementSpeed: 100,
+                    rotateSpeed: 0.5,
+
+                    tmpMoveBuffer: 0,
+                    tmpRotateBuffer: 0,
+
+                    offMoveBufferF: false,
+                    offMoveBufferB: false,
+                    offRotateBufferL: false,
+                    offRotateBufferR: false,
+
+                    is_colid: false,
+
+                    moveForward: false,
+                    moveBackward: false,
+                    rotateLeft: false,
+                    rotateRight: false,
+
+                    memory_pos: { x: 0, y: 0, z: 0 },
+
                     ground: "",
-                    is_fps_studio:false,
-					
-					isJoy:false,
-					camera_pos_y:40,
-					
-					move_trans_control:false,
-					
-				}
-                
+                    is_fps_studio: false,
+
+                    isJoy: false,
+                    camera_pos_y: 40,
+
+                    move_trans_control: false,
+                },
             },
 
             models: {},
@@ -231,11 +227,10 @@ tyrano.plugin.kag = {
         current_bgm: "", //現在再生中のBGM
         current_bgm_vol: "", //現在再生中のBGMボリューム
         current_bgm_html5: "false", //現在再生中のhtml5パラメータ
-        
-        current_bgm_base64:"", //現在再生中のBGMがbase64エンコードされているかどうか。されている場合はファイル形式が格納される。(mp3 ogg etc)
-        
-        current_bgm_pause_seek:"", //ポーズ中ならその時間が入る。ポーズ中じゃない場合は空白
-        
+
+        current_bgm_base64: "", //現在再生中のBGMがbase64エンコードされているかどうか。されている場合はファイル形式が格納される。(mp3 ogg etc)
+
+        current_bgm_pause_seek: "", //ポーズ中ならその時間が入る。ポーズ中じゃない場合は空白
 
         current_se: {}, //現在再生中のループ効果音
 
@@ -871,8 +866,8 @@ tyrano.plugin.kag = {
         //コンフィグボタン追加
         var button_menu_obj = $(
             "<div class='button_menu' style='z-index:100000000'><img src='./tyrano/images/system/" +
-            $.novel("file_button_menu") +
-            "'  /></div>",
+                $.novel("file_button_menu") +
+                "'  /></div>",
         );
 
         //コンフィグボタンの位置を指定する
@@ -2837,7 +2832,7 @@ tyrano.plugin.kag = {
     },
 
     chara: {
-        init() { },
+        init() {},
 
         /**
          * 発言者の名前欄を意味する p 要素を返す
@@ -3082,7 +3077,7 @@ tyrano.plugin.kag = {
         }, 10);
     },
 
-    test: function () { },
+    test: function () {},
 };
 
 //すべてのタグに共通する、拡張用
