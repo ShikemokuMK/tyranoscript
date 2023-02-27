@@ -1464,8 +1464,9 @@ tyrano.plugin.kag.tag.text = {
         for (let i = edges.length - 1; i >= 0; i--) {
             const edge = edges[i];
             const width = edge.total_width * 2;
-            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${100 - i
-                }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
+            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${
+                100 - i
+            }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
             if (is_edge_overlap) {
                 style += "opacity:1;";
             }
@@ -2096,7 +2097,7 @@ tyrano.plugin.kag.tag.text = {
         }
     },
 
-    nextOrder: function () { },
+    nextOrder: function () {},
 
     setFukiStyle: function (j_outer_message, chara_fuki) {
         //見た目の指定がある場合は設定する
@@ -2268,11 +2269,16 @@ tyrano.plugin.kag.tag.l = {
         this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
-        //クリックするまで、次へすすまないようにする
+        //
+        // スキップまたはオートモード時の処理
+        //
+
         if (this.kag.stat.is_skip == true) {
             //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
         } else if (this.kag.stat.is_auto == true) {
+            // オートモード時は現在表示されているメッセージ量から待機時間を計算して
+            // setTimeout で次のタグに進む
             this.kag.stat.is_wait_auto = true;
 
             var auto_speed = that.kag.config.autoSpeed;
@@ -2294,6 +2300,7 @@ tyrano.plugin.kag.tag.l = {
             }, auto_speed);
         }
 
+        // スキップモードでなければ waitClick を呼んでイベントレイヤ―の表示処理などを行う
         if (!this.kag.stat.is_skip) {
             this.kag.waitClick("l");
         }
@@ -2479,7 +2486,7 @@ tyrano.plugin.kag.tag.jump = {
             setTimeout(function () {
                 that.kag.ftag.nextOrderWithLabel(_pm.target, _pm.storage);
             }, 1);
-        })(pm)
+        })(pm);
     },
 };
 
@@ -8384,8 +8391,8 @@ tyrano.plugin.kag.tag.layermode_movie = {
 
         blend_layer = $(
             "<video class='layer_blend_mode blendlayer blendvideo' data-video-name='" +
-            pm.name +
-            "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
+                pm.name +
+                "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
         );
         var video = blend_layer.get(0);
         var url = "./data/video/" + pm.video;
