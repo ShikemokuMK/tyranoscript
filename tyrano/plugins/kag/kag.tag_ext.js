@@ -540,11 +540,22 @@ tyrano.plugin.kag.tag.showsave = {
     start: function (pm) {
         var that = this;
 
-        that.kag.stat.load_auto_next = true;
-        this.kag.menu.displaySave(function () {
-            that.kag.stat.load_auto_next = false;
-            that.kag.ftag.nextOrder();
-        });
+        // セーブ完了時コールバックで次のタグに進む仕様を廃止
+        // ([showsave]で開いたメニューからセーブする度に次のタグに進んでしまう問題を解消)
+        // that.kag.stat.load_auto_next = true;
+        // this.kag.menu.displaySave(function () {
+        //     that.kag.stat.load_auto_next = false;
+        //     that.kag.ftag.nextOrder();
+        // });
+
+        // スキップとオートを止めつつ実質[l]で待機している状態にする
+        that.kag.stat.is_skip = false;
+        that.kag.stat.is_auto = false;
+        that.kag.ftag.startTag("l");
+
+        // ただ単にセーブメニューを開く
+        // ロールボタンやキーコンフィグからセーブメニューを開いたときと同等の挙動となる
+        this.kag.menu.displaySave();
     },
 };
 
