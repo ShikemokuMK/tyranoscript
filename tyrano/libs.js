@@ -410,11 +410,9 @@
             },
         });
     };
-    
+
     $.loadTextSync = function (file_path) {
-        
         return new Promise((resolve, reject) => {
-            
             $.ajax({
                 url: file_path + "?" + Math.floor(Math.random() * 1000000),
                 cache: false,
@@ -423,14 +421,13 @@
                     const order_str = text;
                     resolve(order_str);
                 },
-                
+
                 error: function () {
                     if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
                     alert($.lang("file_not_found", { path: file_path }));
                     reject();
                 },
             });
-            
         });
     };
 
@@ -1139,7 +1136,8 @@
         const inst = j_box.remodal();
 
         // 汎用クローズ処理
-        const close_common = () => {
+        const close_common = (e) => {
+            e.stopPropagation();
             j_event.setStyle("pointer-events", "none");
             TYRANO.kag.key_mouse.vmouse.hide();
             const effect = TYRANO.kag.tmp.remodal_closing_effect;
@@ -1149,7 +1147,6 @@
                     j_box.setStyleMap({ "animation-name": "" }, "webkit");
                 });
             }
-
             $.removeRemodalEvents(false);
         };
 
@@ -1166,7 +1163,8 @@
         // ラッパーのクリックでウィンドウを閉じられるようにする
         j_wrapper
             .off("mousedown.outerclose click.outerclose")
-            .on("click.outerclose", () => {
+            .on("click.outerclose", (e) => {
+                e.stopPropagation();
                 if (mousedown_elm !== j_wrapper[0]) return;
                 j_box.off("mousedown.outerclose");
                 j_wrapper.off("mousedown.outerclose click.outerclose");
@@ -1198,8 +1196,8 @@
 
         if (options.type === "alert") {
             // アラート: クローズ時の処理
-            $(document).on("closed", ".remodal", () => {
-                close_common();
+            $(document).on("closed", ".remodal", (e) => {
+                close_common(e);
                 $.removeRemodalEvents(false);
                 if (typeof options.on_ok === "function") {
                     options.on_ok();
@@ -1209,16 +1207,16 @@
 
         if (options.type === "confirm") {
             // コンファーム: OK 時の処理
-            $(document).on("confirmation", ".remodal", () => {
-                close_common();
+            $(document).on("confirmation", ".remodal", (e) => {
+                close_common(e);
                 if (typeof options.on_ok === "function") {
                     options.on_ok();
                 }
             });
 
             // コンファーム: Cancel 時の処理
-            $(document).on("cancellation", ".remodal", () => {
-                close_common();
+            $(document).on("cancellation", ".remodal", (e) => {
+                close_common(e);
                 if (typeof options.on_cancel === "function") {
                     options.on_cancel();
                 }
