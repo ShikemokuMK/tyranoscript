@@ -493,6 +493,8 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     next() {
+        // いまクリック可能か？
+        // クリック可能ならスキップ/オートを解除し、イベントレイヤのクリックをトリガーする
         if (this.util.canClick()) {
             this.util.clearSkipAndAuto();
             $(".layer_event_click").trigger("click");
@@ -1392,12 +1394,12 @@ tyrano.plugin.kag.key_mouse = {
 
         /**
          * イベントレイヤをクリックできる状態なら true を返す
-         * イベントレイヤが表示されていて、かつ、メニューが表示されていない状態
+         * イベントレイヤが表示されていて、かつ、セーブ等のメニューやリモーダルウィンドウが表示されていない状態
          * @returns {boolean}
          */
         canClick() {
             const is_event_layer_displayed = this.kag.layer.layer_event.css("display") !== "none";
-            if (is_event_layer_displayed && !this.isMenuDisplayed()) {
+            if (is_event_layer_displayed && !this.isMenuDisplayed() && !this.isRemodalDisplayed()) {
                 return true;
             }
             return false;
@@ -2008,7 +2010,7 @@ tyrano.plugin.kag.key_mouse = {
                         }
                     }
                 }
-                
+
                 return that.util.isDefaultActionEnabled(action, "mouse");
             });
 
