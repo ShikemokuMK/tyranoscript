@@ -2279,6 +2279,9 @@ tyrano.plugin.kag.tag.l = {
             return;
         }
 
+        // ここに到達したということは
+        // スキップモード中ではない
+
         // オートモード時は現在表示されているメッセージ量から待機時間を計算して
         // setTimeout で次のタグに進む
         if (this.kag.stat.is_auto == true) {
@@ -2293,7 +2296,6 @@ tyrano.plugin.kag.tag.l = {
             setTimeout(function () {
                 if (that.kag.stat.is_wait_auto == true) {
                     //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
-
                     if (that.kag.tmp.is_vo_play == true) {
                         that.kag.tmp.is_vo_play_wait = true;
                     } else {
@@ -2337,16 +2339,29 @@ tyrano.plugin.kag.tag.l = {
 tyrano.plugin.kag.tag.p = {
     start: function () {
         var that = this;
+
         //改ページ
         this.kag.stat.flag_ref_page = true;
 
         this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
+        //
+        // スキップまたはオートモード時の処理
+        //
+
+        // スキップモードの場合は単に次のタグに進んで早期リターン
         if (this.kag.stat.is_skip == true) {
-            //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
-        } else if (this.kag.stat.is_auto == true) {
+            return;
+        }
+
+        // ここに到達したということは
+        // スキップモード中ではない
+
+        // オートモード時は現在表示されているメッセージ量から待機時間を計算して
+        // setTimeout で次のタグに進む
+        if (this.kag.stat.is_auto == true) {
             this.kag.stat.is_wait_auto = true;
 
             var auto_speed = that.kag.config.autoSpeed;
@@ -2367,9 +2382,8 @@ tyrano.plugin.kag.tag.p = {
             }, auto_speed);
         }
 
-        if (!this.kag.stat.is_skip) {
-            this.kag.waitClick("p");
-        }
+        // waitClick を呼んでイベントレイヤ―の表示処理などを行う
+        this.kag.waitClick("p");
     },
 };
 
