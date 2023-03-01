@@ -1114,16 +1114,12 @@
 
         // OK 表示
         j_ok.show().focusable();
-        if (j_ok.hasClass("remodal-image-button")) {
-            j_ok.trigger("init");
-        }
+        j_ok.trigger("init");
 
         // Cancel 表示
         if (options.type === "confirm") {
             j_ng.show().focusable();
-            if (j_ng.hasClass("remodal-image-button")) {
-                j_ng.trigger("init");
-            }
+            j_ng.trigger("init");
         } else {
             j_ng.hide();
         }
