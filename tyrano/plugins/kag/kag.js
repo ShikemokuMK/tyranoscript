@@ -639,11 +639,15 @@ tyrano.plugin.kag = {
         var sf = this.variable.sf;
         var tf = this.variable.tf;
         var mp = this.stat.mp;
-
-        eval(str);
-
-        this.saveSystemVariable();
-
+        
+        try {
+            eval(str);
+            this.saveSystemVariable();
+        } catch (e) {
+            console.error(e);
+            this.warning(e,true);
+        }
+        
         /*
         if(this.kag.is_rider){
             this.kag.rider.pushVariableGrid();
