@@ -32,7 +32,6 @@ tyrano.plugin.kag = {
         "data-effect",
         "data",
         "type",
-
     ],
 
     config: {
@@ -150,6 +149,7 @@ tyrano.plugin.kag = {
                     isJoy: false,
                     camera_pos_y: 40,
 
+
                     fps_rate: 0,
 
                     move_trans_control: false,
@@ -239,7 +239,6 @@ tyrano.plugin.kag = {
         current_bgm_base64: "", //現在再生中のBGMがbase64エンコードされているかどうか。されている場合はファイル形式が格納される。(mp3 ogg etc)
 
         current_bgm_pause_seek: "", //ポーズ中ならその時間が入る。ポーズ中じゃない場合は空白
-
 
         current_se: {}, //現在再生中のループ効果音
 
@@ -879,8 +878,8 @@ tyrano.plugin.kag = {
         //コンフィグボタン追加
         var button_menu_obj = $(
             "<div class='button_menu' style='z-index:100000000'><img src='./tyrano/images/system/" +
-            $.novel("file_button_menu") +
-            "'  /></div>",
+                $.novel("file_button_menu") +
+                "'  /></div>",
         );
 
         //コンフィグボタンの位置を指定する
@@ -2864,7 +2863,7 @@ tyrano.plugin.kag = {
     },
 
     chara: {
-        init() { },
+        init() {},
 
         /**
          * 発言者の名前欄を意味する p 要素を返す
@@ -3109,7 +3108,7 @@ tyrano.plugin.kag = {
         }, 10);
     },
 
-    test: function () { },
+    test: function () {},
 };
 
 //すべてのタグに共通する、拡張用

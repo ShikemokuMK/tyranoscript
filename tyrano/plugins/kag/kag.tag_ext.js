@@ -39,20 +39,14 @@ tyrano.plugin.kag.tag.loadjs = {
         var that = this;
 
         if (pm.type === "module") {
-
             import("../../../data/others/" + pm.storage).then((module) => {
                 that.kag.ftag.nextOrder();
             });
-
         } else {
-
             $.getScript("./data/others/" + pm.storage, function () {
                 that.kag.ftag.nextOrder();
             });
-
         }
-
-
     },
 };
 
@@ -546,11 +540,22 @@ tyrano.plugin.kag.tag.showsave = {
     start: function (pm) {
         var that = this;
 
-        that.kag.stat.load_auto_next = true;
-        this.kag.menu.displaySave(function () {
-            that.kag.stat.load_auto_next = false;
-            that.kag.ftag.nextOrder();
-        });
+        // セーブ完了時コールバックで次のタグに進む仕様を廃止
+        // ([showsave]で開いたメニューからセーブする度に次のタグに進んでしまう問題を解消)
+        // that.kag.stat.load_auto_next = true;
+        // this.kag.menu.displaySave(function () {
+        //     that.kag.stat.load_auto_next = false;
+        //     that.kag.ftag.nextOrder();
+        // });
+
+        // スキップとオートを止めつつ実質[l]で待機している状態にする
+        that.kag.stat.is_skip = false;
+        that.kag.stat.is_auto = false;
+        that.kag.ftag.startTag("l");
+
+        // ただ単にセーブメニューを開く
+        // ロールボタンやキーコンフィグからセーブメニューを開いたときと同等の挙動となる
+        this.kag.menu.displaySave();
     },
 };
 
@@ -3343,7 +3348,7 @@ tyrano.plugin.kag.tag.chara_move = {
                     }
                 });
 
-                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () { });
+                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () {});
             } else {
                 target_obj.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)) / 2, 0, function () {
                     target_obj.css(anim_style);

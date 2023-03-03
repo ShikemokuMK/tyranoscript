@@ -3488,9 +3488,10 @@ tyrano.plugin.kag.tag.dialog_config = {
      * @returns
      */
     changeButton(pm, is_ok) {
-        // ボタンを画像に変更する
-        if (pm.img) return this.replaceButton(pm, is_ok);
+        // ボタンを画像に変更する場合は replaceButton に丸投げする
+        if (pm.img && pm.btnimgtype !== "bg") return this.replaceButton(pm, is_ok);
 
+        // 画像ボタンではない場合
         const j_elm = is_ok ? this.j_ok : this.j_cancel;
 
         const id = is_ok ? "remodal-confirm" : "remodal-cancel";
@@ -3513,8 +3514,28 @@ tyrano.plugin.kag.tag.dialog_config = {
         if (pm.fontface) j_elm.setStyle("font-family", pm.fontface);
         if (pm.fontcolor) j_elm.setStyle("color", $.convertColor(pm.fontcolor));
 
+        // ボタンの背景画像を設定
+        if (pm.img) {
+            this.css_map[`#${id}`]["background-image"] = $.convertBackgroundImage(pm.img, "image");
+        }
+        if (pm.activeimg) {
+            this.css_map[`#${id}:active`]["background-image"] = $.convertBackgroundImage(pm.activeimg, "image");
+            this.css_map[`#${id}.active`]["background-image"] = $.convertBackgroundImage(pm.activeimg, "image");
+        }
+        if (pm.enterimg) {
+            this.css_map[`#${id}:hover`]["background-image"] = $.convertBackgroundImage(pm.enterimg, "image");
+            this.css_map[`#${id}.hover`]["background-image"] = $.convertBackgroundImage(pm.enterimg, "image");
+        }
+        if (pm.clickimg) {
+            this.css_map[`#${id}.clicked`]["background-image"] = $.convertBackgroundImage(pm.clickimg, "image");
+        }
+        this.updateCSS();
+
         // ホバーイン, ホバーアウト
-        j_elm.off("mouseenter mouseleave click");
+        j_elm.off("init mouseenter mouseleave click");
+        j_elm.on("init", () => {
+            j_elm.removeClass("clicked");
+        });
         j_elm.on("mouseenter", () => {
             if (pm.enterse) this.kag.playSound(pm.enterse);
         });
@@ -3523,7 +3544,48 @@ tyrano.plugin.kag.tag.dialog_config = {
         });
         j_elm.on("click", () => {
             if (pm.clickse) this.kag.playSound(pm.clickse);
+            j_elm.addClass("clicked");
         });
+    },
+
+    css_map: {
+        "#remodal-confirm": {},
+        "#remodal-confirm:hover": {},
+        "#remodal-confirm.hover": {},
+        "#remodal-confirm:active": {},
+        "#remodal-confirm.active": {},
+        "#remodal-confirm.clicked": {},
+        "#remodal-cancel": {},
+        "#remodal-cancel:hover": {},
+        "#remodal-cancel.hover": {},
+        "#remodal-cancel:active": {},
+        "#remodal-cancel.active": {},
+        "#remodal-cancel.clicked": {},
+    },
+
+    updateCSS() {
+        let css_exists = false;
+        let css = "";
+        for (const key in this.css_map) {
+            css += `${key}{`;
+            const styles = this.css_map[key];
+            for (const prop in styles) {
+                const value = styles[prop];
+                css += `${prop}:${value};`;
+                css_exists = true;
+            }
+            css += `}`;
+        }
+        if (!css_exists) {
+            return;
+        }
+        let style_elm = document.getElementById("dialog_config_style");
+        if (!style_elm) {
+            style_elm = document.createElement("style");
+            style_elm.id = "dialog_config_style";
+            document.head.appendChild(style_elm);
+        }
+        style_elm.textContent = css;
     },
 
     /**
@@ -3594,7 +3656,7 @@ tyrano.plugin.kag.tag.dialog_config = {
         j_img.on("mouseleave", () => {
             if (pm.activeimg) {
                 // アクティブ中にホバーアウトしたときに画像を変更しないようにする
-                if (j_img.filter(":active").length === 0) j_img.attr("src", pm.img);
+                if (!clicked && j_img.filter(":active").length === 0) j_img.attr("src", pm.img);
             } else {
                 // クリック済みなのに画像を変えてしまうことのないように
                 if (!clicked) j_img.attr("src", pm.img);
@@ -3697,6 +3759,7 @@ clickimg  = マウスがOKボタンをクリックした後の画像ファイル
 enterse   = マウスがOKボタンの上に乗ったときに再生する音声ファイル。`sound`フォルダから探します。
 leavese   = マウスがOKボタンの上から離れたときに再生する音声ファイル。`sound`フォルダから探します。
 clickse   = マウスがOKボタンを押し込んだときに再生する音声ファイル。`sound`フォルダから探します。
+btnimgtype= このパラメータに`bg`を指定しておくと、`img`や`enterimg`などのパラメータで指定した画像がボタンの「背景」として使われるようになります。（通常、`img`に画像を指定したときはテキストが消え、画像がそのままボタン化されます。つまり、画像内に「OK」などのデザインが含まれていることを想定しているということです）
 
 :sample
 [dialog_config_ok text="いいですよ"]
@@ -3729,6 +3792,8 @@ tyrano.plugin.kag.tag.dialog_config_ok = {
         enterse: "",
         leavese: "",
         clickse: "",
+
+        btnimgtype: "",
     },
 
     start: function (pm) {
@@ -3782,6 +3847,7 @@ clickimg  = マウスがキャンセルボタンをクリックした後の画�
 enterse   = マウスがキャンセルボタンの上に乗ったときに再生する音声ファイル。`sound`フォルダから探します。
 leavese   = マウスがキャンセルボタンの上から離れたときに再生する音声ファイル。`sound`フォルダから探します。
 clickse   = マウスがキャンセルボタンを押し込んだときに再生する音声ファイル。`sound`フォルダから探します。
+btnimgtype= このパラメータに`bg`を指定しておくと、`img`や`enterimg`などのパラメータで指定した画像がボタンの「背景」として使われるようになります。（通常、`img`に画像を指定したときはテキストが消え、画像がそのままボタン化されます。つまり、画像内に「OK」などのデザインが含まれていることを想定しているということです）
 
 :sample
 [dialog_config_ng text="ダメです"]

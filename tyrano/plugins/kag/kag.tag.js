@@ -1522,8 +1522,9 @@ tyrano.plugin.kag.tag.text = {
         for (let i = edges.length - 1; i >= 0; i--) {
             const edge = edges[i];
             const width = edge.total_width * 2;
-            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${100 - i
-                }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
+            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${
+                100 - i
+            }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
             if (is_edge_overlap) {
                 style += "opacity:1;";
             }
@@ -2326,11 +2327,22 @@ tyrano.plugin.kag.tag.l = {
         this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
-        //クリックするまで、次へすすまないようにする
+        //
+        // スキップまたはオートモード時の処理
+        //
+
+        // スキップモードの場合は単に次のタグに進んで早期リターン
         if (this.kag.stat.is_skip == true) {
-            //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
-        } else if (this.kag.stat.is_auto == true) {
+            return;
+        }
+
+        // ここに到達したということは
+        // スキップモード中ではない
+
+        // オートモード時は現在表示されているメッセージ量から待機時間を計算して
+        // setTimeout で次のタグに進む
+        if (this.kag.stat.is_auto == true) {
             this.kag.stat.is_wait_auto = true;
 
             var auto_speed = that.kag.config.autoSpeed;
@@ -2342,7 +2354,6 @@ tyrano.plugin.kag.tag.l = {
             setTimeout(function () {
                 if (that.kag.stat.is_wait_auto == true) {
                     //ボイス再生中の場合は、オートで次に行かない。効果音再生終了後に進めるためのフラグを立てる
-
                     if (that.kag.tmp.is_vo_play == true) {
                         that.kag.tmp.is_vo_play_wait = true;
                     } else {
@@ -2352,9 +2363,8 @@ tyrano.plugin.kag.tag.l = {
             }, auto_speed);
         }
 
-        if (!this.kag.stat.is_skip) {
-            this.kag.waitClick("l");
-        }
+        // waitClick を呼んでイベントレイヤ―の表示処理などを行う
+        this.kag.waitClick("l");
     },
 };
 
@@ -2387,16 +2397,29 @@ tyrano.plugin.kag.tag.l = {
 tyrano.plugin.kag.tag.p = {
     start: function () {
         var that = this;
+
         //改ページ
         this.kag.stat.flag_ref_page = true;
 
         this.kag.stat.is_click_text = false;
         this.kag.ftag.showNextImg();
 
+        //
+        // スキップまたはオートモード時の処理
+        //
+
+        // スキップモードの場合は単に次のタグに進んで早期リターン
         if (this.kag.stat.is_skip == true) {
-            //スキップ中の場合は、nextorder
             this.kag.ftag.nextOrder();
-        } else if (this.kag.stat.is_auto == true) {
+            return;
+        }
+
+        // ここに到達したということは
+        // スキップモード中ではない
+
+        // オートモード時は現在表示されているメッセージ量から待機時間を計算して
+        // setTimeout で次のタグに進む
+        if (this.kag.stat.is_auto == true) {
             this.kag.stat.is_wait_auto = true;
 
             var auto_speed = that.kag.config.autoSpeed;
@@ -2417,9 +2440,8 @@ tyrano.plugin.kag.tag.p = {
             }, auto_speed);
         }
 
-        if (!this.kag.stat.is_skip) {
-            this.kag.waitClick("p");
-        }
+        // waitClick を呼んでイベントレイヤ―の表示処理などを行う
+        this.kag.waitClick("p");
     },
 };
 
@@ -2532,6 +2554,7 @@ tyrano.plugin.kag.tag.jump = {
         }
 
         var that = this;
+
         //ジャンプ直後のwt などでフラグがおかしくなる対策
         setTimeout(function () {
             that.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
@@ -2676,7 +2699,7 @@ tyrano.plugin.kag.tag.cm = {
 メッセージ・テキスト
 
 :title
-メッセージレイヤにのリセット
+メッセージレイヤのリセット
 
 :exp
 すべてのメッセージレイヤの文字が消去されます。
@@ -6783,7 +6806,6 @@ storage    = !!jump,
 target     = !!jump,
 name       = !!,
 text       = テキストの内容を指定します。,
-font_color = フォントの色を指定できます。,
 x          = ボタンの横位置を指定します。,
 y          = ボタンの縦位置を指定します。,
 width      = ボタンの横幅をピクセルで指定できます。,
@@ -7764,7 +7786,6 @@ tyrano.plugin.kag.tag.glyph_skip = {
         if (pm.use) {
             $("#mode_glyph_skip").remove();
             const j_glyph = $("." + pm.use).eq(0);
-            console.error(j_glyph);
             if (j_glyph.length) {
                 j_glyph.attr("id", "mode_glyph_skip");
                 if (this.kag.stat.is_skip) {
@@ -8445,8 +8466,8 @@ tyrano.plugin.kag.tag.layermode_movie = {
 
         blend_layer = $(
             "<video class='layer_blend_mode blendlayer blendvideo' data-video-name='" +
-            pm.name +
-            "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
+                pm.name +
+                "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
         );
         var video = blend_layer.get(0);
         var url = "./data/video/" + pm.video;

@@ -962,8 +962,6 @@ img#remodal-cancel {
     margin: auto;
     display: block;
     pointer-events: none;
-    background: rgba(0, 0, 0, 1);
-    border-radius: 50%;
     justify-content: center;
     align-items: center;
     display: flex;
@@ -973,6 +971,8 @@ img#remodal-cancel {
 }
 
 .mode_effect_default {
+    background: rgba(0, 0, 0, 1);
+    border-radius: 50%;
     font-size: 10px;
     width: 15em;
     height: 15em;

@@ -493,6 +493,8 @@ tyrano.plugin.kag.key_mouse = {
      * @returns {boolean}
      */
     next() {
+        // いまクリック可能か？
+        // クリック可能ならスキップ/オートを解除し、イベントレイヤのクリックをトリガーする
         if (this.util.canClick()) {
             this.util.clearSkipAndAuto();
             $(".layer_event_click").trigger("click");
@@ -1302,7 +1304,13 @@ tyrano.plugin.kag.key_mouse = {
                 if (this.kag.stat.is_auto) {
                     this.kag.ftag.startTag("autostop", { next: "false" });
                 } else {
-                    this.kag.ftag.startTag("autostart", {});
+                    // クリック可能な状態ならオートモードを開始するが、
+                    // クリック不可能な状態ではなにもしない
+                    if (this.util.canClick()) {
+                        this.kag.ftag.startTag("autostart", {});
+                    } else {
+                        return false;
+                    }
                 }
                 break;
         }
@@ -1392,12 +1400,12 @@ tyrano.plugin.kag.key_mouse = {
 
         /**
          * イベントレイヤをクリックできる状態なら true を返す
-         * イベントレイヤが表示されていて、かつ、メニューが表示されていない状態
+         * イベントレイヤが表示されていて、かつ、セーブ等のメニューやリモーダルウィンドウが表示されていない状態
          * @returns {boolean}
          */
         canClick() {
             const is_event_layer_displayed = this.kag.layer.layer_event.css("display") !== "none";
-            if (is_event_layer_displayed && !this.isMenuDisplayed()) {
+            if (is_event_layer_displayed && !this.isMenuDisplayed() && !this.isRemodalDisplayed()) {
                 return true;
             }
             return false;
@@ -1438,6 +1446,11 @@ tyrano.plugin.kag.key_mouse = {
          * @returns {boolean}
          */
         canShowMenu() {
+            // リモーダルウィンドウが開いている場合はメニューを開けない
+            if (this.util.isRemodalDisplayed()) {
+                return false;
+            }
+
             // [l][p][text]待機状態でもなければ[s][wait]待機状態でもない場合
             // なんらかのタグが進行中ということだからメニューは開けない
             if (this.kag.layer.layer_event.css("display") === "none" && !this.kag.stat.is_strong_stop) {
@@ -1450,7 +1463,7 @@ tyrano.plugin.kag.key_mouse = {
             }
 
             // あとは開ける
-            // つまり、[l][p][s]どれかで待機している状態なら開ける
+            // つまり、[text][l][p][s]どれかで待機している状態なら開ける
             return true;
         },
 
@@ -2008,7 +2021,7 @@ tyrano.plugin.kag.key_mouse = {
                         }
                     }
                 }
-                
+
                 return that.util.isDefaultActionEnabled(action, "mouse");
             });
 
