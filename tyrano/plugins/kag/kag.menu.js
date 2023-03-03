@@ -71,9 +71,29 @@ tyrano.plugin.kag.menu = {
                     })
                     .focusable();
 
+                //戻る機能
                 that.setMenuCloseEvent(layer_menu);
-                that.setMenuCloseEvent(layer_menu, { target: "menu_window_close" });
+                that.setHoverEvent(layer_menu);
+        
+                //that.setMenuCloseEvent(layer_menu, { target: "menu_window_close" });
 
+                layer_menu
+                    .find(".menu_window_close")
+                    .click(function (e) {
+
+                        //ウィンドウ消去
+                        that.kag.layer.hideMessageLayers();
+                        layer_menu.html("");
+                        layer_menu.hide();
+                        if (that.kag.stat.visible_menu_button == true) {
+                            $(".button_menu").show();
+                        }
+
+                        e.stopPropagation();
+
+
+                    }).focusable();
+                
                 layer_menu
                     .find(".menu_save")
                     .click(function (e) {
@@ -638,6 +658,32 @@ tyrano.plugin.kag.menu = {
             })
             .focusable();
     },
+    
+    //こ・ぱんださんのプラグイン対応。下位互換性の確保
+    setHoverEvent: function (j_parent, options = {}) {
+        
+        if (j_parent.html().indexOf('$(".menu_item").hover') == -1 && j_parent.html().indexOf('$(".menu_close").hover') == -1) {
+            return false;
+        }
+        
+        j_parent.find(".menu_item").off('mouseenter mouseleave');
+        j_parent.find(".menu_item img").off('mouseenter mouseleave');
+        
+        j_parent.find(".menu_item img").each((i, elm) => {
+            const j_elm = $(elm);
+            const original_src = j_elm.attr("src");
+            const hover_src = original_src.replace(".png", "2.png");
+            j_elm.hover(
+                () => {
+                    j_elm.attr("src", hover_src);
+                },
+                () => {
+                    j_elm.attr("src", original_src);
+                },
+            );
+        });
+        
+    },
 
     /**
      * スクロールボタンにイベントリスナを取り付けて
@@ -1180,12 +1226,15 @@ tyrano.plugin.kag.menu = {
         var that = this;
 
         var layer_menu = this.kag.layer.getMenuLayer();
-
+        
         that.setMenuCloseEvent(j_obj, { callback: cb });
-
+        
         j_obj.hide();
         layer_menu.append(j_obj);
         layer_menu.show();
+        
+        that.setHoverEvent(layer_menu);
+        
         $.preloadImgCallback(
             layer_menu,
             function () {
@@ -1304,6 +1353,8 @@ tyrano.plugin.kag.menu = {
                 layer_menu.append(j_menu);
 
                 that.setMenuCloseEvent(layer_menu);
+                that.setHoverEvent(layer_menu);
+        
                 that.setMenuScrollEvents(j_menu, { target: ".log_body", move: 60 });
 
                 // スマホのタッチ操作でスクロールできるようにするために touchmove の伝搬を切る

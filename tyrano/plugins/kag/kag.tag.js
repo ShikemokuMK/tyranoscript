@@ -325,6 +325,7 @@ tyrano.plugin.kag.ftag = {
 
     //次の命令を実行する
     nextOrder: function () {
+
         //nextOrderの割り込みが発生している場合
         if (typeof this.kag.tmp.cut_nextorder == "function") {
             this.kag.tmp.cut_nextorder();
@@ -680,9 +681,19 @@ tyrano.plugin.kag.ftag = {
 
     //タグを指定して直接実行
     startTag: function (name, pm, cb) {
+
         if (typeof pm == "undefined") {
             pm = {};
         }
+
+        /*
+        if (typeof pm.next != "undefined" && pm.next == "false") {
+            this.kag.tmp.cut_nextorder = () => {
+                //何もしない。nextOrderで。
+                this.kag.tmp.cut_nextorder = null;
+            }
+        }
+        */
 
         //コールバックがある場合はnextOrderの書き換え
         if (typeof cb == "function") {
@@ -694,29 +705,76 @@ tyrano.plugin.kag.ftag = {
 
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
+
     },
+
+    bufTags: [],
+    current_tags: [],
+    current_cb: null,
+    isExeTag: false,
+    cntTag: 0,
 
     //タグをnextorderの順番で使用する
     startTags: function (array_tag, cb) {
+
         var that = this;
-        let i = 0;
+
+        this.bufTags.push({ "tags": array_tag, "cb": cb });
+
+        //console.log("buftags");
+        //console.log(this.bufTags);
 
         let post_tag = () => {
-            let tobj = array_tag[i];
 
-            that.startTag(tobj.tag, tobj.pm, function () {
+            this.isExeTag = true;
+
+            let tobj = null;
+            if (this.cntTag == 0) {
+
+                var tmp = this.bufTags.shift();
+                this.current_tags = tmp.tags;
+                this.current_cb = tmp.cb;
+
+            }
+
+            tobj = this.current_tags[this.cntTag];
+
+            //            console.log(this.cntTag);
+            //            console.log(tobj);
+
+            that.startTag(tobj.tag, tobj.pm, () => {
+
                 TYRANO.kag.tmp.cut_nextorder = null;
-                i++;
+                this.cntTag++;
 
-                if (array_tag.length == i) {
-                    cb();
+                if (this.current_tags.length == this.cntTag) {
+                    //最後まできた
+                    this.current_cb();
+
+                    if (this.bufTags.length != 0) {
+                        this.cntTag = 0;
+                        setTimeout(() => {
+                            post_tag();
+                        }, 10);
+                    } else {
+                        this.isExeTag = false;
+                    }
+
                 } else {
-                    post_tag();
+                    setTimeout(() => {
+
+                        post_tag();
+
+                    }, 10);
                 }
             });
         };
 
-        post_tag();
+        if (this.isExeTag == false) {
+            this.cntTag = 0;
+            post_tag();
+        }
+
     },
 
     //indexを指定して、その命令を実行
@@ -2097,7 +2155,7 @@ tyrano.plugin.kag.tag.text = {
         }
     },
 
-    nextOrder: function () {},
+    //nextOrder: function () { },
 
     setFukiStyle: function (j_outer_message, chara_fuki) {
         //見た目の指定がある場合は設定する
@@ -2496,12 +2554,11 @@ tyrano.plugin.kag.tag.jump = {
         }
 
         var that = this;
-        //ジャンプ直後のwt などでフラグがおかしくなる対策。クロージャーで包む
-        (function (_pm) {
-            setTimeout(function () {
-                that.kag.ftag.nextOrderWithLabel(_pm.target, _pm.storage);
-            }, 1);
-        })(pm);
+
+        //ジャンプ直後のwt などでフラグがおかしくなる対策
+        setTimeout(function () {
+            that.kag.ftag.nextOrderWithLabel(pm.target, pm.storage);
+        }, 1);
     },
 };
 
@@ -6212,13 +6269,17 @@ tyrano.plugin.kag.tag.button = {
         }
 
         if (pm.x == "") {
-            j_button.css("left", this.kag.stat.locate.x + "px");
+            if (this.kag.stat.locate.x != 0) {
+                j_button.css("left", this.kag.stat.locate.x + "px");
+            }
         } else {
             j_button.css("left", pm.x + "px");
         }
 
         if (pm.y == "") {
-            j_button.css("top", this.kag.stat.locate.y + "px");
+            if (this.kag.stat.locate.y != 0) {
+                j_button.css("top", this.kag.stat.locate.y + "px");
+            }
         } else {
             j_button.css("top", pm.y + "px");
         }
@@ -6342,19 +6403,20 @@ tyrano.plugin.kag.tag.button = {
         //
 
         j_button.on("mousedown touchstart", () => {
-            if (!this.kag.stat.is_strong_stop) return false;
-            if (button_clicked) return false;
+            if (!this.kag.stat.is_strong_stop) return true;
+            if (button_clicked) return true;
             if (!j_button.hasClass("src-change-disabled")) {
                 if (pm.activeimg) j_button.attr("src", $.parseStorage(pm.activeimg, pm.folder));
             }
-            return false;
+            //falseを返すと ipad などの一部環境で不具合
+            return true;
         });
 
         //
         // クリックイベント
         //
 
-        j_button.click((e) => {
+        j_button.on("click", (e) => {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
@@ -6386,8 +6448,8 @@ tyrano.plugin.kag.tag.button = {
             // [sleepgame]しようとしたものの現在すでに[sleepgame]中なら無効
             if (pm.role === "sleepgame" && that.kag.tmp.sleep_game !== null) return false;
 
-            // ロールボタンじゃなくて、storageもtargetも指定されてない場合は無効
-            if (!is_role_button && pm.storage == null && pm.target == null) return false;
+            // storageもtargetも指定されてない場合は無効
+            if (pm.role == "" && pm.storage == null && pm.target == null) return false;
 
             // [call]スタックが存在するか ボタン実行時に判定する。
             const exists_call_stack = !!that.kag.getStack("call");
