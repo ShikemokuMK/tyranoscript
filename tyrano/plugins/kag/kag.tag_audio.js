@@ -523,8 +523,26 @@ tyrano.plugin.kag.tag.playbgm = {
                         // 状態次第で nextOrder
                         if (this.kag.tmp.is_se_play_wait == true) {
                             // [wse]に到達してSEの再生終了を待っている状態だったら nextOrder
-                            this.kag.tmp.is_se_play_wait = false;
-                            this.kag.ftag.nextOrder();
+                            // …したいのはやまやまだが、その前に
+                            // これ以外の効果音が同時に再生されていないかをチェックする必要がある
+
+                            // SEマップを走査してほかに再生中の効果音がないかどうかをチェック
+                            // ただしループSE（環境音などが想定される）は除外する必要がある
+                            let is_sound_playing = false;
+                            for (const key in this.kag.tmp.map_se) {
+                                const howl = this.kag.tmp.map_se[key];
+                                if (!howl._loop) {
+                                    if (howl.playing()) {
+                                        is_sound_playing = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!is_sound_playing) {
+                                this.kag.tmp.is_se_play_wait = false;
+                                this.kag.ftag.nextOrder();
+                            }
                         } else if (this.kag.tmp.is_vo_play_wait == true) {
                             // オートモード中に[l]や[p]に到達してボイスの再生終了を待っている状態だったら
                             // この音声がボイスである場合にのみ nextOrder
