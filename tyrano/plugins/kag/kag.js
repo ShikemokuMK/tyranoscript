@@ -24,6 +24,7 @@ tyrano.plugin.kag = {
         "data-event-pm",
         "data-event-target",
         "data-event-storage",
+        "data-restore",
         "tabindex",
         "l_visible",
         "data-parent-layer",
@@ -120,7 +121,6 @@ tyrano.plugin.kag = {
                 },
 
                 fps: {
-
                     active: false,
 
                     movementSpeed: 300,
@@ -149,19 +149,15 @@ tyrano.plugin.kag = {
                     isJoy: false,
                     camera_pos_y: 40,
 
-
                     fps_rate: 0,
 
                     move_trans_control: false,
-
-                }
-
+                },
             },
 
             groups: {},
             models: {},
             evt: {},
-
         },
 
         preload_audio_map: {},
@@ -638,15 +634,15 @@ tyrano.plugin.kag = {
         var sf = this.variable.sf;
         var tf = this.variable.tf;
         var mp = this.stat.mp;
-        
+
         try {
             eval(str);
             this.saveSystemVariable();
         } catch (e) {
             console.error(e);
-            this.warning(e,true);
+            this.warning(e, true);
         }
-        
+
         /*
         if(this.kag.is_rider){
             this.kag.rider.pushVariableGrid();
@@ -1412,7 +1408,6 @@ tyrano.plugin.kag = {
                 "./tyrano/libs/three/controls/OrbitControls.js",
                 "./tyrano/libs/three/classes/ThreeModel.js",
                 "./tyrano/libs/three/etc/stats.min.js",
-
             ];
         }
 
@@ -1862,11 +1857,9 @@ tyrano.plugin.kag = {
     //キャッシュ領域にシナリオを格納します。
     //これはシナリオファイルを配置しなくても動的に挿入できることを意味します。
     setCacheScenario: function (filename, str) {
-
         var result_obj = this.parser.parseScenario(str);
         console.log(this.cache_scenario);
         this.cache_scenario["./data/scenario/" + filename] = result_obj;
-
     },
 
     getMessageInnerLayer: function () {
@@ -2037,13 +2030,13 @@ tyrano.plugin.kag = {
             audio_obj.load();
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
             // 動画ファイルプリロード
-            
+
             let evt_name = "loadeddata";
-            
-            if($.userenv()=="iphone"){
+
+            if ($.userenv() == "iphone") {
                 evt_name = "loadedmetadata";
             }
-            
+
             $("<video />")
                 .on(evt_name, function (e) {
                     onend(this);

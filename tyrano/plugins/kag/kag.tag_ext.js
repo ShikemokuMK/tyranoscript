@@ -1311,12 +1311,17 @@ tyrano.plugin.kag.tag.kanim = {
     },
 
     start: function (pm) {
-        var that = this;
+        const that = this;
+
+        // pmのコピーを取っておく
+        const original_pm = $.extend({}, pm);
 
         // アニメーション対象を取得、見つからなければ早期リターン
         const j_targets = $.findAnimTargets(pm);
         if (j_targets.length === 0) {
-            this.kag.ftag.nextOrder();
+            if (pm._next !== false) {
+                this.kag.ftag.nextOrder();
+            }
             return;
         }
 
@@ -1379,6 +1384,12 @@ tyrano.plugin.kag.tag.kanim = {
                 that.kag.pushAnimStack();
             }
 
+            // 無限ループアニメーションの場合はロード時に復元が必要
+            that.kag.event.removeRestoreData(j_this, "kanim");
+            if (pm.count === "infinite") {
+                that.kag.event.addRestoreData(j_this, "kanim", original_pm);
+            }
+
             // 要素が削除されたときにcompleteを呼ぶ
             j_this.on("remove", () => {
                 this_anim.complete();
@@ -1394,7 +1405,9 @@ tyrano.plugin.kag.tag.kanim = {
         //     j_targets.remove();
         // }, 300);
 
-        this.kag.ftag.nextOrder();
+        if (pm._next !== false) {
+            this.kag.ftag.nextOrder();
+        }
     },
 };
 
@@ -1452,6 +1465,8 @@ tyrano.plugin.kag.tag.stop_kanim = {
                 "animation-timing-function": "",
                 "transform": "",
             });
+
+            that.kag.event.removeRestoreData(j_this, "kanim");
         });
 
         this.kag.ftag.nextOrder();
