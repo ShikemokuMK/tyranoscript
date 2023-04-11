@@ -1342,8 +1342,27 @@ tyrano.plugin.kag.tag.kanim = {
         j_targets.each(function () {
             const j_this = $(this);
 
-            // アニメオブジェクトをクローン
-            const this_anim = $.extend({}, anim);
+            // アニメーション定義をディープコピーする
+            const this_anim = $.extend(true, {}, anim);
+
+            // 左右反転画像の場合（すなわち[image reflect="true"]の場合）
+            if (j_this.hasClass("reflect")) {
+                // 画像の左右反転はreflectクラスを付けてtransform: scaleX(-1)を適用することによって実現しているため、
+                // 単純に[kanim]を使用してキーフレームアニメーションを適用すると、
+                // transformプロパティが上書きされることによって、左右反転が解除されてしまう！
+                // そこで、左右反転画像に対して[kanim]を使用する際は、事前にアニメーション定義を書き変えてしまおう
+                let prev_scale_x = 1;
+                for (let key in this_anim.frames) {
+                    const frame = this_anim.frames[key];
+                    if (typeof frame.trans.scaleX === "undefined") {
+                        frame.trans.scaleX = prev_scale_x;
+                    }
+                    prev_scale_x = frame.trans.scaleX;
+                    frame.trans.scaleX *= -1;
+                }
+                // CSSのscaleプロパティによる対応もひとつの手だが、
+                // 旧Chromiumではscaleプロパティが使用できないため実装を保留
+            }
 
             // "この要素"専用の complete メソッドを取り付ける
             this_anim.complete = () => {
