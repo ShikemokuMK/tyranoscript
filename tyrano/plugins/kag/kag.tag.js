@@ -325,7 +325,6 @@ tyrano.plugin.kag.ftag = {
 
     //次の命令を実行する
     nextOrder: function () {
-
         //nextOrderの割り込みが発生している場合
         if (typeof this.kag.tmp.cut_nextorder == "function") {
             this.kag.tmp.cut_nextorder();
@@ -681,7 +680,6 @@ tyrano.plugin.kag.ftag = {
 
     //タグを指定して直接実行
     startTag: function (name, pm, cb) {
-
         if (typeof pm == "undefined") {
             pm = {};
         }
@@ -705,7 +703,6 @@ tyrano.plugin.kag.ftag = {
 
         pm["_tag"] = name;
         this.master_tag[name].start($.extend(true, $.cloneObject(this.master_tag[name].pm), pm));
-
     },
 
     bufTags: [],
@@ -716,25 +713,21 @@ tyrano.plugin.kag.ftag = {
 
     //タグをnextorderの順番で使用する
     startTags: function (array_tag, cb) {
-
         var that = this;
 
-        this.bufTags.push({ "tags": array_tag, "cb": cb });
+        this.bufTags.push({ tags: array_tag, cb: cb });
 
         //console.log("buftags");
         //console.log(this.bufTags);
 
         let post_tag = () => {
-
             this.isExeTag = true;
 
             let tobj = null;
             if (this.cntTag == 0) {
-
                 var tmp = this.bufTags.shift();
                 this.current_tags = tmp.tags;
                 this.current_cb = tmp.cb;
-
             }
 
             tobj = this.current_tags[this.cntTag];
@@ -743,7 +736,6 @@ tyrano.plugin.kag.ftag = {
             //            console.log(tobj);
 
             that.startTag(tobj.tag, tobj.pm, () => {
-
                 TYRANO.kag.tmp.cut_nextorder = null;
                 this.cntTag++;
 
@@ -759,12 +751,9 @@ tyrano.plugin.kag.ftag = {
                     } else {
                         this.isExeTag = false;
                     }
-
                 } else {
                     setTimeout(() => {
-
                         post_tag();
-
                     }, 10);
                 }
             });
@@ -774,7 +763,6 @@ tyrano.plugin.kag.ftag = {
             this.cntTag = 0;
             post_tag();
         }
-
     },
 
     //indexを指定して、その命令を実行
@@ -3292,7 +3280,8 @@ wait    = !!fadein,
 zindex  = 画像同士の重なりを指定できます。数値が大きい方が前に表示されます。,
 depth   = zindexが同一な場合の重なりを指定できます。`front`(最前面)または`back`(最後面)で指定します。デフォルトはfront。,
 reflect = `true`を指定すると左右反転します。,
-pos     = <p>画像の位置をキーワードで決定します。</p><p>指定できるキーワードは`left`(左端)、`left_center`(左寄り)、`center`(中央)、`right_center`(右寄り)、`right`(右端)。各キーワードに対応する実際の座標は`Config.tjs`で設定されており、自由に編集できます。</p><p>各キーワードにはそれぞれ省略形があり、`l`、`lc`、`c`、`rc`、`r`と指定することもできます。動作は同じです。</p><p>この属性を指定した場合は`left`パラメータは無視されます。</p><p>`layer`を`base`と指定した場合、この属性は指定しないでください。</p>
+pos     = <p>画像の位置をキーワードで決定します。</p><p>指定できるキーワードは`left`(左端)、`left_center`(左寄り)、`center`(中央)、`right_center`(右寄り)、`right`(右端)。各キーワードに対応する実際の座標は`Config.tjs`で設定されており、自由に編集できます。</p><p>各キーワードにはそれぞれ省略形があり、`l`、`lc`、`c`、`rc`、`r`と指定することもできます。動作は同じです。</p><p>この属性を指定した場合は`left`パラメータは無視されます。</p><p>`layer`を`base`と指定した場合、この属性は指定しないでください。</p>,
+animimg = `true`を指定すると、GIFまたはAPNG形式のアニメーション画像を最初から再生できます。,
 
 :demo
 1,kaisetsu/05_image
@@ -3423,6 +3412,30 @@ tyrano.plugin.kag.tag.image = {
                 }
             }
 
+            // APNG/GIF画像によるアニメーションを最初から再生するための処理
+            // [image ... animimg="true"] で有効
+            if (pm.animimg === "true") {
+                // 現在のドキュメント上に存在する同じソースを持つ画像の個数を取得
+                const same_src_imgs = $(`[src^='${strage_url}'`);
+                const count = same_src_imgs.length;
+                // 個数をクエリパラメータに追加する（?count=1 のように）
+                const url_obj = new URL(strage_url, window.location.href);
+                url_obj.searchParams.set("count", count + 1);
+                let new_url = url_obj.pathname + url_obj.search;
+                // 元のURLが相対指定の場合は調整する
+                if (strage_url.startsWith("./data/")) {
+                    const separator = strage_url.slice(1).split("?")[0];
+                    new_url = "." + separator + new_url.split(separator).pop();
+                }
+                img_obj.attr("src", new_url);
+                that.kag.event.addEventElement({
+                    tag: "image",
+                    j_target: img_obj,
+                    pm: pm,
+                });
+                that.setEvent(img_obj, pm);
+            }
+
             //オブジェクトにクラス名をセットします
             $.setName(img_obj, pm.name);
 
@@ -3483,6 +3496,15 @@ tyrano.plugin.kag.tag.image = {
 
             this.kag.setStyles(this.kag.layer.getLayer(pm.layer, pm.page), new_style);
             this.kag.ftag.nextOrder();
+        }
+    },
+
+    setEvent(j_obj, pm) {
+        if (pm.animimg === "true") {
+            // 画像を削除する前にソースを空にする
+            j_obj.on("remove", () => {
+                j_obj.attr("src", "");
+            });
         }
     },
 };
