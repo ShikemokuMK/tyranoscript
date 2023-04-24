@@ -419,6 +419,7 @@ tyrano.plugin.kag = {
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
 
     init: function () {
+        
         this.kag = this;
 
         var that = this;
@@ -516,7 +517,7 @@ tyrano.plugin.kag = {
     //パッチを反映します。
     applyPatch: function (patch_path, flag_reload, call_back) {
         //アップデートファイルの存在チェック
-        var fs = require("fs");
+        var fs = window.studio_api.fs;
 
         if (!fs.existsSync(patch_path)) {
             call_back();

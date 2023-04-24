@@ -17,87 +17,18 @@ tyrano.plugin.kag.studio = {
 
         if (window.navigator.userAgent.indexOf("TyranoStudio") != -1) {
             //スタジオ拡張用。iframeで読み込んだときの対応
+            
             try {
-                this.ipc = require("electron");
+                this.ipc = window.studio_api;
             } catch (e) {
                 return false;
             }
 
             TYRANO.kag.is_studio = true;
-
-            this.ipc = require("electron");
-
-            this.ipc.ipcRenderer.on("ping", (event, arg) => {
-                this.send("asynchronous-reply", JSON.stringify(arg));
-            });
-
-            this.ipc.ipcRenderer.on("variable-add", (event, arg) => {
-                let data = JSON.parse(arg);
-                let array_name = data["names"];
-
-                for (let i = 0; i < array_name.length; i++) {
-                    let name = array_name[i]["name"];
-
-                    let val = "" + this.kag.embScript(name);
-
-                    this.map_watch[name] = val;
-
-                    array_name[i]["val"] = val;
-                }
-
-                data["names"] = array_name;
-
-                this.send("changed-variable", data);
-            });
-
-            //セーブデータの消去
-            this.ipc.ipcRenderer.on("status-clear-save-data", (event, arg) => {
-                localStorage.clear();
-            });
-
-            //ステータスのロード
-            this.ipc.ipcRenderer.on("status-load-save", (event, arg) => {
-                let data = JSON.parse(arg);
-                let slot = data["slot"];
-
-                var timer_id = setInterval(() => {
-                    //strongstop 担った瞬間にロードする
-                    if (this.kag.stat.is_strong_stop == true) {
-                        clearInterval(timer_id);
-                        this.kag.menu.loadGame(slot);
-                    }
-                }, 100);
-            });
-
-            //タグの実行
-            this.ipc.ipcRenderer.on("exe-tag", (event, arg) => {
-                let data = JSON.parse(arg);
-                let tag_text = data["tag_text"];
-
-                this.cutTyranoScript(tag_text);
-            });
-
-            this.ipc.ipcRenderer.on("material-preview-position", (event, arg) => {
-                let data = JSON.parse(arg);
-
-                let file = data["file"];
-                let category = data["category"];
-
-                this.insertElement(category, file);
-            });
-
-            this.ipc.ipcRenderer.on("variable-add-all", (event, arg) => {
-                //すべての変数を読み込んでスタジオに通知する
-                var map_variable = TYRANO.kag.variable;
-
-                var f = TYRANO.kag.stat.f;
-                var mp = TYRANO.kag.stat.mp;
-
-                map_variable.f = f;
-                map_variable.mp = mp;
-
-                this.send("init-variable-all", map_variable);
-            });
+            
+            this.ipc = window.studio_api;
+            
+            console.log(this.ipc);
 
             //キャラの情報をアップデートする
             setInterval((e) => {
@@ -136,8 +67,84 @@ tyrano.plugin.kag.studio = {
         })
         */
     },
+    
+    trigger(cmd, arg) {
+        
+        if (cmd == "ping") {
+        
+            this.send("asynchronous-reply", JSON.stringify(arg));
+            
+        } else if (cmd == "variable-add") {
+            
+            let data = JSON.parse(arg);
+            let array_name = data["names"];
+
+            for (let i = 0; i < array_name.length; i++) {
+                let name = array_name[i]["name"];
+
+                let val = "" + this.kag.embScript(name);
+
+                this.map_watch[name] = val;
+
+                array_name[i]["val"] = val;
+            }
+
+            data["names"] = array_name;
+
+            this.send("changed-variable", data);
+            
+        } else if (cmd=="status-clear-save-data") {
+        
+            localStorage.clear();
+        
+        } else if (cmd == "status-load-save") {
+            
+            let data = JSON.parse(arg);
+            let slot = data["slot"];
+
+            var timer_id = setInterval(() => {
+                //strongstop 担った瞬間にロードする
+                if (this.kag.stat.is_strong_stop == true) {
+                    clearInterval(timer_id);
+                    this.kag.menu.loadGame(slot);
+                }
+            }, 100);
+            
+        } else if (cmd == "exe-tag") {
+            
+            let data = JSON.parse(arg);
+            let tag_text = data["tag_text"];
+
+            this.cutTyranoScript(tag_text);
+            
+        } else if (cmd == "material-preview-position") {
+            
+            let data = JSON.parse(arg);
+
+            let file = data["file"];
+            let category = data["category"];
+
+            this.insertElement(category, file);
+            
+        } else if (cmd == "variable-add-all") {
+            
+            var map_variable = TYRANO.kag.variable;
+
+            var f = TYRANO.kag.stat.f;
+            var mp = TYRANO.kag.stat.mp;
+
+            map_variable.f = f;
+            map_variable.mp = mp;
+
+            this.send("init-variable-all", map_variable);
+            
+        } else if (cmd=="") {
+        } 
+        
+    },
 
     insertElement: function (category, file) {
+        
         var path = "./data/" + category + "/" + file;
 
         if (category == "fgimage" || category == "image") {
@@ -211,7 +218,16 @@ tyrano.plugin.kag.studio = {
     },
 
     send: function (key, json_obj) {
-        this.ipc.ipcRenderer.send(key, JSON.stringify(json_obj));
+        
+        //普通に親の関数呼び出しでいいよ。
+        //親
+        console.log("bbbbbbbbbbb");
+        console.log(window.opener.window);
+        console.log(key);
+        console.log(json_obj);
+        window.opener.window.app.project.triggerIpc(key, json_obj);
+        //this.ipc.ipcRenderer.send(key, JSON.stringify(json_obj));
+    
     },
 
     notifyChangeVariable: function () {

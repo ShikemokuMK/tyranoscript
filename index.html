@@ -17,6 +17,17 @@
                 window.jQuery = window.$ = require("./tyrano/libs/jquery-3.6.0.min.js");
             } catch (e) {}
         </script>
+        
+        <script>
+            
+            if (window.opener.window.studio_api) {
+                window.studio_api = window.opener.window.studio_api;
+                window.process = window.opener.window.studio_api.ipcRenderer.sendSync("getProcess");
+            }
+
+            console.log(window.process);
+
+        </script>
 
         <!-- jQuery Plugins -->
         <script src="./tyrano/libs/jquery-migrate-1.4.1.js"></script>

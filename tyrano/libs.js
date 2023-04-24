@@ -59,6 +59,7 @@
     };
 
     $.localFilePath = function () {
+        
         var path = "";
         //Mac os Sierra 対応
         if (process.execPath.indexOf("var/folders") != -1) {
@@ -982,10 +983,10 @@
 
     //PC用の実行パスを取得
     $.getExePath = function () {
-        const _app = require("electron").remote.app;
-
+        
         //TyranoStudio.app/Contents/Resources/app
-        let path = _app.getAppPath();
+        let path = window.studio_api.ipcRenderer.sendSync("getAppPath", {});
+        
         let platform = "";
         //alert(process.platform);
         //console.log(process.platform)
