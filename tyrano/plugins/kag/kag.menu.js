@@ -74,13 +74,12 @@ tyrano.plugin.kag.menu = {
                 //戻る機能
                 that.setMenuCloseEvent(layer_menu);
                 that.setHoverEvent(layer_menu);
-        
+
                 //that.setMenuCloseEvent(layer_menu, { target: "menu_window_close" });
 
                 layer_menu
                     .find(".menu_window_close")
                     .click(function (e) {
-
                         //ウィンドウ消去
                         that.kag.layer.hideMessageLayers();
                         layer_menu.html("");
@@ -90,10 +89,9 @@ tyrano.plugin.kag.menu = {
                         }
 
                         e.stopPropagation();
+                    })
+                    .focusable();
 
-
-                    }).focusable();
-                
                 layer_menu
                     .find(".menu_save")
                     .click(function (e) {
@@ -347,6 +345,21 @@ tyrano.plugin.kag.menu = {
         three_save.models = save_models;
 
         /////////////////////////////////////////////////////////////
+
+        // [anim wait="false"]中のセーブ対策
+        // アニメーションを強制的に完了させる
+        $(".tyrano-anim").each(function () {
+            $(this).stop(true, true);
+        });
+
+        // [chara_mod wait="false"]中のセーブ対策
+        // 表情変更中にセーブが実行された場合は表情変更を強制的に完了させる
+        $(".chara-mod-animation").each(function () {
+            const j_old = $(this);
+            const j_new = j_old.next();
+            j_old.remove();
+            j_new.stop(true, true);
+        });
 
         if (typeof flag_thumb == "undefined") {
             flag_thumb = this.kag.config.configThumbnail;
@@ -658,17 +671,15 @@ tyrano.plugin.kag.menu = {
             })
             .focusable();
     },
-    
+
     //こ・ぱんださんのプラグイン対応。下位互換性の確保
     setHoverEvent: function (j_parent, options = {}) {
-        
         if (j_parent.html().indexOf('$(".menu_item").hover') == -1 && j_parent.html().indexOf('$(".menu_close").hover') == -1) {
             return false;
         }
-        
-        j_parent.find(".menu_item").off('mouseenter mouseleave');
-        j_parent.find(".menu_item img").off('mouseenter mouseleave');
-        
+        j_parent.find(".menu_item").off("mouseenter mouseleave");
+        j_parent.find(".menu_item img").off("mouseenter mouseleave");
+
         j_parent.find(".menu_item img").each((i, elm) => {
             const j_elm = $(elm);
             const original_src = j_elm.attr("src");
@@ -682,7 +693,6 @@ tyrano.plugin.kag.menu = {
                 },
             );
         });
-        
     },
 
     /**
@@ -869,19 +879,17 @@ tyrano.plugin.kag.menu = {
                 if (this.kag.stat.current_bgm_vol != "") {
                     pm["volume"] = this.kag.stat.current_bgm_vol;
                 }
-                
+
                 if (this.kag.stat.current_bgm_pause_seek != "") {
                     pm["pause"] = "true";
                     pm["seek"] = this.kag.stat.current_bgm_pause_seek;
                 }
-                
+
                 if (this.kag.stat.current_bgm_base64 != "") {
                     pm["base64"] = this.kag.stat.current_bgm_base64;
                 }
-                
+
                 this.kag.ftag.startTag("playbgm", pm);
-                
-                
             }
 
             // ループSE
@@ -891,7 +899,6 @@ tyrano.plugin.kag.menu = {
                 pm_obj["stop"] = "true";
                 this.kag.ftag.startTag("playbgm", pm_obj);
             }
-            
         }
 
         //読み込んだCSSがある場合
@@ -960,23 +967,19 @@ tyrano.plugin.kag.menu = {
 
                 //アニメーションの実行
                 if (key == "layer_camera") {
-                    
                     $(".layer_camera").css("-webkit-transform-origin", "center center");
                     (function (_a3d_define) {
                         setTimeout(function () {
                             $(".layer_camera").a3d(a3d_define);
                         }, 1);
                     })(a3d_define);
-                        
                 } else {
-                    
                     $("." + key + "_fore").css("-webkit-transform-origin", "center center");
                     (function (_a3d_define) {
                         setTimeout(function () {
                             $("." + key + "_fore").a3d(_a3d_define);
                         }, 1);
                     })(a3d_define);
-                    
                 }
             }
         }
@@ -1094,6 +1097,19 @@ tyrano.plugin.kag.menu = {
             var tag_name = j_elm.attr("data-event-tag");
             var pm = JSON.parse(j_elm.attr("data-event-pm"));
             that.kag.getTag(tag_name).setEvent(j_elm, pm);
+        });
+
+        // 復元用タグの実行
+        $("[data-restore]").each(function () {
+            const j_elm = $(this);
+            const restore_data = j_elm.data("restore");
+            if (Array.isArray(restore_data)) {
+                restore_data.forEach((item) => {
+                    const { tag, pm } = item;
+                    pm._next = false;
+                    that.kag.ftag.startTag(tag, pm);
+                });
+            }
         });
 
         //
@@ -1226,15 +1242,15 @@ tyrano.plugin.kag.menu = {
         var that = this;
 
         var layer_menu = this.kag.layer.getMenuLayer();
-        
+
         that.setMenuCloseEvent(j_obj, { callback: cb });
-        
+
         j_obj.hide();
         layer_menu.append(j_obj);
         layer_menu.show();
-        
+
         that.setHoverEvent(layer_menu);
-        
+
         $.preloadImgCallback(
             layer_menu,
             function () {
@@ -1354,7 +1370,7 @@ tyrano.plugin.kag.menu = {
 
                 that.setMenuCloseEvent(layer_menu);
                 that.setHoverEvent(layer_menu);
-        
+
                 that.setMenuScrollEvents(j_menu, { target: ".log_body", move: 60 });
 
                 // スマホのタッチ操作でスクロールできるようにするために touchmove の伝搬を切る
