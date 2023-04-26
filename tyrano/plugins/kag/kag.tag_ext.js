@@ -994,6 +994,7 @@ tyrano.plugin.kag.tag.anim = {
 
                 // アニメーションの実施
                 $(this)
+                    .stop(true, true)
                     .off("remove.anim")
                     .on("remove.anim", () => {
                         // アニメーション中に要素が削除されてしまった場合の対策
@@ -1002,10 +1003,10 @@ tyrano.plugin.kag.tag.anim = {
                         // ※"remove"はJavaScriptの標準イベントではなくjQueryが実装しているカスタムイベント
                         that.kag.popAnimStack();
                     })
-                    .stop(true, true)
+                    .addClass("tyrano-anim")
                     .animate(anim_style, parseInt(pm.time), pm.effect, function () {
                         // 要素削除時のイベントハンドラはもう不要
-                        $(this).off("remove.anim");
+                        $(this).off("remove.anim").removeClass("tyrano-anim");
                         // アニメーションスタックを取り除く
                         that.kag.popAnimStack();
                     });
@@ -3232,8 +3233,11 @@ tyrano.plugin.kag.tag.chara_mod = {
         }
 
         this.kag.preload(folder + storage_url, function () {
-            if ($(".chara-mod-animation").get(0)) {
-                $(".chara-mod-animation_" + pm.name).remove();
+            // wait=falseで表情を変更している最中に重ねて表情変更が実行された場合の対策
+            // アニメーション中の表情が残っている場合はそれを削除する
+            const j_old_face = $(".chara-mod-animation_" + pm.name);
+            if (j_old_face.length) {
+                j_old_face.remove();
             }
 
             if (chara_time != "0") {
@@ -3245,7 +3249,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                 j_new_img.attr("src", folder + storage_url);
                 j_new_img.css("opacity", 0);
 
-                j_img.addClass("chara-mod-animation_" + pm.name);
+                j_img.addClass("chara-mod-animation chara-mod-animation_" + pm.name);
                 j_img.after(j_new_img);
 
                 if (is_cross) {

@@ -346,6 +346,21 @@ tyrano.plugin.kag.menu = {
 
         /////////////////////////////////////////////////////////////
 
+        // [anim wait="false"]中のセーブ対策
+        // アニメーションを強制的に完了させる
+        $(".tyrano-anim").each(function () {
+            $(this).stop(true, true);
+        });
+
+        // [chara_mod wait="false"]中のセーブ対策
+        // 表情変更中にセーブが実行された場合は表情変更を強制的に完了させる
+        $(".chara-mod-animation").each(function () {
+            const j_old = $(this);
+            const j_new = j_old.next();
+            j_old.remove();
+            j_new.stop(true, true);
+        });
+
         if (typeof flag_thumb == "undefined") {
             flag_thumb = this.kag.config.configThumbnail;
         }
