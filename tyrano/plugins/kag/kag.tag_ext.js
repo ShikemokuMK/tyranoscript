@@ -971,35 +971,42 @@ tyrano.plugin.kag.tag.anim = {
             anim_style.color = $.convertColor(pm.color);
         }
 
-        var target = "";
+        // アニメーション対象のjQueryオブジェクト
+        let j_targets = null;
 
         if (pm.name != "") {
-            //アニメーションスタックの積み上げ
-            $("." + pm.name).each(function () {
-                that.kag.pushAnimStack();
-                $(this)
-                    .stop(true, true)
-                    .animate(anim_style, parseInt(pm.time), pm.effect, function () {
-                        that.kag.popAnimStack();
-                    });
-            });
+            // nameパラメータが指定されている場合はそれをクラスに持つ要素をすべて選択する
+            j_targets = $("." + pm.name);
         } else if (pm.layer != "") {
+            // name指定がなくlayer指定がある場合はそのレイヤの子要素をすべて選択する
             var layer_name = pm.layer + "_fore";
-
-            //フリーレイヤに対して実施
-            if (pm.layer == "free") {
+            // フリーレイヤの場合
+            if (pm.layer === "free") {
                 layer_name = "layer_free";
             }
+            j_targets = $("." + layer_name).children();
+        }
 
-            //レイヤ指定の場合、その配下にある要素全てに対して、実施
-            var target_array = $("." + layer_name).children();
-
-            target_array.each(function () {
+        if (j_targets) {
+            j_targets.each(function () {
+                // アニメーションスタックを積み上げる
                 that.kag.pushAnimStack();
 
+                // アニメーションの実施
                 $(this)
+                    .off("remove.anim")
+                    .on("remove.anim", () => {
+                        // アニメーション中に要素が削除されてしまった場合の対策
+                        // 要素削除時にアニメーションスタックをポップする処理を仕込んでおく
+                        // ※通常通りアニメーションが完了した場合このイベントハンドラは取り除かれる
+                        // ※"remove"はJavaScriptの標準イベントではなくjQueryが実装しているカスタムイベント
+                        that.kag.popAnimStack();
+                    })
                     .stop(true, true)
                     .animate(anim_style, parseInt(pm.time), pm.effect, function () {
+                        // 要素削除時のイベントハンドラはもう不要
+                        $(this).off("remove.anim");
+                        // アニメーションスタックを取り除く
                         that.kag.popAnimStack();
                     });
             });
