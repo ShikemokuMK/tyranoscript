@@ -971,35 +971,43 @@ tyrano.plugin.kag.tag.anim = {
             anim_style.color = $.convertColor(pm.color);
         }
 
-        var target = "";
+        // アニメーション対象のjQueryオブジェクト
+        let j_targets = null;
 
         if (pm.name != "") {
-            //アニメーションスタックの積み上げ
-            $("." + pm.name).each(function () {
-                that.kag.pushAnimStack();
-                $(this)
-                    .stop(true, true)
-                    .animate(anim_style, parseInt(pm.time), pm.effect, function () {
-                        that.kag.popAnimStack();
-                    });
-            });
+            // nameパラメータが指定されている場合はそれをクラスに持つ要素をすべて選択する
+            j_targets = $("." + pm.name);
         } else if (pm.layer != "") {
+            // name指定がなくlayer指定がある場合はそのレイヤの子要素をすべて選択する
             var layer_name = pm.layer + "_fore";
-
-            //フリーレイヤに対して実施
-            if (pm.layer == "free") {
+            // フリーレイヤの場合
+            if (pm.layer === "free") {
                 layer_name = "layer_free";
             }
+            j_targets = $("." + layer_name).children();
+        }
 
-            //レイヤ指定の場合、その配下にある要素全てに対して、実施
-            var target_array = $("." + layer_name).children();
-
-            target_array.each(function () {
+        if (j_targets) {
+            j_targets.each(function () {
+                // アニメーションスタックを積み上げる
                 that.kag.pushAnimStack();
 
+                // アニメーションの実施
                 $(this)
                     .stop(true, true)
+                    .off("remove.anim")
+                    .on("remove.anim", () => {
+                        // アニメーション中に要素が削除されてしまった場合の対策
+                        // 要素削除時にアニメーションスタックをポップする処理を仕込んでおく
+                        // ※通常通りアニメーションが完了した場合このイベントハンドラは取り除かれる
+                        // ※"remove"はJavaScriptの標準イベントではなくjQueryが実装しているカスタムイベント
+                        that.kag.popAnimStack();
+                    })
+                    .addClass("tyrano-anim")
                     .animate(anim_style, parseInt(pm.time), pm.effect, function () {
+                        // 要素削除時のイベントハンドラはもう不要
+                        $(this).off("remove.anim").removeClass("tyrano-anim");
+                        // アニメーションスタックを取り除く
                         that.kag.popAnimStack();
                     });
             });
@@ -1311,12 +1319,17 @@ tyrano.plugin.kag.tag.kanim = {
     },
 
     start: function (pm) {
-        var that = this;
+        const that = this;
+
+        // pmのコピーを取っておく
+        const original_pm = $.extend({}, pm);
 
         // アニメーション対象を取得、見つからなければ早期リターン
         const j_targets = $.findAnimTargets(pm);
         if (j_targets.length === 0) {
-            this.kag.ftag.nextOrder();
+            if (pm._next !== false) {
+                this.kag.ftag.nextOrder();
+            }
             return;
         }
 
@@ -1342,8 +1355,27 @@ tyrano.plugin.kag.tag.kanim = {
         j_targets.each(function () {
             const j_this = $(this);
 
-            // アニメオブジェクトをクローン
-            const this_anim = $.extend({}, anim);
+            // アニメーション定義をディープコピーする
+            const this_anim = $.extend(true, {}, anim);
+
+            // 左右反転画像の場合（すなわち[image reflect="true"]の場合）
+            if (j_this.hasClass("reflect")) {
+                // 画像の左右反転はreflectクラスを付けてtransform: scaleX(-1)を適用することによって実現しているため、
+                // 単純に[kanim]を使用してキーフレームアニメーションを適用すると、
+                // transformプロパティが上書きされることによって、左右反転が解除されてしまう！
+                // そこで、左右反転画像に対して[kanim]を使用する際は、事前にアニメーション定義を書き変えてしまおう
+                let prev_scale_x = 1;
+                for (let key in this_anim.frames) {
+                    const frame = this_anim.frames[key];
+                    if (typeof frame.trans.scaleX === "undefined") {
+                        frame.trans.scaleX = prev_scale_x;
+                    }
+                    prev_scale_x = frame.trans.scaleX;
+                    frame.trans.scaleX *= -1;
+                }
+                // CSSのscaleプロパティによる対応もひとつの手だが、
+                // 旧Chromiumではscaleプロパティが使用できないため実装を保留
+            }
 
             // "この要素"専用の complete メソッドを取り付ける
             this_anim.complete = () => {
@@ -1358,6 +1390,12 @@ tyrano.plugin.kag.tag.kanim = {
             if (should_push_anim_stack && !this.anim_stack_exists) {
                 this.anim_stack_exists = true;
                 that.kag.pushAnimStack();
+            }
+
+            // 無限ループアニメーションの場合はロード時に復元が必要
+            that.kag.event.removeRestoreData(j_this, "kanim");
+            if (pm.count === "infinite") {
+                that.kag.event.addRestoreData(j_this, "kanim", original_pm);
             }
 
             // 要素が削除されたときにcompleteを呼ぶ
@@ -1375,7 +1413,9 @@ tyrano.plugin.kag.tag.kanim = {
         //     j_targets.remove();
         // }, 300);
 
-        this.kag.ftag.nextOrder();
+        if (pm._next !== false) {
+            this.kag.ftag.nextOrder();
+        }
     },
 };
 
@@ -1433,6 +1473,8 @@ tyrano.plugin.kag.tag.stop_kanim = {
                 "animation-timing-function": "",
                 "transform": "",
             });
+
+            that.kag.event.removeRestoreData(j_this, "kanim");
         });
 
         this.kag.ftag.nextOrder();
@@ -3191,8 +3233,11 @@ tyrano.plugin.kag.tag.chara_mod = {
         }
 
         this.kag.preload(folder + storage_url, function () {
-            if ($(".chara-mod-animation").get(0)) {
-                $(".chara-mod-animation_" + pm.name).remove();
+            // wait=falseで表情を変更している最中に重ねて表情変更が実行された場合の対策
+            // アニメーション中の表情が残っている場合はそれを削除する
+            const j_old_face = $(".chara-mod-animation_" + pm.name);
+            if (j_old_face.length) {
+                j_old_face.remove();
             }
 
             if (chara_time != "0") {
@@ -3204,7 +3249,7 @@ tyrano.plugin.kag.tag.chara_mod = {
                 j_new_img.attr("src", folder + storage_url);
                 j_new_img.css("opacity", 0);
 
-                j_img.addClass("chara-mod-animation_" + pm.name);
+                j_img.addClass("chara-mod-animation chara-mod-animation_" + pm.name);
                 j_img.after(j_new_img);
 
                 if (is_cross) {
