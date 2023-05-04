@@ -1,6 +1,7 @@
 TyranoScript｜ティラノスクリプト　Ver5.20（C）ShikemokuMK
 https://tyrano.jp
 
+*** README and LICENSE are also available in English ***
 
 ■主な特徴■
 

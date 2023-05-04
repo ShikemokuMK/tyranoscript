@@ -3,6 +3,8 @@ TyranoScript | ティラノスクリプト
 Copyright (c) 2022 STRIKEWORKS @Shikemokumk
 https://strikeworks.jp
 
+*** README and LICENSE are also available in English ***
+
 ■利用規約■
 ティラノスクリプトは無料でご利用いただけます。
 商用利用にも制限はありません。
