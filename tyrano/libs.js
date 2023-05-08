@@ -1026,7 +1026,7 @@
 
     $.removeStorageFile = function (key) {
         try {
-            const fs = require("fs");
+            const fs = window.studio_api.fs;
             let out_path;
             if (process.execPath.indexOf("var/folders") != -1) {
                 out_path = process.env.HOME + "/_TyranoGameData";
@@ -1043,7 +1043,7 @@
 
     $.setStorageFile = function (key, val) {
         val = JSON.stringify(val);
-        var fs = require("fs");
+        var fs = window.studio_api.fs;
 
         var out_path = $.getExePath();
 
@@ -1063,7 +1063,7 @@
     $.getStorageFile = function (key) {
         try {
             var gv = "null";
-            var fs = require("fs");
+            var fs = window.studio_api.fs;
             var out_path = $.getExePath();
 
             if (process.execPath.indexOf("var/folders") != -1) {
@@ -1076,7 +1076,7 @@
             }
 
             if (fs.existsSync(out_path + "/" + key + ".sav")) {
-                var str = fs.readFileSync(out_path + "/" + key + ".sav");
+                var str = fs.readFileSync(out_path + "/" + key + ".sav","utf8");
                 gv = unescape(str);
             } else {
                 //Fileが存在しない場合にローカルストレージから読み取る使用は破棄。

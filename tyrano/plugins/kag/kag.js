@@ -424,7 +424,8 @@ tyrano.plugin.kag = {
 
         //二重起動チェック ElectronかつTyranoStudioからの起動じゃない場合
         if ($.isElectron() && window.navigator.userAgent.indexOf("TyranoStudio") == -1) {
-            if (!require("electron").remote.app.requestSingleInstanceLock()) {
+            //if (!require("electron").remote.app.requestSingleInstanceLock()) {
+            if (!window.studio_api.ipcRenderer.sendSync("doubleCheck", {})) {
                 alert($.lang("double_start"));
                 window.close();
                 if (typeof navigator.app != "undefined") {
