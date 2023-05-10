@@ -221,10 +221,7 @@ tyrano.plugin.kag.studio = {
         
         //普通に親の関数呼び出しでいいよ。
         //親
-        console.log("bbbbbbbbbbb");
-        console.log(window.opener.window);
-        console.log(key);
-        console.log(json_obj);
+        //console.log(json_obj);
         window.opener.window.app.project.triggerIpc(key, json_obj);
         //this.ipc.ipcRenderer.send(key, JSON.stringify(json_obj));
     
