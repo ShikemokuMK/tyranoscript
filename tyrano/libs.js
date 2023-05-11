@@ -1015,7 +1015,7 @@
 
     //展開先のパスを返す。
     $.getUnzipPath = function () {
-        let path = __dirname;
+        let path = process.__dirname;
 
         if (path.indexOf(".asar") != -1) {
             return "asar";
