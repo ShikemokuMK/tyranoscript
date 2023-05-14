@@ -6328,13 +6328,11 @@ tyrano.plugin.kag.tag.button = {
 
         //オブジェクトにクラス名をセットします
         $.setName(j_button, pm.name);
-        
-        /*
+
         if (pm.preexp !== "") {
             var preexp_entity = that.kag.embScript(pm.preexp);
             pm.preexp = JSON.stringify(preexp_entity);
         }
-        */
 
         if (pm.autoimg) {
             j_button.addClass("button-auto-sync");

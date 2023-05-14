@@ -663,7 +663,7 @@ tyrano.plugin.kag = {
             var tf = this.variable.tf;
             var mp = this.stat.mp;
 
-            return eval(str);
+            return eval("("+str+")");
         } catch (e) {
             return undefined;
         }
