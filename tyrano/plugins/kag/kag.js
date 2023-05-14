@@ -656,6 +656,7 @@ tyrano.plugin.kag = {
 
     //式を評価して値を返却します
     embScript: function (str, preexp) {
+        
         try {
             var f = this.stat.f;
             var sf = this.variable.sf;
