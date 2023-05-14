@@ -1420,6 +1420,7 @@ tyrano.plugin.kag = {
                 //"./tyrano/libs/three/loader/MMDLoader.js",
 
                 "./tyrano/libs/three/controls/OrbitControls.js",
+                "./tyrano/libs/three/controls/TransformControls.js",
                 "./tyrano/libs/three/classes/ThreeModel.js",
                 "./tyrano/libs/three/etc/stats.min.js",
             ];
