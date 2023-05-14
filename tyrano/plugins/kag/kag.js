@@ -670,13 +670,14 @@ tyrano.plugin.kag = {
 
     //式を評価して値を返却します
     embScript: function (str, preexp) {
+        
         try {
             var f = this.stat.f;
             var sf = this.variable.sf;
             var tf = this.variable.tf;
             var mp = this.stat.mp;
 
-            return eval(str);
+            return eval("("+str+")");
         } catch (e) {
             return undefined;
         }
