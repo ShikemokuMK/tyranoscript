@@ -415,6 +415,7 @@ tyrano.plugin.kag = {
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
 
     init: function () {
+        
         this.kag = this;
 
         var that = this;
@@ -423,7 +424,8 @@ tyrano.plugin.kag = {
 
         //二重起動チェック ElectronかつTyranoStudioからの起動じゃない場合
         if ($.isElectron() && window.navigator.userAgent.indexOf("TyranoStudio") == -1) {
-            if (!require("electron").remote.app.requestSingleInstanceLock()) {
+            //if (!require("electron").remote.app.requestSingleInstanceLock()) {
+            if (!window.studio_api.ipcRenderer.sendSync("doubleCheck", {})) {
                 alert($.lang("double_start"));
                 window.close();
                 if (typeof navigator.app != "undefined") {
@@ -512,26 +514,26 @@ tyrano.plugin.kag = {
     //パッチを反映します。
     applyPatch: function (patch_path, flag_reload, call_back) {
         //アップデートファイルの存在チェック
-        var fs = require("fs");
+        var fs = window.studio_api.fs;
 
         if (!fs.existsSync(patch_path)) {
             call_back();
             return;
         }
 
-        var fse = require("fs-extra");
-        var _path = require("path");
+        var fse = window.studio_api.fs;
+        var _path = window.studio_api.path;
         //リロードの場合は、アップデート不要
 
         var unzip_path = $.getUnzipPath();
 
         //asar化している場合は上書きできない
         if (unzip_path == "asar") {
-            const asar = require("asar");
+            const asar = window.studio_api.asar;
 
-            let path = __dirname;
+            let path = process.__dirname;
 
-            let asar_files = fs.readdirSync(path);
+            //let asar_files = fs.readdirSync(path);
 
             let out_path = $.localFilePath();
 
@@ -539,13 +541,25 @@ tyrano.plugin.kag = {
                 alert("パッチを適応するゲーム実行ファイル（.app）の場所を選択してください。");
 
                 //実行パスを選択させる
-                let dialog = require("electron").remote.dialog;
-
+                //let dialog = require("electron").remote.dialog;
+                
+                let filenames = window.studio_api.ipcRenderer.sendSync("showSelectFileDialog",
+                    {
+                        prop: ["openFile"],
+                        title: "パッチを適応するゲームの実行ファイル（app）を選択してください。",
+                        filters: [{ name: "", extensions: ["app"] }],
+                    }
+                );
+                
+                console.log(filenames);
+        
+                /*
                 let filenames = dialog.showOpenDialogSync(null, {
-                    properties: ["openFile"],
+                    prop: ["openFile"],
                     title: "パッチを適応するゲームの実行ファイル（app）を選択してください。",
                     filters: [{ name: "", extensions: ["app"] }],
                 });
+                */
 
                 if (typeof filenames == "undefined") {
                     alert("パッチの適応を中止します");
@@ -553,7 +567,7 @@ tyrano.plugin.kag = {
                     return;
                 }
 
-                path = filenames[0] + "/Contents/Resources/app.asar";
+                path = filenames.filepath + "/Contents/Resources/app.asar";
                 out_path = out_path + "/";
             } else {
                 out_path = out_path + "/";
@@ -566,7 +580,7 @@ tyrano.plugin.kag = {
             })();
 
             //ファイル全部コピーする
-            var AdmZip = require("adm-zip");
+            var AdmZip = window.studio_api.admzip;
 
             // reading archives  ファイルを上書きしている。
             var zip = new AdmZip(patch_path);
@@ -594,9 +608,9 @@ tyrano.plugin.kag = {
 
             return;
         } else {
-            const AdmZip = require("adm-zip");
+            const AdmZip = window.studio_api.admzip; 
 
-            var path = require("path");
+            var path = window.studio_api.path; 
             var abspath = path.resolve("./");
 
             // reading archives
@@ -1407,6 +1421,7 @@ tyrano.plugin.kag = {
                 //"./tyrano/libs/three/loader/MMDLoader.js",
 
                 "./tyrano/libs/three/controls/OrbitControls.js",
+                "./tyrano/libs/three/controls/TransformControls.js",
                 "./tyrano/libs/three/classes/ThreeModel.js",
                 "./tyrano/libs/three/etc/stats.min.js",
             ];

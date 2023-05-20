@@ -45,7 +45,7 @@ $array_mini = array(
 "plugins/kag/kag.tag_system.js",
 "plugins/kag/kag.key_mouse.js",
 "plugins/kag/kag.rider.js",
-"plugins/kag/kag.studio.js",
+"plugins/kag/kag.studio_v6.js",
 "plugins/kag/kag.tag_camera.js",
 "plugins/kag/kag.tag_vchat.js",
 "plugins/kag/kag.tag_ar.js",
