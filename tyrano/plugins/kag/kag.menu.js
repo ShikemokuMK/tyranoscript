@@ -140,7 +140,14 @@ tyrano.plugin.kag.menu = {
         );
     },
 
-    displaySave: function (cb) {
+    /**
+     * セーブ画面を表示する
+     * cbだけを指定した場合、セーブ完了時とセーブ画面クローズ時どちらもcbが実行される（互換性の担保）
+     * cb_closeを別に指定した場合、セーブ完了時にはcbが、セーブ画面クローズ時にはcb_closeが実行される
+     * @param {function} [cb] - セーブ完了時およびセーブ画面クローズ時のコールバック
+     * @param {function} [cb_close] - セーブ画面クローズ時のコールバック
+     */
+    displaySave: function (cb, cb_close) {
         //セーブ画面作成
 
         var that = this;
@@ -205,7 +212,7 @@ tyrano.plugin.kag.menu = {
 
                 that.setMenuScrollEvents(j_save, { target: ".area_save_list", move: 160 });
 
-                that.setMenu(j_save, cb);
+                that.setMenu(j_save, cb_close || cb);
             },
         );
     },
