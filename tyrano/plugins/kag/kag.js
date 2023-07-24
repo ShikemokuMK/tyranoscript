@@ -2798,10 +2798,45 @@ tyrano.plugin.kag = {
         j_elm.attr("tabindex", tabindex);
         j_elm.addClass("tyrano-focusable");
         j_elm.off("focusin focusout");
-        j_elm.on("focusin", () => {
-            if (this.config["keyFocusWithHoverStyle"] === "true") {
-                j_elm.trigger("mouseenter");
+
+        // この要素にmousedownが発生したときのタイムスタンプを記憶しておく
+        let mousedown_timestamp = 0;
+        let mousedown_target = null;
+        j_elm.on("mousedown", (e) => {
+            mousedown_timestamp = e.timeStamp;
+            mousedown_target = e.target;
+        });
+
+        // 要素にフォーカスが当たったときのイベントハンドラを設定する
+        // 要素にフォーカスが当たるのは次の3ケース
+        // - マウスクリックによる選択
+        // - Tabキーによる選択
+        // - focus()メソッドの使用
+        j_elm.on("focusin", (e) => {
+            // Tabキーによる選択でこの要素にフォーカスが当たったときに
+            // mouseenterイベントをトリガーすることで、
+            // 本来マウスを乗せたときに生じる効果音の再生などを再現することができる。
+            // if (this.config["keyFocusWithHoverStyle"] === "true") {
+            //     j_elm.trigger("mouseenter");
+            // }
+
+            // しかし、マウスクリックでこの要素にフォーカスが当たった場合に
+            // mouseenterをトリガーしてしまうと、
+            // mouseenterが二重に実行されることになるため、おかしなことになる
+
+            // したがって、マウスクリックでフォーカスが当たった場合を検知して除外する必要がある
+            // focusinイベントが発火する直前（10ミリ秒以内）に同じ要素でmousedownイベントが発火している場合は
+            // マウスクリックでフォーカスが当たったと見なす
+            let by_mousedown = e.timeStamp - mousedown_timestamp < 10 && mousedown_target === e.target;
+            if (by_mousedown) {
+                // console.log("マウスクリックによるフォーカス");
+            } else {
+                // console.log("TabキーやJS操作によるフォーカス");
+                if (this.config["keyFocusWithHoverStyle"] === "true") {
+                    j_elm.trigger("mouseenter");
+                }
             }
+
             j_elm.addClass("focus");
         });
         j_elm.on("focusout", () => {
