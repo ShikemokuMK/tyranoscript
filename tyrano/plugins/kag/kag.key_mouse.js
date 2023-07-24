@@ -1893,6 +1893,7 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             $(document).on("mousedown", (e) => {
+                
                 if (e.originalEvent && e.originalEvent.isTrusted) {
                     that.vmouse.hide();
                 }

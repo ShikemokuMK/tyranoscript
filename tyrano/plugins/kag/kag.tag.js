@@ -6252,6 +6252,7 @@ tyrano.plugin.kag.tag.button = {
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
     //cmで抹消しよう
     start: function (pm) {
+        
         var that = this;
 
         var target_layer = null;
@@ -6424,7 +6425,10 @@ tyrano.plugin.kag.tag.button = {
         // 押下イベント
         //
 
-        j_button.on("mousedown touchstart", () => {
+        j_button.on("mousedown touchstart", (e) => {
+            
+            e.stopPropagation();
+                
             if (!this.kag.stat.is_strong_stop) return true;
             if (button_clicked) return true;
             if (!j_button.hasClass("src-change-disabled")) {
@@ -6438,7 +6442,8 @@ tyrano.plugin.kag.tag.button = {
         // クリックイベント
         //
 
-        j_button.on("mousedown", (e) => {
+        j_button.on("click", (e) => {
+            
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
