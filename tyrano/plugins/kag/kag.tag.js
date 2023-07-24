@@ -6438,7 +6438,7 @@ tyrano.plugin.kag.tag.button = {
         // クリックイベント
         //
 
-        j_button.on("click", (e) => {
+        j_button.on("mousedown", (e) => {
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 
