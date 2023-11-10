@@ -1278,7 +1278,7 @@ tyrano.plugin.kag.tag.bgmopt = {
         }
 
         // システム変数の変更とセーブ(sfのデータは[eval]実行時点でセーブされる)
-        if (pm.volume) {
+        if (pm.volume !== undefined && pm.volume !== "") {
             this.kag.ftag.startTag("eval", {
                 exp: "sf._system_config_bgm_volume = " + pm.volume,
                 next: pm.next,
@@ -1393,7 +1393,7 @@ tyrano.plugin.kag.tag.seopt = {
         }
 
         // システム変数の変更とセーブ(sfのデータは[eval]実行時点でセーブされる)
-        if (pm.volume) {
+        if (pm.volume !== undefined && pm.volume !== "") {
             this.kag.ftag.startTag("eval", {
                 exp: "sf._system_config_se_volume = " + pm.volume,
                 next: pm.next,
