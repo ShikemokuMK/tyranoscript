@@ -280,7 +280,7 @@ tyrano.plugin.kag.tag.playbgm = {
             case "sound":
                 config_volume = $.parseVolume(this.kag.config.defaultSeVolume);
                 // このbufの個別SE音量が存在する場合はそれで上書き
-                if (this.kag.stat.map_se_volume[buf]) {
+                if (this.kag.stat.map_se_volume[buf] !== undefined) {
                     config_volume = $.parseVolume(this.kag.stat.map_se_volume[buf]);
                 }
                 break;
@@ -1278,7 +1278,7 @@ tyrano.plugin.kag.tag.bgmopt = {
         }
 
         // システム変数の変更とセーブ(sfのデータは[eval]実行時点でセーブされる)
-        if (pm.volume) {
+         if (pm.volume !== undefined && pm.volume !== "") {
             this.kag.ftag.startTag("eval", {
                 exp: "sf._system_config_bgm_volume = " + pm.volume,
                 next: pm.next,
@@ -1393,7 +1393,7 @@ tyrano.plugin.kag.tag.seopt = {
         }
 
         // システム変数の変更とセーブ(sfのデータは[eval]実行時点でセーブされる)
-        if (pm.volume) {
+        if (pm.volume !== undefined && pm.volume !== "") {
             this.kag.ftag.startTag("eval", {
                 exp: "sf._system_config_se_volume = " + pm.volume,
                 next: pm.next,
