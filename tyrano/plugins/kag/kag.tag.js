@@ -2959,8 +2959,13 @@ tyrano.plugin.kag.tag.position = {
         // 『marginr, marginb が指定されていない[position]タグ』を通過するときにそれまでの marginr, marginb が破棄される問題があった
         // (タグリファレンスの『いずれの属性も、指定しなければ変更は行われません。』という説明と矛盾していた)
         const new_style_inner = {
-            "box-sizing": "border-box",
         };
+        
+        if (this.kag.stat.fuki.active == true) {
+            new_style_inner["box-sizing"] = "content-box";
+        } else {
+            new_style_inner["box-sizing"] = "border-box";
+        }
 
         // marginパラメータで一括指定
         if (pm.margin !== "") {
@@ -3075,7 +3080,9 @@ tyrano.plugin.kag.tag.fuki_start = {
         var j_msg_inner = this.kag.layer.getLayer(pm.layer, pm.page).find(".message_inner");
         j_msg_inner.css("width", "");
         j_msg_inner.css("height", "");
-
+        j_msg_inner.css("box-sizing", "content-box");
+        
+        
         this.kag.ftag.nextOrder();
     },
 };
@@ -3122,9 +3129,10 @@ tyrano.plugin.kag.tag.fuki_stop = {
         let def_style_inner = this.kag.stat.fuki.def_style_inner;
 
         j_inner_layer.css("left", parseInt(j_outer_layer.css("left")) + 10).css("top", parseInt(j_outer_layer.css("top")) + 10);
-
+        j_inner_layer.css("box-sizing", "border-box");
+        
         this.kag.setStyles(j_inner_layer, def_style_inner);
-
+        
         //名前表示エリアを復元する。
         $(".tyrano_base").find(".chara_name_area").show();
 
