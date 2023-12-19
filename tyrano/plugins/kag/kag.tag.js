@@ -2345,6 +2345,8 @@ tyrano.plugin.kag.tag.l = {
                     if (that.kag.tmp.is_vo_play == true) {
                         that.kag.tmp.is_vo_play_wait = true;
                     } else {
+                        // クリック待ちグリフを消去
+                        that.kag.ftag.hideNextImg();
                         that.kag.ftag.nextOrder();
                     }
                 }
@@ -2422,6 +2424,8 @@ tyrano.plugin.kag.tag.p = {
                     if (that.kag.tmp.is_vo_play == true) {
                         that.kag.tmp.is_vo_play_wait = true;
                     } else {
+                        // クリック待ちグリフを消去
+                        that.kag.ftag.hideNextImg();
                         that.kag.ftag.nextOrder();
                     }
                 }
