@@ -4016,7 +4016,7 @@ tyrano.plugin.kag.tag.filter = {
 
         j_obj.setFilterCSS(filter_str, false);
 
-        //j_obj.addClass("tyrano_filter_effect");
+        j_obj.addClass("tyrano_filter_effect");
 
         this.kag.ftag.nextOrder();
     },

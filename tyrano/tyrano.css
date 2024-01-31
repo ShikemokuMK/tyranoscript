@@ -113,10 +113,12 @@ body {
 }
 
 /* [filter] で付与, [free_filter] で除去 */
+/*
 .tyrano_filter_effect {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
 }
+*/
 
 /* 縦書き
 --------------------------------------*/
