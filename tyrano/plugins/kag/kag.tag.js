@@ -1588,129 +1588,201 @@ tyrano.plugin.kag.tag.text = {
      * @param {jQuery} chara_obj キャラ画像のjQueryオブジェクト
      */
     adjustCharaFukiSize: function (j_msg_inner, chara_name, chara_obj) {
+        // キャラクターのふきだし設定
         const chara_fuki = this.kag.stat.charas[chara_name]["fuki"];
+        // たとえばこういうデータ
+        // {
+        //   name: "akane",
+        //   top: "270",
+        //   left: "200",
+        //   sippo: "top",
+        //   sippo_top: "30",
+        //   sippo_left: "30",
+        //   sippo_width: 12,
+        //   sippo_height: 20,
+        //   max_width: "300",
+        //   radius: "15",
+        //   fix_width: "",
+        //   enable: "true",
+        //   _tag: "fuki_chara",
+        // }
 
+        // インナーの width, max-width の設定
+        // 横幅固定するかどうかで場合分け
         if (chara_fuki["fix_width"] != "") {
+            // 横幅固定する場合
+            // max-width を解除し width を直接指定する
             j_msg_inner.css("max-width", "");
             j_msg_inner.css("width", parseInt(chara_fuki["fix_width"]));
         } else {
+            // 横幅固定しない場合（自動調節する場合）
+            // width を解除し max-width だけを指定する
             j_msg_inner.css("width", "");
             j_msg_inner.css("max-width", parseInt(chara_fuki["max_width"]));
         }
 
-        //縦書きの場合はheightだけ無視で。
+        // インナーの width, height の設定
+        // 縦書きかどうかで場合分け
         if (this.kag.stat.vertical == "true") {
-            //safariでも表示させるための処置
+            // 縦書きの場合は height だけ無視する
+            // safari でも表示させるための処置
             let w = j_msg_inner.find(".vertical_text").css("width");
             j_msg_inner.css("width", w);
             j_msg_inner.css("height", "");
             j_msg_inner.css("max-height", parseInt(chara_fuki["max_width"]));
         } else {
+            // 横書きの場合
+            // 自動調節する場合は width, height を解除する
             if (chara_fuki["fix_width"] == "") {
                 j_msg_inner.css("width", "");
                 j_msg_inner.css("height", "");
             }
         }
 
-        //吹き出しの大きさを自動調整。
+        //
+        // アウターサイズを自動調節する
+        //
+
+        // インナーサイズを取得する
         let width = j_msg_inner.css("width");
         let height = j_msg_inner.css("height");
 
-        //20 はアイコンの文
-        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
-        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + 20;
+        // margin, padding, border を含まない
+        // width = j_msg_inner.width()
+        // height = j_msg_inner.height()
 
-        let j_outer_message = this.kag.getMessageOuterLayer();
+        // padding-left(top)、margin-right(bottom)、20（アイコンの分）を足す
+        // これがアウターのサイズとなる
+        const icon_size = 20;
+        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + icon_size;
+        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + icon_size;
 
+        // アウターのサイズをインナーに同期する
+        const j_outer_message = this.kag.getMessageOuterLayer();
         j_outer_message.css("width", width);
         j_outer_message.css("height", height);
 
-        let chara_left = parseInt(chara_obj.css("left"));
-        let chara_top = parseInt(chara_obj.css("top"));
+        //
+        // アウターの位置を決定する
+        // まずキャラ画像の left, top にふきだし設定の left, top を足す
+        // その際にキャラ画像の実際の表示サイズとオリジナルサイズの比を考慮する
+        // オリジナルサイズのキャラ画像の口の部分に合わせてふきだしの left, top が設定されることを想定しているため
+        //
 
         let fuki_left = chara_fuki["left"];
         let fuki_top = chara_fuki["top"];
+        const chara_left = parseInt(chara_obj.css("left"));
+        const chara_top = parseInt(chara_obj.css("top"));
+        const chara_width = parseInt(chara_obj.find("img").css("width"));
+        const chara_height = parseInt(chara_obj.find("img").css("height"));
+        const origin_width = this.kag.stat.charas[chara_name]["origin_width"];
+        const origin_height = this.kag.stat.charas[chara_name]["origin_height"];
+        const per_width = chara_width / origin_width;
+        const per_height = chara_height / origin_height;
+        fuki_left = chara_left + fuki_left * per_width;
+        fuki_top = chara_top + fuki_top * per_height;
 
-        let fuki_sippo_left = chara_fuki["sippo_left"];
-        let fuki_sippo_top = chara_fuki["sippo_top"];
+        //
+        // アウターのサイズを改めて取得する
+        // しっぽのサイズも考慮する
+        //
 
-        let chara_width = parseInt(chara_obj.find("img").css("width"));
-        let chara_height = parseInt(chara_obj.find("img").css("height"));
+        const sippo_width = parseInt(chara_fuki.sippo_width);
+        const sippo_height = parseInt(chara_fuki.sippo_height);
+        const sippo_left = parseInt(chara_fuki.sippo_left);
+        const sippo_top = parseInt(chara_fuki.sippo_top);
+        const outer_width = parseInt(j_outer_message.css("width")) + sippo_width;
+        const outer_height = parseInt(j_outer_message.css("height")) + sippo_height;
 
-        let origin_width = this.kag.stat.charas[chara_name]["origin_width"];
-        let origin_height = this.kag.stat.charas[chara_name]["origin_height"];
+        //
+        // しっぽの位置（ふきだしの方向）次第で位置を調節する
+        //
 
-        //相対位置はキャラのサイズによって座標を調整する
-        let per_width = chara_width / origin_width;
-        let per_height = chara_height / origin_height;
-
-        fuki_left = fuki_left * per_width;
-        fuki_top = fuki_top * per_height;
-
-        let fuki_left2 = chara_left + fuki_left;
-        let fuki_top2 = chara_top + fuki_top;
-
-        let outer_width = parseInt(j_outer_message.css("width"));
-        let outer_height = parseInt(j_outer_message.css("height"));
-
-        //吹き出し位置によって位置を変更
-        let sippo = chara_fuki["sippo"];
-        if (sippo == "bottom") {
-            fuki_top2 = fuki_top2 - outer_height;
-        } else if (sippo == "left") {
-            fuki_left2 = fuki_left2 + parseInt(chara_fuki["sippo_left"]);
-        } else if (sippo == "right") {
-            fuki_left2 = fuki_left2 - outer_width;
+        switch (chara_fuki.sippo) {
+            case "top":
+                // しっぽが上に付く場合（下に向かってふきだしが出る場合）
+                break;
+            case "bottom":
+                // しっぽが下に付く場合（上に向かってふきだしが出る場合）
+                // top はアウターサイズ分だけ上にずらす
+                fuki_top -= outer_height;
+                break;
+            case "left":
+                // しっぽが左に付く場合（右に向かってふきだしが出る場合）
+                break;
+            case "right":
+                // しっぽが右に付く場合（左に向かってふきだしが出る場合）
+                // left はアウターサイズ分だけ左にずらす
+                fuki_left -= outer_width;
+                break;
         }
 
-        //左端と下端の座標
-        let fuki_right = fuki_left2 + outer_width;
-        let fuki_bottom = fuki_top2 + outer_height;
+        //
+        // ふきだしが画面から飛び出していたら押し戻す
+        //
 
-        let sc_width = parseInt(this.kag.config.scWidth);
-        let sc_height = parseInt(this.kag.config.scHeight);
+        // ふきだしの右端と下端の座標
+        let fuki_right = fuki_left + outer_width;
+        let fuki_bottom = fuki_top + outer_height;
 
-        let sippo_left = 0;
-        let sippo_top = 0;
+        // ゲーム画面サイズ
+        const sc_padding = 10; // ゲーム画面内にふきだしを配置する際の最低限の余白
+        const sc_width = parseInt(this.kag.config.scWidth) - sc_padding;
+        const sc_height = parseInt(this.kag.config.scHeight) - sc_padding;
 
-        //右端に飛び出ていたら
+        // しっぽのX座標調整量
+        let sippo_left_offset = 0;
 
+        // 画面右に飛び出している場合
         if (fuki_right >= sc_width) {
-            fuki_left2 = fuki_left2 - (fuki_right - sc_width) - 10;
-            sippo_left = fuki_right - sc_width + 10; //はみ出たぶんだけプラス
+            // 飛び出している量
+            const overflow_width = fuki_right - sc_width;
+
+            // ふきだしを左に押し戻す
+            fuki_left -= overflow_width;
+
+            // ふきだし全体を左に押し戻すだけだとしっぽの位置がキャラの口からずれてしまう
+            // ふきだし全体を左に押し戻した分だけしっぽは右にずらしてあげる
+            sippo_left_offset = overflow_width;
         }
 
+        // 画面左に飛び出している場合
+        if (fuki_left <= sc_padding) {
+            // 飛び出している量
+            const overflow_width = sc_padding - fuki_left;
+            // ふきだしを右に押し戻す
+            fuki_left = sc_padding;
+            // しっぽの補正量
+            sippo_left_offset = -overflow_width;
+        }
+
+        // 画面下に飛び出している場合
         if (fuki_bottom >= sc_height) {
-            fuki_top2 = fuki_top2 - (fuki_bottom - sc_height) - 10;
-            //sippo_left = (fuki_bottom - -50;
+            // 上に押し戻す
+            fuki_top = fuki_top - (fuki_bottom - sc_height);
         }
 
-        if (fuki_left2 <= 0) {
-            //しっぽの位置はマイナスさせる
-            sippo_left = fuki_left2 - 10;
-            fuki_left2 = 10;
+        // 画面上に飛び出ている場合
+        if (fuki_top <= sc_padding) {
+            fuki_top = sc_padding;
         }
 
-        if (fuki_top2 <= 0) {
-            fuki_top2 = 10;
-        }
+        // アウターの位置を更新
+        j_outer_message.css("left", fuki_left);
+        j_outer_message.css("top", fuki_top);
 
-        j_outer_message.css("left", fuki_left2);
-        j_outer_message.css("top", fuki_top2);
-
-        //innerの情報
+        // インナーの位置を更新
         j_msg_inner.css({
             left: parseInt(j_outer_message.css("left")) + 10,
             top: parseInt(j_outer_message.css("top")) + 10,
         });
 
-        //調整値。はみ出し多分
-
+        // スタイルをセット
         this.setFukiStyle(j_outer_message, chara_fuki);
 
-        //ふきだしの位置を調整//////////////
+        // しっぽの調整
         this.kag.updateFuki(chara_name, {
-            sippo_left: sippo_left,
+            sippo_left: sippo_left_offset,
         });
     },
 
@@ -1719,46 +1791,89 @@ tyrano.plugin.kag.tag.text = {
      * @param {jQuery} j_msg_inner div.message_inner
      */
     adjustOthersFukiSize: function (j_msg_inner) {
-        let others_style = this.kag.stat.fuki.others_style;
-        let def_style = this.kag.stat.fuki.def_style;
+        const others_style = this.kag.stat.fuki.others_style;
+        const def_style = this.kag.stat.fuki.def_style;
+        const fuki_max_width = others_style.max_width || def_style.width;
+        const fuki_left = others_style.left || def_style.left;
+        const fuki_top = others_style.top || def_style.top;
 
-        let nwidth = others_style.max_width || def_style.width;
-        let nleft = others_style.left || def_style.left;
-        let ntop = others_style.top || def_style.top;
+        // インナーの width, max-width の設定
+        // 縦書きかどうかで場合分け
+        if (this.kag.stat.vertical !== "true") {
+            // 横書きの場合
 
-        if (others_style["fix_width"] != "") {
-            j_msg_inner.css("max-width", "");
-            j_msg_inner.css("width", parseInt(others_style["fix_width"]));
+            // 高さは自由にしてやる
+            j_msg_inner.css("height", "");
+            j_msg_inner.css("max-height", "");
+
+            // 横幅固定するかどうかで場合分け
+            if (others_style.fix_width) {
+                // 横幅固定の場合は直接 width を指定する
+                j_msg_inner.css("max-width", "");
+                j_msg_inner.css("width", parseInt(others_style.fix_width));
+            } else {
+                // 自動調節の場合は max-width だけを指定する
+                j_msg_inner.css("width", "");
+                j_msg_inner.css("max-width", parseInt(fuki_max_width));
+            }
         } else {
+            // 縦書きの場合
+
+            // 縦書きの場合は width, max-width と height, max-height を入れ替えて処理する
             j_msg_inner.css("width", "");
-            j_msg_inner.css("max-width", parseInt(nwidth));
+            j_msg_inner.css("max-width", "");
+
+            // 高さ固定するかどうかで場合分け
+            if (others_style.fix_width) {
+                // 高さ固定
+                j_msg_inner.css("max-height", "");
+                j_msg_inner.css("height", parseInt(others_style.fix_width));
+            } else {
+                // 自動調節
+                j_msg_inner.css("height", "");
+                j_msg_inner.css("max-height", parseInt(fuki_max_width));
+            }
+
+            // 縦書きの場合は内部の p.vertical_text の横幅を引っ張ってインナーに直接指定しておかないと
+            // 後々アウターのサイズと合わなくなる
+            j_msg_inner.css("width", j_msg_inner.find(".vertical_text").css("width"));
         }
 
-        //吹き出しの大きさを自動調整。
+        //
+        // アウターサイズを自動調節する
+        //
+
+        // インナーサイズを取得する
         let width = j_msg_inner.css("width");
         let height = j_msg_inner.css("height");
 
-        //20 はアイコンの文
-        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + 20;
-        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + 20;
+        // margin, padding, border を含まない
+        // width = j_msg_inner.width()
+        // height = j_msg_inner.height()
 
-        let j_outer_message = this.kag.getMessageOuterLayer();
+        // padding-left(top)、margin-right(bottom)、20（アイコンの分）を足す
+        // これがアウターのサイズとなる
+        const icon_size = 20;
+        width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + icon_size;
+        height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + icon_size;
 
+        // アウターの位置とサイズを更新
+        const j_outer_message = this.kag.getMessageOuterLayer();
         j_outer_message.css("width", width);
         j_outer_message.css("height", height);
+        j_outer_message.css("left", parseInt(fuki_left));
+        j_outer_message.css("top", parseInt(fuki_top));
 
-        j_outer_message.css("left", parseInt(nleft));
-        j_outer_message.css("top", parseInt(ntop));
-
-        //通常のポジションに戻す
+        // インナーの位置を更新
         j_msg_inner.css({
             left: parseInt(j_outer_message.css("left")) + 10,
             top: parseInt(j_outer_message.css("top")) + 10,
         });
 
+        // スタイルを適用する（文字色やボーダー関連など）
         this.setFukiStyle(j_outer_message, this.kag.stat.fuki.others_style);
 
-        //ふきだしを消す
+        // しっぽを消す
         this.kag.updateFuki("others", { sippo: "none" });
     },
 
