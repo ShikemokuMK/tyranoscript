@@ -431,7 +431,7 @@ tyrano.plugin.kag.ftag = {
             //・[iscript]-[endscript]内
             //・エンティティ置換が無効化されている(本文テキスト)
             if (!this.kag.stat.is_script && tag.is_entity_disabled !== true) {
-                tag.pm = this.convertEntity(tag.pm);
+                tag.pm = this.convertEntity(tag.pm,tag.name);
             }
 
             //必須項目チェック
@@ -474,7 +474,7 @@ tyrano.plugin.kag.ftag = {
                 stack.pm = $.extend({}, this.kag.stat.mp);
             }
 
-            tag.pm = this.convertEntity(tag.pm);
+            tag.pm = this.convertEntity(tag.pm,tag.name);
 
             //マクロの場合、その位置へジャンプ
             var pms = tag.pm;
@@ -558,7 +558,7 @@ tyrano.plugin.kag.ftag = {
                     }
 
                     //この時点で、変数の中にエンティティがあれば、置き換える必要あり
-                    tag.pm = this.convertEntity(tag.pm);
+                    tag.pm = this.convertEntity(tag.pm,tag.name);
                     tag.pm["_tag"] = tag.name;
                     this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
                     return true;
@@ -576,7 +576,7 @@ tyrano.plugin.kag.ftag = {
     },
 
     //要素にエンティティが含まれている場合は評価値を代入する
-    convertEntity: function (pm) {
+    convertEntity: function (pm,tag_name) {
         var that = this;
 
         //もし、pmの中に、*が入ってたら、引き継いだ引数を全て、pmに統合させる。その上で実行
@@ -629,6 +629,12 @@ tyrano.plugin.kag.ftag = {
                         // 存在しない場合はデフォルト値を代入
                         pm[key] = default_value;
                     }
+                }
+            } else {
+                
+                //翻訳機能を使用中はタグのパラメータが翻訳対象でないかをチェックする
+                if (this.kag.lang != "") {
+                    pm[key] = this.kag.convertLang("tag", tag_name, key, pm[key]);
                 }
             }
         }
@@ -1047,7 +1053,7 @@ tyrano.plugin.kag.tag.text = {
             }
         }
     },
-
+    
     /**
      * テキストを表示する統括的な処理
      * @param {string} message_str 表示するテキスト
@@ -1056,6 +1062,8 @@ tyrano.plugin.kag.tag.text = {
     showMessage: function (message_str, is_vertical) {
         // 現在の発言者名（誰も喋っていない場合は空の文字列）
         const chara_name = this.kag.chara.getCharaName();
+        
+        message_str = this.kag.convertLang("scenario",message_str);
 
         // バックログにテキストを追加
         this.pushTextToBackLog(chara_name, message_str);
@@ -6979,6 +6987,7 @@ opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0
 edge       = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
 shadow     = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。,
 keyfocus   = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
+autopos    = `true`か`false`を指定します。デフォルトは`false`。trueを指定するとボタンの位置を自動的に調整します。つまりxとyに何も指定しなかったと同じ動作になります,
 
 :demo
 1,kaisetsu/14_select
@@ -7013,6 +7022,7 @@ tyrano.plugin.kag.tag.glink = {
         face: "",
         bold: "",
         keyfocus: "",
+        autopos:"false",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -7029,6 +7039,13 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("font-size", pm.size + "px");
         that.kag.setElmCursor(j_button, "pointer");
         that.kag.makeFocusable(j_button, pm.keyfocus);
+        
+        //強制自動配置が有効な場合
+        if (pm.autopos == "true") {
+            pm.x = "auto";
+            pm.y = "";
+            pm.height = "";
+        }
 
         if (pm.font_color != "") {
             j_button.css("color", $.convertColor(pm.font_color));
@@ -7075,7 +7092,7 @@ tyrano.plugin.kag.tag.glink = {
         } else if (that.kag.stat.font.face != "") {
             j_button.css("font-family", that.kag.stat.font.face);
         }
-
+        
         if (pm.x == "auto") {
             var sc_width = parseInt(that.kag.config.scWidth);
             var center = Math.floor(parseInt(j_button.css("width")) / 2);

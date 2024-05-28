@@ -3,6 +3,9 @@ tyrano.plugin.kag = {
     tyrano: null,
     kag: null,
     sound_swf: null,
+    
+    lang: "", //言語設定
+    map_lang: {},    //言語設定のマップ
 
     is_rider: false, //ティラノライダーからの起動かどうか
     is_studio: false, //ティラノスタジオからの起動かどうか
@@ -412,6 +415,7 @@ tyrano.plugin.kag = {
         word_nobreak_list: [],
 
         title: "", //ゲームのタイトル
+        
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
 
     init: function () {
@@ -863,7 +867,7 @@ tyrano.plugin.kag = {
         if (typeof that.variable.sf._system_config_unread_text_skip != "undefined") {
             that.config["unReadTextSkip"] = that.variable.sf._system_config_unread_text_skip;
         }
-
+        
         //自動セーブのデータがあるかどうか
         var auto_save_data = $.getStorage(this.kag.config.projectID + "_tyrano_auto_save", this.kag.config.configSave);
 
@@ -2118,7 +2122,7 @@ tyrano.plugin.kag = {
         }
         if (next_chara_ptext_pm) {
             // 一応エンティティ置換しておく(基本的に #hoge 表記であろうからほぼ不要とは思うが)
-            next_chara_ptext_pm = this.kag.ftag.convertEntity(next_chara_ptext_pm);
+            next_chara_ptext_pm = this.kag.ftag.convertEntity(next_chara_ptext_pm,"chara_ptext");
             const next_chara_name = next_chara_ptext_pm.name;
             const next_chara_voconfig = this.kag.stat.map_vo.vochara[next_chara_name];
             if (next_chara_voconfig) {
@@ -3142,6 +3146,77 @@ tyrano.plugin.kag = {
             clearTimeout(tmp.loading_log_timer_id);
             tmp.j_loading_log.hide();
         }, 10);
+    },
+    
+    
+    convertLang(type, str, str2, str3) {
+        
+        if (this.kag.lang == "") return str;
+        
+        let scenario = this.kag.stat.current_scenario;
+            
+        //シナリオのときは現在のシナリオを読み込む
+        if (type === "scenario") {
+            
+            if (this.kag.map_lang[scenario]) {
+                
+                if (this.kag.map_lang[scenario][type]) {
+        
+                    if (this.kag.map_lang[scenario][type][str]) {
+                        return this.kag.map_lang[scenario][type][str];
+                    }
+                }
+            }
+        
+        } else if (type === "tag") {
+            
+            if (this.kag.map_lang[scenario]) {
+                
+                if (this.kag.map_lang[scenario][type]) {
+                    
+                    if (this.kag.map_lang[scenario][type][str]) {
+                        if (this.kag.map_lang[scenario][type][str][str2]) {
+                            if (this.kag.map_lang[scenario][type][str][str2][str3]) {
+                                return this.kag.map_lang[scenario][type][str][str2][str3];
+                            }
+                        }
+                    }
+                }
+            }
+        
+            return str3;
+            
+        }
+        
+        return str;
+        
+    },
+    
+    //langファイルを読み込んで設定する
+    async loadLang(name) {
+        
+        if (name != "default") {
+        
+            try {
+            
+                let lang_str = await $.loadTextSync("./data/others/lang/" + name + ".json");
+                this.lang = name;
+                this.map_lang = lang_str;
+            
+            } catch (e) {
+                this.lang = "";
+                this.map_lang = {};
+            }
+            
+        } else {
+            
+            this.lang = "";
+            this.map_lang = {};
+            
+        }
+        
+        this.kag.evalScript("sf._system_config_lang='" + name + "';");
+        
     },
 
     test: function () {},
