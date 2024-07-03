@@ -2471,91 +2471,100 @@ tyrano.plugin.kag.tag.chara_show = {
     },
 
     start: function (pm) {
-        var that = this;
+        const that = this;
 
-        var cpm = this.kag.stat.charas[pm.name];
+        // このキャラの定義オブジェクト
+        const cpm = this.kag.stat.charas[pm.name];
 
-        var array_storage = [];
-
-        if (cpm == null) {
+        // 未定義のキャラを表示しようとしているならばエラーとなる
+        if (!cpm) {
             this.kag.error("undefined_character", pm);
             return;
         }
 
-        //すでにキャラクターが登場している場合は無視する
-        var check_obj = that.kag.chara.getCharaContainer(pm.name);
+        // このキャラを表示する前にプリロードしておく必要がある画像をこの配列に突っ込んでおく
+        const preload_images = [];
 
-        check_obj.stop(true, true);
+        //
+        // すでにこのキャラが画面に存在していないかどうかを確認
+        //
 
-        if (check_obj.get(0)) {
-            check_obj.stop(true, true);
-
-            if (check_obj.css("display") != "none") {
+        // 存在している場合
+        const existing_chara = that.kag.chara.getCharaContainer(pm.name);
+        if (existing_chara.get(0)) {
+            existing_chara.stop(true, true);
+            // 存在しているし表示もされている場合（display: none; でない場合）は
+            // もはや何も処理する必要はないので次のタグへ
+            if (existing_chara.css("display") != "none") {
                 that.kag.ftag.nextOrder();
                 return;
             }
-        } else {
-            //別の方法で消された場合
+        }
+        // 存在していない場合
+        else {
             cpm.is_show = "false";
         }
 
-        //スキップ時にロードとの間で分身するやつ
+        // ここに到達したということは
+        // このキャラはまだ画面に存在していない、もしくは
+        // 存在していても display: none; である
+
+        // スキップ時にロードとの間で分身するやつ
         if (cpm.is_show == "true") {
             that.kag.ftag.nextOrder();
             return;
         }
 
-        var storage_url = "./data/fgimage/" + cpm.storage;
+        //
+        // ベースとなる画像ソースを決定する
+        //
 
-        if ($.isHTTP(cpm.storage)) {
-            storage_url = cpm.storage;
-        }
+        // デフォルトの画像ソースとして[chara_new]時のstorageを参照する
+        let storage_url = $.parseStorage(cpm.storage, "fgimage");
 
-        //表情が指定されている場合はその値を活用する。
+        // [chara_show]に表情（face）が指定されている場合
         if (pm.face != "") {
+            // 未定義のfaceを使用しようとしている場合はエラーを出してゲームを止める
             if (!cpm["map_face"][pm.face]) {
                 this.kag.error("undefined_face", pm);
                 return;
             }
-            storage_url = "./data/fgimage/" + cpm["map_face"][pm.face];
-            //表情画像がhttpで指定されている場合はそれをそのまま格納する
-            if ($.isHTTP(cpm["map_face"][pm.face])) {
-                storage_url = cpm["map_face"][pm.face];
-            }
-        } else if (pm.storage != "") {
-            if ($.isHTTP(pm.storage)) {
-                storage_url = pm.storage;
-            } else {
-                storage_url = "./data/fgimage/" + pm.storage;
-            }
-
-            that.kag.stat.charas[pm.name]["storage"] = pm.storage;
+            storage_url = $.parseStorage(cpm["map_face"][pm.face], "fgimage");
+        }
+        // [chara_show]にstorageが直接指定されている場合
+        else if (pm.storage != "") {
+            storage_url = $.parseStorage(pm.storage, "fgimage");
+            // キャラ定義を書き換える
+            cpm["storage"] = pm.storage;
         }
 
+        // この画像ソースをプリロード対象に追加する
+        preload_images.push(storage_url);
+
+        //
+        // 要素を作成する
+        //
+
+        // キャラのラッパーとなる<div>要素
         var j_chara_root = $("<div></div>");
         j_chara_root.css({
             position: "absolute",
             display: "none",
         });
 
-        var img_obj = $("<img />");
-        img_obj.attr("src", storage_url);
-        img_obj.addClass("chara_img");
-        //img_obj.css("position", "absolute");
-        //img_obj.css("display", "none");
-        //前景レイヤを表示状態にする
+        // ベースとなる<img>要素を作成してラッパーに追加
+        var j_chara_base_img = $("<img />");
+        j_chara_base_img.attr("src", storage_url);
+        j_chara_base_img.addClass("chara_img");
+        j_chara_root.append(j_chara_base_img);
 
-        //div内に追加
-        j_chara_root.append(img_obj);
-
+        // width、height、zindexを反映させる
         if (pm.width != "") {
-            var width = parseInt(pm.width);
-            cpm.width = width;
+            cpm.width = parseInt(pm.width);
         }
 
         if (pm.height != "") {
-            var height = parseInt(pm.height);
-            cpm.height = height;
+            cpm.height = parseInt(pm.height);
         }
 
         if (cpm.width != "") {
@@ -2567,63 +2576,68 @@ tyrano.plugin.kag.tag.chara_show = {
         }
 
         if (pm.zindex != "") {
-            var zindex = parseInt(pm.zindex);
-            j_chara_root.css("z-index", zindex);
+            j_chara_root.css("z-index", parseInt(pm.zindex));
         }
 
-        ////キャラ差分の指定があれば、それを適応する。
-        //レイヤが登録されているかどうか
-        var chara_layer = {};
-        if (cpm["_layer"]) {
-            chara_layer = cpm["_layer"];
-        }
+        //
+        // キャラパーツの設定
+        //
 
+        // 各パーツについて
+        const chara_layer = cpm["_layer"] || {};
         for (let key in chara_layer) {
-            var chara_part = chara_layer[key];
+            // このパーツの現在の状態を参照する
+            const this_part_map = chara_layer[key];
+            const current_part_id = this_part_map["current_part_id"];
+            let current_part = this_part_map[current_part_id];
 
-            //どれを表示すべきか
-            var current_part_id = chara_part["current_part_id"];
-            var chara_obj = chara_part[current_part_id];
+            // key: パーツの部位。mouth/eye/hairなど。
+            // current_part_id: そのパーツの現在の状態。open/mid/closeなど。
+            //   過去に[chara_part]で直接storageを指定した場合は"allow_storage"という文字列が入っている。
 
-            //直接ストレージが指定されている場合の表現
-            if (current_part_id == "allow_storage") {
-                chara_obj = {
-                    storage: chara_part["allow_storage"],
+            // storageが直接指定されている場合の構造を調整
+            if (current_part_id === "allow_storage") {
+                current_part = {
+                    storage: this_part_map["allow_storage"],
                     visible: "true",
                 };
             }
 
-            if (true) {
-                var part_storage = "./data/fgimage/" + chara_obj["storage"];
+            // このパーツ用の<img>要素
+            const j_img = $("<img />");
 
-                var j_img = $("<img />");
+            // このパーツの画像ソース
+            let part_storage;
 
-                //noneの場合はimgオブジェクトだけ作っておく
-                if (chara_obj["storage"] == "none") {
-                    part_storage = "./tyrano/images/system/transparent.png";
-                } else {
-                    array_storage.push(part_storage);
-                }
-
-                j_img.attr("src", part_storage);
-
-                j_img.css({
-                    "position": "absolute",
-                    "left": 0,
-                    "top": 0,
-                    "width": "100%",
-                    "height": "100%",
-                    "z-index": chara_part.zindex,
-                });
-
-                j_img.addClass("part");
-                j_img.addClass(key); //mouse とか head
-
-                j_chara_root.append(j_img);
+            // このパーツの画像ソースがnoneの場合は<img>要素だけ作っておく
+            // (透明なシステム画像を使用する)
+            if (current_part["storage"] === "none") {
+                part_storage = "./tyrano/images/system/transparent.png";
             }
+            // noneでない場合は画像ソースをパースしたあとプリロード対象に追加する
+            else {
+                part_storage = $.parseStorage(current_part["storage"], "fgimage");
+                preload_images.push(part_storage);
+            }
+
+            // 画像ソースの設定ほか
+            j_img.attr("src", part_storage);
+            j_img.css({
+                "position": "absolute",
+                "left": 0,
+                "top": 0,
+                "width": "100%",
+                "height": "100%",
+                "z-index": this_part_map.zindex,
+            });
+            j_img.addClass("part");
+            j_img.addClass(key); // eye/mouth/hairなど
+
+            // ラッパーに追加
+            j_chara_root.append(j_img);
         }
 
-        //反転表示
+        // 左右反転
         if (pm.reflect != "") {
             if (pm.reflect == "true") {
                 cpm.reflect = "true";
@@ -2636,165 +2650,167 @@ tyrano.plugin.kag.tag.chara_show = {
         // 各パーツをさらに<div>でラップする
         that.kag.chara.setPartContainer(j_chara_root);
 
-        array_storage.push(storage_url);
-
-        //
+        // キャラの表示状態と表示レイヤーを記憶しておく
         cpm.is_show = "true";
         cpm.layer = pm.layer;
 
-        //画像は事前にロードしておく必要がありそう
-        this.kag.preloadAll(array_storage, function () {
-            var target_layer = that.kag.layer.getLayer(pm.layer, pm.page);
+        // これ以降の処理はすべて画像のプリロードが完了してから同期的に行う
+        this.kag.preloadAll(preload_images, () => {
+            // 1回ゲーム止める
+            that.kag.weaklyStop();
 
-            //最後に挿入
-            //div内に追加。深さを指定する。
+            // レイヤーを取得
+            const target_layer = that.kag.layer.getLayer(pm.layer, pm.page);
+
+            // キャラのラッパーをレイヤーに挿入する
+            // depth属性がbackならレイヤーのDOMツリーの最初に挿入する
+            // back、つまり最背面に表示されるようになる
+            // back指定がないならDOMツリーの最後挿入する、すなわち最前面に表示される
             if (pm.depth == "back") {
                 target_layer.prepend(j_chara_root).show();
             } else {
                 target_layer.append(j_chara_root).show();
             }
 
-            var chara_num = 1;
-            that.kag.weaklyStop();
+            // 現在アニメーション処理中のキャラを数える（今後増減していく）
+            let animating_chara_count = 1;
 
-            //キャラのサイズを設定する必要がある。
+            // キャラの表示/移動アニメーションが完了したときのハンドラ
+            const on_animation_complete = () => {
+                animating_chara_count--;
+                if (animating_chara_count == 0) {
+                    that.kag.cancelWeakStop();
+                    if (pm.wait == "true") {
+                        that.kag.ftag.nextOrder();
+                    }
+                }
+            };
 
-            //立ち位置を自動的に設定する場合
-            if (that.kag.stat.chara_pos_mode == "true" && pm.left === "") {
-                //立ち位置自動調整
+            // 立ち位置を自動で設定すべきかどうか
+            const is_auto_position = that.kag.stat.chara_pos_mode == "true" && pm.left === "";
+
+            // 自動で設定しないならCSSのtop/leftを指定するだけ
+            if (!is_auto_position) {
+                j_chara_root.css("top", pm.top + "px");
+                j_chara_root.css("left", pm.left + "px");
+            }
+            // 立ち位置を自動調整する場合
+            else {
                 if (pm.top !== "") {
                     j_chara_root.css("top", parseInt(pm.top));
                 } else {
                     j_chara_root.css("bottom", 0);
                 }
 
-                //既存キャラの位置を調整する
-                var chara_cnt = target_layer.find(".tyrano_chara").length;
+                // 既存のキャラの数
+                const existing_chara = target_layer.find(".tyrano_chara");
+                const existing_chara_count = existing_chara.length;
 
-                var sc_width = parseInt(that.kag.config.scWidth);
-                var sc_height = parseInt(that.kag.config.scHeight);
+                // ゲーム画面の横幅、高さ
+                const sc_width = parseInt(that.kag.config.scWidth);
+                const sc_height = parseInt(that.kag.config.scHeight);
 
-                var center = Math.floor(parseInt(j_chara_root.css("width")) / 2);
+                // このキャラの横幅の半分
+                const half_width = Math.floor(parseInt(j_chara_root.css("width")) / 2);
 
-                //一つあたりの位置決定
-                var base = Math.floor(sc_width / (chara_cnt + 2));
-                var tmp_base = base;
-                var first_left = base - center;
+                // 既存のキャラが0人の場合、つまり画面上に初めてキャラを表示する場合、
+                // このキャラは画面中央に表示すればよい
+                // つまり画面中央（画面幅÷2）からキャラの横幅の半分だけ左に戻した位置
+                // ─────┬─────
+                // □□□□□■□□□□□
+                // □□□□■■■□□□□
+                // □□□□■■■□□□□
+                //
+                // 既存のキャラが1人の場合、画面幅÷3がキャラの間隔となる
+                // ───┬───┬───
+                // □□□■□□□■□□□
+                // □□■■■□■■■□□
+                // □□■■■□■■■□□
+                //
+                // 以降同様に、画面幅を既存のキャラ数+2で割った値がキャラの間隔となる
+                const chara_space = Math.floor(sc_width / (existing_chara_count + 2));
+                let current_left = chara_space;
 
-                j_chara_root.css("left", first_left + "px");
+                // このキャラの横位置を決定
+                j_chara_root.css("left", chara_space - half_width + "px");
 
-                //すべてのanimationが完了するまで、次へ進めないように指定
-                var array_tyrano_chara = target_layer.find(".tyrano_chara").get().reverse();
-                $(array_tyrano_chara).each(function () {
-                    chara_num++;
+                // 既存のキャラの横移動アニメーション処理
+                const existing_chara_arr = existing_chara.get().reverse();
+                const pos_change_time = parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time));
+                $(existing_chara_arr).each(function () {
+                    const j_chara = $(this);
+                    // アニメーション中キャラ数カウンタを増加
+                    animating_chara_count++;
+                    // 現在の横位置を1人分スライドさせる
+                    current_left += chara_space;
+                    // ここからキャラの横幅の半分だけ引いた値がleftプロパティにセットすべき値である
+                    const half_width = Math.floor(parseInt(j_chara.css("width")) / 2);
+                    const left = current_left - half_width;
 
-                    tmp_base += base;
-
-                    var j_chara = $(this);
-                    //この分をプラスする感じですね
-                    center = Math.floor(parseInt(j_chara.css("width")) / 2);
-                    //1つ目は主人公にゆずる
-                    var left = tmp_base - center;
-
+                    // [chara_config anim=false]が指定されている場合
+                    // 既存のキャラをいったんフェードアウトさせてから調整後の位置でフェードインする処理
                     if (that.kag.stat.chara_anim == "false") {
-                        j_chara.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)), 0, function () {
+                        j_chara.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)), 0, () => {
                             j_chara.css("left", left);
-
-                            j_chara
-                                .stop(true, true)
-                                .fadeTo(parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)), 1, function () {
-                                    chara_num--;
-                                    if (chara_num == 0) {
-                                        that.kag.cancelWeakStop();
-                                        if (pm.wait == "true") {
-                                            that.kag.ftag.nextOrder();
-                                        }
-                                    }
-                                });
+                            j_chara.stop(true, true).fadeTo(pos_change_time, 1, on_animation_complete);
                         });
-                    } else {
+                    }
+                    // 通常は横移動アニメーションを行う
+                    else {
                         j_chara.stop(true, true).animate(
                             {
                                 left: left,
                             },
-                            parseInt(that.kag.cutTimeWithSkip(that.kag.stat.pos_change_time)),
+                            pos_change_time,
                             that.kag.stat.chara_effect,
-                            function () {
-                                chara_num--;
-                                if (chara_num == 0) {
-                                    that.kag.cancelWeakStop();
-                                    if (pm.wait == "true") {
-                                        that.kag.ftag.nextOrder();
-                                    }
-                                }
-                            },
+                            on_animation_complete,
                         );
                     }
                 });
-            } else {
-                j_chara_root.css("top", pm.top + "px");
-                j_chara_root.css("left", pm.left + "px");
-
-                //that.kag.ftag.nextOrder();
             }
 
-            //読み込み後、サイズを指定する
-            setTimeout(function () {
-                var width = img_obj.css("width");
-                var height = img_obj.css("height");
-
-                j_chara_root.css("width", width);
-                j_chara_root.css("height", height);
-
-                j_chara_root.find(".part").css("width", width);
-                j_chara_root.find(".part").css("height", height);
-            }, 1);
-
-            //オブジェクトにクラス名をセットします name属性は一意でなければなりません
-            $.setName(j_chara_root, cpm.name);
+            // キャラのラッパーにクラス名を付与
+            // tyrano_charaとキャラID
             j_chara_root.addClass("tyrano_chara");
-            //キャラクター属性を付与。
+            $.setName(j_chara_root, cpm.name);
 
-            //新しいスタイルの定義
-
+            // width/heightをベース画像に設定する
             if (cpm.width != "") {
-                img_obj.css("width", cpm.width + "px");
+                j_chara_base_img.css("width", cpm.width + "px");
             }
-
             if (cpm.height != "") {
-                img_obj.css("height", cpm.height + "px");
+                j_chara_base_img.css("height", cpm.height + "px");
             }
 
+            // 左右反転が有効の場合はreflectクラスを付与
             if (cpm.reflect == "true") {
                 j_chara_root.addClass("reflect");
             } else {
                 j_chara_root.removeClass("reflect");
             }
 
-            if (pm.wait != "true") {
+            // アニメーション表示
+            j_chara_root.stop(true, true).fadeIn({
+                duration: parseInt(that.kag.cutTimeWithSkip(pm.time)),
+                easing: that.kag.stat.chara_effect,
+                complete: on_animation_complete,
+            });
+
+            // アニメーションの完了を待たない場合は次のタグへ
+            if (pm.wait !== "true") {
                 that.kag.ftag.nextOrder();
             }
 
-            //アニメーションでj表示させます
-            j_chara_root.stop(true, true).animate(
-                {
-                    opacity: "show",
-                },
-                {
-                    duration: parseInt(that.kag.cutTimeWithSkip(pm.time)),
-                    easing: that.kag.stat.chara_effect,
-                    complete: function () {
-                        chara_num--;
-                        if (chara_num == 0) {
-                            that.kag.cancelWeakStop();
-
-                            if (pm.wait == "true") {
-                                that.kag.ftag.nextOrder();
-                            }
-                        }
-                    }, //end complerte
-                },
-            );
+            // ベース画像のwidth/heightをラッパーおよび各パーツにも設定する
+            // ※読み込みが終わってから
+            setTimeout(function () {
+                const width = j_chara_base_img.css("width");
+                const height = j_chara_base_img.css("height");
+                j_chara_root.css("width", width);
+                j_chara_root.css("height", height);
+                j_chara_root.find(".part").css("width", width);
+                j_chara_root.find(".part").css("height", height);
+            }, 1);
         });
         //end preload
     },
