@@ -289,6 +289,9 @@ tyrano.plugin.kag.parser = {
             //１行づつ解析解析していく
         }
 
+        //翻訳が必要な場合はここでarray_sの中身を解析して翻訳する
+        this.kag.convertLang(this.kag.stat.current_scenario, array_s);
+
         var result_obj = {
             array_s: array_s,
             map_label: map_label,
@@ -503,5 +506,5 @@ tyrano.plugin.kag.parser = {
         return obj;
     },
 
-    test: function () {},
+    test: function () { },
 };

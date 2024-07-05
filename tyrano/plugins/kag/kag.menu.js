@@ -147,7 +147,8 @@ tyrano.plugin.kag.menu = {
      * @param {function} [cb] - セーブ完了時およびセーブ画面クローズ時のコールバック
      * @param {function} [cb_close] - セーブ画面クローズ時のコールバック
      */
-    displaySave: function (cb, cb_close) {    //セーブ画面作成
+    displaySave: function (cb, cb_close) {
+        //セーブ画面作成
 
         var that = this;
 
@@ -212,7 +213,6 @@ tyrano.plugin.kag.menu = {
                 that.setMenuScrollEvents(j_save, { target: ".area_save_list", move: 160 });
 
                 that.setMenu(j_save, cb_close || cb);
-            
             },
         );
     },

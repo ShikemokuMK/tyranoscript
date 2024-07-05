@@ -4105,3 +4105,56 @@ tyrano.plugin.kag.tag.loading_log = {
         this.kag.ftag.nextOrder();
     },
 };
+
+
+
+/*
+#[lang_set]
+
+:group
+システムデザイン変更
+
+:title
+言語の切替
+
+:exp
+ゲームで使用する言語を変更することができます。
+例えば[lang_set name="en"] を指定すると data/others/lang/en.json の翻訳設定が採用されます。
+
+:param
+name = `default`を指定するとローカライズを行いません。
+
+:sample
+[lang_set name="en"]
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.lang_set = {
+    vital: ["name"],
+
+    pm: {
+        name: "",
+    },
+
+    start: function (pm) {
+
+        var that = this;
+        //langファイルを読み込んで設定する
+
+        this.kag.loadLang(pm.name, () => {
+
+            const scenario_file = this.kag.stat.current_scenario;
+
+            //呼び出したファイル自身をロード
+            this.kag.loadScenario(scenario_file, (array_tag) => {
+                this.kag.ftag.array_tag = array_tag;
+                this.kag.ftag.nextOrder();
+            });
+
+        });
+
+
+    },
+};
+
