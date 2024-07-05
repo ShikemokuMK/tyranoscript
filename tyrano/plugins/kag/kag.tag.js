@@ -431,7 +431,7 @@ tyrano.plugin.kag.ftag = {
             //・[iscript]-[endscript]内
             //・エンティティ置換が無効化されている(本文テキスト)
             if (!this.kag.stat.is_script && tag.is_entity_disabled !== true) {
-                tag.pm = this.convertEntity(tag.pm,tag.name);
+                tag.pm = this.convertEntity(tag.pm);
             }
 
             //必須項目チェック
@@ -474,7 +474,7 @@ tyrano.plugin.kag.ftag = {
                 stack.pm = $.extend({}, this.kag.stat.mp);
             }
 
-            tag.pm = this.convertEntity(tag.pm,tag.name);
+            tag.pm = this.convertEntity(tag.pm);
 
             //マクロの場合、その位置へジャンプ
             var pms = tag.pm;
@@ -558,7 +558,7 @@ tyrano.plugin.kag.ftag = {
                     }
 
                     //この時点で、変数の中にエンティティがあれば、置き換える必要あり
-                    tag.pm = this.convertEntity(tag.pm,tag.name);
+                    tag.pm = this.convertEntity(tag.pm);
                     tag.pm["_tag"] = tag.name;
                     this.master_tag[tag.name].start($.extend(true, $.cloneObject(this.master_tag[tag.name].pm), tag.pm));
                     return true;
@@ -576,7 +576,7 @@ tyrano.plugin.kag.ftag = {
     },
 
     //要素にエンティティが含まれている場合は評価値を代入する
-    convertEntity: function (pm,tag_name) {
+    convertEntity: function (pm) {
         var that = this;
 
         //もし、pmの中に、*が入ってたら、引き継いだ引数を全て、pmに統合させる。その上で実行
@@ -632,10 +632,6 @@ tyrano.plugin.kag.ftag = {
                 }
             } else {
                 
-                //翻訳機能を使用中はタグのパラメータが翻訳対象でないかをチェックする
-                if (this.kag.lang != "") {
-                    pm[key] = this.kag.convertLang("tag", tag_name, key, pm[key]);
-                }
             }
         }
 
@@ -1062,8 +1058,6 @@ tyrano.plugin.kag.tag.text = {
     showMessage: function (message_str, is_vertical) {
         // 現在の発言者名（誰も喋っていない場合は空の文字列）
         const chara_name = this.kag.chara.getCharaName();
-        
-        message_str = this.kag.convertLang("scenario",message_str);
 
         // バックログにテキストを追加
         this.pushTextToBackLog(chara_name, message_str);

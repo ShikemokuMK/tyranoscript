@@ -4109,79 +4109,23 @@ tyrano.plugin.kag.tag.loading_log = {
 
 
 /*
-#[lang_init]
-
-:group
-システムデザイン変更
-
-:title
-多言語対応の開始
-
-:exp
-多言語設定を行いたい場合に必ずこのタグを通過しておく必要があります。
-過去に[lang_set]を行っている場合はその言語が自動的に選択されます。
-逆に強制的に設定されている言語設定を上書きしたい場合は[lang_init name="en"]のように指定します。
-プレイヤーの環境から自動的に言語を選択したい場合は[lang_init auto="true"] を指定します。
-
-:param
-name = `default`を指定するとローカライズを行いません。`auto`を指定するとプレイヤーの環境から自動的に採用する言語設定を決定できます。
-
-:sample
-[lane name="en"]
-
-#[end]
-*/
-
-tyrano.plugin.kag.tag.lang_init = {
-    vital: [],
-
-    pm: {
-        name: "",
-    },
-
-    start: function (pm) {
-        
-        var that = this;
-        
-        let lang = "";
-        
-        //言語設定がすでにされている場合はその設定を採用する
-        if (pm.name == "") {
-            if (typeof that.kag.variable.sf._system_config_lang != "undefined") {
-                lang = that.kag.variable.sf._system_config_lang;
-            } else {
-                lang = "default";
-            }
-        } else {
-            lang = pm.name;
-        }
-        
-        //langファイルを読み込んで設定する
-        this.kag.loadLang(lang);
-        
-        this.kag.ftag.nextOrder();
-    },
-};
-
-
-/*
 #[lang_set]
 
 :group
 システムデザイン変更
 
 :title
-多言語設定で採用する言語を変更できるように
+言語の切替
 
 :exp
 ゲームで使用する言語を変更することができます。
 例えば[lang_set name="en"] を指定すると data/others/lang/en.json の翻訳設定が採用されます。
 
 :param
-name = `default`を指定するとローカライズを行いません。`auto`を指定するとプレイヤーの環境から自動的に採用する言語設定を決定できます。
+name = `default`を指定するとローカライズを行いません。
 
 :sample
-[lane name="en"]
+[lang_set name="en"]
 
 #[end]
 */
@@ -4194,12 +4138,23 @@ tyrano.plugin.kag.tag.lang_set = {
     },
 
     start: function (pm) {
-        
+
         var that = this;
         //langファイルを読み込んで設定する
-        this.kag.loadLang(pm.name);
-        this.kag.ftag.nextOrder();
-        
+
+        this.kag.loadLang(pm.name, () => {
+
+            const scenario_file = this.kag.stat.current_scenario;
+
+            //呼び出したファイル自身をロード
+            this.kag.loadScenario(scenario_file, (array_tag) => {
+                this.kag.ftag.array_tag = array_tag;
+                this.kag.ftag.nextOrder();
+            });
+
+        });
+
+
     },
 };
 
