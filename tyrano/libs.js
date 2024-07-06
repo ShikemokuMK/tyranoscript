@@ -982,9 +982,16 @@
 
         return { filename: filename, ext: ext, name: name, dir_name: dir_name };
     };
-
+    
+    //getExePathのキャッシュ
+    $.cacheExePath = "";
+    
     //PC用の実行パスを取得
     $.getExePath = function () {
+        
+        if ($.cacheExePath != "") {
+            return $.cacheExePath;
+        }
         
         //TyranoStudio.app/Contents/Resources/app
         let path = window.studio_api.ipcRenderer.sendSync("getAppPath", {});
@@ -1011,6 +1018,8 @@
                 path = $.replaceAll(path, "\\resources\\app", "");
             }
         }
+        
+        $.cacheExePath = path;
 
         return path;
     };
