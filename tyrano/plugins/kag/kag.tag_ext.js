@@ -2635,6 +2635,8 @@ tyrano.plugin.kag.tag.chara_show = {
 
             // ラッパーに追加
             j_chara_root.append(j_img);
+
+            this.setFrameAnimation(cpm, key, current_part_id, j_img, preload_images);
         }
 
         // 左右反転
@@ -2814,6 +2816,227 @@ tyrano.plugin.kag.tag.chara_show = {
         });
         //end preload
     },
+
+    /**
+     * キーフレームアニメーションを構成する
+     * キャラ表示時に呼び出す
+     * @param {*} cpm - キャラ定義。例）TYRANO.kag.stat.charas.akane
+     * @param {*} part - パーツ部位名。例）eye
+     * @param {*} state - パーツ状態名。例）smile
+     * @param {*} j_frame_base - ベースとなるパーツの<img>要素。
+     * @param {*} preload_srcs - この配列に画像ソースを入れておくと関数の呼び出し元でプリロードに使われる。
+     */
+    setFrameAnimation(cpm, part, state, j_frame_base, preload_srcs) {
+        // パーツ差分がstorage直接指定の場合は無視
+        if (state === "allow_storage") {
+            return;
+        }
+
+        // パーツ差分領域を取得
+        const state_obj = cpm["_layer"][part][state];
+
+        // frame_image属性が未指定なら無視
+        if (!state_obj.frame_image) {
+            return;
+        }
+
+        let j_frames = $(j_frame_base);
+        let j_prev_frame = j_frame_base;
+
+        // 現在の目パーツ差分のすべての瞬きフレームについて<img>要素を作成
+        state_obj.frame_image.forEach((frame_src, i) => {
+            // オリジナルの<img>要素をクローンする
+            const j_clone = j_frame_base.clone();
+
+            // 画像ソースを決定する
+            const src = ((path, filename) => {
+                const hash_slash = path.split("/");
+                const hash_dot = hash_slash.pop().split(".");
+                let new_filename;
+                if (hash_dot.length > 1) {
+                    const extension = hash_dot.pop();
+                    new_filename = `${filename}.${extension}`;
+                } else {
+                    new_filename = filename;
+                }
+                hash_slash.push(new_filename);
+                return hash_slash.join("/");
+            })(j_frame_base.attr("src"), frame_src);
+            j_clone.attr("src", src);
+            j_clone.css("display", "none");
+            if (preload_srcs) {
+                preload_srcs.push(src);
+            }
+
+            // オリジナルの画像の後ろに追加していく
+            j_clone.insertAfter(j_prev_frame);
+            j_prev_frame = j_clone;
+
+            // jQueryオブジェクトの集合に追加しておく
+            j_frames = j_frames.add(j_clone);
+        });
+
+        // オリジナルの<img>要素にクラスと属性付与
+        // キャラの名前、パーツ部位の名前、パーツ状態の名前を記憶
+        j_frame_base.addClass("chara-layer-frame-base");
+        j_frame_base.attr(
+            "data-restore",
+            JSON.stringify({
+                chara_name: cpm.name,
+                part_name: part,
+                state_name: state,
+            }),
+        );
+
+        // すべての<img>要素にクラスと属性付与
+        j_frames.each(function (i) {
+            const j_img = $(this);
+            j_img.addClass("chara-layer-frame");
+            j_img.attr("data-effect", i);
+            j_img.attr("data-event-pm", part);
+        });
+
+        this.startFrameAnimation(cpm, state_obj, j_frames);
+    },
+
+    /**
+     * フレームアニメーションを開始する
+     * @param {*} cpm - キャラ定義。例）TYRANO.kag.stat.charas.akane
+     * @param {*} state_obj - パーツ状態定義。例）cpm._layer.eye.smile
+     * @param {*} j_frames - フレームアニメーションを構成するすべての<img>要素のjQueryオブジェクトの集合
+     */
+    startFrameAnimation(cpm, state_obj, j_frames) {
+        // フレーム番号
+        let frame_index = 0;
+
+        // 最初のフレームから最後のフレームに向かっている最中であるかどうか
+        let to_last = true;
+
+        // 総フレーム数
+        const frame_count = state_obj.frame_image.length + 1;
+
+        // フレームアニメーション1枚分の処理
+        const anim = () => {
+            clearTimeout(state_obj.frame_timer_id);
+
+            // すでにDOMからキャラが削除されたあとならフレームアニメーションを終了する
+            if (j_frames.eq(0).closest("html").length === 0) {
+                return;
+            }
+
+            // フレーム番号増加
+            switch (state_obj.frame_direction) {
+                case "alternate":
+                    if (to_last) {
+                        frame_index += 1;
+                        if (frame_index === frame_count) {
+                            frame_index -= 2;
+                            to_last = false;
+                        }
+                    } else {
+                        frame_index -= 1;
+                        if (frame_index === -1) {
+                            frame_index += 2;
+                            to_last = true;
+                        }
+                    }
+                    break;
+                default:
+                    frame_index = (frame_index + 1) % frame_count;
+                    break;
+            }
+
+            // すべてのフレーム画像を非表示にしてから
+            // 現在のフレーム画像だけを表示する
+            j_frames.css("display", "none");
+            const j_frame = j_frames.eq(frame_index);
+            j_frame.css("display", "block");
+
+            // 次のフレームまでの時間
+            let duration = state_obj.frame_time[frame_index] || 40;
+            if (Array.isArray(duration)) {
+                const min = duration[0];
+                const max = duration[1];
+                duration = Math.floor(min + (max - min) * Math.random());
+            }
+
+            // 次回のフレーム処理の予約
+            state_obj.frame_timer_id = setTimeout(anim, duration);
+        };
+
+        // 最初の瞬き
+        setTimeout(anim, 1000);
+    },
+
+    /**
+     * すべてのキャラクターのフレームアニメーションを停止する
+     * ロード時に呼び出す
+     * @returns
+     */
+    stopFrameAnimation(cpm) {
+        if (!cpm._layer) {
+            return;
+        }
+        for (const part in cpm._layer) {
+            for (const state in cpm._layer[part]) {
+                clearTimeout(cpm._layer[part][state].frame_timer_id);
+            }
+        }
+    },
+
+    /**
+     * すべてのキャラクターのフレームアニメーションを停止する
+     * ロード時に呼び出す
+     * @returns
+     */
+    stopAllFrameAnimation() {
+        const that = this;
+
+        // キャラが存在しない場合なにもしない
+        const charas = that.kag.stat.charas;
+        if (!charas) {
+            return;
+        }
+
+        // すべてのキャラについて瞬きのsetTimeoutを停止
+        for (const name in that.kag.stat.charas) {
+            const cpm = charas[name];
+            this.stopFrameAnimation(cpm);
+        }
+    },
+
+    /**
+     * ゲーム画面に出ているすべてのキャラクターの瞬きを復元する
+     * ロード時に呼び出す
+     */
+    restoreAllFrameAnimation() {
+        const that = this;
+
+        // フレームアニメーションのベース画像すべてについて復元
+        $(".chara-layer-frame-base").each(function () {
+            try {
+                const j_frame_base = $(this);
+                const setting = JSON.parse(j_frame_base.attr("data-restore"));
+                const cpm = that.kag.stat.charas[setting.chara_name];
+                const state_obj = cpm._layer[setting.part_name][setting.state_name];
+
+                // このパーツのフレームアニメーションの
+                // すべてのフレーム画像を含むような集合
+                let j_frames = $(j_frame_base);
+                const j_siblings = j_frame_base.siblings(`.tyrano-blink[data-event-pm=${setting.part_name}]`);
+                j_frames = j_frames.add(j_siblings);
+
+                // いったんベース画像を表示する
+                j_frames.css("display", "none");
+                j_frame_base.css("display", "block");
+
+                // フレームアニメーションを開始
+                that.startFrameAnimation(cpm, state_obj, j_frames);
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    },
 };
 
 /*
@@ -2895,6 +3118,7 @@ tyrano.plugin.kag.tag.chara_hide = {
                 duration: parseInt(that.kag.cutTimeWithSkip(pm.time)),
                 easing: "linear",
                 complete: function () {
+                    that.kag.tag.chara_show.stopFrameAnimation(cpm);
                     img_obj.remove();
 
                     if (that.kag.stat.chara_pos_mode == "true" && pm.pos_mode == "true") {
@@ -3530,31 +3754,25 @@ tyrano.plugin.kag.tag.chara_layer = {
     },
 
     start: function (pm) {
-        var cpm = this.kag.stat.charas[pm.name];
+        // キャラ定義を取得
+        const cpm = this.kag.stat.charas[pm.name];
 
-        if (cpm == null) {
+        // キャラが未定義ならエラーとなる
+        if (!cpm) {
             this.kag.error("undefined_character", pm);
             return;
         }
 
-        var chara_layer = {};
-
-        //レイヤが登録されているかどうか
-        if (cpm["_layer"]) {
-            chara_layer = cpm["_layer"];
-        } else {
+        // キャラ定義オブジェクトにレイヤー領域（_layer）を作成する
+        if (!cpm["_layer"]) {
             cpm["_layer"] = {};
         }
 
-        var chara_part = {};
+        // パーツ登録が初めてかどうか（パーツ領域が作成済みかどうか）
+        var is_first_part = !cpm["_layer"][pm.part];
 
-        //パートが登録されているかどうか
-        var init_part = false;
-        if (chara_layer[pm.part]) {
-            chara_part = chara_layer[pm.part];
-        } else {
-            init_part = true;
-            //一つ上のレイヤに配置する
+        // 初めてならパーツ領域を新規作成する
+        if (is_first_part) {
             cpm["_layer"][pm.part] = {
                 default_part_id: pm.id,
                 current_part_id: pm.id,
@@ -3562,26 +3780,72 @@ tyrano.plugin.kag.tag.chara_layer = {
             };
         }
 
-        var chara_obj = {};
+        // 改めてパーツ領域を参照（口、目などのレベル）
+        const part_obj = cpm["_layer"][pm.part];
 
-        //差分IDを登録する
-        if (chara_part[pm.id]) {
-            chara_obj = chara_part[pm.id];
-        } else {
-            chara_obj = {
+        // パーツ差分領域が未作成なら新規作成する（通常目、泣き目、笑い目などのレベル）
+        if (!part_obj[pm.id]) {
+            part_obj[pm.id] = {
                 storage: "",
                 zindex: "",
+                visible: is_first_part ? "true" : "false",
+                frame_image: "",
+                frame_time: "",
+                frame_interval: "",
+                frame_interval_max: "",
+                frame_interval_min: "",
+                frame_direction: "",
             };
-
-            //パーツ自体が初めての場合は、showにする。
-            if (init_part == true) {
-                chara_obj["visible"] = "true";
-            } else {
-                chara_obj["visible"] = "false";
-            }
         }
 
-        cpm["_layer"][pm.part][pm.id] = $.extendParam(pm, chara_obj);
+        // フレームアニメーション画像が指定されている場合
+        if (pm.frame_image) {
+            // frame_imageが配列型でないなら","で区切って配列化する
+            if (!Array.isArray(pm.frame_image)) {
+                pm.frame_image = pm.frame_image.split(",");
+            }
+
+            // 各フレームの時間設定が未指定ならとりあえず空の配列を
+            if (!pm.frame_time) {
+                pm.frame_time = [];
+            }
+            // 指定されているが配列型でないのならば","で区切って配列化する
+            else if (!Array.isArray(pm.frame_time)) {
+                pm.frame_time = pm.frame_time.split(",");
+            }
+
+            // これでpm.frame_timeが配列型になった
+            // 中身を数値にしていく
+            pm.frame_time = pm.frame_time.map((item) => {
+                if (item.includes("-")) {
+                    const hash = item.split("-");
+                    return [parseInt(hash[0]), parseInt(hash[1])];
+                } else {
+                    return parseInt(item);
+                }
+            });
+
+            // 各フレームの時間設定の不足があれば補う（デフォルト：40ミリ秒）
+            let prev_val = null;
+            pm.frame_image.forEach((src, i) => {
+                if (!pm.frame_time[i]) {
+                    if (prev_val) {
+                        pm.frame_time[i] = prev_val;
+                    } else {
+                        if (i === 0) {
+                            pm.frame_time[i] = [4000, 8000];
+                        } else {
+                            pm.frame_time[i] = 40;
+                        }
+                    }
+                } else {
+                    prev_val = pm.frame_time[i];
+                }
+            });
+        }
+
+        // パーツ差分領域にpmの内容を上書きする
+        $.extendParam(pm, part_obj[pm.id]);
 
         this.kag.ftag.nextOrder();
     },
