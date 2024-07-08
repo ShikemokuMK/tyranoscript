@@ -246,6 +246,9 @@ var PARAM_EXP = {
             if (is_new_param) {
                 push();
                 tmp_name = line.match(/^\s*([^ =]+)/)[1];
+                console.log(master_tag[tag_name]);
+                console.log(tag_name);
+                console.log(tmp_name);
                 if (master_tag[tag_name].pm && master_tag[tag_name].pm[tmp_name]) {
                     tmp_default = master_tag[tag_name].pm[tmp_name];
                 }

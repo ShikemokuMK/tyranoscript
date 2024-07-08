@@ -5988,7 +5988,7 @@ model.model.material.side = THREE.FrontSide;
 };
 
 /*
-#[3d_sound_new]
+#[3d_sound]
 :group
 3D関連
 
@@ -6011,7 +6011,6 @@ rot=3Dオブジェクトの傾きを指定します。半角カンマで区切�
 scale=3Dオブジェクトの拡大率を指定します。半角カンマで区切ってxyz軸の拡大率を指定します。,
 size=フォントサイズ。デフォルトは42, 
 sprite=true or falseを指定。trueを指定すると常に正面をむくテキストを作成します。デフォルトはfalse
-
 
 #[end]
 */
