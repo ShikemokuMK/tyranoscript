@@ -484,6 +484,10 @@ tyrano.plugin.kag.tag.playbgm = {
             if (is_fadein) {
                 audio_obj.fade(0, howl_volume, parseInt(pm.time));
             }
+            // ボイスなら波形分析する
+            if (is_voice) {
+                this.analyzeAudioForLipSync(audio_obj, pm.chara_name);
+            }
             // nextOrder
             next();
         });
@@ -607,6 +611,215 @@ tyrano.plugin.kag.tag.playbgm = {
         // ふつうにロード
         this.kag.showLoadingLog();
         audio_obj.load();
+    },
+
+    /**
+     * リップシンクの対象となるパーツを取得する。
+     * 取得できなかった場合はnullが返る。
+     * @param {string} name - キャラクターの名前。
+     * @param {string} type - リップシンクタイプ。"voice"または"text"。
+     * @returns {Array<Object>} target_parts - 更新対象のパーツの配列。
+     * @returns {Object} target_parts[].j_frames - jQueryオブジェクト。フレームのコレクション。
+     * @returns {Array<number>} target_parts[].thresholds - 各フレームを表示するための閾値の配列。
+     */
+    getLipSyncParts(name, type = "voice") {
+        // キャラ定義
+        const cpm = this.kag.stat.charas[name];
+
+        // キャラ定義が存在しない→無効
+        if (!cpm) return null;
+        // キャラが表示されていない→無効
+        if (!cpm.is_show === "false") return null;
+        // キャラ定義は存在するがリップシンクタイプが一致しない→無効
+        if (cpm.lipsync_type !== type) return null;
+
+        // キャラのjQueryオブジェクト
+        const j_chara = this.kag.chara.getCharaContainer(name);
+
+        // キャラのjQueryオブジェクトが取得できない→無効
+        if (j_chara.length === 0) return null;
+
+        //
+        // 現在のキャラクターのパーツの状況をチェック
+        //
+
+        // リップシンクのパーツを格納する配列
+        // 口が複数あるようなキャラクターを一応想定している
+        const target_parts = [];
+
+        // すべてのパーツを走査してリップシンク対象のパーツを特定する
+        const part_map = cpm._layer;
+        if (!part_map) return;
+        for (const part in part_map) {
+            const part_obj = part_map[part];
+            const state = part_obj.current_part_id;
+            const part_state_obj = part_obj[state];
+            if (!part_state_obj || !part_state_obj.is_lipsync_enabled) {
+                continue;
+            }
+            // ここに到達したならばこのパーツはリップシンク対象である
+
+            // このパーツのすべてのフレームの<img>要素の集合を取得
+            const j_frames = j_chara.find(`.lipsync-frame[data-effect=${part}-${state}]`);
+            const thresholds = part_state_obj.lip_volume;
+            if (j_frames.length > 0 && thresholds) {
+                target_parts.push({
+                    j_frames,
+                    thresholds,
+                    current_index: 0,
+                    max_open_mouth_time: 0,
+                });
+            }
+        }
+        // 対象のパーツがない→無効
+        if (target_parts.length === 0) return null;
+
+        return target_parts;
+    },
+
+    /**
+     * Howlオブジェクトによって再生される音声を解析してリップシンクに利用するメソッド。
+     * 音声信号の振幅を計算し、それに基づいてリップシンクを更新する。
+     * @param {Howl} howl - 解析対象のHowlオブジェクト。
+     * @param {name} string - ボイスを発しているキャラクターの名前。
+     */
+    analyzeAudioForLipSync(howl, name) {
+        // リップシンク対象のパーツを取得する（取得できなければこのリップシンクは無効）
+        const target_parts = this.getLipSyncParts(name);
+        if (!target_parts) return null;
+
+        // const requestAnimationFrame = (callback) => {
+        //     return setTimeout(callback, 1000 / 30);
+        // };
+        // const cancelAnimationFrame = clearTimeout;
+
+        // ベースのリップ画像（閉じている口の画像）だけを表示する関数
+        const resetFrameOpacity = () => {
+            target_parts.forEach((target_part) => {
+                target_part.j_frames.css("opacity", "0");
+                target_part.j_frames.eq(0).css("opacity", "1");
+            });
+        };
+
+        //
+        // 波形分析
+        //
+
+        let animation_id;
+        let last_timestamp = performance.now(); // 最後のフレームのタイムスタンプ
+        let silent_time = 0; // 無音の経過時間を追跡
+        const max_silent_duration = 10000; // 無音が続く最大時間（ミリ秒）
+        const audio_context = Howler.ctx;
+        const sound_node = howl._sounds[0]._node;
+        const analyser = audio_context.createAnalyser();
+        sound_node.connect(analyser);
+        analyser.connect(audio_context.destination);
+        analyser.fftSize = 32;
+        const buffer_length = analyser.frequencyBinCount;
+        const data_array = new Uint8Array(buffer_length);
+        const analyze = (timestamp) => {
+            // 経過時間
+            const elapsed_time = timestamp - last_timestamp;
+            // 振幅のサンプリングデータをdata_arrayに格納する
+            analyser.getByteTimeDomainData(data_array);
+            // 振幅の最大値を計算する
+            let max = 0;
+            for (let i = 0; i < buffer_length; i++) {
+                if (data_array[i] > max) {
+                    max = data_array[i];
+                    if (max === 255) {
+                        break;
+                    }
+                }
+            }
+            // 振幅を0～100に補正してリップシンクメソッドに渡す
+            max = Math.max(128, max);
+            const volume = (((max - 128) / (255 - 128)) * 100) | 0;
+            this.updateLipSync(volume, target_parts, elapsed_time);
+            // 無音の経過時間を計算
+            // 既定時間無音だった場合は波形分析を中断する
+            if (max <= 128) {
+                silent_time += elapsed_time;
+            } else {
+                // 音が鳴っている場合、無音時間をリセット
+                silent_time = 0;
+            }
+            if (silent_time >= max_silent_duration) {
+                resetFrameOpacity();
+                return;
+            }
+            // 現在のタイムスタンプを保存
+            last_timestamp = timestamp;
+            // 次回の波形分析を呼ぶ
+            animation_id = requestAnimationFrame(analyze);
+        };
+
+        // 再生停止時に解析を中断する
+        howl.on("stop", function () {
+            resetFrameOpacity();
+            cancelAnimationFrame(animation_id);
+        });
+        howl.on("end", function () {
+            resetFrameOpacity();
+            cancelAnimationFrame(animation_id);
+        });
+
+        // 解析開始
+        analyze();
+    },
+
+    /**
+     * リップシンクを更新するメソッド。
+     * 入力値に基づいて、指定されたパーツの表示状態を変更する。
+     * @param {number} value - 現在の振幅の値。
+     * @param {Array<Object>} target_parts - 更新対象のパーツの配列。
+     * @param {number} elapsed_time - 前回のリップシンクからの経過時間。
+     * @param {Object} target_parts[].j_frames - jQueryオブジェクト。フレームのコレクション。
+     * @param {Array<number>} target_parts[].thresholds - 各フレームを表示するための閾値の配列。
+     * @param {number} target_parts[].current_index - 前回表示したフレームのインデックス。
+     */
+    updateLipSync(value, target_parts, elapsed_time) {
+        target_parts.forEach((part) => {
+            // 閾値から現在形成すべきリップフレーム番号を特定する
+            let target_i = 0;
+            for (; target_i < part.thresholds.length; target_i++) {
+                if (value < part.thresholds[target_i]) {
+                    break;
+                }
+            }
+
+            // 前回のリップフレーム番号と同じであれば何も処理しなくてよい
+            if (target_i === part.current_index) {
+                return;
+            }
+
+            // ここに到達したならば前回のリップフレーム番号とは異なるということ
+
+            // 先ほどまで口を最大まで開けていた場合
+            if (part.current_index === part.thresholds.length) {
+                // 経過時間を数える
+                part.max_open_mouth_time += elapsed_time;
+                // 一度口を開けたら500ミリ秒間はそのまま固定する
+                if (part.max_open_mouth_time < 100) {
+                    return;
+                } else {
+                    part.max_open_mouth_time = 0;
+                }
+            }
+
+            // より口を大きく開こうとしている
+            if (target_i > part.current_index) {
+                // 1ずつ大きくしよう
+                target_i = part.current_index + 1;
+            } else {
+                // 1ずつ小さくしよう
+                target_i = part.current_index - 1;
+            }
+
+            part.j_frames.css("opacity", "0");
+            part.j_frames.eq(target_i).css("opacity", "1");
+            part.current_index = target_i;
+        });
     },
 
     /*

@@ -2006,6 +2006,9 @@ tyrano.plugin.kag.tag.text = {
         // もう追加しおわった
         this.kag.stat.is_adding_text = false;
 
+        // リップシンク開始
+        this.stopLipSyncWithText();
+
         // いまメッセージウィンドウがユーザー操作によって非表示にされているかどうか
         if (this.kag.stat.is_hide_message) {
             // メッセージの表示途中でユーザーが右クリックしてメッセージウィンドウを消しおった！
@@ -2086,6 +2089,9 @@ tyrano.plugin.kag.tag.text = {
 
         // テキスト追加中だよ
         this.kag.stat.is_adding_text = true;
+
+        // リップシンク開始
+        this.startLipSyncWithText();
 
         // クリックの割り込みを処理したかどうか
         this.kag.tmp.processed_click_interrupt = false;
@@ -2291,6 +2297,57 @@ tyrano.plugin.kag.tag.text = {
         if (typeof chara_fuki["font_size"] != "undefined") {
             j_outer_message.parent().find(".message_inner").find(".current_span").css("font-size", parseInt(chara_fuki["font_size"]));
         }
+    },
+
+    /**
+     * テキストによるリップシンクを開始する。
+     */
+    startLipSyncWithText() {
+        // 現在の発言者名（誰のセリフでもない場合は無効）
+        let chara_name = this.kag.chara.getCharaName();
+        if (!chara_name) return null;
+        if (this.kag.stat.jcharas[chara_name]) {
+            chara_name = this.kag.stat.jcharas[chara_name];
+        }
+
+        // リップシンク対象のパーツを取得する（取得できなければこのリップシンクは無効）
+        const target_parts = this.kag.tag.playbgm.getLipSyncParts.call(this, chara_name, "text");
+        if (!target_parts) return null;
+
+        // 別のメソッドからtarget_partsにアクセスできるようにしておく
+        this.kag.tmp.text_lipsync_target_parts = target_parts;
+
+        // アップデート関数と初回呼び出し
+        const updateLipSync = () => {
+            target_parts.forEach((part) => {
+                const i = Math.floor(Math.random() * part.j_frames.length);
+                part.j_frames.css("opacity", "0");
+                part.j_frames.eq(i).css("opacity", "1");
+            });
+            this.kag.tmp.text_lipsync_timer_id = setTimeout(updateLipSync, 50);
+        };
+        updateLipSync();
+    },
+
+    /**
+     * テキストによるリップシンクを終了する。
+     */
+    stopLipSyncWithText() {
+        // ターゲットパーツがなければなにもしない
+        const target_parts = this.kag.tmp.text_lipsync_target_parts;
+        if (!target_parts) return null;
+
+        // タイマーを停止
+        clearTimeout(this.kag.tmp.text_lipsync_timer_id);
+
+        // ベースとなる口を表示し中間点を非表示にする
+        target_parts.forEach((target_part) => {
+            target_part.j_frames.css("opacity", "0");
+            target_part.j_frames.eq(0).css("opacity", "1");
+        });
+
+        // 不要になったプロパティを削除
+        delete this.kag.tmp.text_lipsync_target_parts;
     },
 };
 
@@ -3073,9 +3130,8 @@ tyrano.plugin.kag.tag.position = {
         // [position]タグ実行時には必ず上のインナーリフレッシュによって width, height が破壊されてしまうため、
         // 『marginr, marginb が指定されていない[position]タグ』を通過するときにそれまでの marginr, marginb が破棄される問題があった
         // (タグリファレンスの『いずれの属性も、指定しなければ変更は行われません。』という説明と矛盾していた)
-        const new_style_inner = {
-        };
-        
+        const new_style_inner = {};
+
         if (this.kag.stat.fuki.active == true) {
             new_style_inner["box-sizing"] = "content-box";
         } else {
@@ -3196,8 +3252,7 @@ tyrano.plugin.kag.tag.fuki_start = {
         j_msg_inner.css("width", "");
         j_msg_inner.css("height", "");
         j_msg_inner.css("box-sizing", "content-box");
-        
-        
+
         this.kag.ftag.nextOrder();
     },
 };
@@ -3245,9 +3300,9 @@ tyrano.plugin.kag.tag.fuki_stop = {
 
         j_inner_layer.css("left", parseInt(j_outer_layer.css("left")) + 10).css("top", parseInt(j_outer_layer.css("top")) + 10);
         j_inner_layer.css("box-sizing", "border-box");
-        
+
         this.kag.setStyles(j_inner_layer, def_style_inner);
-        
+
         //名前表示エリアを復元する。
         $(".tyrano_base").find(".chara_name_area").show();
 
@@ -6379,7 +6434,6 @@ tyrano.plugin.kag.tag.button = {
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
     //cmで抹消しよう
     start: function (pm) {
-        
         var that = this;
 
         var target_layer = null;
@@ -6553,9 +6607,8 @@ tyrano.plugin.kag.tag.button = {
         //
 
         j_button.on("mousedown touchstart", (e) => {
-            
             e.stopPropagation();
-                
+
             if (!this.kag.stat.is_strong_stop) return true;
             if (button_clicked) return true;
             if (!j_button.hasClass("src-change-disabled")) {
@@ -6570,7 +6623,6 @@ tyrano.plugin.kag.tag.button = {
         //
 
         j_button.on("click", (e) => {
-            
             // ブラウザの音声の再生制限を解除
             if (!that.kag.tmp.ready_audio) that.kag.readyAudio();
 

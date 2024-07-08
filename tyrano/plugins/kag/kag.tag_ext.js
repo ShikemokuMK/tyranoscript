@@ -2101,6 +2101,7 @@ tyrano.plugin.kag.tag.chara_ptext = {
                     storage: playsefile,
                     stop: "true",
                     buf: vochara.buf,
+                    chara_name: pm.name,
                 };
 
                 this.kag.ftag.startTag("playse", se_pm);
@@ -2863,7 +2864,7 @@ tyrano.plugin.kag.tag.chara_show = {
                 return hash_slash.join("/");
             })(j_frame_base.attr("src"), frame_src);
             j_clone.attr("src", src);
-            j_clone.css("display", "none");
+            j_clone.css("opacity", "0");
             if (preload_srcs) {
                 preload_srcs.push(src);
             }
@@ -2875,6 +2876,14 @@ tyrano.plugin.kag.tag.chara_show = {
             // jQueryオブジェクトの集合に追加しておく
             j_frames = j_frames.add(j_clone);
         });
+
+        if (state_obj.lip_image) {
+            cpm.lipsync_type = state_obj.lip_type;
+            state_obj.is_lipsync_enabled = true;
+            j_frames.addClass("lipsync-frame");
+            j_frames.attr("data-effect", `${part}-${state}`);
+            return;
+        }
 
         // オリジナルの<img>要素にクラスと属性付与
         // キャラの名前、パーツ部位の名前、パーツ状態の名前を記憶
@@ -2948,9 +2957,9 @@ tyrano.plugin.kag.tag.chara_show = {
 
             // すべてのフレーム画像を非表示にしてから
             // 現在のフレーム画像だけを表示する
-            j_frames.css("display", "none");
+            j_frames.css("opacity", "0");
             const j_frame = j_frames.eq(frame_index);
-            j_frame.css("display", "block");
+            j_frame.css("opacity", "1");
 
             // 次のフレームまでの時間
             let duration = state_obj.frame_time[frame_index] || 40;
@@ -3791,19 +3800,68 @@ tyrano.plugin.kag.tag.chara_layer = {
                 visible: is_first_part ? "true" : "false",
                 frame_image: "",
                 frame_time: "",
-                frame_interval: "",
-                frame_interval_max: "",
-                frame_interval_min: "",
                 frame_direction: "",
+                lip_type: "text",
+                lip_image: "",
+                lip_volume: "",
             };
         }
 
-        // フレームアニメーション画像が指定されている場合
-        if (pm.frame_image) {
-            // frame_imageが配列型でないなら","で区切って配列化する
+        // リップシンク画像が設定されている場合
+        if (pm.lip_image) {
+            // 内部的にはpm.frame_imageに変換してしまおう
+            pm.frame_image = pm.lip_image;
+
+            // pm.frame_imageが配列型でないなら","で区切って配列化する
             if (!Array.isArray(pm.frame_image)) {
                 pm.frame_image = pm.frame_image.split(",");
             }
+
+            // トリミングする
+            pm.frame_image = pm.frame_image.map((item) => {
+                return item.trim();
+            });
+
+            // 各リップフレームの閾値設定が未指定ならとりあえず空の配列を
+            if (!pm.lip_volume) {
+                pm.lip_volume = [];
+            }
+            // 指定されているが配列型でないのならば","で区切って配列化する
+            else if (!Array.isArray(pm.lip_volume)) {
+                pm.lip_volume = pm.lip_volume.split(",");
+            }
+
+            // これでpm.lip_volumeが配列型であることが保証された
+            // 中身を数値にしていく
+            pm.lip_volume = pm.lip_volume.map((item) => {
+                return parseInt(item);
+            });
+
+            let prev_value;
+            // 各フレームの時間設定の不足があれば補う（デフォルト：40ミリ秒）
+            for (let i = 0; i < pm.frame_image.length; i++) {
+                if (!pm.lip_volume[i]) {
+                    if (!prev_value) {
+                        pm.lip_volume[i] = 10;
+                    } else {
+                        pm.lip_volume[i] = prev_value + 10;
+                    }
+                }
+                prev_value = pm.lip_volume[i];
+            }
+        }
+
+        // フレームアニメーション画像が指定されている場合
+        else if (pm.frame_image) {
+            // pm.frame_imageが配列型でないなら","で区切って配列化する
+            if (!Array.isArray(pm.frame_image)) {
+                pm.frame_image = pm.frame_image.split(",");
+            }
+
+            // トリミングする
+            pm.frame_image = pm.frame_image.map((item) => {
+                return item.trim();
+            });
 
             // 各フレームの時間設定が未指定ならとりあえず空の配列を
             if (!pm.frame_time) {
