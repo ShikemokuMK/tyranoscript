@@ -1659,11 +1659,17 @@ tyrano.plugin.kag.tag.text = {
         width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + icon_size;
         height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + icon_size;
 
-        // アウターのサイズをインナーに同期する
+        // アウターのサイズ
         const j_outer_message = this.kag.getMessageOuterLayer();
         j_outer_message.css("width", width);
         j_outer_message.css("height", height);
 
+        //インナーに同期できてないのでここで同期する（Safariでの不具合対応）
+        if (this.kag.stat.vertical != "true") {
+            j_msg_inner.css("width", width);
+            j_msg_inner.css("height", height);
+        }
+        
         //
         // アウターの位置を決定する
         // まずキャラ画像の left, top にふきだし設定の left, top を足す
