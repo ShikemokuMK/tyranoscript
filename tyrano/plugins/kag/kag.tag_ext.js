@@ -4010,125 +4010,173 @@ tyrano.plugin.kag.tag.chara_part = {
     },
 
     start: function (pm) {
-        var that = this;
+        const that = this;
 
-        var cpm = this.kag.stat.charas[pm.name];
-
-        if (cpm == null) {
+        // キャラ定義（取得できなければエラー）
+        const cpm = this.kag.stat.charas[pm.name];
+        if (!cpm) {
             this.kag.error("undefined_character", pm);
             return;
         }
 
-        //レイヤが登録されているかどうか
-        if (!cpm["_layer"]) {
+        // パーツ定義（取得できなければエラー）
+        const part_map = cpm["_layer"];
+        if (!part_map) {
             this.kag.error("undefined_character_parts", pm);
             return;
         }
 
-        var chara_part = cpm["_layer"];
+        //
+        // 切替先のパーツ状態定義のマップを取得する
+        //
 
-        var map_part = {};
-        var array_storage = [];
+        // 切替対象のパーツ状態定義を格納する配列
+        const target_map = {};
 
-        var part_num = 0;
+        // プリロード対象の画像ソースを格納する配列
+        const preload_srcs = [];
 
-        for (let key in pm) {
-            if (chara_part[key]) {
-                var part_id = pm[key];
-                if (chara_part[key][part_id]) {
-                    var part = chara_part[key][part_id];
-                    part.id = part_id;
-                    map_part[key] = part;
-                    //partの中で指定された画像を表示する
+        // タグに指定されたすべての属性（＝パーツ名）について走査する
+        for (const part_id in pm) {
+            // 存在しないパーツは無視
+            if (!part_map[part_id]) {
+                continue;
+            }
 
-                    if (part["storage"] != "none") {
-                        array_storage.push("./data/fgimage/" + part["storage"]);
-                    }
+            // 属性に指定されている値をパーツの状態IDとして解釈する
+            const state_id = pm[part_id];
 
-                    //デフォルトのパートを変更する
-                    this.kag.stat.charas[pm.name]["_layer"][key]["current_part_id"] = part_id;
-                } else {
-                    if (pm.allow_storage == "true") {
-                        map_part[key] = { storage: part_id, id: part_id };
-                        array_storage.push("./data/fgimage/" + part_id);
+            // この状態IDがパーツ定義に存在する場合
+            if (part_map[part_id][state_id]) {
+                // 状態定義を取得
+                const state_obj = part_map[part_id][state_id];
+                state_obj.id = state_id;
 
-                        this.kag.stat.charas[pm.name]["_layer"][key]["current_part_id"] = "allow_storage";
-                        this.kag.stat.charas[pm.name]["_layer"][key]["allow_storage"] = part_id;
-                    }
+                // プリロード対象に追加
+                if (state_obj["storage"] !== "none") {
+                    preload_srcs.push($.parseStorage(state_obj["storage"], "fgimage"));
                 }
+
+                // 現在のパーツ状態を書き換える
+                part_map[part_id]["current_part_id"] = state_id;
+
+                // 切替対象マップに追加
+                target_map[part_id] = state_obj;
+            }
+            // この状態IDはパーツ定義に存在しないがstorage直接指定が有効の場合
+            else if (pm.allow_storage === "true") {
+                // stage_idはstorageが直接指定されているものとする
+                // プリロード対象にstate_idを追加
+                preload_srcs.push($.parseStorage(state_id, "fgimage"));
+
+                // current_part_id、allow_storageを更新する
+                part_map[part_id]["current_part_id"] = "allow_storage";
+                part_map[part_id]["allow_storage"] = state_id;
+
+                // 切替対象マップに追加
+                target_map[part_id] = { id: state_id, storage: state_id };
             }
         }
 
-        var target_obj = this.kag.chara.getCharaContainer(pm.name);
+        //
+        // 画像の切替処理
+        //
 
-        //プリロード
-        this.kag.preloadAll(array_storage, function () {
-            //指定された配列を回して、該当するオブジェクトを切り替える
-            if (pm.time != "") {
-                var n = 0;
-                var cnt = 0;
+        // キャラクターを構成するDOM要素のラッパーのjQueryオブジェクトを取得
+        const j_chara = this.kag.chara.getCharaContainer(pm.name);
 
-                for (let key in map_part) {
-                    (function () {
-                        cnt++;
-                        var part = map_part[key];
-                        var j_img = target_obj.find(".part" + "." + key + "");
-                        var j_new_img = j_img.clone();
-                        j_new_img.css("opacity", 0);
+        // プリロード完了を待つ
+        this.kag.preloadAll(preload_srcs, () => {
+            // 時間をかけてフェード切り替えする場合
+            if (pm.time && pm.time !== "0") {
+                // フェード時間を確定（スキップ時は短縮できるようにする）
+                const time = parseInt(that.kag.cutTimeWithSkip(pm.time));
 
-                        if (part.storage != "none") {
-                            j_new_img.attr("src", "./data/fgimage/" + part.storage);
-                        } else {
-                            j_new_img.attr("src", "./tyrano/images/system/transparent.png");
-                        }
+                // アニメーションが完了したパーツの数
+                let completed_count = 0;
 
-                        //zindexの指定があった場合は、変更を行う
-                        if (pm[key + "_zindex"]) {
-                            j_new_img.css("z-index", pm[key + "_zindex"]);
-                        } else {
-                            j_new_img.css("z-index", chara_part[key]["zindex"]);
-                        }
+                // アニメーション対象パーツの総数
+                let total_count = 0;
 
-                        //イメージを追加
-                        j_img.after(j_new_img);
+                // 切替対象のパーツマップすべてについて
+                for (const part_id in target_map) {
+                    total_count++;
 
-                        j_img.stop(true, true).fadeTo(parseInt(pm.time), 0, function () {
-                            j_img.remove();
-                        });
+                    // このパーツの状態定義を参照
+                    const part = target_map[part_id];
 
-                        j_new_img.stop(true, true).fadeTo(parseInt(pm.time), 1, function () {
-                            n++;
-                            if (pm.wait == "true") {
-                                if (cnt == n) {
-                                    that.kag.ftag.nextOrder();
-                                }
+                    // このパーツの<img>要素を取得しそのクローン（透明）を作成する
+                    const j_img = j_chara.find(`.part.${part_id}`);
+                    const j_new_img = j_img.clone();
+                    j_new_img.css("opacity", 0);
+                    j_img.after(j_new_img);
+
+                    // クローンのsrc属性を書き換える
+                    if (part.storage !== "none") {
+                        j_new_img.attr("src", $.parseStorage(part.storage, "fgimage"));
+                    } else {
+                        j_new_img.attr("src", "./tyrano/images/system/transparent.png");
+                    }
+
+                    // [chara_layer]にeye_zindex="10"のような指定があった場合
+                    // CSSのz-indexプロパティの変更を行う
+                    // 指定がなければパーツ定義のz-indexを参照する
+                    if (pm[`${part_id}_zindex`]) {
+                        j_new_img.css("z-index", pm[`${part_id}_zindex`]);
+                    } else {
+                        j_new_img.css("z-index", part_map[part_id]["zindex"]);
+                    }
+
+                    // オリジナルの画像をフェードアウトさせ、完了後に削除する
+                    j_img.stop(true, true).fadeTo(time, 0, () => {
+                        j_img.remove();
+                    });
+
+                    // クローン画像をフェードインさせ、
+                    // すべてのパーツのフェードインが完了したなら次のタグに進む
+                    j_new_img.stop(true, true).fadeTo(time, 1, () => {
+                        completed_count++;
+                        if (total_count === completed_count) {
+                            if (pm.wait === "true") {
+                                that.kag.ftag.nextOrder();
                             }
-                        });
-                    })();
+                        }
+                    });
                 }
 
-                if (pm.wait == "false") {
+                // wait=trueでないならばもう次のタグに進む
+                if (pm.wait !== "true") {
                     that.kag.ftag.nextOrder();
                 }
-            } else {
-                for (let key in map_part) {
-                    var part = map_part[key];
-                    var j_img = target_obj.find(".part" + "." + key + "");
+            }
+            // 瞬間切替の場合
+            else {
+                // 切替対象のパーツマップすべてについて
+                for (const part_id in target_map) {
+                    // このパーツの状態定義を参照
+                    const part = target_map[part_id];
 
-                    if (part.storage != "none") {
-                        j_img.attr("src", "./data/fgimage/" + part.storage);
+                    // このパーツの<img>要素を取得
+                    const j_img = j_chara.find(`.part.${part_id}`);
+
+                    // src属性を書き換える
+                    if (part.storage !== "none") {
+                        j_img.attr("src", $.parseStorage(part.storage, "fgimage"));
                     } else {
                         j_img.attr("src", "./tyrano/images/system/transparent.png");
                     }
 
-                    //zindexの指定があった場合は、変更を行う
-                    if (pm[key + "_zindex"]) {
-                        j_img.css("z-index", pm[key + "_zindex"]);
+                    // [chara_layer]にeye_zindex="10"のような指定があった場合
+                    // CSSのz-indexプロパティの変更を行う
+                    // 指定がなければパーツ定義のz-indexを参照する
+                    if (pm[`${part_id}_zindex`]) {
+                        j_img.css("z-index", pm[`${part_id}_zindex`]);
                     } else {
-                        j_img.css("z-index", chara_part[key]["zindex"]);
+                        j_img.css("z-index", part_map[part_id]["zindex"]);
                     }
                 }
 
+                // 次のタグへ
                 that.kag.ftag.nextOrder();
             }
         });
