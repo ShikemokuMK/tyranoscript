@@ -2314,19 +2314,21 @@ tyrano.plugin.kag.tag.text = {
         const target_parts = this.kag.tag.playbgm.getLipSyncParts.call(this, chara_name, "text");
         if (!target_parts) return null;
 
-        // 別のメソッドからtarget_partsにアクセスできるようにしておく
+        // 別のメソッドからtarget_partsにアクセスできるようにするために
+        // tmp領域にtarget_partsの参照を格納しておく
         this.kag.tmp.text_lipsync_target_parts = target_parts;
 
-        // アップデート関数と初回呼び出し
-        const updateLipSync = () => {
-            target_parts.forEach((part) => {
+        // パーツごとに
+        target_parts.forEach((part) => {
+            // アップデート関数と初回呼び出し
+            const updateLipSync = () => {
                 const i = Math.floor(Math.random() * part.j_frames.length);
-                part.j_frames.css("opacity", "0");
-                part.j_frames.eq(i).css("opacity", "1");
-            });
-            this.kag.tmp.text_lipsync_timer_id = setTimeout(updateLipSync, 50);
-        };
-        updateLipSync();
+                part.j_frames.showAtIndexWithVisibility(i);
+                const duration = parseInt(part.def.lip_time) || 50;
+                part.text_lipsync_timer_id = setTimeout(updateLipSync, duration);
+            };
+            updateLipSync();
+        });
     },
 
     /**
@@ -2338,12 +2340,13 @@ tyrano.plugin.kag.tag.text = {
         if (!target_parts) return null;
 
         // タイマーを停止
-        clearTimeout(this.kag.tmp.text_lipsync_timer_id);
+        target_parts.forEach((part) => {
+            clearTimeout(part.text_lipsync_timer_id);
+        });
 
         // ベースとなる口を表示し中間点を非表示にする
         target_parts.forEach((target_part) => {
-            target_part.j_frames.css("opacity", "0");
-            target_part.j_frames.eq(0).css("opacity", "1");
+            target_part.j_frames.showAtIndexWithVisibility(0);
         });
 
         // 不要になったプロパティを削除

@@ -2828,23 +2828,23 @@ tyrano.plugin.kag.tag.chara_show = {
      * @param {*} preload_srcs - この配列に画像ソースを入れておくと関数の呼び出し元でプリロードに使われる。
      */
     setFrameAnimation(cpm, part, state, j_frame_base, preload_srcs) {
-        // パーツ差分がstorage直接指定の場合は無視
+        // パーツ状態がstorage直接指定の場合は無視
         if (state === "allow_storage") {
-            return;
+            return null;
         }
 
-        // パーツ差分領域を取得
+        // パーツ状態定義を取得
         const state_obj = cpm["_layer"][part][state];
 
         // frame_image属性が未指定なら無視
         if (!state_obj.frame_image) {
-            return;
+            return null;
         }
 
         let j_frames = $(j_frame_base);
         let j_prev_frame = j_frame_base;
 
-        // 現在の目パーツ差分のすべての瞬きフレームについて<img>要素を作成
+        // すべてのフレームについて<img>要素を作成
         state_obj.frame_image.forEach((frame_src, i) => {
             // オリジナルの<img>要素をクローンする
             const j_clone = j_frame_base.clone();
@@ -2863,8 +2863,14 @@ tyrano.plugin.kag.tag.chara_show = {
                 hash_slash.push(new_filename);
                 return hash_slash.join("/");
             })(j_frame_base.attr("src"), frame_src);
+
+            // 属性、クラス、CSSの調整
             j_clone.attr("src", src);
-            j_clone.css("opacity", "0");
+            j_clone.addClass("sub");
+            j_clone.removeClass("chara-layer-frame-base");
+            j_clone.css("visibility", "hidden");
+
+            // プリロードに追加
             if (preload_srcs) {
                 preload_srcs.push(src);
             }
@@ -2882,7 +2888,7 @@ tyrano.plugin.kag.tag.chara_show = {
             state_obj.is_lipsync_enabled = true;
             j_frames.addClass("lipsync-frame");
             j_frames.attr("data-effect", `${part}-${state}`);
-            return;
+            return j_frames;
         }
 
         // オリジナルの<img>要素にクラスと属性付与
@@ -2906,13 +2912,14 @@ tyrano.plugin.kag.tag.chara_show = {
         });
 
         this.startFrameAnimation(cpm, state_obj, j_frames);
+        return j_frames;
     },
 
     /**
      * フレームアニメーションを開始する
-     * @param {*} cpm - キャラ定義。例）TYRANO.kag.stat.charas.akane
-     * @param {*} state_obj - パーツ状態定義。例）cpm._layer.eye.smile
-     * @param {*} j_frames - フレームアニメーションを構成するすべての<img>要素のjQueryオブジェクトの集合
+     * @param {Object} cpm - キャラ定義。例）TYRANO.kag.stat.charas.akane
+     * @param {string} state_obj - パーツ状態定義。例）cpm._layer.eye.smile
+     * @param {jQuery} j_frames - フレームアニメーションを構成するすべての<img>要素のjQueryコレクション
      */
     startFrameAnimation(cpm, state_obj, j_frames) {
         // フレーム番号
@@ -2924,17 +2931,28 @@ tyrano.plugin.kag.tag.chara_show = {
         // 総フレーム数
         const frame_count = state_obj.frame_image.length + 1;
 
+        const calc_duration = (i) => {
+            let duration = state_obj.frame_time[i] || 40;
+            if (Array.isArray(duration)) {
+                const min = duration[0];
+                const max = duration[1];
+                duration = Math.floor(min + (max - min) * Math.random());
+            }
+            return duration;
+        };
+
         // フレームアニメーション1枚分の処理
         const anim = () => {
             clearTimeout(state_obj.frame_timer_id);
 
-            // すでにDOMからキャラが削除されたあとならフレームアニメーションを終了する
+            // すでにDOMから削除されている場合はフレームアニメーションを終了する
             if (j_frames.eq(0).closest("html").length === 0) {
                 return;
             }
 
             // フレーム番号増加
             switch (state_obj.frame_direction) {
+                // 0-1-2-3-2-1-0のような変化
                 case "alternate":
                     if (to_last) {
                         frame_index += 1;
@@ -2950,6 +2968,7 @@ tyrano.plugin.kag.tag.chara_show = {
                         }
                     }
                     break;
+                // 0-1-2-3-0-1-2-3のような変化
                 default:
                     frame_index = (frame_index + 1) % frame_count;
                     break;
@@ -2957,24 +2976,17 @@ tyrano.plugin.kag.tag.chara_show = {
 
             // すべてのフレーム画像を非表示にしてから
             // 現在のフレーム画像だけを表示する
-            j_frames.css("opacity", "0");
-            const j_frame = j_frames.eq(frame_index);
-            j_frame.css("opacity", "1");
+            j_frames.showAtIndexWithVisibility(frame_index);
 
             // 次のフレームまでの時間
-            let duration = state_obj.frame_time[frame_index] || 40;
-            if (Array.isArray(duration)) {
-                const min = duration[0];
-                const max = duration[1];
-                duration = Math.floor(min + (max - min) * Math.random());
-            }
+            const duration = calc_duration(frame_index);
 
             // 次回のフレーム処理の予約
             state_obj.frame_timer_id = setTimeout(anim, duration);
         };
 
         // 最初の瞬き
-        setTimeout(anim, 1000);
+        setTimeout(anim, calc_duration(0));
     },
 
     /**
@@ -3032,12 +3044,12 @@ tyrano.plugin.kag.tag.chara_show = {
                 // このパーツのフレームアニメーションの
                 // すべてのフレーム画像を含むような集合
                 let j_frames = $(j_frame_base);
-                const j_siblings = j_frame_base.siblings(`.tyrano-blink[data-event-pm=${setting.part_name}]`);
+                const j_siblings = j_frame_base.siblings(`.chara-layer-frame[data-event-pm=${setting.part_name}]`);
                 j_frames = j_frames.add(j_siblings);
 
                 // いったんベース画像を表示する
-                j_frames.css("display", "none");
-                j_frame_base.css("display", "block");
+                const i = j_frames.index(j_frame_base);
+                j_frames.showAtIndexWithVisibility(i);
 
                 // フレームアニメーションを開始
                 that.startFrameAnimation(cpm, state_obj, j_frames);
@@ -3842,9 +3854,9 @@ tyrano.plugin.kag.tag.chara_layer = {
             for (let i = 0; i < pm.frame_image.length; i++) {
                 if (!pm.lip_volume[i]) {
                     if (!prev_value) {
-                        pm.lip_volume[i] = 10;
+                        pm.lip_volume[i] = 5;
                     } else {
-                        pm.lip_volume[i] = prev_value + 10;
+                        pm.lip_volume[i] = prev_value + 5;
                     }
                 }
                 prev_value = pm.lip_volume[i];
@@ -4048,20 +4060,23 @@ tyrano.plugin.kag.tag.chara_part = {
 
             // この状態IDがパーツ定義に存在する場合
             if (part_map[part_id][state_id]) {
-                // 状態定義を取得
-                const state_obj = part_map[part_id][state_id];
-                state_obj.id = state_id;
+                // この状態IDが現在のパーツの状態IDとは異なる場合に限り切替作業を行う
+                if (part_map[part_id]["current_part_id"] !== state_id) {
+                    // 状態定義を取得
+                    const state_obj = part_map[part_id][state_id];
+                    state_obj.id = state_id;
 
-                // プリロード対象に追加
-                if (state_obj["storage"] !== "none") {
-                    preload_srcs.push($.parseStorage(state_obj["storage"], "fgimage"));
+                    // プリロード対象に追加
+                    if (state_obj["storage"] !== "none") {
+                        preload_srcs.push($.parseStorage(state_obj["storage"], "fgimage"));
+                    }
+
+                    // 現在のパーツ状態を書き換える
+                    part_map[part_id]["current_part_id"] = state_id;
+
+                    // 切替対象マップに追加
+                    target_map[part_id] = state_obj;
                 }
-
-                // 現在のパーツ状態を書き換える
-                part_map[part_id]["current_part_id"] = state_id;
-
-                // 切替対象マップに追加
-                target_map[part_id] = state_obj;
             }
             // この状態IDはパーツ定義に存在しないがstorage直接指定が有効の場合
             else if (pm.allow_storage === "true") {
@@ -4076,6 +4091,12 @@ tyrano.plugin.kag.tag.chara_part = {
                 // 切替対象マップに追加
                 target_map[part_id] = { id: state_id, storage: state_id };
             }
+        }
+
+        // 切替パーツが存在しなかった場合はなにもせずに次のタグへ
+        if (Object.keys(target_map).length === 0) {
+            that.kag.ftag.nextOrder();
+            return;
         }
 
         //
@@ -4100,23 +4121,49 @@ tyrano.plugin.kag.tag.chara_part = {
 
                 // 切替対象のパーツマップすべてについて
                 for (const part_id in target_map) {
-                    total_count++;
-
                     // このパーツの状態定義を参照
                     const part = target_map[part_id];
 
-                    // このパーツの<img>要素を取得しそのクローン（透明）を作成する
-                    const j_img = j_chara.find(`.part.${part_id}`);
-                    const j_new_img = j_img.clone();
-                    j_new_img.css("opacity", 0);
-                    j_img.after(j_new_img);
+                    // このパーツの<img>要素を取得する
+                    let j_img = j_chara.find(`.part.${part_id}`);
+                    let j_img_last = j_img.eq(j_img.length - 1);
 
-                    // クローンのsrc属性を書き換える
+                    // 口パクのフレームがあれば削除してベースフレームだけを表示する
+                    const j_sub_frames = j_img.filter(".lipsync-frame.sub");
+                    if (j_sub_frames.length) {
+                        j_img_last = j_img.eq(0);
+                        j_sub_frames.remove();
+                        j_img.css("visibility", "visible");
+                        j_img.removeClass("lipsync-frame");
+                    }
+
+                    // これからフェードアウトしていく要素にはtemp-elementクラスを付ける
+                    // temp-element: ロード時に削除される要素であることを示すクラス
+                    // wait=falseでアニメーション中の要素がセーブされた場合に対応する
+                    j_img.addClass("temp-element");
+
+                    // オリジナルの<img>のクローンを作成しsrc属性を書き換える
+                    // 透明状態にしてフェードインの準備をする
+                    let j_new_img = j_img.eq(0).clone();
                     if (part.storage !== "none") {
                         j_new_img.attr("src", $.parseStorage(part.storage, "fgimage"));
                     } else {
                         j_new_img.attr("src", "./tyrano/images/system/transparent.png");
                     }
+                    j_new_img.css("opacity", 0);
+                    j_img_last.after(j_new_img);
+
+                    // クローンについて目パチ口パクなどのフレームアニメーションを設定する（設定があれば）
+                    const ret = this.kag.tag.chara_show.setFrameAnimation(cpm, part_id, part.id, j_new_img, preload_srcs);
+
+                    // フレームアニメーションの設定があった場合、すべてのフレームのコレクションをj_new_imgに代入する
+                    j_new_img = ret || j_new_img;
+
+                    // ベースフレームは表示しておく（クローン元のオリジナルで非表示にされている可能性がある）
+                    j_new_img.eq(0).css("visibility", "visible");
+
+                    // temp-element（ロード時に削除される要素であることを示すクラス）を除外
+                    j_new_img.removeClass("temp-element");
 
                     // [chara_layer]にeye_zindex="10"のような指定があった場合
                     // CSSのz-indexプロパティの変更を行う
@@ -4134,6 +4181,7 @@ tyrano.plugin.kag.tag.chara_part = {
 
                     // クローン画像をフェードインさせ、
                     // すべてのパーツのフェードインが完了したなら次のタグに進む
+                    total_count += j_new_img.length;
                     j_new_img.stop(true, true).fadeTo(time, 1, () => {
                         completed_count++;
                         if (total_count === completed_count) {

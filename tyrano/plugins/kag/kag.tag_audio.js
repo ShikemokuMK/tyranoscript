@@ -668,6 +668,8 @@ tyrano.plugin.kag.tag.playbgm = {
                     thresholds,
                     current_index: 0,
                     max_open_mouth_time: 0,
+                    text_lipsync_timer_id: 0,
+                    def: part_state_obj,
                 });
             }
         }
@@ -735,7 +737,7 @@ tyrano.plugin.kag.tag.playbgm = {
             // 振幅を0～100に補正してリップシンクメソッドに渡す
             max = Math.max(128, max);
             const volume = (((max - 128) / (255 - 128)) * 100) | 0;
-            this.updateLipSync(volume, target_parts, elapsed_time);
+            this.updateLipSyncWithVoice(volume, target_parts, elapsed_time);
             // 無音の経過時間を計算
             // 既定時間無音だった場合は波形分析を中断する
             if (max <= 128) {
@@ -778,7 +780,7 @@ tyrano.plugin.kag.tag.playbgm = {
      * @param {Array<number>} target_parts[].thresholds - 各フレームを表示するための閾値の配列。
      * @param {number} target_parts[].current_index - 前回表示したフレームのインデックス。
      */
-    updateLipSync(value, target_parts, elapsed_time) {
+    updateLipSyncWithVoice(value, target_parts, elapsed_time) {
         target_parts.forEach((part) => {
             // 閾値から現在形成すべきリップフレーム番号を特定する
             let target_i = 0;
@@ -816,8 +818,7 @@ tyrano.plugin.kag.tag.playbgm = {
                 target_i = part.current_index - 1;
             }
 
-            part.j_frames.css("opacity", "0");
-            part.j_frames.eq(target_i).css("opacity", "1");
+            part.j_frames.showAtIndexWithVisibility(target_i);
             part.current_index = target_i;
         });
     },
