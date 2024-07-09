@@ -690,16 +690,15 @@ tyrano.plugin.kag.tag.playbgm = {
         const target_parts = this.getLipSyncParts(name);
         if (!target_parts) return null;
 
-        // const requestAnimationFrame = (callback) => {
-        //     return setTimeout(callback, 1000 / 30);
-        // };
-        // const cancelAnimationFrame = clearTimeout;
+        const requestAnimationFrame = (callback) => {
+            return setTimeout(callback, 1000 / 30);
+        };
+        const cancelAnimationFrame = clearTimeout;
 
         // ベースのリップ画像（閉じている口の画像）だけを表示する関数
         const resetFrameOpacity = () => {
             target_parts.forEach((target_part) => {
-                target_part.j_frames.css("opacity", "0");
-                target_part.j_frames.eq(0).css("opacity", "1");
+                target_part.j_frames.showAtIndexWithVisibility(0);
             });
         };
 
@@ -719,8 +718,9 @@ tyrano.plugin.kag.tag.playbgm = {
         analyser.fftSize = 32;
         const buffer_length = analyser.frequencyBinCount;
         const data_array = new Uint8Array(buffer_length);
-        const analyze = (timestamp) => {
+        const analyze = () => {
             // 経過時間
+            const timestamp = performance.now();
             const elapsed_time = timestamp - last_timestamp;
             // 振幅のサンプリングデータをdata_arrayに格納する
             analyser.getByteTimeDomainData(data_array);
@@ -801,8 +801,8 @@ tyrano.plugin.kag.tag.playbgm = {
             if (part.current_index === part.thresholds.length) {
                 // 経過時間を数える
                 part.max_open_mouth_time += elapsed_time;
-                // 一度口を開けたら500ミリ秒間はそのまま固定する
-                if (part.max_open_mouth_time < 100) {
+                // 一度口を開けたら200ミリ秒間はそのまま固定する
+                if (part.max_open_mouth_time < 200) {
                     return;
                 } else {
                     part.max_open_mouth_time = 0;
