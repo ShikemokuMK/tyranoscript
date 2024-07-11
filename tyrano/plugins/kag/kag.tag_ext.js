@@ -2839,25 +2839,39 @@ tyrano.plugin.kag.tag.chara_show = {
             return [];
         }
 
+        // 画像ソースの配列
         const srcs = [];
 
-        // すべてのフレームについて<img>要素を作成
+        // 画像ファイルの拡張子を取得する関数
+        const image_extensions = ["png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff", "tif", "svg", "ico"];
+        const get_image_extension = (filename) => {
+            const extension = filename.split(".").pop();
+            return image_extensions.includes(extension.toLowerCase()) ? extension : null;
+        };
+
+        // ベースフレームの画像ファイルのパス
+        const base_path = $.parseStorage(state_obj.storage, "fgimage");
+        const base_extension = get_image_extension(base_path);
+
+        // すべてのフレームについて画像ソースを決定
         state_obj.frame_image.forEach((frame_src) => {
-            // 画像ソースを決定する
-            const origin_src = $.parseStorage(state_obj.storage, "fgimage");
-            const src = ((path, filename) => {
-                const hash_slash = path.split("/");
-                const hash_dot = hash_slash.pop().split(".");
-                let new_filename;
-                if (hash_dot.length > 1) {
-                    const extension = hash_dot.pop();
-                    new_filename = `${filename}.${extension}`;
-                } else {
-                    new_filename = filename;
-                }
-                hash_slash.push(new_filename);
-                return hash_slash.join("/");
-            })(origin_src, frame_src);
+            // このフレームの画像ソースの拡張子を取得
+            // ※省略されている場合もある！
+            const frame_extension = get_image_extension(frame_src);
+
+            // ベースのパスのファイル名部分を置換する
+            const hash_slash = base_path.split("/");
+            let new_filename;
+            // ベースのパスには拡張子が指定されているがこのフレームには拡張子が指定されていない場合
+            // ベースのパスの拡張子でこのフレームのソースを補う
+            if (base_extension && !frame_extension) {
+                new_filename = `${frame_src}.${base_extension}`;
+            } else {
+                new_filename = frame_src;
+            }
+            hash_slash.pop();
+            hash_slash.push(new_filename);
+            const src = hash_slash.join("/");
 
             srcs.push(src);
         });
@@ -2875,51 +2889,32 @@ tyrano.plugin.kag.tag.chara_show = {
      * @returns {jQuery|null}
      */
     setFrameAnimation(cpm, part, state, j_frame_base, preload_srcs) {
-        // パーツ状態がstorage直接指定の場合は無視
-        if (state === "allow_storage") {
+        // フレームの画像ソースの配列
+        const frame_srcs = this.getFrameAnimationSrcs(cpm, part, state);
+        if (!frame_srcs.length) {
             return null;
         }
 
         // パーツ状態定義を取得
         const state_obj = cpm["_layer"][part][state];
 
-        // frame_image属性が未指定なら無視
-        if (!state_obj.frame_image) {
-            return null;
-        }
-
         let j_frames = $(j_frame_base);
         let j_prev_frame = j_frame_base;
 
         // すべてのフレームについて<img>要素を作成
-        state_obj.frame_image.forEach((frame_src, i) => {
+        frame_srcs.forEach((frame_src) => {
             // オリジナルの<img>要素をクローンする
             const j_clone = j_frame_base.clone();
 
-            // 画像ソースを決定する
-            const src = ((path, filename) => {
-                const hash_slash = path.split("/");
-                const hash_dot = hash_slash.pop().split(".");
-                let new_filename;
-                if (hash_dot.length > 1) {
-                    const extension = hash_dot.pop();
-                    new_filename = `${filename}.${extension}`;
-                } else {
-                    new_filename = filename;
-                }
-                hash_slash.push(new_filename);
-                return hash_slash.join("/");
-            })(j_frame_base.attr("src"), frame_src);
-
             // 属性、クラス、CSSの調整
-            j_clone.attr("src", src);
+            j_clone.attr("src", frame_src);
             j_clone.addClass("sub");
             j_clone.removeClass("base");
             j_clone.css("visibility", "hidden");
 
             // プリロードに追加
             if (preload_srcs) {
-                preload_srcs.push(src);
+                preload_srcs.push(frame_src);
             }
 
             // オリジナルの画像の後ろに追加していく
@@ -3962,11 +3957,15 @@ tyrano.plugin.kag.tag.chara_layer = {
             // これでpm.frame_timeが配列型になった
             // 中身を数値にしていく
             pm.frame_time = pm.frame_time.map((item) => {
-                if (item.includes("-")) {
-                    const hash = item.split("-");
-                    return [parseInt(hash[0]), parseInt(hash[1])];
+                if (typeof item === "string") {
+                    if (item.includes("-")) {
+                        const hash = item.split("-");
+                        return [parseInt(hash[0]), parseInt(hash[1])];
+                    } else {
+                        return parseInt(item);
+                    }
                 } else {
-                    return parseInt(item);
+                    return item;
                 }
             });
 
