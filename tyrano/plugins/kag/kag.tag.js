@@ -2311,7 +2311,7 @@ tyrano.plugin.kag.tag.text = {
         }
 
         // リップシンク対象のパーツを取得する（取得できなければこのリップシンクは無効）
-        const target_parts = this.kag.tag.playbgm.getLipSyncParts.call(this, chara_name, "text");
+        const target_parts = this.kag.chara.getLipSyncParts.call(this, chara_name, "text");
         if (!target_parts) return null;
 
         // 別のメソッドからtarget_partsにアクセスできるようにするために
