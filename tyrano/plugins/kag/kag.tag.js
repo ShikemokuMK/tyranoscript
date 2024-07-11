@@ -2304,11 +2304,8 @@ tyrano.plugin.kag.tag.text = {
      */
     startLipSyncWithText() {
         // 現在の発言者名（誰のセリフでもない場合は無効）
-        let chara_name = this.kag.chara.getCharaName();
+        let chara_name = this.kag.chara.getCharaName(true);
         if (!chara_name) return null;
-        if (this.kag.stat.jcharas[chara_name]) {
-            chara_name = this.kag.stat.jcharas[chara_name];
-        }
 
         // リップシンク対象のパーツを取得する（取得できなければこのリップシンクは無効）
         const target_parts = this.kag.chara.getLipSyncParts.call(this, chara_name, "text");

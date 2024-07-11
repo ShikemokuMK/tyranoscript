@@ -411,6 +411,8 @@ tyrano.plugin.kag = {
         message_config: {},
         word_nobreak_list: [],
 
+        lipsync_buf_chara: {},
+
         title: "", //ゲームのタイトル
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
 
@@ -2912,8 +2914,16 @@ tyrano.plugin.kag = {
          * 発言者がいない場合は空の文字列を返す
          * @returns {string}
          */
-        getCharaName() {
+        getCharaName(convert_to_id) {
             let chara_name = "";
+
+            // stat.current_speakerが未定義でないならそれを返す
+            if (this.kag.stat.current_speaker !== undefined) {
+                return this.kag.stat.current_speaker;
+            }
+
+            // stat.current_speakerが未定義の場合は
+            // 泥臭いがchara_ptext_areaから抽出する必要がある
             if (this.kag.stat.chara_ptext != "") {
                 // 発言者エリアを取得
                 const j_chara_name = this.getCharaNameArea();
@@ -2936,6 +2946,14 @@ tyrano.plugin.kag = {
                     chara_name = j_chara_name.find(".fill").text();
                 }
             }
+
+            // IDへの変換をする場合
+            if (convert_to_id) {
+                if (this.kag.stat.jcharas[chara_name]) {
+                    chara_name = this.kag.stat.jcharas[chara_name];
+                }
+            }
+
             return chara_name;
         },
 
@@ -3293,6 +3311,13 @@ tyrano.plugin.kag = {
                 // すべてのフレーム画像を非表示にしてから
                 // 現在のフレーム画像だけを表示する
                 j_frames.showAtIndexWithVisibility(frame_index);
+
+                // 最後のフレームでループしない設定なら終了する
+                if (frame_index === frame_count - 1) {
+                    if (state_obj.frame_loop === "false") {
+                        return;
+                    }
+                }
 
                 // 次のフレームまでの時間
                 const duration = calc_duration(frame_index);

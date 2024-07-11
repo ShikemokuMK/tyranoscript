@@ -2001,8 +2001,8 @@ tyrano.plugin.kag.tag.chara_ptext = {
         // 発言者名
         //
 
+        // 誰も話していない場合
         if (pm.name == "") {
-            // 誰も話していない
             j_chara_name.updatePText("");
 
             // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
@@ -2014,9 +2014,9 @@ tyrano.plugin.kag.tag.chara_ptext = {
             if (this.kag.stat.chara_talk_anim == "zoom") {
                 this.zoomChara("", this.kag.stat.chara_talk_anim_zoom_rate);
             }
-        } else {
-            // 誰かが話している
-
+        }
+        // 誰かが話している場合
+        else {
             // 日本語で指定されていた場合はIDに直す
             // 例) "あかね" → "akane"
             if (this.kag.stat.jcharas[pm.name]) {
@@ -2025,9 +2025,9 @@ tyrano.plugin.kag.tag.chara_ptext = {
 
             // キャラクター定義を取得
             const cpm = this.kag.stat.charas[pm.name];
-            if (cpm) {
-                // キャラクターが取得できた場合
 
+            // キャラクターが取得できた場合
+            if (cpm) {
                 // キャラクター名出力
                 j_chara_name.updatePText(cpm.jname);
 
@@ -2069,8 +2069,10 @@ tyrano.plugin.kag.tag.chara_ptext = {
                         }
                     }, timeout);
                 }
-            } else {
-                // キャラクター定義が存在しない場合は指定ワードをそのまま表示
+            }
+            // キャラクター定義が存在しない場合
+            else {
+                // 指定ワードをそのまま表示
                 j_chara_name.updatePText(pm.name);
 
                 // キャラフォーカス機能が有効の場合、全員に非発言者用のスタイルを当てる。誰も話していないから
@@ -2084,6 +2086,9 @@ tyrano.plugin.kag.tag.chara_ptext = {
                 }
             }
         }
+
+        // 現在の発言者
+        this.kag.stat.current_speaker = pm.name || "";
 
         //
         // ボイス設定
@@ -3572,9 +3577,13 @@ tyrano.plugin.kag.tag.chara_layer = {
                 frame_image: "",
                 frame_time: "",
                 frame_direction: "",
-                lip_type: "text",
+                frame_loop: "true",
                 lip_image: "",
+                lip_time: 50,
+                lip_type: "text",
                 lip_volume: "",
+                lip_se_buf: "",
+                lip_se_buf_all: "",
             };
         } else {
             for (const key in part_obj[pm.id]) {
@@ -3624,9 +3633,9 @@ tyrano.plugin.kag.tag.chara_layer = {
             for (let i = 0; i < pm.frame_image.length; i++) {
                 if (!pm.lip_volume[i]) {
                     if (!prev_value) {
-                        pm.lip_volume[i] = 5;
+                        pm.lip_volume[i] = 1;
                     } else {
-                        pm.lip_volume[i] = prev_value + 5;
+                        pm.lip_volume[i] = prev_value + 4;
                     }
                 }
                 prev_value = pm.lip_volume[i];
@@ -3686,6 +3695,19 @@ tyrano.plugin.kag.tag.chara_layer = {
                     prev_val = pm.frame_time[i];
                 }
             });
+        }
+
+        // 口パクの対象に取る[playse]のスロット
+        if (pm.lip_se_buf) {
+            pm.lip_se_buf = parseInt(pm.lip_se_buf);
+            if (!cpm.lipsync_bufs) {
+                cpm.lipsync_bufs = [];
+            }
+            cpm.lipsync_bufs.push(pm.lip_se_buf);
+        }
+        if (pm.lip_se_buf_all) {
+            pm.lip_se_buf_all = parseInt(pm.lip_se_buf_all);
+            this.kag.stat.lipsync_buf_chara[pm.lip_se_buf_all] = pm.name;
         }
 
         // パーツ差分領域にpmの内容を上書きする

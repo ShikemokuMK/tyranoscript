@@ -487,6 +487,22 @@ tyrano.plugin.kag.tag.playbgm = {
             // ボイスなら波形分析する
             if (is_voice) {
                 this.analyzeAudioForLipSync(audio_obj, pm.chara_name);
+            } else if (pm.chara) {
+                this.analyzeAudioForLipSync(audio_obj, pm.chara);
+            } else if (is_se) {
+                const _buf = parseInt(buf);
+                if (this.kag.stat.lipsync_buf_chara[buf]) {
+                    pm.chara_name = this.kag.stat.lipsync_buf_chara[buf];
+                    this.analyzeAudioForLipSync(audio_obj, pm.chara_name);
+                } else {
+                    pm.chara_name = this.kag.chara.getCharaName();
+                    if (pm.chara_name) {
+                        const cpm = this.kag.stat.charas[pm.chara_name];
+                        if (cpm && cpm.lipsync_bufs && cpm.lipsync_bufs.includes(_buf)) {
+                            this.analyzeAudioForLipSync(audio_obj, pm.chara_name);
+                        }
+                    }
+                }
             }
             // nextOrder
             next();
