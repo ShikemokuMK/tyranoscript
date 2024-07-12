@@ -630,6 +630,8 @@ tyrano.plugin.kag.ftag = {
                         pm[key] = default_value;
                     }
                 }
+            } else {
+                
             }
         }
 
@@ -1047,7 +1049,7 @@ tyrano.plugin.kag.tag.text = {
             }
         }
     },
-
+    
     /**
      * テキストを表示する統括的な処理
      * @param {string} message_str 表示するテキスト
@@ -1657,11 +1659,17 @@ tyrano.plugin.kag.tag.text = {
         width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + icon_size;
         height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + icon_size;
 
-        // アウターのサイズをインナーに同期する
+        // アウターのサイズ
         const j_outer_message = this.kag.getMessageOuterLayer();
         j_outer_message.css("width", width);
         j_outer_message.css("height", height);
 
+        //インナーに同期できてないのでここで同期する（Safariでの不具合対応）
+        if (this.kag.stat.vertical != "true") {
+            j_msg_inner.css("width", width);
+            j_msg_inner.css("height", height);
+        }
+        
         //
         // アウターの位置を決定する
         // まずキャラ画像の left, top にふきだし設定の left, top を足す
@@ -7031,6 +7039,7 @@ opacity    = 領域の不透明度を`0`～`255`の数値で指定します。`0
 edge       = 文字の縁取りを有効にできます。縁取り色を`0xRRGGBB`形式等で指定します。<br>V515以降：縁取りの太さもあわせて指定できます。`4px 0xFF0000`のように、色の前に縁取りの太さをpx付きで記述します。太さと色は半角スペースで区切ってください。さらに`4px 0xFF0000, 2px 0xFFFFFF`のようにカンマ区切りで複数の縁取りを指定できます。,
 shadow     = 文字に影をつけます。影の色を`0xRRGGBB`形式で指定します。,
 keyfocus   = `false`を指定すると、キーボードやゲームパッドで選択できなくなります。また`1`や`2`などの数値を指定すると、キーコンフィグの`focus_next`アクションでボタンを選択していくときの順序を指定できます。,
+autopos    = `true`か`false`を指定します。デフォルトは`false`。trueを指定するとボタンの位置を自動的に調整します。つまりxとyに何も指定しなかったと同じ動作になります,
 
 :demo
 1,kaisetsu/14_select
@@ -7065,6 +7074,7 @@ tyrano.plugin.kag.tag.glink = {
         face: "",
         bold: "",
         keyfocus: "",
+        autopos:"false",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -7081,6 +7091,13 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("font-size", pm.size + "px");
         that.kag.setElmCursor(j_button, "pointer");
         that.kag.makeFocusable(j_button, pm.keyfocus);
+        
+        //強制自動配置が有効な場合
+        if (pm.autopos == "true") {
+            pm.x = "auto";
+            pm.y = "";
+            pm.height = "";
+        }
 
         if (pm.font_color != "") {
             j_button.css("color", $.convertColor(pm.font_color));
@@ -7127,7 +7144,7 @@ tyrano.plugin.kag.tag.glink = {
         } else if (that.kag.stat.font.face != "") {
             j_button.css("font-family", that.kag.stat.font.face);
         }
-
+        
         if (pm.x == "auto") {
             var sc_width = parseInt(that.kag.config.scWidth);
             var center = Math.floor(parseInt(j_button.css("width")) / 2);
