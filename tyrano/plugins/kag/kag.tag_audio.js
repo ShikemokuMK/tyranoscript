@@ -484,6 +484,26 @@ tyrano.plugin.kag.tag.playbgm = {
             if (is_fadein) {
                 audio_obj.fade(0, howl_volume, parseInt(pm.time));
             }
+            // ボイスなら波形分析する
+            if (is_voice) {
+                this.analyzeAudioForLipSync(audio_obj, pm.chara_name);
+            } else if (pm.chara) {
+                this.analyzeAudioForLipSync(audio_obj, pm.chara);
+            } else if (is_se) {
+                const _buf = parseInt(buf);
+                if (this.kag.stat.lipsync_buf_chara[buf]) {
+                    pm.chara_name = this.kag.stat.lipsync_buf_chara[buf];
+                    this.analyzeAudioForLipSync(audio_obj, pm.chara_name);
+                } else {
+                    pm.chara_name = this.kag.chara.getCharaName();
+                    if (pm.chara_name) {
+                        const cpm = this.kag.stat.charas[pm.chara_name];
+                        if (cpm && cpm.lipsync_bufs && cpm.lipsync_bufs.includes(_buf)) {
+                            this.analyzeAudioForLipSync(audio_obj, pm.chara_name);
+                        }
+                    }
+                }
+            }
             // nextOrder
             next();
         });
@@ -607,6 +627,97 @@ tyrano.plugin.kag.tag.playbgm = {
         // ふつうにロード
         this.kag.showLoadingLog();
         audio_obj.load();
+    },
+
+    /**
+     * Howlオブジェクトによって再生される音声を解析してリップシンクに利用するメソッド。
+     * 音声信号の振幅を計算し、それに基づいてリップシンクを更新する。
+     * @param {Howl} howl - 解析対象のHowlオブジェクト。
+     * @param {name} string - ボイスを発しているキャラクターの名前。
+     */
+    analyzeAudioForLipSync(howl, name) {
+        // リップシンク対象のパーツを取得する（取得できなければこのリップシンクは無効）
+        const target_parts = this.kag.chara.getLipSyncParts(name);
+        if (!target_parts) return null;
+
+        const requestAnimationFrame = (callback) => {
+            return setTimeout(callback, 1000 / 30);
+        };
+        const cancelAnimationFrame = clearTimeout;
+
+        // ベースのリップ画像（閉じている口の画像）だけを表示する関数
+        const resetFrameOpacity = () => {
+            target_parts.forEach((target_part) => {
+                target_part.j_frames.showAtIndexWithVisibility(0);
+            });
+        };
+
+        //
+        // 波形分析
+        //
+
+        let animation_id;
+        let last_timestamp = performance.now(); // 最後のフレームのタイムスタンプ
+        let silent_time = 0; // 無音の経過時間を追跡
+        const max_silent_duration = 10000; // 無音が続く最大時間（ミリ秒）
+        const audio_context = Howler.ctx;
+        const sound_node = howl._sounds[0]._node;
+        const analyser = audio_context.createAnalyser();
+        sound_node.connect(analyser);
+        analyser.connect(audio_context.destination);
+        analyser.fftSize = 32;
+        const buffer_length = analyser.frequencyBinCount;
+        const data_array = new Uint8Array(buffer_length);
+        const analyze = () => {
+            // 経過時間
+            const timestamp = performance.now();
+            const elapsed_time = timestamp - last_timestamp;
+            // 振幅のサンプリングデータをdata_arrayに格納する
+            analyser.getByteTimeDomainData(data_array);
+            // 振幅の最大値を計算する
+            let max = 0;
+            for (let i = 0; i < buffer_length; i++) {
+                if (data_array[i] > max) {
+                    max = data_array[i];
+                    if (max === 255) {
+                        break;
+                    }
+                }
+            }
+            // 振幅を0～100に補正してリップシンクメソッドに渡す
+            max = Math.max(128, max);
+            const volume = (((max - 128) / (255 - 128)) * 100) | 0;
+            this.kag.chara.updateLipSyncWithVoice(volume, target_parts, elapsed_time);
+            // 無音の経過時間を計算
+            // 既定時間無音だった場合は波形分析を中断する
+            if (max <= 128) {
+                silent_time += elapsed_time;
+            } else {
+                // 音が鳴っている場合、無音時間をリセット
+                silent_time = 0;
+            }
+            if (silent_time >= max_silent_duration) {
+                resetFrameOpacity();
+                return;
+            }
+            // 現在のタイムスタンプを保存
+            last_timestamp = timestamp;
+            // 次回の波形分析を呼ぶ
+            animation_id = requestAnimationFrame(analyze);
+        };
+
+        // 再生停止時に解析を中断する
+        howl.on("stop", function () {
+            resetFrameOpacity();
+            cancelAnimationFrame(animation_id);
+        });
+        howl.on("end", function () {
+            resetFrameOpacity();
+            cancelAnimationFrame(animation_id);
+        });
+
+        // 解析開始
+        analyze();
     },
 
     /*
