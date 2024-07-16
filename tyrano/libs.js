@@ -409,6 +409,7 @@
 
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
+            dataType: 'text',
             cache: false,
             success: function (text) {
                 if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
@@ -427,6 +428,7 @@
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: file_path + "?" + Math.floor(Math.random() * 1000000),
+                dataType: 'text',
                 cache: false,
                 success: function (text) {
                     if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();

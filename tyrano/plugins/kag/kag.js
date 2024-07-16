@@ -4,6 +4,9 @@ tyrano.plugin.kag = {
     kag: null,
     sound_swf: null,
 
+    lang: "", //言語設定
+    map_lang: {},    //言語設定のマップ
+
     is_rider: false, //ティラノライダーからの起動かどうか
     is_studio: false, //ティラノスタジオからの起動かどうか
 
@@ -414,6 +417,7 @@ tyrano.plugin.kag = {
         lipsync_buf_chara: {},
 
         title: "", //ゲームのタイトル
+
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
 
     init: function () {
@@ -658,6 +662,7 @@ tyrano.plugin.kag = {
 
     //式を評価して値を返却します
     embScript: function (str, preexp) {
+
         try {
             var f = this.stat.f;
             var sf = this.variable.sf;
@@ -665,7 +670,9 @@ tyrano.plugin.kag = {
             var mp = this.stat.mp;
 
             return eval("(" + str + ")");
+
         } catch (e) {
+
             try {
                 return eval(str);
             } catch (e) {
@@ -880,8 +887,8 @@ tyrano.plugin.kag = {
         //コンフィグボタン追加
         var button_menu_obj = $(
             "<div class='button_menu' style='z-index:100000000'><img src='./tyrano/images/system/" +
-                $.novel("file_button_menu") +
-                "'  /></div>",
+            $.novel("file_button_menu") +
+            "'  /></div>",
         );
 
         //コンフィグボタンの位置を指定する
@@ -2897,7 +2904,7 @@ tyrano.plugin.kag = {
     },
 
     chara: {
-        init() {},
+        init() { },
 
         /**
          * 発言者の名前欄を意味する p 要素を返す
@@ -3582,7 +3589,116 @@ tyrano.plugin.kag = {
         }, 10);
     },
 
-    test: function () {},
+
+    convertLang(scenario, array_s) {
+
+        if (this.kag.lang == "") return array_s;
+
+        if (!this.kag.map_lang["scenes"][scenario]) {
+            return array_s;
+        }
+
+        let map_trans = this.kag.map_lang["scenes"][scenario];
+        let map_charas = this.kag.map_lang["charas"];
+
+
+        let is_script = false;
+
+        for (let i = 0; i < array_s.length; i++) {
+
+            const tobj = array_s[i];
+
+            if (tobj.name === "iscript") {
+                is_script = true;
+            } else if (tobj.name === "endscript") {
+                is_script = false;
+            } else if (tobj.name === "text") {
+
+                if (!is_script) {
+
+                    let trans_text = "";
+                    if (map_trans["scenario"][tobj.pm.val]) {
+                        trans_text = map_trans["scenario"][tobj.pm.val];
+                        tobj.pm.val = trans_text;
+                        array_s[i] = tobj;
+                    }
+
+                }
+
+            } else if (tobj.name === "chara_ptext") {
+
+                if (map_charas && map_charas[tobj["pm"]["name"]]) {
+
+                    //キャラ名指定の場合はこうなる
+                    if (this.kag.stat.charas[tobj["pm"]["name"]]) {
+                        this.kag.stat.charas[tobj["pm"]["name"]].jname = map_charas[tobj["pm"]["name"]];
+                    } else {
+
+                        tobj["pm"]["name"] = map_charas[tobj["pm"]["name"]];
+
+                    }
+                    array_s[i] = tobj;
+                }
+
+            } else {
+
+                if (map_trans["tag"] && map_trans["tag"][tobj.name]) {
+
+                    //翻訳対象のタグだった場合
+                    let pm = tobj["pm"];
+                    for (let key in pm) {
+
+                        if (map_trans["tag"][tobj.name][key]) {
+                            if (map_trans["tag"][tobj.name][key][pm[key]]) {
+                                array_s[i]["pm"][key] = map_trans["tag"][tobj.name][key][pm[key]];
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+
+        return array_s;
+
+    },
+
+    //langファイルを読み込んで設定する
+    async loadLang(name, cb) {
+
+        if (name != "default") {
+
+            try {
+
+                let lang_str = await $.loadTextSync("./data/others/lang/" + name + ".json");
+                this.lang = name;
+                this.map_lang = JSON.parse(lang_str);
+
+            } catch (e) {
+                console.log(e);
+                this.lang = "";
+                this.map_lang = {};
+            }
+
+        } else {
+
+            this.lang = "";
+            this.map_lang = {};
+
+        }
+
+        //キャッシュは削除
+        this.cache_scenario = {};
+
+        this.kag.evalScript("sf._system_config_lang='" + name + "';");
+
+        cb();
+
+    },
+
+    test: function () { },
 };
 
 //すべてのタグに共通する、拡張用
