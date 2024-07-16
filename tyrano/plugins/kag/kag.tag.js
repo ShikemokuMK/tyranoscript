@@ -1057,11 +1057,16 @@ tyrano.plugin.kag.tag.text = {
      */
     showMessage: function (message_str, is_vertical) {
         // 現在の発言者名（誰も喋っていない場合は空の文字列）
-        const chara_name = this.kag.chara.getCharaName();
+        let chara_name = this.kag.chara.getCharaName();
+
+        //chara_nameにjnameが存在する場合は変換する
+        if (this.kag.stat.charas[chara_name]&&this.kag.stat.charas[chara_name].jname!="") {
+            chara_name = this.kag.stat.charas[chara_name].jname;
+        }
 
         // バックログにテキストを追加
         this.pushTextToBackLog(chara_name, message_str);
-
+        
         // 読み上げ（有効な場合）
         if (this.kag.stat.play_speak) {
             this.speechMessage(message_str);
