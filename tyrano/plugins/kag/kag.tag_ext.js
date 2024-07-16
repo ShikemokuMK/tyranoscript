@@ -2903,7 +2903,7 @@ tyrano.plugin.kag.tag.chara_hide = {
                 duration: parseInt(that.kag.cutTimeWithSkip(pm.time)),
                 easing: "linear",
                 complete: function () {
-                    that.kag.tag.chara_show.stopFrameAnimation(cpm);
+                    that.kag.chara.stopFrameAnimation(cpm);
                     img_obj.remove();
 
                     if (that.kag.stat.chara_pos_mode == "true" && pm.pos_mode == "true") {
