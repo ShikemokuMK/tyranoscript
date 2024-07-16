@@ -772,7 +772,7 @@ tyrano.plugin.kag.menu = {
         this.kag.trigger("load-start");
 
         // 瞬きを停止
-        this.kag.ftag.master_tag.chara_show.stopAllFrameAnimation();
+        this.kag.chara.stopAllFrameAnimation();
 
         // 一時リスナをすべて消去
         this.kag.offTempListeners();
@@ -1123,7 +1123,7 @@ tyrano.plugin.kag.menu = {
         });
 
         // 瞬きを復元
-        this.kag.ftag.master_tag.chara_show.restoreAllFrameAnimation();
+        this.kag.chara.restoreAllFrameAnimation();
 
         //
         // プロパティの初期化
