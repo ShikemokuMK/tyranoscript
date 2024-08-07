@@ -777,12 +777,17 @@ tyrano.plugin.kag.menu = {
         // 一時リスナをすべて消去
         this.kag.offTempListeners();
 
-        //普通のロードの場合
+        // 普通のロードの場合
         if (typeof options == "undefined") {
             options = { bgm_over: "false" };
         } else if (typeof options.bgm_over == "undefined") {
             options["bgm_over"] = "false";
         }
+
+        // [wait]中にロードされた場合の対策
+        clearTimeout(this.kag.tmp.wait_id);
+        this.kag.tmp.wait_id = "";
+        this.kag.stat.is_wait = false;
 
         /**
          * make.ks を通過してもとの場所に戻ってきたときに次のタグに進むかどうかを制御する文字列。
@@ -799,7 +804,7 @@ tyrano.plugin.kag.menu = {
             auto_next = options.auto_next;
         }
 
-        //Live2Dモデルがある場合の後始末
+        // Live2Dモデルがある場合の後始末
         if (typeof Live2Dcanvas != "undefined") {
             for (let model_id in Live2Dcanvas) {
                 if (Live2Dcanvas[model_id]) {
