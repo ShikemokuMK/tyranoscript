@@ -1299,14 +1299,16 @@
         });
     };
 
+    /**
+     * 文字列がdata-URLであるかを判定する
+     * @param {string} str - 判定する文字列
+     * @returns {boolean} data-URLの場合はtrue、そうでない場合はfalse
+     */
     $.isBase64 = function (str) {
-        if (!str) return false;
-
-        if (str.substr(0, 10) == "data:image") {
-            return true;
-        } else {
-            return false;
-        }
+        if (!str || typeof str !== "string" ) return false;
+        
+        // 画像, 音声, 動画ファイルを受け入れる
+        return str.startsWith("data:image") || str.startsWith("data:audio") || str.startsWith("data:video")
     };
 
     //オブジェクトの個数をもってきます。1
