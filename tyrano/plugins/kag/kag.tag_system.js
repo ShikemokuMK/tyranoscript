@@ -1821,7 +1821,7 @@ tyrano.plugin.kag.tag.commit = {
             .find(".form")
             .each(function () {
                 var name = $(this).attr("name");
-                var val = $(this).val().replace("'", "\\'");
+                var val = $(this).val().replaceAll("'", "\\'");
 
                 var str = name + " = '" + val + "'";
 
