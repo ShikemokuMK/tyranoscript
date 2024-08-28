@@ -415,6 +415,8 @@ tyrano.plugin.kag = {
         word_nobreak_list: [],
 
         lipsync_buf_chara: {},
+        
+        checkpoint: {},
 
         title: "", //ゲームのタイトル
 
