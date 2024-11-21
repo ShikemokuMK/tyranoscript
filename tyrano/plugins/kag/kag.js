@@ -164,6 +164,8 @@ tyrano.plugin.kag = {
         },
 
         preload_audio_map: {},
+        preload_objects: [],
+        preload_complete_callbacks: [],
 
         mode_effect: {
             pc: {
@@ -1949,11 +1951,35 @@ tyrano.plugin.kag = {
         jtext.find("p").find(".current_span").html(str);
     },
 
+    registerPreloadCompleteCallback(callback) {
+        if (this.preload_objects.length === 0) {
+            callback();
+            return;
+        }
+        this.preload_complete_callbacks.push(callback);
+    },
+
     //画像のプリロード オンの場合は、ロードが完了するまで次へ行かない
     preload: function (src, callbk, options = {}) {
+        var symbol = Symbol();
+        this.preload_objects.push(symbol);
         this.kag.showLoadingLog("preload");
 
+        const removeByPreloadObjects = () => {
+            var index = this.preload_objects.indexOf(symbol);
+            if (index !== -1) {
+                this.preload_objects.splice(index, 1);
+            }
+            if (this.preload_objects.length == 0 && this.preload_complete_callbacks.length > 0) {
+                this.preload_complete_callbacks.forEach((callback) => {
+                    callback();
+                });
+                this.preload_complete_callbacks.splice(0, this.preload_complete_callbacks.length);
+            }
+        }
+
         const onend = (elm) => {
+            removeByPreloadObjects();
             this.kag.hideLoadingLog();
             if (callbk) callbk(elm);
         };
@@ -1988,6 +2014,7 @@ tyrano.plugin.kag = {
                 switch (preloaded_audio.state()) {
                     case "unload":
                         // アンロードで残っていることは基本的にはないが…
+                        removeByPreloadObjects();
                         delete this.kag.tmp.preload_audio_map[src];
                         break;
                     case "loading":
