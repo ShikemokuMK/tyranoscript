@@ -1616,9 +1616,11 @@ tyrano.plugin.kag.tag.text = {
 
         // インナーの width, max-width の設定
         // 横幅固定するかどうかで場合分け
+            
         if (chara_fuki["fix_width"] != "") {
             // 横幅固定する場合
             // max-width を解除し width を直接指定する
+            j_msg_inner.css("height", "");
             j_msg_inner.css("max-width", "");
             j_msg_inner.css("width", parseInt(chara_fuki["fix_width"]));
         } else {
@@ -1660,6 +1662,7 @@ tyrano.plugin.kag.tag.text = {
 
         // padding-left(top)、margin-right(bottom)、20（アイコンの分）を足す
         // これがアウターのサイズとなる
+        
         const icon_size = 20;
         width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + icon_size;
         height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + icon_size;
@@ -1670,7 +1673,7 @@ tyrano.plugin.kag.tag.text = {
         j_outer_message.css("height", height);
 
         //インナーに同期できてないのでここで同期する（Safariでの不具合対応）
-        if (this.kag.stat.vertical != "true") {
+        if (this.kag.stat.vertical != "true" && chara_fuki["fix_width"] == "") {
             j_msg_inner.css("width", width);
             j_msg_inner.css("height", height);
         }

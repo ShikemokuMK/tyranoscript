@@ -1374,6 +1374,8 @@ tyrano.plugin.kag.tag.autoload = {
 
 :exp
 `[rollback]`タグでチェックポイントの地点へ戻ってくることができます。
+チェックポイントを作りすぎるとゲームの動作が重くなる場合があります。
+必要最低限に留めておき、不要になったら`[clear_checkpoint]`タグで削除しましょう。
 
 :sample
 
