@@ -1705,7 +1705,7 @@ tyrano.plugin.kag.tag.wait_preload = {
     start: function (pm) {
         var that = this;
         that.kag.weaklyStop();
-        that.tag.registerPreloadCompleteCallback(function () {
+        that.kag.registerPreloadCompleteCallback(function () {
             that.kag.cancelWeakStop();
             that.kag.ftag.nextOrder();
         });
