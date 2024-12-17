@@ -4504,8 +4504,13 @@ tyrano.plugin.kag.tag.web = {
                 var gui = require("nw.gui");
                 gui.Shell.openExternal(pm.url);
             } else if ($.isElectron()) {
-                var shell = require("electron").shell;
-                shell.openExternal(pm.url);
+                if (window.studio_api) {
+                    //V6	
+                    window.studio_api.shell.openExternal(pm.url);
+		        } else {
+                    var shell = require("electron").shell;
+                    shell.openExternal(pm.url);
+                }
             } else if ($.isTyranoPlayer()) {
                 //ティラノプレイヤーなら、上に伝える
                 $.openWebFromApp(pm.url);

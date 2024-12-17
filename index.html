@@ -16,6 +16,23 @@
             try {
                 window.jQuery = window.$ = require("./tyrano/libs/jquery-3.6.0.min.js");
             } catch (e) {}
+            
+            try{
+                
+                if(window.studio_api){
+                    //Win Macなど パッケージング時 
+                    window.studio_api = window.studio_api;
+                    window.process = window.studio_api.ipcRenderer.sendSync("getProcess");
+                }else if (window.opener.window.studio_api) {
+                    //プレビューのとき
+                    window.studio_api = window.opener.window.studio_api;
+                    window.process = window.opener.window.studio_api.ipcRenderer.sendSync("getProcess");
+                }
+                
+            }catch(e){
+            
+            }
+
         </script>
 
         <!-- jQuery Plugins -->
@@ -52,7 +69,7 @@
         <script src="./tyrano/plugins/kag/kag.menu.js"></script>
         <script src="./tyrano/plugins/kag/kag.parser.js"></script>
         <script src="./tyrano/plugins/kag/kag.rider.js"></script>
-        <script src="./tyrano/plugins/kag/kag.studio.js"></script>
+        <script src="./tyrano/plugins/kag/kag.studio_v6.js"></script>
         <script src="./tyrano/plugins/kag/kag.tag_audio.js"></script>
         <script src="./tyrano/plugins/kag/kag.tag_camera.js"></script>
         <script src="./tyrano/plugins/kag/kag.tag_ext.js"></script>

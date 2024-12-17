@@ -1361,6 +1361,152 @@ tyrano.plugin.kag.tag.autoload = {
     },
 };
 
+
+
+/*
+#[checkpoint]
+
+:group
+システム操作
+
+:title
+チェックポイントの登録
+
+:exp
+`[rollback]`タグでチェックポイントの地点へ戻ってくることができます。
+チェックポイントを作りすぎるとゲームの動作が重くなる場合があります。
+必要最低限に留めておき、不要になったら`[clear_checkpoint]`タグで削除しましょう。
+
+:sample
+
+[checkpoint name="p1"]
+
+;ここでいろいろ画面をつくりかえる
+
+;チェックポイントの位置へどこからでも戻ることができる
+[rollback checkpoint="p1"]
+
+:param
+name = チェックポイント名を指定します。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.checkpoint = {
+    vital: ["name"],
+
+    pm: {
+        name: "",
+    },
+
+    start: function (pm) {
+        
+        var that = this;
+        var name = pm.name;
+        
+        this.kag.menu.snapSave("checkpoint", function () {
+            that.kag.menu.doSetCheckpoint(name);
+            that.kag.ftag.nextOrder();
+        },"false");
+    },
+};
+
+
+/*
+#[rollback]
+
+:group
+システム操作
+
+:title
+ロールバック
+
+:exp
+`[checkpoint]`タグを通過した場所にどこからでも戻ることができます。
+
+:sample
+
+[checkpoint name="p1"]
+
+;ここでいろいろ画面をつくりかえる
+
+;チェックポイントの位置へどこからでも戻ることができる
+[rollback checkpoint="p1"]
+
+:param
+checkpoint = チェックポイント名を指定します。,
+variable_over = `true`または`false`を指定します。`true`を指定すると、ロールバック後に現在のゲーム変数を引き継ぎます。デフォルトは`true`,
+bgm_over      = `true`または`false`を指定します。`true`を指定すると、ロールバック後にBGMを引き継ぎます。デフォルトは`false`
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.rollback = {
+    vital: ["checkpoint"],
+
+    pm: {
+        checkpoint: "",
+        variable_over: "true",
+        bgm_over:"false",
+    },
+
+    start: function (pm) {
+        
+        let result = this.kag.menu.doRollback(pm.checkpoint,pm.variable_over,pm.bgm_over);
+        if (result == false) {
+            this.kag.error("チェックポイント「"+pm.checkpoint+"」は存在しません");
+            this.kag.ftag.nextOrder();            
+        }
+    },
+};
+
+/*
+#[clear_checkpoint]
+
+:group
+システム操作
+
+:title
+チェックポイントの削除
+
+:exp
+`[checkpoint]`タグをクリアすることができます。
+チェックポイントは便利ですが不用意に増やしすぎるとゲームの動作に影響します。
+不要になったチェックポイントはこまめに削除しておきましょう。
+
+:sample
+
+;チェックポイントの作成
+[checkpoint name="p1"]
+
+[clear_checkpoint name="p1"]
+
+:param
+name = 削除するチェックポイント名を指定します。指定しない場合はすべてのチェックポイントが削除されます
+
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.clear_checkpoint = {
+    vital: [],
+
+    pm: {
+        name: "",
+    },
+
+    start: function (pm) {
+        
+        if (pm.name == "") {
+            this.kag.stat.checkpoint = {};
+        } else {
+            delete this.kag.stat.checkpoint[pm.name];
+        }
+        this.kag.ftag.nextOrder();            
+        
+    },
+};
+
 /*
 #[ignore]
 
