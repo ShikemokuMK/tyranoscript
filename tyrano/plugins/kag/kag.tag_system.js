@@ -3531,7 +3531,7 @@ tyrano.plugin.kag.tag.dialog_config = {
         this.j_boxbase = $('<div class="remodal-boxbase"></div>');
         this.j_box.prepend(this.j_boxbase);
         this.j_base = $('<div class="remodal-base"></div>');
-        this.j_image = $('<div class="remodal-image"</div>');
+        this.j_image = $('<div class="remodal-image"></div>');
         this.j_base.append(this.j_image);
         this.j_wrapper.prepend(this.j_base);
         this.j_ok_img = null;
