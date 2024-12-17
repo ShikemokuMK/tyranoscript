@@ -1824,6 +1824,41 @@ tyrano.plugin.kag.tag.preload = {
 };
 
 /*
+#[wait_preload]
+
+:group
+変数・JS操作・ファイル読込
+
+:title
+素材ファイルの事前読み込みの完了待機
+
+:exp
+`[preload]`タグをwait=falseで利用した後、何かの演出を挟んだ後、全てのpreloadが終わるのを待機します。
+
+:sample
+
+;preloadで複数の画像をwait=falseで読み込みます
+[preload storage="data/fgimage/girl.jpg" wait="false"]
+[preload storage="data/fgimage/haruko.jpg" wait="false"]
+;読み込んでいる間に別のアニメーションをします
+[quake2 time="1000" wait="true"]
+;まだ終わっていない場合は終わるまで待機します
+[wait_preload]
+
+#[end]
+*/
+tyrano.plugin.kag.tag.wait_preload = {
+    start: function (pm) {
+        var that = this;
+        that.kag.weaklyStop();
+        that.kag.registerPreloadCompleteCallback(function () {
+            that.kag.cancelWeakStop();
+            that.kag.ftag.nextOrder();
+        });
+    },
+}
+
+/*
 #[unload]
 
 :group
