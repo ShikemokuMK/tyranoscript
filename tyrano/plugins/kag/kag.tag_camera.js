@@ -427,6 +427,12 @@ tyrano.plugin.kag.tag.mask = {
         if (pm.time == "0") {
             pm.time = "1";
         }
+        
+        //mask表示中なら無視して次へ
+        if ($(".layer_mask").get(0)) {
+            that.kag.ftag.nextOrder();
+            return;
+        }
 
         var j_div = $("<div class='layer layer_mask' data-effect='" + pm.effect + "' style='z-index:100000000;position:absolute;'>");
         j_div.css("animation-duration", parseInt(pm.time) + "ms");

@@ -158,6 +158,14 @@ tyrano.plugin.kag.studio = {
                 var _j_img = j_img;
                 var _category = category;
                 var _file = file;
+                
+                j_img.on("mousedown", (e) => {
+                    TYRANO.kag.tmp.three.stat.fps.stop_eye_move = true;
+                });
+
+                j_img.on("mouseup", (e) => {
+                    TYRANO.kag.tmp.three.stat.fps.stop_eye_move = false;
+                });
 
                 j_img.draggable({
                     scroll: false,
@@ -219,10 +227,14 @@ tyrano.plugin.kag.studio = {
 
     send: function (key, json_obj) {
         
+        
+        if (window.opener) {
+            window.opener.window.app.project.triggerIpc(key, json_obj);
+        }
         //普通に親の関数呼び出しでいいよ。
         //親
         //console.log(json_obj);
-        window.opener.window.app.project.triggerIpc(key, json_obj);
+        //window.opener.window.app.project.triggerIpc(key, json_obj);
         //this.ipc.ipcRenderer.send(key, JSON.stringify(json_obj));
     
     },

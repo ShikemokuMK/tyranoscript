@@ -136,6 +136,10 @@ tyrano.plugin.kag = {
                     offMoveBufferB: false,
                     offRotateBufferL: false,
                     offRotateBufferR: false,
+                    
+                    moveUp: false,
+                    moveDown: false,
+
 
                     is_colid: false,
 
@@ -155,6 +159,9 @@ tyrano.plugin.kag = {
                     fps_rate: 0,
 
                     move_trans_control: false,
+                    
+                    stop_eye_move: false,
+                    enable_move_updown: true, //上下の高さ移動
                 },
             },
 
@@ -1429,7 +1436,7 @@ tyrano.plugin.kag = {
 
         if (this.kag.config["use3D"] == "true") {
             array_scripts = [
-                "./tyrano/libs/three/three.js",
+                 "./tyrano/libs/three/three.js",
 
                 "./tyrano/libs/three/loader/GLTFLoader.js",
                 "./tyrano/libs/three/loader/OBJLoader.js",
@@ -1438,8 +1445,12 @@ tyrano.plugin.kag = {
 
                 "./tyrano/libs/three/controls/OrbitControls.js",
                 "./tyrano/libs/three/controls/TransformControls.js",
+                "./tyrano/libs/three/controls/DeviceOrientationControls.js",
                 "./tyrano/libs/three/classes/ThreeModel.js",
                 "./tyrano/libs/three/etc/stats.min.js",
+                "./tyrano/libs/three/etc/ar.js",
+
+                "./tyrano/libs/three/etc/CSS3DRenderer.js",
             ];
         }
 
@@ -1890,8 +1901,12 @@ tyrano.plugin.kag = {
     //これはシナリオファイルを配置しなくても動的に挿入できることを意味します。
     setCacheScenario: function (filename, str) {
         var result_obj = this.parser.parseScenario(str);
-        console.log(this.cache_scenario);
         this.cache_scenario["./data/scenario/" + filename] = result_obj;
+    },
+    
+     //キャッシュシナリオの削除
+    deleteCacheScenario: function (filename) {
+        delete this.cache_scenario["./data/scenario/" + filename];
     },
 
     getMessageInnerLayer: function () {
@@ -2103,6 +2118,12 @@ tyrano.plugin.kag = {
                     onend();
                 })
                 .attr("src", src);
+        }else if ("json" == ext) {
+
+            $.loadText(src, function (text_str) {
+                onend(this);
+            }, true);
+
         } else {
             // 画像ファイルプリロード
             $("<img />")

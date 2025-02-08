@@ -715,12 +715,45 @@ tyrano.plugin.kag.ftag = {
 
     //タグをnextorderの順番で使用する
     startTags: function (array_tag, cb) {
+        
+        if (array_tag.length == 0) {
+            cb();
+            return;
+        }
+        
         var that = this;
 
         this.bufTags.push({ tags: array_tag, cb: cb });
 
         //console.log("buftags");
         //console.log(this.bufTags);
+        
+        let next_tag = () => {
+
+            TYRANO.kag.tmp.cut_nextorder = null;
+            this.cntTag++;
+
+            if (this.current_tags.length == this.cntTag) {
+
+                //最後まできた
+                if (this.current_cb) {
+                    this.current_cb();
+                }
+
+                if (this.bufTags.length != 0) {
+                    this.cntTag = 0;
+                    //setTimeout(() => {
+                    post_tag();
+                    //}, 10);
+                } else {
+                    this.isExeTag = false;
+                }
+            } else {
+                //setTimeout(() => {
+                post_tag();
+                //}, 10);
+            }
+        }
 
         let post_tag = () => {
             this.isExeTag = true;
@@ -734,30 +767,24 @@ tyrano.plugin.kag.ftag = {
 
             tobj = this.current_tags[this.cntTag];
 
-            //            console.log(this.cntTag);
-            //            console.log(tobj);
+            //console.log(this.cntTag);
+            //console.log(tobj);
+
+            //Condチェック
+            if (tobj) {
+                if (tobj.pm.cond) {
+
+                    if (TYRANO.kag.ftag.checkCond(tobj) == false) {
+                        next_tag();
+                        return;
+                    }
+                }
+            }
 
             that.startTag(tobj.tag, tobj.pm, () => {
-                TYRANO.kag.tmp.cut_nextorder = null;
-                this.cntTag++;
 
-                if (this.current_tags.length == this.cntTag) {
-                    //最後まできた
-                    this.current_cb();
+                next_tag();
 
-                    if (this.bufTags.length != 0) {
-                        this.cntTag = 0;
-                        setTimeout(() => {
-                            post_tag();
-                        }, 10);
-                    } else {
-                        this.isExeTag = false;
-                    }
-                } else {
-                    setTimeout(() => {
-                        post_tag();
-                    }, 10);
-                }
             });
         };
 

@@ -37,7 +37,30 @@ tyrano.plugin.kag.tag.loadjs = {
 
     start: function (pm) {
         var that = this;
+        
+        let storage_url = "";
 
+        if ($.isHTTP(pm.storage)) {
+            storage_url = pm.storage;
+        } else {
+            if (pm.type === "module") {
+                storage_url = "../../../data/others/" + pm.storage + "?" + new Date().getTime();
+            } else {
+                storage_url = "./data/others/" + pm.storage + "?" + new Date().getTime();
+            }
+        }
+
+        if (pm.type === "module") {
+            import(storage_url).then((module) => {
+                that.kag.ftag.nextOrder();
+            });
+        } else {
+            $.getScript(storage_url, function () {
+                that.kag.ftag.nextOrder();
+            });
+        }
+
+        /*
         if (pm.type === "module") {
             import("../../../data/others/" + pm.storage).then((module) => {
                 that.kag.ftag.nextOrder();
@@ -47,6 +70,7 @@ tyrano.plugin.kag.tag.loadjs = {
                 that.kag.ftag.nextOrder();
             });
         }
+        */
     },
 };
 
