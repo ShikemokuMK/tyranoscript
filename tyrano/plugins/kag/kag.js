@@ -3771,9 +3771,9 @@ tyrano.plugin.kag = {
 
             try {
 
-                let lang_str = await $.loadTextSync("./data/others/lang/" + name + ".json");
+                let lang_json = await $.loadTextSync("./data/others/lang/" + name + ".json");
                 this.lang = name;
-                this.map_lang = JSON.parse(lang_str);
+                this.map_lang = lang_json;
 
             } catch (e) {
                 console.log(e);

@@ -1898,7 +1898,6 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
             }
             */
 
-
             var obj_url = storage_url;
             var objLoader = new THREE.ObjectLoader();
 
