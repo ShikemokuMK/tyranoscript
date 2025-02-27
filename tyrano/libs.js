@@ -499,14 +499,11 @@
 
     //ユーザ環境を取得
     $.userenv = function () {
-        var ua = navigator.userAgent;
-        if (ua.indexOf("iPhone") > -1) {
+        var userAgent = navigator.userAgent;
+    
+        if (userAgent.match(/iphone|ipad|ipod/i)) {
             return "iphone";
-        } else if (ua.indexOf("iPad") > -1) {
-            return "iphone";
-        } else if (ua.indexOf("Android") > -1) {
-            return "android";
-        } else if (ua.indexOf("Chrome") > -1 && navigator.platform.indexOf("Linux") > -1) {
+        } else if (userAgent.match(/android/i)) {
             return "android";
         } else {
             return "pc";
