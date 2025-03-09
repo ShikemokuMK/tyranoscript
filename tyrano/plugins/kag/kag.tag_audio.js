@@ -2135,3 +2135,318 @@ tyrano.plugin.kag.tag.speak_off = {
         this.kag.ftag.nextOrder();
     },
 };
+
+
+
+/*
+#[popopo]
+
+:group
+オーディオ
+
+:title
+ポポポ音再生
+
+:exp
+テキストに合わせてポポポという電子音を流すことができます。
+
+:sample
+
+:param
+type=7つのキーワードsine/square/sawtooth/triangle/noise/file/noneのいずれかで指定します。順に、正弦波/矩形波/のこぎり波/三角波/ホワイトノイズ/音声ファイル再生/再生しない、を意味します。,
+volume=音の大きさ。0～100の数値またはキーワードdefaultで指定します。defaultを指定すると、コンフィグのSE効果音量を参照します。,
+time=ポポポ音の長さをミリ秒で指定します。typeがfileの場合は無意味。デフォルトは20。,
+tailtime=ポポポ音のフェードアウト時間をミリ秒で指定します。typeがfileの場合は無意味。デフォルトは30。,
+frequency=ポポポ音の音程。A/A+/B/B+/C/C+/D/D+/E/E+/F/F+/G/G+のいずれかのキーワードで指定します。それぞれラ/ラ♯/……/ソ/ソ♯を意味します。なお、typeがfileあるいはtypeがnoiseの場合は無意味。,
+octave=音(オクターブ)の高さを整数で指定します。デフォルトは0。1増減させるごとに隣のオクターブに移動します。typeがfileあるいはtypeがnoiseの場合は無意味。,
+samplerate=ポポポ音のサンプルレート。typeがnoiseの場合のみ機能します。初期値は44000。3000以上、192000以下でなければなりません。,
+buf=typeがfileの場合のみ機能します。再生するスロットを整数で指定します。,
+storage=type=fileの場合のみ機能します。再生する音声ファイル名を指定します。,
+mode=everyone/intervalのどちらかのキーワードで指定します。順に、ポポポ音を文字毎に鳴らす/文字に関係なく一定の間隔で鳴らす、を意味します。デフォルトはeveryone。,
+noplaychars=modeがeveryoneの場合のみ機能します。ポポポ音を鳴らさない文字を指定できます。デフォルトは"…・、。「」（）　 "。,
+interval=modeがintervalの場合のみ機能します。ポポポ音を鳴らす間隔をミリ秒で指定します。デフォルトは80。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.popopo = {
+    
+    pm: {
+        volume: "",
+        time: "",
+        tailtime: "",
+        frequency: "",
+        octave: "",
+        type: "",
+        mode: "",
+        buf: "",
+        storage: "",
+        samplerate: ""
+    },
+    
+    start: function (pm) {
+        
+        // 音程の文字列と数値対応
+        const FREQUENCY = {
+            "A": 0,
+            "A+": 100,
+            "B": 200,
+            "B+": 300,
+            "C": 300,
+            "C+": 400,
+            "D": 500,
+            "D+": 600,
+            "E": 700,
+            "E+": 800,
+            "F": 800,
+            "F+": 900,
+            "G": 1000,
+            "G+": 1100,
+        };
+
+
+        //# TYRANO.kag.stat.popopo
+        
+        var popopo = this.kag.stat.popopo;
+        var f = 0, is_set = false;
+        if (pm.volume !== "") popopo.volume = pm.volume;
+        if (pm.time !== "") popopo.time = parseInt(pm.time) / 1000;
+        if (pm.tailtime !== "") popopo.time = parseInt(pm.tailtime) / 1000;
+        if (pm.frequency !== "") popopo.frequency = FREQUENCY[pm.frequency];
+        if (pm.octave !== "") popopo.octave = parseInt(pm.octave);
+        if (pm.type !== "") popopo.type = pm.type;
+        if (pm.mode !== "") popopo.mode = pm.mode;
+        if (pm.buf !== "") popopo.buf = pm.buf;
+        if (pm.storage !== "") popopo.storage = pm.storage;
+        if (pm.samplerate !== "") popopo.samplerate = parseInt(pm.samplerate);
+        if (typeof pm.noplaychars === "string") popopo.noplaychars = pm.noplaychars;
+        
+        popopo.enable = true; //ポポポが有効化どうか
+
+        this.kag.ftag.nextOrder();
+            
+    }
+};
+
+//ポポポ初期化
+//# TYRANO.kag.popopo
+tyrano.plugin.kag.popopo = {
+    kag: TYRANO.kag,
+    is_ready: false
+};
+
+tyrano.plugin.kag.popopo.init = function () {
+    
+    TYRANO.kag.popopo.is_ready = true;
+    
+    // oscillatorNode.typeの文字列と数値対応
+    const TYPE_TO_NUMBER = {
+        "sine": 0,
+        "square": 1,
+        "sawtooth": 2,
+        "triangle": 3
+    };
+    
+    // AudioContext
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+
+    // AudioContextが偽の場合はここで終了する
+    if (!AudioContext) {
+        return;
+    }
+
+    TYRANO.kag.popopo.audioContext = new AudioContext();
+    TYRANO.kag.popopo.audioContext.createGain = TYRANO.kag.popopo.audioContext.createGain || TYRANO.kag.popopo.audioContext.createGainNode;
+    TYRANO.kag.popopo.gainNode = TYRANO.kag.popopo.audioContext.createGain();
+    TYRANO.kag.popopo.gainNode.gain.value = 0;
+    TYRANO.kag.popopo.gainNode.connect(TYRANO.kag.popopo.audioContext.destination);
+
+    //# TYRANO.kag.popopo.file
+    TYRANO.kag.popopo.file = {
+        everyone: {
+            start: function (message_str, ch_speed) {
+            },
+            play: function (ch) {
+                var pm = TYRANO.kag.stat.popopo;
+                
+                if (pm.noplaychars.indexOf(ch) > -1) return;
+                var volume = pm.volume;
+                if (volume === "default") {
+                    volume = "";
+                }
+                TYRANO.kag.ftag.startTag("playse", {
+                    volume: volume,
+                    buf: pm.buf,
+                    storage: pm.storage,
+                    stop: true
+                });
+            },
+            stop: function (message_str, ch_speed) {
+            }
+        },
+        interval: {
+            start: function (message_str, ch_speed) {
+                var pm = TYRANO.kag.stat.popopo;
+                if (pm.volume === "default") {
+                    pm.volume = "";
+                }
+                var interval = pm.interval || 100;
+                var count = Math.ceil(message_str.length * ch_speed / interval);
+                var i = 0;
+                var play = function () {
+                    TYRANO.kag.ftag.startTag("playse", {
+                        volume: pm.volume,
+                        buf: pm.buf,
+                        storage: pm.storage,
+                        stop: true
+                    });
+                    if (++i >= count) {
+                        clearInterval(TYRANO.kag.popopo_timer);
+                    }
+                }
+                clearInterval(TYRANO.kag.popopo_timer);
+                TYRANO.kag.popopo_timer = setInterval(play, interval);
+                play();
+            },
+            play: function (ch) {
+            },
+            stop: function (message_str, ch_speed) {
+                clearInterval(TYRANO.kag.popopo_timer);
+            }
+        }
+    };
+
+    //# TYRANO.kag.popopo.createNode
+    // オシレーターノードを作るぞ
+    TYRANO.kag.popopo.createNode = function (pm) {
+        if (pm.type === "noise") {
+            return this.noise.createNoise(pm);
+        }
+        else {
+            var node = this.audioContext.createOscillator();
+            node.detune.value = pm.frequency + pm.octave * 1200;
+            node.type = (typeof node.type === "string") ? pm.type : TYPE_TO_NUMBER[pm.type];
+            node.start = node.start || node.noteOn;
+            node.stop = node.stop || node.noteOff;
+            node.connect(this.gainNode);
+            node.start();
+            return node;
+        }
+    };
+
+    //# TYRANO.kag.popopo.createNoise
+    // オシレーターノード（ノイズ）を作る
+    TYRANO.kag.popopo.noise = {
+        cache: {},
+        createNoise: function (pm) {
+            var audioContext = TYRANO.kag.popopo.audioContext;
+            var sampleRate = Math.min(Math.max(3000, parseInt(pm.samplerate) || 44000), 192000);
+            var noiseBuffer;
+            if (this.cache[sampleRate]) {
+                noiseBuffer = this.cache[sampleRate];
+            }
+            else {
+                var bufferSize = audioContext.sampleRate;
+                noiseBuffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+                var output = noiseBuffer.getChannelData(0);
+                for (var i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                this.cache[sampleRate] = noiseBuffer;
+            }
+            var whiteNoise = audioContext.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+            whiteNoise.start(0);
+            whiteNoise.connect(TYRANO.kag.popopo.gainNode);
+            whiteNoise.stop = function () {
+                whiteNoise.disconnect();
+            };
+            return whiteNoise;
+        }
+    };
+
+    //# TYRANO.kag.popopo.wave
+    // 音声を生成・再生・終了する
+    TYRANO.kag.popopo.wave = {
+        // 文字毎
+        everyone: {
+            start: function (message_str, ch_speed) {
+                var pm = TYRANO.kag.stat.popopo;
+                
+                if (pm.volume === "default") {
+                    pm._volume = parseInt(TYRANO.kag.config.defaultSeVolume) / 100;
+                }
+                else {
+                    pm._volume = parseInt(pm.volume) / 100;
+                }
+                
+                TYRANO.kag.popopo.oscillatorNode = TYRANO.kag.popopo.createNode(pm);
+            },
+            play: function (ch) {
+                var t0 = TYRANO.kag.popopo.audioContext.currentTime;
+                var pm = TYRANO.kag.stat.popopo;
+                
+                if (pm.noplaychars.indexOf(ch) > -1) return;
+                
+                TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(pm._volume, t0, 0);
+                TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(0, t0 + pm.time, pm.tailtime);
+            },
+            stop: function (message_str, ch_speed) {
+                var t0 = TYRANO.kag.popopo.audioContext.currentTime;
+                var pm = TYRANO.kag.stat.popopo;
+                TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(0, t0 + pm.time, pm.tailtime);
+                TYRANO.kag.popopo.oscillatorNode.stop(t0 + pm.tailtime);
+                TYRANO.kag.popopo.oscillatorNode = null;
+            }
+        },
+        // 定間隔
+        interval: {
+            start: function (message_str, ch_speed) {
+                var pm = TYRANO.kag.stat.popopo;
+                if (pm.volume === "default") {
+                    pm._volume = parseInt(TYRANO.kag.config.defaultSeVolume) / 100;
+                }
+                else {
+                    pm._volume = parseInt(pm.volume) / 100;
+                }
+                TYRANO.kag.popopo.oscillatorNode = TYRANO.kag.popopo.createNode(pm);
+        
+                var t0 = TYRANO.kag.popopo.audioContext.currentTime;
+                var gainNode = TYRANO.kag.popopo.gainNode;
+                var interval = pm.interval || 100;
+                var count = Math.ceil(message_str.length * ch_speed / interval);
+                interval /= 1000;
+                var t = t0;
+                for (var i = 0; i < count; i++) {
+                    gainNode.gain.setTargetAtTime(pm._volume, t, 0);
+                    gainNode.gain.setTargetAtTime(0, t + pm.time, pm.tailtime);
+                    t += interval;
+                }
+            },
+            play: function (ch) {
+            },
+            stop: function (message_str, ch_speed) {
+                var t0 = TYRANO.kag.popopo.audioContext.currentTime;
+                var pm = TYRANO.kag.stat.popopo;
+                var gainNode = TYRANO.kag.popopo.gainNode;
+                TYRANO.kag.popopo.oscillatorNode.stop(t0 + pm.time);
+                TYRANO.kag.popopo.oscillatorNode = null;
+            }
+        }
+    };
+
+    tyrano.plugin.kag.tag.configdelay.start = function (pm) {
+        if (pm.speed != "") {
+            this.kag.stat.ch_speed = "";
+            this.kag.config.chSpeed = pm.speed;
+            this.kag.ftag.startTag("eval", { "exp": "sf._config_ch_speed = " + pm.speed });
+        } else {
+            this.kag.ftag.nextOrder();
+        }
+    };
+
+};
+
+
+

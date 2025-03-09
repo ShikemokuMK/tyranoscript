@@ -173,6 +173,11 @@ tyrano.plugin.kag = {
         preload_audio_map: {},
         preload_objects: [],
         preload_complete_callbacks: [],
+        
+        popopo: {
+            key: "",
+            player: null,
+        },
 
         mode_effect: {
             pc: {
@@ -345,6 +350,21 @@ tyrano.plugin.kag = {
             marginb: 0,
 
             others_style: {},
+        },
+        
+        popopo:{
+            volume: "default",
+            time: 0.02,
+            tailtime: 0.03,
+            frequency: 0,
+            octave: 0,
+            interval: 80,
+            type: "sine",
+            mode: "everyone",
+            buf: "0",
+            storage: "none",
+            samplerate: 44000,
+            noplaychars: "…・、。「」（）　 "
         },
 
         //システム系で使用するHTMLの場所を保持

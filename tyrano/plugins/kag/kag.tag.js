@@ -1993,6 +1993,11 @@ tyrano.plugin.kag.tag.text = {
 
         // 次の文字のインデックス
         const next_char_index = char_index + 1;
+        
+        //ポポポ判定
+        if (this.kag.tmp.popopo.key) {
+            this.kag.tmp.popopo.player.play(j_char_span_children.eq(char_index).text());
+        }
 
         // すべての文字を表示し終わったかどうか
         if (next_char_index < j_char_span_children.length) {
@@ -2002,7 +2007,14 @@ tyrano.plugin.kag.tag.text = {
                 this.addOneChar(next_char_index, j_char_span_children, j_message_span, j_msg_inner);
             }, this.kag.tmp.ch_speed);
         } else {
+            
             // すべての文字を表示し終わったようだ
+            
+            //ポポポ判定があるなら停止させる
+            if (this.kag.tmp.popopo.key) {
+                this.kag.tmp.popopo.player.stop();
+            }
+            
             $.setTimeout(() => {
                 this.finishAddingChars();
             }, this.kag.tmp.ch_speed);
@@ -2087,6 +2099,39 @@ tyrano.plugin.kag.tag.text = {
         } else if (this.kag.config.chSpeed) {
             ch_speed = parseInt(this.kag.config.chSpeed);
         }
+        
+        //ポポポ判定
+        if (this.kag.stat.popopo.enable == true) {
+            
+            //初期化が完了してるかどうか。
+            if (!TYRANO.kag.popopo.is_ready) {
+                console.log("init popopo");
+                TYRANO.kag.popopo.init();
+            }
+        
+            var key = this.kag.stat.popopo.type;
+            if (key === "file") {
+            }else if (key === "none") {
+                key = "";
+            }else {
+                key = "wave";
+            }
+        
+            if (key) {
+            
+                const message_str = this.kag.stat.current_message_str;
+                var key2 = this.kag.stat.popopo.mode;
+                var player = this.kag.popopo[key][key2];
+                this.kag.tmp.popopo.player = player;
+            
+                player.start(message_str, ch_speed);
+        
+            }
+        
+            this.kag.tmp.popopo.key = key;
+            
+        }
+        
 
         // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
         const j_char_span_children = j_message_span.find(".char");
