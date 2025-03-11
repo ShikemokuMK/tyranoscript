@@ -2108,8 +2108,34 @@ tyrano.plugin.kag.tag.text = {
                 console.log("init popopo");
                 TYRANO.kag.popopo.init();
             }
+            
+            let popopo_obj = this.kag.stat.popopo;
         
-            var key = this.kag.stat.popopo.type;
+            //当該キャラクターのpopopoが登録されているかを確認する。
+            //存在すれば、popopo_objの差し替え
+            let chara_name = this.kag.chara.getCharaName();
+            
+            if (!chara_name) {
+                chara_name = "default";
+            }
+            
+            let j_chara_name = "-1";
+            //chara_nameにjnameが存在する場合は変換する
+            if (this.kag.stat.charas[chara_name]&&this.kag.stat.charas[chara_name].jname!="") {
+                j_chara_name = this.kag.stat.charas[chara_name].jname;
+            }
+            
+            if (this.kag.stat.popopo_chara[chara_name]) {
+                popopo_obj = this.kag.stat.popopo_chara[chara_name];
+            } else if (this.kag.stat.popopo_chara[j_chara_name]) {
+                popopo_obj = this.kag.stat.popopo_chara[j_chara_name];
+            } else if (this.kag.stat.popopo_chara["default"]) {
+                popopo_obj = this.kag.stat.popopo_chara["default"];
+            }
+            
+            this.kag.stat.popopo = popopo_obj;
+            
+            var key = popopo_obj.type;
             if (key === "file") {
             }else if (key === "none") {
                 key = "";
@@ -2120,7 +2146,7 @@ tyrano.plugin.kag.tag.text = {
             if (key) {
             
                 const message_str = this.kag.stat.current_message_str;
-                var key2 = this.kag.stat.popopo.mode;
+                var key2 = popopo_obj.mode;
                 var player = this.kag.popopo[key][key2];
                 this.kag.tmp.popopo.player = player;
             
@@ -6160,6 +6186,7 @@ opacity = レイヤの不透明度を`0`～`255`の範囲で指定します。`0
 
 #[end]
 */
+
 
 //レイヤーオプション変更
 tyrano.plugin.kag.tag.layopt = {

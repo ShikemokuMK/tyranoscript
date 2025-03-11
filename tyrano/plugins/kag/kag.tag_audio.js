@@ -2164,7 +2164,8 @@ buf=typeがfileの場合のみ機能します。再生するスロットを整�
 storage=type=fileの場合のみ機能します。再生する音声ファイル名を指定します。,
 mode=everyone/intervalのどちらかのキーワードで指定します。順に、ポポポ音を文字毎に鳴らす/文字に関係なく一定の間隔で鳴らす、を意味します。デフォルトはeveryone。,
 noplaychars=modeがeveryoneの場合のみ機能します。ポポポ音を鳴らさない文字を指定できます。デフォルトは"…・、。「」（）　 "。,
-interval=modeがintervalの場合のみ機能します。ポポポ音を鳴らす間隔をミリ秒で指定します。デフォルトは80。
+interval=modeがintervalの場合のみ機能します。ポポポ音を鳴らす間隔をミリ秒で指定します。デフォルトは80。,
+chara=キャラクター名を指定できます。このキャラクターが話しているときだけ、ポポポ音を適用できます。
 
 #[end]
 */
@@ -2181,7 +2182,8 @@ tyrano.plugin.kag.tag.popopo = {
         mode: "",
         buf: "",
         storage: "",
-        samplerate: ""
+        samplerate: "",
+        chara:"default",
     },
     
     start: function (pm) {
@@ -2204,10 +2206,15 @@ tyrano.plugin.kag.tag.popopo = {
             "G+": 1100,
         };
 
-
         //# TYRANO.kag.stat.popopo
+        let popopo = $.extend(true, {}, this.kag.stat.popopo);
         
-        var popopo = this.kag.stat.popopo;
+        if (pm.chara != "") {
+            if (this.kag.stat.popopo_chara[pm.chara]) {
+                popopo = this.kag.stat.popopo_chara[pm.chara];
+            }
+        }
+        
         var f = 0, is_set = false;
         if (pm.volume !== "") popopo.volume = pm.volume;
         if (pm.time !== "") popopo.time = parseInt(pm.time) / 1000;
@@ -2221,8 +2228,12 @@ tyrano.plugin.kag.tag.popopo = {
         if (pm.samplerate !== "") popopo.samplerate = parseInt(pm.samplerate);
         if (typeof pm.noplaychars === "string") popopo.noplaychars = pm.noplaychars;
         
-        popopo.enable = true; //ポポポが有効化どうか
-
+        popopo.enable = true;
+        
+        this.kag.stat.popopo.enable = true; //ポポポが有効化どうか
+        
+        this.kag.stat.popopo_chara[pm.chara] = popopo;
+        
         this.kag.ftag.nextOrder();
             
     }

@@ -366,6 +366,8 @@ tyrano.plugin.kag = {
             samplerate: 44000,
             noplaychars: "…・、。「」（）　 "
         },
+        
+        popopo_chara: {},
 
         //システム系で使用するHTMLの場所を保持
         sysview: {
