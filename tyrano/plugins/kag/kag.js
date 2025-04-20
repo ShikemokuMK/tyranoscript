@@ -23,6 +23,8 @@ tyrano.plugin.kag = {
         "id",
         "src",
         "name",
+        "width",
+        "height",
         "data-event-tag",
         "data-event-pm",
         "data-event-target",
