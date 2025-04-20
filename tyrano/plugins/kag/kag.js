@@ -3219,7 +3219,7 @@ tyrano.plugin.kag = {
                 // ここに到達したならばこのパーツはリップシンク対象である
 
                 // このパーツのすべてのフレームの<img>要素の集合を取得
-                const j_frames = j_chara.find(`.lipsync-frame[data-effect=${part}-${state}]`);
+                const j_frames = j_chara.find(`.lipsync-frame[data-effect="${part}-${state}"]`);
                 const thresholds = part_state_obj.lip_volume;
                 if (j_frames.length > 0 && thresholds) {
                     target_parts.push({
