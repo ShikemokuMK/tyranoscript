@@ -2101,62 +2101,71 @@ tyrano.plugin.kag.tag.text = {
         }
         
         //ポポポ判定
-        if (this.kag.stat.popopo.enable == true) {
-            
-            //初期化が完了してるかどうか。
-            if (!TYRANO.kag.popopo.is_ready) {
-                console.log("init popopo");
-                TYRANO.kag.popopo.init();
-            }
-            
-            let popopo_obj = this.kag.stat.popopo;
         
-            //当該キャラクターのpopopoが登録されているかを確認する。
-            //存在すれば、popopo_objの差し替え
-            let chara_name = this.kag.chara.getCharaName();
+        if (this.kag.stat.popopo.enable) {
             
-            if (!chara_name) {
-                chara_name = "default";
-            }
-            
-            let j_chara_name = "-1";
-            //chara_nameにjnameが存在する場合は変換する
-            if (this.kag.stat.charas[chara_name]&&this.kag.stat.charas[chara_name].jname!="") {
-                j_chara_name = this.kag.stat.charas[chara_name].jname;
-            }
-            
-            if (this.kag.stat.popopo_chara[chara_name]) {
-                popopo_obj = this.kag.stat.popopo_chara[chara_name];
-            } else if (this.kag.stat.popopo_chara[j_chara_name]) {
-                popopo_obj = this.kag.stat.popopo_chara[j_chara_name];
-            } else if (this.kag.stat.popopo_chara["default"]) {
-                popopo_obj = this.kag.stat.popopo_chara["default"];
-            }
-            
-            this.kag.stat.popopo = popopo_obj;
-            
-            var key = popopo_obj.type;
-            if (key === "file") {
-            }else if (key === "none") {
-                key = "";
-            }else {
-                key = "wave";
-            }
+            if (this.kag.stat.is_skip !== true && !this.kag.stat.is_nowait && ch_speed >= 3) {
         
-            if (key) {
+                //初期化が完了してるかどうか。
+                if (!TYRANO.kag.popopo.is_ready) {
+                    console.log("init popopo");
+                    TYRANO.kag.popopo.init();
+                }
             
-                const message_str = this.kag.stat.current_message_str;
-                var key2 = popopo_obj.mode;
-                var player = this.kag.popopo[key][key2];
-                this.kag.tmp.popopo.player = player;
-            
-                player.start(message_str, ch_speed);
+                let popopo_obj = this.kag.stat.popopo;
         
+                //当該キャラクターのpopopoが登録されているかを確認する。
+                //存在すれば、popopo_objの差し替え
+                let chara_name = this.kag.chara.getCharaName();
+            
+                if (!chara_name) {
+                    chara_name = "default";
+                }
+            
+                let j_chara_name = "-1";
+                //chara_nameにjnameが存在する場合は変換する
+                if (this.kag.stat.charas[chara_name] && this.kag.stat.charas[chara_name].jname != "") {
+                    j_chara_name = this.kag.stat.charas[chara_name].jname;
+                }
+            
+                if (this.kag.stat.popopo_chara[chara_name]) {
+                    popopo_obj = this.kag.stat.popopo_chara[chara_name];
+                } else if (this.kag.stat.popopo_chara[j_chara_name]) {
+                    popopo_obj = this.kag.stat.popopo_chara[j_chara_name];
+                } else if (this.kag.stat.popopo_chara["default"]) {
+                    popopo_obj = this.kag.stat.popopo_chara["default"];
+                }
+            
+                this.kag.stat.popopo = popopo_obj;
+            
+                var key = popopo_obj.type;
+                if (key === "file") {
+                } else if (key === "none") {
+                    key = "";
+                } else {
+                    key = "wave";
+                }
+        
+                if (key) {
+            
+                    const message_str = this.kag.stat.current_message_str;
+                    var key2 = popopo_obj.mode;
+                    var player = this.kag.popopo[key][key2];
+                    this.kag.tmp.popopo.player = player;
+            
+                    player.start(message_str, ch_speed);
+        
+                }
+        
+                this.kag.tmp.popopo.key = key;
+                
+            } else {
+                TYRANO.kag.popopo.is_ready = false;
             }
-        
-            this.kag.tmp.popopo.key = key;
             
         }
+        
+       
         
 
         // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
