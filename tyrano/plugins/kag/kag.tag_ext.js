@@ -4355,14 +4355,25 @@ tyrano.plugin.kag.tag.free_filter = {
     },
 
     start: function (pm) {
+        
         var filter_str = "";
 
         var j_obj;
 
-        if (pm.layer == "") {
+        try {
+        
+            if (pm.layer == "all") {
+                j_obj = $(".tyrano_filter_effect");
+            } else if (pm.layer != "") {
+                j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+            } else {
+                j_obj = $(".tyrano_filter_effect");
+            }
+            
+        } catch (e) {
+            
             j_obj = $(".tyrano_filter_effect");
-        } else {
-            j_obj = this.kag.layer.getLayer(pm.layer, pm.page);
+            
         }
 
         if (pm.name != "") {
