@@ -3798,6 +3798,11 @@ tyrano.plugin.kag = {
                 let lang_json = await $.loadTextSync("./data/others/lang/" + name + ".json");
                 this.lang = name;
                 this.map_lang = lang_json;
+                
+                //システム関連の更新
+                if (this.map_lang["systems"]) {
+                    window.tyrano_lang["word"] = this.map_lang["systems"];
+                }
 
             } catch (e) {
                 console.log(e);
