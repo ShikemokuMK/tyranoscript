@@ -14,16 +14,23 @@
 
     $.isHTTP = function (str) {
 
-        if ($.isBase64(str)) {
-            return true;
+        try {
+            if ($.isBase64(str)) {
+                return true;
+            }
+
+            if (str.substring(0, 4) === "http" || str.substring(0, 4) === "file" || str.substring(0, 6) === "./data" || str.substring(0, 1) === "/" || str.substring(1, 2) === ":") {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            console.log(e)
         }
 
-        if (str.substring(0, 4) === "http") {
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     };
+
 
     $.play_audio = function (audio_obj) {
         audio_obj.play();
@@ -59,6 +66,7 @@
     };
 
     $.localFilePath = function () {
+
         var path = "";
         //Mac os Sierra 対応
         if (process.execPath.indexOf("var/folders") != -1) {
@@ -303,7 +311,7 @@
     $.tag = function (tag_name, pm) {
         var pm_str = "";
         for (key in pm) {
-            pm_str += " " + key + "=\"" + pm[key] + "\" ";
+            pm_str += " " + key + '="' + pm[key] + '" ';
         }
         return "[" + tag_name + " " + pm_str + " ]";
     };
@@ -329,6 +337,10 @@
 
     //確証しを取得
     $.getExt = function (str) {
+
+        var questionMarkIndex = str.indexOf('?');
+        var str = questionMarkIndex !== -1 ? str.substring(0, questionMarkIndex) : str;
+
         return str.split(".").pop();
     };
 
@@ -408,8 +420,15 @@
     $.loadText = function (file_path, callback) {
         if (window.TYRANO) window.TYRANO.kag.showLoadingLog();
 
+        let dataType = "text";
+
+        if ($.getExt(file_path) == "json") {
+            dataType = "json";
+        }
+
         $.ajax({
             url: file_path + "?" + Math.floor(Math.random() * 1000000),
+            dataType: dataType,
             cache: false,
             success: function (text) {
                 if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
@@ -426,10 +445,16 @@
 
     $.loadTextSync = function (file_path) {
 
-        return new Promise((resolve, reject) => {
+        let dataType = "text";
 
+        if ($.getExt(file_path) == "json") {
+            dataType = "json";
+        }
+
+        return new Promise((resolve, reject) => {
             $.ajax({
                 url: file_path + "?" + Math.floor(Math.random() * 1000000),
+                dataType: dataType,
                 cache: false,
                 success: function (text) {
                     if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
@@ -443,7 +468,6 @@
                     reject();
                 },
             });
-
         });
     };
 
@@ -982,12 +1006,19 @@
         return { filename: filename, ext: ext, name: name, dir_name: dir_name };
     };
 
+    //getExePathのキャッシュ
+    $.cacheExePath = "";
+
     //PC用の実行パスを取得
     $.getExePath = function () {
-        const _app = require("electron").remote.app;
+
+        if ($.cacheExePath != "") {
+            return $.cacheExePath;
+        }
 
         //TyranoStudio.app/Contents/Resources/app
-        let path = _app.getAppPath();
+        let path = window.studio_api.ipcRenderer.sendSync("getAppPath", {});
+
         let platform = "";
         //alert(process.platform);
         //console.log(process.platform)
@@ -1011,12 +1042,14 @@
             }
         }
 
+        $.cacheExePath = path;
+
         return path;
     };
 
     //展開先のパスを返す。
     $.getUnzipPath = function () {
-        let path = __dirname;
+        let path = process.__dirname;
 
         if (path.indexOf(".asar") != -1) {
             return "asar";
@@ -1027,7 +1060,7 @@
 
     $.removeStorageFile = function (key) {
         try {
-            const fs = require("fs");
+            const fs = window.studio_api.fs;
             let out_path;
             if (process.execPath.indexOf("var/folders") != -1) {
                 out_path = process.env.HOME + "/_TyranoGameData";
@@ -1044,7 +1077,7 @@
 
     $.setStorageFile = function (key, val) {
         val = JSON.stringify(val);
-        var fs = require("fs");
+        var fs = window.studio_api.fs;
 
         var out_path = $.getExePath();
 
@@ -1064,7 +1097,7 @@
     $.getStorageFile = function (key) {
         try {
             var gv = "null";
-            var fs = require("fs");
+            var fs = window.studio_api.fs;
             var out_path = $.getExePath();
 
             if (process.execPath.indexOf("var/folders") != -1) {
@@ -1077,7 +1110,7 @@
             }
 
             if (fs.existsSync(out_path + "/" + key + ".sav")) {
-                var str = fs.readFileSync(out_path + "/" + key + ".sav");
+                var str = fs.readFileSync(out_path + "/" + key + ".sav", "utf8");
                 gv = unescape(str);
             } else {
                 //Fileが存在しない場合にローカルストレージから読み取る使用は破棄。
@@ -1130,16 +1163,12 @@
 
         // OK 表示
         j_ok.show().focusable();
-        if (j_ok.hasClass("remodal-image-button")) {
-            j_ok.trigger("init");
-        }
+        j_ok.trigger("init");
 
         // Cancel 表示
         if (options.type === "confirm") {
             j_ng.show().focusable();
-            if (j_ng.hasClass("remodal-image-button")) {
-                j_ng.trigger("init");
-            }
+            j_ng.trigger("init");
         } else {
             j_ng.hide();
         }
@@ -1152,7 +1181,8 @@
         const inst = j_box.remodal();
 
         // 汎用クローズ処理
-        const close_common = () => {
+        const close_common = (e) => {
+            e.stopPropagation();
             j_event.setStyle("pointer-events", "none");
             TYRANO.kag.key_mouse.vmouse.hide();
             const effect = TYRANO.kag.tmp.remodal_closing_effect;
@@ -1162,7 +1192,6 @@
                     j_box.setStyleMap({ "animation-name": "" }, "webkit");
                 });
             }
-
             $.removeRemodalEvents(false);
         };
 
@@ -1179,7 +1208,8 @@
         // ラッパーのクリックでウィンドウを閉じられるようにする
         j_wrapper
             .off("mousedown.outerclose click.outerclose")
-            .on("click.outerclose", () => {
+            .on("click.outerclose", (e) => {
+                e.stopPropagation();
                 if (mousedown_elm !== j_wrapper[0]) return;
                 j_box.off("mousedown.outerclose");
                 j_wrapper.off("mousedown.outerclose click.outerclose");
@@ -1211,8 +1241,8 @@
 
         if (options.type === "alert") {
             // アラート: クローズ時の処理
-            $(document).on("closed", ".remodal", () => {
-                close_common();
+            $(document).on("closed", ".remodal", (e) => {
+                close_common(e);
                 $.removeRemodalEvents(false);
                 if (typeof options.on_ok === "function") {
                     options.on_ok();
@@ -1222,16 +1252,16 @@
 
         if (options.type === "confirm") {
             // コンファーム: OK 時の処理
-            $(document).on("confirmation", ".remodal", () => {
-                close_common();
+            $(document).on("confirmation", ".remodal", (e) => {
+                close_common(e);
                 if (typeof options.on_ok === "function") {
                     options.on_ok();
                 }
             });
 
             // コンファーム: Cancel 時の処理
-            $(document).on("cancellation", ".remodal", () => {
-                close_common();
+            $(document).on("cancellation", ".remodal", (e) => {
+                close_common(e);
                 if (typeof options.on_cancel === "function") {
                     options.on_cancel();
                 }
@@ -1297,19 +1327,14 @@
     };
 
     $.prompt = function (str, cb) {
-
         alertify.prompt(str, function (flag, text) {
-
             if (typeof cb == "function") {
                 cb(flag, text);
             }
-
         });
-
     };
 
     $.isBase64 = function (str) {
-
         if (!str) return false;
 
         if (str.substr(0, 10) == "data:image") {
@@ -1317,9 +1342,7 @@
         } else {
             return false;
         }
-
-
-    }
+    };
 
     //オブジェクトの個数をもってきます。1
     $.countObj = function (obj) {
@@ -2718,6 +2741,20 @@
             return $.convertLength(item);
         });
         return hash.join(" ");
+    };
+
+    $.fn.showAtIndexWithVisibility = function (index) {
+        return this.each(function (i) {
+            if (i === index) {
+                if (this.style.visibility !== "visible") {
+                    this.style.visibility = "visible";
+                }
+            } else {
+                if (this.style.visibility !== "hidden") {
+                    this.style.visibility = "hidden";
+                }
+            }
+        });
     };
 
     $.captureStackTrace = (str = "captured stack trace!") => {

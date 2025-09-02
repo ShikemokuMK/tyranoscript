@@ -21,7 +21,11 @@ class ThreeModel {
 		this.model.name = obj.name;
 		this.setUserData("name", obj.name);
 
-		if (this.pm.visible == true) {
+		if (obj.pm.not_export) {
+			this.setUserData("not_export", obj.pm.not_export);
+		}
+
+		if (this.pm.visible == "true") {
 
 			this.show();
 
@@ -31,7 +35,8 @@ class ThreeModel {
 			this.opacity(0);
 		}
 
-		this.anim_obj = {};
+		this.model_helper;
+		this.anim_obj = null;
 
 	}
 
@@ -185,8 +190,51 @@ class ThreeModel {
 		if (pos.z == 0) {
 			to_pos.z = 0;
 		}
+		
+		
+		let from_pos = {
+			x: this.model[type].x,
+			y: this.model[type].y,
+			z: this.model[type].z
+		}
 
+		//相対指定の場合
+		if (options.relative == "true") {
 
+			to_pos.x += from_pos.x;
+			to_pos.y += from_pos.y;
+			to_pos.z += from_pos.z;
+
+		}
+
+		this.anim_obj = anime({
+			targets: from_pos,
+			x: to_pos.x,
+			y: to_pos.y,
+			z: to_pos.z,
+			round: 1000,
+			duration: options.duration,
+			easing: options.easing,
+			direction: options.direction,
+			loop: options.loop,
+			update: (e) => {
+				//console.log(from_pos);
+				this.model[type]["x"] = from_pos.x;
+				this.model[type]["y"] = from_pos.y;
+				this.model[type]["z"] = from_pos.z;
+			},
+
+			complete: (e) => {
+				if (typeof cb == "function") {
+					cb();
+				}
+			}
+
+		});
+
+		return;
+
+		//以下無効
 		var arr = ["x", "y", "z"];
 		var cnt_fin = 0;
 
@@ -236,6 +284,13 @@ class ThreeModel {
 	}
 
 	stopAnim(finish) {
+		
+		if (this.anim_obj) {
+			anime.remove(this.anim_obj);
+			this.anim_obj = null;
+		}
+		
+		return;
 
 		for (let type in this.anim_obj) {
 
@@ -248,14 +303,6 @@ class ThreeModel {
 				} else {
 					anim_obj.obj.stop(true, false);
 				}
-
-
-				/*
-				if(finish == "true"){
-					this.model[type][key] = anim_obj[key].finish_val;
-				}
-				*/
-
 
 			}
 
@@ -296,6 +343,16 @@ class ThreeModel {
 
 	}
 
+	show(opacity = 1) {
+
+		this.opacity(opacity);
+
+		this.visible = true;
+		this.model.visible = true;
+
+	}
+	
+	/*
 	show() {
 
 		if (typeof this.pm["opacity"] == "undefined" || this.pm["opacity"] == "") {
@@ -308,6 +365,7 @@ class ThreeModel {
 		this.model.visible = true;
 
 	}
+	*/
 
 
 

@@ -4,6 +4,9 @@ tyrano.plugin.kag = {
     kag: null,
     sound_swf: null,
 
+    lang: "", //言語設定
+    map_lang: {},    //言語設定のマップ
+
     is_rider: false, //ティラノライダーからの起動かどうか
     is_studio: false, //ティラノスタジオからの起動かどうか
 
@@ -20,10 +23,13 @@ tyrano.plugin.kag = {
         "id",
         "src",
         "name",
+        "width",
+        "height",
         "data-event-tag",
         "data-event-pm",
         "data-event-target",
         "data-event-storage",
+        "data-restore",
         "tabindex",
         "l_visible",
         "data-parent-layer",
@@ -32,7 +38,6 @@ tyrano.plugin.kag = {
         "data-effect",
         "data",
         "type",
-
     ],
 
     config: {
@@ -121,7 +126,6 @@ tyrano.plugin.kag = {
                 },
 
                 fps: {
-
                     active: false,
 
                     movementSpeed: 300,
@@ -134,6 +138,10 @@ tyrano.plugin.kag = {
                     offMoveBufferB: false,
                     offRotateBufferL: false,
                     offRotateBufferR: false,
+                    
+                    moveUp: false,
+                    moveDown: false,
+
 
                     is_colid: false,
 
@@ -153,18 +161,25 @@ tyrano.plugin.kag = {
                     fps_rate: 0,
 
                     move_trans_control: false,
-
-                }
-
+                    
+                    stop_eye_move: false,
+                    enable_move_updown: true, //上下の高さ移動
+                },
             },
 
             groups: {},
             models: {},
             evt: {},
-
         },
 
         preload_audio_map: {},
+        preload_objects: [],
+        preload_complete_callbacks: [],
+        
+        popopo: {
+            key: "",
+            player: null,
+        },
 
         mode_effect: {
             pc: {
@@ -239,7 +254,6 @@ tyrano.plugin.kag = {
         current_bgm_base64: "", //現在再生中のBGMがbase64エンコードされているかどうか。されている場合はファイル形式が格納される。(mp3 ogg etc)
 
         current_bgm_pause_seek: "", //ポーズ中ならその時間が入る。ポーズ中じゃない場合は空白
-
 
         current_se: {}, //現在再生中のループ効果音
 
@@ -339,6 +353,23 @@ tyrano.plugin.kag = {
 
             others_style: {},
         },
+        
+        popopo:{
+            volume: "default",
+            time: 0.02,
+            tailtime: 0.03,
+            frequency: 0,
+            octave: 0,
+            interval: 80,
+            type: "sine",
+            mode: "everyone",
+            buf: "0",
+            storage: "none",
+            samplerate: 44000,
+            noplaychars: "…・、。「」（）　 "
+        },
+        
+        popopo_chara: {},
 
         //システム系で使用するHTMLの場所を保持
         sysview: {
@@ -416,10 +447,16 @@ tyrano.plugin.kag = {
         message_config: {},
         word_nobreak_list: [],
 
+        lipsync_buf_chara: {},
+        
+        checkpoint: {},
+
         title: "", //ゲームのタイトル
+
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
 
     init: function () {
+        
         this.kag = this;
 
         var that = this;
@@ -428,7 +465,8 @@ tyrano.plugin.kag = {
 
         //二重起動チェック ElectronかつTyranoStudioからの起動じゃない場合
         if ($.isElectron() && window.navigator.userAgent.indexOf("TyranoStudio") == -1) {
-            if (!require("electron").remote.app.requestSingleInstanceLock()) {
+            //if (!require("electron").remote.app.requestSingleInstanceLock()) {
+            if (!window.studio_api.ipcRenderer.sendSync("doubleCheck", {})) {
                 alert($.lang("double_start"));
                 window.close();
                 if (typeof navigator.app != "undefined") {
@@ -517,26 +555,26 @@ tyrano.plugin.kag = {
     //パッチを反映します。
     applyPatch: function (patch_path, flag_reload, call_back) {
         //アップデートファイルの存在チェック
-        var fs = require("fs");
+        var fs = window.studio_api.fs;
 
         if (!fs.existsSync(patch_path)) {
             call_back();
             return;
         }
 
-        var fse = require("fs-extra");
-        var _path = require("path");
+        var fse = window.studio_api.fs;
+        var _path = window.studio_api.path;
         //リロードの場合は、アップデート不要
 
         var unzip_path = $.getUnzipPath();
 
         //asar化している場合は上書きできない
         if (unzip_path == "asar") {
-            const asar = require("asar");
+            const asar = window.studio_api.asar;
 
-            let path = __dirname;
+            let path = process.__dirname;
 
-            let asar_files = fs.readdirSync(path);
+            //let asar_files = fs.readdirSync(path);
 
             let out_path = $.localFilePath();
 
@@ -544,13 +582,25 @@ tyrano.plugin.kag = {
                 alert("パッチを適応するゲーム実行ファイル（.app）の場所を選択してください。");
 
                 //実行パスを選択させる
-                let dialog = require("electron").remote.dialog;
-
+                //let dialog = require("electron").remote.dialog;
+                
+                let filenames = window.studio_api.ipcRenderer.sendSync("showSelectFileDialog",
+                    {
+                        prop: ["openFile"],
+                        title: "パッチを適応するゲームの実行ファイル（app）を選択してください。",
+                        filters: [{ name: "", extensions: ["app"] }],
+                    }
+                );
+                
+                console.log(filenames);
+        
+                /*
                 let filenames = dialog.showOpenDialogSync(null, {
-                    properties: ["openFile"],
+                    prop: ["openFile"],
                     title: "パッチを適応するゲームの実行ファイル（app）を選択してください。",
                     filters: [{ name: "", extensions: ["app"] }],
                 });
+                */
 
                 if (typeof filenames == "undefined") {
                     alert("パッチの適応を中止します");
@@ -558,7 +608,7 @@ tyrano.plugin.kag = {
                     return;
                 }
 
-                path = filenames[0] + "/Contents/Resources/app.asar";
+                path = filenames.filepath + "/Contents/Resources/app.asar";
                 out_path = out_path + "/";
             } else {
                 out_path = out_path + "/";
@@ -571,7 +621,7 @@ tyrano.plugin.kag = {
             })();
 
             //ファイル全部コピーする
-            var AdmZip = require("adm-zip");
+            var AdmZip = window.studio_api.admzip;
 
             // reading archives  ファイルを上書きしている。
             var zip = new AdmZip(patch_path);
@@ -599,9 +649,9 @@ tyrano.plugin.kag = {
 
             return;
         } else {
-            const AdmZip = require("adm-zip");
+            const AdmZip = window.studio_api.admzip; 
 
-            var path = require("path");
+            var path = window.studio_api.path; 
             var abspath = path.resolve("./");
 
             // reading archives
@@ -640,9 +690,13 @@ tyrano.plugin.kag = {
         var tf = this.variable.tf;
         var mp = this.stat.mp;
 
-        eval(str);
-
-        this.saveSystemVariable();
+        try {
+            eval(str);
+            this.saveSystemVariable();
+        } catch (e) {
+            console.error(e);
+            this.warning(e, true);
+        }
 
         /*
         if(this.kag.is_rider){
@@ -657,15 +711,22 @@ tyrano.plugin.kag = {
 
     //式を評価して値を返却します
     embScript: function (str, preexp) {
+
         try {
             var f = this.stat.f;
             var sf = this.variable.sf;
             var tf = this.variable.tf;
             var mp = this.stat.mp;
 
-            return eval(str);
+            return eval("(" + str + ")");
+
         } catch (e) {
-            return undefined;
+
+            try {
+                return eval(str);
+            } catch (e) {
+                return undefined;
+            }
         }
     },
 
@@ -1399,7 +1460,7 @@ tyrano.plugin.kag = {
 
         if (this.kag.config["use3D"] == "true") {
             array_scripts = [
-                "./tyrano/libs/three/three.js",
+                 "./tyrano/libs/three/three.js",
 
                 "./tyrano/libs/three/loader/GLTFLoader.js",
                 "./tyrano/libs/three/loader/OBJLoader.js",
@@ -1407,9 +1468,13 @@ tyrano.plugin.kag = {
                 //"./tyrano/libs/three/loader/MMDLoader.js",
 
                 "./tyrano/libs/three/controls/OrbitControls.js",
+                "./tyrano/libs/three/controls/TransformControls.js",
+                "./tyrano/libs/three/controls/DeviceOrientationControls.js",
                 "./tyrano/libs/three/classes/ThreeModel.js",
                 "./tyrano/libs/three/etc/stats.min.js",
+                "./tyrano/libs/three/etc/ar.js",
 
+                "./tyrano/libs/three/etc/CSS3DRenderer.js",
             ];
         }
 
@@ -1859,11 +1924,13 @@ tyrano.plugin.kag = {
     //キャッシュ領域にシナリオを格納します。
     //これはシナリオファイルを配置しなくても動的に挿入できることを意味します。
     setCacheScenario: function (filename, str) {
-
         var result_obj = this.parser.parseScenario(str);
-        console.log(this.cache_scenario);
         this.cache_scenario["./data/scenario/" + filename] = result_obj;
-
+    },
+    
+     //キャッシュシナリオの削除
+    deleteCacheScenario: function (filename) {
+        delete this.cache_scenario["./data/scenario/" + filename];
     },
 
     getMessageInnerLayer: function () {
@@ -1940,11 +2007,35 @@ tyrano.plugin.kag = {
         jtext.find("p").find(".current_span").html(str);
     },
 
+    registerPreloadCompleteCallback(callback) {
+        if (this.tmp.preload_objects.length === 0) {
+            callback();
+            return;
+        }
+        this.tmp.preload_complete_callbacks.push(callback);
+    },
+
     //画像のプリロード オンの場合は、ロードが完了するまで次へ行かない
     preload: function (src, callbk, options = {}) {
+        var symbol = Symbol();
+        this.tmp.preload_objects.push(symbol);
         this.kag.showLoadingLog("preload");
 
+        const removeByPreloadObjects = () => {
+            var index = this.tmp.preload_objects.indexOf(symbol);
+            if (index !== -1) {
+                this.tmp.preload_objects.splice(index, 1);
+            }
+            if (this.tmp.preload_objects.length == 0 && this.tmp.preload_complete_callbacks.length > 0) {
+                this.tmp.preload_complete_callbacks.forEach((callback) => {
+                    callback();
+                });
+                this.tmp.preload_complete_callbacks.splice(0, this.tmp.preload_complete_callbacks.length);
+            }
+        }
+
         const onend = (elm) => {
+            removeByPreloadObjects();
             this.kag.hideLoadingLog();
             if (callbk) callbk(elm);
         };
@@ -1979,6 +2070,7 @@ tyrano.plugin.kag = {
                 switch (preloaded_audio.state()) {
                     case "unload":
                         // アンロードで残っていることは基本的にはないが…
+                        removeByPreloadObjects();
                         delete this.kag.tmp.preload_audio_map[src];
                         break;
                     case "loading":
@@ -2034,13 +2126,13 @@ tyrano.plugin.kag = {
             audio_obj.load();
         } else if ("mp4" == ext || "ogv" == ext || "webm" == ext) {
             // 動画ファイルプリロード
-            
+
             let evt_name = "loadeddata";
-            
-            if($.userenv()=="iphone"){
+
+            if ($.userenv() == "iphone") {
                 evt_name = "loadedmetadata";
             }
-            
+
             $("<video />")
                 .on(evt_name, function (e) {
                     onend(this);
@@ -2050,6 +2142,12 @@ tyrano.plugin.kag = {
                     onend();
                 })
                 .attr("src", src);
+        }else if ("json" == ext) {
+
+            $.loadText(src, function (text_str) {
+                onend(this);
+            }, true);
+
         } else {
             // 画像ファイルプリロード
             $("<img />")
@@ -2794,12 +2892,81 @@ tyrano.plugin.kag = {
         j_elm.attr("tabindex", tabindex);
         j_elm.addClass("tyrano-focusable");
         j_elm.off("focusin focusout");
-        j_elm.on("focusin", () => {
-            if (this.config["keyFocusWithHoverStyle"] === "true") {
-                j_elm.trigger("mouseenter");
+        // この要素にmousedownが発生したときのタイムスタンプを記憶しておく
+        let mousedown_timestamp = 0;
+        let mousedown_target = null;
+        j_elm.on("mousedown", (e) => {
+            mousedown_timestamp = e.timeStamp;
+            mousedown_target = e.target;
+        });
+
+        // 要素にフォーカスが当たったときのイベントハンドラを設定する
+        // 要素にフォーカスが当たるのは次の3ケース
+        // - マウスクリックによる選択
+        // - Tabキーによる選択
+        // - focus()メソッドの使用
+        j_elm.on("focusin", (e) => {
+            // Tabキーによる選択でこの要素にフォーカスが当たったときに
+            // mouseenterイベントをトリガーすることで、
+            // 本来マウスを乗せたときに生じる効果音の再生などを再現することができる。
+            // if (this.config["keyFocusWithHoverStyle"] === "true") {
+            //     j_elm.trigger("mouseenter");
+            // }
+
+            // しかし、マウスクリックでこの要素にフォーカスが当たった場合に
+            // mouseenterをトリガーしてしまうと、
+            // mouseenterが二重に実行されることになるため、おかしなことになる
+
+            // したがって、マウスクリックでフォーカスが当たった場合を検知して除外する必要がある
+            // focusinイベントが発火する直前（10ミリ秒以内）に同じ要素でmousedownイベントが発火している場合は
+            // マウスクリックでフォーカスが当たったと見なす
+            let by_mousedown = e.timeStamp - mousedown_timestamp < 10 && mousedown_target === e.target;
+            if (by_mousedown) {
+                // console.log("マウスクリックによるフォーカス");
+            } else {
+                // console.log("TabキーやJS操作によるフォーカス");
+                if (this.config["keyFocusWithHoverStyle"] === "true") {
+                    j_elm.trigger("mouseenter");
+                }
             }
+
             j_elm.addClass("focus");
         });
+
+        // 要素にフォーカスが当たったときのイベントハンドラを設定する
+        // 要素にフォーカスが当たるのは次の3ケース
+        // - マウスクリックによる選択
+        // - Tabキーによる選択
+        // - focus()メソッドの使用
+        j_elm.on("focusin", (e) => {
+            // Tabキーによる選択でこの要素にフォーカスが当たったときに
+            // mouseenterイベントをトリガーすることで、
+            // 本来マウスを乗せたときに生じる効果音の再生などを再現することができる。
+            // if (this.config["keyFocusWithHoverStyle"] === "true") {
+            //     j_elm.trigger("mouseenter");
+            // }
+
+            // しかし、マウスクリックでこの要素にフォーカスが当たった場合に
+            // mouseenterをトリガーしてしまうと、
+            // mouseenterが二重に実行されることになるため、おかしなことになる
+
+            // したがって、マウスクリックでフォーカスが当たった場合を検知して除外する必要がある
+            // focusinイベントが発火する直前（10ミリ秒以内）に同じ要素でmousedownイベントが発火している場合は
+            // マウスクリックでフォーカスが当たったと見なす
+            let by_mousedown = e.timeStamp - mousedown_timestamp < 10 && mousedown_target === e.target;
+            if (by_mousedown) {
+                // console.log("マウスクリックによるフォーカス");
+            } else {
+                // console.log("TabキーやJS操作によるフォーカス");
+                if (this.config["keyFocusWithHoverStyle"] === "true") {
+                    j_elm.trigger("mouseenter");
+                }
+            }
+
+            j_elm.addClass("focus");
+            
+        });
+        
         j_elm.on("focusout", () => {
             if (this.config["keyFocusWithHoverStyle"] === "true") {
                 j_elm.trigger("mouseleave");
@@ -2877,8 +3044,16 @@ tyrano.plugin.kag = {
          * 発言者がいない場合は空の文字列を返す
          * @returns {string}
          */
-        getCharaName() {
+        getCharaName(convert_to_id) {
             let chara_name = "";
+
+            // stat.current_speakerが未定義でないならそれを返す
+            if (this.kag.stat.current_speaker !== undefined) {
+                return this.kag.stat.current_speaker;
+            }
+
+            // stat.current_speakerが未定義の場合は
+            // 泥臭いがchara_ptext_areaから抽出する必要がある
             if (this.kag.stat.chara_ptext != "") {
                 // 発言者エリアを取得
                 const j_chara_name = this.getCharaNameArea();
@@ -2901,6 +3076,14 @@ tyrano.plugin.kag = {
                     chara_name = j_chara_name.find(".fill").text();
                 }
             }
+
+            // IDへの変換をする場合
+            if (convert_to_id) {
+                if (this.kag.stat.jcharas[chara_name]) {
+                    chara_name = this.kag.stat.jcharas[chara_name];
+                }
+            }
+
             return chara_name;
         },
 
@@ -2989,6 +3172,430 @@ tyrano.plugin.kag = {
             const j_div = $('<div class="chara_part_container plus_lighter_container" />');
             j_div.insertAfter(j_img);
             j_div.append(j_img);
+        },
+
+        /**
+         * リップシンクの対象となるパーツを取得する。
+         * 取得できなかった場合はnullが返る。
+         * @param {string} name - キャラクターの名前。
+         * @param {string} type - リップシンクタイプ。"voice"または"text"。
+         * @returns {Array<Object>} target_parts - 更新対象のパーツの配列。
+         * @returns {Object} target_parts[].j_frames - jQueryオブジェクト。フレームのコレクション。
+         * @returns {Array<number>} target_parts[].thresholds - 各フレームを表示するための閾値の配列。
+         */
+        getLipSyncParts(name, type = "voice") {
+            // キャラ定義
+            const cpm = this.kag.stat.charas[name];
+
+            // キャラ定義が存在しない→無効
+            if (!cpm) return null;
+            // キャラが表示されていない→無効
+            if (!cpm.is_show === "false") return null;
+            // キャラ定義は存在するがリップシンクタイプが一致しない→無効
+            if (cpm.lipsync_type !== type) return null;
+
+            // キャラのjQueryオブジェクト
+            const j_chara = this.kag.chara.getCharaContainer(name);
+
+            // キャラのjQueryオブジェクトが取得できない→無効
+            if (j_chara.length === 0) return null;
+
+            //
+            // 現在のキャラクターのパーツの状況をチェック
+            //
+
+            // リップシンクのパーツを格納する配列
+            // 口が複数あるようなキャラクターを一応想定している
+            const target_parts = [];
+
+            // すべてのパーツを走査してリップシンク対象のパーツを特定する
+            const part_map = cpm._layer;
+            if (!part_map) return;
+            for (const part in part_map) {
+                const part_obj = part_map[part];
+                const state = part_obj.current_part_id;
+                const part_state_obj = part_obj[state];
+                if (!part_state_obj || !part_state_obj.is_lipsync_enabled) {
+                    continue;
+                }
+                // ここに到達したならばこのパーツはリップシンク対象である
+
+                // このパーツのすべてのフレームの<img>要素の集合を取得
+                const j_frames = j_chara.find(`.lipsync-frame[data-effect="${part}-${state}"]`);
+                const thresholds = part_state_obj.lip_volume;
+                if (j_frames.length > 0 && thresholds) {
+                    target_parts.push({
+                        j_frames,
+                        thresholds,
+                        current_index: 0,
+                        max_open_mouth_time: 0,
+                        text_lipsync_timer_id: 0,
+                        def: part_state_obj,
+                    });
+                }
+            }
+            // 対象のパーツがない→無効
+            if (target_parts.length === 0) return null;
+
+            return target_parts;
+        },
+
+        /**
+         * フレームアニメーションの各フレームの画像ソースの配列を取得する
+         * @param {Object} cpm - キャラ定義。例）TYRANO.kag.stat.charas.akane
+         * @param {string} part - パーツ部位名。例）eye
+         * @param {string} state - パーツ状態名。例）smile
+         * @returns {Array<string>}
+         */
+        getFrameAnimationSrcs(cpm, part, state) {
+            // パーツ状態がstorage直接指定の場合は無視
+            if (state === "allow_storage") {
+                return [];
+            }
+
+            // パーツ状態定義を取得
+            const state_obj = cpm["_layer"][part][state];
+
+            // frame_image属性が未指定なら無視
+            if (!state_obj.frame_image) {
+                return [];
+            }
+
+            // 画像ソースの配列
+            const srcs = [];
+
+            // 画像ファイルの拡張子を取得する関数
+            const image_extensions = ["png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff", "tif", "svg", "ico"];
+            const get_image_extension = (filename) => {
+                const extension = filename.split(".").pop();
+                return image_extensions.includes(extension.toLowerCase()) ? extension : null;
+            };
+
+            // ベースフレームの画像ファイルのパス
+            const base_path = $.parseStorage(state_obj.storage, "fgimage");
+            const base_extension = get_image_extension(base_path);
+
+            // すべてのフレームについて画像ソースを決定
+            state_obj.frame_image.forEach((frame_src) => {
+                // このフレームの画像ソースの拡張子を取得
+                // ※省略されている場合もある！
+                const frame_extension = get_image_extension(frame_src);
+
+                // ベースのパスのファイル名部分を置換する
+                const hash_slash = base_path.split("/");
+                let new_filename;
+                // ベースのパスには拡張子が指定されているがこのフレームには拡張子が指定されていない場合
+                // ベースのパスの拡張子でこのフレームのソースを補う
+                if (base_extension && !frame_extension) {
+                    new_filename = `${frame_src}.${base_extension}`;
+                } else {
+                    new_filename = frame_src;
+                }
+                hash_slash.pop();
+                hash_slash.push(new_filename);
+                const src = hash_slash.join("/");
+
+                srcs.push(src);
+            });
+
+            return srcs;
+        },
+
+        /**
+         * フレームアニメーションを設定する
+         * @param {Object} cpm - キャラ定義。例）TYRANO.kag.stat.charas.akane
+         * @param {string} part - パーツ部位名。例）eye
+         * @param {string} state - パーツ状態名。例）smile
+         * @param {jQuery} j_frame_base - ベースとなるパーツの<img>要素。
+         * @param {Array<string>} preload_srcs - この配列に画像ソースを入れておくと関数の呼び出し元でプリロードに使われる。
+         * @returns {jQuery|null}
+         */
+        setFrameAnimation(cpm, part, state, j_frame_base, preload_srcs) {
+            // フレームの画像ソースの配列
+            const frame_srcs = this.getFrameAnimationSrcs(cpm, part, state);
+            if (!frame_srcs.length) {
+                return null;
+            }
+
+            // パーツ状態定義を取得
+            const state_obj = cpm["_layer"][part][state];
+
+            let j_frames = $(j_frame_base);
+            let j_prev_frame = j_frame_base;
+
+            // すべてのフレームについて<img>要素を作成
+            frame_srcs.forEach((frame_src) => {
+                // オリジナルの<img>要素をクローンする
+                const j_clone = j_frame_base.clone();
+
+                // 属性、クラス、CSSの調整
+                j_clone.attr("src", frame_src);
+                j_clone.addClass("sub");
+                j_clone.removeClass("base");
+                j_clone.css("visibility", "hidden");
+
+                // プリロードに追加
+                if (preload_srcs) {
+                    preload_srcs.push(frame_src);
+                }
+
+                // オリジナルの画像の後ろに追加していく
+                j_clone.insertAfter(j_prev_frame);
+                j_prev_frame = j_clone;
+
+                // jQueryオブジェクトの集合に追加しておく
+                j_frames = j_frames.add(j_clone);
+            });
+
+            if (state_obj.lip_image) {
+                cpm.lipsync_type = state_obj.lip_type;
+                state_obj.is_lipsync_enabled = true;
+                j_frame_base.addClass("base");
+                j_frames.addClass("lipsync-frame");
+                j_frames.attr("data-effect", `${part}-${state}`);
+                return j_frames;
+            }
+
+            // オリジナルの<img>要素にクラスと属性付与
+            // キャラの名前、パーツ部位の名前、パーツ状態の名前を記憶
+            j_frame_base.addClass("base");
+            j_frame_base.attr(
+                "data-restore",
+                JSON.stringify({
+                    chara_name: cpm.name,
+                    part_name: part,
+                    state_name: state,
+                }),
+            );
+
+            // すべての<img>要素にクラスと属性付与
+            j_frames.each(function (i) {
+                const j_img = $(this);
+                j_img.addClass("chara-layer-frame");
+                j_img.attr("data-effect", i);
+                j_img.attr("data-event-pm", part);
+            });
+
+            this.startFrameAnimation(state_obj, j_frames);
+            return j_frames;
+        },
+
+        /**
+         * フレームアニメーションを開始する
+         * @param {string} state_obj - パーツ状態定義。例）cpm._layer.eye.smile
+         * @param {jQuery} j_frames - フレームアニメーションを構成するすべての<img>要素のjQueryコレクション
+         */
+        startFrameAnimation(state_obj, j_frames) {
+            // フレーム番号
+            let frame_index = 0;
+
+            // 最初のフレームから最後のフレームに向かっている最中であるかどうか
+            let to_last = true;
+
+            // 総フレーム数
+            const frame_count = state_obj.frame_image.length + 1;
+
+            const calc_duration = (i) => {
+                let duration = state_obj.frame_time[i] || 40;
+                if (Array.isArray(duration)) {
+                    const min = duration[0];
+                    const max = duration[1];
+                    duration = Math.floor(min + (max - min) * Math.random());
+                }
+                return duration;
+            };
+
+            // フレームアニメーション1枚分の処理
+            const anim = () => {
+                clearTimeout(state_obj.frame_timer_id);
+
+                // すでにDOMから削除されている場合はフレームアニメーションを終了する
+                if (j_frames.eq(0).closest("html").length === 0) {
+                    return;
+                }
+
+                // フレーム番号増加
+                switch (state_obj.frame_direction) {
+                    // 0-1-2-3-2-1-0のような変化
+                    case "alternate":
+                        if (to_last) {
+                            frame_index += 1;
+                            if (frame_index === frame_count) {
+                                frame_index -= 2;
+                                to_last = false;
+                            }
+                        } else {
+                            frame_index -= 1;
+                            if (frame_index === -1) {
+                                frame_index += 2;
+                                to_last = true;
+                            }
+                        }
+                        break;
+                    // 0-1-2-3-0-1-2-3のような変化
+                    default:
+                        frame_index = (frame_index + 1) % frame_count;
+                        break;
+                }
+
+                // すべてのフレーム画像を非表示にしてから
+                // 現在のフレーム画像だけを表示する
+                j_frames.showAtIndexWithVisibility(frame_index);
+
+                // 最後のフレームでループしない設定なら終了する
+                if (frame_index === frame_count - 1) {
+                    if (state_obj.frame_loop === "false") {
+                        return;
+                    }
+                }
+
+                // 次のフレームまでの時間
+                const duration = calc_duration(frame_index);
+
+                // 次回のフレーム処理の予約
+                state_obj.frame_timer_id = setTimeout(anim, duration);
+            };
+
+            // 最初の瞬き
+            state_obj.frame_timer_id = setTimeout(anim, calc_duration(0));
+        },
+
+        /**
+         * すべてのキャラクターのフレームアニメーションを停止する
+         * ロード時に呼び出す
+         * @returns
+         */
+        stopFrameAnimation(cpm) {
+            if (!cpm._layer) {
+                return;
+            }
+            for (const part in cpm._layer) {
+                for (const state in cpm._layer[part]) {
+                    clearTimeout(cpm._layer[part][state].frame_timer_id);
+                }
+            }
+        },
+
+        /**
+         * すべてのキャラクターのフレームアニメーションを停止する
+         * ロード時に呼び出す
+         * @returns
+         */
+        stopAllFrameAnimation() {
+            // キャラが存在しない場合なにもしない
+            const charas = this.kag.stat.charas;
+            if (!charas) {
+                return;
+            }
+
+            // すべてのキャラについて瞬きのsetTimeoutを停止
+            for (const name in this.kag.stat.charas) {
+                const cpm = charas[name];
+                this.stopFrameAnimation(cpm);
+            }
+        },
+
+        /**
+         * ゲーム画面に出ているすべてのキャラクターの瞬きを復元する
+         * ロード時に呼び出す
+         */
+        restoreAllFrameAnimation() {
+            const that = this;
+
+            // フレームアニメーションの復元作業
+            $(".chara-layer-frame.base").each(function () {
+                try {
+                    // ベース画像
+                    const j_frame_base = $(this);
+                    // 保存しておいた設定値
+                    const setting = JSON.parse(j_frame_base.attr("data-restore"));
+                    // キャラ定義
+                    const cpm = that.kag.stat.charas[setting.chara_name];
+                    // キャラパーツ状態定義
+                    const state_obj = cpm._layer[setting.part_name][setting.state_name];
+
+                    // このパーツのフレームアニメーションの
+                    // すべてのフレーム画像を含むようなコレクション
+                    let j_frames = $(j_frame_base);
+                    const j_siblings = j_frame_base.siblings(`.chara-layer-frame[data-event-pm=${setting.part_name}]`);
+                    j_frames = j_frames.add(j_siblings);
+
+                    // いったんベース画像を表示する
+                    const i = j_frames.index(j_frame_base);
+                    j_frames.showAtIndexWithVisibility(i);
+
+                    // フレームアニメーションを開始
+                    that.startFrameAnimation(state_obj, j_frames);
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+
+            // リップシンクが有効な口パーツをベース画像に戻す
+            // 口パク中にセーブされる可能性があるためその対策
+            $(".lipsync-frame.base").each(function () {
+                try {
+                    const j_frame_base = $(this);
+                    const data_effect = j_frame_base.attr("data-effect");
+                    j_frame_base.siblings(`.sub[data-effect=${data_effect}]`).css("visibility", "hidden");
+                    j_frame_base.css("visibility", "visible");
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+        },
+
+        /**
+         * リップシンクを更新するメソッド。
+         * 入力値に基づいて、指定されたパーツの表示状態を変更する。
+         * @param {number} value - 現在の振幅の値。
+         * @param {Array<Object>} target_parts - 更新対象のパーツの配列。
+         * @param {number} elapsed_time - 前回のリップシンクからの経過時間。
+         * @param {Object} target_parts[].j_frames - jQueryオブジェクト。フレームのコレクション。
+         * @param {Array<number>} target_parts[].thresholds - 各フレームを表示するための閾値の配列。
+         * @param {number} target_parts[].current_index - 前回表示したフレームのインデックス。
+         */
+        updateLipSyncWithVoice(value, target_parts, elapsed_time) {
+            target_parts.forEach((part) => {
+                // 閾値から現在形成すべきリップフレーム番号を特定する
+                let target_i = 0;
+                for (; target_i < part.thresholds.length; target_i++) {
+                    if (value < part.thresholds[target_i]) {
+                        break;
+                    }
+                }
+
+                // 前回のリップフレーム番号と同じであれば何も処理しなくてよい
+                if (target_i === part.current_index) {
+                    return;
+                }
+
+                // ここに到達したならば前回のリップフレーム番号とは異なるということ
+
+                // 先ほどまで口を最大まで開けていた場合
+                if (part.current_index === part.thresholds.length) {
+                    // 経過時間を数える
+                    part.max_open_mouth_time += elapsed_time;
+                    // 一度口を開けたら200ミリ秒間はそのまま固定する
+                    if (part.max_open_mouth_time < 200) {
+                        return;
+                    } else {
+                        part.max_open_mouth_time = 0;
+                    }
+                }
+
+                // より口を大きく開こうとしている
+                if (target_i > part.current_index) {
+                    // 1ずつ大きくしよう
+                    target_i = part.current_index + 1;
+                } else {
+                    // 1ずつ小さくしよう
+                    target_i = part.current_index - 1;
+                }
+
+                part.j_frames.showAtIndexWithVisibility(target_i);
+                part.current_index = target_i;
+            });
         },
     },
 
@@ -3103,6 +3710,120 @@ tyrano.plugin.kag = {
             clearTimeout(tmp.loading_log_timer_id);
             tmp.j_loading_log.hide();
         }, 10);
+    },
+
+
+    convertLang(scenario, array_s) {
+
+        if (this.kag.lang == "") return array_s;
+
+        if (!this.kag.map_lang["scenes"][scenario]) {
+            return array_s;
+        }
+
+        let map_trans = this.kag.map_lang["scenes"][scenario];
+        let map_charas = this.kag.map_lang["charas"];
+
+
+        let is_script = false;
+
+        for (let i = 0; i < array_s.length; i++) {
+
+            const tobj = array_s[i];
+
+            if (tobj.name === "iscript") {
+                is_script = true;
+            } else if (tobj.name === "endscript") {
+                is_script = false;
+            } else if (tobj.name === "text") {
+
+                if (!is_script) {
+
+                    let trans_text = "";
+                    if (map_trans["scenario"][tobj.pm.val]) {
+                        trans_text = map_trans["scenario"][tobj.pm.val];
+                        tobj.pm.val = trans_text;
+                        array_s[i] = tobj;
+                    }
+
+                }
+
+            } else if (tobj.name === "chara_ptext") {
+
+                if (map_charas && map_charas[tobj["pm"]["name"]]) {
+
+                    //キャラ名指定の場合はこうなる
+                    if (this.kag.stat.charas[tobj["pm"]["name"]]) {
+                        this.kag.stat.charas[tobj["pm"]["name"]].jname = map_charas[tobj["pm"]["name"]];
+                    } else {
+
+                        tobj["pm"]["name"] = map_charas[tobj["pm"]["name"]];
+
+                    }
+                    array_s[i] = tobj;
+                }
+
+            } else {
+
+                if (map_trans["tag"] && map_trans["tag"][tobj.name]) {
+
+                    //翻訳対象のタグだった場合
+                    let pm = tobj["pm"];
+                    for (let key in pm) {
+
+                        if (map_trans["tag"][tobj.name][key]) {
+                            if (map_trans["tag"][tobj.name][key][pm[key]]) {
+                                array_s[i]["pm"][key] = map_trans["tag"][tobj.name][key][pm[key]];
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+
+        return array_s;
+
+    },
+
+    //langファイルを読み込んで設定する
+    async loadLang(name, cb) {
+
+        if (name != "default") {
+
+            try {
+
+                let lang_json = await $.loadTextSync("./data/others/lang/" + name + ".json");
+                this.lang = name;
+                this.map_lang = lang_json;
+                
+                //システム関連の更新
+                if (this.map_lang["systems"]) {
+                    window.tyrano_lang["word"] = this.map_lang["systems"];
+                }
+
+            } catch (e) {
+                console.log(e);
+                this.lang = "";
+                this.map_lang = {};
+            }
+
+        } else {
+
+            this.lang = "";
+            this.map_lang = {};
+
+        }
+
+        //キャッシュは削除
+        this.cache_scenario = {};
+
+        this.kag.evalScript("sf._system_config_lang='" + name + "';");
+
+        cb();
+
     },
 
     test: function () { },

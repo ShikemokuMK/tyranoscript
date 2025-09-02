@@ -68,6 +68,5 @@ window.tyrano_lang = {
         file_save_bg: "menu_save_bg.jpg",
         file_load_bg: "menu_load_bg.jpg",
         file_button_menu: "button_menu.png",
-        error_occurred: "error occurred",
     },
 };

@@ -2,12 +2,23 @@
 
 echo "start TyranoScript Minifiy\n";
 
-echo "version:v".$argv[1]."\n";
+if(count($argv)<3){
+	echo "error: example: php minify.php 600 ja\n";
+	return;
+}
+
+echo "version:v".$argv[1]."_".$argv[2]."\n";
 
 $version = $argv[1];
+$lang = $argv[2];
 
 //今日の日付を含むディレクトリの作成
 $tyrano_name = "tyranoscript_v".$version;
+
+if($lang!="ja"){
+	$tyrano_name .= "_".$lang;
+}
+
 $dirname="./result/".$tyrano_name;
 
 mkdir($dirname, 0700);
@@ -45,7 +56,7 @@ $array_mini = array(
 "plugins/kag/kag.tag_system.js",
 "plugins/kag/kag.key_mouse.js",
 "plugins/kag/kag.rider.js",
-"plugins/kag/kag.studio.js",
+"plugins/kag/kag.studio_v6.js",
 "plugins/kag/kag.tag_camera.js",
 "plugins/kag/kag.tag_vchat.js",
 "plugins/kag/kag.tag_ar.js",
@@ -94,6 +105,11 @@ foreach($array_mini as $file){
 //	exec("java -jar compiler-latest/compiler.jar --js=../tyrano/".$file." --js_output_file=".$dirname."/tyrano/".$file." --compilation_level WHITESPACE_ONLY");
     exec("terser ../tyrano/".$file." -c toplevel,sequences=false > ".$dirname."/tyrano/".$file."");	
 
+}
+
+//言語設定が日本以外の場合、ファイルを上書きコピーする
+if($lang!="ja"){
+	exec("cp -R ./lang/".$lang."/ ".$dirname."/");
 }
 
 	chdir("./result") ;

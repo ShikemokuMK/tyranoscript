@@ -1,6 +1,6 @@
 TyranoScript | ティラノスクリプト
 
-Copyright (c) 2022 STRIKEWORKS @Shikemokumk
+Copyright (c) 2025 STRIKEWORKS @Shikemokumk
 https://strikeworks.jp
 
 ■利用規約■
@@ -101,3 +101,11 @@ animejs.com
 Released under the MIT license
 
 ----------------
+
+Popopo Plugin 
+https://plugin.tyrano.jp/item/5032
+
+Made by Ogihara
+Under MIT License
+
+-----------------

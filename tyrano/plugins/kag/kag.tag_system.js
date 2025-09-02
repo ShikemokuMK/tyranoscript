@@ -1361,6 +1361,152 @@ tyrano.plugin.kag.tag.autoload = {
     },
 };
 
+
+
+/*
+#[checkpoint]
+
+:group
+システム操作
+
+:title
+チェックポイントの登録
+
+:exp
+`[rollback]`タグでチェックポイントの地点へ戻ってくることができます。
+チェックポイントを作りすぎるとゲームの動作が重くなる場合があります。
+必要最低限に留めておき、不要になったら`[clear_checkpoint]`タグで削除しましょう。
+
+:sample
+
+[checkpoint name="p1"]
+
+;ここでいろいろ画面をつくりかえる
+
+;チェックポイントの位置へどこからでも戻ることができる
+[rollback checkpoint="p1"]
+
+:param
+name = チェックポイント名を指定します。
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.checkpoint = {
+    vital: ["name"],
+
+    pm: {
+        name: "",
+    },
+
+    start: function (pm) {
+        
+        var that = this;
+        var name = pm.name;
+        
+        this.kag.menu.snapSave("checkpoint", function () {
+            that.kag.menu.doSetCheckpoint(name);
+            that.kag.ftag.nextOrder();
+        },"false");
+    },
+};
+
+
+/*
+#[rollback]
+
+:group
+システム操作
+
+:title
+ロールバック
+
+:exp
+`[checkpoint]`タグを通過した場所にどこからでも戻ることができます。
+
+:sample
+
+[checkpoint name="p1"]
+
+;ここでいろいろ画面をつくりかえる
+
+;チェックポイントの位置へどこからでも戻ることができる
+[rollback checkpoint="p1"]
+
+:param
+checkpoint = チェックポイント名を指定します。,
+variable_over = `true`または`false`を指定します。`true`を指定すると、ロールバック後に現在のゲーム変数を引き継ぎます。デフォルトは`true`,
+bgm_over      = `true`または`false`を指定します。`true`を指定すると、ロールバック後にBGMを引き継ぎます。デフォルトは`false`
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.rollback = {
+    vital: ["checkpoint"],
+
+    pm: {
+        checkpoint: "",
+        variable_over: "true",
+        bgm_over:"false",
+    },
+
+    start: function (pm) {
+        
+        let result = this.kag.menu.doRollback(pm.checkpoint,pm.variable_over,pm.bgm_over);
+        if (result == false) {
+            this.kag.error("チェックポイント「"+pm.checkpoint+"」は存在しません");
+            this.kag.ftag.nextOrder();            
+        }
+    },
+};
+
+/*
+#[clear_checkpoint]
+
+:group
+システム操作
+
+:title
+チェックポイントの削除
+
+:exp
+`[checkpoint]`タグをクリアすることができます。
+チェックポイントは便利ですが不用意に増やしすぎるとゲームの動作に影響します。
+不要になったチェックポイントはこまめに削除しておきましょう。
+
+:sample
+
+;チェックポイントの作成
+[checkpoint name="p1"]
+
+[clear_checkpoint name="p1"]
+
+:param
+name = 削除するチェックポイント名を指定します。指定しない場合はすべてのチェックポイントが削除されます
+
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.clear_checkpoint = {
+    vital: [],
+
+    pm: {
+        name: "",
+    },
+
+    start: function (pm) {
+        
+        if (pm.name == "") {
+            this.kag.stat.checkpoint = {};
+        } else {
+            delete this.kag.stat.checkpoint[pm.name];
+        }
+        this.kag.ftag.nextOrder();            
+        
+    },
+};
+
 /*
 #[ignore]
 
@@ -1676,6 +1822,41 @@ tyrano.plugin.kag.tag.preload = {
         }
     },
 };
+
+/*
+#[wait_preload]
+
+:group
+変数・JS操作・ファイル読込
+
+:title
+素材ファイルの事前読み込みの完了待機
+
+:exp
+`[preload]`タグをwait=falseで利用した後、何かの演出を挟んだ後、全てのpreloadが終わるのを待機します。
+
+:sample
+
+;preloadで複数の画像をwait=falseで読み込みます
+[preload storage="data/fgimage/girl.jpg" wait="false"]
+[preload storage="data/fgimage/haruko.jpg" wait="false"]
+;読み込んでいる間に別のアニメーションをします
+[quake2 time="1000" wait="true"]
+;まだ終わっていない場合は終わるまで待機します
+[wait_preload]
+
+#[end]
+*/
+tyrano.plugin.kag.tag.wait_preload = {
+    start: function (pm) {
+        var that = this;
+        that.kag.weaklyStop();
+        that.kag.registerPreloadCompleteCallback(function () {
+            that.kag.cancelWeakStop();
+            that.kag.ftag.nextOrder();
+        });
+    },
+}
 
 /*
 #[unload]
@@ -3385,7 +3566,7 @@ tyrano.plugin.kag.tag.dialog_config = {
         this.j_boxbase = $('<div class="remodal-boxbase"></div>');
         this.j_box.prepend(this.j_boxbase);
         this.j_base = $('<div class="remodal-base"></div>');
-        this.j_image = $('<div class="remodal-image"</div>');
+        this.j_image = $('<div class="remodal-image"></div>');
         this.j_base.append(this.j_image);
         this.j_wrapper.prepend(this.j_base);
         this.j_ok_img = null;
@@ -3488,9 +3669,10 @@ tyrano.plugin.kag.tag.dialog_config = {
      * @returns
      */
     changeButton(pm, is_ok) {
-        // ボタンを画像に変更する
-        if (pm.img) return this.replaceButton(pm, is_ok);
+        // ボタンを画像に変更する場合は replaceButton に丸投げする
+        if (pm.img && pm.btnimgtype !== "bg") return this.replaceButton(pm, is_ok);
 
+        // 画像ボタンではない場合
         const j_elm = is_ok ? this.j_ok : this.j_cancel;
 
         const id = is_ok ? "remodal-confirm" : "remodal-cancel";
@@ -3513,8 +3695,28 @@ tyrano.plugin.kag.tag.dialog_config = {
         if (pm.fontface) j_elm.setStyle("font-family", pm.fontface);
         if (pm.fontcolor) j_elm.setStyle("color", $.convertColor(pm.fontcolor));
 
+        // ボタンの背景画像を設定
+        if (pm.img) {
+            this.css_map[`#${id}`]["background-image"] = $.convertBackgroundImage(pm.img, "image");
+        }
+        if (pm.activeimg) {
+            this.css_map[`#${id}:active`]["background-image"] = $.convertBackgroundImage(pm.activeimg, "image");
+            this.css_map[`#${id}.active`]["background-image"] = $.convertBackgroundImage(pm.activeimg, "image");
+        }
+        if (pm.enterimg) {
+            this.css_map[`#${id}:hover`]["background-image"] = $.convertBackgroundImage(pm.enterimg, "image");
+            this.css_map[`#${id}.hover`]["background-image"] = $.convertBackgroundImage(pm.enterimg, "image");
+        }
+        if (pm.clickimg) {
+            this.css_map[`#${id}.clicked`]["background-image"] = $.convertBackgroundImage(pm.clickimg, "image");
+        }
+        this.updateCSS();
+
         // ホバーイン, ホバーアウト
-        j_elm.off("mouseenter mouseleave click");
+        j_elm.off("init mouseenter mouseleave click");
+        j_elm.on("init", () => {
+            j_elm.removeClass("clicked");
+        });
         j_elm.on("mouseenter", () => {
             if (pm.enterse) this.kag.playSound(pm.enterse);
         });
@@ -3523,7 +3725,48 @@ tyrano.plugin.kag.tag.dialog_config = {
         });
         j_elm.on("click", () => {
             if (pm.clickse) this.kag.playSound(pm.clickse);
+            j_elm.addClass("clicked");
         });
+    },
+
+    css_map: {
+        "#remodal-confirm": {},
+        "#remodal-confirm:hover": {},
+        "#remodal-confirm.hover": {},
+        "#remodal-confirm:active": {},
+        "#remodal-confirm.active": {},
+        "#remodal-confirm.clicked": {},
+        "#remodal-cancel": {},
+        "#remodal-cancel:hover": {},
+        "#remodal-cancel.hover": {},
+        "#remodal-cancel:active": {},
+        "#remodal-cancel.active": {},
+        "#remodal-cancel.clicked": {},
+    },
+
+    updateCSS() {
+        let css_exists = false;
+        let css = "";
+        for (const key in this.css_map) {
+            css += `${key}{`;
+            const styles = this.css_map[key];
+            for (const prop in styles) {
+                const value = styles[prop];
+                css += `${prop}:${value};`;
+                css_exists = true;
+            }
+            css += `}`;
+        }
+        if (!css_exists) {
+            return;
+        }
+        let style_elm = document.getElementById("dialog_config_style");
+        if (!style_elm) {
+            style_elm = document.createElement("style");
+            style_elm.id = "dialog_config_style";
+            document.head.appendChild(style_elm);
+        }
+        style_elm.textContent = css;
     },
 
     /**
@@ -3594,7 +3837,7 @@ tyrano.plugin.kag.tag.dialog_config = {
         j_img.on("mouseleave", () => {
             if (pm.activeimg) {
                 // アクティブ中にホバーアウトしたときに画像を変更しないようにする
-                if (j_img.filter(":active").length === 0) j_img.attr("src", pm.img);
+                if (!clicked && j_img.filter(":active").length === 0) j_img.attr("src", pm.img);
             } else {
                 // クリック済みなのに画像を変えてしまうことのないように
                 if (!clicked) j_img.attr("src", pm.img);
@@ -3697,6 +3940,7 @@ clickimg  = マウスがOKボタンをクリックした後の画像ファイル
 enterse   = マウスがOKボタンの上に乗ったときに再生する音声ファイル。`sound`フォルダから探します。
 leavese   = マウスがOKボタンの上から離れたときに再生する音声ファイル。`sound`フォルダから探します。
 clickse   = マウスがOKボタンを押し込んだときに再生する音声ファイル。`sound`フォルダから探します。
+btnimgtype= このパラメータに`bg`を指定しておくと、`img`や`enterimg`などのパラメータで指定した画像がボタンの「背景」として使われるようになります。（通常、`img`に画像を指定したときはテキストが消え、画像がそのままボタン化されます。つまり、画像内に「OK」などのデザインが含まれていることを想定しているということです）
 
 :sample
 [dialog_config_ok text="いいですよ"]
@@ -3729,6 +3973,8 @@ tyrano.plugin.kag.tag.dialog_config_ok = {
         enterse: "",
         leavese: "",
         clickse: "",
+
+        btnimgtype: "",
     },
 
     start: function (pm) {
@@ -3782,6 +4028,7 @@ clickimg  = マウスがキャンセルボタンをクリックした後の画�
 enterse   = マウスがキャンセルボタンの上に乗ったときに再生する音声ファイル。`sound`フォルダから探します。
 leavese   = マウスがキャンセルボタンの上から離れたときに再生する音声ファイル。`sound`フォルダから探します。
 clickse   = マウスがキャンセルボタンを押し込んだときに再生する音声ファイル。`sound`フォルダから探します。
+btnimgtype= このパラメータに`bg`を指定しておくと、`img`や`enterimg`などのパラメータで指定した画像がボタンの「背景」として使われるようになります。（通常、`img`に画像を指定したときはテキストが消え、画像がそのままボタン化されます。つまり、画像内に「OK」などのデザインが含まれていることを想定しているということです）
 
 :sample
 [dialog_config_ng text="ダメです"]
@@ -4039,3 +4286,56 @@ tyrano.plugin.kag.tag.loading_log = {
         this.kag.ftag.nextOrder();
     },
 };
+
+
+
+/*
+#[lang_set]
+
+:group
+システムデザイン変更
+
+:title
+言語の切替
+
+:exp
+ゲームで使用する言語を変更することができます。
+例えば[lang_set name="en"] を指定すると data/others/lang/en.json の翻訳設定が採用されます。
+
+:param
+name = `default`を指定するとローカライズを行いません。
+
+:sample
+[lang_set name="en"]
+
+#[end]
+*/
+
+tyrano.plugin.kag.tag.lang_set = {
+    vital: ["name"],
+
+    pm: {
+        name: "",
+    },
+
+    start: function (pm) {
+
+        var that = this;
+        //langファイルを読み込んで設定する
+
+        this.kag.loadLang(pm.name, () => {
+
+            const scenario_file = this.kag.stat.current_scenario;
+
+            //呼び出したファイル自身をロード
+            this.kag.loadScenario(scenario_file, (array_tag) => {
+                this.kag.ftag.array_tag = array_tag;
+                this.kag.ftag.nextOrder();
+            });
+
+        });
+
+
+    },
+};
+

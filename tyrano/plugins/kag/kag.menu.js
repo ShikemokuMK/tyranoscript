@@ -74,13 +74,12 @@ tyrano.plugin.kag.menu = {
                 //戻る機能
                 that.setMenuCloseEvent(layer_menu);
                 that.setHoverEvent(layer_menu);
-        
+
                 //that.setMenuCloseEvent(layer_menu, { target: "menu_window_close" });
 
                 layer_menu
                     .find(".menu_window_close")
                     .click(function (e) {
-
                         //ウィンドウ消去
                         that.kag.layer.hideMessageLayers();
                         layer_menu.html("");
@@ -90,10 +89,9 @@ tyrano.plugin.kag.menu = {
                         }
 
                         e.stopPropagation();
+                    })
+                    .focusable();
 
-
-                    }).focusable();
-                
                 layer_menu
                     .find(".menu_save")
                     .click(function (e) {
@@ -142,7 +140,14 @@ tyrano.plugin.kag.menu = {
         );
     },
 
-    displaySave: function (cb) {
+    /**
+     * セーブ画面を表示する
+     * cbだけを指定した場合、セーブ完了時とセーブ画面クローズ時どちらもcbが実行される（互換性の担保）
+     * cb_closeを別に指定した場合、セーブ完了時にはcbが、セーブ画面クローズ時にはcb_closeが実行される
+     * @param {function} [cb] - セーブ完了時およびセーブ画面クローズ時のコールバック
+     * @param {function} [cb_close] - セーブ画面クローズ時のコールバック
+     */
+    displaySave: function (cb, cb_close) {
         //セーブ画面作成
 
         var that = this;
@@ -207,7 +212,7 @@ tyrano.plugin.kag.menu = {
 
                 that.setMenuScrollEvents(j_save, { target: ".area_save_list", move: 160 });
 
-                that.setMenu(j_save, cb);
+                that.setMenu(j_save, cb_close || cb);
             },
         );
     },
@@ -315,6 +320,45 @@ tyrano.plugin.kag.menu = {
 
         this.loadGameData($.extend(true, {}, data), { auto_next: "yes" });
     },
+    
+    //チェックポイントを登録する
+    doSetCheckpoint: function (name) {
+    
+        var data = this.snap;
+        data.save_date = this.getDateStr();
+        
+        //dataを登録する
+        this.kag.stat.checkpoint[name] = $.extend(true, {}, data);
+        
+        var layer_menu = this.kag.layer.getMenuLayer();
+        layer_menu.hide();
+        
+    },
+    
+    //チェックポイントの位置にロールバックします
+    doRollback: function (name,variable_over,bgm_over) {
+        
+        var data = this.kag.stat.checkpoint[name];
+        
+        if (data) {
+            data = data; //JSON.parse(data);
+        } else {
+            return false;
+        }
+        
+        //変数の上書き
+        if (variable_over == "true") {
+            data.stat.f = this.kag.stat.f;
+        }
+        
+        let options = { is_rollback: true, auto_next: "yes" };
+        options.bgm_over = bgm_over;
+        
+        this.loadGameData($.extend(true, {}, data), options);
+        
+        return true;
+        
+    },
 
     //セーブ状態のスナップを保存します。
     snapSave: function (title, call_back, flag_thumb) {
@@ -347,6 +391,21 @@ tyrano.plugin.kag.menu = {
         three_save.models = save_models;
 
         /////////////////////////////////////////////////////////////
+
+        // [anim wait="false"]中のセーブ対策
+        // アニメーションを強制的に完了させる
+        $(".tyrano-anim").each(function () {
+            $(this).stop(true, true);
+        });
+
+        // [chara_mod wait="false"]中のセーブ対策
+        // 表情変更中にセーブが実行された場合は表情変更を強制的に完了させる
+        $(".chara-mod-animation").each(function () {
+            const j_old = $(this);
+            const j_new = j_old.next();
+            j_old.remove();
+            j_new.stop(true, true);
+        });
 
         if (typeof flag_thumb == "undefined") {
             flag_thumb = this.kag.config.configThumbnail;
@@ -658,17 +717,15 @@ tyrano.plugin.kag.menu = {
             })
             .focusable();
     },
-    
+
     //こ・ぱんださんのプラグイン対応。下位互換性の確保
     setHoverEvent: function (j_parent, options = {}) {
-        
         if (j_parent.html().indexOf('$(".menu_item").hover') == -1 && j_parent.html().indexOf('$(".menu_close").hover') == -1) {
             return false;
         }
-        
-        j_parent.find(".menu_item").off('mouseenter mouseleave');
-        j_parent.find(".menu_item img").off('mouseenter mouseleave');
-        
+        j_parent.find(".menu_item").off("mouseenter mouseleave");
+        j_parent.find(".menu_item img").off("mouseenter mouseleave");
+
         j_parent.find(".menu_item img").each((i, elm) => {
             const j_elm = $(elm);
             const original_src = j_elm.attr("src");
@@ -682,7 +739,6 @@ tyrano.plugin.kag.menu = {
                 },
             );
         });
-        
     },
 
     /**
@@ -754,15 +810,23 @@ tyrano.plugin.kag.menu = {
         // ティラノイベント"load-start"を発火
         this.kag.trigger("load-start");
 
+        // 瞬きを停止
+        this.kag.chara.stopAllFrameAnimation();
+
         // 一時リスナをすべて消去
         this.kag.offTempListeners();
 
-        //普通のロードの場合
+        // 普通のロードの場合
         if (typeof options == "undefined") {
             options = { bgm_over: "false" };
         } else if (typeof options.bgm_over == "undefined") {
             options["bgm_over"] = "false";
         }
+
+        // [wait]中にロードされた場合の対策
+        clearTimeout(this.kag.tmp.wait_id);
+        this.kag.tmp.wait_id = "";
+        this.kag.stat.is_wait = false;
 
         /**
          * make.ks を通過してもとの場所に戻ってきたときに次のタグに進むかどうかを制御する文字列。
@@ -779,7 +843,7 @@ tyrano.plugin.kag.menu = {
             auto_next = options.auto_next;
         }
 
-        //Live2Dモデルがある場合の後始末
+        // Live2Dモデルがある場合の後始末
         if (typeof Live2Dcanvas != "undefined") {
             for (let model_id in Live2Dcanvas) {
                 if (Live2Dcanvas[model_id]) {
@@ -833,9 +897,15 @@ tyrano.plugin.kag.menu = {
         //
         // ステータスの更新
         //
-
+        
+        //ロールバックからの呼び出しの場合
+        if (options.is_rollback == true) {
+            const tmp_checkpoint = this.kag.stat.checkpoint;
+            data.stat.checkpoint = tmp_checkpoint;
+        }
+        
         this.kag.stat = data.stat;
-
+        
         // [s] で止まっているセーブデータを読み込んだ場合はロード後次のタグに進めるべきではない
         if (this.kag.stat.is_strong_stop) {
             auto_next = "stop";
@@ -869,19 +939,17 @@ tyrano.plugin.kag.menu = {
                 if (this.kag.stat.current_bgm_vol != "") {
                     pm["volume"] = this.kag.stat.current_bgm_vol;
                 }
-                
+
                 if (this.kag.stat.current_bgm_pause_seek != "") {
                     pm["pause"] = "true";
                     pm["seek"] = this.kag.stat.current_bgm_pause_seek;
                 }
-                
+
                 if (this.kag.stat.current_bgm_base64 != "") {
                     pm["base64"] = this.kag.stat.current_bgm_base64;
                 }
-                
+
                 this.kag.ftag.startTag("playbgm", pm);
-                
-                
             }
 
             // ループSE
@@ -891,7 +959,6 @@ tyrano.plugin.kag.menu = {
                 pm_obj["stop"] = "true";
                 this.kag.ftag.startTag("playbgm", pm_obj);
             }
-            
         }
 
         //読み込んだCSSがある場合
@@ -960,23 +1027,19 @@ tyrano.plugin.kag.menu = {
 
                 //アニメーションの実行
                 if (key == "layer_camera") {
-                    
                     $(".layer_camera").css("-webkit-transform-origin", "center center");
                     (function (_a3d_define) {
                         setTimeout(function () {
                             $(".layer_camera").a3d(a3d_define);
                         }, 1);
                     })(a3d_define);
-                        
                 } else {
-                    
                     $("." + key + "_fore").css("-webkit-transform-origin", "center center");
                     (function (_a3d_define) {
                         setTimeout(function () {
                             $("." + key + "_fore").a3d(_a3d_define);
                         }, 1);
                     })(a3d_define);
-                    
                 }
             }
         }
@@ -1095,6 +1158,22 @@ tyrano.plugin.kag.menu = {
             var pm = JSON.parse(j_elm.attr("data-event-pm"));
             that.kag.getTag(tag_name).setEvent(j_elm, pm);
         });
+
+        // 復元用タグの実行
+        $("[data-restore]").each(function () {
+            const j_elm = $(this);
+            const restore_data = j_elm.data("restore");
+            if (Array.isArray(restore_data)) {
+                restore_data.forEach((item) => {
+                    const { tag, pm } = item;
+                    pm._next = false;
+                    that.kag.ftag.startTag(tag, pm);
+                });
+            }
+        });
+
+        // 瞬きを復元
+        this.kag.chara.restoreAllFrameAnimation();
 
         //
         // プロパティの初期化
@@ -1226,15 +1305,15 @@ tyrano.plugin.kag.menu = {
         var that = this;
 
         var layer_menu = this.kag.layer.getMenuLayer();
-        
+
         that.setMenuCloseEvent(j_obj, { callback: cb });
-        
+
         j_obj.hide();
         layer_menu.append(j_obj);
         layer_menu.show();
-        
+
         that.setHoverEvent(layer_menu);
-        
+
         $.preloadImgCallback(
             layer_menu,
             function () {
@@ -1354,7 +1433,7 @@ tyrano.plugin.kag.menu = {
 
                 that.setMenuCloseEvent(layer_menu);
                 that.setHoverEvent(layer_menu);
-        
+
                 that.setMenuScrollEvents(j_menu, { target: ".log_body", move: 60 });
 
                 // スマホのタッチ操作でスクロールできるようにするために touchmove の伝搬を切る
