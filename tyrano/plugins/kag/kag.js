@@ -3257,7 +3257,7 @@ tyrano.plugin.kag = {
             const state_obj = cpm["_layer"][part][state];
 
             // frame_image属性が未指定なら無視
-            if (!state_obj.frame_image) {
+            if (!state_obj || !state_obj.frame_image) {
                 return [];
             }
 

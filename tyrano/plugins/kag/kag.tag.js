@@ -631,7 +631,7 @@ tyrano.plugin.kag.ftag = {
                     }
                 }
             } else {
-                
+
             }
         }
 
@@ -715,19 +715,19 @@ tyrano.plugin.kag.ftag = {
 
     //タグをnextorderの順番で使用する
     startTags: function (array_tag, cb) {
-        
+
         if (array_tag.length == 0) {
             cb();
             return;
         }
-        
+
         var that = this;
 
         this.bufTags.push({ tags: array_tag, cb: cb });
 
         //console.log("buftags");
         //console.log(this.bufTags);
-        
+
         let next_tag = () => {
 
             TYRANO.kag.tmp.cut_nextorder = null;
@@ -1076,7 +1076,7 @@ tyrano.plugin.kag.tag.text = {
             }
         }
     },
-    
+
     /**
      * テキストを表示する統括的な処理
      * @param {string} message_str 表示するテキスト
@@ -1087,13 +1087,13 @@ tyrano.plugin.kag.tag.text = {
         let chara_name = this.kag.chara.getCharaName();
 
         //chara_nameにjnameが存在する場合は変換する
-        if (this.kag.stat.charas[chara_name]&&this.kag.stat.charas[chara_name].jname!="") {
+        if (this.kag.stat.charas[chara_name] && this.kag.stat.charas[chara_name].jname != "") {
             chara_name = this.kag.stat.charas[chara_name].jname;
         }
 
         // バックログにテキストを追加
         this.pushTextToBackLog(chara_name, message_str);
-        
+
         // 読み上げ（有効な場合）
         if (this.kag.stat.play_speak) {
             this.speechMessage(message_str);
@@ -1544,9 +1544,8 @@ tyrano.plugin.kag.tag.text = {
         for (let i = edges.length - 1; i >= 0; i--) {
             const edge = edges[i];
             const width = edge.total_width * 2;
-            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${
-                100 - i
-            }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
+            let style = `-webkit-text-stroke: ${width}px ${edge.color}; z-index: ${100 - i
+                }; padding: ${width}px; margin: -${width}px 0 0 -${width}px;`;
             if (is_edge_overlap) {
                 style += "opacity:1;";
             }
@@ -1643,7 +1642,7 @@ tyrano.plugin.kag.tag.text = {
 
         // インナーの width, max-width の設定
         // 横幅固定するかどうかで場合分け
-            
+
         if (chara_fuki["fix_width"] != "") {
             // 横幅固定する場合
             // max-width を解除し width を直接指定する
@@ -1689,7 +1688,7 @@ tyrano.plugin.kag.tag.text = {
 
         // padding-left(top)、margin-right(bottom)、20（アイコンの分）を足す
         // これがアウターのサイズとなる
-        
+
         const icon_size = 20;
         width = parseInt(width) + parseInt(j_msg_inner.css("padding-left")) + this.kag.stat.fuki.marginr + icon_size;
         height = parseInt(height) + parseInt(j_msg_inner.css("padding-top")) + this.kag.stat.fuki.marginb + icon_size;
@@ -1704,7 +1703,7 @@ tyrano.plugin.kag.tag.text = {
             j_msg_inner.css("width", width);
             j_msg_inner.css("height", height);
         }
-        
+
         //
         // アウターの位置を決定する
         // まずキャラ画像の left, top にふきだし設定の left, top を足す
@@ -1993,7 +1992,7 @@ tyrano.plugin.kag.tag.text = {
 
         // 次の文字のインデックス
         const next_char_index = char_index + 1;
-        
+
         //ポポポ判定
         if (this.kag.tmp.popopo.key) {
             this.kag.tmp.popopo.player.play(j_char_span_children.eq(char_index).text());
@@ -2007,14 +2006,14 @@ tyrano.plugin.kag.tag.text = {
                 this.addOneChar(next_char_index, j_char_span_children, j_message_span, j_msg_inner);
             }, this.kag.tmp.ch_speed);
         } else {
-            
+
             // すべての文字を表示し終わったようだ
-            
+
             //ポポポ判定があるなら停止させる
             if (this.kag.tmp.popopo.key) {
                 this.kag.tmp.popopo.player.stop();
             }
-            
+
             $.setTimeout(() => {
                 this.finishAddingChars();
             }, this.kag.tmp.ch_speed);
@@ -2099,35 +2098,35 @@ tyrano.plugin.kag.tag.text = {
         } else if (this.kag.config.chSpeed) {
             ch_speed = parseInt(this.kag.config.chSpeed);
         }
-        
+
         //ポポポ判定
-        
+
         if (this.kag.stat.popopo.enable) {
-            
+
             if (this.kag.stat.is_skip !== true && !this.kag.stat.is_nowait && ch_speed >= 3) {
-        
+
                 //初期化が完了してるかどうか。
                 if (!TYRANO.kag.popopo.is_ready) {
                     console.log("init popopo");
                     TYRANO.kag.popopo.init();
                 }
-            
+
                 let popopo_obj = this.kag.stat.popopo;
-        
+
                 //当該キャラクターのpopopoが登録されているかを確認する。
                 //存在すれば、popopo_objの差し替え
                 let chara_name = this.kag.chara.getCharaName();
-            
+
                 if (!chara_name) {
                     chara_name = "default";
                 }
-            
+
                 let j_chara_name = "-1";
                 //chara_nameにjnameが存在する場合は変換する
                 if (this.kag.stat.charas[chara_name] && this.kag.stat.charas[chara_name].jname != "") {
                     j_chara_name = this.kag.stat.charas[chara_name].jname;
                 }
-            
+
                 if (this.kag.stat.popopo_chara[chara_name]) {
                     popopo_obj = this.kag.stat.popopo_chara[chara_name];
                 } else if (this.kag.stat.popopo_chara[j_chara_name]) {
@@ -2135,9 +2134,9 @@ tyrano.plugin.kag.tag.text = {
                 } else if (this.kag.stat.popopo_chara["default"]) {
                     popopo_obj = this.kag.stat.popopo_chara["default"];
                 }
-            
+
                 this.kag.stat.popopo = popopo_obj;
-            
+
                 var key = popopo_obj.type;
                 if (key === "file") {
                 } else if (key === "none") {
@@ -2145,28 +2144,28 @@ tyrano.plugin.kag.tag.text = {
                 } else {
                     key = "wave";
                 }
-        
+
                 if (key) {
-            
+
                     const message_str = this.kag.stat.current_message_str;
                     var key2 = popopo_obj.mode;
                     var player = this.kag.popopo[key][key2];
                     this.kag.tmp.popopo.player = player;
-            
+
                     player.start(message_str, ch_speed);
-        
+
                 }
-        
+
                 this.kag.tmp.popopo.key = key;
-                
+
             } else {
                 TYRANO.kag.popopo.is_ready = false;
             }
-            
+
         }
-        
-       
-        
+
+
+
 
         // 1文字1文字の<span>要素のjQueryオブジェクトのコレクション
         const j_char_span_children = j_message_span.find(".char");
@@ -2553,6 +2552,7 @@ tyrano.plugin.kag.tag.config_record_label = {
     },
 
     start: function (pm) {
+
         var that = this;
 
         if (pm.color != "") {
@@ -2694,6 +2694,7 @@ tyrano.plugin.kag.tag.p = {
         //
 
         // スキップモードの場合は単に次のタグに進んで早期リターン
+
         if (this.kag.stat.is_skip == true) {
             this.kag.ftag.nextOrder();
             return;
@@ -7190,7 +7191,7 @@ tyrano.plugin.kag.tag.glink = {
         face: "",
         bold: "",
         keyfocus: "",
-        autopos:"false",
+        autopos: "false",
     },
 
     //イメージ表示レイヤ。メッセージレイヤのように扱われますね。。
@@ -7207,7 +7208,7 @@ tyrano.plugin.kag.tag.glink = {
         j_button.css("font-size", pm.size + "px");
         that.kag.setElmCursor(j_button, "pointer");
         that.kag.makeFocusable(j_button, pm.keyfocus);
-        
+
         //強制自動配置が有効な場合
         if (pm.autopos == "true") {
             pm.x = "auto";
@@ -7260,7 +7261,7 @@ tyrano.plugin.kag.tag.glink = {
         } else if (that.kag.stat.font.face != "") {
             j_button.css("font-family", that.kag.stat.font.face);
         }
-        
+
         if (pm.x == "auto") {
             var sc_width = parseInt(that.kag.config.scWidth);
             var center = Math.floor(parseInt(j_button.css("width")) / 2);
@@ -8805,8 +8806,8 @@ tyrano.plugin.kag.tag.layermode_movie = {
 
         blend_layer = $(
             "<video class='layer_blend_mode blendlayer blendvideo' data-video-name='" +
-                pm.name +
-                "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
+            pm.name +
+            "' data-video-pm='' style='display:none;position:absolute;width:100%;height:100%;z-index:99' ></video>",
         );
         var video = blend_layer.get(0);
         var url = "./data/video/" + pm.video;

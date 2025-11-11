@@ -417,19 +417,26 @@
         });
     };
 
-    $.loadText = function (file_path, callback) {
+    $.loadText = function (file_path, callback, flag_disabled_cache = true) {
+        
         if (window.TYRANO) window.TYRANO.kag.showLoadingLog();
-
+    
         let dataType = "text";
 
         if ($.getExt(file_path) == "json") {
             dataType = "json";
         }
-
+        
+        //キャッシュが
+        let flag_cache = true;
+        if (flag_disabled_cache == true) {
+          flag_cache = false;
+        }
+        
         $.ajax({
-            url: file_path + "?" + Math.floor(Math.random() * 1000000),
+            url: file_path ,
             dataType: dataType,
-            cache: false,
+            cache: flag_cache,
             success: function (text) {
                 if (window.TYRANO) window.TYRANO.kag.hideLoadingLog();
                 const order_str = text;
