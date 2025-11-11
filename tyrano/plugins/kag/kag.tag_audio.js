@@ -2171,7 +2171,7 @@ chara=キャラクター名を指定できます。このキャラクターが�
 */
 
 tyrano.plugin.kag.tag.popopo = {
-    
+
     pm: {
         volume: "",
         time: "",
@@ -2183,11 +2183,11 @@ tyrano.plugin.kag.tag.popopo = {
         buf: "",
         storage: "",
         samplerate: "",
-        chara:"default",
+        chara: "default",
     },
-    
+
     start: function (pm) {
-        
+
         // 音程の文字列と数値対応
         const FREQUENCY = {
             "A": 0,
@@ -2208,17 +2208,17 @@ tyrano.plugin.kag.tag.popopo = {
 
         //# TYRANO.kag.stat.popopo
         let popopo = $.extend(true, {}, this.kag.stat.popopo);
-        
+
         if (pm.chara != "") {
             if (this.kag.stat.popopo_chara[pm.chara]) {
                 popopo = this.kag.stat.popopo_chara[pm.chara];
             }
         }
-        
+
         var f = 0, is_set = false;
         if (pm.volume !== "") popopo.volume = pm.volume;
         if (pm.time !== "") popopo.time = parseInt(pm.time) / 1000;
-        if (pm.tailtime !== "") popopo.time = parseInt(pm.tailtime) / 1000;
+        if (pm.tailtime !== "") popopo.tailtime = parseInt(pm.tailtime) / 1000;
         if (pm.frequency !== "") popopo.frequency = FREQUENCY[pm.frequency];
         if (pm.octave !== "") popopo.octave = parseInt(pm.octave);
         if (pm.type !== "") popopo.type = pm.type;
@@ -2227,15 +2227,15 @@ tyrano.plugin.kag.tag.popopo = {
         if (pm.storage !== "") popopo.storage = pm.storage;
         if (pm.samplerate !== "") popopo.samplerate = parseInt(pm.samplerate);
         if (typeof pm.noplaychars === "string") popopo.noplaychars = pm.noplaychars;
-        
+
         popopo.enable = true;
-        
+
         this.kag.stat.popopo.enable = true; //ポポポが有効化どうか
-        
+
         this.kag.stat.popopo_chara[pm.chara] = popopo;
-        
+
         this.kag.ftag.nextOrder();
-            
+
     }
 };
 
@@ -2247,9 +2247,10 @@ tyrano.plugin.kag.popopo = {
 };
 
 tyrano.plugin.kag.popopo.init = function () {
-    
+
     TYRANO.kag.popopo.is_ready = true;
-    
+    TYRANO.kag.popopo.noteBusyUntil = 0;
+
     // oscillatorNode.typeの文字列と数値対応
     const TYPE_TO_NUMBER = {
         "sine": 0,
@@ -2257,7 +2258,7 @@ tyrano.plugin.kag.popopo.init = function () {
         "sawtooth": 2,
         "triangle": 3
     };
-    
+
     // AudioContext
     var AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -2269,7 +2270,7 @@ tyrano.plugin.kag.popopo.init = function () {
     TYRANO.kag.popopo.audioContext = new AudioContext();
     TYRANO.kag.popopo.audioContext.createGain = TYRANO.kag.popopo.audioContext.createGain || TYRANO.kag.popopo.audioContext.createGainNode;
     TYRANO.kag.popopo.gainNode = TYRANO.kag.popopo.audioContext.createGain();
-    TYRANO.kag.popopo.gainNode.gain.value = 0;
+    TYRANO.kag.popopo.gainNode.gain.value = 1;
     TYRANO.kag.popopo.gainNode.connect(TYRANO.kag.popopo.audioContext.destination);
 
     //# TYRANO.kag.popopo.file
@@ -2279,7 +2280,7 @@ tyrano.plugin.kag.popopo.init = function () {
             },
             play: function (ch) {
                 var pm = TYRANO.kag.stat.popopo;
-                
+
                 if (pm.noplaychars.indexOf(ch) > -1) return;
                 var volume = pm.volume;
                 if (volume === "default") {
@@ -2330,19 +2331,53 @@ tyrano.plugin.kag.popopo.init = function () {
     //# TYRANO.kag.popopo.createNode
     // オシレーターノードを作るぞ
     TYRANO.kag.popopo.createNode = function (pm) {
+
+        /*
         if (pm.type === "noise") {
-            return this.noise.createNoise(pm);
-        }
-        else {
-            var node = this.audioContext.createOscillator();
+              return this.noise.createNoise(pm);
+          }
+          else {
+              var node = this.audioContext.createOscillator();
+              node.detune.value = pm.frequency + pm.octave * 1200;
+              node.type = (typeof node.type === "string") ? pm.type : TYPE_TO_NUMBER[pm.type];
+              node.start = node.start || node.noteOn;
+              node.stop = node.stop || node.noteOff;
+              node.connect(this.gainNode);
+              node.start();
+              return node;
+          }
+          */
+
+
+        if (pm.type === "noise") {
+            return this.noise.createNoise(pm); // 後述②で内部も1行だけ足します
+        } else {
+            const ctx = this.audioContext;
+            const node = ctx.createOscillator();
             node.detune.value = pm.frequency + pm.octave * 1200;
             node.type = (typeof node.type === "string") ? pm.type : TYPE_TO_NUMBER[pm.type];
             node.start = node.start || node.noteOn;
             node.stop = node.stop || node.noteOff;
-            node.connect(this.gainNode);
+
+            // ★発音専用のゲイン（包絡）
+            const voiceGain = ctx.createGain();
+            voiceGain.gain.value = 0;
+
+            // （任意）DCブロック用HPFを入れると更に安全
+            const hpf = ctx.createBiquadFilter();
+            hpf.type = "highpass";
+            hpf.frequency.value = 20;
+
+            node.connect(hpf);
+            hpf.connect(voiceGain);
+            voiceGain.connect(this.gainNode); // 既存のマスターゲインに合流
             node.start();
-            return node;
+
+            // 呼び出し側で包絡を触れるようにまとめて返す
+            return { source: node, gain: voiceGain };
         }
+
+
     };
 
     //# TYRANO.kag.popopo.createNoise
@@ -2369,11 +2404,22 @@ tyrano.plugin.kag.popopo.init = function () {
             whiteNoise.buffer = noiseBuffer;
             whiteNoise.loop = true;
             whiteNoise.start(0);
+            /*
             whiteNoise.connect(TYRANO.kag.popopo.gainNode);
             whiteNoise.stop = function () {
                 whiteNoise.disconnect();
             };
             return whiteNoise;
+            */
+
+            // ★ 発音専用ゲイン（包絡用）。トーンと同じインターフェイスを返す
+            var voiceGain = audioContext.createGain();
+            voiceGain.gain.value = 0;            // 包絡はここにかける
+            whiteNoise.connect(voiceGain);
+            voiceGain.connect(TYRANO.kag.popopo.gainNode);
+
+            return { source: whiteNoise, gain: voiceGain };
+
         }
     };
 
@@ -2384,31 +2430,77 @@ tyrano.plugin.kag.popopo.init = function () {
         everyone: {
             start: function (message_str, ch_speed) {
                 var pm = TYRANO.kag.stat.popopo;
-                
+
                 if (pm.volume === "default") {
                     pm._volume = parseInt(TYRANO.kag.config.defaultSeVolume) / 100;
                 }
                 else {
                     pm._volume = parseInt(pm.volume) / 100;
                 }
-                
+
                 TYRANO.kag.popopo.oscillatorNode = TYRANO.kag.popopo.createNode(pm);
             },
             play: function (ch) {
+
                 var t0 = TYRANO.kag.popopo.audioContext.currentTime;
                 var pm = TYRANO.kag.stat.popopo;
-                
-                if (pm.noplaychars.indexOf(ch) > -1) return;
-                
-                TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(pm._volume, t0, 0);
+
+                if (pm.noplaychars.indexOf(ch) > -1) {
+                    return;
+                }
+
+                var ctx = TYRANO.kag.popopo.audioContext;
+                var now = ctx.currentTime;
+                var pm = TYRANO.kag.stat.popopo;
+
+
+                // ★追加：前回の発音が終わっていないなら無視（モノフォニック化）
+                var att = pm.attack || 0.005;   // 既に使っている値を流用
+                var rel = pm.tailtime || 0.01;
+                // 微小誤差ぶんの余裕（0.5ms）
+                if (now < (TYRANO.kag.popopo.noteBusyUntil - 0.0005)) return;
+
+                /*
+                  TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(pm._volume, t0, 0);
                 TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(0, t0 + pm.time, pm.tailtime);
+                */
+
+                const g = TYRANO.kag.popopo.oscillatorNode.gain.gain;
+                g.cancelScheduledValues(t0);
+                g.setValueAtTime(0, t0);
+                g.linearRampToValueAtTime(pm._volume, t0 + (pm.attack || 0.005));
+                g.linearRampToValueAtTime(0, t0 + (pm.attack || 0.005) + pm.time + (pm.tailtime || 0.01));
+
+                TYRANO.kag.popopo.noteBusyUntil = now + att + pm.time + rel;
+
             },
             stop: function (message_str, ch_speed) {
+                /*
+                  var t0 = TYRANO.kag.popopo.audioContext.currentTime;
+                  var pm = TYRANO.kag.stat.popopo;
+                  TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(0, t0 + pm.time, pm.tailtime);
+                  TYRANO.kag.popopo.oscillatorNode.stop(t0 + pm.tailtime);
+                  TYRANO.kag.popopo.oscillatorNode = null;
+                  */
+
+
                 var t0 = TYRANO.kag.popopo.audioContext.currentTime;
                 var pm = TYRANO.kag.stat.popopo;
-                TYRANO.kag.popopo.gainNode.gain.setTargetAtTime(0, t0 + pm.time, pm.tailtime);
-                TYRANO.kag.popopo.oscillatorNode.stop(t0 + pm.tailtime);
-                TYRANO.kag.popopo.oscillatorNode = null;
+                const node = TYRANO.kag.popopo.oscillatorNode;
+                if (node) {
+                    const g = node.gain.gain;
+                    g.cancelScheduledValues(t0);
+                    g.setValueAtTime(g.value, t0);
+                    g.linearRampToValueAtTime(0, t0 + (pm.tailtime || 0.01));
+                    // ゼロ到達後に停止＆切断
+                    const stopAt = t0 + (pm.tailtime || 0.01) + 0.01;
+                    try { node.source.stop(stopAt); } catch (e) { }
+                    setTimeout(function () {
+                        try { node.source.disconnect(); node.gain.disconnect(); } catch (e) { }
+                    }, ((pm.tailtime || 0.01) + 0.02) * 1000);
+                    TYRANO.kag.popopo.oscillatorNode = null;
+                }
+
             }
         },
         // 定間隔
@@ -2422,18 +2514,32 @@ tyrano.plugin.kag.popopo.init = function () {
                     pm._volume = parseInt(pm.volume) / 100;
                 }
                 TYRANO.kag.popopo.oscillatorNode = TYRANO.kag.popopo.createNode(pm);
-        
-                var t0 = TYRANO.kag.popopo.audioContext.currentTime;
-                var gainNode = TYRANO.kag.popopo.gainNode;
-                var interval = pm.interval || 100;
-                var count = Math.ceil(message_str.length * ch_speed / interval);
-                interval /= 1000;
+
+                var ctx = TYRANO.kag.popopo.audioContext;
+                var t0 = ctx.currentTime;
+                var node = TYRANO.kag.popopo.oscillatorNode;
+                // voice用ゲインに包絡をかける（トーン/ノイズ双方で {source, gain} になる）
+                var g = node.gain ? node.gain.gain : TYRANO.kag.popopo.gainNode.gain; // 互換フォールバック
+
+                // 攻撃・解放の既定（未指定時の安全値）
+                var att = pm.attack || 0.005;
+                var rel = pm.tailtime || 0.01;
+
+                var intervalMs = pm.interval || 100;
+                var count = Math.ceil(message_str.length * ch_speed / intervalMs);
+                var interval = intervalMs / 1000;
+
+                // 既存スケジュールをクリアしてから発音パルスを並べる
+                g.cancelScheduledValues(t0);
                 var t = t0;
                 for (var i = 0; i < count; i++) {
-                    gainNode.gain.setTargetAtTime(pm._volume, t, 0);
-                    gainNode.gain.setTargetAtTime(0, t + pm.time, pm.tailtime);
+                    g.setValueAtTime(0, t);
+                    g.linearRampToValueAtTime(pm._volume, t + att);
+                    g.linearRampToValueAtTime(0, t + att + pm.time + rel);
                     t += interval;
                 }
+
+
             },
             play: function (ch) {
             },
@@ -2441,7 +2547,10 @@ tyrano.plugin.kag.popopo.init = function () {
                 var t0 = TYRANO.kag.popopo.audioContext.currentTime;
                 var pm = TYRANO.kag.stat.popopo;
                 var gainNode = TYRANO.kag.popopo.gainNode;
-                TYRANO.kag.popopo.oscillatorNode.stop(t0 + pm.time);
+                //TYRANO.kag.popopo.oscillatorNode.stop(t0 + pm.time);
+
+                (TYRANO.kag.popopo.oscillatorNode.source || TYRANO.kag.popopo.oscillatorNode).stop(t0 + pm.time);
+
                 TYRANO.kag.popopo.oscillatorNode = null;
             }
         }
@@ -2458,6 +2567,10 @@ tyrano.plugin.kag.popopo.init = function () {
     };
 
 };
+
+
+
+
 
 
 
