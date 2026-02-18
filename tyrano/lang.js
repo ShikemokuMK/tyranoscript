@@ -55,6 +55,7 @@ window.tyrano_lang = {
         new_patch_found: "新しいアップデートが見つかりました。\n\nVer: { version }\n{ message }\n\n アップデートを行いますか？",
         apply_web_patch: "アップデートを行います。完了後、自動的にゲームは終了します。",
         apply_patch_complete: "アップデートを適用しました。ゲームを再起動してください。",
+        resume_game: "ゲームに復帰しました",
     },
 
     novel: {

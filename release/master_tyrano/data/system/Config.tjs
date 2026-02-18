@@ -232,7 +232,7 @@
 // 既読管理に関連する設定です
 // 以下を有効にするには autoRecordLabel に trueを指定する必要があります
 // 未読スキップを有効にするかどうかを指定します。 true を指定すると有効です
-;unReadTextSkip = false 　
+;unReadTextSkip = false
 
 //既読のテキストの色(0x000000形式)を変更できます。default を指定すると既読テキストでも色は変わりません。
 ;alreadyReadTextColor = 0x87cefa

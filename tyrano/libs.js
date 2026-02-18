@@ -418,23 +418,23 @@
     };
 
     $.loadText = function (file_path, callback, flag_disabled_cache = true) {
-        
+
         if (window.TYRANO) window.TYRANO.kag.showLoadingLog();
-    
+
         let dataType = "text";
 
         if ($.getExt(file_path) == "json") {
             dataType = "json";
         }
-        
+
         //キャッシュが
         let flag_cache = true;
         if (flag_disabled_cache == true) {
-          flag_cache = false;
+            flag_cache = false;
         }
-        
+
         $.ajax({
-            url: file_path ,
+            url: file_path,
             dataType: dataType,
             cache: flag_cache,
             success: function (text) {
@@ -509,7 +509,9 @@
         var ua = navigator.userAgent;
         if (ua.indexOf("iPhone") > -1) {
             return "iphone";
-        } else if (ua.indexOf("iPad") > -1) {
+        } else if (ua.indexOf("iPad") > -1 ||
+            (ua.indexOf("Macintosh") > -1 && navigator.maxTouchPoints > 1)
+        ) {
             return "iphone";
         } else if (ua.indexOf("Android") > -1) {
             return "android";

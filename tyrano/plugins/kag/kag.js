@@ -138,7 +138,7 @@ tyrano.plugin.kag = {
                     offMoveBufferB: false,
                     offRotateBufferL: false,
                     offRotateBufferR: false,
-                    
+
                     moveUp: false,
                     moveDown: false,
 
@@ -161,7 +161,7 @@ tyrano.plugin.kag = {
                     fps_rate: 0,
 
                     move_trans_control: false,
-                    
+
                     stop_eye_move: false,
                     enable_move_updown: true, //上下の高さ移動
                 },
@@ -175,7 +175,7 @@ tyrano.plugin.kag = {
         preload_audio_map: {},
         preload_objects: [],
         preload_complete_callbacks: [],
-        
+
         popopo: {
             key: "",
             player: null,
@@ -353,8 +353,8 @@ tyrano.plugin.kag = {
 
             others_style: {},
         },
-        
-        popopo:{
+
+        popopo: {
             volume: "default",
             time: 0.02,
             tailtime: 0.03,
@@ -368,7 +368,7 @@ tyrano.plugin.kag = {
             samplerate: 44000,
             noplaychars: "…・、。「」（）　 "
         },
-        
+
         popopo_chara: {},
 
         //システム系で使用するHTMLの場所を保持
@@ -448,7 +448,7 @@ tyrano.plugin.kag = {
         word_nobreak_list: [],
 
         lipsync_buf_chara: {},
-        
+
         checkpoint: {},
 
         title: "", //ゲームのタイトル
@@ -456,7 +456,7 @@ tyrano.plugin.kag = {
     }, //ゲームの現在の状態を保持する所 状況によって、いろいろ変わってくる
 
     init: function () {
-        
+
         this.kag = this;
 
         var that = this;
@@ -583,7 +583,7 @@ tyrano.plugin.kag = {
 
                 //実行パスを選択させる
                 //let dialog = require("electron").remote.dialog;
-                
+
                 let filenames = window.studio_api.ipcRenderer.sendSync("showSelectFileDialog",
                     {
                         prop: ["openFile"],
@@ -591,9 +591,9 @@ tyrano.plugin.kag = {
                         filters: [{ name: "", extensions: ["app"] }],
                     }
                 );
-                
+
                 console.log(filenames);
-        
+
                 /*
                 let filenames = dialog.showOpenDialogSync(null, {
                     prop: ["openFile"],
@@ -649,9 +649,9 @@ tyrano.plugin.kag = {
 
             return;
         } else {
-            const AdmZip = window.studio_api.admzip; 
+            const AdmZip = window.studio_api.admzip;
 
-            var path = window.studio_api.path; 
+            var path = window.studio_api.path;
             var abspath = path.resolve("./");
 
             // reading archives
@@ -1308,6 +1308,11 @@ tyrano.plugin.kag = {
             this.tmp.ready_audio = true;
         }
 
+        //iOSで復旧時にBGMを再生するための処置
+        if ($.userenv() == "iphone") {
+            this.resumeAudioSetting();
+        }
+
         //index.htmlでのvchat定義を確認。index.htmlでコンフィグを調整したい。
         $("[tyrano='config']").each(function () {
             var key = $(this).attr("key");
@@ -1460,7 +1465,7 @@ tyrano.plugin.kag = {
 
         if (this.kag.config["use3D"] == "true") {
             array_scripts = [
-                 "./tyrano/libs/three/three.js",
+                "./tyrano/libs/three/three.js",
 
                 "./tyrano/libs/three/loader/GLTFLoader.js",
                 "./tyrano/libs/three/loader/OBJLoader.js",
@@ -1681,6 +1686,61 @@ tyrano.plugin.kag = {
             });
             audio_obj.play();
         }
+    },
+
+    //iphoneで復旧したときにBGMがなるように調整
+    resumeAudioSetting: function () {
+
+        (function () {
+
+            let resumed = false;
+
+            function resumeAudio() {
+                if (resumed) return;
+                resumed = true;
+
+                try {
+                    // WebAudio復帰
+                    if (window.Howler && Howler.ctx && Howler.ctx.state === "suspended") {
+                        Howler.ctx.resume();
+                    }
+
+                    // TyranoScriptのBGMが停止していたら再開
+                    if (window.TYRANO && TYRANO.kag && TYRANO.kag.stat.current_bgm) {
+                        const kag = TYRANO.kag;
+
+                        if (!kag.tmp.is_bgm_play) {
+                            kag.ftag.startTag("playbgm", {
+                                storage: kag.stat.current_bgm,
+                                loop: kag.stat.bgm_loop,
+                                volume: kag.stat.bgm_volume
+                            });
+                        }
+                    }
+
+                } catch (e) {
+                    console.log("Audio resume error:", e);
+                }
+            }
+
+            //iphone系の場合のみ復帰処理
+
+            // ① アプリ復帰検知
+            document.addEventListener("visibilitychange", function () {
+
+                if (!document.hidden) {
+                    alert($.lang("resume_game"));
+                    resumeAudio();
+                }
+
+            });
+
+            // ② iOS対策：タップ時に確実に復帰
+            document.addEventListener("touchstart", resumeAudio, { once: true });
+
+        })();
+
+
     },
 
     //ゲームのカーソルを指定する
@@ -1927,8 +1987,8 @@ tyrano.plugin.kag = {
         var result_obj = this.parser.parseScenario(str);
         this.cache_scenario["./data/scenario/" + filename] = result_obj;
     },
-    
-     //キャッシュシナリオの削除
+
+    //キャッシュシナリオの削除
     deleteCacheScenario: function (filename) {
         delete this.cache_scenario["./data/scenario/" + filename];
     },
@@ -2142,7 +2202,7 @@ tyrano.plugin.kag = {
                     onend();
                 })
                 .attr("src", src);
-        }else if ("json" == ext) {
+        } else if ("json" == ext) {
 
             $.loadText(src, function (text_str) {
                 onend(this);
@@ -2964,9 +3024,9 @@ tyrano.plugin.kag = {
             }
 
             j_elm.addClass("focus");
-            
+
         });
-        
+
         j_elm.on("focusout", () => {
             if (this.config["keyFocusWithHoverStyle"] === "true") {
                 j_elm.trigger("mouseleave");
@@ -3798,7 +3858,7 @@ tyrano.plugin.kag = {
                 let lang_json = await $.loadTextSync("./data/others/lang/" + name + ".json");
                 this.lang = name;
                 this.map_lang = lang_json;
-                
+
                 //システム関連の更新
                 if (this.map_lang["systems"]) {
                     window.tyrano_lang["word"] = this.map_lang["systems"];

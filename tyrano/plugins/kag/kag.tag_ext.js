@@ -37,7 +37,7 @@ tyrano.plugin.kag.tag.loadjs = {
 
     start: function (pm) {
         var that = this;
-        
+
         let storage_url = "";
 
         if ($.isHTTP(pm.storage)) {
@@ -3436,7 +3436,7 @@ tyrano.plugin.kag.tag.chara_move = {
                     }
                 });
 
-                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () {});
+                target_img.stop(true, true).animate(img_anim_style, parseInt(pm.time), pm.effect, function () { });
             } else {
                 target_obj.stop(true, true).fadeTo(parseInt(that.kag.cutTimeWithSkip(pm.time)) / 2, 0, function () {
                     target_obj.css(anim_style);
@@ -4355,13 +4355,13 @@ tyrano.plugin.kag.tag.free_filter = {
     },
 
     start: function (pm) {
-        
+
         var filter_str = "";
 
         var j_obj;
 
         try {
-        
+
             if (pm.layer == "all") {
                 j_obj = $(".tyrano_filter_effect");
             } else if (pm.layer != "") {
@@ -4369,11 +4369,11 @@ tyrano.plugin.kag.tag.free_filter = {
             } else {
                 j_obj = $(".tyrano_filter_effect");
             }
-            
+
         } catch (e) {
-            
+
             j_obj = $(".tyrano_filter_effect");
-            
+
         }
 
         if (pm.name != "") {
@@ -4542,7 +4542,7 @@ tyrano.plugin.kag.tag.web = {
                 if (window.studio_api) {
                     //V6	
                     window.studio_api.shell.openExternal(pm.url);
-		        } else {
+                } else {
                     var shell = require("electron").shell;
                     shell.openExternal(pm.url);
                 }

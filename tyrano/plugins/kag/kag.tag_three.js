@@ -1645,8 +1645,8 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
         motion: "",
         next: "true",
         folder: "",
-        
-        cache:"",
+
+        cache: "",
 
         update: "",
 
@@ -1902,11 +1902,11 @@ tyrano.plugin.kag.tag["3d_model_new"] = {
 
             var obj_url = storage_url;
             var objLoader = new THREE.ObjectLoader();
-          
+
             var flag_disabled_cache = true;
-          
+
             if (pm.cache == "true") {
-              flag_disabled_cache = false;
+                flag_disabled_cache = false;
             }
 
             $.loadText(obj_url, async (json) => {
@@ -7359,7 +7359,7 @@ tyrano.plugin.kag.tag["3d_sound"] = {
             }
 
             sound.setVolume(volume);
-            sound.setRefDistance(20);
+            sound.setRefDistance(200);
 
             sound.onEnded = function () {
 
