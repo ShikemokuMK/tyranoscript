@@ -150,22 +150,20 @@ tyrano.plugin.kag.tag.camera = {
             },
 
             complete: function () {
-                //アニメーションが完了しないと次へはいかない
-                if (pm.wait == "true" && flag_complete == false) {
-                    flag_complete = true; //最初の一回だけwait有効
-
-                    setTimeout(function () {
+                if (flag_complete) return;
+                flag_complete = true;
+                setTimeout(function () {
+                    that.kag.stat.is_move_camera = false;
+                    if (pm.wait == "true") {
                         that.kag.ftag.nextOrder();
-                    }, 300);
-                } else {
-                    //カメラを待ってる状態なら
-                    if (that.kag.stat.is_wait_camera == true) {
-                        that.kag.stat.is_wait_camera = false;
-                        that.kag.ftag.nextOrder();
+                    } else {
+                        //カメラを待ってる状態なら
+                        if (that.kag.stat.is_wait_camera == true) {
+                            that.kag.stat.is_wait_camera = false;
+                            that.kag.ftag.nextOrder();
+                        }
                     }
-                }
-
-                that.kag.stat.is_move_camera = false;
+                }, 20);
             },
         };
 
@@ -277,32 +275,33 @@ tyrano.plugin.kag.tag.reset_camera = {
             },
 
             complete: function () {
-                //リセットした時は、本当に消す
-                $("." + pm.layer).css({
-                    "-animation-name": "",
-                    "-animation-duration": "",
-                    "-animation-play-state": "",
-                    "-animation-delay": "",
-                    "-animation-iteration-count": "",
-                    "-animation-direction": "",
-                    "-animation-fill-mode": "",
-                    "-animation-timing-function": "",
-                    "transform": "",
-                });
-
-                //アニメーションが完了しないと次へはいかない
-                if (pm.wait == "true" && flag_complete == false) {
-                    flag_complete = true; //最初の一回だけwait有効
-                    that.kag.ftag.nextOrder();
-                } else {
-                    //カメラを待ってる状態なら
-                    if (that.kag.stat.is_wait_camera == true) {
-                        that.kag.stat.is_wait_camera = false;
+                if (flag_complete) return;
+                flag_complete = true;
+                setTimeout(function() {
+                    //リセットした時は、本当に消す
+                    $("." + pm.layer).css({
+                        "-animation-name": "",
+                        "-animation-duration": "",
+                        "-animation-play-state": "",
+                        "-animation-delay": "",
+                        "-animation-iteration-count": "",
+                        "-animation-direction": "",
+                        "-animation-fill-mode": "",
+                        "-animation-timing-function": "",
+                        "transform": "",
+                    });
+                    that.kag.stat.is_move_camera = false;
+                    if (pm.wait == "true") {
                         that.kag.ftag.nextOrder();
+                    } else {
+                        //カメラを待ってる状態なら
+                        if (that.kag.stat.is_wait_camera == true) {
+                            that.kag.stat.is_wait_camera = false;
+                            that.kag.ftag.nextOrder();
+                        }
                     }
-                }
+                }, 20);
 
-                that.kag.stat.is_move_camera = false;
             },
         };
 
