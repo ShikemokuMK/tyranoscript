@@ -500,6 +500,16 @@
         return str;
     };
 
+    $.isDefine = function (str) {
+
+        if (str != null && str !== "") {
+            return true;
+        } else {
+            return false;
+        }
+
+    };
+
     $.dstop = function () {
         console.log("dstop");
     };
@@ -864,6 +874,15 @@
                 return "";
             }
         }
+    };
+
+    $.makeSaveKey = function () {
+        var S = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        var N = 16;
+        let key = Array.from(Array(N))
+            .map(() => S[Math.floor(Math.random() * S.length)])
+            .join("");
+        return key;
     };
 
     $.makeSaveKey = function () {

@@ -172,6 +172,8 @@ tyrano.plugin.kag = {
             evt: {},
         },
 
+        view: {},
+
         preload_audio_map: {},
         preload_objects: [],
         preload_complete_callbacks: [],
@@ -450,6 +452,14 @@ tyrano.plugin.kag = {
         lipsync_buf_chara: {},
 
         checkpoint: {},
+
+        view: {
+            cont: {},
+            event: {},
+            config: {
+                zindex: "9",
+            },
+        }, //ビュー関連の保存情報
 
         title: "", //ゲームのタイトル
 
@@ -815,6 +825,11 @@ tyrano.plugin.kag = {
         this.layer = object(tyrano.plugin.kag.layer);
         this.layer.kag = that;
         this.layer.init();
+
+        //view 追加
+        this.view = object(tyrano.plugin.kag.view);
+        this.view.kag = that;
+        this.view.init();
 
         //menu 追加
         this.menu = object(tyrano.plugin.kag.menu);

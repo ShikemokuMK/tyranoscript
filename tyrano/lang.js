@@ -56,6 +56,10 @@ window.tyrano_lang = {
         apply_web_patch: "アップデートを行います。完了後、自動的にゲームは終了します。",
         apply_patch_complete: "アップデートを適用しました。ゲームを再起動してください。",
         resume_game: "ゲームに復帰しました",
+
+        view_undefined_object: "ビューで指定されたオブジェクト「{ name }」は存在しません。",
+        view_undefined_container: "ビューで指定されたコンテナ「{ name }」は存在しません。",
+
     },
 
     novel: {

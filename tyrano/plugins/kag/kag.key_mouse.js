@@ -1330,10 +1330,10 @@ tyrano.plugin.kag.key_mouse = {
         const speed = this.keyboard.isPressed("Control")
             ? 4
             : this.keyboard.isPressed("Shift")
-            ? 2
-            : this.keyboard.isPressed("Alt")
-            ? 0.2
-            : 1;
+                ? 2
+                : this.keyboard.isPressed("Alt")
+                    ? 0.2
+                    : 1;
         const x = xy.x * movement * speed;
         const y = xy.y * movement * speed;
         this.vmouse.move(x, y, this.keyboard.delay_update);
@@ -1893,7 +1893,7 @@ tyrano.plugin.kag.key_mouse = {
             //
 
             $(document).on("mousedown", (e) => {
-                
+
                 if (e.originalEvent && e.originalEvent.isTrusted) {
                     that.vmouse.hide();
                 }
@@ -2034,8 +2034,8 @@ tyrano.plugin.kag.key_mouse = {
                 const delta = e.originalEvent.deltaY
                     ? -e.originalEvent.deltaY
                     : e.originalEvent.wheelDelta
-                    ? e.originalEvent.wheelDelta
-                    : -e.originalEvent.detail;
+                        ? e.originalEvent.wheelDelta
+                        : -e.originalEvent.detail;
 
                 let action = null;
 
@@ -3365,8 +3365,8 @@ tyrano.plugin.kag.key_mouse = {
                 const gamepads = navigator.getGamepads
                     ? navigator.getGamepads()
                     : navigator.webkitGetGamepads
-                    ? navigator.webkitGetGamepads()
-                    : null;
+                        ? navigator.webkitGetGamepads()
+                        : null;
 
                 // getGamepads() が利用できない環境（IE以外ではほとんどありえない）は無視
                 // ※ゲームパッドが未接続であっても getGamepads() は [null, null, null, null] を返す
@@ -3638,8 +3638,8 @@ tyrano.plugin.kag.key_mouse = {
             const gamepads = navigator.getGamepads
                 ? navigator.getGamepads()
                 : navigator.webkitGetGamepads
-                ? navigator.webkitGetGamepads()
-                : null;
+                    ? navigator.webkitGetGamepads()
+                    : null;
 
             if (gamepads) {
                 return gamepads[index];

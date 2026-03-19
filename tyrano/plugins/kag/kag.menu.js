@@ -4,7 +4,7 @@ tyrano.plugin.kag.menu = {
 
     snap: null,
 
-    init: function () {},
+    init: function () { },
 
     getDateStr() {
         const default_format = "yyyy/M/d h:mm:ss";
@@ -320,44 +320,44 @@ tyrano.plugin.kag.menu = {
 
         this.loadGameData($.extend(true, {}, data), { auto_next: "yes" });
     },
-    
+
     //チェックポイントを登録する
     doSetCheckpoint: function (name) {
-    
+
         var data = this.snap;
         data.save_date = this.getDateStr();
-        
+
         //dataを登録する
         this.kag.stat.checkpoint[name] = $.extend(true, {}, data);
-        
+
         var layer_menu = this.kag.layer.getMenuLayer();
         layer_menu.hide();
-        
+
     },
-    
+
     //チェックポイントの位置にロールバックします
-    doRollback: function (name,variable_over,bgm_over) {
-        
+    doRollback: function (name, variable_over, bgm_over) {
+
         var data = this.kag.stat.checkpoint[name];
-        
+
         if (data) {
             data = data; //JSON.parse(data);
         } else {
             return false;
         }
-        
+
         //変数の上書き
         if (variable_over == "true") {
             data.stat.f = this.kag.stat.f;
         }
-        
+
         let options = { is_rollback: true, auto_next: "yes" };
         options.bgm_over = bgm_over;
-        
+
         this.loadGameData($.extend(true, {}, data), options);
-        
+
         return true;
-        
+
     },
 
     //セーブ状態のスナップを保存します。
@@ -897,15 +897,15 @@ tyrano.plugin.kag.menu = {
         //
         // ステータスの更新
         //
-        
+
         //ロールバックからの呼び出しの場合
         if (options.is_rollback == true) {
             const tmp_checkpoint = this.kag.stat.checkpoint;
             data.stat.checkpoint = tmp_checkpoint;
         }
-        
+
         this.kag.stat = data.stat;
-        
+
         // [s] で止まっているセーブデータを読み込んだ場合はロード後次のタグに進めるべきではない
         if (this.kag.stat.is_strong_stop) {
             auto_next = "stop";
@@ -1133,6 +1133,11 @@ tyrano.plugin.kag.menu = {
             //},10);
         }
 
+        /////// view　の復元
+        this.kag.view.loadView();
+
+
+
         /////////////////////////////////////////////
 
         //カーソルの復元
@@ -1325,7 +1330,7 @@ tyrano.plugin.kag.menu = {
     },
 
     //メニューを隠します
-    hideMenu: function () {},
+    hideMenu: function () { },
 
     //セーブデータを取得します
     getSaveData: function () {
@@ -1520,5 +1525,5 @@ tyrano.plugin.kag.menu = {
         }
     },
 
-    test: function () {},
+    test: function () { },
 };

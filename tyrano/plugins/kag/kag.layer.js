@@ -71,6 +71,13 @@ tyrano.plugin.kag.layer = {
         layer_free.css("width", this.kag.config.scWidth).css("height", this.kag.config.scHeight).css("position", "absolute");
         this.layer_free = layer_free;
         this.appendLayer(this.layer_free, "root_layer_system");
+
+        //viewレイヤ すべてのレイヤの後ろにくる。前にする場合はちょっと検討。
+        var layer_view = $("<div class='layer layer_view' style='z-index:9;display:none' ></div>");
+        layer_view.css("width", this.kag.config.scWidth).css("height", this.kag.config.scHeight).css("position", "absolute");
+        this.layer_view = layer_view;
+        this.appendLayer(this.layer_view);
+
     },
 
     //メニューレイヤーを返す
@@ -81,6 +88,10 @@ tyrano.plugin.kag.layer = {
     //フリーレイヤを返却します
     getFreeLayer: function () {
         return this.layer_free;
+    },
+
+    getViewLayer: function () {
+        return this.layer_view;
     },
 
     addLayer: function (layer_name) {
