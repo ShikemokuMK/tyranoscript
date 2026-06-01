@@ -124,6 +124,7 @@ tyrano.plugin.kag.key_mouse = {
                         this.move_point = 0;
                     }
 
+                    clearTimeout(this.hold_timer_id);
                     this.hold_timer_id = setTimeout(() => {
                         let action = this.map_ges.hold;
                         if (typeof action === "object" && "action" in action) action = action.action;
