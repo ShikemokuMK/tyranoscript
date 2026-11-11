@@ -1,0 +1,454 @@
+// Config.tjs - TyranoScript Configuration
+// Copyright (C) 2012-2021 ShikemokuMK
+
+;global.config_version = "6.00"; // Do not remove this line
+
+// These are the basic settings for TyranoScript.
+
+// All settings in this file are in the form:
+// ;settingName = value;
+// Except for "additional settings," each setting must be written on a single line.
+
+
+//------------------------------------------------------- Global Settings -----
+
+// ◆ Title
+// This sets the window caption (title) and is used as the title in browsers.
+;System.title = "TyranoScript";
+
+
+// ◆ Unique Project Identifier (TyranoScript specific setting)
+// Please specify a project-specific string. This must be set especially when deploying multiple projects on the same domain.
+;projectID = tyranoproject;
+
+// ◆ Release Version (numeric)
+// Specify the release version as a number. Full-width characters or alphabets are not allowed.
+// This plays an important role in patch functionality. If a patch file specifies a version greater than this number, the patch will be applied.
+// It is recommended to increase this number whenever the game is updated.
+;game_version = 0.0;
+
+// Whether to fix the aspect ratio
+// "fit": Automatically adjust to the device, but the aspect ratio is not maintained.
+// "fix": Maintain the aspect ratio. However, this may result in blank areas on some devices.
+// "default": No aspect ratio adjustment is made.
+;ScreenRatio = fix;
+
+// Automatically apply patch files on startup if they are present.
+// If set to true, any tpatch file located in the same folder as the executable (or under home/username/_TyranoGameData/ on macOS Sierra and later) will be applied before startup.
+// If false, patches can be applied later using the [apply_local_patch] tag.
+;patch_apply_auto = true;
+
+// Whether to center the screen
+// Set to false if the game screen is displayed outside the visible area (for example, in app deployments).
+;ScreenCentering = true;
+
+// Enable or disable camera functionality.
+// Set to true to enable, false to disable.
+;useCamera = true;
+
+// Enable or disable 3D functionality.
+// Set to true to enable, false to disable.
+// Enabling this may increase startup time, so it is recommended to set it to false if not needed.
+;use3D = false;
+
+// ◆ Whitespace Preservation in Tag Parameter Values
+// Specify the level at which spaces are preserved in parameter values (choose 1, 2, or 3):
+// 1: Do not preserve any whitespace (all spaces are removed)
+// 2: Preserve only internal spaces (trim spaces at both ends)
+// 3: Preserve all spaces
+// For example, for a tag like [bg storage=" my room.jpg  "]:
+// Level 1: "myroom.jpg"
+// Level 2: "my room.jpg"
+// Level 3: " my room.jpg  "
+// If an existing game (pre-V514) stops working after updating to V515 or later, try setting this to 1.
+;KeepSpaceInParameterValue = 2;
+
+//-------------------------------------------- Window and Operation Settings -----
+
+// ◆ Screen Size
+// Specify the screen width (scWidth) and height (scHeight) in pixels.
+;scWidth = 1280;
+;scHeight = 720;
+
+// ◆ Chat Novel Format
+// Since V5. Set to true to play the game in a chat story format.
+;vchat = false;
+
+// ◆ Chat Novel Menu
+// Specify whether to display a menu with convenient functions (such as save and load) in chat novel mode.
+;vchatMenuVisible = false;
+
+// ◆ Text Display Speed
+// When using delay, that value takes precedence. Use resetdelay to revert.
+;chSpeed = 30;
+
+// ◆ Text Display Speeds (milliseconds per character) (Not implemented)
+;chSpeeds.fast = 10;   // "Fast" text display speed
+;chSpeeds.normal = 30; // "Normal" text display speed
+;chSpeeds.slow = 50;   // "Slow" text display speed
+
+// ◆ Text Display Effects
+// Specify the effect used when displaying text. Setting to "none" disables the effect.
+// Available effect names:
+// fadeIn/fadeInDown/fadeInLeft/fadeInRight/fadeInUp/rotateIn/zoomIn/slideIn/bounceIn/vanishIn/puffIn/rollIn/none
+;defaultChEffect = none;
+
+// ◆ Text Display Effect Speed
+// When text effects are enabled, specify the duration of the effect. The "s" suffix stands for seconds.
+;defaultChEffectSpeed = 0.2s;
+
+// ◆ Skip Speed (milliseconds per character)
+// Configure how fast the text advances when skipping.
+;skipSpeed = 30;
+
+// ◆ Skip Text Effects on Skip
+// Set to true to skip text effects (such as background changes and character transitions) when skipping.
+;skipEffectIgnore = true;
+
+// ◆ Auto Speed
+// autoSpeed sets the advance speed (in milliseconds) during auto-play.
+// autoClickStop configures whether auto-play stops when the screen is clicked. Set to true to enable stopping on click.
+;autoSpeed = 1300;
+;autoClickStop = true;
+
+// The auto-play wait time can be adjusted based on the number of characters.
+// For each character, the specified number of milliseconds will be added to the autoSpeed wait time.
+// For example, a 10-character text will wait an additional 10 * 60 = 600ms.
+;autoSpeedWithText = 60;
+
+// ◆ Mouse Cursor
+// Specify the mouse cursor. You can also specify an image file.
+// Setting to "default" will use the standard arrow cursor.
+// If you wish to use a custom image cursor, place the file in the image folder and specify the file name.
+// The [cursor] tag can also change the cursor during gameplay.
+;cursorDefault = pointer; // Standard mouse cursor
+
+// ◆ Default Media Format
+// Specify the default format for sound and video.
+// Unused since V5; no changes are necessary.
+;mediaFormatDefault = ogg;
+
+// ◆ BGM Volume (0 to 100)
+;defaultBgmVolume = 100;
+
+// ◆ SE (Sound Effects) Volume (0 to 100)
+;defaultSeVolume = 100;
+
+// ◆ Movie Volume (0 to 100)
+;defaultMovieVolume = 100;
+
+// ◆ Predefined BGM Slot Count
+// Essential for proper sound playback in smartphone browsers.
+;defaultBgmSlotNum = 1;
+
+// ◆ Predefined Sound Slot Count
+// Essential for proper sound playback in smartphone browsers.
+;defaultSoundSlotNum = 3;
+
+// ◆ Config (Menu) Display
+// Specify whether to display functions such as save/load and return to title.
+;configVisible = true;  // Display config icon
+;configLeft    = -1     // Specify the left position of the config icon. -1 means bottom right.
+;configTop     = -1     // Specify the top position of the config icon. -1 means bottom right.
+
+// ◆ Save Method
+// Note: The save method cannot be changed mid-game.
+// webstorage : Saves to the WebStorage area. Works in all environments but may fail if the save data becomes too large.
+// webstorage_compress : Saves to the WebStorage area with compression. Saving/loading takes longer, but the data capacity is increased.
+// file : Exports save data as a .sav file. This is only available for PC games; it avoids data transfer and storage limit issues.
+;configSave     = webstorage
+
+// If you do not wish to display thumbnails during save/load, set this to false.
+// (On some older devices, disabling thumbnails may not resolve save function issues.)
+;configThumbnail    = true;
+
+// Specify the quality of thumbnail images when using them.
+// For browser or smartphone support with WebStorage, "low" or "middle" is recommended.
+// low: lowest quality (jpeg), middle: medium quality (jpeg), high: highest quality (png)
+;configThumbnailQuality = middle ;
+
+// Specify the size of thumbnail images when using them.
+// For WebStorage, it is recommended to use a smaller number to reduce save data size.
+// Range: 0.01 to 1.0 (1.0 corresponds to full screen size)
+;configThumbnailScale = 0.3;
+
+// Specify the number of save slots.
+// Note: If using webstorage for configSave, it is recommended to keep this around 5 to avoid capacity issues.
+// The number of slots cannot be changed after the game has started. Changing it requires deleting all save data and restarting the game.
+;configSaveSlotNum = 5;
+
+// Specify the date format displayed for save data.
+// (Example)                  (Example Output)
+// yyyy/M/d h:mm:ss     →   2022/1/1 0:00:00
+// yyyy/MM/dd hh:mm:ss  →   2022/01/01 00:00:00
+// yyyy年M月d日 h時mm分    →   2022年1月1日 0時00分
+;configSaveDateFormat = yyyy/M/d h:mm:ss;
+
+// ◆ Allow Save Data Relocation (PC Games Only)
+// Moving or overwriting save data from other players can lead to cheating.
+// TyranoScript includes a feature that stops the game from launching if altered save data is detected.
+// In cases of frequent updates, false detections may occur. In such cases, changing the installation folder name can help.
+// Setting this to true allows save data relocation and overwriting. However, advise users not to use save data from untrusted sources.
+;configSaveOverwrite = false
+
+// ◆ Backlog Feature
+// Specify the maximum number of text entries to retain for the backlog.
+// The saved data is stored as an array in tf.system.backlog.
+// Setting to 0 disables backlog saving.
+;maxBackLogNum = 50;
+
+// ◆ Label Recording
+// IMPORTANT: To enable read/unread management, be sure to set this to true.
+// This specifies whether labels are automatically recorded as "read".
+// When set to true, each time a label is encountered, the system variable (sf.record) increments a variable named:
+// trail_[scenario_filename]_[label_name]
+// For example, for the *start label in first.ks, the variable would be sf.record.trail_first_start.
+// Areas not yet passed will be undefined.
+// Note: The behavior differs from KiriKiri/KAG. Simply jumping to another scenario file using jump will not record the label.
+// Recording occurs if a label is placed at the beginning of a scenario file.
+;autoRecordLabel = false;
+
+// ◆ Read/Unread Management
+// Settings related to managing read/unread text.
+// To enable the following features, autoRecordLabel must be set to true.
+// Specify whether to enable skipping unread text. Set to true to enable.
+;unReadTextSkip = true
+
+// Change the color of read text (in 0xRRGGBB format). If set to "default," the text color remains unchanged.
+;alreadyReadTextColor = 0x87cefa
+
+// ◆ Initial Number of Foreground Layers
+// Set to 0 if not needed.
+// Having too many layers may reduce performance and consume extra memory, so allocate only as many as necessary.
+// This can also be changed in a scenario using the laycount tag.
+;numCharacterLayers = 3;
+
+// ◆ Horizontal Center Positions for Foreground Layers
+// +---------+
+// |         |
+// | |  |  | |
+// | |  |  | |
+// +---------+
+// Specify the position names (such as left, left_center, etc.) used in the pos attribute of image or img tags,
+// along with their corresponding center x-coordinate.
+// Use the format: ;scPositionX.positionName = centerPosition;
+;scPositionX.left = 160;
+;scPositionX.left_center = 240;
+;scPositionX.center = 320;
+;scPositionX.right_center = 400;
+;scPositionX.right = 480;
+
+// Short aliases
+// Defines alternative names so that left, left_center, center, right_center, and right can also be specified as l, lc, c, rc, and r.
+;scPositionX.l = scPositionX.left;
+;scPositionX.lc = scPositionX.left_center;
+;scPositionX.c = scPositionX.center;
+;scPositionX.rc = scPositionX.right_center;
+;scPositionX.r = scPositionX.right;
+
+// ◆ Initial Number of Message Layers
+// Unlike foreground layers, this cannot be set to 0. Allocate only as many as necessary.
+// This can also be changed in a scenario using the laycount tag.
+;numMessageLayers = 2;
+
+// ◆ Display Message Layers by Default
+// Set to true to display message layer 0 at startup; false will keep all message layers hidden initially.
+;initialMessageLayerVisible = true;
+
+// ◆ Margins (Left, Top, Right, Bottom)
+// Specify the margins (padding) in pixels. If using an image for the message frame,
+// ensure these are set within the display area of the message frame.
+// These correspond to the marginl, maringt, marginr, and marginb attributes of the position tag.
+;marginL = 8; // Left margin
+;marginT = 8; // Top margin
+;marginR = 8; // Right margin
+;marginB = 8; // Bottom margin
+
+// ◆ Initial Position
+// These correspond to the left, top, width, and height attributes of the position tag.
+;ml = 16;  // Left position
+;mt = 16;  // Top position
+;mw = 960-32;   // Width
+;mh = 640-32;   // Height
+
+// ◆ "Debug"
+// Set this to true to output various values to the browser's console log.
+// Be sure to set it to false when releasing the game.
+;debugMenu.visible = true;
+
+//-------------------------------------------- Message Layer Settings -----
+
+// ◆ Message Layer Color and Opacity
+// Specify the message layer color in 0xRRGGBB format (where RR, GG, and BB are two-digit hexadecimal numbers).
+// Specify the opacity (0 to 255). This is ignored if an image is specified for the message frame.
+;frameColor = 0x000000; // Corresponds to the color attribute of the position tag
+;frameOpacity = 128;    // Corresponds to the opacity attribute of the position tag
+
+// ◆ Automatic Line/Page Break
+// Set to true to enable automatic line breaks at the end of lines and automatic page breaks at the end of pages.
+// If false, these will not occur and rule-based processing (such as prohibited line-break rules) will be disabled.
+;defaultAutoReturn = true;
+
+// ◆ Right Text Margin (Not Implemented)
+// Specify the number of characters to leave as a margin on the right for rule-based processing.
+// (In vertical writing mode, this is interpreted as the number of characters at the bottom.)
+;marginRCh = 2;
+
+// ◆ Font Size
+// Specify the default font size (height) in pixels.
+// Corresponds to the size attribute of the deffont tag.
+;defaultFontSize = 28;
+
+// ◆ Line Spacing
+// Specify the line spacing in pixels.
+// Corresponds to the linespacing attribute of the defstyle tag.
+;defaultLineSpacing = 8;
+
+// ◆ Letter Spacing
+// Specify the spacing between letters in pixels.
+// The default is 0. Positive values increase spacing; negative values decrease spacing.
+// Corresponds to the pitch attribute of the defstyle tag.
+;defaultPitch = 0;
+
+// ◆ Font Face
+// Specify the default font name.
+// This setting is stored in a system variable and will be carried over on the next startup.
+// To change and apply the userFace setting, you can specify multiple fonts separated by commas.
+// In that case, the first available font will be used.
+;userFace = Quicksand, 游ゴシック体, "Yu Gothic", YuGothic, "ヒラギノ角ゴシック Pro", "Hiragino Kaku Gothic Pro", メイリオ, Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif, Arial;
+
+// ◆ Text Color
+// Specify the default text color in 0xRRGGBB format.
+// Corresponds to the color attribute of the deffont tag.
+;defaultChColor = 0xffffff;
+
+// ◆ Bold Text
+// Set to true for bold text, false for normal weight.
+// Corresponds to the bold attribute of the deffont tag.
+;defaultBold = false;
+
+// ◆ Ruby Text Size (Not Implemented)
+// Specify the ruby text size in pixels.
+// Corresponds to the rubysize attribute of the deffont tag.
+;defaultRubySize = 10;
+
+// ◆ Ruby Offset (Not Implemented)
+// Specify the display offset for ruby text in pixels. A negative value moves the ruby closer to the main text.
+// Corresponds to the rubyoffset attribute of the deffont tag.
+;defaultRubyOffset = -2;
+
+// ◆ Text Anti-Aliasing (Smoother Text Rendering)
+// Applies to all text in the game.
+// 0: Disabled, 1: Light anti-aliasing, 2: Strong anti-aliasing.
+;defaultAntialiased = 1;
+
+// ◆ Draw Text Shadow
+// Set to true to draw a shadow behind the text, false to disable.
+// Note: Cannot be used together with text outline. In such cases, the shadow will be disabled.
+// Corresponds to the shadow attribute of the deffont tag.
+;defaultShadow = false;
+
+// ◆ Shadow Color
+// Specify the shadow color in 0xRRGGBB format.
+// Corresponds to the shadowcolor attribute of the deffont tag.
+;defaultShadowColor = 0x000000;
+
+// ◆ Text Outline
+// Set to true to enable an outline around the text, false to disable.
+// Corresponds to the edge attribute of the deffont tag.
+;defaultEdge = false;
+
+// ◆ Outline Color
+// Specify the color of the text outline in 0xRRGGBB format.
+// Corresponds to the edgecolor attribute of the deffont tag.
+;defaultEdgeColor = 0x000000;
+
+// ◆ Link Highlight Color (Not Implemented)
+// The default color for the semi-transparent rectangle that appears when a link is selected.
+// Corresponds to the color attribute of the link tag.
+;defaultLinkColor = 0x0080ff;
+
+// ◆ Link Opacity (Not Implemented)
+// The opacity of the semi-transparent rectangle that appears when a link is selected.
+;defaultLinkOpacity = 64;
+
+// ◆ Vertical Writing Mode
+// Set this to true (instead of false) to display message layers in vertical writing mode by default.
+;vertical = false;
+
+//---------------------------------------------- Keyboard Button Selection Settings -----
+
+// ◆ Enable Keyboard Selection for Buttons
+// Set to true to allow button selection via the keyboard, or false to disable.
+// ※ Also refer to the key configuration in system/KeyConfig.js.
+// For keyboard selection to work, keys must be configured with actions such as focus_left.
+// (Example)
+//     "37": "focus_left",  // ←
+//     "38": "focus_up",    // ↑
+//     "39": "focus_right", // →
+//     "40": "focus_down",  // ↓
+;useKeyFocus = true;
+
+// ◆ Initial Focus when Selecting Buttons with Arrow Keys
+// For example, when three choices are arranged vertically, you can choose whether pressing the down arrow focuses the bottom button,
+// or if it always focuses the top button regardless of the arrow key pressed.
+// "first": Always focus the top button regardless of the arrow key.
+// "dir": Focus the top button when pressing up, and the bottom button when pressing down.
+// "dir-2": For two buttons, follow the arrow keys (dir); for three or more, always focus the first button.
+;firstKeyFocusType = first;
+
+// ◆ Display a Temporary Mouse Cursor when Selecting Buttons with the Keyboard
+// true  : Display a temporary mouse cursor
+// false : Do not display a temporary mouse cursor
+;keyFocusWithMouseCursor = true;
+
+// ◆ Apply Hover Style when Selecting Buttons with the Keyboard
+// For example, when the mouse hovers over a [glink], the button might brighten. This setting determines whether the same effect applies when using the keyboard.
+// true  : Apply the hover style
+// false : Do not apply the hover style
+;keyFocusWithHoverStyle = true;
+
+// ◆ Outline Thickness for Keyboard-Selected Buttons
+// Setting this to 0 will remove the outline that appears when a button is selected via the keyboard.
+// For better usability, it is recommended to have an outline.
+;keyFocusOutlineWidth = 0;
+
+// ◆ Outline Style for Keyboard-Selected Buttons
+// Options:
+// solid  : Single line
+// double : Double line
+// dashed : Dashed line with square corners
+// dotted : Dotted line with round corners
+;keyFocusOutlineStyle = solid;
+
+// ◆ Outline Color for Keyboard-Selected Buttons
+// The following formats are supported. For example, rgba(255, 255, 255, 0.5) specifies a semi-transparent white.
+;keyFocusOutlineColor = 0x000000;
+
+// ◆ Outline Animation for Keyboard-Selected Buttons
+// Options:
+// none             : No animation
+// flash            : Smooth flashing
+// flash_momentary  : Momentary flash
+;keyFocusOutlineAnim = flash_momentary;
+
+// ◆ Outline Animation Duration (milliseconds) for Keyboard-Selected Buttons
+;keyFocusOutlineAnimDuration = 2000;
+
+//---------------------------------------------- Gamepad Settings -----
+
+// ◆ Enable Gamepad Controls
+// Set to true to enable gamepad controls, or false to disable.
+;useGamepad = true;
+
+//---------------------------------------------- Other Settings -----
+
+// ◆ Warn When Closing the Game Without Saving
+// Set to true to enable a warning when the player attempts to close the game without saving; false to disable.
+// To use this, enable it and include the [closeconfirm_on] tag in your scenario.
+;useCloseConfirm = true;
+
+// ◆ Allow Advancing Text by Clicking on Offscreen Areas (Black Bars)
+// Black bars appear when the game's aspect ratio does not match the player's display.
+// Set to true to allow advancing text by clicking on these areas, or false to disable.
+;offscreenClickable = true;

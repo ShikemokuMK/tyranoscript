@@ -257,10 +257,10 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 [button name="role_button" role="load" graphic="button/load.png" enterimg="button/load2.png" x="340" y="690"]
 
 ;オートボタン
-[button name="role_button" role="auto" graphic="button/auto.png" enterimg="button/auto2.png" autoimg="button/auto3.png" x="440" y="690"]
+[button name="role_button" role="auto" graphic="button/auto.png" enterimg="button/auto2.png" x="440" y="690"]
 
 ;スキップボタン
-[button name="role_button" role="skip" graphic="button/skip.png" enterimg="button/skip2.png" skipimg="button/skip3.png" x="540" y="690"]
+[button name="role_button" role="skip" graphic="button/skip.png" enterimg="button/skip2.png" x="540" y="690"]
 
 ;バックログボタン
 [button name="role_button" role="backlog" graphic="button/log.png" enterimg="button/log2.png" x="640" y="690"]
@@ -317,7 +317,7 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 
 [cm]
 よし、再生するよ。[l]
-@playbgm time="3000" storage=music.ogg loop=true
+@playbgm time="3000" storage=music.mp3 loop=true
 徐々にフェードインしながら再生することもできるんだ[l][cm]
 
 @jump target="*common_bgm"

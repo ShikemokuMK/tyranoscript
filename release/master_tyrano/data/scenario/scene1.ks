@@ -317,7 +317,7 @@ AppStoreやGooglePlayに向けてアプリ化して販売することもでき�
 
 [cm]
 よし、再生するよ。[l]
-@playbgm time="3000" storage=music.ogg loop=true
+@playbgm time="3000" storage=music.mp3 loop=true
 徐々にフェードインしながら再生することもできるんだ[l][cm]
 
 @jump target="*common_bgm"
